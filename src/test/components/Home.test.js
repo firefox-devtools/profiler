@@ -31,7 +31,7 @@ let userAgent;
   get: () => userAgent,
 });
 
-describe('app/Home', function() {
+describe('app/Home', function () {
   function setup(userAgentToConfigure: string) {
     userAgent = userAgentToConfigure;
     const renderResults = render(

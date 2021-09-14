@@ -52,7 +52,7 @@ autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 beforeEach(addRootOverlayElement);
 afterEach(removeRootOverlayElement);
 
-describe('timeline/TrackNetwork', function() {
+describe('timeline/TrackNetwork', function () {
   it('matches the component snapshot', () => {
     const { container, unmount } = setup();
     expect(container.firstChild).toMatchSnapshot();
@@ -299,18 +299,17 @@ describe('timeline/TrackNetwork', function() {
   });
 });
 
-describe('VerticalIndicators', function() {
-  it('creates the vertical indicators', function() {
+describe('VerticalIndicators', function () {
+  it('creates the vertical indicators', function () {
     const { getIndicatorLines, getState } = setup();
-    const markerIndexes = selectedThreadSelectors.getTimelineVerticalMarkerIndexes(
-      getState()
-    );
+    const markerIndexes =
+      selectedThreadSelectors.getTimelineVerticalMarkerIndexes(getState());
     const markerCount = 5;
     expect(markerIndexes).toHaveLength(markerCount);
     expect(getIndicatorLines()).toHaveLength(markerCount);
   });
 
-  it('displays tooltips', function() {
+  it('displays tooltips', function () {
     const { getIndicatorLines } = setup();
     const [firstIndicator] = getIndicatorLines();
     fireEvent.mouseOver(firstIndicator);

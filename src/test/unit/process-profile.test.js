@@ -25,7 +25,7 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 
-describe('extract functions and resource from location strings', function() {
+describe('extract functions and resource from location strings', function () {
   // These location strings are turned into the proper funcs.
   const locations = [
     // Extract unsymbolicated memory and match them to libraries.
@@ -77,7 +77,7 @@ describe('extract functions and resource from location strings', function() {
     },
   ];
   const stringTable = new UniqueStringArray();
-  const locationIndexes = locations.map(location =>
+  const locationIndexes = locations.map((location) =>
     stringTable.indexForString(location)
   );
   const extensions = {
@@ -90,18 +90,15 @@ describe('extract functions and resource from location strings', function() {
     length: 2,
   };
 
-  it('extracts the information for all different types of locations', function() {
-    const {
-      funcTable,
-      resourceTable,
-      frameFuncs,
-    } = extractFuncsAndResourcesFromFrameLocations(
-      locationIndexes,
-      locationIndexes.map(() => false),
-      stringTable,
-      libs,
-      extensions
-    );
+  it('extracts the information for all different types of locations', function () {
+    const { funcTable, resourceTable, frameFuncs } =
+      extractFuncsAndResourcesFromFrameLocations(
+        locationIndexes,
+        locationIndexes.map(() => false),
+        stringTable,
+        libs,
+        extensions
+      );
 
     expect(
       frameFuncs.map((funcIndex, locationIndex) => {
@@ -160,12 +157,12 @@ describe('extract functions and resource from location strings', function() {
   });
 });
 
-describe('gecko counters processing', function() {
+describe('gecko counters processing', function () {
   function setup() {
     // Create a gecko profile with counters.
-    const findMainThread = profile =>
+    const findMainThread = (profile) =>
       ensureExists(
-        profile.threads.find(thread => thread.name === 'GeckoMain'),
+        profile.threads.find((thread) => thread.name === 'GeckoMain'),
         'There should be a GeckoMain thread in the Gecko profile'
       );
 
@@ -202,7 +199,7 @@ describe('gecko counters processing', function() {
     };
   }
 
-  it('can extract the counter information correctly', function() {
+  it('can extract the counter information correctly', function () {
     const { parentGeckoProfile, parentPid, childPid } = setup();
     const processedProfile = processGeckoProfile(parentGeckoProfile);
     const counters = ensureExists(
@@ -215,7 +212,7 @@ describe('gecko counters processing', function() {
 
     const findMainThreadIndexByPid = (pid: number): number =>
       processedProfile.threads.findIndex(
-        thread => thread.name === 'GeckoMain' && thread.pid === pid
+        (thread) => thread.name === 'GeckoMain' && thread.pid === pid
       );
 
     expect(counters[0].mainThreadIndex).toBe(
@@ -226,19 +223,19 @@ describe('gecko counters processing', function() {
     );
   });
 
-  it('offsets the counter timing for child processes', function() {
+  it('offsets the counter timing for child processes', function () {
     const { parentGeckoProfile, parentCounter, childCounter } = setup();
     const processedProfile = processGeckoProfile(parentGeckoProfile);
     const processedCounters = ensureExists(processedProfile.counters);
 
     const originalTime = [0, 1, 2, 3, 4, 5, 6];
-    const offsetTime = originalTime.map(n => n + 1000);
+    const offsetTime = originalTime.map((n) => n + 1000);
 
-    const extractTime = counter => {
+    const extractTime = (counter) => {
       if (counter.sample_groups.length === 0) {
         return [];
       }
-      return counter.sample_groups[0].samples.data.map(tuple => tuple[0]);
+      return counter.sample_groups[0].samples.data.map((tuple) => tuple[0]);
     };
 
     // The original times and parent process are not offset.
@@ -255,12 +252,12 @@ describe('gecko counters processing', function() {
   });
 });
 
-describe('gecko profilerOverhead processing', function() {
+describe('gecko profilerOverhead processing', function () {
   function setup() {
     // Create a gecko profile with profilerOverhead.
-    const findMainThread = profile =>
+    const findMainThread = (profile) =>
       ensureExists(
-        profile.threads.find(thread => thread.name === 'GeckoMain'),
+        profile.threads.find((thread) => thread.name === 'GeckoMain'),
         'There should be a GeckoMain thread in the Gecko profile'
       );
 
@@ -289,7 +286,7 @@ describe('gecko profilerOverhead processing', function() {
     };
   }
 
-  it('can extract the overhead information correctly', function() {
+  it('can extract the overhead information correctly', function () {
     const { parentGeckoProfile, parentPid, childPid } = setup();
     const processedProfile = processGeckoProfile(parentGeckoProfile);
     const overhead = ensureExists(
@@ -302,7 +299,7 @@ describe('gecko profilerOverhead processing', function() {
 
     const findMainThreadIndexByPid = (pid: number): number =>
       processedProfile.threads.findIndex(
-        thread => thread.name === 'GeckoMain' && thread.pid === pid
+        (thread) => thread.name === 'GeckoMain' && thread.pid === pid
       );
 
     expect(overhead[0].mainThreadIndex).toBe(
@@ -313,17 +310,17 @@ describe('gecko profilerOverhead processing', function() {
     );
   });
 
-  it('offsets the overhead timing for child processes', function() {
+  it('offsets the overhead timing for child processes', function () {
     const { parentGeckoProfile, parentOverhead, childOverhead } = setup();
     const processedProfile = processGeckoProfile(parentGeckoProfile);
     const processedOverheads = ensureExists(processedProfile.profilerOverhead);
 
     const originalTime = [0, 1000, 2000, 3000, 4000, 5000, 6000];
-    const processedTime = originalTime.map(n => n / 1000);
-    const offsetTime = processedTime.map(n => n + 1000);
+    const processedTime = originalTime.map((n) => n / 1000);
+    const offsetTime = processedTime.map((n) => n + 1000);
 
-    const extractTime = overhead =>
-      overhead.samples.data.map(tuple => tuple[0]);
+    const extractTime = (overhead) =>
+      overhead.samples.data.map((tuple) => tuple[0]);
 
     // The original times are not offset and in microseconds.
     expect(extractTime(parentOverhead)).toEqual(originalTime);
@@ -337,14 +334,14 @@ describe('gecko profilerOverhead processing', function() {
   });
 });
 
-describe('serializeProfile', function() {
-  it('should produce a parsable profile string', async function() {
+describe('serializeProfile', function () {
+  it('should produce a parsable profile string', async function () {
     const profile = processGeckoProfile(createGeckoProfile());
     const serialized = serializeProfile(profile);
     expect(JSON.parse.bind(null, serialized)).not.toThrow();
   });
 
-  it('should produce the same profile in a roundtrip', async function() {
+  it('should produce the same profile in a roundtrip', async function () {
     const profile = processGeckoProfile(createGeckoProfile());
     const serialized = serializeProfile(profile);
     const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
@@ -360,7 +357,7 @@ describe('serializeProfile', function() {
   });
 });
 
-describe('js allocation processing', function() {
+describe('js allocation processing', function () {
   function getAllocationMarkerHelper(geckoThread: GeckoThread) {
     let time = 0;
     return ({ byteSize, stackIndex }) => {
@@ -388,7 +385,7 @@ describe('js allocation processing', function() {
     };
   }
 
-  it('should process JS allocation markers into a JS allocation table', function() {
+  it('should process JS allocation markers into a JS allocation table', function () {
     const geckoProfile = createGeckoProfile();
     const geckoThread = geckoProfile.threads[0];
     const createAllocation = getAllocationMarkerHelper(geckoThread);
@@ -425,7 +422,7 @@ describe('js allocation processing', function() {
   });
 });
 
-describe('native allocation processing', function() {
+describe('native allocation processing', function () {
   type CreateAllocation = ({
     byteSize: number,
     stackIndex: number | null,
@@ -458,7 +455,7 @@ describe('native allocation processing', function() {
     };
   }
 
-  it('should process native allocation markers into a native allocation table', function() {
+  it('should process native allocation markers into a native allocation table', function () {
     const geckoProfile = createGeckoProfile();
     const geckoThread = geckoProfile.threads[0];
     const createAllocation = getAllocationMarkerHelper(geckoThread);
@@ -497,8 +494,8 @@ describe('native allocation processing', function() {
   });
 });
 
-describe('gecko samples table processing', function() {
-  it('properly converts all the fields in the schema', function() {
+describe('gecko samples table processing', function () {
+  it('properly converts all the fields in the schema', function () {
     const geckoProfile = createGeckoProfile();
     const geckoSamples = geckoProfile.threads[0].samples;
 
@@ -563,8 +560,8 @@ describe('gecko samples table processing', function() {
   });
 });
 
-describe('profile meta processing', function() {
-  it('keeps the sampleUnits object successfully', function() {
+describe('profile meta processing', function () {
+  it('keeps the sampleUnits object successfully', function () {
     const geckoProfile = createGeckoProfile();
     const geckoMeta = geckoProfile.meta;
 

@@ -16,8 +16,8 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
-describe('getUsefulTabs', function() {
-  it('hides the network chart and JS tracer when no data is in the thread', function() {
+describe('getUsefulTabs', function () {
+  it('hides the network chart and JS tracer when no data is in the thread', function () {
     const { profile } = getProfileFromTextSamples('A');
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
@@ -29,7 +29,7 @@ describe('getUsefulTabs', function() {
     ]);
   });
 
-  it('shows the network chart when network markers are present in the thread', function() {
+  it('shows the network chart when network markers are present in the thread', function () {
     const profile = getProfileWithMarkers(getNetworkMarkers());
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
@@ -42,7 +42,7 @@ describe('getUsefulTabs', function() {
     ]);
   });
 
-  it('shows the js tracer when it is available in a thread', function() {
+  it('shows the js tracer when it is available in a thread', function () {
     const profile = getProfileWithJsTracerEvents([['A', 0, 10]]);
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
@@ -55,7 +55,7 @@ describe('getUsefulTabs', function() {
     ]);
   });
 
-  it('shows only the call tree when a diffing track is selected', function() {
+  it('shows only the call tree when a diffing track is selected', function () {
     const { profile } = getMergedProfileFromTextSamples('A  B  C', 'A  B  B');
     const { getState, dispatch } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
@@ -76,17 +76,15 @@ describe('getUsefulTabs', function() {
     ]);
   });
 
-  it('shows the network chart when network markers are present in the active tab view', function() {
-    const {
-      profile,
-      parentInnerWindowIDsWithChildren,
-      firstTabTabID,
-    } = addActiveTabInformationToProfile(
-      getProfileWithMarkers(getNetworkMarkers())
-    );
+  it('shows the network chart when network markers are present in the active tab view', function () {
+    const { profile, parentInnerWindowIDsWithChildren, firstTabTabID } =
+      addActiveTabInformationToProfile(
+        getProfileWithMarkers(getNetworkMarkers())
+      );
     // Adding the parent innerWindowID to the first thread's first sample, so
     // this thread will be inluded in the active tab view.
-    profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
+    profile.threads[0].frameTable.innerWindowID[0] =
+      parentInnerWindowIDsWithChildren;
     const { dispatch, getState } = storeWithProfile(profile);
 
     // Switch to the active tab view.

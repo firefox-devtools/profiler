@@ -127,13 +127,15 @@ class DragAndDropImpl extends React.PureComponent<Props> {
         >
           {children}
         </div>
-        {/* Put the default overlay here if it is to be used. The
+        {
+          /* Put the default overlay here if it is to be used. The
           dragAndDropArea div creates its own stacking context, so
           even if it contains children with high z-indexes, the
           default overlay will still appear on top when shown.*/
-        this.props.useDefaultOverlay ? (
-          <DragAndDropOverlay isDefault={true} />
-        ) : null}
+          this.props.useDefaultOverlay ? (
+            <DragAndDropOverlay isDefault={true} />
+          ) : null
+        }
       </>
     );
   }
@@ -141,7 +143,7 @@ class DragAndDropImpl extends React.PureComponent<Props> {
 
 export const DragAndDrop = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
-    mapStateToProps: state => ({
+    mapStateToProps: (state) => ({
       isNewProfileLoadAllowed: getIsNewProfileLoadAllowed(state),
       useDefaultOverlay: !getIsDragAndDropOverlayRegistered(state),
     }),
@@ -212,7 +214,7 @@ export const DragAndDropOverlay = explicitConnect<
   OverlayStateProps,
   OverlayDispatchProps
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     isDragging: getIsDragAndDropDragging(state),
     isNewProfileLoadAllowed: getIsNewProfileLoadAllowed(state),
   }),

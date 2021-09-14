@@ -71,7 +71,7 @@ export const TrackVisualProgress = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     const { start, end } = getCommittedRange(state);
     return {
       rangeStart: start,

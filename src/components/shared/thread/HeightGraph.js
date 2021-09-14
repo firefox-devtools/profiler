@@ -43,7 +43,7 @@ export type HeightFunctionParams = {|
 |};
 
 type Props = {|
-  +heightFunc: HeightFunctionParams => number,
+  +heightFunc: (HeightFunctionParams) => number,
   +maxValue: number,
   +className: string,
   +thread: Thread,

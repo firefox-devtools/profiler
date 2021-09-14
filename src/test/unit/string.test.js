@@ -6,8 +6,8 @@
 
 import { removeURLs, removeFilePath } from '../../utils/string';
 
-describe('utils/string', function() {
-  describe('removeURLs', function() {
+describe('utils/string', function () {
+  describe('removeURLs', function () {
     it('should remove the basic URLs successfully', () => {
       let string = 'https://foo.com/';
       expect(removeURLs(string)).toEqual('https://<URL>');
@@ -148,7 +148,7 @@ describe('utils/string', function() {
     });
   });
 
-  describe('removeFilePath', function() {
+  describe('removeFilePath', function () {
     it('should remove Unix-like paths', () => {
       // A file in the root dir.
       let string = '/test.txt';

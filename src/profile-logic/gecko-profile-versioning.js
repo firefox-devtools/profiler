@@ -90,14 +90,14 @@ const _upgraders = {
       'Gecko profile version 2 is very old and no conversion code has been written for that version of the profile format.'
     );
   },
-  [4]: profile => {
+  [4]: (profile) => {
     function convertToVersionFourRecursive(p) {
       // In version < 3, p.libs was a JSON string.
       // Starting with version 4, libs is an actual array, each lib has
       // "debugName", "debugPath", "breakpadId" and "path" fields, and the
       // array is sorted by start address.
       p.libs = JSON.parse(p.libs)
-        .map(lib => {
+        .map((lib) => {
           if ('breakpadId' in lib) {
             lib.debugName = lib.name.substr(lib.name.lastIndexOf('/') + 1);
           } else {
@@ -147,12 +147,12 @@ const _upgraders = {
     }
     convertToVersionFourRecursive(profile);
   },
-  [5]: profile => {
+  [5]: (profile) => {
     // In version 4, profiles from other processes were embedded as JSON
     // strings in the threads array. Version 5 breaks those out into a
     // separate "processes" array and no longer stringifies them.
     function convertToVersionFiveRecursive(p) {
-      const allThreadsAndProcesses = p.threads.map(threadOrProcess => {
+      const allThreadsAndProcesses = p.threads.map((threadOrProcess) => {
         if (typeof threadOrProcess === 'string') {
           const processProfile = JSON.parse(threadOrProcess);
           convertToVersionFiveRecursive(processProfile);
@@ -167,16 +167,16 @@ const _upgraders = {
         };
       });
       p.processes = allThreadsAndProcesses
-        .filter(x => x.type === 'process')
-        .map(p => p.data);
+        .filter((x) => x.type === 'process')
+        .map((p) => p.data);
       p.threads = allThreadsAndProcesses
-        .filter(x => x.type === 'thread')
-        .map(t => t.data);
+        .filter((x) => x.type === 'thread')
+        .map((t) => t.data);
       p.meta.version = 5;
     }
     convertToVersionFiveRecursive(profile);
   },
-  [6]: profile => {
+  [6]: (profile) => {
     // The frameNumber column was removed from the samples table.
     function convertToVersionSixRecursive(p) {
       for (const thread of p.threads) {
@@ -197,7 +197,7 @@ const _upgraders = {
     }
     convertToVersionSixRecursive(profile);
   },
-  [7]: profile => {
+  [7]: (profile) => {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     function convertToVersionSevenRecursive(p) {
       for (const thread of p.threads) {
@@ -219,7 +219,7 @@ const _upgraders = {
     }
     convertToVersionSevenRecursive(profile);
   },
-  [8]: profile => {
+  [8]: (profile) => {
     // Profiles have the following new attributes:
     //  - meta.shutdownTime: null if the process is still running, otherwise
     //    the shutdown time of the process in milliseconds relative to
@@ -255,7 +255,7 @@ const _upgraders = {
     }
     convertToVersionEightRecursive(profile);
   },
-  [9]: profile => {
+  [9]: (profile) => {
     // Upgrade GC markers
 
     /*
@@ -351,7 +351,7 @@ const _upgraders = {
     }
     convertToVersionNineRecursive(profile);
   },
-  [10]: profile => {
+  [10]: (profile) => {
     // Removed the startDate and endDate from DOMEventMarkerPayload and
     // made it a tracing marker instead. DOMEventMarkerPayload is no longer a
     // single marker, it requires a start and an end marker. Therefore, we have
@@ -405,7 +405,7 @@ const _upgraders = {
     }
     convertToVersionTenRecursive(profile);
   },
-  [11]: profile => {
+  [11]: (profile) => {
     // Ensure there is always a pid in the profile meta AND upgrade
     // profile.meta categories.
 
@@ -504,7 +504,7 @@ const _upgraders = {
     }
     convertToVersionElevenRecursive(profile);
   },
-  [12]: profile => {
+  [12]: (profile) => {
     // This version will add column numbers to the JS functions and scripts.
     // There is also a new property in the frameTable called "column" which
     // swaps positions with the "category" property.  The new value for
@@ -532,7 +532,7 @@ const _upgraders = {
     }
     convertToVersionTwelveRecursive(profile);
   },
-  [13]: profile => {
+  [13]: (profile) => {
     // The type field on some markers were missing. Renamed category field of
     // VsyncTimestamp and LayerTranslation marker payloads to type and added
     // a type field to Screenshot marker payload.
@@ -562,7 +562,7 @@ const _upgraders = {
     }
     convertToVersionThirteenRecursive(profile);
   },
-  [14]: profile => {
+  [14]: (profile) => {
     // Profiles now have a relevantForJS property in the frameTable.
     // This column is false on C++ and JS frames, and true on label frames that
     // are entry and exit points to JS.
@@ -614,7 +614,7 @@ const _upgraders = {
     }
     convertToVersionFourteenRecursive(profile);
   },
-  [15]: profile => {
+  [15]: (profile) => {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     function convertToVersion15Recursive(p) {
       for (const thread of p.threads) {
@@ -646,7 +646,7 @@ const _upgraders = {
     }
     convertToVersion15Recursive(profile);
   },
-  [16]: profile => {
+  [16]: (profile) => {
     // profile.meta.categories now has a subcategories property on each element,
     // with an array of subcategories for that category.
     // And the frameTable has another column, subcategory.
@@ -730,7 +730,7 @@ const _upgraders = {
       { name: 'DOM', color: 'blue', subcategories: ['Other'] },
     ]) {
       const index = profile.meta.categories.findIndex(
-        category => category.name === defaultCategory.name
+        (category) => category.name === defaultCategory.name
       );
       if (index === -1) {
         // Add on any unknown categories.
@@ -739,13 +739,13 @@ const _upgraders = {
     }
 
     const otherCategory = profile.meta.categories.findIndex(
-      category => category.name === 'Other'
+      (category) => category.name === 'Other'
     );
 
     const keyToCategoryIndex: Map<string, number> = new Map(
       keyToCategoryName.map(([key, categoryName]) => {
         const index = profile.meta.categories.findIndex(
-          category => category.name === categoryName
+          (category) => category.name === categoryName
         );
         if (index === -1) {
           throw new Error('Could not find a category index to map to.');
@@ -788,7 +788,7 @@ const _upgraders = {
     }
     addMarkerCategoriesRecursively(profile);
   },
-  [17]: profile => {
+  [17]: (profile) => {
     // Previously, we had DocShell ID and DocShell History ID in the page object
     // to identify a specific page. We changed these IDs in the gecko side to
     // Browsing Context ID and Inner Window ID. Inner Window ID is enough to
@@ -881,7 +881,7 @@ const _upgraders = {
     }
     convertToVersion17Recursive(profile);
   },
-  [18]: profile => {
+  [18]: (profile) => {
     // Due to a bug in gecko side, we were keeping the sample_group inside an
     // object instead of an array. Usually there is only one sample group, that's
     // why it wasn't a problem before. To future proof it, we are fixing it by
@@ -904,7 +904,7 @@ const _upgraders = {
     }
     convertToVersion18Recursive(profile);
   },
-  [19]: profile => {
+  [19]: (profile) => {
     // Profiles now have an innerWindowID property in the frameTable.
     // We are filling this array with 0 values because we have no idea what that value might be.
     function convertToVersion19Recursive(p) {
@@ -937,7 +937,7 @@ const _upgraders = {
     }
     convertToVersion19Recursive(profile);
   },
-  [20]: profile => {
+  [20]: (profile) => {
     // The idea of phased markers was added to profiles. This upgrader removes the `time`
     // field from markers and replaces it with startTime, endTime and phase.
     //
@@ -1039,7 +1039,7 @@ const _upgraders = {
     }
     convertToVersion20Recursive(profile);
   },
-  [21]: profile => {
+  [21]: (profile) => {
     // Migrate DOMEvent markers to Markers 2.0
 
     // This is a fairly permissive type, but helps ensure the logic below is type checked.
@@ -1103,7 +1103,7 @@ const _upgraders = {
     }
     convertToVersion21Recursive(profile);
   },
-  [22]: untypedProfile => {
+  [22]: (untypedProfile) => {
     // The marker schema, which details how to display markers was added. Back-fill
     // any old profiles with a default schema.
     type GeckoProfileVersion20To21 = {
@@ -1316,7 +1316,7 @@ const _upgraders = {
       processes.meta.markerSchema = [];
     }
   },
-  [23]: profile => {
+  [23]: (profile) => {
     // The browsingContextID inside the pages array and activeBrowsingContextID
     // have been renamed to tabID and activeTabID.
     // Previously, we were using the browsingcontextID to figure out which tab
@@ -1350,7 +1350,7 @@ const _upgraders = {
     }
     convertToVersion23Recursive(profile);
   },
-  [24]: _ => {
+  [24]: (_) => {
     // This version bumps happened when a new end status "STATUS_CANCELED"
     // appeared for network markers, to ensure that a new version of the
     // frontend will handle it.

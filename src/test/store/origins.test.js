@@ -43,7 +43,7 @@ function getProfileWithOrigins(...originThreads: TestDefinedOriginThread[]) {
       let embedderInnerWindowID = 0;
       if (parentOrigin) {
         embedderInnerWindowID = originThreads.findIndex(
-          other => other.origin === parentOrigin
+          (other) => other.origin === parentOrigin
         );
         if (embedderInnerWindowID === -1) {
           throw new Error('Could not find');
@@ -68,7 +68,7 @@ function getProfileWithOrigins(...originThreads: TestDefinedOriginThread[]) {
   return profile;
 }
 
-describe('origins timeline', function() {
+describe('origins timeline', function () {
   function setup(...originThreads: TestDefinedOriginThread[]) {
     const store = createStore();
     const profile = getProfileWithOrigins(...originThreads);
@@ -78,7 +78,7 @@ describe('origins timeline', function() {
     return store;
   }
 
-  it('can compute an origins based view', function() {
+  it('can compute an origins based view', function () {
     const { getState } = setup(
       { name: `GeckoMain`, pid: 1 },
       { name: `Compositor`, pid: 1 },

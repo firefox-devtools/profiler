@@ -7,7 +7,7 @@ import {
   CategoryInfo,
 } from '../../profile-logic/import/art-trace';
 
-describe('category-info', function() {
+describe('category-info', function () {
   const exampleMethodsForKnownCategories = [
     {
       methodId: 1,
@@ -47,19 +47,19 @@ describe('category-info', function() {
     },
   ];
 
-  it('should return no special category if there are no methods', function() {
+  it('should return no special category if there are no methods', function () {
     const specialCategoryInfo: any = getSpecialCategory([]);
     expect(specialCategoryInfo).toBe(undefined);
   });
 
-  it('should ignore known categories', function() {
+  it('should ignore known categories', function () {
     const specialCategoryInfo: any = getSpecialCategory(
       exampleMethodsForKnownCategories
     );
     expect(specialCategoryInfo).toBe(undefined);
   });
 
-  it('should return the right special category', function() {
+  it('should return the right special category', function () {
     const specialCategoryInfo: any = getSpecialCategory([
       {
         methodId: 1,
@@ -78,7 +78,7 @@ describe('category-info', function() {
     ]);
   });
 
-  it('should return the majority category, 2 mozilla vs 1 arttracetest', function() {
+  it('should return the majority category, 2 mozilla vs 1 arttracetest', function () {
     const specialCategoryInfo: any = getSpecialCategory([
       // Two "mozilla" methods, one "arttracetest" method
       {
@@ -110,7 +110,7 @@ describe('category-info', function() {
     ]);
   });
 
-  it('should return the majority category, 1 mozilla vs 2 arttracetest', function() {
+  it('should return the majority category, 1 mozilla vs 2 arttracetest', function () {
     const specialCategoryInfo: any = getSpecialCategory([
       // One "mozilla" method, two "arttracetest" methods.
       {
@@ -142,7 +142,7 @@ describe('category-info', function() {
     ]);
   });
 
-  it('should infer the right categories for these example methods', function() {
+  it('should infer the right categories for these example methods', function () {
     const categoryInfo = new CategoryInfo([
       // One "mozilla" method, two "arttracetest" methods.
       {

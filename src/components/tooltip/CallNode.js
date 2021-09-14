@@ -243,7 +243,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     // Finding current frame and parent frame URL(if there is).
     let pageAndParentPageURL;
     if (pages) {
-      const page = pages.find(p => p.innerWindowID === innerWindowID);
+      const page = pages.find((p) => p.innerWindowID === innerWindowID);
       if (page) {
         if (page.embedderInnerWindowID !== 0) {
           // This is an iframe since it has an embedder.
@@ -258,7 +258,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
           // Getting the embedder URL now.
           const parentPage = pages.find(
-            p => p.innerWindowID === page.embedderInnerWindowID
+            (p) => p.innerWindowID === page.embedderInnerWindowID
           );
           // Ideally it should find a page.
           if (parentPage) {

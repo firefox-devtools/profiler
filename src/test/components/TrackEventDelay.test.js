@@ -47,7 +47,7 @@ function getSamplesPixelPosition(
 /**
  * This test verifies that the event delay track can draw a graph of the responsiveness.
  */
-describe('TrackEventDelay', function() {
+describe('TrackEventDelay', function () {
   function setup(isTrackEnabled: boolean = true) {
     const profile = getProfileWithEventDelays();
     const store = storeWithProfile(profile);
@@ -115,7 +115,7 @@ describe('TrackEventDelay', function() {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 
-  it('can create a tooltip', function() {
+  it('can create a tooltip', function () {
     const { moveMouseAtEventDelay, getTooltipContents, canvas } = setup();
     expect(getTooltipContents()).toBeFalsy();
     moveMouseAtEventDelay(1, 0.5);
@@ -124,20 +124,20 @@ describe('TrackEventDelay', function() {
     expect(getTooltipContents()).toBeFalsy();
   });
 
-  it('has a tooltip that matches the snapshot', function() {
+  it('has a tooltip that matches the snapshot', function () {
     const { moveMouseAtEventDelay, getTooltipContents } = setup();
     moveMouseAtEventDelay(5, 0.5);
     expect(getTooltipContents()).toMatchSnapshot();
   });
 
-  it('draws a dot on the graph', function() {
+  it('draws a dot on the graph', function () {
     const { moveMouseAtEventDelay, getEventDelayDot } = setup();
     expect(getEventDelayDot()).toBeFalsy();
     moveMouseAtEventDelay(1, 0.5);
     expect(getEventDelayDot()).toBeTruthy();
   });
 
-  it('can draw a dot on both extremes of the graph', function() {
+  it('can draw a dot on both extremes of the graph', function () {
     const { moveMouseAtEventDelay, getEventDelayDot } = setup();
     expect(getEventDelayDot()).toBeFalsy();
     moveMouseAtEventDelay(0, 0.25);
@@ -146,7 +146,7 @@ describe('TrackEventDelay', function() {
     expect(getEventDelayDot()).toBeTruthy();
   });
 
-  it('draws a dot that matches the snapshot', function() {
+  it('draws a dot that matches the snapshot', function () {
     const { moveMouseAtEventDelay, getEventDelayDot } = setup();
     moveMouseAtEventDelay(1, 0.5);
     expect(getEventDelayDot()).toMatchSnapshot();

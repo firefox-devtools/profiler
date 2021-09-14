@@ -191,7 +191,7 @@ export function getSampleIndexToCallNodeIndex(
     [key: IndexIntoStackTable]: IndexIntoCallNodeTable,
   }
 ): Array<IndexIntoCallNodeTable | null> {
-  return stacks.map(stack => {
+  return stacks.map((stack) => {
     return stack === null ? null : stackIndexToCallNodeIndex[stack];
   });
 }
@@ -593,14 +593,13 @@ export function getTimingsForCallNodeIndex(
 
       // step 5: increment the right value in the category breakdown
       if (timings.breakdownByCategory === null) {
-        timings.breakdownByCategory = categories.map(category => ({
+        timings.breakdownByCategory = categories.map((category) => ({
           entireCategoryValue: 0,
           subcategoryBreakdown: Array(category.subcategories.length).fill(0),
         }));
       }
-      timings.breakdownByCategory[
-        categoryIndex
-      ].entireCategoryValue += duration;
+      timings.breakdownByCategory[categoryIndex].entireCategoryValue +=
+        duration;
       timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
         subcategoryIndex
       ] += duration;
@@ -867,7 +866,7 @@ export function getTimeRangeIncludingAllThreads(
   profile: Profile
 ): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
-  profile.threads.forEach(thread => {
+  profile.threads.forEach((thread) => {
     const threadRange = memoizedGetTimeRangeForThread(
       thread,
       profile.meta.interval
@@ -963,7 +962,7 @@ export function filterThreadByImplementation(
     case 'cpp':
       return _filterThreadByFunc(
         thread,
-        funcIndex => {
+        (funcIndex) => {
           // Return quickly if this is a JS frame.
           if (funcTable.isJS[funcIndex]) {
             return false;
@@ -985,7 +984,7 @@ export function filterThreadByImplementation(
     case 'js':
       return _filterThreadByFunc(
         thread,
-        funcIndex => {
+        (funcIndex) => {
           return (
             funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
           );
@@ -999,7 +998,7 @@ export function filterThreadByImplementation(
 
 function _filterThreadByFunc(
   thread: Thread,
-  filter: IndexIntoFuncTable => boolean,
+  filter: (IndexIntoFuncTable) => boolean,
   defaultCategory: IndexIntoCallNodeTable
 ): Thread {
   return timeCode('filterThread', () => {
@@ -1085,13 +1084,8 @@ export function filterThreadToSearchString(
     return thread;
   }
   const lowercaseSearchString = searchString.toLowerCase();
-  const {
-    funcTable,
-    frameTable,
-    stackTable,
-    stringTable,
-    resourceTable,
-  } = thread;
+  const { funcTable, frameTable, stackTable, stringTable, resourceTable } =
+    thread;
 
   function computeFuncMatchesFilter(func) {
     const nameIndex = funcTable.name[func];
@@ -1150,7 +1144,7 @@ export function filterThreadToSearchString(
     return result;
   }
 
-  return updateThreadStacks(thread, stackTable, stackIndex =>
+  return updateThreadStacks(thread, stackTable, (stackIndex) =>
     stackMatchesFilter(stackIndex) ? stackIndex : null
   );
 }
@@ -1178,10 +1172,8 @@ export function filterThreadByTab(
 
     // innerWindowID array lives inside the frameTable. Check that and decide
     // if we should keep that sample or not.
-    const frameMatchesFilterCache: Map<
-      IndexIntoFrameTable,
-      boolean
-    > = new Map();
+    const frameMatchesFilterCache: Map<IndexIntoFrameTable, boolean> =
+      new Map();
     function frameMatchesFilter(frame) {
       const cache = frameMatchesFilterCache.get(frame);
       if (cache !== undefined) {
@@ -1198,10 +1190,8 @@ export function filterThreadByTab(
     }
 
     // Use the stackTable to navigate to frameTable and cache the result of it.
-    const stackMatchesFilterCache: Map<
-      IndexIntoStackTable,
-      boolean
-    > = new Map();
+    const stackMatchesFilterCache: Map<IndexIntoStackTable, boolean> =
+      new Map();
     function stackMatchesFilter(stackIndex) {
       if (stackIndex === null) {
         return false;
@@ -1226,7 +1216,7 @@ export function filterThreadByTab(
     // Update the stack array elements of samples object and make them null if
     // they don't include any relevant JS frame.
     // It doesn't mutate the stack itself.
-    return updateThreadStacks(thread, stackTable, stackIndex =>
+    return updateThreadStacks(thread, stackTable, (stackIndex) =>
       stackMatchesFilter(stackIndex) ? stackIndex : null
     );
   });
@@ -1360,7 +1350,7 @@ export function filterCounterToRange(
   rangeStart: number,
   rangeEnd: number
 ): Counter {
-  const filteredGroups = counter.sampleGroups.map(sampleGroup => {
+  const filteredGroups = counter.sampleGroups.map((sampleGroup) => {
     const samples = sampleGroup.samples;
     let [sBegin, sEnd] = getSampleIndexRangeForSelection(
       samples,
@@ -1419,7 +1409,7 @@ export function filterCounterToRange(
 export function accumulateCounterSamples(
   samplesArray: Array<CounterSamplesTable>
 ): Array<AccumulatedCounterSamples> {
-  const accumulatedSamples = samplesArray.map(samples => {
+  const accumulatedSamples = samplesArray.map((samples) => {
     let minCount = 0;
     let maxCount = 0;
     let accumulated = 0;
@@ -1619,7 +1609,7 @@ export function getCallNodeIndicesFromPaths(
   // the look-up process by caching every CallNodePath we handle which avoids
   // looking up parents again and again.
   const cache = new Map();
-  return callNodePaths.map(path =>
+  return callNodePaths.map((path) =>
     _getCallNodeIndexFromPathWithCache(path, callNodeTable, cache)
   );
 }
@@ -1916,7 +1906,7 @@ export function updateThreadStacks(
 
   const newSamples = {
     ...samples,
-    stack: samples.stack.map(oldStack => convertStack(oldStack)),
+    stack: samples.stack.map((oldStack) => convertStack(oldStack)),
   };
 
   const newThread = {
@@ -1928,13 +1918,13 @@ export function updateThreadStacks(
   if (jsAllocations) {
     newThread.jsAllocations = {
       ...jsAllocations,
-      stack: jsAllocations.stack.map(oldStack => convertStack(oldStack)),
+      stack: jsAllocations.stack.map((oldStack) => convertStack(oldStack)),
     };
   }
   if (nativeAllocations) {
     newThread.nativeAllocations = {
       ...nativeAllocations,
-      stack: nativeAllocations.stack.map(oldStack => convertStack(oldStack)),
+      stack: nativeAllocations.stack.map((oldStack) => convertStack(oldStack)),
     };
   }
 
@@ -2057,7 +2047,7 @@ export function getFriendlyThreadName(
         // We want to use that for the GeckoMain thread because it is shown as the
         // root of other threads in each process group.
         label = thread.processName;
-        const homonymThreads = threads.filter(thread => {
+        const homonymThreads = threads.filter((thread) => {
           return thread.name === 'GeckoMain' && thread.processName === label;
         });
         if (homonymThreads.length > 1) {
@@ -2076,7 +2066,7 @@ export function getFriendlyThreadName(
             label = 'Remote Data Decoder';
             break;
           case 'tab': {
-            const contentThreads = threads.filter(thread => {
+            const contentThreads = threads.filter((thread) => {
               return (
                 thread.name === 'GeckoMain' && thread.processType === 'tab'
               );
@@ -2168,8 +2158,10 @@ export type ParsedFileNameFromSymbolication =
 //   or even just "glib/gmain.c"
 // Some rust stdlib functions: (https://bugzilla.mozilla.org/show_bug.cgi?id=1717973)
 //   "/builds/worker/fetches/rustc/lib/rustlib/src/rust/library/std/src/sys_common/backtrace.rs"
-const repoPathRegex = /^(?<vcs>hg|git):(?<repo>[^:]*):(?<path>[^:]*):(?<rev>[0-9a-f]*)$/;
-const s3PathRegex = /^s3:(?<bucket>[^:]*):(?<digest>[0-9a-f]*)\/(?<path>[^:]*):$/;
+const repoPathRegex =
+  /^(?<vcs>hg|git):(?<repo>[^:]*):(?<path>[^:]*):(?<rev>[0-9a-f]*)$/;
+const s3PathRegex =
+  /^s3:(?<bucket>[^:]*):(?<digest>[0-9a-f]*)\/(?<path>[^:]*):$/;
 export function parseFileNameFromSymbolication(
   file: string
 ): ParsedFileNameFromSymbolication {
@@ -2303,7 +2295,7 @@ export function getFuncNamesAndOriginsForPath(
 }> {
   const { funcTable, stringTable, resourceTable } = thread;
 
-  return path.map(frame => {
+  return path.map((frame) => {
     const { category, func } = frame;
     return {
       funcName: stringTable.getString(funcTable.name[func]),
@@ -2521,7 +2513,7 @@ export function getSampleCategories(
   samples: SamplesTable,
   stackTable: StackTable
 ): Array<IndexIntoSamplesTable | null> {
-  return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
+  return samples.stack.map((s) => (s !== null ? stackTable.category[s] : null));
 }
 
 export function getFriendlyStackTypeName(
@@ -2714,10 +2706,8 @@ export function filterToRetainedAllocations(
   // A-----D------A-------D
   type Address = number;
   type IndexIntoAllocations = number;
-  const memoryAddressToAllocation: Map<
-    Address,
-    IndexIntoAllocations
-  > = new Map();
+  const memoryAddressToAllocation: Map<Address, IndexIntoAllocations> =
+    new Map();
   const retainedAllocation = [];
   for (
     let allocationIndex = 0;
@@ -2737,9 +2727,8 @@ export function filterToRetainedAllocations(
       retainedAllocation[allocationIndex] = false;
 
       // Lookup the previous allocation.
-      const previousAllocationIndex = memoryAddressToAllocation.get(
-        memoryAddress
-      );
+      const previousAllocationIndex =
+        memoryAddressToAllocation.get(memoryAddress);
       if (previousAllocationIndex !== undefined) {
         // This deallocation matches a previous allocation. Remove the allocation.
         retainedAllocation[previousAllocationIndex] = false;
@@ -2786,7 +2775,7 @@ export function extractProfileFilterPageData(
 
   // Getting the pages that are relevant and a top-most frame.
   let filteredPages = pages.filter(
-    page =>
+    (page) =>
       // It's the top-most frame if `embedderInnerWindowID` is zero.
       page.embedderInnerWindowID === 0 && relevantPages.has(page.innerWindowID)
   );
@@ -2795,7 +2784,7 @@ export function extractProfileFilterPageData(
     // If there are more than one top-most page, it's also good to filter out the
     // `about:` pages so user can see their url they are actually profiling.
     filteredPages = filteredPages.filter(
-      page => !page.url.startsWith('about:')
+      (page) => !page.url.startsWith('about:')
     );
   }
 
@@ -2914,7 +2903,7 @@ export function hasThreadKeys(
   threadIndexesSet: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ): boolean {
-  const threadIndexes = ('' + threadsKey).split(',').map(n => +n);
+  const threadIndexes = ('' + threadsKey).split(',').map((n) => +n);
   for (const threadIndex of threadIndexes) {
     if (!threadIndexesSet.has(threadIndex)) {
       return false;

@@ -260,22 +260,19 @@ export const StackSettings = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     invertCallstack: getInvertCallstack(state),
     selectedTab: getSelectedTab(state),
     showUserTimings: getShowUserTimings(state),
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
     hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
-    hasNativeAllocations: selectedThreadSelectors.getHasNativeAllocations(
-      state
-    ),
-    canShowRetainedMemory: selectedThreadSelectors.getCanShowRetainedMemory(
-      state
-    ),
-    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-      state
-    ),
+    hasNativeAllocations:
+      selectedThreadSelectors.getHasNativeAllocations(state),
+    canShowRetainedMemory:
+      selectedThreadSelectors.getCanShowRetainedMemory(state),
+    callTreeSummaryStrategy:
+      selectedThreadSelectors.getCallTreeSummaryStrategy(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,

@@ -248,7 +248,7 @@ export function convertPerfScriptProfile(
     }
   }
 
-  const threadArray = Array.from(threadMap.values()).map(thread =>
+  const threadArray = Array.from(threadMap.values()).map((thread) =>
     thread.finish()
   );
 

@@ -11,12 +11,12 @@ import type {
   L10nFetchingPhase,
 } from 'firefox-profiler/types';
 
-export const getL10nState: Selector<L10nState> = state => state.l10n;
-export const getL10nFetchingPhase: Selector<L10nFetchingPhase> = state =>
+export const getL10nState: Selector<L10nState> = (state) => state.l10n;
+export const getL10nFetchingPhase: Selector<L10nFetchingPhase> = (state) =>
   getL10nState(state).l10nFetchingPhase;
-export const getLocalization: Selector<Localization> = state =>
+export const getLocalization: Selector<Localization> = (state) =>
   getL10nState(state).localization;
-export const getPrimaryLocale: Selector<string | null> = state =>
+export const getPrimaryLocale: Selector<string | null> = (state) =>
   getL10nState(state).primaryLocale;
-export const getDirection: Selector<'ltr' | 'rtl'> = state =>
+export const getDirection: Selector<'ltr' | 'rtl'> = (state) =>
   getL10nState(state).direction;

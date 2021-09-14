@@ -98,8 +98,7 @@ export function createGeckoSubprocessProfile(
     breakpadId: '9F950E2CE3CD3E1ABD06D80788B606E60',
     debugName: 'firefox-webcontent',
     name: 'firefox-webcontent',
-    path:
-      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
+    path: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
     debugPath:
       '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
     offset: 0,
@@ -290,9 +289,8 @@ export function createGeckoProfile(): GeckoProfile {
     createGeckoCounter(parentProcessThreads[0]),
   ];
 
-  const parentProcessOverhead: GeckoProfilerOverhead = createGeckoProfilerOverhead(
-    parentProcessThreads[0]
-  );
+  const parentProcessOverhead: GeckoProfilerOverhead =
+    createGeckoProfilerOverhead(parentProcessThreads[0]);
 
   const profile = {
     meta: parentProcessMeta,
@@ -330,7 +328,7 @@ function _createGeckoThreadWithMarkers(
   const { stringTable } = thread;
   const testDefinedMarkerStringIndex = stringTable.length;
   thread.stringTable.push('TestDefinedMarker');
-  thread.markers.data = markers.map(marker => {
+  thread.markers.data = markers.map((marker) => {
     let name = testDefinedMarkerStringIndex;
     const markerName = marker.name;
     if (markerName) {

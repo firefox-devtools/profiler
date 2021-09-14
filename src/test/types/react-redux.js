@@ -41,8 +41,8 @@ type StateProps = {|
   +statePropNumber: number,
 |};
 
-type ExampleActionCreator = string => Action;
-type ExampleThunkActionCreator = string => ThunkAction<number>;
+type ExampleActionCreator = (string) => Action;
+type ExampleThunkActionCreator = (string) => ThunkAction<number>;
 
 type DispatchProps = {|
   +dispatchString: ExampleActionCreator,
@@ -60,9 +60,9 @@ class ExampleComponent extends React.PureComponent<Props> {
     (this.props.statePropNumber: number);
 
     // The action creators are properly wrapped by dispatch.
-    (this.props.dispatchString: string => Action);
+    (this.props.dispatchString: (string) => Action);
     // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-    (this.props.dispatchThunk: string => number);
+    (this.props.dispatchThunk: (string) => number);
     // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
     (this.props.dispatchThunk('foo'): number);
 
@@ -81,8 +81,8 @@ const validMapStateToProps = (state, ownProps) => {
 };
 
 declare var validDispatchToProps: {|
-  +dispatchString: string => Action,
-  +dispatchThunk: string => ThunkAction<number>,
+  +dispatchString: (string) => Action,
+  +dispatchThunk: (string) => ThunkAction<number>,
 |};
 
 // This value also serves as a test for the common case of creating a component
@@ -100,27 +100,26 @@ const ConnectedExampleComponent = explicitConnect<
 {
   // Test that WrapDispatchProps modifies the ThunkActions.
   const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {|
-    +dispatchString: string => Action,
-    +dispatchThunk: string => number,
+    +dispatchString: (string) => Action,
+    +dispatchThunk: (string) => number,
   |});
 }
 
 {
   // Test that the original unwrapped action creators do not work.
   const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {|
-    +dispatchString: string => Action,
+    +dispatchString: (string) => Action,
     // $FlowExpectError
-    +dispatchThunk: string => ThunkAction<number>,
+    +dispatchThunk: (string) => ThunkAction<number>,
   |});
 }
 
 {
   // Test that WrapFunctionInDispatch works to strip off the return action.
   const exampleAction = (string: string) => (ANY_VALUE: Action);
-  const exampleThunkAction = (string: string) => (
-    dispatch: Dispatch,
-    getState: GetState
-  ) => (ANY_VALUE: number);
+  const exampleThunkAction =
+    (string: string) => (dispatch: Dispatch, getState: GetState) =>
+      (ANY_VALUE: number);
   const exampleThunkActionWrapped = (string: string) => 5;
 
   (exampleAction: WrapFunctionInDispatch<ExampleActionCreator>);
@@ -133,7 +132,7 @@ const ConnectedExampleComponent = explicitConnect<
   // Test that mapStateToProps will error out if provided an extra value.
   explicitConnect<OwnProps, StateProps, DispatchProps>({
     // $FlowExpectError
-    mapStateToProps: state => ({
+    mapStateToProps: (state) => ({
       statePropString: 'string',
       statePropNumber: 0,
       extraValue: null,
@@ -146,7 +145,7 @@ const ConnectedExampleComponent = explicitConnect<
 {
   // Test that mapStateToProps will error if provided an extra value.
   explicitConnect<OwnProps, StateProps, DispatchProps>({
-    mapStateToProps: state => ({
+    mapStateToProps: (state) => ({
       statePropString: 'string',
       // $FlowExpectError
       statePropNumber: 'not a number',
@@ -162,7 +161,7 @@ const ConnectedExampleComponent = explicitConnect<
     mapStateToProps: validMapStateToProps,
     // $FlowExpectError
     mapDispatchToProps: (ANY_VALUE: {|
-      +dispatchThunk: string => ThunkAction<number>,
+      +dispatchThunk: (string) => ThunkAction<number>,
     |}),
     component: ExampleComponent,
   });
@@ -174,8 +173,8 @@ const ConnectedExampleComponent = explicitConnect<
     mapStateToProps: validMapStateToProps,
     mapDispatchToProps: (ANY_VALUE: {|
       // $FlowExpectError
-      +dispatchString: string => string,
-      +dispatchThunk: string => ThunkAction<number>,
+      +dispatchString: (string) => string,
+      +dispatchThunk: (string) => ThunkAction<number>,
     |}),
     component: ExampleComponent,
   });
@@ -188,7 +187,7 @@ const ConnectedExampleComponent = explicitConnect<
     // $FlowExpectError
     mapDispatchToProps: (ANY_VALUE: {|
       ...typeof validDispatchToProps,
-      +extraProperty: string => string,
+      +extraProperty: (string) => string,
     |}),
     component: ExampleComponent,
   });

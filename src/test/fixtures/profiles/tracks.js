@@ -52,12 +52,10 @@ export function getHumanReadableTracks(state: State): string[] {
   const threads = profileViewSelectors.getThreads(state);
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
   const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
-  const selectedThreadIndexes = urlStateSelectors.getSelectedThreadIndexes(
-    state
-  );
-  const timelineTrackOrganization = urlStateSelectors.getTimelineTrackOrganization(
-    state
-  );
+  const selectedThreadIndexes =
+    urlStateSelectors.getSelectedThreadIndexes(state);
+  const timelineTrackOrganization =
+    urlStateSelectors.getTimelineTrackOrganization(state);
   const text: string[] = [];
 
   if (timelineTrackOrganization.type !== 'full') {
@@ -177,9 +175,7 @@ export function getProfileWithNiceTracks(): Profile {
 export function getStoreWithMemoryTrack(pid: number = 222) {
   const { profile } = getProfileFromTextSamples(
     // Create a trivial profile with 10 samples, all of the function "A".
-    Array(10)
-      .fill('A')
-      .join('  ')
+    Array(10).fill('A').join('  ')
   );
   const threadIndex = 0;
   const trackIndex = 0;
@@ -223,9 +219,8 @@ export function getStoreWithMemoryTrack(pid: number = 222) {
  */
 export function getHumanReadableActiveTabTracks(state: State): string[] {
   const globalTracks = profileViewSelectors.getActiveTabGlobalTracks(state);
-  const selectedThreadIndexes = urlStateSelectors.getSelectedThreadIndexes(
-    state
-  );
+  const selectedThreadIndexes =
+    urlStateSelectors.getSelectedThreadIndexes(state);
   const text: string[] = [];
 
   for (const globalTrack of globalTracks) {

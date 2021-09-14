@@ -40,7 +40,7 @@ jest.mock('../../components/app/AppLocalizationProvider', () => ({
   AppLocalizationProvider: ({ children }) => children,
 }));
 
-describe('Root with history', function() {
+describe('Root with history', function () {
   type TestConfig = {|
     profileHash?: string,
   |};
@@ -102,7 +102,7 @@ describe('Root with history', function() {
     };
   }
 
-  beforeEach(function() {
+  beforeEach(function () {
     window.TextDecoder = TextDecoder;
   });
 
@@ -111,7 +111,7 @@ describe('Root with history', function() {
     delete window.fetch;
   });
 
-  it('can view a file from the profile store, use history with it', async function() {
+  it('can view a file from the profile store, use history with it', async function () {
     const { waitForTab } = setup({
       profileHash: 'FAKEHASH',
     });
@@ -123,7 +123,7 @@ describe('Root with history', function() {
     ).toBeInTheDocument();
     expect(screen.queryByText('Call Tree')).not.toBeInTheDocument();
 
-    await Promise.all((window: any).fetch.mock.results.map(n => n.value));
+    await Promise.all((window: any).fetch.mock.results.map((n) => n.value));
 
     // Wait until the call tree is visible.
     await waitForTab({ name: 'Call Tree', selected: true });
@@ -160,7 +160,7 @@ describe('Root with history', function() {
 
   // In the next test, we test that we don't throw.
   // eslint-disable-next-line jest/expect-expect
-  it('can work with history after a reload', async function() {
+  it('can work with history after a reload', async function () {
     const { waitForTab, loadPageAgain } = setup({
       profileHash: 'FAKEHASH',
     });
@@ -191,7 +191,7 @@ describe('Root with history', function() {
     await waitForTab({ name: 'Marker Chart', selected: false });
   });
 
-  it('resets the history length between tests', async function() {
+  it('resets the history length between tests', async function () {
     setup({
       profileHash: 'FAKEHASH',
     });

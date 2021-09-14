@@ -32,7 +32,7 @@ function checkVersions() {
 
   const checks = [checkNode(agents), checkYarn(agents)];
 
-  const successful = checks.every(returnValue => returnValue);
+  const successful = checks.every((returnValue) => returnValue);
   if (successful) {
     console.log(
       'All project requirements are satisfied, moving forward with the installation.'

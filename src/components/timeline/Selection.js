@@ -106,7 +106,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     let isRangeSelecting = false;
 
-    const mouseMoveHandler = event => {
+    const mouseMoveHandler = (event) => {
       const mouseMoveX = event.pageX;
       const mouseMoveTime =
         ((mouseMoveX - rect.left) / rect.width) *
@@ -136,7 +136,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       }
     };
 
-    const mouseUpHandler = event => {
+    const mouseUpHandler = (event) => {
       if (isRangeSelecting) {
         const mouseMoveTime =
           ((event.pageX - rect.left) / rect.width) *
@@ -232,43 +232,45 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     }
   };
 
-  _makeOnMove = (fun: number => { startDelta: number, endDelta: number }) => (
-    originalSelection: { +selectionStart: number, +selectionEnd: number },
-    dx: number,
-    dy: number,
-    isModifying: boolean
-  ) => {
-    const { committedRange, width, updatePreviewSelection } = this.props;
-    const delta = (dx / width) * (committedRange.end - committedRange.start);
-    const selectionDeltas = fun(delta);
-    const selectionStart = Math.max(
-      committedRange.start,
-      originalSelection.selectionStart + selectionDeltas.startDelta
-    );
-    const selectionEnd = clamp(
-      originalSelection.selectionEnd + selectionDeltas.endDelta,
-      selectionStart,
-      committedRange.end
-    );
-    updatePreviewSelection({
-      hasSelection: true,
-      isModifying,
-      selectionStart,
-      selectionEnd,
-    });
-  };
+  _makeOnMove =
+    (fun: (number) => { startDelta: number, endDelta: number }) =>
+    (
+      originalSelection: { +selectionStart: number, +selectionEnd: number },
+      dx: number,
+      dy: number,
+      isModifying: boolean
+    ) => {
+      const { committedRange, width, updatePreviewSelection } = this.props;
+      const delta = (dx / width) * (committedRange.end - committedRange.start);
+      const selectionDeltas = fun(delta);
+      const selectionStart = Math.max(
+        committedRange.start,
+        originalSelection.selectionStart + selectionDeltas.startDelta
+      );
+      const selectionEnd = clamp(
+        originalSelection.selectionEnd + selectionDeltas.endDelta,
+        selectionStart,
+        committedRange.end
+      );
+      updatePreviewSelection({
+        hasSelection: true,
+        isModifying,
+        selectionStart,
+        selectionEnd,
+      });
+    };
 
-  _rangeStartOnMove = this._makeOnMove(delta => ({
+  _rangeStartOnMove = this._makeOnMove((delta) => ({
     startDelta: delta,
     endDelta: 0,
   }));
 
-  _moveRangeOnMove = this._makeOnMove(delta => ({
+  _moveRangeOnMove = this._makeOnMove((delta) => ({
     startDelta: delta,
     endDelta: delta,
   }));
 
-  _rangeEndOnMove = this._makeOnMove(delta => ({
+  _rangeEndOnMove = this._makeOnMove((delta) => ({
     startDelta: 0,
     endDelta: delta,
   }));
@@ -390,7 +392,7 @@ export const TimelineSelection = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),

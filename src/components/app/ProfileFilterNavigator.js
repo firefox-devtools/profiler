@@ -97,7 +97,7 @@ export const ProfileFilterNavigator = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     const items = getCommittedRangeLabels(state);
     const previewSelection = getPreviewSelection(state);
     const uncommittedItem = previewSelection.hasSelection

@@ -29,7 +29,7 @@ import {
   INTERVAL_END,
 } from '../../app-logic/constants';
 
-describe('selectors/getStackTimingByDepth', function() {
+describe('selectors/getStackTimingByDepth', function () {
   /**
    * This table shows off how a stack chart gets filtered to JS only, where the number is
    * the stack index, and P is platform code, and J javascript.
@@ -46,7 +46,7 @@ describe('selectors/getStackTimingByDepth', function() {
    *                          8J     |
    */
 
-  it('computes unfiltered stack timing by depth', function() {
+  it('computes unfiltered stack timing by depth', function () {
     const store = storeWithProfile();
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
       store.getState()
@@ -67,7 +67,7 @@ describe('selectors/getStackTimingByDepth', function() {
     ]);
   });
 
-  it('uses search strings', function() {
+  it('uses search strings', function () {
     const store = storeWithProfile();
     store.dispatch(changeCallTreeSearchString('javascript'));
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
@@ -100,7 +100,7 @@ describe('selectors/getStackTimingByDepth', function() {
    *                          8J     |                             0P
    */
 
-  it('can handle inverted stacks', function() {
+  it('can handle inverted stacks', function () {
     const store = storeWithProfile();
     store.dispatch(changeInvertCallstack(true));
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
@@ -138,7 +138,7 @@ describe('selectors/getStackTimingByDepth', function() {
   });
 });
 
-describe('selectors/getFlameGraphTiming', function() {
+describe('selectors/getFlameGraphTiming', function () {
   /**
    * Map the flameGraphTiming data structure into a human readable format where
    * each line takes the form:
@@ -195,7 +195,7 @@ describe('selectors/getFlameGraphTiming', function() {
     });
   }
 
-  it('computes a basic example', function() {
+  it('computes a basic example', function () {
     const {
       profile,
       funcNamesPerThread: [funcNames],
@@ -217,7 +217,7 @@ describe('selectors/getFlameGraphTiming', function() {
     ]);
   });
 
-  it('can handle null samples', function() {
+  it('can handle null samples', function () {
     const {
       profile,
       funcNamesPerThread: [funcNames],
@@ -242,7 +242,7 @@ describe('selectors/getFlameGraphTiming', function() {
     ]);
   });
 
-  it('sorts stacks in alphabetical order', function() {
+  it('sorts stacks in alphabetical order', function () {
     const {
       profile,
       funcNamesPerThread: [funcNames],
@@ -260,7 +260,7 @@ describe('selectors/getFlameGraphTiming', function() {
     ]);
   });
 
-  it('contains totalTime, selfTime and selfRelative', function() {
+  it('contains totalTime, selfTime and selfRelative', function () {
     const {
       profile,
       funcNamesPerThread: [funcNames],
@@ -279,8 +279,8 @@ describe('selectors/getFlameGraphTiming', function() {
   });
 });
 
-describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
-  it('calculates the max call node depth', function() {
+describe('selectors/getCallNodeMaxDepthForFlameGraph', function () {
+  it('calculates the max call node depth', function () {
     const { profile } = getProfileFromTextSamples(`
       A  A  A
       B  B  B
@@ -289,39 +289,41 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
     `);
 
     const store = storeWithProfile(profile);
-    const allSamplesMaxDepth = selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
-      store.getState()
-    );
+    const allSamplesMaxDepth =
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
+        store.getState()
+      );
     expect(allSamplesMaxDepth).toEqual(4);
   });
 
-  it('returns zero if there are no samples', function() {
+  it('returns zero if there are no samples', function () {
     const { profile } = getProfileFromTextSamples(` `);
     const store = storeWithProfile(profile);
-    const allSamplesMaxDepth = selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
-      store.getState()
-    );
+    const allSamplesMaxDepth =
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
+        store.getState()
+      );
     expect(allSamplesMaxDepth).toEqual(0);
   });
 });
 
-describe('actions/changeImplementationFilter', function() {
+describe('actions/changeImplementationFilter', function () {
   const store = storeWithProfile();
 
-  it('is initially set to filter to all', function() {
+  it('is initially set to filter to all', function () {
     const filter = UrlStateSelectors.getImplementationFilter(store.getState());
     expect(filter).toEqual('combined');
   });
 
-  it('can be changed to cpp', function() {
+  it('can be changed to cpp', function () {
     store.dispatch(changeImplementationFilter('cpp'));
     const filter = UrlStateSelectors.getImplementationFilter(store.getState());
     expect(filter).toEqual('cpp');
   });
 });
 
-describe('actions/updatePreviewSelection', function() {
-  it('can update the selection with new values', function() {
+describe('actions/updatePreviewSelection', function () {
+  it('can update the selection with new values', function () {
     const store = storeWithProfile();
 
     const initialSelection = ProfileViewSelectors.getPreviewSelection(
@@ -353,7 +355,7 @@ describe('actions/updatePreviewSelection', function() {
   });
 });
 
-describe('actions/changeInvertCallstack', function() {
+describe('actions/changeInvertCallstack', function () {
   // This profile has a heavily weighted path of A, B, I, J that should be selected.
   const {
     profile,
@@ -365,7 +367,7 @@ describe('actions/changeInvertCallstack', function() {
       D  G  J  J  J
          H
     `);
-  const toFuncIndex = funcName => funcNames.indexOf(funcName);
+  const toFuncIndex = (funcName) => funcNames.indexOf(funcName);
   const threadIndex = 0;
 
   // The assumptions in this tests is that we are going between these two call node
@@ -375,16 +377,16 @@ describe('actions/changeInvertCallstack', function() {
 
   // Make tests more readable by grabbing the relevant paths, and transforming
   // them to their function names, rather than indexes.
-  const getPaths = state => ({
+  const getPaths = (state) => ({
     selectedCallNodePath: selectedThreadSelectors
       .getSelectedCallNodePath(state)
-      .map(index => funcNames[index]),
+      .map((index) => funcNames[index]),
     expandedCallNodePaths: Array.from(
       selectedThreadSelectors.getExpandedCallNodePaths(state)
-    ).map(path => path.map(index => funcNames[index])),
+    ).map((path) => path.map((index) => funcNames[index])),
   });
 
-  describe('on a normal call tree', function() {
+  describe('on a normal call tree', function () {
     // Each test uses a normal call tree, with a selected call node.
     const storeWithNormalCallTree = () => {
       const store = storeWithProfile(profile);
@@ -392,7 +394,7 @@ describe('actions/changeInvertCallstack', function() {
       return store;
     };
 
-    it('starts with a selectedCallNodePath', function() {
+    it('starts with a selectedCallNodePath', function () {
       const { getState } = storeWithNormalCallTree();
       const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
         getState()
@@ -401,7 +403,7 @@ describe('actions/changeInvertCallstack', function() {
       expect(expandedCallNodePaths).toEqual([['A']]);
     });
 
-    it('inverts the selectedCallNodePath', function() {
+    it('inverts the selectedCallNodePath', function () {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(changeSelectedCallNode(threadIndex, callNodePath));
       dispatch(changeInvertCallstack(true));
@@ -418,7 +420,7 @@ describe('actions/changeInvertCallstack', function() {
     });
   });
 
-  describe('on an inverted call tree', function() {
+  describe('on an inverted call tree', function () {
     // Each test uses a store with an inverted profile, and a selected call node.
     const storeWithInvertedCallTree = () => {
       const store = storeWithProfile(profile);
@@ -427,7 +429,7 @@ describe('actions/changeInvertCallstack', function() {
       return store;
     };
 
-    it('starts with a selectedCallNodePath', function() {
+    it('starts with a selectedCallNodePath', function () {
       const { getState } = storeWithInvertedCallTree();
       const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
         getState()
@@ -436,7 +438,7 @@ describe('actions/changeInvertCallstack', function() {
       expect(expandedCallNodePaths).toEqual([['J'], ['J', 'I']]);
     });
 
-    it('uninverts the selectedCallNodePath', function() {
+    it('uninverts the selectedCallNodePath', function () {
       const { dispatch, getState } = storeWithInvertedCallTree();
       dispatch(changeInvertCallstack(false));
       const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
@@ -449,8 +451,8 @@ describe('actions/changeInvertCallstack', function() {
   });
 });
 
-describe('actions/changeShowJsTracerSummary', function() {
-  it('can change the view to show a summary', function() {
+describe('actions/changeShowJsTracerSummary', function () {
+  it('can change the view to show a summary', function () {
     const { profile } = getProfileFromTextSamples(`A`);
     const { dispatch, getState } = storeWithProfile(profile);
     expect(UrlStateSelectors.getShowJsTracerSummary(getState())).toBe(false);
@@ -459,8 +461,8 @@ describe('actions/changeShowJsTracerSummary', function() {
   });
 });
 
-describe('actions/changeShowUserTimings', function() {
-  it('can change the view to show a summary', function() {
+describe('actions/changeShowUserTimings', function () {
+  it('can change the view to show a summary', function () {
     const { profile } = getProfileFromTextSamples(`A`);
     const { dispatch, getState } = storeWithProfile(profile);
     expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(false);
@@ -469,7 +471,7 @@ describe('actions/changeShowUserTimings', function() {
   });
 });
 
-describe('selectors/getCombinedTimingRows', function() {
+describe('selectors/getCombinedTimingRows', function () {
   function setupUserTimings() {
     // Approximately generate this type of graph with the following user timings.
     //
@@ -554,8 +556,8 @@ describe('selectors/getCombinedTimingRows', function() {
   });
 });
 
-describe('selectors/getThreadRange', function() {
-  it('should compute a thread range based on the number of samples', function() {
+describe('selectors/getThreadRange', function () {
+  it('should compute a thread range based on the number of samples', function () {
     const { profile } = getProfileFromTextSamples('A  B  C');
     const { getState } = storeWithProfile(profile);
 
@@ -565,7 +567,7 @@ describe('selectors/getThreadRange', function() {
     });
   });
 
-  it('should compute a thread range based on markers when no samples are present', function() {
+  it('should compute a thread range based on markers when no samples are present', function () {
     const { getState } = storeWithProfile(
       getProfileWithMarkers([['Marker', 10, 20]])
     );
@@ -576,7 +578,7 @@ describe('selectors/getThreadRange', function() {
     });
   });
 
-  it('should use proper marker start/end times depending on the phase', function() {
+  it('should use proper marker start/end times depending on the phase', function () {
     // Gecko outputs "0" for the unused values.
     const profile = getProfileWithMarkers([
       ['Instant', 10, 0], // Only starTime should be taken into account.
@@ -604,7 +606,7 @@ describe('selectors/getThreadRange', function() {
     });
   });
 
-  it('should use the Interval marker start time even if it is zero', function() {
+  it('should use the Interval marker start time even if it is zero', function () {
     // Gecko outputs "0" for the unused values.
     // Both start and endTime should be taken into account for Interval.
     const profile = getProfileWithMarkers([
@@ -625,7 +627,7 @@ describe('selectors/getThreadRange', function() {
     });
   });
 
-  it('should use the Instant marker start time even if it is zero', function() {
+  it('should use the Instant marker start time even if it is zero', function () {
     // Gecko outputs "0" for the unused values.
     // Both startTime should be taken into account for Instant.
     const profile = getProfileWithMarkers([
@@ -646,7 +648,7 @@ describe('selectors/getThreadRange', function() {
     });
   });
 
-  it('ignores markers when there are samples', function() {
+  it('ignores markers when there are samples', function () {
     const { profile } = getProfileFromTextSamples('A  B  C');
     {
       const markersProfile = getProfileWithMarkers([['Marker', 10, 20]]);

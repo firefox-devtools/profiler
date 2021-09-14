@@ -14,7 +14,7 @@ import { changeSelectedMarker } from '../../actions/profile-view';
 import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerTableProfile } from '../fixtures/profiles/processed-profile';
 
-describe('MarkerSidebar', function() {
+describe('MarkerSidebar', function () {
   function setup() {
     const profile = getMarkerTableProfile();
     const store = storeWithProfile(profile);
@@ -38,7 +38,7 @@ describe('MarkerSidebar', function() {
       changeSelectedMarker(
         0,
         profile.threads[0].markers.data.findIndex(
-          data => data && data.type === 'IPC'
+          (data) => data && data.type === 'IPC'
         )
       )
     );

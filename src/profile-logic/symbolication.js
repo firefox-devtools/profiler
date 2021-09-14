@@ -549,9 +549,8 @@ export function applySymbolicationStep(
   // Make a new frameTable with the updated nativeSymbol assignments.
   const newFrameTableNativeSymbolsColumn = oldFrameTable.nativeSymbol.slice();
   for (const [frameIndex, symbolAddress] of frameToSymbolAddressMap) {
-    const symbolIndex = symbolAddressToCanonicalSymbolIndexMap.get(
-      symbolAddress
-    );
+    const symbolIndex =
+      symbolAddressToCanonicalSymbolIndexMap.get(symbolAddress);
     if (symbolIndex === undefined) {
       throw new Error(
         'Impossible, all symbolAddresses have a canonical symbol at this point.'
@@ -660,9 +659,8 @@ export async function symbolicateProfile(
   symbolicationStepCallback: SymbolicationStepCallback
 ): Promise<void> {
   const symbolicationInfo = profile.threads.map(getThreadSymbolicationInfo);
-  const libSymbolicationRequests = buildLibSymbolicationRequestsForAllThreads(
-    symbolicationInfo
-  );
+  const libSymbolicationRequests =
+    buildLibSymbolicationRequestsForAllThreads(symbolicationInfo);
   await symbolStore.getSymbols(
     libSymbolicationRequests,
     (request, results) => {

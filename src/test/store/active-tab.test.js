@@ -27,7 +27,7 @@ import { stateFromLocation } from '../../app-logic/url-handling';
 
 import type { Profile } from 'firefox-profiler/types';
 
-describe('ActiveTab', function() {
+describe('ActiveTab', function () {
   function setup(p = getProfileWithNiceTracks(), addInnerWindowID = true) {
     const { profile, ...pageInfo } = addActiveTabInformationToProfile(p);
     // Add the innerWindowIDs so we can compute the first thread as main track.
@@ -56,15 +56,15 @@ describe('ActiveTab', function() {
     };
   }
 
-  describe('global tracks', function() {
-    it('can initialize with active tab information', function() {
+  describe('global tracks', function () {
+    it('can initialize with active tab information', function () {
       const { getState } = setup();
       expect(getHumanReadableActiveTabTracks(getState())).toEqual([
         'main track [tab] SELECTED',
       ]);
     });
 
-    it('can extract a screenshots track', function() {
+    it('can extract a screenshots track', function () {
       const profile = getScreenshotTrackProfile();
       profile.threads[0].name = 'GeckoMain';
       const { getState } = setup(profile);
@@ -75,7 +75,7 @@ describe('ActiveTab', function() {
       ]);
     });
 
-    it('do not rely on network markers while calculating the tracks', function() {
+    it('do not rely on network markers while calculating the tracks', function () {
       // Network markers are not reliable to compute the tracks because some network
       // markers of an iframe comes from the parent frame. Therefore, their
       // innerWindowID will be the parent window's innerWindowID.
@@ -103,7 +103,7 @@ describe('ActiveTab', function() {
   });
 });
 
-describe('finalizeProfileView', function() {
+describe('finalizeProfileView', function () {
   function setup({
     profile = addActiveTabInformationToProfile(getProfileWithNiceTracks())
       .profile,
@@ -147,7 +147,7 @@ describe('finalizeProfileView', function() {
     return store;
   }
 
-  it('loads the profile with only `view=active-tab` in active tab view', async function() {
+  it('loads the profile with only `view=active-tab` in active tab view', async function () {
     const { getState } = setup({ search: '?view=active-tab&v=5' });
 
     // Check if we can successfully finalized the profile view for active tab.
@@ -158,7 +158,7 @@ describe('finalizeProfileView', function() {
     });
   });
 
-  it('switches back to full view if there is no `pages` array', async function() {
+  it('switches back to full view if there is no `pages` array', async function () {
     const { getState } = setup({
       search: '?view=active-tab&v=5',
       noPages: true,
@@ -171,7 +171,7 @@ describe('finalizeProfileView', function() {
     });
   });
 
-  it('switches back to full view if there is no `activeTabID` value', function() {
+  it('switches back to full view if there is no `activeTabID` value', function () {
     const { getState } = setup({
       search: '?view=active-tab&v=5',
       activeTabID: null,
@@ -184,7 +184,7 @@ describe('finalizeProfileView', function() {
     });
   });
 
-  it('switches back to full view if there is no relevant page with the given `activeTabID` value', function() {
+  it('switches back to full view if there is no relevant page with the given `activeTabID` value', function () {
     const activeTabIDWithNoRelevantPage = 99999;
     const { getState } = setup({
       search: '?view=active-tab&v=5',
@@ -198,7 +198,7 @@ describe('finalizeProfileView', function() {
     });
   });
 
-  it('sets the timeline type to "categories with CPU" if there are CPU usage values in the profile', function() {
+  it('sets the timeline type to "categories with CPU" if there are CPU usage values in the profile', function () {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithThreadCPUDelta([1, 2])
     );
@@ -218,7 +218,7 @@ describe('finalizeProfileView', function() {
     expect(getTimelineType(getState())).toBe('cpu-category');
   });
 
-  it('sets the timeline type to "categories" if there are no CPU usage values in the profile', function() {
+  it('sets the timeline type to "categories" if there are no CPU usage values in the profile', function () {
     const { getState } = setup({
       search: '?view=active-tab&v=5',
     });

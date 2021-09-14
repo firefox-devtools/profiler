@@ -39,7 +39,7 @@ import { ensureExists } from '../../utils/flow';
 
 import type { Profile } from 'firefox-profiler/types';
 
-describe('Timeline multiple thread selection', function() {
+describe('Timeline multiple thread selection', function () {
   autoMockDomRect();
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
@@ -61,7 +61,7 @@ describe('Timeline multiple thread selection', function() {
     return { ...renderResult, ...store };
   }
 
-  it('can toggle select multiple threads', function() {
+  it('can toggle select multiple threads', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
@@ -96,7 +96,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('will not de-select the last thread', function() {
+  it('will not de-select the last thread', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
@@ -120,7 +120,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('can select one thread from many', function() {
+  it('can select one thread from many', function () {
     const { getState, getByRole } = setup();
 
     const domWorker = getByRole('button', { name: 'DOM Worker' });
@@ -144,7 +144,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('will not de-select threads when clicking on a sample', function() {
+  it('will not de-select threads when clicking on a sample', function () {
     const { getState, getByRole, getByText } = setup();
 
     const domWorker = getByRole('button', { name: 'DOM Worker' });
@@ -177,7 +177,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('will still work on the activity graph when holding ctrl', function() {
+  it('will still work on the activity graph when holding ctrl', function () {
     const { getState, getByRole, getByText } = setup();
 
     const domWorker = getByRole('button', { name: 'DOM Worker' });
@@ -214,7 +214,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('maintains multi-selections when using the context menu', function() {
+  it('maintains multi-selections when using the context menu', function () {
     const { getState, getByRole } = setup();
 
     const domWorker = getByRole('button', { name: 'DOM Worker' });
@@ -238,7 +238,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('will select a thread through enter and spacebar keypresses for global tracks', function() {
+  it('will select a thread through enter and spacebar keypresses for global tracks', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
@@ -274,7 +274,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('will not select a track through a random keypress for a global track', function() {
+  it('will not select a track through a random keypress for a global track', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
@@ -296,7 +296,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('will select a thread through enter and spacebar keypresses for local tracks', function() {
+  it('will select a thread through enter and spacebar keypresses for local tracks', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
@@ -329,7 +329,7 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('will not select a track through a random keypress for local tracks', function() {
+  it('will not select a track through a random keypress for local tracks', function () {
     const { getState, getByRole } = setup();
 
     const domWorker = getByRole('button', { name: 'DOM Worker' });
@@ -402,7 +402,7 @@ function _getProfileWithDroppedSamples(): Profile {
   return profile;
 }
 
-describe('Timeline', function() {
+describe('Timeline', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
 
@@ -439,7 +439,7 @@ describe('Timeline', function() {
   // These tests are disabled for now because active tab view checkbox is disabled for now.
   // TODO: Enable it again once we have that checbox back.
   // eslint-disable-next-line jest/no-disabled-tests
-  describe.skip('TimelineSettingsActiveTabView', function() {
+  describe.skip('TimelineSettingsActiveTabView', function () {
     autoMockCanvasContext();
 
     it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {

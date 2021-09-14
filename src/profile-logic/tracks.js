@@ -139,7 +139,8 @@ export function initializeLocalTrackOrderByPid(
       // Go through the legacy thread order and pair it with the correct track.
       for (const threadIndex of legacyThreadOrder) {
         const trackIndex = tracks.findIndex(
-          track => track.type === 'thread' && track.threadIndex === threadIndex
+          (track) =>
+            track.type === 'thread' && track.threadIndex === threadIndex
         );
         if (trackIndex !== -1) {
           trackOrder.push(trackIndex);
@@ -173,7 +174,8 @@ export function initializeHiddenLocalTracksByPid(
     if (legacyHiddenThreads !== null) {
       for (const threadIndex of legacyHiddenThreads) {
         const trackIndex = tracks.findIndex(
-          track => track.type === 'thread' && track.threadIndex === threadIndex
+          (track) =>
+            track.type === 'thread' && track.threadIndex === threadIndex
         );
         if (trackIndex !== -1) {
           hiddenTracks.add(trackIndex);
@@ -235,12 +237,14 @@ export function computeLocalTracksByPid(
       tracks.push({ type: 'thread', threadIndex });
     }
 
-    if (thread.markers.data.some(datum => datum && datum.type === 'Network')) {
+    if (
+      thread.markers.data.some((datum) => datum && datum.type === 'Network')
+    ) {
       // This thread has network markers.
       tracks.push({ type: 'network', threadIndex });
     }
 
-    if (thread.markers.data.some(datum => datum && datum.type === 'IPC')) {
+    if (thread.markers.data.some((datum) => datum && datum.type === 'IPC')) {
       // This thread has IPC markers.
       tracks.push({ type: 'ipc', threadIndex });
     }
@@ -420,7 +424,7 @@ export function initializeGlobalTrackOrder(
     // Convert the thread index to a track index, if it's valid.
     for (const threadIndex of legacyThreadOrder) {
       const trackIndex = globalTracks.findIndex(
-        globalTrack =>
+        (globalTrack) =>
           globalTrack.type === 'process' &&
           globalTrack.mainThreadIndex === threadIndex
       );
@@ -481,7 +485,7 @@ export function initializeSelectedThreadIndex(
   // order.
   const threadIndex = profile.threads.indexOf(
     _findDefaultThread(
-      visibleThreadIndexes.map(threadIndex => profile.threads[threadIndex])
+      visibleThreadIndexes.map((threadIndex) => profile.threads[threadIndex])
     )
   );
   if (threadIndex === -1) {
@@ -502,7 +506,7 @@ export function initializeHiddenGlobalTracks(
   if (legacyHiddenThreads !== null) {
     for (const threadIndex of legacyHiddenThreads) {
       const trackIndex = globalTracks.findIndex(
-        track =>
+        (track) =>
           track.type === 'process' && track.mainThreadIndex === threadIndex
       );
       if (trackIndex !== -1) {
@@ -599,9 +603,9 @@ export function getGlobalTrackName(
         // First, see if any thread in this process has a non-empty processName.
         const pid = globalTrack.pid;
         const processName = threads
-          .filter(thread => thread.pid === pid)
-          .map(thread => thread.processName)
-          .find(processName => !!processName);
+          .filter((thread) => thread.pid === pid)
+          .map((thread) => thread.processName)
+          .find((processName) => !!processName);
         if (processName) {
           return processName;
         }
@@ -824,7 +828,7 @@ function _findDefaultThread(threads: Thread[]): Thread | null {
     return null;
   }
   const contentThreadId = threads.findIndex(
-    thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
+    (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
   );
   const defaultThreadIndex =
     contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];

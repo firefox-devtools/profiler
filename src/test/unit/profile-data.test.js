@@ -42,22 +42,22 @@ import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from 'firefox-profiler/types';
 
-describe('unique-string-array', function() {
+describe('unique-string-array', function () {
   const u = new UniqueStringArray(['foo', 'bar', 'baz']);
 
-  it('should return the right strings', function() {
+  it('should return the right strings', function () {
     expect(u.getString(0)).toEqual('foo');
     expect(u.getString(1)).toEqual('bar');
     expect(u.getString(2)).toEqual('baz');
   });
 
-  it('should return the correct index for existing strings', function() {
+  it('should return the correct index for existing strings', function () {
     expect(u.indexForString('foo')).toEqual(0);
     expect(u.indexForString('bar')).toEqual(1);
     expect(u.indexForString('baz')).toEqual(2);
   });
 
-  it('should return a new index for a new string', function() {
+  it('should return a new index for a new string', function () {
     expect(u.indexForString('qux')).toEqual(3);
     expect(u.indexForString('qux')).toEqual(3);
     expect(u.indexForString('hello')).toEqual(4);
@@ -68,8 +68,8 @@ describe('unique-string-array', function() {
   });
 });
 
-describe('data-table-utils', function() {
-  describe('sortDataTable', function() {
+describe('data-table-utils', function () {
+  describe('sortDataTable', function () {
     const originalDataTable = {
       length: 6,
       word: ['a', 'is', 'now', 'This', 'array', 'sorted'],
@@ -78,14 +78,14 @@ describe('data-table-utils', function() {
     };
     const dt = JSON.parse(JSON.stringify(originalDataTable));
 
-    it('test preparation', function() {
+    it('test preparation', function () {
       // verify copy
       expect(dt).not.toBe(originalDataTable);
       expect(dt).toEqual(originalDataTable);
-      expect(dt.word.map(w => w.length)).toEqual(dt.wordLength);
+      expect(dt.word.map((w) => w.length)).toEqual(dt.wordLength);
     });
 
-    it('should sort this data table by order', function() {
+    it('should sort this data table by order', function () {
       // sort by order
       sortDataTable(dt, dt.order, (a, b) => a - b);
 
@@ -93,12 +93,12 @@ describe('data-table-utils', function() {
       expect(dt.word.length).toEqual(originalDataTable.length);
       expect(dt.order.length).toEqual(originalDataTable.length);
       expect(dt.wordLength.length).toEqual(originalDataTable.length);
-      expect(dt.word.map(w => w.length)).toEqual(dt.wordLength);
+      expect(dt.word.map((w) => w.length)).toEqual(dt.wordLength);
       expect(dt.order).toEqual([...dt.order].sort((a, b) => a - b));
       expect(dt.word.join(' ')).toEqual('This is now a sorted array');
     });
 
-    it('should sort this data table by wordLength', function() {
+    it('should sort this data table by wordLength', function () {
       // sort by wordLength
       sortDataTable(dt, dt.wordLength, (a, b) => a - b);
       expect(dt).toEqual(originalDataTable);
@@ -109,7 +109,7 @@ describe('data-table-utils', function() {
       keyColumn: [1, 2, 3, 5, 6, 4, 7],
     };
 
-    it('should sort this other data table', function() {
+    it('should sort this other data table', function () {
       sortDataTable(
         differentDataTable,
         differentDataTable.keyColumn,
@@ -120,19 +120,19 @@ describe('data-table-utils', function() {
   });
 });
 
-describe('process-profile', function() {
-  describe('processGeckoProfile', function() {
+describe('process-profile', function () {
+  describe('processGeckoProfile', function () {
     const profile = processGeckoProfile(createGeckoProfile());
 
-    it('should have three threads', function() {
+    it('should have three threads', function () {
       expect(profile.threads.length).toEqual(3);
     });
 
-    it('should not have a profile-wide libs property', function() {
+    it('should not have a profile-wide libs property', function () {
       expect('libs' in profile).toBeFalsy();
     });
 
-    it('should have threads that are objects of the right shape', function() {
+    it('should have threads that are objects of the right shape', function () {
       for (const thread of profile.threads) {
         expect(typeof thread).toEqual('object');
         expect('libs' in thread).toBeTruthy();
@@ -146,7 +146,7 @@ describe('process-profile', function() {
       }
     });
 
-    it('should sort libs by start address', function() {
+    it('should sort libs by start address', function () {
       const libs = profile.threads[0].libs;
       let lastStartAddress = -Infinity;
       for (const lib of libs) {
@@ -155,7 +155,7 @@ describe('process-profile', function() {
       }
     });
 
-    it('should have reasonable debugName fields on each library', function() {
+    it('should have reasonable debugName fields on each library', function () {
       expect(profile.threads[0].libs[0].debugName).toEqual('firefox');
       expect(profile.threads[0].libs[1].debugName).toEqual('examplebinary');
       expect(profile.threads[0].libs[2].debugName).toEqual(
@@ -177,7 +177,7 @@ describe('process-profile', function() {
       );
     });
 
-    it('should have reasonable breakpadId fields on each library', function() {
+    it('should have reasonable breakpadId fields on each library', function () {
       for (const thread of profile.threads) {
         for (const lib of thread.libs) {
           expect('breakpadId' in lib).toBeTruthy();
@@ -187,7 +187,7 @@ describe('process-profile', function() {
       }
     });
 
-    it('should shift the content process by 1 second', function() {
+    it('should shift the content process by 1 second', function () {
       const thread0 = profile.threads[0];
       const thread2 = profile.threads[2];
 
@@ -226,7 +226,7 @@ describe('process-profile', function() {
       // TODO: also shift the samples inside marker callstacks
     });
 
-    it('should create one function per frame', function() {
+    it('should create one function per frame', function () {
       const thread = profile.threads[0];
       expect(thread.frameTable.length).toEqual(5);
       expect('location' in thread.frameTable).toBeFalsy();
@@ -261,7 +261,7 @@ describe('process-profile', function() {
       expect(thread.funcTable.columnNumber[4]).toEqual(35);
     });
 
-    it('should create no entries in nativeSymbols before symbolication', function() {
+    it('should create no entries in nativeSymbols before symbolication', function () {
       const thread = profile.threads[0];
       expect(thread.frameTable.length).toEqual(5);
       expect('nativeSymbol' in thread.frameTable).toBeTruthy();
@@ -273,7 +273,7 @@ describe('process-profile', function() {
       expect(thread.frameTable.nativeSymbol[4]).toEqual(null);
     });
 
-    it('should create one resource per used library', function() {
+    it('should create one resource per used library', function () {
       const thread = profile.threads[0];
       expect(thread.resourceTable.length).toEqual(3);
       expect(thread.resourceTable.type[0]).toEqual(resourceTypes.addon);
@@ -288,13 +288,13 @@ describe('process-profile', function() {
     });
   });
 
-  describe('JS tracer', function() {
-    it('does not have JS tracer information by default', function() {
+  describe('JS tracer', function () {
+    it('does not have JS tracer information by default', function () {
       const profile = processGeckoProfile(createGeckoProfile());
       expect(profile.threads[0].jsTracer).toBe(undefined);
     });
 
-    it('processes JS tracer and offsets the timestamps', function() {
+    it('processes JS tracer and offsets the timestamps', function () {
       const geckoProfile = createGeckoProfile();
       let timestampOffsetMs = 33;
 
@@ -323,7 +323,7 @@ describe('process-profile', function() {
       // Process the profile, and grab the threads we are interested in.
       const processedProfile = processGeckoProfile(geckoProfile);
       const childProcessThread = ensureExists(
-        processedProfile.threads.find(thread => thread.jsTracer),
+        processedProfile.threads.find((thread) => thread.jsTracer),
         'Could not find the thread with the JS tracer information'
       );
       const processedJsTracer = ensureExists(
@@ -333,7 +333,7 @@ describe('process-profile', function() {
 
       // Check that the values are correct from the test defined data.
       expect(
-        processedJsTracer.events.map(index =>
+        processedJsTracer.events.map((index) =>
           childProcessThread.stringTable.getString(index)
         )
       ).toEqual(['jsTracerA', 'jsTracerB', 'jsTracerC']);
@@ -346,8 +346,8 @@ describe('process-profile', function() {
     });
   });
 
-  describe('DevTools profiles', function() {
-    it('should process correctly', function() {
+  describe('DevTools profiles', function () {
+    it('should process correctly', function () {
       // Mock out a DevTools profile.
       const profile = processGeckoOrDevToolsProfile({
         label: null,
@@ -368,8 +368,8 @@ describe('process-profile', function() {
     });
   });
 
-  describe('extensions metadata', function() {
-    it('should be processed correctly', function() {
+  describe('extensions metadata', function () {
+    it('should be processed correctly', function () {
       const geckoProfile = createGeckoProfile();
       geckoProfile.meta.extensions = {
         schema: {
@@ -403,7 +403,7 @@ describe('process-profile', function() {
       });
     });
 
-    it('should be handled correctly if missing', function() {
+    it('should be handled correctly if missing', function () {
       const geckoProfile = createGeckoProfile();
       delete geckoProfile.meta.extensions;
 
@@ -418,13 +418,13 @@ describe('process-profile', function() {
   });
 });
 
-describe('profile-data', function() {
-  describe('createCallNodeTableAndFixupSamples', function() {
+describe('profile-data', function () {
+  describe('createCallNodeTableAndFixupSamples', function () {
     const profile = processGeckoProfile(createGeckoProfile());
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
-    ).findIndex(c => c.name === 'Other');
+    ).findIndex((c) => c.name === 'Other');
     const thread = profile.threads[0];
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
@@ -433,7 +433,7 @@ describe('profile-data', function() {
       defaultCategory
     );
 
-    it('should create one callNode per stack', function() {
+    it('should create one callNode per stack', function () {
       expect(thread.stackTable.length).toEqual(5);
       expect(callNodeTable.length).toEqual(5);
       expect('prefix' in callNodeTable).toBeTruthy();
@@ -466,7 +466,7 @@ describe('profile-data', function() {
     return stackList;
   }
 
-  describe('getCallNodeInfo', function() {
+  describe('getCallNodeInfo', function () {
     const {
       meta,
       threads: [thread],
@@ -474,7 +474,7 @@ describe('profile-data', function() {
     const defaultCategory = ensureExists(
       meta.categories,
       'Expected to find categories'
-    ).findIndex(c => c.name === 'Other');
+    ).findIndex((c) => c.name === 'Other');
     const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -497,7 +497,7 @@ describe('profile-data', function() {
       callNodeTable
     );
 
-    it('starts with a fully unduplicated set stack frames', function() {
+    it('starts with a fully unduplicated set stack frames', function () {
       /**
        * Assert this original structure:
        *
@@ -523,7 +523,7 @@ describe('profile-data', function() {
       expect(originalStackListB).toEqual([0, 1, 2, 5, 6]);
     });
 
-    it('creates a callNodeTable with merged stacks that share functions', function() {
+    it('creates a callNodeTable with merged stacks that share functions', function () {
       /**
        * This structure represents the desired de-duplication.
        *
@@ -550,15 +550,15 @@ describe('profile-data', function() {
   });
 });
 
-describe('symbolication', function() {
-  describe('getContainingLibrary', function() {
+describe('symbolication', function () {
+  describe('getContainingLibrary', function () {
     const libs = [
       { start: 0, end: 20, name: 'first' },
       { start: 20, end: 40, name: 'second' },
       { start: 40, end: 50, name: 'third' },
       { start: 60, end: 80, name: 'fourth' },
       { start: 80, end: 100, name: 'fifth' },
-    ].map(lib => {
+    ].map((lib) => {
       // Make sure our fixtures are correctly typed.
       return Object.assign({}, lib, {
         offset: 0,
@@ -578,27 +578,27 @@ describe('symbolication', function() {
       return null;
     }
 
-    it('should return the first library for addresses inside the first library', function() {
+    it('should return the first library for addresses inside the first library', function () {
       expect(getLibName(getContainingLibrary(libs, 0))).toEqual('first');
       expect(getLibName(getContainingLibrary(libs, 10))).toEqual('first');
       expect(getLibName(getContainingLibrary(libs, 19))).toEqual('first');
     });
 
-    it('should return the second library for addresses inside the second library', function() {
+    it('should return the second library for addresses inside the second library', function () {
       expect(getLibName(getContainingLibrary(libs, 20))).toEqual('second');
       expect(getLibName(getContainingLibrary(libs, 21))).toEqual('second');
       expect(getLibName(getContainingLibrary(libs, 27))).toEqual('second');
       expect(getLibName(getContainingLibrary(libs, 39))).toEqual('second');
     });
 
-    it('should return the third library for addresses inside the third library', function() {
+    it('should return the third library for addresses inside the third library', function () {
       expect(getLibName(getContainingLibrary(libs, 40))).toEqual('third');
       expect(getLibName(getContainingLibrary(libs, 41))).toEqual('third');
       expect(getLibName(getContainingLibrary(libs, 47))).toEqual('third');
       expect(getLibName(getContainingLibrary(libs, 49))).toEqual('third');
     });
 
-    it('should return no library when outside or in holes', function() {
+    it('should return no library when outside or in holes', function () {
       expect(getContainingLibrary(libs, -1)).toEqual(null);
       expect(getContainingLibrary(libs, -10)).toEqual(null);
       expect(getContainingLibrary(libs, 100)).toEqual(null);
@@ -609,11 +609,11 @@ describe('symbolication', function() {
     });
   });
 
-  describe('symbolicateProfile', function() {
+  describe('symbolicateProfile', function () {
     let unsymbolicatedProfile = null;
     let symbolicatedProfile = null;
 
-    beforeAll(function() {
+    beforeAll(function () {
       unsymbolicatedProfile = processGeckoProfile(createGeckoProfile());
       const symbolTable = new Map();
       symbolTable.set(0, 'first symbol');
@@ -646,7 +646,7 @@ describe('symbolication', function() {
       return symbolicationPromise;
     });
 
-    it('should assign correct symbols to frames', function() {
+    it('should assign correct symbols to frames', function () {
       function functionNameForFrameInThread(thread, frameIndex) {
         const funcIndex = thread.frameTable.func[frameIndex];
         const funcNameStringIndex = thread.funcTable.name[funcIndex];
@@ -675,12 +675,12 @@ describe('symbolication', function() {
   // TODO: check that functions are collapsed correctly
 });
 
-describe('filter-by-implementation', function() {
+describe('filter-by-implementation', function () {
   const profile = processGeckoProfile(createGeckoProfileWithJsTimings());
   const defaultCategory = ensureExists(
     profile.meta.categories,
     'Expected to find categories'
-  ).findIndex(c => c.name === 'Other');
+  ).findIndex((c) => c.name === 'Other');
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
@@ -692,40 +692,40 @@ describe('filter-by-implementation', function() {
     return filteredThread.funcTable.isJS[funcIndex];
   }
 
-  it('will return the same thread if filtering to "all"', function() {
+  it('will return the same thread if filtering to "all"', function () {
     expect(
       filterThreadByImplementation(thread, 'combined', defaultCategory)
     ).toEqual(thread);
   });
 
-  it('will return only JS samples if filtering to "js"', function() {
+  it('will return only JS samples if filtering to "js"', function () {
     const jsOnlyThread = filterThreadByImplementation(
       thread,
       'js',
       defaultCategory
     );
     const nonNullSampleStacks = jsOnlyThread.samples.stack.filter(
-      stack => stack !== null
+      (stack) => stack !== null
     );
     const samplesAreAllJS = nonNullSampleStacks
-      .map(stack => stackIsJS(jsOnlyThread, stack))
+      .map((stack) => stackIsJS(jsOnlyThread, stack))
       .reduce((a, b) => a && b);
 
     expect(samplesAreAllJS).toBe(true);
     expect(nonNullSampleStacks.length).toBe(4);
   });
 
-  it('will return only C++ samples if filtering to "cpp"', function() {
+  it('will return only C++ samples if filtering to "cpp"', function () {
     const cppOnlyThread = filterThreadByImplementation(
       thread,
       'cpp',
       defaultCategory
     );
     const nonNullSampleStacks = cppOnlyThread.samples.stack.filter(
-      stack => stack !== null
+      (stack) => stack !== null
     );
     const samplesAreAllJS = nonNullSampleStacks
-      .map(stack => !stackIsJS(cppOnlyThread, stack))
+      .map((stack) => !stackIsJS(cppOnlyThread, stack))
       .reduce((a, b) => a && b);
 
     expect(samplesAreAllJS).toBe(true);
@@ -733,17 +733,15 @@ describe('filter-by-implementation', function() {
   });
 });
 
-describe('get-sample-index-closest-to-time', function() {
-  it('returns the correct sample index for a provided time', function() {
+describe('get-sample-index-closest-to-time', function () {
+  it('returns the correct sample index for a provided time', function () {
     const { profile } = getProfileFromTextSamples(
-      Array(10)
-        .fill('A')
-        .join('  ')
+      Array(10).fill('A').join('  ')
     );
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
-    ).findIndex(c => c.name === 'Other');
+    ).findIndex((c) => c.name === 'Other');
     const thread = profile.threads[0];
     const { samples } = filterThreadByImplementation(
       thread,
@@ -761,7 +759,7 @@ describe('get-sample-index-closest-to-time', function() {
   });
 });
 
-describe('funcHasRecursiveCall', function() {
+describe('funcHasRecursiveCall', function () {
   const {
     profile,
     funcNamesPerThread: [funcNames],
@@ -774,7 +772,7 @@ describe('funcHasRecursiveCall', function() {
   `);
   const [thread] = profile.threads;
 
-  it('correctly identifies recursive functions based taking into account implementation', function() {
+  it('correctly identifies recursive functions based taking into account implementation', function () {
     expect([
       funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('A.js')),
       funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
@@ -783,8 +781,8 @@ describe('funcHasRecursiveCall', function() {
   });
 });
 
-describe('convertStackToCallNodeAndCategoryPath', function() {
-  it('correctly returns a call node path for a stack', function() {
+describe('convertStackToCallNodeAndCategoryPath', function () {
+  it('correctly returns a call node path for a stack', function () {
     const {
       threads: [thread],
     } = getCallNodeProfile();
@@ -795,13 +793,13 @@ describe('convertStackToCallNodeAndCategoryPath', function() {
       throw new Error("stack shouldn't be null");
     }
     let callNodePath = convertStackToCallNodeAndCategoryPath(thread, stack1);
-    expect(callNodePath.map(f => f.func)).toEqual([0, 1, 2, 3, 4]);
+    expect(callNodePath.map((f) => f.func)).toEqual([0, 1, 2, 3, 4]);
     callNodePath = convertStackToCallNodeAndCategoryPath(thread, stack2);
-    expect(callNodePath.map(f => f.func)).toEqual([0, 1, 2, 3, 5]);
+    expect(callNodePath.map((f) => f.func)).toEqual([0, 1, 2, 3, 5]);
   });
 });
 
-describe('getSamplesSelectedStates', function() {
+describe('getSamplesSelectedStates', function () {
   const {
     profile,
     funcNamesDictPerThread: [{ A, B, D, E, F }],
@@ -827,7 +825,7 @@ describe('getSamplesSelectedStates', function() {
   const A_D = getCallNodeIndexFromPath([A, D], callNodeTable);
   const A_D_E = getCallNodeIndexFromPath([A, D, E], callNodeTable);
 
-  it('determines the selection status of all the samples', function() {
+  it('determines the selection status of all the samples', function () {
     expect(
       getSamplesSelectedStates(
         callNodeTable,
@@ -886,7 +884,7 @@ describe('getSamplesSelectedStates', function() {
     ]);
   });
 
-  it('can sort the samples based on their selection status', function() {
+  it('can sort the samples based on their selection status', function () {
     const comparator = getTreeOrderComparator(callNodeTable, sampleCallNodes);
     const samples = [4, 1, 3, 0, 2]; // some random order
     samples.sort(comparator);
@@ -899,7 +897,7 @@ describe('getSamplesSelectedStates', function() {
   });
 });
 
-describe('extractProfileFilterPageData', function() {
+describe('extractProfileFilterPageData', function () {
   const innerWindowIds = {
     mozilla: 1,
     aboutBlank: 2,
@@ -936,7 +934,7 @@ describe('extractProfileFilterPageData', function() {
     },
   ];
 
-  it('extracts the page data when there is only one relevant page', function() {
+  it('extracts the page data when there is only one relevant page', function () {
     // Adding only the https://www.mozilla.org page.
     const relevantPages = new Set([innerWindowIds.mozilla]);
 
@@ -948,7 +946,7 @@ describe('extractProfileFilterPageData', function() {
     });
   });
 
-  it('extracts the page data when there are multiple relevant page', function() {
+  it('extracts the page data when there are multiple relevant page', function () {
     const relevantPages = new Set([
       innerWindowIds.profiler,
       innerWindowIds.exampleSubFrame,
@@ -962,7 +960,7 @@ describe('extractProfileFilterPageData', function() {
     });
   });
 
-  it('extracts the page data when there are multiple relevant page with about:blank', function() {
+  it('extracts the page data when there are multiple relevant page with about:blank', function () {
     const relevantPages = new Set([
       innerWindowIds.aboutBlank,
       innerWindowIds.profiler,
@@ -976,7 +974,7 @@ describe('extractProfileFilterPageData', function() {
     });
   });
 
-  it('extracts the page data when there is only about:blank as relevant page', function() {
+  it('extracts the page data when there is only about:blank as relevant page', function () {
     const relevantPages = new Set([innerWindowIds.aboutBlank]);
 
     const pageData = extractProfileFilterPageData(pages, relevantPages);
@@ -987,7 +985,7 @@ describe('extractProfileFilterPageData', function() {
     });
   });
 
-  it('fails to extract the page data when there is no profile data in common', function() {
+  it('fails to extract the page data when there is no profile data in common', function () {
     // Ignore the error we output when it fails.
     jest.spyOn(console, 'error').mockImplementation(() => {});
     const relevantPages = new Set([innerWindowIds.unknown]);
@@ -998,7 +996,7 @@ describe('extractProfileFilterPageData', function() {
     expect(console.error).toHaveBeenCalled();
   });
 
-  it('fails to extract the page data when there is only a sub frame', function() {
+  it('fails to extract the page data when there is only a sub frame', function () {
     // Ignore the error we output when it fails.
     jest.spyOn(console, 'error').mockImplementation(() => {});
     const relevantPages = new Set([innerWindowIds.exampleSubFrame]);

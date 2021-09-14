@@ -18,13 +18,13 @@ import * as ZippedProfilesActions from '../../actions/zipped-profiles';
 import * as ReceiveProfileActions from '../../actions/receive-profile';
 import * as ProfileViewActions from '../../actions/profile-view';
 
-describe('reducer zipFileState', function() {
-  it('can store the zip file in the reducer', async function() {
+describe('reducer zipFileState', function () {
+  it('can store the zip file in the reducer', async function () {
     const { zippedProfiles } = await storeWithZipFile();
     expect(zippedProfiles).toBe(zippedProfiles);
   });
 
-  it('can load a profile from the zip file', async function() {
+  it('can load a profile from the zip file', async function () {
     const { dispatch, getState } = await storeWithZipFile([
       'foo/bar/profile1.json',
       'foo/profile2.json',
@@ -46,7 +46,7 @@ describe('reducer zipFileState', function() {
     expect(profile1).toBeTruthy();
   });
 
-  describe('profileName handling', function() {
+  describe('profileName handling', function () {
     async function setup() {
       const { dispatch, getState } = await storeWithZipFile([
         'foo/bar/profile1.json',
@@ -64,7 +64,7 @@ describe('reducer zipFileState', function() {
       return { getState, dispatch };
     }
 
-    it('computes a profile name from the loaded file', async function() {
+    it('computes a profile name from the loaded file', async function () {
       const { getState } = await setup();
 
       const expectedName = 'bar/profile1.json';
@@ -73,7 +73,7 @@ describe('reducer zipFileState', function() {
       );
     });
 
-    it('computes a profile when no folder present', async function() {
+    it('computes a profile when no folder present', async function () {
       const { dispatch, getState } = await storeWithZipFile([
         'foo/bar/profile1.json',
         'foo/profile2.json',
@@ -91,7 +91,7 @@ describe('reducer zipFileState', function() {
       );
     });
 
-    it('prefers ProfileName if it is given in the URL', async function() {
+    it('prefers ProfileName if it is given in the URL', async function () {
       const { getState, dispatch } = await setup();
       const profileNameFromURL = 'good profile';
 
@@ -102,7 +102,7 @@ describe('reducer zipFileState', function() {
     });
   });
 
-  it('will fail when trying to load an invalid profile', async function() {
+  it('will fail when trying to load an invalid profile', async function () {
     const store = createStore();
     const { getState, dispatch } = store;
     const zip = new JSZip();
@@ -123,7 +123,7 @@ describe('reducer zipFileState', function() {
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
-  it('will fail when not finding a profile', async function() {
+  it('will fail when not finding a profile', async function () {
     const store = createStore();
     const { getState, dispatch } = store;
     dispatch(ReceiveProfileActions.receiveZipFile(new JSZip()));
@@ -136,7 +136,7 @@ describe('reducer zipFileState', function() {
     );
   });
 
-  it('can compute a ZipFileTable', async function() {
+  it('can compute a ZipFileTable', async function () {
     const { getState } = await storeWithZipFile([
       'foo/bar/profile1.json',
       'foo/profile2.json',
@@ -158,7 +158,7 @@ describe('reducer zipFileState', function() {
     ]);
   });
 
-  it('computes the zip file max depth', async function() {
+  it('computes the zip file max depth', async function () {
     const { getState } = await storeWithZipFile([
       'foo/bar/profile1.json',
       'foo/profile2.json',
@@ -170,8 +170,8 @@ describe('reducer zipFileState', function() {
   });
 });
 
-describe('selected and expanded zip files', function() {
-  it('can expand selections in the zip file', function() {
+describe('selected and expanded zip files', function () {
+  it('can expand selections in the zip file', function () {
     const { dispatch, getState } = createStore();
 
     expect(
@@ -185,7 +185,7 @@ describe('selected and expanded zip files', function() {
     ).toEqual([123, 456, 789]);
   });
 
-  it('can procure an interesting selection', async function() {
+  it('can procure an interesting selection', async function () {
     const { getState, dispatch } = await storeWithZipFile([
       'a/profile1.json',
       'a/profile2.json',
@@ -208,7 +208,7 @@ describe('selected and expanded zip files', function() {
       getState()
     );
     const expandedNames = expanded.map(
-      index => zipFileTable.path[ensureExists(index)]
+      (index) => zipFileTable.path[ensureExists(index)]
     );
     expect(expandedNames).toEqual([
       'a',
@@ -226,7 +226,7 @@ describe('selected and expanded zip files', function() {
     ]);
   });
 
-  it('can select a zip file', function() {
+  it('can select a zip file', function () {
     const { dispatch, getState } = createStore();
 
     expect(ZippedProfilesSelectors.getSelectedZipFileIndex(getState())).toEqual(
@@ -242,20 +242,20 @@ describe('selected and expanded zip files', function() {
   });
 });
 
-describe('profile state invalidation when switching between profiles', function() {
+describe('profile state invalidation when switching between profiles', function () {
   const getStoreViewingProfile = async () => {
     const { dispatch, getState } = await storeWithZipFile([
       'profile1.json',
       'profile2.json',
     ]);
 
-    const viewProfile = path =>
+    const viewProfile = (path) =>
       dispatch(ZippedProfilesActions.viewProfileFromPathInZipFile(path));
 
     return { dispatch, getState, viewProfile };
   };
 
-  it('invalidates profile-specific url state', async function() {
+  it('invalidates profile-specific url state', async function () {
     const { dispatch, getState, viewProfile } = await getStoreViewingProfile();
     viewProfile('profile1.json');
 
@@ -274,7 +274,7 @@ describe('profile state invalidation when switching between profiles', function(
     expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
   });
 
-  it('invalidates profile view state', async function() {
+  it('invalidates profile view state', async function () {
     const { dispatch, getState, viewProfile } = await getStoreViewingProfile();
     viewProfile('profile1.json');
 

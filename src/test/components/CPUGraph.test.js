@@ -38,7 +38,7 @@ const PIXELS_PER_SAMPLE = 10;
 const GRAPH_WIDTH = PIXELS_PER_SAMPLE * SAMPLE_COUNT;
 const GRAPH_HEIGHT = 10;
 
-describe('CPUGraph', function() {
+describe('CPUGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 
