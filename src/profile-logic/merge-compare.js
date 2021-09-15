@@ -123,7 +123,7 @@ export function mergeProfilesForDiffing(
   let ipcCorrelations;
 
   for (let i = 0; i < profileStates.length; i++) {
-    const { profileSpecific } = profileStates[i];
+    const { profileName, profileSpecific } = profileStates[i];
     const selectedThreadIndexes = profileSpecific.selectedThreads;
     if (selectedThreadIndexes === null) {
       throw new Error(`No thread has been selected in profile ${i}`);
@@ -190,7 +190,7 @@ export function mergeProfilesForDiffing(
 
     // We're reseting the thread's PID to make sure we don't have any collision.
     thread.pid = `${thread.pid} from profile ${i + 1}`;
-    thread.processName = `Profile ${i + 1}: ${
+    thread.processName = `${profileName || `Profile ${i + 1}`}: ${
       thread.processName || thread.name
     }`;
 
