@@ -20,12 +20,14 @@ import type {
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   Address,
+  CallNodePath,
 } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
   AddressResult,
   LibSymbolicationRequest,
 } from './symbol-store';
+import { PathSet } from '../utils/path';
 
 // Contains functions to symbolicate a profile.
 
@@ -75,7 +77,7 @@ import type {
  *    expanded call nodes should survive symbolication-triggered adjustments of
  *    the funcTable as much as possible. More specifically, if all frames that
  *    used to be assigned to function A get reassigned to function B, we want to
- *    create an A -> B entry in an oldFuncToNewFuncMap that gets dispatched in
+ *    create an A -> B entry in an oldFuncToNewFuncsMap that gets dispatched in
  *    a redux action so that the appropriate parts of the redux state can react.
  *  - Multiple processes and threads in the profile will require symbols from
  *    the same set of native libraries, and the number and size of the
@@ -129,7 +131,7 @@ import type {
  * frameTable, funcTable, nativeSymbols and stringTable, with the
  * symbols substituted in the right places. This usually causes many funcs to
  * be orphaned (no frames will use them any more); these orphaned funcs remain
- * in the funcTable. It also creates the oldFuncToNewFuncMap.
+ * in the funcTable. It also creates the oldFuncToNewFuncsMap.
  *
  * Re-symbolication only re-runs phases II through V. At the beginning of
  * re-symbolication, the frameTable, funcTable and nativeSymbols are in the
@@ -149,12 +151,12 @@ import type {
  * the same func. Nevertheless, "splitting funcs" is very uncommon during
  * initial symbolication.
  *
- * When funcs are merged, oldFuncToNewFuncMap lets us update other parts of the
+ * When funcs are merged, oldFuncToNewFuncsMap lets us update other parts of the
  * redux state that refer to func indexes. But when funcs are split, this is not
  * possible. But since function splitting is the rare case, we accept this
  * imperfection.
  *
- * Example for oldFuncToNewFuncMap:
+ * Example for oldFuncToNewFuncsMap:
  *
  * Let's say we have a frameTable [0, 1, 2, 3, 4, 5, 6, 7, 8] and all frames are
  * from the same lib. Profile processing creates an initial funcTable with one
@@ -166,7 +168,7 @@ import type {
  * The user selects the call node with the call path A-B-C-D-H in the call tree.
  * Now we look up symbols for all frame addresses, and frames 4 and 7 turn out
  * to belong to the same function. We choose function E as the shared function.
- * We update the thread with an oldFuncToNewFuncMap that contains an entry H -> E.
+ * We update the thread with an oldFuncToNewFuncsMap that contains an entry H -> E.
  * This collapses both call paths into the call path A-B-C-D-E, and A-B-C-D-E
  * becomes the selected call node.
  * Now, let's say initial symbolication used an incomplete symbol table that
@@ -180,7 +182,7 @@ import type {
  * are assigned to different functions again; this time we happened to pick the
  * assignment 0 -> A, 1 -> D, 2 -> B, 3 -> C. So now our samples' call paths
  * become A-D-B-C-E.
- * There is no way to choose oldFuncToNewFuncMap so that the selected call path
+ * There is no way to choose oldFuncToNewFuncsMap so that the selected call path
  * A-A-A-A-E can become A-D-B-C-E. So in the case of splitting functions we
  * accept that the current selection is lost and that some expanded call nodes
  * will close.
@@ -215,7 +217,7 @@ export type SymbolicationStepInfo = {|
   resultsForLib: Map<Address, AddressResult>,
 |};
 
-export type FuncToFuncMap = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
+export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
 
 type ThreadSymbolicationInfo = Map<LibKey, ThreadLibSymbolicationInfo>;
 
@@ -382,15 +384,15 @@ function finishSymbolicationForLib(
  * right symbol string and funcAddress, and updating the frameTable to assign
  * frames to the right funcs. When multiple frames are merged into one func,
  * some funcs can become orphaned; they remain in the funcTable.
- * oldFuncToNewFuncMap is mutated to include the new mappings that result from
- * this symbolication step. oldFuncToNewFuncMap is allowed to contain existing
+ * oldFuncToNewFuncsMap is mutated to include the new mappings that result from
+ * this symbolication step. oldFuncToNewFuncsMap is allowed to contain existing
  * content; the existing entries are assumed to be for other libs, i.e. they're
  * expected to have no overlap with allFuncsForThisLib.
  */
 export function applySymbolicationStep(
   thread: Thread,
   symbolicationStepInfo: SymbolicationStepInfo,
-  oldFuncToNewFuncMap: FuncToFuncMap
+  oldFuncToNewFuncsMap: FuncToFuncsMap
 ): Thread {
   const {
     frameTable: oldFrameTable,
@@ -617,7 +619,7 @@ export function applySymbolicationStep(
     oldFuncToNewFuncEntries
   );
   for (const [oldFunc, newFunc] of oldFuncToNewFuncMapForThisLib) {
-    oldFuncToNewFuncMap.set(oldFunc, newFunc);
+    oldFuncToNewFuncsMap.set(oldFunc, [newFunc]);
   }
 
   return { ...thread, frameTable, funcTable, nativeSymbols, stringTable };
@@ -659,4 +661,74 @@ export async function symbolicateProfile(
       console.warn(error);
     }
   );
+}
+
+// Create a new call path, where each func in the old call path is
+// replaced with one or more funcs from the FuncToFuncsMap.
+// This is used during symbolication, where some previously separate
+// funcs can be mapped onto the same new func, or a previously "flat"
+// func can expand into a path of new funcs (from inlined functions).
+// Any func that is not present as a key in the map stays unchanged.
+//
+// Example:
+// path: [1, 2, 3]
+// oldFuncToNewFuncsMap: (1 => [1, 4], 2 => [1])
+// result: [1, 4, 1, 3]
+export function applyFuncSubstitutionToCallPath(
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  path: CallNodePath
+): CallNodePath {
+  return path.reduce((accum, oldFunc) => {
+    const newFuncs = oldFuncToNewFuncsMap.get(oldFunc);
+    return newFuncs === undefined
+      ? [...accum, oldFunc]
+      : [...accum, ...newFuncs];
+  }, []);
+}
+
+// This function is used for the path set of expanded call nodes in the call tree
+// when symbolication is applied. We want to keep all open ("expanded") tree nodes open.
+// The tree nodes are represented as a set of call paths, each call path is an array
+// of funcs. Symbolication substitutes funcs.
+export function applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  pathSet: PathSet
+): PathSet {
+  const newPathSet = [];
+  for (const callPath of pathSet) {
+    // Apply substitution to this path and add it.
+    const newCallPath = applyFuncSubstitutionToCallPath(
+      oldFuncToNewFuncsMap,
+      callPath
+    );
+    newPathSet.push(newCallPath);
+
+    // Additionally, we want to make sure that all new ancestors of the substituted call path
+    // are in the new path set. Example:
+    //
+    // callPath = [1, 2, 3, 4] and map = (4 => [5, 6, 7])
+    // newCallPath = [1, 2, 3, 5, 6, 7]
+    //
+    // We need to add these three new call paths:
+    //
+    //  1. [1, 2, 3, 5, 6, 7] (this one is already done)
+    //  2. [1, 2, 3, 5, 6]
+    //  3. [1, 2, 3, 5]
+
+    const oldLeaf = callPath[callPath.length - 1];
+    const mappedOldLeaf = applyFuncSubstitutionToCallPath(
+      oldFuncToNewFuncsMap,
+      [oldLeaf]
+    );
+    const mappedOldLeafSubpathLen = mappedOldLeaf.length;
+    // "assert(newCallPath.endsWith(mappedOldLeaf))"
+    if (mappedOldLeafSubpathLen > 1) {
+      // The leaf has been replaced by multiple funcs.
+      for (let i = 1; i < mappedOldLeafSubpathLen; i++) {
+        newPathSet.push(newCallPath.slice(0, newCallPath.length - i));
+      }
+    }
+  }
+
+  return new PathSet(newPathSet);
 }

@@ -27,10 +27,14 @@ import type {
   MarkerReference,
   ActiveTabTimeline,
   CallNodePath,
-  IndexIntoFuncTable,
   ThreadsKey,
   Milliseconds,
 } from 'firefox-profiler/types';
+import {
+  applyFuncSubstitutionToCallPath,
+  applyFuncSubstitutionToPathSetAndIncludeNewAncestors,
+} from '../profile-logic/symbolication';
+
 import { objectMap } from '../utils/flow';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
@@ -171,13 +175,13 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       // The view options are lazily initialized. Reset to the default values.
       return {};
     case 'BULK_SYMBOLICATION': {
-      const { oldFuncToNewFuncMaps } = action;
-      // For each thread, apply oldFuncToNewFuncMap to that thread's
+      const { oldFuncToNewFuncsMaps } = action;
+      // For each thread, apply oldFuncToNewFuncsMap to that thread's
       // selectedCallNodePath and expandedCallNodePaths.
       const newState = objectMap(state, (threadViewOptions, threadsKey) => {
         // Multiple selected threads are not supported, note that transforming
         // the threadKey with multiple threads into a number will result in a NaN.
-        // This should be fine here, as the oldFuncToNewFuncMaps only supports
+        // This should be fine here, as the oldFuncToNewFuncsMaps only supports
         // single thread indexes.
         const threadIndex = +threadsKey;
         if (Number.isNaN(threadIndex)) {
@@ -186,27 +190,22 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
               'multiple threads was used.'
           );
         }
-        const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(threadIndex);
-        if (oldFuncToNewFuncMap === undefined) {
+        const oldFuncToNewFuncsMap = oldFuncToNewFuncsMaps.get(threadIndex);
+        if (oldFuncToNewFuncsMap === undefined) {
           return threadViewOptions;
-        }
-
-        function mapOldFuncToNewFunc(
-          oldFunc: IndexIntoFuncTable
-        ): IndexIntoFuncTable {
-          const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-          return newFunc === undefined ? oldFunc : newFunc;
         }
 
         return {
           ...threadViewOptions,
-          selectedCallNodePath:
-            threadViewOptions.selectedCallNodePath.map(mapOldFuncToNewFunc),
-          expandedCallNodePaths: new PathSet(
-            Array.from(threadViewOptions.expandedCallNodePaths).map((oldPath) =>
-              oldPath.map(mapOldFuncToNewFunc)
-            )
+          selectedCallNodePath: applyFuncSubstitutionToCallPath(
+            oldFuncToNewFuncsMap,
+            threadViewOptions.selectedCallNodePath
           ),
+          expandedCallNodePaths:
+            applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
+              oldFuncToNewFuncsMap,
+              threadViewOptions.expandedCallNodePaths
+            ),
         };
       });
 
@@ -507,21 +506,19 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
         return null;
       }
 
-      const { oldFuncToNewFuncMaps } = action;
+      const { oldFuncToNewFuncsMaps } = action;
       // This doesn't support a ThreadsKey with multiple threads.
-      const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(+state.threadsKey);
-      if (oldFuncToNewFuncMap === undefined) {
+      const oldFuncToNewFuncsMap = oldFuncToNewFuncsMaps.get(+state.threadsKey);
+      if (oldFuncToNewFuncsMap === undefined) {
         return state;
       }
 
-      const mapOldFuncToNewFunc = (oldFunc) => {
-        const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-        return newFunc === undefined ? oldFunc : newFunc;
-      };
-
       return {
         ...state,
-        callNodePath: state.callNodePath.map(mapOldFuncToNewFunc),
+        callNodePath: applyFuncSubstitutionToCallPath(
+          oldFuncToNewFuncsMap,
+          state.callNodePath
+        ),
       };
     }
     case 'CHANGE_RIGHT_CLICKED_CALL_NODE':
