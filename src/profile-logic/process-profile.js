@@ -29,6 +29,7 @@ import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
   getOrCreateURIResource,
+  nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
@@ -1097,7 +1098,7 @@ function _processThread(
 
   processJsTracer();
 
-  return newThread;
+  return nudgeReturnAddresses(newThread);
 }
 
 /**

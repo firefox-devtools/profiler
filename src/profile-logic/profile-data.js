@@ -11,6 +11,8 @@ import {
   resourceTypes,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
+  getEmptyStackTable,
+  shallowCloneFrameTable,
 } from './data-structures';
 import {
   INSTANT,
@@ -67,6 +69,8 @@ import type {
   EventDelayInfo,
   ThreadsKey,
   resourceTypeEnum,
+  MarkerPayload,
+  Address,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -2910,4 +2914,440 @@ export function hasThreadKeys(
     }
   }
   return true;
+}
+
+export type StackReferences = {|
+  // Stacks which were sampled by sampling. For native stacks, the
+  // corresponding frame address was observed as a value of the instruction
+  // pointer register.
+  samplingSelfStacks: Set<IndexIntoStackTable>,
+  // Stacks which were obtained during a synchronous backtrace. For
+  // native stacks, the corresponding frame address is *not* an observed
+  // value of the instruction pointer, because synchronous backtraces have
+  // a few frames removed from the end of the stack, which includes the
+  // frame with the instruction pointer. This difference only matters for
+  // "return address nudging" which happens at the end of profile processing.
+  syncBacktraceSelfStacks: Set<IndexIntoStackTable>,
+|};
+
+/**
+ * Find the sets of stacks that are referenced as "self" stacks by
+ * various tables in the thread.
+ * The stacks' ancestor nodes are not included (except for any ancestor
+ * nodes that had self time, i.e. were also referenced directly).
+ * The returned sets are split into two groups: Stacks referenced by
+ * samples, and stacks referenced by sync backtraces (e.g. marker causes).
+ * The two have slightly different properties, see the type definition.
+ */
+export function gatherStackReferences(thread: Thread): StackReferences {
+  const samplingSelfStacks = new Set();
+  const syncBacktraceSelfStacks = new Set();
+
+  const { samples, markers, jsAllocations, nativeAllocations } = thread;
+
+  // Samples
+  for (let i = 0; i < samples.length; i++) {
+    const stack = samples.stack[i];
+    if (stack !== null) {
+      samplingSelfStacks.add(stack);
+    }
+  }
+
+  // Markers
+  for (let i = 0; i < markers.length; i++) {
+    const data = markers.data[i];
+    if (data && data.cause) {
+      const stack = data.cause.stack;
+      if (stack !== null) {
+        syncBacktraceSelfStacks.add(stack);
+      }
+    }
+  }
+
+  // JS allocations
+  if (jsAllocations !== undefined) {
+    for (let i = 0; i < jsAllocations.length; i++) {
+      const stack = jsAllocations.stack[i];
+      if (stack !== null) {
+        syncBacktraceSelfStacks.add(stack);
+      }
+    }
+  }
+
+  // Native allocations
+  if (nativeAllocations !== undefined) {
+    for (let i = 0; i < nativeAllocations.length; i++) {
+      const stack = nativeAllocations.stack[i];
+      if (stack !== null) {
+        syncBacktraceSelfStacks.add(stack);
+      }
+    }
+  }
+
+  return { samplingSelfStacks, syncBacktraceSelfStacks };
+}
+
+/**
+ * Create a new thread with all stack references translated via the given
+ * maps. The maps map IndexIntoOldStackTable -> IndexIntoNewStackTable.
+ * Only a subset of entries are read from the map: The same stacks that
+ * gatherStackReferences found in the thread. All other entries are ignored
+ * and do not need to be present.
+ * With the exception of the caller which does the initial return address
+ * nudging, most callers will want to pass the same map to both map arguments.
+ */
+export function replaceStackReferences(
+  thread: Thread,
+  mapForSamplingSelfStacks: Map<IndexIntoStackTable, IndexIntoStackTable>,
+  mapForBacktraceSelfStacks: Map<IndexIntoStackTable, IndexIntoStackTable>
+): Thread {
+  const {
+    samples: oldSamples,
+    markers: oldMarkers,
+    jsAllocations: oldJsAllocations,
+    nativeAllocations: oldNativeAllocations,
+  } = thread;
+
+  // Samples
+  const samples = {
+    ...oldSamples,
+    stack: oldSamples.stack.map((oldStackIndex) => {
+      if (oldStackIndex === null) {
+        return null;
+      }
+      const newStack = mapForSamplingSelfStacks.get(oldStackIndex);
+      if (newStack === undefined) {
+        throw new Error(
+          `Missing mapForSamplingSelfStacks entry for stack ${oldStackIndex}`
+        );
+      }
+      return newStack;
+    }),
+  };
+
+  function mapBacktraceSelfStack(oldStackIndex) {
+    if (oldStackIndex === null) {
+      return null;
+    }
+    const newStack = mapForBacktraceSelfStacks.get(oldStackIndex);
+    if (newStack === undefined) {
+      throw new Error(
+        `Missing mapForBacktraceSelfStacks entry for stack ${oldStackIndex}`
+      );
+    }
+    return newStack;
+  }
+
+  // Markers
+  function replaceStackReferenceInMarkerPayload(
+    oldData: MarkerPayload
+  ): MarkerPayload {
+    if (oldData && 'cause' in oldData && oldData.cause) {
+      // Replace the cause with the right stack index.
+      // Use (...: any) because our current version of Flow has trouble with
+      // the object spread operator.
+      return ({
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: mapBacktraceSelfStack(oldData.cause.stack),
+        },
+      }: any);
+    }
+    return oldData;
+  }
+  const markers = {
+    ...oldMarkers,
+    data: oldMarkers.data.map(replaceStackReferenceInMarkerPayload),
+  };
+
+  // JS allocations
+  let jsAllocations;
+  if (oldJsAllocations !== undefined) {
+    jsAllocations = {
+      ...oldJsAllocations,
+      stack: oldJsAllocations.stack.map(mapBacktraceSelfStack),
+    };
+  }
+
+  // Native allocations
+  let nativeAllocations;
+  if (oldNativeAllocations !== undefined) {
+    nativeAllocations = {
+      ...oldNativeAllocations,
+      stack: oldNativeAllocations.stack.map(mapBacktraceSelfStack),
+    };
+  }
+
+  return { ...thread, samples, markers, jsAllocations, nativeAllocations };
+}
+
+/**
+ * Creates a new thread with modified frame and stack tables for "nudged" return addresses:
+ * All return addresses are moved backwards by one byte, to point into the "call"
+ * instruction. This allows symbolication to obtain accurate line numbers and inline frames
+ * for these frames.
+ * Addresses which were sampled from the instruction pointer register remain unchanged.
+ * Non-native frames (i.e profiler label frames or JS frames) also remain unchanged.
+ *
+ * This function is called at the end of profile processing. In the Gecko profile format,
+ * caller frame addresses are return addresses. In the processed profile format, caller
+ * frame addresses point at/into the call instruction.
+ *
+ * # Motivation
+ *
+ * When the profiler captures a stack, the frame addresses in the stack come from two
+ * different sources:
+ *
+ *  1. The top frame comes from the instruction pointer register. The register contains the
+ *     address of the instruction that is currently executing.
+ *  2. The other frames come from stack walking. Stack walkers calculate the return
+ *     addresses for all caller functions that are on the stack. A "return address" is the
+ *     address that the CPU will jump to once the called function returns. It is the
+ *     address of the instruction *after* the "call" instruction.
+ *     The Gecko profile format assumes that all caller frame addresses are return
+ *     addresses.
+ *
+ * Here's an example, where _LZ4F_compressUpdate calls _LZ4F_localSaveDict and the
+ * CPU was observed executing an instruction in _LZ4F_localSaveDict.
+ * The frame addresses in the stack are: [..., 0x5783a, 0x57c17].
+ * (The example uses libmozglue.dylib 64EC2645330C3A0BA6E4EBCD28A1B5940.)
+ *
+ * Top of stack:
+ *   _LZ4F_localSaveDict:
+ *     57c10  push  rbp
+ *     57c11  mov   rbp, rsp
+ *     57c14  mov   rax, rdi
+ * --> 57c17  cmp   dword [rdi+0x20], 0x2    ; instruction pointer, address maps to line 808
+ *     57c1b  mov   rdi, qword [rdi+0xa8]
+ *     57c22  jle   loc_57c33
+ *     [...]
+ *
+ * Caller:
+ *   _LZ4F_compressUpdate:
+ *     [...]
+ *     5782d  jmp   loc_5765f
+ *     57832  mov   rdi, rbx
+ *     57835  call  _LZ4F_localSaveDict       ; call instruction, address maps to line 897
+ * --> 5783a  test  eax, eax                  ; return address,   address maps to line 898
+ *     5783c  mov   rcx, 0xffffffffffffffff
+ *     [...]
+ *
+ * Corresponding C code:
+ *
+ * [...]
+ * 893    if ((cctxPtr->prefs.frameInfo.blockMode==LZ4F_blockLinked) && (lastBlockCompressed==fromSrcBuffer)) {
+ * 894        if (compressOptionsPtr->stableSrc) {
+ * 895            cctxPtr->tmpIn = cctxPtr->tmpBuff;
+ * 896        } else {
+ * 897            int const realDictSize = LZ4F_localSaveDict(cctxPtr);   // <-- here is the call
+ * 898            if (realDictSize==0) return err0r(LZ4F_ERROR_GENERIC);  // <-- here is the line we'd get for the return address
+ * 899            cctxPtr->tmpIn = cctxPtr->tmpBuff + realDictSize;
+ * 900        }
+ * 901    }
+ * [...]
+ *
+ * During symbolication, we resolve each address to a source file + line number.
+ * However, if we were to look up the line number for a return address, we get the
+ * line number for the instruction *after* the "call" instruction. In the example,
+ * 0x5783a is the return address, and symbolicating 0x5783a gives us line number 898.
+ * This is not the line number we want! We want to know *which line contains the
+ * function call*. So we need to look up the address of the call instruction, or at
+ * least an address that falls "inside" the call instruction.
+ * In the example, the call instruction is at 0x57835 and the return address is 0x5783a.
+ * So the call instruction occupies 5 bytes starting at 0x57835. Any address in that
+ * range, i.e. any address with `0x57835 <= address && address < 0x5783a`, will
+ * symbolicate to line number 897. This is the line number we want.
+ *
+ * To keep it simple, we will just subtract one byte from the return address. This
+ * won't point at the start of the call instruction, but it will point inside of it,
+ * which is good enough.
+ *
+ * ## Alternatives
+ *
+ * There are two places where we could potentially perform the one-byte adjustment:
+ * We can bake it into the frame table, or we can leave the frame table as-is and
+ * do the adjustment only when we prepare the symbolication request. For the latter,
+ * we would need a way to know which addresses need adjustment and which do not.
+ * So we'd need a per-frame bit (e.g. a new frame table column) to differentiate
+ * these frames.
+ * However, we don't really have a use for the unchanged return address. The only
+ * places where we make use of the frame address is during symbolication, and, in the
+ * future, in an assembly view. Both uses want to account the sample time to the
+ * calling instruction.
+ * So for simplicity, this function chooses the "bake it into the frame table"
+ * approach, and the processed format is documented to contain this adjustment.
+ *
+ * ## Summary
+ *
+ * To reiterate: The adjustment performed by this function is absolutely critical
+ * for useful line numbers.  It may be "just one byte", but it makes all the
+ * difference in having trustworthy information.
+ * Without the adjustment, line numbers can be way off - in the example it was just
+ * the very next line, but it could potentially be anywhere else in the function!
+ * And finally, this issue does not only affect line numbers, it also affects inline
+ * frames, for the same reason: The instruction after the call instruction could be
+ * the result of a completely different function that was inlined at this spot.
+ * If we instead look up the inline frames for the call instruction, we will get
+ * the correct inline frames at the point of the function call.
+ *
+ * # Implementation
+ *
+ * There are two slightly tricky parts to the implementation of this function.
+ *
+ *  1. The original frame table + stack table does not annotate which frames came
+ *     from the instruction pointer and which frames came from stack walking. We have
+ *     to look at the rest of the thread to see which stack nodes are referenced from
+ *     where.
+ *  2. Some stack nodes and frames in the original thread serve a dual purpose: The
+ *     address of an instruction that directly follows a call instruction could have
+ *     been observed in both manners, at different times. And a stack node could be
+ *     used in both contexts. If we detect that this happened, we need to duplicate
+ *     the frame and the stack node and pick the right one depending on the use.
+ */
+export function nudgeReturnAddresses(thread: Thread): Thread {
+  const { samplingSelfStacks, syncBacktraceSelfStacks } =
+    gatherStackReferences(thread);
+
+  const { stackTable, frameTable } = thread;
+
+  // Collect frames that were obtained from the instruction pointer.
+  // These are the top ("self") frames of stacks from sampling.
+  // In the variable names below, ip means "instruction pointer".
+  const oldIpFrameToNewIpFrame = new Uint32Array(frameTable.length);
+  const ipFrames = new Set();
+  for (const stack of samplingSelfStacks) {
+    const frame = stackTable.frame[stack];
+    oldIpFrameToNewIpFrame[frame] = frame;
+    const address = frameTable.address[frame];
+    if (address !== -1) {
+      ipFrames.add(frame);
+    }
+  }
+
+  // Collect frames that were obtained from stack walking.
+  // These are any "self" frames of sync backtraces, and any frames
+  // used for "prefix" stacks, i.e. callers.
+  const returnAddressFrames: Map<IndexIntoFrameTable, Address> = new Map();
+  const prefixStacks: Set<IndexIntoStackTable> = new Set();
+  for (const stack of syncBacktraceSelfStacks) {
+    const frame = stackTable.frame[stack];
+    const returnAddress = frameTable.address[frame];
+    if (returnAddress !== -1) {
+      returnAddressFrames.set(frame, returnAddress);
+    }
+  }
+  for (let stack = 0; stack < stackTable.length; stack++) {
+    const prefix = stackTable.prefix[stack];
+    if (prefix === null || prefixStacks.has(prefix)) {
+      continue;
+    }
+    prefixStacks.add(prefix);
+    const prefixFrame = stackTable.frame[prefix];
+    const prefixAddress = frameTable.address[prefixFrame];
+    if (prefixAddress !== -1) {
+      returnAddressFrames.set(prefixFrame, prefixAddress);
+    }
+  }
+
+  if (ipFrames.size === 0 && returnAddressFrames.size === 0) {
+    // Nothing to do, use the original thread.
+    return thread;
+  }
+
+  // Create the new frame table.
+  // Frames that were observed both from the instruction pointer and from
+  // stack walking have to be duplicated.
+  const newFrameTable = shallowCloneFrameTable(frameTable);
+  // Iterate over all *return address* frames, i.e. all frames that were obtained
+  // by stack walking.
+  for (const [frame, address] of returnAddressFrames) {
+    if (ipFrames.has(frame)) {
+      // This address of this frame was observed both as a return address and as
+      // an instruction pointer register value. We have to duplicate this frame so
+      // so that we can make a distinction between the two uses.
+      // The new frame will be used as the ipFrame, and the old frame will be used
+      // as the return address frame (and have its address nudged).
+      const newIpFrame = newFrameTable.length;
+      newFrameTable.address.push(address);
+      newFrameTable.category.push(frameTable.category[frame]);
+      newFrameTable.subcategory.push(frameTable.subcategory[frame]);
+      newFrameTable.func.push(frameTable.func[frame]);
+      newFrameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
+      newFrameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
+      newFrameTable.implementation.push(frameTable.implementation[frame]);
+      newFrameTable.line.push(frameTable.line[frame]);
+      newFrameTable.column.push(frameTable.column[frame]);
+      newFrameTable.optimizations.push(frameTable.optimizations[frame]);
+      newFrameTable.length++;
+      oldIpFrameToNewIpFrame[frame] = newIpFrame;
+      // Note: The duplicated frame uses the same func as the original frame.
+      // This is ok because return address nudging is never expected to move
+      // an address to a different function, so symbolication should never
+      // have a need to split these frames into different functions.
+    }
+    // Subtract 1 byte from the return address.
+    newFrameTable.address[frame] = address - 1;
+
+    // Note that we don't change the funcTable.
+    // Before symbolication, the funcTable name for the native frames are
+    // of the form "0xhexaddress", and this string will still be the original
+    // un-adjusted return address. Symbolication will fix that up.
+    // Leaving the old string is ok; we're adjusting the frame address and
+    // symbolication only looks at the frame address.
+  }
+
+  // Now the frame table contains adjusted / "nudged" addresses.
+
+  // Make a new stack table which refers to the adjusted frames.
+  const newStackTable = getEmptyStackTable();
+  const mapForSamplingSelfStacks = new Map();
+  const mapForBacktraceSelfStacks = new Map();
+  const prefixMap = new Uint32Array(stackTable.length);
+  for (let stack = 0; stack < stackTable.length; stack++) {
+    const frame = stackTable.frame[stack];
+    const category = stackTable.category[stack];
+    const subcategory = stackTable.subcategory[stack];
+    const prefix = stackTable.prefix[stack];
+
+    const newPrefix = prefix === null ? null : prefixMap[prefix];
+
+    if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
+      // Copy this stack to the new stack table, and use the original frame
+      // (which will have the nudged address if this is a return address stack).
+      const newStackIndex = newStackTable.length;
+      newStackTable.frame.push(frame);
+      newStackTable.category.push(category);
+      newStackTable.subcategory.push(subcategory);
+      newStackTable.prefix.push(newPrefix);
+      newStackTable.length++;
+      prefixMap[stack] = newStackIndex;
+      mapForBacktraceSelfStacks.set(stack, newStackIndex);
+    }
+
+    if (samplingSelfStacks.has(stack)) {
+      // Copy this stack to the new stack table, and use the potentially duplicated
+      // frame, with a non-nudged address.
+      const ipFrame = oldIpFrameToNewIpFrame[frame];
+      const newStackIndex = newStackTable.length;
+      newStackTable.frame.push(ipFrame);
+      newStackTable.category.push(category);
+      newStackTable.subcategory.push(subcategory);
+      newStackTable.prefix.push(newPrefix);
+      newStackTable.length++;
+      mapForSamplingSelfStacks.set(stack, newStackIndex);
+    }
+  }
+
+  const newThread = {
+    ...thread,
+    frameTable: newFrameTable,
+    stackTable: newStackTable,
+  };
+
+  return replaceStackReferences(
+    newThread,
+    mapForSamplingSelfStacks,
+    mapForBacktraceSelfStacks
+  );
 }
