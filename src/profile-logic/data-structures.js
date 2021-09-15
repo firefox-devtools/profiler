@@ -92,6 +92,7 @@ export function getEmptyFrameTable(): FrameTable {
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
     address: [],
+    inlineDepth: [],
     category: [],
     subcategory: [],
     func: [],
@@ -112,6 +113,7 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
     address: frameTable.address.slice(),
+    inlineDepth: frameTable.inlineDepth.slice(),
     category: frameTable.category.slice(),
     subcategory: frameTable.subcategory.slice(),
     func: frameTable.func.slice(),

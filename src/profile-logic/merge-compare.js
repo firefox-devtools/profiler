@@ -699,6 +699,7 @@ function combineFrameTables(
       }
 
       newFrameTable.address.push(frameTable.address[i]);
+      newFrameTable.inlineDepth.push(frameTable.inlineDepth[i]);
       newFrameTable.category.push(newCategory);
       // TODO issue #2151: we assume that subcategory strings are the same if
       // the category is the same, and have no translation maps. But we should

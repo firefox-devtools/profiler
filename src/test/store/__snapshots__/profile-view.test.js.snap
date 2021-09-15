@@ -401,7 +401,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 38,
+    "preprocessedProfileVersion": 39,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -477,6 +477,7 @@ Object {
           null,
           null,
         ],
+        "inlineDepth": Array [],
         "innerWindowID": Array [
           0,
           0,
@@ -907,6 +908,7 @@ Object {
         "column": Array [],
         "func": Array [],
         "implementation": Array [],
+        "inlineDepth": Array [],
         "innerWindowID": Array [],
         "length": 0,
         "line": Array [],
@@ -1157,6 +1159,7 @@ Array [
         null,
         null,
       ],
+      "inlineDepth": Array [],
       "innerWindowID": Array [
         0,
         0,
@@ -1587,6 +1590,7 @@ Array [
       "column": Array [],
       "func": Array [],
       "implementation": Array [],
+      "inlineDepth": Array [],
       "innerWindowID": Array [],
       "length": 0,
       "line": Array [],
@@ -2609,6 +2613,7 @@ Object {
       null,
       null,
     ],
+    "inlineDepth": Array [],
     "innerWindowID": Array [
       0,
       0,
@@ -3008,6 +3013,7 @@ Object {
       null,
       null,
     ],
+    "inlineDepth": Array [],
     "innerWindowID": Array [
       0,
       0,
@@ -3322,6 +3328,7 @@ Object {
       null,
       null,
     ],
+    "inlineDepth": Array [],
     "innerWindowID": Array [
       0,
       0,
@@ -3642,6 +3649,7 @@ Object {
       null,
       null,
     ],
+    "inlineDepth": Array [],
     "innerWindowID": Array [
       0,
       0,
@@ -3966,6 +3974,7 @@ Object {
       null,
       null,
     ],
+    "inlineDepth": Array [],
     "innerWindowID": Array [
       0,
       0,

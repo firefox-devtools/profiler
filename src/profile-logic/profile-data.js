@@ -3695,6 +3695,7 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       // as the return address frame (and have its address nudged).
       const newIpFrame = newFrameTable.length;
       newFrameTable.address.push(address);
+      newFrameTable.inlineDepth.push(frameTable.inlineDepth[frame]);
       newFrameTable.category.push(frameTable.category[frame]);
       newFrameTable.subcategory.push(frameTable.subcategory[frame]);
       newFrameTable.func.push(frameTable.func[frame]);
