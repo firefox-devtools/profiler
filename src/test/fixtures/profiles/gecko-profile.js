@@ -487,6 +487,8 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [1, 2], // (root), 0x100000f84, 0x100001a45
         [1, 3], // (root), 0x100000f84, Startup::XRE_Main
         [1, 4], // (root), 0x100000f84, frobnicate
+        [2, 5], // (root), 0x100000f84, 0x100001a45, 0x100001bcd
+        [2, 6], // (root), 0x100000f84, 0x100001a45, 0x100001bce
       ],
     },
     frameTable: {
@@ -507,6 +509,8 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [2, false, 0, null, null, null, null, null, null], // 0x100001a45
         [3, false, 0, null, null, 4391, null, 0, 0], // Startup::XRE_Main, line 4391, category Other, subcategory Other
         [7, false, 0, 6, null, 34, null, null, null], // frobnicate, implementation 'baseline', line 34
+        [19, false, 0, null, null, null, null, null, null], // 0x100001bcd
+        [20, false, 0, null, null, null, null, null, null], // 0x100001bce
       ],
     },
     markers: {
@@ -864,6 +868,8 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
       'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD', // 16
       'PreferenceRead', // 17
       'IPC', // 18
+      '0x100001bcd', // 19
+      '0x100001bce', // 20
     ],
   };
 }

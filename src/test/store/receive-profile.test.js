@@ -1742,27 +1742,31 @@ describe('actions/receive-profile', function () {
     it('retrieves profiles and put them in the same view', async function () {
       const { profile1, profile2, resultProfile, globalTracks, rootRange } =
         await setupWithLongUrl(getSomeProfiles(), {
-          urlSearch1: 'thread=0',
+          urlSearch1: 'thread=0&profileName=name 1',
           urlSearch2: 'thread=1',
         });
 
-      const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
-        (thread, i) => ({
-          ...thread,
-          pid: `${thread.pid} from profile ${i + 1}`,
-          processName: `Profile ${i + 1}: ${thread.name}`,
-          unregisterTime: getTimeRangeForThread(thread, 1).end,
-        })
-      );
-
-      // comparison thread
-      expectedThreads.push(
+      const expectedThreads = [
+        {
+          ...profile1.threads[0],
+          pid: '0 from profile 1',
+          processName: 'name 1: Empty',
+          unregisterTime: getTimeRangeForThread(profile1.threads[0], 1).end,
+        },
+        {
+          ...profile2.threads[1],
+          pid: '0 from profile 2',
+          processName: 'Profile 2: Empty',
+          unregisterTime: getTimeRangeForThread(profile2.threads[1], 1).end,
+        },
+        // comparison thread
         expect.objectContaining({
           processType: 'comparison',
           pid: 'Diff between 1 and 2',
           name: 'Diff between 1 and 2',
-        })
-      );
+        }),
+      ];
+
       expect(resultProfile.threads).toEqual(expectedThreads);
       expect(globalTracks).toHaveLength(3); // each thread + comparison track
       expect(rootRange).toEqual({ start: 0, end: 9 });
