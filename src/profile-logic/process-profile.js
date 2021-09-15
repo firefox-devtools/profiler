@@ -537,6 +537,7 @@ function _processFrameTable(
 ): FrameTable {
   return {
     address: frameAddresses.map((a) => a ?? -1),
+    inlineDepth: Array(geckoFrameStruct.length).fill(0),
     category: geckoFrameStruct.category,
     subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,

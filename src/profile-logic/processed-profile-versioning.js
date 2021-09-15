@@ -2019,5 +2019,15 @@ const _upgraders = {
       }
     }
   },
+  [40]: (profile) => {
+    // The FrameTable has a new column: inlineDepth.
+    // We can initialize this column to zero for all frames. Zero means "this is
+    // the frame for the outer function at this address". That's correct because
+    // old profiles have not been symbolicated with inline frames, and the function
+    // name we got from symbolication was always the name for the "outer" function.
+    for (const thread of profile.threads) {
+      thread.frameTable.inlineDepth = Array(thread.frameTable.length).fill(0);
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

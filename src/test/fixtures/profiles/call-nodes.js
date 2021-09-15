@@ -86,6 +86,7 @@ export default function getProfile(): Profile {
   const frameTable: FrameTable = {
     func: frameFuncs.map((stringIndex) => funcTable.name.indexOf(stringIndex)),
     address: Array(frameFuncs.length).fill(-1),
+    inlineDepth: Array(frameFuncs.length).fill(0),
     nativeSymbol: Array(frameFuncs.length).fill(null),
     category: Array(frameFuncs.length).fill(null),
     subcategory: Array(frameFuncs.length).fill(null),

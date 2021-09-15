@@ -807,6 +807,7 @@ export function collapseResource(
             collapsedFuncIndex = newFuncTable.length++;
             // Add the collapsed frame
             newFrameTable.address.push(frameTable.address[frameIndex]);
+            newFrameTable.inlineDepth.push(frameTable.inlineDepth[frameIndex]);
             newFrameTable.category.push(frameTable.category[frameIndex]);
             newFrameTable.subcategory.push(frameTable.subcategory[frameIndex]);
             newFrameTable.func.push(collapsedFuncIndex);
