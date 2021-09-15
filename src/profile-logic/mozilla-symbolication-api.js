@@ -56,7 +56,7 @@ type APIFrameInfoV5 = {
   // As of September 2021, this is only supported by profiler-symbol-server.
   // Adding this functionality to the Mozilla symbol server is tracked in
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1636194
-  inlines?: APIInlineFrameInfoV5,
+  inlines?: APIInlineFrameInfoV5[],
 };
 
 type APIStackV5 = APIFrameInfoV5[];
@@ -169,11 +169,26 @@ function getV5ResultForLibRequest(
     if (info.function !== undefined && info.function_offset !== undefined) {
       const name = info.function;
       const functionOffset = parseInt(info.function_offset.substr(2), 16);
+      let inlines;
+      if (info.inlines !== undefined) {
+        const inlineCount = info.inlines.length;
+        inlines = info.inlines.map(({ function: name, file, line }, i) => {
+          const depth = inlineCount - i;
+          return {
+            name:
+              name ??
+              `<unknown at ${info.module_offset} at inline depth ${depth}>`,
+            file,
+            line,
+          };
+        });
+      }
       addressResult = {
         name,
         symbolAddress: address - functionOffset,
         file: info.file,
         line: info.line,
+        inlines,
       };
     } else {
       // This can happen if the address is between functions, or before the first
