@@ -630,7 +630,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       data: {
         // Stack property is converted to a cause.
         cause: {
-          stack: 2,
+          stack: 4,
           tid: 1111,
           // The cause's time hasn't been changed.
           time: 1,
@@ -703,7 +703,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       data: {
         // Stack property is converted to a cause.
         cause: {
-          stack: 2,
+          stack: 4,
           tid: 1111,
           // The cause's time has been properly increased of 1000ms (this is the
           // difference between the start times for the content process and the

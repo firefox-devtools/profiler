@@ -1896,107 +1896,109 @@ const _upgraders = {
         }
       }
 
-      if (ipFrames.size !== 0 || returnAddressFrames.size !== 0) {
-        // Iterate over all *return address* frames, i.e. all frames that were obtained
-        // by stack walking.
-        for (const [frame, address] of returnAddressFrames) {
-          if (ipFrames.has(frame)) {
-            // This address of this frame was observed both as a return address and as
-            // an instruction pointer register value. We have to duplicate this frame so
-            // so that we can make a distinction between the two uses.
-            // The new frame will be used as the ipFrame, and the old frame will be used
-            // as the return address frame (and have its address nudged).
-            const newIpFrame = frameTable.length;
-            frameTable.address.push(address);
-            frameTable.category.push(frameTable.category[frame]);
-            frameTable.subcategory.push(frameTable.subcategory[frame]);
-            frameTable.func.push(frameTable.func[frame]);
-            frameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
-            frameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
-            frameTable.implementation.push(frameTable.implementation[frame]);
-            frameTable.line.push(frameTable.line[frame]);
-            frameTable.column.push(frameTable.column[frame]);
-            frameTable.optimizations.push(frameTable.optimizations[frame]);
-            frameTable.length++;
-            oldIpFrameToNewIpFrame[frame] = newIpFrame;
-          }
-          // Subtract 1 byte from the return address.
-          frameTable.address[frame] = address - 1;
+      if (ipFrames.size === 0 && returnAddressFrames.size === 0) {
+        continue;
+      }
+
+      // Iterate over all *return address* frames, i.e. all frames that were obtained
+      // by stack walking.
+      for (const [frame, address] of returnAddressFrames) {
+        if (ipFrames.has(frame)) {
+          // This address of this frame was observed both as a return address and as
+          // an instruction pointer register value. We have to duplicate this frame so
+          // so that we can make a distinction between the two uses.
+          // The new frame will be used as the ipFrame, and the old frame will be used
+          // as the return address frame (and have its address nudged).
+          const newIpFrame = frameTable.length;
+          frameTable.address.push(address);
+          frameTable.category.push(frameTable.category[frame]);
+          frameTable.subcategory.push(frameTable.subcategory[frame]);
+          frameTable.func.push(frameTable.func[frame]);
+          frameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
+          frameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
+          frameTable.implementation.push(frameTable.implementation[frame]);
+          frameTable.line.push(frameTable.line[frame]);
+          frameTable.column.push(frameTable.column[frame]);
+          frameTable.optimizations.push(frameTable.optimizations[frame]);
+          frameTable.length++;
+          oldIpFrameToNewIpFrame[frame] = newIpFrame;
+        }
+        // Subtract 1 byte from the return address.
+        frameTable.address[frame] = address - 1;
+      }
+
+      // Now the frame table contains adjusted / "nudged" addresses.
+
+      // Make a new stack table which refers to the adjusted frames.
+      const newStackTable = {
+        frame: [],
+        prefix: [],
+        category: [],
+        subcategory: [],
+        length: 0,
+      };
+      const mapForSamplingSelfStacks = new Map();
+      const mapForSyncBacktraces = new Map();
+      const prefixMap = new Uint32Array(stackTable.length);
+      for (let stack = 0; stack < stackTable.length; stack++) {
+        const frame = stackTable.frame[stack];
+        const category = stackTable.category[stack];
+        const subcategory = stackTable.subcategory[stack];
+        const prefix = stackTable.prefix[stack];
+
+        const newPrefix = prefix === null ? null : prefixMap[prefix];
+
+        if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
+          // Copy this stack to the new stack table, and use the original frame
+          // (which will have the nudged address if this is a return address stack).
+          const newStackIndex = newStackTable.length;
+          newStackTable.frame.push(frame);
+          newStackTable.category.push(category);
+          newStackTable.subcategory.push(subcategory);
+          newStackTable.prefix.push(newPrefix);
+          newStackTable.length++;
+          prefixMap[stack] = newStackIndex;
+          mapForSyncBacktraces.set(stack, newStackIndex);
         }
 
-        // Now the frame table contains adjusted / "nudged" addresses.
-
-        // Make a new stack table which refers to the adjusted frames.
-        const newStackTable = {
-          frame: [],
-          prefix: [],
-          category: [],
-          subcategory: [],
-          length: 0,
-        };
-        const mapForSamplingSelfStacks = new Uint32Array(stackTable.length);
-        const mapForReturnAddressStacks = new Uint32Array(stackTable.length);
-        for (let stack = 0; stack < stackTable.length; stack++) {
-          const frame = stackTable.frame[stack];
-          const category = stackTable.category[stack];
-          const subcategory = stackTable.subcategory[stack];
-          const prefix = stackTable.prefix[stack];
-
-          const newPrefix =
-            prefix === null ? null : mapForReturnAddressStacks[prefix];
-
-          if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
-            // Copy this stack to the new stack table, and use the original frame
-            // (which will have the nudged address if this is a return address stack).
-            const newStackIndex = newStackTable.length;
-            newStackTable.frame.push(frame);
-            newStackTable.category.push(category);
-            newStackTable.subcategory.push(subcategory);
-            newStackTable.prefix.push(newPrefix);
-            newStackTable.length++;
-            mapForReturnAddressStacks[stack] = newStackIndex;
-          }
-
-          if (samplingSelfStacks.has(stack)) {
-            // Copy this stack to the new stack table, and use the potentially duplicated
-            // frame, with a non-nudged address.
-            const ipFrame = oldIpFrameToNewIpFrame[frame];
-            const newStackIndex = newStackTable.length;
-            newStackTable.frame.push(ipFrame);
-            newStackTable.category.push(category);
-            newStackTable.subcategory.push(subcategory);
-            newStackTable.prefix.push(newPrefix);
-            newStackTable.length++;
-            mapForSamplingSelfStacks[stack] = newStackIndex;
-          }
+        if (samplingSelfStacks.has(stack)) {
+          // Copy this stack to the new stack table, and use the potentially duplicated
+          // frame, with a non-nudged address.
+          const ipFrame = oldIpFrameToNewIpFrame[frame];
+          const newStackIndex = newStackTable.length;
+          newStackTable.frame.push(ipFrame);
+          newStackTable.category.push(category);
+          newStackTable.subcategory.push(subcategory);
+          newStackTable.prefix.push(newPrefix);
+          newStackTable.length++;
+          mapForSamplingSelfStacks.set(stack, newStackIndex);
         }
-        thread.stackTable = newStackTable;
+      }
+      thread.stackTable = newStackTable;
 
-        samples.stack = samples.stack.map((oldStackIndex) =>
+      samples.stack = samples.stack.map((oldStackIndex) =>
+        oldStackIndex === null
+          ? null
+          : mapForSamplingSelfStacks.get(oldStackIndex) ?? null
+      );
+      markers.data.forEach((data) => {
+        if (data && 'cause' in data && data.cause) {
+          data.cause.stack = mapForSyncBacktraces.get(data.cause.stack);
+        }
+      });
+      if (jsAllocations !== undefined) {
+        jsAllocations.stack = jsAllocations.stack.map((oldStackIndex) =>
           oldStackIndex === null
             ? null
-            : mapForSamplingSelfStacks[oldStackIndex]
+            : mapForSyncBacktraces.get(oldStackIndex) ?? null
         );
-        markers.data.forEach((data) => {
-          if (data && 'cause' in data && data.cause) {
-            data.cause.stack = mapForReturnAddressStacks[data.cause.stack];
-          }
-        });
-        if (jsAllocations !== undefined) {
-          jsAllocations.stack = jsAllocations.stack.map((oldStackIndex) =>
-            oldStackIndex === null
-              ? null
-              : mapForReturnAddressStacks[oldStackIndex]
-          );
-        }
-        if (nativeAllocations !== undefined) {
-          nativeAllocations.stack = nativeAllocations.stack.map(
-            (oldStackIndex) =>
-              oldStackIndex === null
-                ? null
-                : mapForReturnAddressStacks[oldStackIndex]
-          );
-        }
+      }
+      if (nativeAllocations !== undefined) {
+        nativeAllocations.stack = nativeAllocations.stack.map((oldStackIndex) =>
+          oldStackIndex === null
+            ? null
+            : mapForSyncBacktraces.get(oldStackIndex) ?? null
+        );
       }
     }
   },

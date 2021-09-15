@@ -120,6 +120,7 @@ describe('data-table-utils', function () {
   });
 });
 
+// TODO: Move this test section to process-profile.test.js?
 describe('process-profile', function () {
   describe('processGeckoProfile', function () {
     const profile = processGeckoProfile(createGeckoProfile());
@@ -226,23 +227,34 @@ describe('process-profile', function () {
       // TODO: also shift the samples inside marker callstacks
     });
 
-    it('should create one function per frame', function () {
+    it('should create one function per frame, except for extra frames from return address nudging', function () {
       const thread = profile.threads[0];
-      expect(thread.frameTable.length).toEqual(5);
+      expect(thread.frameTable.length).toEqual(9);
       expect('location' in thread.frameTable).toBeFalsy();
       expect('func' in thread.frameTable).toBeTruthy();
       expect('resource' in thread.funcTable).toBeTruthy();
-      expect(thread.funcTable.length).toEqual(5);
+      expect(thread.funcTable.length).toEqual(7);
       expect(thread.frameTable.func[0]).toEqual(0);
       expect(thread.frameTable.func[1]).toEqual(1);
       expect(thread.frameTable.func[2]).toEqual(2);
       expect(thread.frameTable.func[3]).toEqual(3);
       expect(thread.frameTable.func[4]).toEqual(4);
+      expect(thread.frameTable.func[5]).toEqual(5);
+      expect(thread.frameTable.func[6]).toEqual(6);
+      expect(thread.frameTable.func[7]).toEqual(2);
+      expect(thread.frameTable.func[8]).toEqual(1);
       expect(thread.frameTable.address[0]).toEqual(-1);
-      expect(thread.frameTable.address[1]).toEqual(3972);
-      expect(thread.frameTable.address[2]).toEqual(6725);
+      // The next two addresses were return addresses which were "nudged"
+      // by one byte to point into the calling instruction.
+      expect(thread.frameTable.address[1]).toEqual(0xf83);
+      expect(thread.frameTable.address[2]).toEqual(0x1a44);
       expect(thread.frameTable.address[3]).toEqual(-1);
       expect(thread.frameTable.address[4]).toEqual(-1);
+      expect(thread.frameTable.address[5]).toEqual(0x1bcd);
+      expect(thread.frameTable.address[6]).toEqual(0x1bce);
+      // Here are the non-nudged addresses for when they were sampled directly.
+      expect(thread.frameTable.address[7]).toEqual(0x1a45);
+      expect(thread.frameTable.address[8]).toEqual(0xf84);
       expect(thread.funcTable.name[0]).toEqual(0);
       expect(thread.funcTable.name[1]).toEqual(1);
       expect(thread.funcTable.name[2]).toEqual(2);
@@ -261,9 +273,30 @@ describe('process-profile', function () {
       expect(thread.funcTable.columnNumber[4]).toEqual(35);
     });
 
+    it('nudges return addresses but not sampled instruction pointer values', function () {
+      const profile = processGeckoProfile(createGeckoProfile());
+      const thread = profile.threads[0];
+      function getFrameAddressesForSampleIndex(sample) {
+        const addresses = [];
+        let stack = thread.samples.stack[sample];
+        while (stack !== null) {
+          addresses.push(
+            thread.frameTable.address[thread.stackTable.frame[stack]]
+          );
+          stack = thread.stackTable.prefix[stack];
+        }
+        addresses.reverse();
+        return addresses;
+      }
+
+      expect(getFrameAddressesForSampleIndex(0)).toEqual([-1, 0xf84]);
+      // 0xf84 from the caller has been nudged to 0xf83
+      expect(getFrameAddressesForSampleIndex(1)).toEqual([-1, 0xf83, 0x1a45]);
+    });
+
     it('should create no entries in nativeSymbols before symbolication', function () {
       const thread = profile.threads[0];
-      expect(thread.frameTable.length).toEqual(5);
+      expect(thread.frameTable.length).toEqual(9);
       expect('nativeSymbol' in thread.frameTable).toBeTruthy();
       expect(thread.nativeSymbols.length).toEqual(0);
       expect(thread.frameTable.nativeSymbol[0]).toEqual(null);
@@ -271,6 +304,10 @@ describe('process-profile', function () {
       expect(thread.frameTable.nativeSymbol[2]).toEqual(null);
       expect(thread.frameTable.nativeSymbol[3]).toEqual(null);
       expect(thread.frameTable.nativeSymbol[4]).toEqual(null);
+      expect(thread.frameTable.nativeSymbol[5]).toEqual(null);
+      expect(thread.frameTable.nativeSymbol[6]).toEqual(null);
+      expect(thread.frameTable.nativeSymbol[7]).toEqual(null);
+      expect(thread.frameTable.nativeSymbol[8]).toEqual(null);
     });
 
     it('should create one resource per used library', function () {
@@ -433,8 +470,13 @@ describe('profile-data', function () {
       defaultCategory
     );
 
-    it('should create one callNode per stack', function () {
-      expect(thread.stackTable.length).toEqual(5);
+    it('should create one callNode per original stack', function () {
+      // After nudgeReturnAddresses, the stack table now has 8 entries.
+      expect(thread.stackTable.length).toEqual(8);
+      // But the call node table only has 5, same as the original stack table.
+      // That's because, whenever nudgeReturnAddresses duplicates frames (one nudged
+      // and one non-nudged), the two frames still share the same func, so the call
+      // node table respects that func sharing.
       expect(callNodeTable.length).toEqual(5);
       expect('prefix' in callNodeTable).toBeTruthy();
       expect('func' in callNodeTable).toBeTruthy();

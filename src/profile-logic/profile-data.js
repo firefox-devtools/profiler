@@ -73,7 +73,6 @@ import type {
   ThreadsKey,
   resourceTypeEnum,
   MarkerPayload,
-  CauseBacktrace,
   Address,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
@@ -3418,14 +3417,14 @@ export function gatherStackReferences(thread: Thread): StackReferences {
  * maps. The maps map IndexIntoOldStackTable -> IndexIntoNewStackTable.
  * Only a subset of entries are read from the map: The same stacks that
  * gatherStackReferences found in the thread. All other entries are ignored
- * and can have arbitrary values (e.g. 0).
+ * and do not need to be present.
  * With the exception of the caller which does the initial return address
  * nudging, most callers will want to pass the same map to both map arguments.
  */
 export function replaceStackReferences(
   thread: Thread,
-  mapForSampleSelfStacks: Uint32Array,
-  mapForBacktraceSelfStacks: Uint32Array
+  mapForSamplingSelfStacks: Map<IndexIntoStackTable, IndexIntoStackTable>,
+  mapForBacktraceSelfStacks: Map<IndexIntoStackTable, IndexIntoStackTable>
 ): Thread {
   const {
     samples: oldSamples,
@@ -3437,25 +3436,46 @@ export function replaceStackReferences(
   // Samples
   const samples = {
     ...oldSamples,
-    stack: oldSamples.stack.map((oldStackIndex) =>
-      oldStackIndex === null ? null : mapForSampleSelfStacks[oldStackIndex]
-    ),
+    stack: oldSamples.stack.map((oldStackIndex) => {
+      if (oldStackIndex === null) {
+        return null;
+      }
+      const newStack = mapForSamplingSelfStacks.get(oldStackIndex);
+      if (newStack === undefined) {
+        throw new Error(
+          `Missing mapForSamplingSelfStacks entry for stack ${oldStackIndex}`
+        );
+      }
+      return newStack;
+    }),
   };
 
+  function mapBacktraceSelfStack(oldStackIndex) {
+    if (oldStackIndex === null) {
+      return null;
+    }
+    const newStack = mapForBacktraceSelfStacks.get(oldStackIndex);
+    if (newStack === undefined) {
+      throw new Error(
+        `Missing mapForBacktraceSelfStacks entry for stack ${oldStackIndex}`
+      );
+    }
+    return newStack;
+  }
+
   // Markers
-  function replaceStackReferenceInPayload(
+  function replaceStackReferenceInMarkerPayload(
     oldData: MarkerPayload
   ): MarkerPayload {
     if (oldData && 'cause' in oldData && oldData.cause) {
       // Replace the cause with the right stack index.
       // Use (...: any) because our current version of Flow has trouble with
       // the object spread operator.
-      const newStack = mapForBacktraceSelfStacks[oldData.cause.stack];
       return ({
         ...oldData,
         cause: {
           ...oldData.cause,
-          stack: newStack,
+          stack: mapBacktraceSelfStack(oldData.cause.stack),
         },
       }: any);
     }
@@ -3463,7 +3483,7 @@ export function replaceStackReferences(
   }
   const markers = {
     ...oldMarkers,
-    data: oldMarkers.data.map(replaceStackReferenceInPayload),
+    data: oldMarkers.data.map(replaceStackReferenceInMarkerPayload),
   };
 
   // JS allocations
@@ -3471,9 +3491,7 @@ export function replaceStackReferences(
   if (oldJsAllocations !== undefined) {
     jsAllocations = {
       ...oldJsAllocations,
-      stack: oldJsAllocations.stack.map((oldStackIndex) =>
-        oldStackIndex === null ? null : mapForBacktraceSelfStacks[oldStackIndex]
-      ),
+      stack: oldJsAllocations.stack.map(mapBacktraceSelfStack),
     };
   }
 
@@ -3482,9 +3500,7 @@ export function replaceStackReferences(
   if (oldNativeAllocations !== undefined) {
     nativeAllocations = {
       ...oldNativeAllocations,
-      stack: oldNativeAllocations.stack.map((oldStackIndex) =>
-        oldStackIndex === null ? null : mapForBacktraceSelfStacks[oldStackIndex]
-      ),
+      stack: oldNativeAllocations.stack.map(mapBacktraceSelfStack),
     };
   }
 
@@ -3510,10 +3526,12 @@ export function replaceStackReferences(
  *
  *  1. The top frame comes from the instruction pointer register. The register contains the
  *     address of the instruction that is currently executing.
- *  2. The other frames come from stack walking. During stack walking, we record the
- *     return addresses for all caller functions that are on the stack. A "return address"
- *     is the address that the CPU will jump to once the called function returns. It is the
+ *  2. The other frames come from stack walking. Stack walkers calculate the return
+ *     addresses for all caller functions that are on the stack. A "return address" is the
+ *     address that the CPU will jump to once the called function returns. It is the
  *     address of the instruction *after* the "call" instruction.
+ *     The Gecko profile format assumes that all caller frame addresses are return
+ *     addresses.
  *
  * Here's an example, where _LZ4F_compressUpdate calls _LZ4F_localSaveDict and the
  * CPU was observed executing an instruction in _LZ4F_localSaveDict.
@@ -3548,7 +3566,7 @@ export function replaceStackReferences(
  * 895            cctxPtr->tmpIn = cctxPtr->tmpBuff;
  * 896        } else {
  * 897            int const realDictSize = LZ4F_localSaveDict(cctxPtr);   // <-- here is the call
- * 898            if (realDictSize==0) return err0r(LZ4F_ERROR_GENERIC);
+ * 898            if (realDictSize==0) return err0r(LZ4F_ERROR_GENERIC);  // <-- here is the line we'd get for the return address
  * 899            cctxPtr->tmpIn = cctxPtr->tmpBuff + realDictSize;
  * 900        }
  * 901    }
@@ -3688,25 +3706,36 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       newFrameTable.optimizations.push(frameTable.optimizations[frame]);
       newFrameTable.length++;
       oldIpFrameToNewIpFrame[frame] = newIpFrame;
+      // Note: The duplicated frame uses the same func as the original frame.
+      // This is ok because return address nudging is never expected to move
+      // an address to a different function, so symbolication should never
+      // have a need to split these frames into different functions.
     }
     // Subtract 1 byte from the return address.
     newFrameTable.address[frame] = address - 1;
+
+    // Note that we don't change the funcTable.
+    // Before symbolication, the funcTable name for the native frames are
+    // of the form "0xhexaddress", and this string will still be the original
+    // un-adjusted return address. Symbolication will fix that up.
+    // Leaving the old string is ok; we're adjusting the frame address and
+    // symbolication only looks at the frame address.
   }
 
   // Now the frame table contains adjusted / "nudged" addresses.
 
   // Make a new stack table which refers to the adjusted frames.
   const newStackTable = getEmptyStackTable();
-  const mapForSamplingSelfStacks = new Uint32Array(stackTable.length);
-  const mapForReturnAddressStacks = new Uint32Array(stackTable.length);
+  const mapForSamplingSelfStacks = new Map();
+  const mapForBacktraceSelfStacks = new Map();
+  const prefixMap = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
     const category = stackTable.category[stack];
     const subcategory = stackTable.subcategory[stack];
     const prefix = stackTable.prefix[stack];
 
-    const newPrefix =
-      prefix === null ? null : mapForReturnAddressStacks[prefix];
+    const newPrefix = prefix === null ? null : prefixMap[prefix];
 
     if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
       // Copy this stack to the new stack table, and use the original frame
@@ -3717,7 +3746,8 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       newStackTable.subcategory.push(subcategory);
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
-      mapForReturnAddressStacks[stack] = newStackIndex;
+      prefixMap[stack] = newStackIndex;
+      mapForBacktraceSelfStacks.set(stack, newStackIndex);
     }
 
     if (samplingSelfStacks.has(stack)) {
@@ -3730,7 +3760,7 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       newStackTable.subcategory.push(subcategory);
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
-      mapForSamplingSelfStacks[stack] = newStackIndex;
+      mapForSamplingSelfStacks.set(stack, newStackIndex);
     }
   }
 
@@ -3743,6 +3773,6 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
   return replaceStackReferences(
     newThread,
     mapForSamplingSelfStacks,
-    mapForReturnAddressStacks
+    mapForBacktraceSelfStacks
   );
 }
