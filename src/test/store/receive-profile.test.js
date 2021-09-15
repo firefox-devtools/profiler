@@ -1739,17 +1739,12 @@ describe('actions/receive-profile', function () {
       delete window.fetch;
     });
 
-    it('retrieves profiles and put them in the same view', async function() {
-      const {
-        profile1,
-        profile2,
-        resultProfile,
-        globalTracks,
-        rootRange,
-      } = await setupWithLongUrl(getSomeProfiles(), {
-        urlSearch1: 'thread=0&profileName=name 1',
-        urlSearch2: 'thread=1',
-      });
+    it('retrieves profiles and put them in the same view', async function () {
+      const { profile1, profile2, resultProfile, globalTracks, rootRange } =
+        await setupWithLongUrl(getSomeProfiles(), {
+          urlSearch1: 'thread=0&profileName=name 1',
+          urlSearch2: 'thread=1',
+        });
 
       const expectedThreads = [
         {
