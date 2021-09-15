@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-type MaybeFn = (any => any) | void;
+type MaybeFn = ((any) => any) | void;
 const identity = () => {};
 
 export function autoMockCanvasContext() {
@@ -76,7 +76,9 @@ function mockCanvasContext() {
       lineTo: spyLog('lineTo'),
       stroke: spyLog('stroke'),
       arc: spyLog('arc'),
-      measureText: spyLog('measureText', text => ({ width: text.length * 5 })),
+      measureText: spyLog('measureText', (text) => ({
+        width: text.length * 5,
+      })),
       createLinearGradient: spyLog('createLinearGradient', () => ({
         addColorStop: spyLog('addColorStop'),
       })),

@@ -33,7 +33,8 @@ export function extractAndDecodePayload(jwtToken: string): any {
 // Here is an example:
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiP34_fj9-In0.KIumXQmDxL1bJ0RGNV2-mm-8h0LEQATKbtHUsCHMGcg
 //                  ╰ header                        ╰ payload                     ╰ signature
-const JWT_TOKEN_RE = /^(?:[a-zA-Z0-9_-])+\.(?:[a-zA-Z0-9_-])+\.(?:[a-zA-Z0-9_-])+$/;
+const JWT_TOKEN_RE =
+  /^(?:[a-zA-Z0-9_-])+\.(?:[a-zA-Z0-9_-])+\.(?:[a-zA-Z0-9_-])+$/;
 export function isValidJwtToken(jwtToken: string): boolean {
   return JWT_TOKEN_RE.test(jwtToken);
 }

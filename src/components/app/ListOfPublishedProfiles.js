@@ -108,11 +108,8 @@ class PublishedProfile extends React.PureComponent<
   };
 
   render() {
-    const {
-      uploadedProfileInformation,
-      nowTimestamp,
-      withActionButtons,
-    } = this.props;
+    const { uploadedProfileInformation, nowTimestamp, withActionButtons } =
+      this.props;
     const { confirmDialogIsOpen } = this.state;
 
     let { urlPath } = uploadedProfileInformation;
@@ -213,12 +210,14 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   };
 
   _refreshList = async () => {
-    const uploadedProfileInformationList = await listAllUploadedProfileInformationFromDb();
+    const uploadedProfileInformationList =
+      await listAllUploadedProfileInformationFromDb();
     if (this._isMounted) {
       // It isn't ideal to use a setState here, but this is the only way.
       this.setState({
         // We want to display the list with the most recent uploaded profile first.
-        uploadedProfileInformationList: uploadedProfileInformationList.reverse(),
+        uploadedProfileInformationList:
+          uploadedProfileInformationList.reverse(),
       });
     }
   };
@@ -293,7 +292,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
       <>
         <ul className="publishedProfilesList">
           {reducedUploadedProfileInformationList.map(
-            uploadedProfileInformation => (
+            (uploadedProfileInformation) => (
               <PublishedProfile
                 onProfileDelete={this.onProfileDelete}
                 key={uploadedProfileInformation.profileToken}

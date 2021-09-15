@@ -118,7 +118,7 @@ export function loadProfile(
   |}> = {},
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
-  return async dispatch => {
+  return async (dispatch) => {
     if (profile.threads.length === 0) {
       console.error('This profile has no threads.', profile);
       dispatch(
@@ -342,7 +342,7 @@ export function finalizeFullProfileView(
       if (hiddenLocalTracks.size === localTracks.length) {
         // All of the local tracks were hidden.
         const globalTrackIndex = globalTracks.findIndex(
-          globalTrack =>
+          (globalTrack) =>
             globalTrack.type === 'process' &&
             globalTrack.pid === pid &&
             globalTrack.mainThreadIndex === null
@@ -418,7 +418,7 @@ export function finalizeOriginProfileView(
   pages: Page[],
   selectedThreadIndexes: Set<ThreadIndex> | null
 ): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch) => {
     const idToPage: Map<InnerWindowID, Page> = new Map();
     for (const page of pages) {
       idToPage.set(page.innerWindowID, page);
@@ -522,7 +522,7 @@ export function finalizeOriginProfileView(
         innerWindowIDToRoot.set(innerWindowID, rootInnerWindowID);
         const root = ensureExists(
           originsTimelineRoots.find(
-            root => root.innerWindowID === rootInnerWindowID
+            (root) => root.innerWindowID === rootInnerWindowID
           )
         );
         root.children.push({
@@ -548,7 +548,7 @@ export function finalizeOriginProfileView(
       if (rootInnerWindowID) {
         const root = ensureExists(
           originsTimelineRoots.find(
-            root => root.innerWindowID === rootInnerWindowID
+            (root) => root.innerWindowID === rootInnerWindowID
           )
         );
         root.children.push(noOriginEntry);
@@ -720,7 +720,7 @@ export function viewProfile(
     shouldUseWebChannel: boolean,
   |}> = {}
 ): ThunkAction<Promise<void>> {
-  return async dispatch => {
+  return async (dispatch) => {
     await dispatch(loadProfile(profile, config, false));
   };
 }
@@ -800,7 +800,7 @@ if (typeof window === 'object' && window.requestIdleCallback) {
   // Node environment
   requestIdleCallbackPolyfill = process.nextTick;
 } else {
-  requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
+  requestIdleCallbackPolyfill = (callback) => setTimeout(callback, 0);
 }
 
 // Queues up symbolication steps and bulk-processes them from requestIdleCallback,
@@ -934,7 +934,7 @@ function getSymbolStore(
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
-    requestSymbolsFromServer: requests => {
+    requestSymbolsFromServer: (requests) => {
       for (const { lib } of requests) {
         dispatch(requestingSymbolTable(lib));
       }
@@ -952,7 +952,7 @@ function getSymbolStore(
         }
       });
     },
-    requestSymbolTableFromBrowser: async lib => {
+    requestSymbolTableFromBrowser: async (lib) => {
       // On Firefox 93 and above, we can get the symbol table from the WebChannel.
       if (shouldUseWebChannel) {
         const { debugName, breakpadId } = lib;
@@ -1012,7 +1012,7 @@ export async function doSymbolicateProfile(
       symbolicationStepInfo: SymbolicationStepInfo
     ) => {
       completionPromises.push(
-        new Promise(resolve => {
+        new Promise((resolve) => {
           _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
             dispatch,
             threadIndex,
@@ -1054,7 +1054,7 @@ export async function checkIfWebChannelUsableForSymbolication(): Promise<boolean
 }
 
 export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
       let shouldUseWebChannel = false;
       try {
@@ -1144,12 +1144,12 @@ export function temporaryError(error: TemporaryError): Action {
 }
 
 function _wait(delayMs: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, delayMs));
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
 type FetchProfileArgs = {
   url: string,
-  onTemporaryError: TemporaryError => void,
+  onTemporaryError: (TemporaryError) => void,
   // Allow tests to capture the reported error, but normally use console.error.
   reportError?: (...data: Array<any>) => void,
 };
@@ -1373,7 +1373,7 @@ export function retrieveProfileOrZipFromUrl(
   profileUrl: string,
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
-  return async function(dispatch) {
+  return async function (dispatch) {
     dispatch(waitingForProfileFromUrl(profileUrl));
 
     try {
@@ -1447,7 +1447,7 @@ export function retrieveProfileFromFile(
   // Allow tests to inject a custom file reader to bypass the DOM APIs.
   fileReader: typeof _fileReader = _fileReader
 ): ThunkAction<Promise<void>> {
-  return async dispatch => {
+  return async (dispatch) => {
     // Notify the UI that we are loading and parsing a profile. This can take
     // a little bit of time.
     dispatch(waitingForProfileFromFile());
@@ -1477,7 +1477,8 @@ export function retrieveProfileFromFile(
           throw new Error('Unable to parse the profile.');
         }
 
-        const shouldUseWebChannel = await checkIfWebChannelUsableForSymbolication();
+        const shouldUseWebChannel =
+          await checkIfWebChannelUsableForSymbolication();
 
         await withHistoryReplaceStateAsync(async () => {
           await dispatch(viewProfile(profile, { shouldUseWebChannel }));
@@ -1497,14 +1498,14 @@ export function retrieveProfilesToCompare(
   profileViewUrls: string[],
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(waitingForProfileFromUrl());
 
     try {
       // First we get a state from each URL. From these states we'll get all the
       // data we need to fetch and process the profiles.
       const profileStates = await Promise.all(
-        profileViewUrls.map(async url => {
+        profileViewUrls.map(async (url) => {
           if (
             url.startsWith('https://perfht.ml/') ||
             url.startsWith('https://share.firefox.dev/') ||
@@ -1517,7 +1518,7 @@ export function retrieveProfilesToCompare(
       );
 
       const hasSupportedDatasources = profileStates.every(
-        state => state.dataSource === 'public'
+        (state) => state.dataSource === 'public'
       );
       if (!hasSupportedDatasources) {
         throw new Error(
@@ -1585,7 +1586,7 @@ export function getProfilesFromRawUrl(
   location: Location
 ): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {
-    const pathParts = location.pathname.split('/').filter(d => d);
+    const pathParts = location.pathname.split('/').filter((d) => d);
     let possibleDataSource = pathParts[0];
 
     // Treat from-addon as from-browser, for compatibility with Firefox < 93.

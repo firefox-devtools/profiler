@@ -22,7 +22,7 @@ import {
 } from '../../profile-logic/marker-data';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 
-describe('sanitizePII', function() {
+describe('sanitizePII', function () {
   function setup(
     piiConfig,
     originalProfile = processGeckoProfile(createGeckoProfile())
@@ -38,7 +38,7 @@ describe('sanitizePII', function() {
     };
 
     const derivedMarkerInfoForAllThreads = originalProfile.threads.map(
-      thread => {
+      (thread) => {
         const ipcCorrelations = correlateIPCMarkers(originalProfile.threads);
         const timeRangeForThread = getTimeRangeForThread(
           thread,
@@ -66,7 +66,7 @@ describe('sanitizePII', function() {
     };
   }
 
-  it('should sanitize the threads if they are provided', function() {
+  it('should sanitize the threads if they are provided', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveThreads: new Set([0, 2]),
     });
@@ -76,7 +76,7 @@ describe('sanitizePII', function() {
     expect(sanitizedProfile.threads.length).toEqual(1);
   });
 
-  it('should sanitize counters if its thread is deleted', function() {
+  it('should sanitize counters if its thread is deleted', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveThreads: new Set([0]),
     });
@@ -92,7 +92,7 @@ describe('sanitizePII', function() {
     expect(ensureExists(sanitizedProfile.counters).length).toEqual(0);
   });
 
-  it('should not sanitize counters if its thread is not deleted', function() {
+  it('should not sanitize counters if its thread is not deleted', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveThreads: new Set([1, 2]),
     });
@@ -108,7 +108,7 @@ describe('sanitizePII', function() {
     expect(ensureExists(sanitizedProfile.counters).length).toEqual(1);
   });
 
-  it('should sanitize profiler overhead if its thread is deleted', function() {
+  it('should sanitize profiler overhead if its thread is deleted', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveThreads: new Set([0]),
     });
@@ -117,7 +117,7 @@ describe('sanitizePII', function() {
     expect(ensureExists(sanitizedProfile.profilerOverhead).length).toEqual(0);
   });
 
-  it('should not sanitize profiler overhead if its thread is not deleted', function() {
+  it('should not sanitize profiler overhead if its thread is not deleted', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveThreads: new Set([1, 2]),
     });
@@ -126,7 +126,7 @@ describe('sanitizePII', function() {
     expect(ensureExists(sanitizedProfile.profilerOverhead).length).toEqual(1);
   });
 
-  it('should sanitize the screenshots if they are provided', function() {
+  it('should sanitize the screenshots if they are provided', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveThreadsWithScreenshots: new Set([0, 1, 2]),
     });
@@ -159,13 +159,13 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should sanitize the pages information', function() {
+  it('should sanitize the pages information', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveUrls: true,
     });
 
     // Checking to make sure that we have a http{,s} URI in the pages array.
-    const pageUrl = ensureExists(originalProfile.pages).find(page =>
+    const pageUrl = ensureExists(originalProfile.pages).find((page) =>
       page.url.includes('http')
     );
     if (pageUrl === undefined) {
@@ -179,13 +179,13 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should keep the chrome URIs inside the pages array', function() {
+  it('should keep the chrome URIs inside the pages array', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveUrls: true,
     });
 
     // Checking to make sure that we have a chrome URI in the pages array.
-    const chromePageUrl = ensureExists(originalProfile.pages).find(page =>
+    const chromePageUrl = ensureExists(originalProfile.pages).find((page) =>
       page.url.includes('chrome://')
     );
     if (chromePageUrl === undefined) {
@@ -204,7 +204,7 @@ describe('sanitizePII', function() {
     expect(includesChromeUrl).toBe(true);
   });
 
-  it('should sanitize all the URLs inside network markers', function() {
+  it('should sanitize all the URLs inside network markers', function () {
     const { sanitizedProfile } = setup({
       shouldRemoveUrls: true,
     });
@@ -229,7 +229,7 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should sanitize the URLs inside text markers', function() {
+  it('should sanitize the URLs inside text markers', function () {
     const unsanitizedNameField =
       'onBeforeRequest https://profiler.firefox.com/ by extension';
     const sanitizedNameField = 'onBeforeRequest https://<URL> by extension';
@@ -257,7 +257,7 @@ describe('sanitizePII', function() {
     expect(marker.name).toBe(sanitizedNameField);
   });
 
-  it('should sanitize all the URLs inside string table', function() {
+  it('should sanitize all the URLs inside string table', function () {
     const { sanitizedProfile } = setup({
       shouldRemoveUrls: true,
     });
@@ -273,7 +273,7 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should sanitize extensions', function() {
+  it('should sanitize extensions', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveExtensions: true,
     });
@@ -293,7 +293,7 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should sanitize extension ids inside text markers', function() {
+  it('should sanitize extension ids inside text markers', function () {
     const unsanitizedNameField =
       'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener';
     const sanitizedNameField =
@@ -333,7 +333,7 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should sanitize both URLs and extension ids inside Extension Suspend markers', function() {
+  it('should sanitize both URLs and extension ids inside Extension Suspend markers', function () {
     const unsanitizedNameField =
       'onBeforeRequest https://profiler.firefox.com/ by extension';
     const sanitizedNameField = 'onBeforeRequest https://<URL>';
@@ -362,7 +362,7 @@ describe('sanitizePII', function() {
     expect(marker.name).toBe(sanitizedNameField);
   });
 
-  it('should not sanitize all the preference values inside preference read markers', function() {
+  it('should not sanitize all the preference values inside preference read markers', function () {
     const { sanitizedProfile } = setup(
       {
         shouldRemovePreferenceValues: false,
@@ -399,7 +399,7 @@ describe('sanitizePII', function() {
     ).toBeTruthy();
   });
 
-  it('should sanitize all the preference values inside preference read markers', function() {
+  it('should sanitize all the preference values inside preference read markers', function () {
     const { sanitizedProfile } = setup(
       {
         shouldRemovePreferenceValues: true,
@@ -436,7 +436,7 @@ describe('sanitizePII', function() {
     ).toBeTruthy();
   });
 
-  it('should not push any null values to marker values by mistake while filtering', function() {
+  it('should not push any null values to marker values by mistake while filtering', function () {
     const { sanitizedProfile } = setup({
       shouldRemoveThreadsWithScreenshots: new Set([0, 1, 2]),
     });
@@ -462,7 +462,7 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should sanitize the FileIO marker paths', function() {
+  it('should sanitize the FileIO marker paths', function () {
     const marker1File = 'permissions.sqlite-journal';
     const marker2File = 'CustomizableUI.jsm';
     const { sanitizedProfile } = setup(
@@ -538,8 +538,8 @@ describe('sanitizePII', function() {
   });
 });
 
-describe('getRemoveProfileInformation', function() {
-  it('should bail out early when there is no preference marker in the profile', function() {
+describe('getRemoveProfileInformation', function () {
+  it('should bail out early when there is no preference marker in the profile', function () {
     const { getState, dispatch } = storeWithProfile();
     // Checking to see that we don't have Preference markers.
     expect(getHasPreferenceMarkers(getState())).toEqual(false);

@@ -219,7 +219,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         (HorizontalViewport) => PreviewSelection
       > = [];
       _container: HTMLElement | null = null;
-      _takeContainerRef = container => {
+      _takeContainerRef = (container) => {
         if (this.props.viewportProps.containerRef) {
           this.props.viewportProps.containerRef(container);
         }
@@ -227,7 +227,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       };
       _lastKeyboardNavigationFrame: number = 0;
       _keysDown: Set<NavigationKey> = new Set();
-      _deltaToZoomFactor = delta => Math.pow(ZOOM_SPEED, delta);
+      _deltaToZoomFactor = (delta) => Math.pow(ZOOM_SPEED, delta);
 
       constructor(props: ViewportProps) {
         super(props);
@@ -332,7 +332,7 @@ export const withChartViewport: WithChartViewport<*, *> =
             this.state.containerWidth !== rect.width ||
             this.state.containerHeight !== rect.height
           ) {
-            this.setState(prevState => ({
+            this.setState((prevState) => ({
               containerWidth: rect.width,
               containerHeight: rect.height,
               containerLeft: rect.left,
@@ -432,7 +432,7 @@ export const withChartViewport: WithChartViewport<*, *> =
        * processes all queued updates from a requestAnimationFrame callback.
        */
       _addBatchedPreviewSelectionUpdate(
-        callback: HorizontalViewport => PreviewSelection
+        callback: (HorizontalViewport) => PreviewSelection
       ) {
         if (this._pendingPreviewSelectionUpdates.length === 0) {
           requestAnimationFrame(() =>
@@ -498,10 +498,8 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       zoomRangeSelection = (center, zoomFactor) => {
-        const {
-          disableHorizontalMovement,
-          maximumZoom,
-        } = this.props.viewportProps;
+        const { disableHorizontalMovement, maximumZoom } =
+          this.props.viewportProps;
         if (disableHorizontalMovement) {
           return;
         }
@@ -626,7 +624,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         this._keysDown.delete(BARE_KEYMAP[event.nativeEvent.code]);
       };
 
-      _keyboardNavigation = timestamp => {
+      _keyboardNavigation = (timestamp) => {
         if (this._keysDown.size === 0) {
           // No keys are down, nothing to do.  Don't request a new
           // animation frame.
@@ -677,12 +675,8 @@ export const withChartViewport: WithChartViewport<*, *> =
             disableHorizontalMovement,
           },
         } = this.props;
-        const {
-          containerWidth,
-          containerHeight,
-          viewportTop,
-          isSizeSet,
-        } = this.state;
+        const { containerWidth, containerHeight, viewportTop, isSizeSet } =
+          this.state;
 
         if (!isSizeSet) {
           // Moving the viewport and calculating its dimensions
@@ -864,7 +858,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       ViewportStateProps,
       ViewportDispatchProps
     >({
-      mapStateToProps: state => ({
+      mapStateToProps: (state) => ({
         panelLayoutGeneration: getPanelLayoutGeneration(state),
         hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
       }),

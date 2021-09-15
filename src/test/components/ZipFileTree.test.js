@@ -16,7 +16,7 @@ import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { waitUntilState, fireFullClick } from '../fixtures/utils';
 
-describe('calltree/ZipFileTree', function() {
+describe('calltree/ZipFileTree', function () {
   autoMockCanvasContext();
 
   // This makes the bounding box large enough so that we don't trigger
@@ -61,10 +61,10 @@ describe('calltree/ZipFileTree', function() {
       'profile2.json',
       'baz',
       'profile3.json',
-    ].forEach(fileName => screen.getByText(fileName));
+    ].forEach((fileName) => screen.getByText(fileName));
   });
 
-  describe('clicking on a profile link', function() {
+  describe('clicking on a profile link', function () {
     const setupClickingTest = async () => {
       const setupResult = await setup();
       const { store, container } = setupResult;
@@ -74,7 +74,7 @@ describe('calltree/ZipFileTree', function() {
       const waitUntilDoneProcessingZip = () =>
         waitUntilState(
           store,
-          state =>
+          (state) =>
             ZippedProfileSelectors.getZipFileState(state).phase ===
             'VIEW_PROFILE_IN_ZIP_FILE'
         );
@@ -121,11 +121,8 @@ describe('calltree/ZipFileTree', function() {
     });
 
     it('will show the ProfileViewer component when done processing', async () => {
-      const {
-        profileViewer,
-        profile1OpenLink,
-        waitUntilDoneProcessingZip,
-      } = await setupClickingTest();
+      const { profileViewer, profile1OpenLink, waitUntilDoneProcessingZip } =
+        await setupClickingTest();
 
       fireFullClick(profile1OpenLink);
       await waitUntilDoneProcessingZip();

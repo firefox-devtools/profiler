@@ -380,5 +380,6 @@ export type GeckoProfileWithMeta<Meta> = {|
   jsTracerDictionary?: string[],
 |};
 
-export type GeckoSubprocessProfile = GeckoProfileWithMeta<GeckoProfileShortMeta>;
+export type GeckoSubprocessProfile =
+  GeckoProfileWithMeta<GeckoProfileShortMeta>;
 export type GeckoProfile = GeckoProfileWithMeta<GeckoProfileFullMeta>;

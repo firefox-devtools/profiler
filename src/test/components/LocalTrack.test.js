@@ -46,41 +46,33 @@ import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 // local tracks.
 const PID = 222;
 
-describe('timeline/LocalTrack', function() {
+describe('timeline/LocalTrack', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 400, height: 400 });
 
-  describe('with a thread track', function() {
+  describe('with a thread track', function () {
     it('matches the snapshot of a local track', () => {
       const { container } = setupThreadTrack();
       expect(container.firstChild).toMatchSnapshot();
     });
 
-    it('has the correct selectors into useful parts of the component', function() {
+    it('has the correct selectors into useful parts of the component', function () {
       const { getLocalTrackLabel, getLocalTrackRow } = setupThreadTrack();
       expect(getLocalTrackLabel()).toHaveTextContent('DOM Worker');
       expect(getLocalTrackRow()).toBeTruthy();
     });
 
-    it('starts out not being selected', function() {
-      const {
-        getState,
-        threadIndex,
-        trackReference,
-        getLocalTrackRow,
-      } = setupThreadTrack();
+    it('starts out not being selected', function () {
+      const { getState, threadIndex, trackReference, getLocalTrackRow } =
+        setupThreadTrack();
       expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
       expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       expect(getLocalTrackRow()).not.toHaveClass('selected');
     });
 
     it('can select a thread by clicking the label', () => {
-      const {
-        getState,
-        getLocalTrackLabel,
-        threadIndex,
-        getLocalTrackRow,
-      } = setupThreadTrack();
+      const { getState, getLocalTrackLabel, threadIndex, getLocalTrackRow } =
+        setupThreadTrack();
       expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       fireFullClick(getLocalTrackLabel());
       expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
@@ -88,12 +80,8 @@ describe('timeline/LocalTrack', function() {
     });
 
     it('can right click a thread', () => {
-      const {
-        getState,
-        getLocalTrackLabel,
-        threadIndex,
-        trackReference,
-      } = setupThreadTrack();
+      const { getState, getLocalTrackLabel, threadIndex, trackReference } =
+        setupThreadTrack();
 
       fireFullContextMenu(getLocalTrackLabel());
       expect(getRightClickedTrack(getState())).toEqual(trackReference);
@@ -115,8 +103,8 @@ describe('timeline/LocalTrack', function() {
     });
   });
 
-  describe('with a network track', function() {
-    it('has correctly renders the network label', function() {
+  describe('with a network track', function () {
+    it('has correctly renders the network label', function () {
       const { getLocalTrackLabel } = setupWithNetworkProfile();
       expect(getLocalTrackLabel()).toHaveTextContent('Network');
     });
@@ -127,8 +115,8 @@ describe('timeline/LocalTrack', function() {
     });
   });
 
-  describe('with a memory track', function() {
-    it('correctly renders the network label', function() {
+  describe('with a memory track', function () {
+    it('correctly renders the network label', function () {
       const { getLocalTrackLabel } = setupWithMemory();
       expect(getLocalTrackLabel()).toHaveTextContent('Memory');
     });
@@ -139,8 +127,8 @@ describe('timeline/LocalTrack', function() {
     });
   });
 
-  describe('with an IPC track', function() {
-    it('correctly renders the IPC label', function() {
+  describe('with an IPC track', function () {
+    it('correctly renders the IPC label', function () {
       const { getLocalTrackLabel } = setupWithIPC();
       expect(getLocalTrackLabel()).toHaveTextContent('IPC — Empty');
     });
@@ -252,12 +240,8 @@ function setupWithNetworkProfile() {
  * Set up a profile with a memory counter.
  */
 function setupWithMemory() {
-  const {
-    store,
-    trackReference,
-    localTrack,
-    threadIndex,
-  } = getStoreWithMemoryTrack(PID);
+  const { store, trackReference, localTrack, threadIndex } =
+    getStoreWithMemoryTrack(PID);
   return setup(store, trackReference, localTrack, threadIndex);
 }
 

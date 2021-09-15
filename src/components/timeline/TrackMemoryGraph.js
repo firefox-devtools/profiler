@@ -307,11 +307,8 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       // malloc counter. Print an error and bail out early.
       throw new Error('No accumulated sample found for memory counter');
     }
-    const {
-      minCount,
-      countRange,
-      accumulatedCounts,
-    } = this.props.accumulatedSamples[0];
+    const { minCount, countRange, accumulatedCounts } =
+      this.props.accumulatedSamples[0];
     const bytes = accumulatedCounts[counterIndex] - minCount;
     return (
       <div className="timelineTrackMemoryTooltip">

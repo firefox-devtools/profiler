@@ -45,7 +45,7 @@ function getSamplesPixelPosition(
   return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
 }
 
-describe('SampleGraph', function() {
+describe('SampleGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 
@@ -95,7 +95,7 @@ describe('SampleGraph', function() {
     function getCallNodePath() {
       return selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map(funcIndex =>
+        .map((funcIndex) =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
     }
@@ -127,8 +127,8 @@ describe('SampleGraph', function() {
    * The ThreadSampleGraph is not a connected component. It's easiest to test it
    * as once it's connected to the Redux store in the TrackThread.
    */
-  describe('ThreadSampleGraph', function() {
-    it('selects the full call node path when clicked', function() {
+  describe('ThreadSampleGraph', function () {
+    it('selects the full call node path when clicked', function () {
       const { clickSampleGraph, getCallNodePath } = setup();
 
       // The full call node at this sample is:

@@ -52,7 +52,7 @@ class BeforeUnloadManagerImpl extends React.PureComponent<Props> {
 }
 
 export const BeforeUnloadManager = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     isUploading: getUploadPhase(state) === 'uploading',
   }),
   component: BeforeUnloadManagerImpl,

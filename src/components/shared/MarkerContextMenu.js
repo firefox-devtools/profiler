@@ -55,7 +55,7 @@ type StateProps = {|
   +committedRange: StartEndRange,
   +thread: Thread | null,
   +implementationFilter: ImplementationFilter,
-  +getMarkerLabelToCopy: MarkerIndex => string,
+  +getMarkerLabelToCopy: (MarkerIndex) => string,
 |};
 
 type DispatchProps = {|
@@ -67,11 +67,8 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class MarkerContextMenuImpl extends PureComponent<Props> {
   _setStartRange = (selectionStart: number) => {
-    const {
-      updatePreviewSelection,
-      previewSelection,
-      committedRange,
-    } = this.props;
+    const { updatePreviewSelection, previewSelection, committedRange } =
+      this.props;
 
     const selectionEnd = previewSelection.hasSelection
       ? previewSelection.selectionEnd
@@ -86,11 +83,8 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   };
 
   _setEndRange = (selectionEnd: number) => {
-    const {
-      updatePreviewSelection,
-      committedRange,
-      previewSelection,
-    } = this.props;
+    const { updatePreviewSelection, committedRange, previewSelection } =
+      this.props;
 
     const selectionStart = previewSelection.hasSelection
       ? previewSelection.selectionStart
@@ -419,7 +413,7 @@ class MaybeMarkerContextMenuImpl extends PureComponent<MaybeProps> {
 }
 
 export const MaybeMarkerContextMenu = explicitConnect<{||}, MaybeProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     rightClickedMarkerInfo: getRightClickedMarkerInfo(state),
   }),
   component: MaybeMarkerContextMenuImpl,

@@ -62,10 +62,10 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       case 'local':
         break;
       case 'public':
-        retrieveProfileFromStore(hash).catch(e => console.error(e));
+        retrieveProfileFromStore(hash).catch((e) => console.error(e));
         break;
       case 'from-url':
-        retrieveProfileOrZipFromUrl(profileUrl).catch(e => console.error(e));
+        retrieveProfileOrZipFromUrl(profileUrl).catch((e) => console.error(e));
         break;
       case 'compare':
         if (profilesToCompare) {
@@ -100,7 +100,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
 }
 
 export const ProfileLoader = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     dataSource: getDataSource(state),
     hash: getHash(state),
     profileUrl: getProfileUrl(state),

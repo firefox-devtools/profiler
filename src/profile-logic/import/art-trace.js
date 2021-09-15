@@ -385,9 +385,8 @@ function parseRecord(reader, version, recordSize, clock) {
 
 function parseRegularFormat(reader) {
   // *version
-  const { summaryVersion, summaryDetails, lineAfterSummary } = parseSummary(
-    reader
-  );
+  const { summaryVersion, summaryDetails, lineAfterSummary } =
+    parseSummary(reader);
 
   // *threads
   if (lineAfterSummary !== '*threads') {
@@ -697,9 +696,8 @@ export class CategoryInfo {
   constructor(methods: ArtTraceMethod[]) {
     this._specialCategoryInfo = getSpecialCategory(methods);
     if (this._specialCategoryInfo) {
-      this.categories[
-        this.specialCategory
-      ].name = this._specialCategoryInfo.name;
+      this.categories[this.specialCategory].name =
+        this._specialCategoryInfo.name;
     }
   }
 
@@ -728,7 +726,9 @@ export class CategoryInfo {
     }
     if (
       this._specialCategoryInfo &&
-      this._specialCategoryInfo.prefixes.some(prefix => name.startsWith(prefix))
+      this._specialCategoryInfo.prefixes.some((prefix) =>
+        name.startsWith(prefix)
+      )
     ) {
       return this.specialCategory;
     }
@@ -927,7 +927,7 @@ export function convertArtTraceProfile(
 
   const { summaryDetails, threads, methods, methodActions } = trace;
   const categoryInfo = new CategoryInfo(methods);
-  const methodMap = new Map(methods.map(m => [m.methodId, m]));
+  const methodMap = new Map(methods.map((m) => [m.methodId, m]));
   const threadBuilderMap = new Map();
 
   if (methodActions.length > 0) {
@@ -935,7 +935,7 @@ export function convertArtTraceProfile(
       const { tid, methodId, globalTime, action } = methodActions[i];
       let threadBuilder = threadBuilderMap.get(tid);
       if (threadBuilder === undefined) {
-        const traceThread = threads.find(t => t.tid === tid);
+        const traceThread = threads.find((t) => t.tid === tid);
         if (!traceThread) {
           throw new Error(
             `Encountered method action for unknown thread ${tid}`
@@ -967,8 +967,8 @@ export function convertArtTraceProfile(
     }
   }
 
-  const threadArray = Array.from(threadBuilderMap.values()).map(threadBuilder =>
-    threadBuilder.finish()
+  const threadArray = Array.from(threadBuilderMap.values()).map(
+    (threadBuilder) => threadBuilder.finish()
   );
 
   return {

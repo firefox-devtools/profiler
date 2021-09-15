@@ -20,7 +20,7 @@ import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
  * it would be easy for them to have errors. These tests cover a variety of different
  * code branches, especially parse errors.
  */
-describe('marker schema labels', function() {
+describe('marker schema labels', function () {
   type LabelOptions = {|
     schemaData: $PropertyType<MarkerSchema, 'data'>,
     label: string,
@@ -54,7 +54,7 @@ describe('marker schema labels', function() {
     return getter(marker);
   }
 
-  it('can parse very simple labels', function() {
+  it('can parse very simple labels', function () {
     expect(
       applyLabel({
         label: 'Just text',
@@ -65,7 +65,7 @@ describe('marker schema labels', function() {
     expect(console.error).toBeCalledTimes(0);
   });
 
-  it('can parse a label with just a lookup value', function() {
+  it('can parse a label with just a lookup value', function () {
     expect(
       applyLabel({
         label: '{marker.data.duration}',
@@ -76,7 +76,7 @@ describe('marker schema labels', function() {
     expect(console.error).toBeCalledTimes(0);
   });
 
-  it('can parse a label with surrounding text', function() {
+  it('can parse a label with surrounding text', function () {
     expect(
       applyLabel({
         label: 'It took {marker.data.duration} for this test.',
@@ -87,7 +87,7 @@ describe('marker schema labels', function() {
     expect(console.error).toBeCalledTimes(0);
   });
 
-  it('can mix and match lookups', function() {
+  it('can mix and match lookups', function () {
     expect(
       applyLabel({
         label: 'It took {marker.data.duration}, which is {marker.data.ratio}',
@@ -104,7 +104,7 @@ describe('marker schema labels', function() {
     expect(console.error).toBeCalledTimes(0);
   });
 
-  it('is empty if there is no information in a payload', function() {
+  it('is empty if there is no information in a payload', function () {
     expect(
       applyLabel({
         label: 'This will be nothing: "{marker.data.nokey}"',
@@ -115,7 +115,7 @@ describe('marker schema labels', function() {
     expect(console.error).toBeCalledTimes(0);
   });
 
-  it('can look up various parts of the marker', function() {
+  it('can look up various parts of the marker', function () {
     const text = applyLabel({
       label: [
         'Start: {marker.start}',
@@ -138,7 +138,7 @@ describe('marker schema labels', function() {
     expect(console.error).toBeCalledTimes(0);
   });
 
-  describe('parseErrors', function() {
+  describe('parseErrors', function () {
     function testParseError(label: string) {
       expect(
         applyLabel({
@@ -154,29 +154,29 @@ describe('marker schema labels', function() {
     }
 
     // eslint-disable-next-line jest/expect-expect
-    it('errors if not looking up into a marker', function() {
+    it('errors if not looking up into a marker', function () {
       testParseError('Parse error: "{duration}"');
     });
 
     // eslint-disable-next-line jest/expect-expect
-    it('errors if looking up into a part of the marker that does not exist', function() {
+    it('errors if looking up into a part of the marker that does not exist', function () {
       testParseError('Parse error: "{marker.nothing}"');
     });
 
     // eslint-disable-next-line jest/expect-expect
-    it('errors when accessing random properties', function() {
+    it('errors when accessing random properties', function () {
       testParseError('Parse error: "{property.value}"');
     });
 
     // eslint-disable-next-line jest/expect-expect
-    it('errors when accessing twice into a payload', function() {
+    it('errors when accessing twice into a payload', function () {
       testParseError('Parse error: "{marker.data.duration.extra}"');
     });
   });
 });
 
-describe('marker schema formatting', function() {
-  it('can apply a variety of formats', function() {
+describe('marker schema formatting', function () {
+  it('can apply a variety of formats', function () {
     const entries = [
       ['url', 'http://example.com'],
       ['file-path', '/Users/me/gecko'],
@@ -292,8 +292,8 @@ describe('marker schema formatting', function() {
   });
 });
 
-describe('getMarkerSchema', function() {
-  it('combines front-end and Gecko marker schema', function() {
+describe('getMarkerSchema', function () {
+  it('combines front-end and Gecko marker schema', function () {
     const { profile } = getProfileFromTextSamples('A');
     profile.meta.markerSchema = markerSchemaForTests;
     const { getState } = storeWithProfile(profile);
@@ -301,22 +301,24 @@ describe('getMarkerSchema', function() {
 
     // Find front-end only marker schema.
     expect(
-      profile.meta.markerSchema.find(schema => schema.name === 'Jank')
+      profile.meta.markerSchema.find((schema) => schema.name === 'Jank')
     ).toBeUndefined();
     expect(
-      markerSchemaFrontEndOnly.find(schema => schema.name === 'Jank')
+      markerSchemaFrontEndOnly.find((schema) => schema.name === 'Jank')
     ).toBeTruthy();
-    expect(combinedSchema.find(schema => schema.name === 'Jank')).toBeTruthy();
+    expect(
+      combinedSchema.find((schema) => schema.name === 'Jank')
+    ).toBeTruthy();
 
     // Find the Gecko only marker schema.
     expect(
-      profile.meta.markerSchema.find(schema => schema.name === 'GCMajor')
+      profile.meta.markerSchema.find((schema) => schema.name === 'GCMajor')
     ).toBeTruthy();
     expect(
-      markerSchemaFrontEndOnly.find(schema => schema.name === 'GCMajor')
+      markerSchemaFrontEndOnly.find((schema) => schema.name === 'GCMajor')
     ).toBeUndefined();
     expect(
-      combinedSchema.find(schema => schema.name === 'GCMajor')
+      combinedSchema.find((schema) => schema.name === 'GCMajor')
     ).toBeTruthy();
   });
 });

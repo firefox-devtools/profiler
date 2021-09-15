@@ -10,10 +10,10 @@ import { mockDate, restoreDate } from './date';
 // tests always green.
 //
 function wait() {
-  return new Promise(resolve => setTimeout(resolve, 50));
+  return new Promise((resolve) => setTimeout(resolve, 50));
 }
 
-describe('Date mock', function() {
+describe('Date mock', function () {
   it('can mock a date with a string', async () => {
     const earlierNow = new Date();
     const someDateString = '2019-07-04';

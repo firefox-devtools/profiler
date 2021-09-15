@@ -15,7 +15,7 @@ type Props = {|
   +label: string,
   +title: string,
   +currentSearchString: string,
-  +onSearch: string => void,
+  +onSearch: (string) => void,
 |};
 
 type State = {| searchFieldFocused: boolean |};

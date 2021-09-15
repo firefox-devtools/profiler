@@ -133,9 +133,8 @@ export class CallTree {
         childCallNodeIndex++
       ) {
         const childPrefixIndex = this._callNodeTable.prefix[childCallNodeIndex];
-        const childTotalSummary = this._callNodeSummary.total[
-          childCallNodeIndex
-        ];
+        const childTotalSummary =
+          this._callNodeSummary.total[childCallNodeIndex];
         const childChildCount = this._callNodeChildCount[childCallNodeIndex];
 
         if (
@@ -211,13 +210,11 @@ export class CallTree {
   }
 
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
-    let displayData: CallNodeDisplayData | void = this._displayDataByIndex.get(
-      callNodeIndex
-    );
+    let displayData: CallNodeDisplayData | void =
+      this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, total, totalRelative, self } = this.getNodeData(
-        callNodeIndex
-      );
+      const { funcName, total, totalRelative, self } =
+        this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const categoryIndex = this._callNodeTable.category[callNodeIndex];
       const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
@@ -499,12 +496,8 @@ export function getCallTree(
   weightType: WeightType
 ): CallTree {
   return timeCode('getCallTree', () => {
-    const {
-      callNodeSummary,
-      callNodeChildCount,
-      rootTotalSummary,
-      rootCount,
-    } = callTreeCountsAndSummary;
+    const { callNodeSummary, callNodeChildCount, rootTotalSummary, rootCount } =
+      callTreeCountsAndSummary;
 
     const jsOnly = implementationFilter === 'js';
     // By default add a single decimal value, e.g 13.1, 0.3, 5234.4

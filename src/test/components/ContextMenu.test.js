@@ -8,7 +8,7 @@ import * as React from 'react';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ContextMenu } from '../../components/shared/ContextMenu';
 
-describe('ContextMenu', function() {
+describe('ContextMenu', function () {
   it('correctly renders the context-menu with the props that were passed through', () => {
     const { container } = render(
       <ContextMenu

@@ -15,7 +15,7 @@ import {
 } from '../../selectors/url-state';
 import { fireFullClick } from '../fixtures/utils';
 
-describe('StackSettings', function() {
+describe('StackSettings', function () {
   function setup() {
     jest.useFakeTimers();
     const store = storeWithProfile();
@@ -44,7 +44,7 @@ describe('StackSettings', function() {
     return (element: any).checked;
   }
 
-  it('can change the implementation filter to JavaScript', async function() {
+  it('can change the implementation filter to JavaScript', async function () {
     const { getByLabelText, getState } = setup();
     expect(getImplementationFilter(getState())).toEqual('combined');
     const radioButton = getByLabelText(/JavaScript/);
@@ -55,7 +55,7 @@ describe('StackSettings', function() {
     expect(getImplementationFilter(getState())).toEqual('js');
   });
 
-  it('can change the implementation filter to Native', function() {
+  it('can change the implementation filter to Native', function () {
     const { getByLabelText, getState } = setup();
     expect(getImplementationFilter(getState())).toEqual('combined');
     const radioButton = getByLabelText(/Native/);
@@ -66,7 +66,7 @@ describe('StackSettings', function() {
     expect(getImplementationFilter(getState())).toEqual('cpp');
   });
 
-  it('can change the implementation filter to All stacks', function() {
+  it('can change the implementation filter to All stacks', function () {
     const { getByLabelText, getState } = setup();
     fireFullClick(getByLabelText(/Native/));
     expect(getImplementationFilter(getState())).toEqual('cpp');
@@ -78,7 +78,7 @@ describe('StackSettings', function() {
     expect(getImplementationFilter(getState())).toEqual('combined');
   });
 
-  it('can change the search', function() {
+  it('can change the search', function () {
     const { getByLabelText, getState } = setup();
     expect(getCurrentSearchString(getState())).toEqual('');
     const searchText = 'some search';

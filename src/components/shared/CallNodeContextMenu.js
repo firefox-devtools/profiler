@@ -314,11 +314,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const {
-      threadsKey,
-      callNodeIndex,
-      callNodeInfo,
-    } = rightClickedCallNodeInfo;
+    const { threadsKey, callNodeIndex, callNodeInfo } =
+      rightClickedCallNodeInfo;
 
     expandAllCallNodeDescendants(threadsKey, callNodeIndex, callNodeInfo);
   }
@@ -651,7 +648,7 @@ export const CallNodeContextMenu = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
 
     let thread = null;

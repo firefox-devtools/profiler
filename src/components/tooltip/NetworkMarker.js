@@ -263,7 +263,7 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
     }
 
     const availableProperties = PRECONNECT_PROPERTIES_IN_ORDER.filter(
-      property => typeof payload[property] === 'number'
+      (property) => typeof payload[property] === 'number'
     );
     const dur = preconnectEnd - preconnectStart;
 
@@ -300,7 +300,7 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
       : ALL_NETWORK_PROPERTIES_IN_ORDER;
 
     const availableProperties = networkProperties.filter(
-      property => typeof payload[property] === 'number'
+      (property) => typeof payload[property] === 'number'
     );
 
     if (availableProperties.length === 0 || availableProperties.length === 1) {

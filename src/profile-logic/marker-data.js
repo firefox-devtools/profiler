@@ -110,7 +110,7 @@ export function deriveJankMarkers(
 }
 
 export function getSearchFilteredMarkerIndexes(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   searchRegExp: RegExp | null,
   categoryList: CategoryList
@@ -206,7 +206,7 @@ export function getSearchFilteredMarkerIndexes(
  * If we don't have any item in relevantPages, return the whole marker list.
  */
 export function getTabFilteredMarkerIndexes(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   relevantPages: Set<InnerWindowID>,
   includeGlobalMarkers: boolean = true
@@ -431,10 +431,8 @@ export function deriveMarkersFromRawMarkerTable(
   // table.
   // The first map contains the start markers for tracing markers. They can be
   // nested and that's why we use an array structure as value.
-  const openIntervalMarkers: Map<
-    IndexIntoStringTable,
-    MarkerIndex[]
-  > = new Map();
+  const openIntervalMarkers: Map<IndexIntoStringTable, MarkerIndex[]> =
+    new Map();
 
   // The second map contains the start markers for network markers.
   // Note that we don't have more than 2 network markers with the same name as
@@ -562,9 +560,8 @@ export function deriveMarkersFromRawMarkerTable(
           // Interval markers with a a start and end time.
 
           const { windowID } = data;
-          const previousScreenshotMarker = previousScreenshotMarkers.get(
-            windowID
-          );
+          const previousScreenshotMarker =
+            previousScreenshotMarkers.get(windowID);
           if (previousScreenshotMarker !== undefined) {
             previousScreenshotMarkers.delete(windowID);
             const previousStartTime = ensureExists(
@@ -953,17 +950,17 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
  * markers, with marker indexes both as input and output.
  */
 export function filterMarkerIndexes(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
-  filterFunc: Marker => boolean
+  filterFunc: (Marker) => boolean
 ): MarkerIndex[] {
-  return markerIndexes.filter(markerIndex => {
+  return markerIndexes.filter((markerIndex) => {
     return filterFunc(getMarker(markerIndex));
   });
 }
 
 export function filterMarkerIndexesToRange(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   rangeStart: number,
   rangeEnd: number
@@ -971,7 +968,7 @@ export function filterMarkerIndexesToRange(
   return filterMarkerIndexes(
     getMarker,
     markerIndexes,
-    marker =>
+    (marker) =>
       marker.start <= rangeEnd && (marker.end || marker.start) >= rangeStart
   );
 }
@@ -1039,8 +1036,8 @@ export function isOnThreadFileIoMarker(marker: Marker): boolean | void {
  */
 export function getAllowMarkersWithNoSchema(
   markerSchemaByName: MarkerSchemaByName
-): Marker => boolean | void {
-  return marker => {
+): (Marker) => boolean | void {
+  return (marker) => {
     const { data } = marker;
 
     if (!data) {
@@ -1130,7 +1127,7 @@ export function getColorClassNameForMimeType(
 }
 
 export function groupScreenshotsById(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[]
 ): Map<string, Marker[]> {
   const idToScreenshotMarkers = new Map();
@@ -1240,7 +1237,7 @@ function _doNotAutomaticallyAdd(_data: Marker) {
  * Filter markers to a smaller set based on the location.
  */
 export function filterMarkerByDisplayLocation(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchema: MarkerSchema[],
   markerSchemaByName: MarkerSchemaByName,
@@ -1253,7 +1250,7 @@ export function filterMarkerByDisplayLocation(
   ) => boolean | void = _doNotAutomaticallyAdd
 ): MarkerIndex[] {
   const markerTypes = getMarkerTypesForDisplay(markerSchema, displayLocation);
-  return filterMarkerIndexes(getMarker, markerIndexes, marker => {
+  return filterMarkerIndexes(getMarker, markerIndexes, (marker) => {
     const additionalResult = preemptiveFilterFunc(marker);
 
     if (additionalResult !== undefined) {

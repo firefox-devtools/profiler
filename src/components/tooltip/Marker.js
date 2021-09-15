@@ -86,7 +86,7 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +threadIdToNameMap: Map<number, string>,
   +markerSchemaByName: MarkerSchemaByName,
-  +getMarkerLabel: MarkerIndex => string,
+  +getMarkerLabel: (MarkerIndex) => string,
   +categories: CategoryList,
 |};
 
@@ -105,12 +105,12 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     }
 
     const innerWindowID = marker.data.innerWindowID;
-    const page = pages.find(page => page.innerWindowID === innerWindowID);
+    const page = pages.find((page) => page.innerWindowID === innerWindowID);
 
     if (page) {
       // If multiple pages have the same url, show the innerWindowID to disambiguate.
       let innerWindowIDSuffix = null;
-      if (pages.filter(p => p.url === page.url).length > 1) {
+      if (pages.filter((p) => p.url === page.url).length > 1) {
         innerWindowIDSuffix = ' (id: ' + innerWindowID + ')';
       }
       try {
@@ -325,19 +325,21 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         <TooltipDetailSeparator key="backtrace-separator" />,
         <TooltipDetail label="Stack" key="backtrace">
           <div className="tooltipDetailsBackTrace">
-            {/* The cause's time might be later than the marker's start. For
+            {
+              /* The cause's time might be later than the marker's start. For
                 example this happens in some usual cases when the cause is
                 captured right when setting the end marker for tracing pairs of
                 markers. */
-            causeAge > 0 ? (
-              <h2 className="tooltipBackTraceTitle">
-                {data.type === 'Styles' || marker.name === 'Reflow'
-                  ? `First invalidated ${formatTimestamp(
-                      causeAge
-                    )} before the flush, at:`
-                  : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
-              </h2>
-            ) : null}
+              causeAge > 0 ? (
+                <h2 className="tooltipBackTraceTitle">
+                  {data.type === 'Styles' || marker.name === 'Reflow'
+                    ? `First invalidated ${formatTimestamp(
+                        causeAge
+                      )} before the flush, at:`
+                    : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
+                </h2>
+              ) : null
+            }
             <Backtrace
               maxStacks={restrictHeightWidth ? 20 : Infinity}
               stackIndex={cause.stack}

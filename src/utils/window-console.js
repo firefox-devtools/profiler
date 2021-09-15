@@ -49,12 +49,12 @@ export function addDataToWindowObject(
     enumerable: true,
     get() {
       const state = getState();
-      const getMarker = selectorsForConsole.selectedThread.getMarkerGetter(
-        state
-      );
-      const markerIndexes = selectorsForConsole.selectedThread.getPreviewFilteredMarkerIndexes(
-        state
-      );
+      const getMarker =
+        selectorsForConsole.selectedThread.getMarkerGetter(state);
+      const markerIndexes =
+        selectorsForConsole.selectedThread.getPreviewFilteredMarkerIndexes(
+          state
+        );
       return markerIndexes.map(getMarker);
     },
   });
@@ -87,7 +87,7 @@ export function addDataToWindowObject(
     },
   };
 
-  target.togglePseudoLocalization = function(pseudoStrategy?: string) {
+  target.togglePseudoLocalization = function (pseudoStrategy?: string) {
     if (
       pseudoStrategy !== undefined &&
       pseudoStrategy !== 'accented' &&

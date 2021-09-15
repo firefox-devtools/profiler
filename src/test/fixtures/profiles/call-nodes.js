@@ -42,19 +42,14 @@ import {
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
   let thread = getEmptyThread();
-  const funcNames = [
-    'funcA',
-    'funcB',
-    'funcC',
-    'funcD',
-    'funcE',
-    'funcF',
-  ].map(name => thread.stringTable.indexForString(name));
+  const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
+    (name) => thread.stringTable.indexForString(name)
+  );
 
   const categoryOther = ensureExists(
     profile.meta.categories,
     'Expected to find categories'
-  ).findIndex(c => c.name === 'Other');
+  ).findIndex((c) => c.name === 'Other');
 
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {
@@ -76,7 +71,7 @@ export default function getProfile(): Profile {
     'funcD', // 4 duplicate
     'funcE', // 5
     'funcF', // 6
-  ].map(name => thread.stringTable.indexForString(name));
+  ].map((name) => thread.stringTable.indexForString(name));
   // Name the indices
   const [
     funcAFrame,
@@ -89,7 +84,7 @@ export default function getProfile(): Profile {
   ] = frameFuncs.map((_, i) => i);
 
   const frameTable: FrameTable = {
-    func: frameFuncs.map(stringIndex => funcTable.name.indexOf(stringIndex)),
+    func: frameFuncs.map((stringIndex) => funcTable.name.indexOf(stringIndex)),
     address: Array(frameFuncs.length).fill(-1),
     nativeSymbol: Array(frameFuncs.length).fill(null),
     category: Array(frameFuncs.length).fill(null),

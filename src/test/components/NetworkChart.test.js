@@ -42,7 +42,7 @@ import {
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
-const NETWORK_MARKERS = (function() {
+const NETWORK_MARKERS = (function () {
   const arrayOfNetworkMarkers = Array(10)
     .fill()
     .map((_, i) =>
@@ -77,20 +77,20 @@ function setupWithProfile(profile) {
   function getUrlShorteningParts(): Array<[string, string]> {
     return Array.from(
       container.querySelectorAll('.networkChartRowItemLabel span')
-    ).map(node => [node.className, node.textContent]);
+    ).map((node) => [node.className, node.textContent]);
   }
 
   const getBarElements = () =>
     Array.from(container.querySelectorAll('.networkChartRowItemBar'));
 
   const getBarElementStyles = () =>
-    getBarElements().map(element => element.getAttribute('style'));
+    getBarElements().map((element) => element.getAttribute('style'));
 
   const getPhaseElements = () =>
     Array.from(container.querySelectorAll('.networkChartRowItemBarPhase'));
 
   const getPhaseElementStyles = () =>
-    getPhaseElements().map(element => element.getAttribute('style'));
+    getPhaseElements().map((element) => element.getAttribute('style'));
 
   function rowItem() {
     return ensureExists(
@@ -129,7 +129,7 @@ autoMockElementSize({
   height: 300,
 });
 
-describe('NetworkChart', function() {
+describe('NetworkChart', function () {
   it('renders NetworkChart correctly', () => {
     const { container } = setupWithPayload([...NETWORK_MARKERS]);
     expect(container.firstChild).toMatchSnapshot();
@@ -168,7 +168,7 @@ describe('NetworkChart', function() {
   });
 });
 
-describe('NetworkChartRowBar phase calculations', function() {
+describe('NetworkChartRowBar phase calculations', function () {
   it('divides up the different phases of the request with full set of required information', () => {
     const { getPhaseElementStyles, getBarElementStyles } = setupWithPayload(
       getNetworkMarkers({
@@ -210,33 +210,30 @@ describe('NetworkChartRowBar phase calculations', function() {
   });
 
   it('displays properly a network marker even when it crosses the boundary', () => {
-    const {
-      dispatch,
-      getPhaseElementStyles,
-      getBarElementStyles,
-    } = setupWithPayload(
-      getNetworkMarkers({
-        uri: 'https://mozilla.org/img/',
-        id: 100,
-        startTime: 10,
-        // With an endTime at 109, the profile's end time is 110, and so the
-        // profile's length is 100, which gives integer values for test results.
-        endTime: 109,
-        payload: {
-          pri: 20,
-          count: 10,
-          domainLookupStart: 20,
-          domainLookupEnd: 24,
-          connectStart: 25,
-          tcpConnectEnd: 26,
-          secureConnectionStart: 26,
-          connectEnd: 28,
-          requestStart: 30,
-          responseStart: 60,
-          responseEnd: 80,
-        },
-      })
-    );
+    const { dispatch, getPhaseElementStyles, getBarElementStyles } =
+      setupWithPayload(
+        getNetworkMarkers({
+          uri: 'https://mozilla.org/img/',
+          id: 100,
+          startTime: 10,
+          // With an endTime at 109, the profile's end time is 110, and so the
+          // profile's length is 100, which gives integer values for test results.
+          endTime: 109,
+          payload: {
+            pri: 20,
+            count: 10,
+            domainLookupStart: 20,
+            domainLookupEnd: 24,
+            connectStart: 25,
+            tcpConnectEnd: 26,
+            secureConnectionStart: 26,
+            connectEnd: 28,
+            requestStart: 30,
+            responseStart: 60,
+            responseEnd: 80,
+          },
+        })
+      );
 
     // Note: "10" here means "20" in the profile, because this is the delta
     // since the start of the profile (aka zeroAt), and not an absolute value.
@@ -431,8 +428,7 @@ describe('NetworkChartRowBar phase calculations', function() {
         // as a result.
         endTime: 10109,
         id: 1235,
-        uri:
-          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        uri: 'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         payload: {
           count: 47027,
           domainLookupStart: 500,
@@ -466,8 +462,7 @@ describe('NetworkChartRowBar phase calculations', function() {
         // as a result.
         endTime: 10109,
         id: 1235,
-        uri:
-          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        uri: 'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         payload: {
           count: 47027,
           domainLookupStart: 500,
@@ -488,12 +483,12 @@ describe('NetworkChartRowBar phase calculations', function() {
   });
 });
 
-describe('NetworkChartRowBar URL split', function() {
+describe('NetworkChartRowBar URL split', function () {
   function setupForUrl(uri: string) {
     return setupWithPayload(getNetworkMarkers({ uri }));
   }
 
-  it('splits up the url by protocol / domain / path / filename / params / hash', function() {
+  it('splits up the url by protocol / domain / path / filename / params / hash', function () {
     const { getUrlShorteningParts } = setupForUrl(
       'https://test.mozilla.org/img/optimized/test.gif?param1=123&param2=321#hashNode2'
     );
@@ -508,7 +503,7 @@ describe('NetworkChartRowBar URL split', function() {
     ]);
   });
 
-  it('splits properly a url without a path', function() {
+  it('splits properly a url without a path', function () {
     const testUrl = 'https://mozilla.org/';
     const { getUrlShorteningParts } = setupForUrl(testUrl);
     expect(getUrlShorteningParts()).toEqual([
@@ -518,7 +513,7 @@ describe('NetworkChartRowBar URL split', function() {
     ]);
   });
 
-  it('splits properly a url without a directory', function() {
+  it('splits properly a url without a directory', function () {
     const testUrl = 'https://mozilla.org/index.html';
     const { getUrlShorteningParts } = setupForUrl(testUrl);
     expect(getUrlShorteningParts()).toEqual([
@@ -528,7 +523,7 @@ describe('NetworkChartRowBar URL split', function() {
     ]);
   });
 
-  it('splits properly a url without a filename', function() {
+  it('splits properly a url without a filename', function () {
     const testUrl = 'https://mozilla.org/analytics/';
     const { getUrlShorteningParts } = setupForUrl(testUrl);
     expect(getUrlShorteningParts()).toEqual([
@@ -538,7 +533,7 @@ describe('NetworkChartRowBar URL split', function() {
     ]);
   });
 
-  it('splits properly a url without a filename and a long directory', function() {
+  it('splits properly a url without a filename and a long directory', function () {
     const testUrl = 'https://mozilla.org/assets/analytics/';
     const { getUrlShorteningParts } = setupForUrl(testUrl);
     expect(getUrlShorteningParts()).toEqual([
@@ -549,7 +544,7 @@ describe('NetworkChartRowBar URL split', function() {
     ]);
   });
 
-  it('splits properly a url with a short directory path', function() {
+  it('splits properly a url with a short directory path', function () {
     const testUrl = 'https://mozilla.org/img/image.jpg';
     const { getUrlShorteningParts } = setupForUrl(testUrl);
     expect(getUrlShorteningParts()).toEqual([
@@ -560,7 +555,7 @@ describe('NetworkChartRowBar URL split', function() {
     ]);
   });
 
-  it('splits properly a url with a long directory path', function() {
+  it('splits properly a url with a long directory path', function () {
     const testUrl = 'https://mozilla.org/assets/img/image.jpg';
     const { getUrlShorteningParts } = setupForUrl(testUrl);
     expect(getUrlShorteningParts()).toEqual([
@@ -571,7 +566,7 @@ describe('NetworkChartRowBar URL split', function() {
     ]);
   });
 
-  it('returns null with an invalid url', function() {
+  it('returns null with an invalid url', function () {
     const { getUrlShorteningParts } = setupForUrl(
       'test.mozilla.org/img/optimized/'
     );
@@ -579,7 +574,7 @@ describe('NetworkChartRowBar URL split', function() {
   });
 });
 
-describe('NetworkChartRowBar MIME-type filter', function() {
+describe('NetworkChartRowBar MIME-type filter', function () {
   /**
    * Setup network markers payload for URL, with content type removed.
    */
@@ -589,31 +584,31 @@ describe('NetworkChartRowBar MIME-type filter', function() {
     );
   }
 
-  it('searches for img MIME-Type', function() {
+  it('searches for img MIME-Type', function () {
     const { rowItem } = setupForUrl(
       'https://test.mozilla.org/img/optimized/test.png'
     );
     expect(rowItem()).toHaveClass('network-color-img');
   });
 
-  it('searches for html MIME-Type', function() {
+  it('searches for html MIME-Type', function () {
     const { rowItem } = setupForUrl(
       'https://test.mozilla.org/img/optimized/test.html'
     );
     expect(rowItem()).toHaveClass('network-color-html');
   });
 
-  it('searches for js MIME-Type', function() {
+  it('searches for js MIME-Type', function () {
     const { rowItem } = setupForUrl('https://test.mozilla.org/scripts/test.js');
     expect(rowItem()).toHaveClass('network-color-js');
   });
 
-  it('searches for css MIME-Type', function() {
+  it('searches for css MIME-Type', function () {
     const { rowItem } = setupForUrl('https://test.mozilla.org/styles/test.css');
     expect(rowItem()).toHaveClass('network-color-css');
   });
 
-  it('uses default when no filter applies', function() {
+  it('uses default when no filter applies', function () {
     const { rowItem } = setupForUrl('https://test.mozilla.org/file.xuul');
     expect(rowItem()).toHaveClass('network-color-other');
   });
@@ -665,12 +660,8 @@ describe('Network Chart/tooltip behavior', () => {
     // use fake timers to avoid bad interactions between tests.
     jest.useFakeTimers();
 
-    const {
-      rowItem,
-      queryByTestId,
-      getByText,
-      getContextMenu,
-    } = setupWithPayload(getNetworkMarkers());
+    const { rowItem, queryByTestId, getByText, getContextMenu } =
+      setupWithPayload(getNetworkMarkers());
 
     fireFullContextMenu(getByText('mozilla.org'));
 
@@ -728,7 +719,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     // <length - i> times, which means it will have a self time of <length - i>
     // ms. This is a good way to control the order we'll get in the call tree
     // view: function "name1" will be first, etc.
-    const markers = (function() {
+    const markers = (function () {
       const arrayOfNetworkMarkers = Array(48)
         .fill()
         .map((_, i) =>

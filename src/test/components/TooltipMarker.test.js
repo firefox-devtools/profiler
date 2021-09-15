@@ -21,7 +21,7 @@ import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import type { NetworkPayload } from 'firefox-profiler/types';
 
-describe('TooltipMarker', function() {
+describe('TooltipMarker', function () {
   it('renders tooltips for various markers', () => {
     // First, create a profile with one stack, so that the stack table contains
     // something that we can refer to from the CauseBacktrace of a marker.
@@ -302,8 +302,7 @@ describe('TooltipMarker', function() {
         null,
         {
           type: 'Text',
-          name:
-            'NonObjectInput at JumpTarget on line 27 of https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:27',
+          name: 'NonObjectInput at JumpTarget on line 27 of https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:27',
         },
       ],
       // This is a Invalidate text marker, as of Gecko profile version 20-21
@@ -313,8 +312,7 @@ describe('TooltipMarker', function() {
         null,
         {
           type: 'Text',
-          name:
-            'https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:198:23518',
+          name: 'https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:198:23518',
         },
       ],
       [
@@ -488,11 +486,10 @@ describe('TooltipMarker', function() {
     const state = store.getState();
     const threadIndex = getFirstSelectedThreadIndex(state);
     const getMarker = selectedThreadSelectors.getMarkerGetter(state);
-    const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
-      state
-    );
+    const markerIndexes =
+      selectedThreadSelectors.getFullMarkerListIndexes(state);
 
-    markerIndexes.forEach(markerIndex => {
+    markerIndexes.forEach((markerIndex) => {
       const marker = getMarker(markerIndex);
       const { container } = render(
         <Provider store={store}>
@@ -526,9 +523,8 @@ describe('TooltipMarker', function() {
     const state = store.getState();
 
     const getMarker = selectedThreadSelectors.getMarkerGetter(state);
-    const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
-      state
-    );
+    const markerIndexes =
+      selectedThreadSelectors.getFullMarkerListIndexes(state);
 
     // We render the first marker.
     const marker = getMarker(markerIndexes[0]);
@@ -575,7 +571,7 @@ describe('TooltipMarker', function() {
       expect(container.firstChild).toMatchSnapshot();
     });
 
-    ['Permanent', 'Internal', 'Temporary'].forEach(redirectType => {
+    ['Permanent', 'Internal', 'Temporary'].forEach((redirectType) => {
       it(`for a ${redirectType} redirection`, () => {
         const { container } = setupWithPayload(
           getNetworkMarkers(
@@ -608,8 +604,7 @@ describe('TooltipMarker', function() {
         startTime: 19000,
         fetchStart: 19200.2,
         endTime: 20433.8,
-        uri:
-          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        uri: 'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         payload: {
           cache: 'Hit',
           pri: 8,
@@ -638,8 +633,7 @@ describe('TooltipMarker', function() {
         fetchStart: 19201,
         endTime: 20433,
         id: 1235,
-        uri:
-          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        uri: 'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         payload: {
           cache: 'Hit',
           pri: 8,
@@ -671,8 +665,7 @@ describe('TooltipMarker', function() {
         fetchStart: 19201,
         endTime: 20433,
         id: 1235,
-        uri:
-          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        uri: 'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         payload: {
           cache: 'Hit',
           pri: 8,
@@ -700,8 +693,7 @@ describe('TooltipMarker', function() {
         fetchStart: 19201,
         endTime: 20433,
         id: 1235,
-        uri:
-          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        uri: 'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         payload: {
           cache: 'Hit',
           pri: 8,
@@ -726,8 +718,7 @@ describe('TooltipMarker', function() {
         fetchStart: 19201,
         endTime: 20433,
         id: 1235,
-        uri:
-          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        uri: 'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         payload: {
           cache: 'Hit',
           pri: 8,
@@ -752,8 +743,7 @@ describe('TooltipMarker', function() {
         fetchStart: 19201,
         endTime: 20433,
         id: 1235,
-        uri:
-          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        uri: 'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         payload: {
           contentType: null,
           cache: 'Unresolved',
@@ -807,9 +797,8 @@ describe('TooltipMarker', function() {
     const state = store.getState();
     const threadIndex = getFirstSelectedThreadIndex(state);
     const getMarker = selectedThreadSelectors.getMarkerGetter(state);
-    const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
-      state
-    );
+    const markerIndexes =
+      selectedThreadSelectors.getFullMarkerListIndexes(state);
 
     // Render the first marker
     const marker = getMarker(markerIndexes[0]);
@@ -828,17 +817,11 @@ describe('TooltipMarker', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('shows a tooltip for Jank markers', function() {
+  it('shows a tooltip for Jank markers', function () {
     const eventDelay = [
-      0,
-      20,
-      40,
-      60,
-      70,
+      0, 20, 40, 60, 70,
       // break point
-      0,
-      20,
-      40,
+      0, 20, 40,
     ];
 
     const profile = getProfileWithEventDelays(eventDelay);

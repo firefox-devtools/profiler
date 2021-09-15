@@ -16,7 +16,7 @@ type ZeeWorkerData = {
 };
 
 function workerOnMessage(zeeWorker: Worker) {
-  zeeWorker.onmessage = function(msg: MessageEvent) {
+  zeeWorker.onmessage = function (msg: MessageEvent) {
     const data = ((msg.data: any): ZeeWorkerData);
     const callbacks = zeeCallbacks[data.callbackID];
     if (callbacks) {
@@ -36,7 +36,7 @@ export function compress(
 
   const arrayData =
     typeof data === 'string' ? new TextEncoder().encode(data) : data;
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     zeeWorker.postMessage(
       {
         request: 'compress',
@@ -55,7 +55,7 @@ export function compress(
 
 // Neuters data's buffer, if data is a typed array.
 export function decompress(data: Uint8Array): Promise<Uint8Array> {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const zeeWorker = new WebWorker('zee-worker');
     workerOnMessage(zeeWorker);
     zeeWorker.postMessage(

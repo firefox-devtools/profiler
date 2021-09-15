@@ -45,7 +45,7 @@ function getSamplesPixelPosition(
   return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
 }
 
-describe('ThreadActivityGraph', function() {
+describe('ThreadActivityGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 
@@ -104,7 +104,7 @@ describe('ThreadActivityGraph', function() {
     function getCallNodePath() {
       return selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map(funcIndex =>
+        .map((funcIndex) =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
     }
@@ -237,7 +237,7 @@ describe('ThreadActivityGraph', function() {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 
-  it('selects the full call node path when clicked', function() {
+  it('selects the full call node path when clicked', function () {
     const { clickActivityGraph, getCallNodePath } = setup();
 
     // The full call node at this sample is:
@@ -251,7 +251,7 @@ describe('ThreadActivityGraph', function() {
     expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
   });
 
-  it('will redraw even when there are no samples in range', function() {
+  it('will redraw even when there are no samples in range', function () {
     const { dispatch } = setup();
     flushDrawLog();
 
@@ -265,7 +265,7 @@ describe('ThreadActivityGraph', function() {
     );
   });
 
-  it('will compute the percentage properly even though it is in a commited range with missing samples', function() {
+  it('will compute the percentage properly even though it is in a commited range with missing samples', function () {
     const MS_TO_NS_MULTIPLIER = 1000000;
     const profile = getSamplesProfile();
     profile.meta.interval = 1;

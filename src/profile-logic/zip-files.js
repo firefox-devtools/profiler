@@ -47,7 +47,7 @@ export function createZipTable(zipEntries: JSZip): ZipFileTable {
     const pathParts = fullPath
       .split('/')
       // Prevent any empty strings from double // or trailing slashes.
-      .filter(part => part);
+      .filter((part) => part);
     // pathParts: ['profile_tresize', 'tresize', 'cycle_0.profile']
 
     let path = '';

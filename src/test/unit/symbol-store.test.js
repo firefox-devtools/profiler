@@ -12,7 +12,7 @@ import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { ensureExists } from '../../utils/flow';
 
-describe('SymbolStore', function() {
+describe('SymbolStore', function () {
   let symbolProvider, symbolStore;
 
   function deleteDatabase() {
@@ -25,14 +25,14 @@ describe('SymbolStore', function() {
     });
   }
 
-  beforeAll(function() {
+  beforeAll(function () {
     // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
     window.indexedDB = fakeIndexedDB;
     window.IDBKeyRange = FDBKeyRange;
     window.TextDecoder = TextDecoder;
   });
 
-  afterAll(function() {
+  afterAll(function () {
     delete window.indexedDB;
     delete window.IDBKeyRange;
     delete window.TextDecoder;
@@ -40,17 +40,17 @@ describe('SymbolStore', function() {
     symbolStore = null;
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     if (symbolStore) {
       await symbolStore.closeDb().catch(() => {});
     }
     await deleteDatabase();
   });
 
-  it('should only request symbols from the symbol provider once per library', async function() {
+  it('should only request symbols from the symbol provider once per library', async function () {
     symbolProvider = {
-      requestSymbolsFromServer: jest.fn(requests =>
-        requests.map(request => {
+      requestSymbolsFromServer: jest.fn((requests) =>
+        requests.map((request) => {
           expect(request.lib.breakpadId).not.toBe('');
           return Promise.reject(
             new Error('this example only supports symbol tables')
@@ -137,9 +137,9 @@ describe('SymbolStore', function() {
     );
   });
 
-  it('should persist in DB', async function() {
+  it('should persist in DB', async function () {
     symbolProvider = {
-      requestSymbolsFromServer: jest.fn(requests =>
+      requestSymbolsFromServer: jest.fn((requests) =>
         requests.map(() =>
           Promise.reject(new Error('this example only supports symbol tables'))
         )
@@ -177,7 +177,7 @@ describe('SymbolStore', function() {
     expect(errorCallback).not.toHaveBeenCalled();
   });
 
-  it('should call requestSymbolsFromServer first', async function() {
+  it('should call requestSymbolsFromServer first', async function () {
     const symbolTable = new Map([
       [0, 'first symbol'],
       [0xf00, 'second symbol'],
@@ -191,10 +191,10 @@ describe('SymbolStore', function() {
     let symbolsForAddressesRequestCount = 0;
 
     symbolProvider = {
-      requestSymbolsFromServer: jest.fn(requests => {
+      requestSymbolsFromServer: jest.fn((requests) => {
         symbolsForAddressesRequestCount += requests.length;
         return requests.map(
-          request =>
+          (request) =>
             new Promise((resolve, reject) => {
               fakeSymbolStore.getSymbols(
                 [request],
@@ -293,7 +293,7 @@ describe('SymbolStore', function() {
     );
   });
 
-  it('should should report the right errors', async function() {
+  it('should should report the right errors', async function () {
     const libs = [
       {
         debugName: 'available-from-both-server-and-browser',
@@ -334,8 +334,8 @@ describe('SymbolStore', function() {
       ])
     );
     symbolProvider = {
-      requestSymbolsFromServer: requests => {
-        return requests.map(request => {
+      requestSymbolsFromServer: (requests) => {
+        return requests.map((request) => {
           const { debugName, breakpadId } = request.lib;
           expect(debugName).not.toEqual('');
           expect(breakpadId).not.toEqual('');
@@ -366,7 +366,7 @@ describe('SymbolStore', function() {
     const succeededLibs = new Set();
     const failedLibs = new Map();
     await symbolStore.getSymbols(
-      libs.map(lib => ({ lib, addresses })),
+      libs.map((lib) => ({ lib, addresses })),
       (request, _results) => {
         succeededLibs.add(request.lib);
       },

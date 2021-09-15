@@ -133,7 +133,7 @@ export function parseLabel(
   markerSchema: MarkerSchema,
   categories: CategoryList,
   label: string
-): Marker => string {
+): (Marker) => string {
   // Split the label on the "{key}" capture groups.
   // Each (zero-indexed) even entry will be a raw string label.
   // Each (zero-indexed) odd entry will be a key to the payload.
@@ -206,19 +206,19 @@ export function parseLabel(
       // Handle:                      ^^^^^^^^^^^
       switch (markerKey) {
         case 'start':
-          return marker => formatTimestamp(marker.start);
+          return (marker) => formatTimestamp(marker.start);
         case 'end':
-          return marker =>
+          return (marker) =>
             marker.end === null ? 'unknown' : formatTimestamp(marker.end);
         case 'duration':
-          return marker =>
+          return (marker) =>
             marker.end === null
               ? 'unknown'
               : formatTimestamp(marker.end - marker.start);
         case 'name':
-          return marker => marker.name;
+          return (marker) => marker.name;
         case 'category':
-          return marker => categories[marker.category].name;
+          return (marker) => categories[marker.category].name;
         case 'data':
         default:
           return parseError(label, part);
@@ -240,7 +240,7 @@ export function parseLabel(
         }
       }
 
-      return marker => {
+      return (marker) => {
         if (!marker.data) {
           // There was no data.
           return '';
@@ -275,9 +275,9 @@ type LabelKey = 'tooltipLabel' | 'tableLabel' | 'chartLabel';
 // to label things. It also allows for a place to do some custom handling
 // in the cases where the marker schema is not enough.
 const fallbacks: { [LabelKey]: (Marker) => string } = {
-  tooltipLabel: marker => marker.name,
+  tooltipLabel: (marker) => marker.name,
 
-  chartLabel: _marker => '',
+  chartLabel: (_marker) => '',
 
   tableLabel: (marker: Marker) => {
     let description = marker.name;
@@ -313,12 +313,12 @@ const fallbacks: { [LabelKey]: (Marker) => string } = {
  * This function should only be used behind a selector.
  */
 export function getLabelGetter(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerSchemaList: MarkerSchema[],
   markerSchemaByName: MarkerSchemaByName,
   categoryList: CategoryList,
   labelKey: LabelKey
-): MarkerIndex => string {
+): (MarkerIndex) => string {
   // Build up a list of label functions, that are tied to the schema name.
   const labelFns: Map<string, (Marker) => string> = new Map();
   for (const schema of markerSchemaList) {

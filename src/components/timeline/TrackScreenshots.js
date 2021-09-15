@@ -106,11 +106,8 @@ class Screenshots extends PureComponent<Props, State> {
   // we use the mouseup event so that isMakingPreviewSelection is still
   // accurate.
   _selectScreenshotOnClick = (event: SyntheticMouseEvent<HTMLDivElement>) => {
-    const {
-      screenshots,
-      updatePreviewSelection,
-      isMakingPreviewSelection,
-    } = this.props;
+    const { screenshots, updatePreviewSelection, isMakingPreviewSelection } =
+      this.props;
     if (isMakingPreviewSelection) {
       // Avoid reseting the selection if the user is currently selecting one.
       return;
@@ -347,7 +344,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
     const images = [];
     const rangeLength = rangeEnd - rangeStart;
     const imageContainerWidth = trackHeight * 0.75;
-    const timeToPixel = time =>
+    const timeToPixel = (time) =>
       (outerContainerWidth * (time - rangeStart)) / rangeLength;
 
     const leftmostPixel = Math.max(timeToPixel(screenshots[0].start), 0);
