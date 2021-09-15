@@ -11,7 +11,20 @@ import type { MixedObject } from 'firefox-profiler/types';
  * invocation of `perf script`, where `perf` is the Linux perf command line tool.
  */
 export function isPerfScriptFormat(profile: string): boolean {
-  const firstLine = profile.substring(0, profile.indexOf('\n'));
+  // Optimisation: The simplest way to solve this would be using
+  // the same logic as parsing: looping over profile.split('\n').
+  // But fingerprinting the profile should be fast. So we use a
+  // multiline regex to avoid processing the entire profile.
+
+  // This regexp matches the first line that doesn't start with #,
+  // and has at least one character.
+  const firstLineFinderRe = /^(?!#).+$/m;
+  const maybeFirstLine = firstLineFinderRe.exec(profile);
+  if (!maybeFirstLine) {
+    return false;
+  }
+
+  const firstLine = maybeFirstLine[0];
   //          +- process name (anything before the rest of the regexp, can contain spaces)
   //          |        +- PID/ (optional)
   //          |        |      +- TID
@@ -185,10 +198,13 @@ export function convertPerfScriptProfile(
   let lineIndex = 0;
   let startTime = 0;
   while (lineIndex < lines.length) {
-    const sampleStartLine = lines[lineIndex++];
-    if (sampleStartLine === '') {
+    const line = lines[lineIndex++];
+    // perf script --header outputs header lines beginning with #
+    if (line === '' || line.startsWith('#')) {
       continue;
     }
+
+    const sampleStartLine = line;
     // default "perf script" output has TID but not PID
     // eg, "java 25607 4794564.109216: cycles:"
     // eg, "java 12688 [002] 6544038.708352: cpu-clock:"
