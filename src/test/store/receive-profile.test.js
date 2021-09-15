@@ -20,7 +20,7 @@ import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
-import { urlFromState, stateFromLocation } from '../../app-logic/url-handling';
+import { urlFromState } from '../../app-logic/url-handling';
 import {
   viewProfile,
   finalizeProfileView,
