@@ -4,7 +4,7 @@ Linux has a native profiler called 'perf' that can profile any application. This
 
 [The Firefox Profiler](https://profiler.firefox.com/) provides an alternative UI for these profiles; it knows how to display profiles from perf.
 
-(Importing other profile sources is being investigated, such as in [issue #1138](https://github.com/firefox-devtools/profiler/issues/1138).)
+(Importing other profile sources is being investigated, such as in [issue #1138](https://github.com/firefox-devtools/profiler/issues/1138), and [issue #1553](https://github.com/firefox-devtools/profiler/issues/1553).)
 
 There are three major differences between the Gecko profiler and perf:
 
