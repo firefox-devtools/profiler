@@ -451,6 +451,86 @@ function _removeFramesFromStackTable(
   return { stackTable: newStackTable, oldStackToNewStack: prefixMap };
 }
 
+// Create a new stack table where all stack nodes with frames in
+// frameIndexToInlineExpansionFrames have been replaced by a straight path
+// of stack nodes for that frame's new inline frames.
+//
+// Example:
+//  stack table:
+//  - stack A with frame 0
+//    - stack B with frame 1
+//      - stack C with frame 2
+//    - stack D with frame 3
+//      - stack E with frame 4
+//      - stack F with frame 5
+//
+//  frameIndexToInlineExpansionFrames:
+//  1 => [1, 6, 7]
+//  4 => [4, 8]
+//
+//  result:
+//  - stack A with frame 0
+//    - stack B with frame 1
+//      - stack B' with frame 6
+//        - stack B'' with frame 7
+//          - stack C with frame 2
+//    - stack D with frame 3
+//      - stack E with frame 4
+//        - stack E' with frame 8
+//      - stack F with frame 5
+
+function _addExpansionStacksToStackTable(
+  stackTable: StackTable,
+  frameIndexToInlineExpansionFrames: Map<
+    IndexIntoFrameTable,
+    IndexIntoFrameTable[]
+  >
+): {
+  stackTable: StackTable,
+  oldStackToNewStack: Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  > | null,
+} {
+  if (frameIndexToInlineExpansionFrames.size === 0) {
+    return {
+      stackTable: stackTable,
+      oldStackToNewStack: null,
+    };
+  }
+  const newStackTable = getEmptyStackTable();
+  const prefixMap = new Map();
+  for (let stack = 0; stack < stackTable.length; stack++) {
+    const oldFrame = stackTable.frame[stack];
+    const oldPrefix = stackTable.prefix[stack];
+    const category = stackTable.category[stack];
+    const subcategory = stackTable.subcategory[stack];
+    let expansionFrames = frameIndexToInlineExpansionFrames.get(oldFrame);
+    if (expansionFrames === undefined) {
+      expansionFrames = [oldFrame];
+    }
+    let prefix = oldPrefix === null ? null : prefixMap.get(oldPrefix) ?? null;
+    for (
+      let inlineDepth = 0;
+      inlineDepth < expansionFrames.length;
+      inlineDepth++
+    ) {
+      const frame = expansionFrames[inlineDepth];
+      const newStack = newStackTable.length;
+      newStackTable.frame.push(frame);
+      newStackTable.prefix.push(prefix);
+      newStackTable.category.push(category);
+      newStackTable.subcategory.push(subcategory);
+      newStackTable.length++;
+      prefix = newStack;
+    }
+    if (prefix !== null) {
+      prefixMap.set(stack, prefix);
+    }
+  }
+  return { stackTable: newStackTable, oldStackToNewStack: prefixMap };
+}
+
 /**
  * Apply symbolication to the thread, based on the information that was prepared
  * in symbolicationStepInfo. This involves updating the funcTable to contain the
@@ -648,7 +728,12 @@ export function applySymbolicationStep(
   // funcKey -> funcIndex, where funcKey = `${nameStringIndex}:${fileStringIndex}`
   const funcKeyToFuncMap = new Map();
 
-  const oldFuncToNewFuncEntries = [];
+  const availableFrameIter = inlinedFrames.values();
+  const frameIndexToInlineExpansionFrames: Map<
+    IndexIntoFrameTable,
+    IndexIntoFrameTable[]
+  > = new Map();
+  const oldFuncToNewFuncsEntries: Array<[IndexIntoFuncTable, string]> = [];
 
   for (const frameIndex of nonInlinedFrames) {
     const oldFunc = oldFrameTable.func[frameIndex];
@@ -671,50 +756,108 @@ export function applySymbolicationStep(
         line: oldFrameTable.line[frameIndex] ?? undefined,
       };
     }
-    const functionStringIndex = stringTable.indexForString(addressResult.name);
-    const fileNameStringIndex =
-      addressResult.file !== undefined
-        ? stringTable.indexForString(addressResult.file)
-        : null;
-    // Group frames into the same function if the have the same function name
-    // and the same file.
-    const funcKey = `${functionStringIndex}:${fileNameStringIndex ?? ''}`;
-    let funcIndex = funcKeyToFuncMap.get(funcKey);
-    if (funcIndex === undefined) {
-      funcIndex = availableFuncIter.next().value;
+    // Make a combined list which contains both the outer function and the inlines.
+    const framesAtThisAddress = addressResult.inlines
+      ? addressResult.inlines.slice()
+      : [];
+    framesAtThisAddress.push({
+      name: addressResult.name,
+      file: addressResult.file,
+      line: addressResult.line,
+    });
+    framesAtThisAddress.reverse(); // Now the frames are from outside to inside.
+
+    const inlineExpansionFrames = [];
+    const inlineExpansionFuncIndexes = [];
+    for (
+      let inlineDepth = 0;
+      inlineDepth < framesAtThisAddress.length;
+      inlineDepth++
+    ) {
+      const frameInfo = framesAtThisAddress[inlineDepth];
+      const functionStringIndex = stringTable.indexForString(frameInfo.name);
+      const fileNameStringIndex =
+        frameInfo.file !== undefined
+          ? stringTable.indexForString(frameInfo.file)
+          : null;
+      // Group frames into the same function if the have the same function name
+      // and the same file.
+      const funcKey = `${functionStringIndex}:${fileNameStringIndex ?? ''}`;
+      let funcIndex = funcKeyToFuncMap.get(funcKey);
       if (funcIndex === undefined) {
-        // Need a new func.
-        funcIndex = funcTable.length;
-        funcTable.isJS[funcIndex] = false;
-        funcTable.relevantForJS[funcIndex] = false;
-        funcTable.resource[funcIndex] = resourceIndex;
-        funcTable.lineNumber[funcIndex] = null;
-        funcTable.columnNumber[funcIndex] = null;
-        // The name and fileName fields will be filled below.
-        funcTable.length++;
+        funcIndex = availableFuncIter.next().value;
+        if (funcIndex === undefined) {
+          // Need a new func.
+          funcIndex = funcTable.length;
+          funcTable.isJS[funcIndex] = false;
+          funcTable.relevantForJS[funcIndex] = false;
+          funcTable.resource[funcIndex] = resourceIndex;
+          funcTable.fileName[funcIndex] = null;
+          funcTable.lineNumber[funcIndex] = null;
+          funcTable.columnNumber[funcIndex] = null;
+          // The name field will be filled below.
+          funcTable.length++;
+        }
+        funcTable.name[funcIndex] = functionStringIndex;
+        funcTable.fileName[funcIndex] = fileNameStringIndex;
+        funcKeyToFuncMap.set(funcKey, funcIndex);
       }
-      funcTable.name[funcIndex] = functionStringIndex;
-      funcTable.fileName[funcIndex] = fileNameStringIndex;
-      funcKeyToFuncMap.set(funcKey, funcIndex);
+      inlineExpansionFuncIndexes.push(funcIndex);
+      let expansionFrameIndex;
+      if (inlineDepth === 0) {
+        expansionFrameIndex = frameIndex;
+      } else {
+        // Add a frame at this depth.
+        expansionFrameIndex = availableFrameIter.next().value;
+        if (expansionFrameIndex === undefined) {
+          // Need a new frame.
+          expansionFrameIndex = frameTable.length;
+          frameTable.category[expansionFrameIndex] =
+            frameTable.category[frameIndex];
+          frameTable.subcategory[expansionFrameIndex] =
+            frameTable.subcategory[frameIndex];
+          frameTable.innerWindowID[expansionFrameIndex] =
+            frameTable.innerWindowID[frameIndex];
+          frameTable.implementation[expansionFrameIndex] =
+            frameTable.implementation[frameIndex];
+          frameTable.optimizations[expansionFrameIndex] =
+            frameTable.optimizations[frameIndex];
+          // The other fields will be filled below.
+          frameTable.length++;
+        }
+        frameTable.address[expansionFrameIndex] = address;
+        frameTable.inlineDepth[expansionFrameIndex] = inlineDepth;
+        frameTable.nativeSymbol[expansionFrameIndex] = nativeSymbolIndex;
+      }
+      frameTable.func[expansionFrameIndex] = funcIndex;
+      frameTable.line[expansionFrameIndex] = frameInfo.line ?? null;
+      frameTable.column[expansionFrameIndex] = null;
+      inlineExpansionFrames.push(expansionFrameIndex);
     }
-
-    frameTable.func[frameIndex] = funcIndex;
-    frameTable.line[frameIndex] = addressResult.line ?? null;
-    oldFuncToNewFuncEntries.push([oldFunc, funcIndex]);
+    if (inlineExpansionFrames.length > 1) {
+      frameIndexToInlineExpansionFrames.set(frameIndex, inlineExpansionFrames);
+    }
+    oldFuncToNewFuncsEntries.push([
+      oldFunc,
+      inlineExpansionFuncIndexes.join('#'),
+    ]);
   }
 
-  // Build oldFuncToNewFuncMapForThisLib.
-  // If (oldFunc, newFunc) is in oldFuncToNewFuncMapForThisLib, this means
+  // Build oldFuncToNewFuncsMapForThisLib.
+  // If (oldFunc, newFuncs) is in oldFuncToNewFuncsMapForThisLib, this means
   // that all frames that used to belong to oldFunc have been resolved to
-  // the same func newFunc.
-  const oldFuncToNewFuncMapForThisLib = makeConsensusMap(
-    oldFuncToNewFuncEntries
+  // the same sequence of funcs newFuncs.
+  const oldFuncToNewFuncsMapForThisLib = makeConsensusMap(
+    oldFuncToNewFuncsEntries
   );
-  for (const [oldFunc, newFunc] of oldFuncToNewFuncMapForThisLib) {
-    oldFuncToNewFuncsMap.set(oldFunc, [newFunc]);
+  for (const [oldFunc, newFuncs] of oldFuncToNewFuncsMapForThisLib) {
+    oldFuncToNewFuncsMap.set(
+      oldFunc,
+      newFuncs.split('#').map((strFuncIndex) => +strFuncIndex)
+    );
   }
 
-  const newThread = {
+  let newThread = {
     ...thread,
     frameTable,
     stackTable,
@@ -722,13 +865,32 @@ export function applySymbolicationStep(
     nativeSymbols,
     stringTable,
   };
+
   if (oldStackToNewStack !== null) {
-    return replaceStackReferences(
+    newThread = replaceStackReferences(
       newThread,
       oldStackToNewStack,
       oldStackToNewStack
     );
   }
+
+  // We have the finished new frameTable and new funcTable.
+  // Build a new stackTable.
+  const {
+    stackTable: finalStackTable,
+    oldStackToNewStack: finalOldStackToNewStack,
+  } = _addExpansionStacksToStackTable(
+    stackTable,
+    frameIndexToInlineExpansionFrames
+  );
+  if (finalOldStackToNewStack !== null) {
+    newThread = replaceStackReferences(
+      { ...newThread, stackTable: finalStackTable },
+      finalOldStackToNewStack,
+      finalOldStackToNewStack
+    );
+  }
+
   return newThread;
 }
 
