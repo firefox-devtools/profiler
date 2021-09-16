@@ -2558,6 +2558,12 @@ CallTree {
   "_interval": 1,
   "_isHighPrecision": false,
   "_jsOnly": false,
+  "_nativeSymbols": Object {
+    "address": Array [],
+    "length": 0,
+    "libIndex": Array [],
+    "name": Array [],
+  },
   "_resourceTable": Object {
     "host": Array [],
     "length": 0,
