@@ -150,6 +150,14 @@ CallTree--bytes-self = Self (bytes)
         The “self” bytes are useful for understanding where memory was actually
         allocated or deallocated in the program.
 
+# These inlining badges are displayed in the call tree in front of some
+# functions for native code (C / C++ / Rust). They're a small "inl" icon with
+# a title.
+CallTree--divergent-inlining-badge =
+    .title = Some calls to { $calledFunction } were inlined by the compiler.
+CallTree--inlining-badge = (inlined)
+    .title = Calls to { $calledFunction } were inlined into { $outerFunction } by the compiler.
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 

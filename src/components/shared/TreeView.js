@@ -299,6 +299,20 @@ class TreeViewRowScrolledColumns<
             }
           )}
         >
+          {displayData.badge ? (
+            <Localized
+              id={displayData.badge.localizationId}
+              vars={displayData.badge.vars}
+              attrs={{ title: true }}
+            >
+              <span
+                className={`treeBadge ${displayData.badge.name}`}
+                title={displayData.badge.title}
+              >
+                {displayData.badge.contentFallback}
+              </span>
+            </Localized>
+          ) : null}
           {RenderComponent ? (
             <RenderComponent displayData={displayData} />
           ) : (
