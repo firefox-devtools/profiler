@@ -5,6 +5,7 @@
 
 import {
   resourceTypes,
+  getEmptyStackTable,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
 } from './data-structures';
@@ -19,8 +20,10 @@ import type {
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
+  IndexIntoStackTable,
   Address,
   CallNodePath,
+  StackTable,
 } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
@@ -28,6 +31,7 @@ import type {
   LibSymbolicationRequest,
 } from './symbol-store';
 import { PathSet } from '../utils/path';
+import { replaceStackReferences } from './profile-data';
 
 // Contains functions to symbolicate a profile.
 
@@ -378,6 +382,48 @@ function finishSymbolicationForLib(
   }
 }
 
+// Create a new stack table where all stack nodes with frames in framesToRemove
+// are removed. Their child nodes are reparented to the removed node's parent.
+function _removeFramesFromStackTable(
+  stackTable: StackTable,
+  framesToRemove: Set<IndexIntoFrameTable>
+): {
+  stackTable: StackTable,
+  oldStackToNewStack: Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  > | null,
+} {
+  if (framesToRemove.size === 0) {
+    return { stackTable, oldStackToNewStack: null };
+  }
+  const newStackTable = getEmptyStackTable();
+  const oldStackToNewStack: Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  > = new Map();
+  for (let stack = 0; stack < stackTable.length; stack++) {
+    const frame = stackTable.frame[stack];
+    const prefix = stackTable.prefix[stack];
+    const newPrefix =
+      prefix === null ? null : oldStackToNewStack.get(prefix) ?? null;
+    if (framesToRemove.has(frame)) {
+      // Don't add this stack node to the new stack table. Instead, make it
+      // so that this node's children use our prefix as their prefix.
+      oldStackToNewStack.set(stack, newPrefix);
+      continue;
+    }
+    const newStackIndex = newStackTable.length;
+    newStackTable.frame.push(frame);
+    newStackTable.prefix.push(newPrefix);
+    newStackTable.category.push(stackTable.category[stack]);
+    newStackTable.subcategory.push(stackTable.subcategory[stack]);
+    newStackTable.length++;
+    oldStackToNewStack.set(stack, newStackIndex);
+  }
+  return { stackTable: newStackTable, oldStackToNewStack };
+}
+
 /**
  * Apply symbolication to the thread, based on the information that was prepared
  * in symbolicationStepInfo. This involves updating the funcTable to contain the
@@ -398,6 +444,7 @@ export function applySymbolicationStep(
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     nativeSymbols: oldNativeSymbols,
+    stackTable: oldStackTable,
     stringTable,
   } = thread;
   const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
@@ -420,6 +467,25 @@ export function applySymbolicationStep(
     IndexIntoNativeSymbolTable
   > = new Map();
 
+  // If this profile was symbolicated before, we may have frames for inlined functions
+  // in the profile. Partition those out because their frame addresses are also present
+  // in non-inlined frames. Then remove any stack nodes for inline frames from the stack
+  // table, because and having a "clean" stack table with no inline frames makes the
+  // rest of symbolication easier.
+  const inlinedFrames = new Set();
+  const nonInlinedFrames = new Set();
+  for (const frameIndex of allFramesForThisLib) {
+    if (oldFrameTable.inlineDepth[frameIndex] > 0) {
+      inlinedFrames.add(frameIndex);
+    } else {
+      nonInlinedFrames.add(frameIndex);
+    }
+  }
+  const { stackTable, oldStackToNewStack } = _removeFramesFromStackTable(
+    oldStackTable,
+    inlinedFrames
+  );
+
   // We want to group frames into nativeSymbols, and give each nativeSymbol a name.
   // We group frames to the same nativeSymbol if the addresses for these frames resolve
   // to the same symbolAddress.
@@ -429,7 +495,7 @@ export function applySymbolicationStep(
   // All frames with the same symbolAddress are grouped into the same nativeSymbol.
   // Afterwards, we create funcs for symbols with the same name, and then group frames
   // into funcs.
-  for (const frameIndex of allFramesForThisLib) {
+  for (const frameIndex of nonInlinedFrames) {
     const oldFrameSymbol = oldFrameTable.nativeSymbol[frameIndex];
     const address = oldFrameTable.address[frameIndex];
     let addressResult: AddressResult | void = resultsForLib.get(address);
@@ -552,7 +618,7 @@ export function applySymbolicationStep(
 
   const newFrameTableFuncColumn = oldFrameTable.func.slice();
   const newFrameTableLineColumn = oldFrameTable.line.slice();
-  for (const frameIndex of allFramesForThisLib) {
+  for (const frameIndex of nonInlinedFrames) {
     const oldFunc = oldFrameTable.func[frameIndex];
     const nativeSymbolIndex = newFrameTableNativeSymbolsColumn[frameIndex];
     if (nativeSymbolIndex === null) {
@@ -622,7 +688,22 @@ export function applySymbolicationStep(
     oldFuncToNewFuncsMap.set(oldFunc, [newFunc]);
   }
 
-  return { ...thread, frameTable, funcTable, nativeSymbols, stringTable };
+  const newThread = {
+    ...thread,
+    frameTable,
+    stackTable,
+    funcTable,
+    nativeSymbols,
+    stringTable,
+  };
+  if (oldStackToNewStack !== null) {
+    return replaceStackReferences(
+      newThread,
+      oldStackToNewStack,
+      oldStackToNewStack
+    );
+  }
+  return newThread;
 }
 
 /**

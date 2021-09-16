@@ -2925,8 +2925,14 @@ export function gatherStackReferences(thread: Thread): StackReferences {
  */
 export function replaceStackReferences(
   thread: Thread,
-  mapForSamplingSelfStacks: Map<IndexIntoStackTable, IndexIntoStackTable>,
-  mapForBacktraceSelfStacks: Map<IndexIntoStackTable, IndexIntoStackTable>
+  mapForSamplingSelfStacks: Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  >,
+  mapForBacktraceSelfStacks: Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  >
 ): Thread {
   const {
     samples: oldSamples,
