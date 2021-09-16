@@ -45,6 +45,7 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
+  IndexIntoNativeSymbolTable,
   ThreadIndex,
   Category,
   Counter,
@@ -109,6 +110,9 @@ export function getCallNodeInfo(
     const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
     const innerWindowID: Array<InnerWindowID> = [];
     const depth: Array<number> = [];
+    const sourceFramesInlinedIntoSymbol: Array<
+      IndexIntoNativeSymbolTable | -1 | null
+    > = [];
     let length = 0;
 
     function addCallNode(
@@ -116,7 +120,8 @@ export function getCallNodeInfo(
       funcIndex: IndexIntoFuncTable,
       categoryIndex: IndexIntoCategoryList,
       subcategoryIndex: IndexIntoSubcategoryListForCategory,
-      windowID: InnerWindowID
+      windowID: InnerWindowID,
+      inlinedIntoSymbol: IndexIntoNativeSymbolTable | null
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
@@ -124,6 +129,7 @@ export function getCallNodeInfo(
       category[index] = categoryIndex;
       subcategory[index] = subcategoryIndex;
       innerWindowID[index] = windowID;
+      sourceFramesInlinedIntoSymbol[index] = inlinedIntoSymbol;
       if (prefixIndex === -1) {
         depth[index] = 0;
       } else {
@@ -143,31 +149,59 @@ export function getCallNodeInfo(
       const categoryIndex = stackTable.category[stackIndex];
       const subcategoryIndex = stackTable.subcategory[stackIndex];
       const windowID = frameTable.innerWindowID[frameIndex] || 0;
+      const inlinedIntoSymbol =
+        frameTable.inlineDepth[frameIndex] > 0
+          ? frameTable.nativeSymbol[frameIndex]
+          : null;
       const funcIndex = frameTable.func[frameIndex];
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
+
+      // Check if the call node for this stack already exists.
       let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
         prefixCallNodeAndFuncIndex
       );
       if (callNodeIndex === undefined) {
+        // New call node.
         callNodeIndex = length;
         addCallNode(
           prefixCallNode,
           funcIndex,
           categoryIndex,
           subcategoryIndex,
-          windowID
+          windowID,
+          inlinedIntoSymbol
         );
         prefixCallNodeAndFuncToCallNodeMap.set(
           prefixCallNodeAndFuncIndex,
           callNodeIndex
         );
-      } else if (category[callNodeIndex] !== categoryIndex) {
-        // Conflicting origin stack categories -> default category + subcategory.
-        category[callNodeIndex] = defaultCategory;
-        subcategory[callNodeIndex] = 0;
-      } else if (subcategory[callNodeIndex] !== subcategoryIndex) {
-        // Conflicting origin stack subcategories -> "Other" subcategory.
-        subcategory[callNodeIndex] = 0;
+      } else {
+        // There is already a call node for this function. Use it, and check if
+        // there are any conflicts between the various stack nodes that have been
+        // merged into it.
+
+        // Resolve category conflicts, by resetting a conflicting subcategory or
+        // category to the default category.
+        if (category[callNodeIndex] !== categoryIndex) {
+          // Conflicting origin stack categories -> default category + subcategory.
+          category[callNodeIndex] = defaultCategory;
+          subcategory[callNodeIndex] = 0;
+        } else if (subcategory[callNodeIndex] !== subcategoryIndex) {
+          // Conflicting origin stack subcategories -> "Other" subcategory.
+          subcategory[callNodeIndex] = 0;
+        }
+
+        // Resolve "inlined into" conflicts. This can happen if you have two
+        // function calls A -> B where only one of the B calls is inlined, or
+        // if you use call tree transforms in such a way that a function B which
+        // was inlined into two different callers (A -> B, C -> B) gets collapsed
+        // into one call node.
+        if (
+          sourceFramesInlinedIntoSymbol[callNodeIndex] !== inlinedIntoSymbol
+        ) {
+          // Conflicting inlining: -1.
+          sourceFramesInlinedIntoSymbol[callNodeIndex] = -1;
+        }
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
@@ -178,6 +212,7 @@ export function getCallNodeInfo(
       category: new Int32Array(category),
       subcategory: new Int32Array(subcategory),
       innerWindowID: new Float64Array(innerWindowID),
+      sourceFramesInlinedIntoSymbol,
       depth,
       length,
     };

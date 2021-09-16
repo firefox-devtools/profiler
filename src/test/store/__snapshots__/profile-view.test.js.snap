@@ -2274,6 +2274,16 @@ Object {
       1,
       6,
     ],
+    "sourceFramesInlinedIntoSymbol": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
     "subcategory": Int32Array [
       0,
       0,
@@ -2383,6 +2393,16 @@ CallTree {
       4,
       1,
       6,
+    ],
+    "sourceFramesInlinedIntoSymbol": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ],
     "subcategory": Int32Array [
       0,
