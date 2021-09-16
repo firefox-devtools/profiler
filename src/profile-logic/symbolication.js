@@ -8,6 +8,7 @@ import {
   getEmptyStackTable,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
+  shallowCloneFrameTable,
 } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
 
@@ -629,6 +630,13 @@ export function applySymbolicationStep(
     newFrameTableNativeSymbolsColumn[frameIndex] = symbolIndex;
   }
 
+  // Integrate the new native symbol column into the frame table and make a
+  // copy so that we can add new frames below.
+  const frameTable = shallowCloneFrameTable({
+    ...oldFrameTable,
+    nativeSymbol: newFrameTableNativeSymbolsColumn,
+  });
+
   // Now it is time to look at funcs.
   // For funcs belonging to a native library, we group frames into funcs based
   // on the function name string and the file name. (We don't expect there to
@@ -642,8 +650,6 @@ export function applySymbolicationStep(
 
   const oldFuncToNewFuncEntries = [];
 
-  const newFrameTableFuncColumn = oldFrameTable.func.slice();
-  const newFrameTableLineColumn = oldFrameTable.line.slice();
   for (const frameIndex of nonInlinedFrames) {
     const oldFunc = oldFrameTable.func[frameIndex];
     const nativeSymbolIndex = newFrameTableNativeSymbolsColumn[frameIndex];
@@ -692,16 +698,10 @@ export function applySymbolicationStep(
       funcKeyToFuncMap.set(funcKey, funcIndex);
     }
 
-    newFrameTableFuncColumn[frameIndex] = funcIndex;
-    newFrameTableLineColumn[frameIndex] = addressResult.line ?? null;
+    frameTable.func[frameIndex] = funcIndex;
+    frameTable.line[frameIndex] = addressResult.line ?? null;
     oldFuncToNewFuncEntries.push([oldFunc, funcIndex]);
   }
-  const frameTable = {
-    ...oldFrameTable,
-    func: newFrameTableFuncColumn,
-    nativeSymbol: newFrameTableNativeSymbolsColumn,
-    line: newFrameTableLineColumn,
-  };
 
   // Build oldFuncToNewFuncMapForThisLib.
   // If (oldFunc, newFunc) is in oldFuncToNewFuncMapForThisLib, this means
