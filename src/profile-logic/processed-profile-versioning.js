@@ -1807,5 +1807,200 @@ const _upgraders = {
       }
     }
   },
+  [38]: (profile) => {
+    // The frame table no longer contains return addresses, it now contains
+    // "nudged" return addresses, i.e. return address minus one byte.
+    // See nudgeReturnAddresses for more details.
+    // The code from nudgeReturnAddresses is duplicated below because this
+    // upgrader needs to stay unaffected by any profile format changes after
+    // version 38.
+    //
+    // This upgrader is needed so that clicking "Re-symbolicate" on old profiles
+    // will obtain correct line numbers and inline frames (once implemented),
+    // and so that the assembly view (once implemented) on an old profile will
+    // assign the correct "total" cost to call instructions.
+    for (const thread of profile.threads) {
+      const samplingSelfStacks = new Set();
+      const syncBacktraceSelfStacks = new Set();
+
+      const {
+        samples,
+        markers,
+        jsAllocations,
+        nativeAllocations,
+        stackTable,
+        frameTable,
+      } = thread;
+
+      for (let i = 0; i < samples.length; i++) {
+        const stack = samples.stack[i];
+        if (stack !== null) {
+          samplingSelfStacks.add(stack);
+        }
+      }
+      for (let i = 0; i < markers.length; i++) {
+        const data = markers.data[i];
+        if (data && data.cause) {
+          const stack = data.cause.stack;
+          if (stack !== null) {
+            syncBacktraceSelfStacks.add(stack);
+          }
+        }
+      }
+      if (jsAllocations !== undefined) {
+        for (let i = 0; i < jsAllocations.length; i++) {
+          const stack = jsAllocations.stack[i];
+          if (stack !== null) {
+            syncBacktraceSelfStacks.add(stack);
+          }
+        }
+      }
+      if (nativeAllocations !== undefined) {
+        for (let i = 0; i < nativeAllocations.length; i++) {
+          const stack = nativeAllocations.stack[i];
+          if (stack !== null) {
+            syncBacktraceSelfStacks.add(stack);
+          }
+        }
+      }
+
+      const oldIpFrameToNewIpFrame = new Uint32Array(frameTable.length);
+      const ipFrames = new Set();
+      for (const stack of samplingSelfStacks) {
+        const frame = stackTable.frame[stack];
+        oldIpFrameToNewIpFrame[frame] = frame;
+        const address = frameTable.address[frame];
+        if (address !== -1) {
+          ipFrames.add(frame);
+        }
+      }
+      const returnAddressFrames = new Map();
+      const prefixStacks = new Set();
+      for (const stack of syncBacktraceSelfStacks) {
+        const frame = stackTable.frame[stack];
+        const returnAddress = frameTable.address[frame];
+        if (returnAddress !== -1) {
+          returnAddressFrames.set(frame, returnAddress);
+        }
+      }
+      for (let stack = 0; stack < stackTable.length; stack++) {
+        const prefix = stackTable.prefix[stack];
+        if (prefix === null || prefixStacks.has(prefix)) {
+          continue;
+        }
+        prefixStacks.add(prefix);
+        const prefixFrame = stackTable.frame[prefix];
+        const prefixAddress = frameTable.address[prefixFrame];
+        if (prefixAddress !== -1) {
+          returnAddressFrames.set(prefixFrame, prefixAddress);
+        }
+      }
+
+      if (ipFrames.size === 0 && returnAddressFrames.size === 0) {
+        continue;
+      }
+
+      // Iterate over all *return address* frames, i.e. all frames that were obtained
+      // by stack walking.
+      for (const [frame, address] of returnAddressFrames) {
+        if (ipFrames.has(frame)) {
+          // This address of this frame was observed both as a return address and as
+          // an instruction pointer register value. We have to duplicate this frame so
+          // so that we can make a distinction between the two uses.
+          // The new frame will be used as the ipFrame, and the old frame will be used
+          // as the return address frame (and have its address nudged).
+          const newIpFrame = frameTable.length;
+          frameTable.address.push(address);
+          frameTable.category.push(frameTable.category[frame]);
+          frameTable.subcategory.push(frameTable.subcategory[frame]);
+          frameTable.func.push(frameTable.func[frame]);
+          frameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
+          frameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
+          frameTable.implementation.push(frameTable.implementation[frame]);
+          frameTable.line.push(frameTable.line[frame]);
+          frameTable.column.push(frameTable.column[frame]);
+          frameTable.optimizations.push(frameTable.optimizations[frame]);
+          frameTable.length++;
+          oldIpFrameToNewIpFrame[frame] = newIpFrame;
+        }
+        // Subtract 1 byte from the return address.
+        frameTable.address[frame] = address - 1;
+      }
+
+      // Now the frame table contains adjusted / "nudged" addresses.
+
+      // Make a new stack table which refers to the adjusted frames.
+      const newStackTable = {
+        frame: [],
+        prefix: [],
+        category: [],
+        subcategory: [],
+        length: 0,
+      };
+      const mapForSamplingSelfStacks = new Map();
+      const mapForSyncBacktraces = new Map();
+      const prefixMap = new Uint32Array(stackTable.length);
+      for (let stack = 0; stack < stackTable.length; stack++) {
+        const frame = stackTable.frame[stack];
+        const category = stackTable.category[stack];
+        const subcategory = stackTable.subcategory[stack];
+        const prefix = stackTable.prefix[stack];
+
+        const newPrefix = prefix === null ? null : prefixMap[prefix];
+
+        if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
+          // Copy this stack to the new stack table, and use the original frame
+          // (which will have the nudged address if this is a return address stack).
+          const newStackIndex = newStackTable.length;
+          newStackTable.frame.push(frame);
+          newStackTable.category.push(category);
+          newStackTable.subcategory.push(subcategory);
+          newStackTable.prefix.push(newPrefix);
+          newStackTable.length++;
+          prefixMap[stack] = newStackIndex;
+          mapForSyncBacktraces.set(stack, newStackIndex);
+        }
+
+        if (samplingSelfStacks.has(stack)) {
+          // Copy this stack to the new stack table, and use the potentially duplicated
+          // frame, with a non-nudged address.
+          const ipFrame = oldIpFrameToNewIpFrame[frame];
+          const newStackIndex = newStackTable.length;
+          newStackTable.frame.push(ipFrame);
+          newStackTable.category.push(category);
+          newStackTable.subcategory.push(subcategory);
+          newStackTable.prefix.push(newPrefix);
+          newStackTable.length++;
+          mapForSamplingSelfStacks.set(stack, newStackIndex);
+        }
+      }
+      thread.stackTable = newStackTable;
+
+      samples.stack = samples.stack.map((oldStackIndex) =>
+        oldStackIndex === null
+          ? null
+          : mapForSamplingSelfStacks.get(oldStackIndex) ?? null
+      );
+      markers.data.forEach((data) => {
+        if (data && 'cause' in data && data.cause) {
+          data.cause.stack = mapForSyncBacktraces.get(data.cause.stack);
+        }
+      });
+      if (jsAllocations !== undefined) {
+        jsAllocations.stack = jsAllocations.stack.map((oldStackIndex) =>
+          oldStackIndex === null
+            ? null
+            : mapForSyncBacktraces.get(oldStackIndex) ?? null
+        );
+      }
+      if (nativeAllocations !== undefined) {
+        nativeAllocations.stack = nativeAllocations.stack.map((oldStackIndex) =>
+          oldStackIndex === null
+            ? null
+            : mapForSyncBacktraces.get(oldStackIndex) ?? null
+        );
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

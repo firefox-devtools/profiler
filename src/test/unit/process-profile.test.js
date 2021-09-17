@@ -384,6 +384,16 @@ describe('js allocation processing', function () {
       geckoThread.markers.data.push(markerTuple);
     };
   }
+  function getFrameAddressesForStack(thread, stackIndex) {
+    const addresses = [];
+    let stack = stackIndex;
+    while (stack !== null) {
+      addresses.push(thread.frameTable.address[thread.stackTable.frame[stack]]);
+      stack = thread.stackTable.prefix[stack];
+    }
+    addresses.reverse();
+    return addresses;
+  }
 
   it('should process JS allocation markers into a JS allocation table', function () {
     const geckoProfile = createGeckoProfile();
@@ -396,8 +406,9 @@ describe('js allocation processing', function () {
 
     // Create 3 allocations, and note the marker lengths.
     const originalMarkersLength = geckoThread.markers.data.length;
-    createAllocation({ byteSize: 3, stackIndex: 11 });
-    createAllocation({ byteSize: 5, stackIndex: 13 });
+    // Note: the stack indexes used here must exist in the thread's stackTable.
+    createAllocation({ byteSize: 3, stackIndex: 5 });
+    createAllocation({ byteSize: 5, stackIndex: 6 });
     createAllocation({ byteSize: 7, stackIndex: null });
     const markersAndAllocationsLength = geckoThread.markers.data.length;
 
@@ -418,7 +429,18 @@ describe('js allocation processing', function () {
     // Assert that the transformation makes sense.
     expect(jsAllocations.time).toEqual([0, 1, 2]);
     expect(jsAllocations.weight).toEqual([3, 5, 7]);
-    expect(jsAllocations.stack).toEqual([11, 13, null]);
+
+    // All addressses should be nudged by 1 byte, because js allocation stack frames
+    // all come from stack walking (the instruction pointer frame is removed by gecko).
+    expect(
+      getFrameAddressesForStack(processedThread, jsAllocations.stack[0])
+    ).toEqual([-1, 0xf83, 0x1a44, 0x1bcc]);
+    expect(
+      getFrameAddressesForStack(processedThread, jsAllocations.stack[1])
+    ).toEqual([-1, 0xf83, 0x1a44, 0x1bcd]);
+    expect(
+      getFrameAddressesForStack(processedThread, jsAllocations.stack[2])
+    ).toEqual([]);
   });
 });
 
@@ -466,8 +488,9 @@ describe('native allocation processing', function () {
 
     // Create 3 allocations, and note the marker lengths.
     const originalMarkersLength = geckoThread.markers.data.length;
-    createAllocation({ byteSize: 3, stackIndex: 11 });
-    createAllocation({ byteSize: 5, stackIndex: 13 });
+    // Note: the stack indexes used below must exist in the stackTable.
+    createAllocation({ byteSize: 3, stackIndex: 5 });
+    createAllocation({ byteSize: 5, stackIndex: 6 });
     createAllocation({ byteSize: 7, stackIndex: null });
     const markersAndAllocationsLength = geckoThread.markers.data.length;
 
@@ -490,7 +513,7 @@ describe('native allocation processing', function () {
     // Assert that the transformation makes sense.
     expect(nativeAllocations.time).toEqual([0, 1, 2]);
     expect(nativeAllocations.weight).toEqual([3, 5, 7]);
-    expect(nativeAllocations.stack).toEqual([11, 13, null]);
+    expect(nativeAllocations.stack).toEqual([8, 9, null]);
   });
 });
 
@@ -509,7 +532,9 @@ describe('gecko samples table processing', function () {
 
     // Add some values to the samples table so we can have hardcoded tests.
     const hardcodedTime: Milliseconds[] = [1, 2];
-    const hardcodedStack: Array<null | IndexIntoGeckoStackTable> = [5, 4];
+    const hardcodedStack: Array<null | IndexIntoGeckoStackTable> = [6, 5];
+    const hardcodedStackAfterProcessing: Array<null | IndexIntoGeckoStackTable> =
+      [9, 8];
     const hardcodedEventDelay: Milliseconds[] = [0, 1];
     const hardcodedThreadCPUDelta: Array<number | null> = [0.1, 0.2];
     const hardcodedSamplesTable = [
@@ -537,7 +562,9 @@ describe('gecko samples table processing', function () {
     expect(processedSamples.length).toBe(geckoSamples.data.length);
 
     // Let's check the hardcoded values here.
-    expect(processedSamples.stack.slice(0, 2)).toEqual(hardcodedStack);
+    expect(processedSamples.stack.slice(0, 2)).toEqual(
+      hardcodedStackAfterProcessing
+    );
     expect(processedSamples.time.slice(0, 2)).toEqual(hardcodedTime);
     expect(ensureExists(processedSamples.eventDelay).slice(0, 2)).toEqual(
       hardcodedEventDelay
@@ -549,6 +576,11 @@ describe('gecko samples table processing', function () {
     // Check the processed profile samples array to see if we properly processed
     // the sample fields.
     for (const fieldName in geckoSamples.schema) {
+      if (fieldName === 'stack') {
+        // Don't check the stack here because profile processing changes the shape
+        // of the stack table, so the value is expected to change.
+        continue;
+      }
       const fieldIndex = geckoSamples.schema[fieldName];
 
       for (let i = 0; i < processedSamples.length; i++) {
