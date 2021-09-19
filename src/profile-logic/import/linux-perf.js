@@ -11,6 +11,15 @@ import type { MixedObject } from 'firefox-profiler/types';
  * invocation of `perf script`, where `perf` is the Linux perf command line tool.
  */
 export function isPerfScriptFormat(profile: string): boolean {
+  // Slice the input to a reasonable length, because this can
+  // also be abused by one very long line.
+
+  // One test showed a header 2KB long:
+  // $ cat src/test/fixtures/upgrades/graphviz.perf.gz | gunzip | grep '#' | wc -c
+  // 2286
+  // 10x margin of error => 20KB should be enough.
+  profile = profile.slice(0, 20 * 1024);
+
   // Optimisation: The simplest way to solve this would be using
   // the same logic as parsing: looping over profile.split('\n').
   // But fingerprinting the profile should be fast. So we use a
