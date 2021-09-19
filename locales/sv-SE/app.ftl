@@ -361,17 +361,22 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Tillägg:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
-MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } Overhead
+MenuButtons--metaOverheadStatistics-subtitle = Omkostnad { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Medel
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Omkostnad
+    .title = Tid att prova alla trådar.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Rensning
     .title = Tid för att kassera utgångna data.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Räknare
     .title = Dags att samla in alla räknare.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Intervall
     .title = Observerat intervall mellan två prover.
-MenuButtons--metaOverheadStatistics-overhead-percentage = Overheadprocent:
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Låsningar
+    .title = Tid för låsning innan provtagning.
+MenuButtons--metaOverheadStatistics-overhead-duration = Omkostnad varaktighet:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Omkostnad procent:
 MenuButtons--metaOverheadStatistics-profiled-duration = Profilerad varaktighet:
 
 ## Publish panel
@@ -464,6 +469,10 @@ StackSettings--implementation-all-stacks = Alla stackar
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Ursprunglig
 StackSettings--use-data-source-label = Datakälla:
+StackSettings--call-tree-strategy-native-retained-allocations = Lagrat minne
+    .title = Sammanfatta med hjälp av byte av minne som tilldelades och som aldrig frigjordes i det aktuella förhandsgranskningsvalet
+StackSettings--call-tree-native-allocations = Tilldelat minne
+    .title = Sammanfatta med byte av tilldelat minne
 StackSettings--show-user-timing = Visa användartiming
 
 ## Tab Bar for the bottom half of the analysis UI.
