@@ -329,5 +329,5 @@ funcTable: {
 ```
 
 [nsIProfiler]: https://dxr.mozilla.org/mozilla-central/source/tools/profiler/gecko/nsIProfiler.idl
-[ProfileBufferEntry.h]: https://dxr.mozilla.org/mozilla-central/rev/b043233ec04f06768d59dcdfb9e928142280f3cc/tools/profiler/core/ProfileBufferEntry.h#322-411
+[ProfileBufferEntry.h]: https://searchfox.org/mozilla-central/rev/5966e98bdfa7355e0a3d9cce482f4717dc3419b0/tools/profiler/core/ProfileBufferEntry.h#358
 [profiler.firefox.com]: https://profiler.firefox.com
