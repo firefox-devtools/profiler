@@ -103,12 +103,12 @@ CallNodeContextMenu--copy-stack = Copiar pila
 ## CallTree
 ## This is the component for Call Tree panel.
 
-CallTree--tracing-ms-total = Tempore executive (ms)
+CallTree--tracing-ms-total = Tempore de execution (ms)
     .title =
-        Le tempore executive “total” include un summario de tote le tempore que iste
-        function ha essite presente in le pila. Isto include le tempore que
-        le function era realmente exequite e le tempore passate in le visitatores de
-        iste function.
+        Le tempore de execution “total” include un summario de tote le
+        tempore que iste function ha essite presente in le pila. Isto
+        include le tempore que le function esseva realmente in execution
+        e le tempore passate in le appellatores de iste function.
 CallTree--tracing-ms-self = Proprie (ms)
     .title =
         Le tempore"proprie" solo include le tempore que le function era
