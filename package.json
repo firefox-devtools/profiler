@@ -51,7 +51,7 @@
   "dependencies": {
     "@fluent/bundle": "^0.17.0",
     "@fluent/langneg": "^0.6.0",
-    "@fluent/react": "^0.13.1",
+    "@fluent/react": "^0.14.0",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
     "clamp": "^1.0.1",
