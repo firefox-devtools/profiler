@@ -377,6 +377,7 @@ MenuButtons--metaInfo--logical-cpu =
 MenuButtons--metaInfo--recording-started = Запис розпочато:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--profile-version = Версія профілю:
+MenuButtons--metaInfo--buffer-capacity = Обсяг буфера:
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
 #   $configurationDuration (Number) - Configuration Duration in Seconds
@@ -386,6 +387,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
         [few] { $configurationDuration } секунди
        *[many] { $configurationDuration } секунд
     }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Необмежено
 MenuButtons--metaInfo--application = Застосунок
 MenuButtons--metaInfo--name-and-version = Назва та версія:
 MenuButtons--metaInfo--update-channel = Канал оновлень:
@@ -500,6 +503,7 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-stacks = Усі стеки
 StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Нативні
 StackSettings--use-data-source-label = Джерело даних:
 StackSettings--panel-search =
     .label = Фільтр стеків:
