@@ -505,6 +505,9 @@ StackSettings--use-data-source-label = Джерело даних:
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Дерево викликів
+TabBar--stack-chart-tab = Діаграма стека
+TabBar--marker-chart-tab = Маркерна діаграма
+TabBar--marker-table-tab = Маркерна таблиця
 TabBar--network-tab = Мережа
 
 ## TrackContextMenu
