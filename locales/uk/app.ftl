@@ -501,10 +501,14 @@ ServiceWorkerManager--hide-notice-button =
 StackSettings--implementation-all-stacks = Усі стеки
 StackSettings--implementation-javascript = JavaScript
 StackSettings--use-data-source-label = Джерело даних:
+StackSettings--panel-search =
+    .label = Фільтр стеків:
+    .title = Показувати лише стеки, що містять функцію, чия назва збігається з цим підрядком
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Дерево викликів
+TabBar--flame-graph-tab = Флейм-діаграма
 TabBar--stack-chart-tab = Діаграма стека
 TabBar--marker-chart-tab = Маркерна діаграма
 TabBar--marker-table-tab = Маркерна таблиця
