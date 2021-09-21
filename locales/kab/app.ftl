@@ -112,7 +112,6 @@ Home--load-from-url-submit-button =
     .value = Sali
 Home--documentation-button = Tasemlit
 Home--menu-button = Rmed taqeffalt n wumuɣ { -profiler-brand-name }
-Home--addon-button = Sebded azegrir
 Home--instructions-title = Amek ara twaliḍ akked ad teskelseḍ imuɣna
 Home--record-instructions-start-stop = Seḥbes neɣ bdu timeɣna
 Home--record-instructions-capture-load = Ṭṭef neɣ sali amaɣnu
@@ -360,8 +359,34 @@ TransformNavigator--complete = Ččar “{ $item }”
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = Fneẓ: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Afukus: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Smezdi tikerrist: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Smezdi: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Sers: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Fneẓ asniles: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Iseklasen i d-yettwasulin

@@ -67,6 +67,18 @@ CallNodeContextMenu--transform-focus-subtree = Fokusera endast på underträd
         innehåller den specifika delen av anropsträdet. Den tar ut en gren av
         anropsträdet, men det gör det endast för den anropsnoden. Alla andra
         anrop från funktionen ignoreras.
+CallNodeContextMenu--transform-collapse-function-subtree = Fäll ihop funktion
+    .title =
+        Att fälla ihop en funktion kommer ta bort allt som anropas, och tilldela
+        all tid till funktionen. Detta kan förenkla en profilering som
+        anropar kod som inte behöver analyseras.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Fäll ihop <strong> { $nameForResource } </strong>
+    .title =
+        Att fälla ihop en resurs plattar ut alla anrop till den
+        resursen till en enda ihopfälld anropsnod.
 CallNodeContextMenu--expand-all = Expandera alla
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -78,6 +90,11 @@ CallNodeContextMenu--copy-stack = Kopiera stack
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Körningstid (ms)
+    .title =
+        Den "totala" körtiden innehåller en sammanfattning av hela tiden där denna
+        funktion observerades vara på stacken. Detta inkluderar den tid då funktionen
+        faktiskt kördes och den tid som tillbringades i anropen från den här funktionen.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -147,10 +164,6 @@ Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
 Home--menu-button-instructions =
     Aktivera profil-menyknappen för att börja spela in en prestandaprofil
     i { -firefox-brand-name }, analysera den och dela den med profiler.firefox.com.
-Home--addon-button = Installera tillägg
-Home--addon-button-instructions =
-    Installera tillägget Gecko Profiler för att börja spela in en prestandaprofil
-    i { -firefox-brand-name }, analysera den sedan och dela den med profiler.firefox.com.
 Home--record-instructions =
     För att starta profilering, klicka på profileringsknappen eller använd
     kortkommandona. Ikonen är blå när en profil spelas in. Tryck på
@@ -206,6 +219,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Ange markering från markörens varaktighet
 MarkerContextMenu--start-selection-here = Starta markering här
 MarkerContextMenu--end-selection-here = Avsluta markering här
 MarkerContextMenu--start-selection-at-marker-start = Starta markering vid markörens <strong>start</strong>
@@ -347,15 +361,23 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Tillägg:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Omkostnad { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Medel
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Omkostnad
+    .title = Tid att prova alla trådar.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Rensning
     .title = Tid för att kassera utgångna data.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Räknare
     .title = Dags att samla in alla räknare.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Intervall
     .title = Observerat intervall mellan två prover.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Låsningar
+    .title = Tid för låsning innan provtagning.
+MenuButtons--metaOverheadStatistics-overhead-duration = Omkostnad varaktighet:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Omkostnad procent:
+MenuButtons--metaOverheadStatistics-profiled-duration = Profilerad varaktighet:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -363,6 +385,7 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Intervall
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Inkludera dolda trådar
 MenuButtons--publish--renderCheckbox-label-hidden-time = Inkludera dolt tidsintervall
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Inkludera skärmdumpar
+MenuButtons--publish--renderCheckbox-label-resource = Inkludera resursURLs och sökvägar
 MenuButtons--publish--renderCheckbox-label-extension = Inkludera tilläggsinformation
 MenuButtons--publish--renderCheckbox-label-preference = Inkludera preferensvärden
 MenuButtons--publish--reupload-performance-profile = Ladda upp prestandaprofilen igen
@@ -446,12 +469,21 @@ StackSettings--implementation-all-stacks = Alla stackar
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Ursprunglig
 StackSettings--use-data-source-label = Datakälla:
+StackSettings--call-tree-strategy-native-retained-allocations = Lagrat minne
+    .title = Sammanfatta med hjälp av byte av minne som tilldelades och som aldrig frigjordes i det aktuella förhandsgranskningsvalet
+StackSettings--call-tree-native-allocations = Tilldelat minne
+    .title = Sammanfatta med byte av tilldelat minne
+StackSettings--show-user-timing = Visa användartiming
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Anropsträd
+TabBar--flame-graph-tab = Flamgraf
 TabBar--stack-chart-tab = Stapeldiagram
+TabBar--marker-chart-tab = Markördiagram
+TabBar--marker-table-tab = Markörtabell
 TabBar--network-tab = Nätverk
+TabBar--js-tracer-tab = JS Tracer
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
@@ -477,6 +509,17 @@ TrackContextMenu--show-all-tracks = Visa alla spår
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Slutförd “{ $item }”
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Fäll ihop: { $item }
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
@@ -497,6 +540,11 @@ TransformNavigator--merge-call-node = Sammanfoga nod: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Sammanfoga: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Släpp: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

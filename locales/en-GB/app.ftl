@@ -215,10 +215,19 @@ Home--menu-button = Enable { -profiler-brand-name } Menu Button
 Home--menu-button-instructions =
     Enable the profiler menu button to start recording a performance
     profile in { -firefox-brand-name }, then analyse it and share it with profiler.firefox.com.
-Home--addon-button = Install add-on
-Home--addon-button-instructions =
-    Install the Gecko Profiler Add-on to start recording a performance
-    profile in { -firefox-brand-name }, then analyse it and share it with profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = This profiler instance was unable to connect to the WebChannel, so it cannot enable the profiler menu button.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    This profiler instance was unable to connect to the WebChannel. This usually means that it’s
+    running on a different host from the one that is specified in the preference
+    <code>devtools.performance.recording.ui-base-url</code>. If you would like to capture new
+    profiles with this instance, and give it programmatic control of the profiler menu button,
+    you can go to <code>about:config</code> and change the preference.
 Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording.
