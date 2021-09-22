@@ -24,7 +24,10 @@ export const AVAILABLE_LOCALES: Array<string> = AVAILABLE_STAGING_LOCALES || [
   'es-CL',
   'ia',
   'it',
+  'nl',
   'pt-BR',
+  'sv-SE',
+  'uk',
   'zh-CN',
   'zh-TW',
 ];
