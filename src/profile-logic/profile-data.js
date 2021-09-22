@@ -2109,14 +2109,18 @@ export function getFriendlyThreadName(
   return label;
 }
 
-export function getThreadProcessDetails(thread: Thread): string {
-  let label = `thread: "${thread.name}"`;
+export function getThreadProcessDetails(
+  thread: Thread,
+  friendlyThreadName: string
+): string {
+  let label = `${friendlyThreadName}\n`;
+  label += `Thread: "${thread.name}"`;
   if (thread.tid !== undefined) {
     label += ` (${thread.tid})`;
   }
 
   if (thread.processType) {
-    label += `\nprocess: "${thread.processType}"`;
+    label += `\nProcess: "${thread.processType}"`;
     if (thread.pid !== undefined) {
       label += ` (${thread.pid})`;
     }
