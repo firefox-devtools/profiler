@@ -2046,6 +2046,11 @@ export function getFriendlyThreadName(
 
   switch (thread.name) {
     case 'GeckoMain': {
+      if (thread['eTLD+1']) {
+        // Return the host name if it's provided by the back-end and it's not sanitized.
+        return thread['eTLD+1'];
+      }
+
       if (thread.processName) {
         // If processName is present, use that as it should contain a friendly name.
         // We want to use that for the GeckoMain thread because it is shown as the
