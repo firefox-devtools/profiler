@@ -39,7 +39,11 @@ describe('app/ErrorBoundary', function () {
     stack.textContent = stack.textContent
       .replace(/\\/g, '/') // normalizes Windows paths
       .replace(/\(.*\/src/g, '(REDACTED)/src') // Removes the home directory
-      .replace(/\(.*\/node_modules/g, '(REDACTED)/node_modules'); // Removes the home directory
+      // Removes the home directory and line / column numbers of vendored files.
+      .replace(
+        /\(.*\/node_modules\/([^:]*):.+/g,
+        '(REDACTED)/node_modules/$1:(REDACTED)'
+      );
 
     expect(container.firstChild).toMatchSnapshot();
   });

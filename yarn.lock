@@ -1042,19 +1042,19 @@
   resolved "https://registry.yarnpkg.com/@fluent/langneg/-/langneg-0.6.0.tgz#4161dbcfdecd2451c77c4852e983c057dfefe380"
   integrity sha512-tvfjaYU4nQxdY7rQ3LVBcBJ6INAlkv0xZjlDQ3Pm1AxEJimO3M9iABr/+fF5Pu2T8m4cHLaQzkekeMh/rq/61A==
 
-"@fluent/react@^0.13.1":
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/@fluent/react/-/react-0.13.1.tgz#c6337f6031220baf78c08c9f31d2c6ded4531508"
-  integrity sha512-0hvWZojJgc97J1V2nI2COvStjKOD3blYGk1EPdDyhK+OhddsZR4Gp9S1c4cOdxNjLYbz1sBwBOMOKP+tY6Zarg==
+"@fluent/react@^0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@fluent/react/-/react-0.14.0.tgz#a2c8724833fd9c462f334b61f0e06830ac98ae40"
+  integrity sha512-XYiEajY4GM9GJGlldrjCJvLLAj+5T/otRDNRgGX+23UKYdzVrjyp1kcO5akG+12Wk5yxspmZdOmqwbru6xxZmw==
   dependencies:
-    "@fluent/sequence" "0.5.0"
-    cached-iterable "^0.2.1"
+    "@fluent/sequence" "^0.7.0"
+    cached-iterable "^0.3.0"
     prop-types "^15.7.2"
 
-"@fluent/sequence@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@fluent/sequence/-/sequence-0.5.0.tgz#6349b614711df2d8ed256598fa31a757fe032539"
-  integrity sha512-70LhnbPO/sO2rI2vHws66QwKq9a7PKiEN0hrc65xY3LzWq3AlATZnt+EmFG1ihmPI+5mqGPnJMAdpp3qze3X2Q==
+"@fluent/sequence@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@fluent/sequence/-/sequence-0.7.0.tgz#2fbfa872e87293cca209ba4a586d1a8fbaa2e5c4"
+  integrity sha512-aH1xMwX8DFvKOQSKUKpB3zMsnJ2rRKt7MajLNnx/r3V3DWDo2nzEfm21d7UyOgwEckPIjPmhxdW1MEmsGUxYIw==
 
 "@humanwhocodes/config-array@^0.5.0":
   version "0.5.0"
@@ -3057,10 +3057,10 @@ cacheable-request@^7.0.1:
     normalize-url "^4.1.0"
     responselike "^2.0.0"
 
-cached-iterable@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/cached-iterable/-/cached-iterable-0.2.1.tgz#723958f5e7adc74c96bedb10b426bdfd95f2fe6d"
-  integrity sha512-8zAVjMjdn/S/QXJaOnqsko0+ZJzXT2Dum2u9TMGg5YR9fxONPrUjuO9VYqnb1AoldXeYVAcNJLgT5Q8WaIJSgA==
+cached-iterable@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/cached-iterable/-/cached-iterable-0.3.0.tgz#2618204549e9c5dd102102a6e7e50af6adb77df8"
+  integrity sha512-MDqM6TpBVebZD4UDtmlFp8EjVtRcsB6xt9aRdWymjk0fWVUUGgmt/V7o0H0gkI2Tkvv8B0ucjidZm4mLosdlWw==
 
 call-bind@^1.0.0, call-bind@^1.0.2:
   version "1.0.2"
