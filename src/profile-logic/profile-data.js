@@ -2159,6 +2159,13 @@ export type ParsedFileNameFromSymbolication =
       bucket: string,
       digest: string,
       path: string,
+    |}
+  | {|
+      type: 'cargo',
+      registry: string,
+      crate: string,
+      version: string,
+      path: string,
     |};
 
 // For native code, the symbolication API returns special filenames that allow
@@ -2170,6 +2177,8 @@ export type ParsedFileNameFromSymbolication =
 // "git:github.com/rust-lang/rust:../88f19c6dab716c6281af7602e30f413e809c5974//library/std/src/sys/windows/thread.rs:88f19c6dab716c6281af7602e30f413e809c5974"
 // "s3:gecko-generated-sources:a5d3747707d6877b0e5cb0a364e3cb9fea8aa4feb6ead138952c2ba46d41045297286385f0e0470146f49403e46bd266e654dfca986de48c230f3a71c2aafed4/ipc/ipdl/PBackgroundChild.cpp:"
 // "s3:gecko-generated-sources:4fd754dd7ca7565035aaa3357b8cd99959a2dddceba0fc2f7018ef99fd78ea63d03f9bf928afdc29873089ee15431956791130b97f66ab8fcb88ec75f4ba6b04/aarch64-apple-darwin/release/build/swgl-580c7d646d09cf59/out/ps_text_run_ALPHA_PASS_TEXTURE_2D.h:"
+// "cargo:github.com-1ecc6299db9ec823:tokio-1.6.1:src/runtime/task/mod.rs"
+// "cargo:github.com-1ecc6299db9ec823:addr2line-0.16.0:src/function.rs"
 //
 // This smart filename substitution is implemented here:
 // https://searchfox.org/mozilla-central/rev/f213971fbd82ada22c2c4e2072f729c3799ec563/toolkit/crashreporter/tools/symbolstore.py#605-636
@@ -2189,6 +2198,8 @@ const repoPathRegex =
   /^(?<vcs>hg|git):(?<repo>[^:]*):(?<path>[^:]*):(?<rev>[0-9a-f]*)$/;
 const s3PathRegex =
   /^s3:(?<bucket>[^:]*):(?<digest>[0-9a-f]*)\/(?<path>[^:]*):$/;
+const cargoPathRegex =
+  /^cargo:(?<registry>[^:]*):(?<crate>[^/]+)-(?<version>[0-9]+\.[0-9]+\.[0-9]+):(?<path>[^:]*)$/;
 export function parseFileNameFromSymbolication(
   file: string
 ): ParsedFileNameFromSymbolication {
@@ -2219,6 +2230,18 @@ export function parseFileNameFromSymbolication(
     };
   }
 
+  const cargoMatch = cargoPathRegex.exec(file);
+  if (cargoMatch !== null && cargoMatch.groups) {
+    const { registry, crate, version, path } = cargoMatch.groups;
+    return {
+      type: 'cargo',
+      registry,
+      crate,
+      version,
+      path: `${crate}-${version}/${path}`,
+    };
+  }
+
   // At this point, it could be a local path (if this is a native function), or
   // it could be an http/https/chrome URL (for JavaScript code).
   return {
@@ -2235,6 +2258,7 @@ export function getUrlsForSourceFile(
   corsFetchableRawSource?: string,
   userCopyableRawSource?: string,
   userViewablePrettySource?: string,
+  corsFetchableCrate?: string,
 |} {
   switch (parsedFile.type) {
     case 'hg': {
@@ -2265,6 +2289,15 @@ export function getUrlsForSourceFile(
         corsFetchableRawSource: `https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
         userCopyableRawSource: `view-source:https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
         userViewablePrettySource: `https://crash-stats.mozilla.org/sources/highlight/?url=https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
+      };
+    }
+    case 'cargo': {
+      const { crate, version, path } = parsedFile;
+      const pathWithoutSrc = path.slice(4);
+      return {
+        userCopyableRawSource: `https://docs.rs/crate/${crate}/${version}/source/${path}`,
+        userViewablePrettySource: `https://docs.rs/${crate}/${version}/src/${crate}/${pathWithoutSrc}`,
+        corsFetchableCrate: `https://crates.io/api/v1/crates/${crate}/${version}/download`,
       };
     }
     case 'normal': {
