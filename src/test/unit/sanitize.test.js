@@ -6,7 +6,10 @@
 import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { sanitizePII } from '../../profile-logic/sanitize';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithMarkers,
+  getProfileFromTextSamples,
+} from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 import type { RemoveProfileInformation } from 'firefox-profiler/types';
 import { storeWithProfile } from '../fixtures/stores';
@@ -535,6 +538,37 @@ describe('sanitizePII', function () {
     // Now check the filename fields and make sure they are sanitized.
     expect(marker1.filename).toBe('<PATH>/' + marker1File);
     expect(marker2.filename).toBe('<PATH>\\' + marker2File);
+  });
+
+  it('should sanitize the eTLD+1 field if urls are supposed to be sanitized', function () {
+    // Create a simple profile with eTLD+1 field in its thread.
+    const { profile } = getProfileFromTextSamples('A');
+    profile.threads[0]['eTLD+1'] = 'https://profiler.firefox.com/';
+
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveUrls: true,
+      },
+      profile
+    );
+
+    expect(sanitizedProfile.threads[0]['eTLD+1']).toBeFalsy();
+  });
+
+  it('should not sanitize the eTLD+1 field if urls are not supposed to be sanitized', function () {
+    // Create a simple profile with eTLD+1 field in its thread.
+    const { profile } = getProfileFromTextSamples('A');
+    const eTLDPlus1 = 'https://profiler.firefox.com/';
+    profile.threads[0]['eTLD+1'] = eTLDPlus1;
+
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveUrls: false,
+      },
+      profile
+    );
+
+    expect(sanitizedProfile.threads[0]['eTLD+1']).toBe(eTLDPlus1);
   });
 });
 

@@ -229,6 +229,12 @@ export type GeckoStackStruct = {|
 
 export type GeckoThread = {|
   name: string,
+  // The eTLD+1 of the isolated content process if provided by the back-end.
+  // It will be undefined if:
+  // - Fission is not enabled.
+  // - It's not an isolated content process.
+  // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
+  'eTLD+1'?: string,
   registerTime: number,
   processType: string,
   processName?: string,
