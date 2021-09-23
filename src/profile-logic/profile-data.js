@@ -2046,6 +2046,11 @@ export function getFriendlyThreadName(
 
   switch (thread.name) {
     case 'GeckoMain': {
+      if (thread['eTLD+1']) {
+        // Return the host name if it's provided by the back-end and it's not sanitized.
+        return thread['eTLD+1'];
+      }
+
       if (thread.processName) {
         // If processName is present, use that as it should contain a friendly name.
         // We want to use that for the GeckoMain thread because it is shown as the
@@ -2104,14 +2109,18 @@ export function getFriendlyThreadName(
   return label;
 }
 
-export function getThreadProcessDetails(thread: Thread): string {
-  let label = `thread: "${thread.name}"`;
+export function getThreadProcessDetails(
+  thread: Thread,
+  friendlyThreadName: string
+): string {
+  let label = `${friendlyThreadName}\n`;
+  label += `Thread: "${thread.name}"`;
   if (thread.tid !== undefined) {
     label += ` (${thread.tid})`;
   }
 
   if (thread.processType) {
-    label += `\nprocess: "${thread.processType}"`;
+    label += `\nProcess: "${thread.processType}"`;
     if (thread.pid !== undefined) {
       label += ` (${thread.pid})`;
     }

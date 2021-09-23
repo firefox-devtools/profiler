@@ -330,6 +330,12 @@ function sanitizeThreadPII(
     }
   }
 
+  if (PIIToBeRemoved.shouldRemoveUrls && newThread['eTLD+1']) {
+    // Remove the domain name of the isolated content process if it's provided
+    // from the back-end.
+    delete newThread['eTLD+1'];
+  }
+
   // Remove the old stringTable and markerTable and replace it
   // with new updated ones.
   newThread.stringTable = new UniqueStringArray(stringArray);
