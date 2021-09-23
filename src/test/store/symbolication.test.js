@@ -142,6 +142,7 @@ describe('doSymbolicateProfile', function () {
         profile,
         symbolStore,
       } = init();
+
       expect(formatTree(getCallTree(getState()))).toEqual([
         '- 0x000a (total: 1, self: —)',
         '  - 0x2000 (total: 1, self: 1)',
@@ -187,7 +188,9 @@ describe('doSymbolicateProfile', function () {
       expect(formatTree(getCallTree(getState()))).toEqual([
         // 0x0000 and 0x000a get merged together.
         '- first symbol (total: 2, self: —)',
-        '  - last symbol (total: 2, self: 2)',
+        '  - second symbol (total: 1, self: —)',
+        '    - last symbol (total: 1, self: 1)',
+        '  - last symbol (total: 1, self: 1)',
         '- third symbol (total: 1, self: 1)',
         '- second symbol (total: 1, self: 1)',
       ]);
@@ -242,12 +245,31 @@ describe('doSymbolicateProfile', function () {
       // 0x0000 should be at line 12.
       expect(frameTable.line[frameAt0x0000]).toBe(12);
 
-      // Now, find the frame for 0x000a, and make sure there's only one.
-      const frameAt0x000a = frameTable.address.indexOf(0x000a);
-      expect(frameAt0x000a).not.toBe(-1);
-      expect(frameTable.address.indexOf(0x000a, frameAt0x000a + 1)).toBe(-1);
-      // 0x000a should be at line 14.
-      expect(frameTable.line[frameAt0x000a]).toBe(14);
+      // Now, find the frames for 0x000a.
+      // There should be two: One with inline depth 0, and one with inline depth 1.
+      const firstFrameAt0x000a = frameTable.address.indexOf(0x000a);
+      expect(firstFrameAt0x000a).not.toBe(-1);
+      const secondFrameAt0x000a = frameTable.address.indexOf(
+        0x000a,
+        firstFrameAt0x000a + 1
+      );
+      expect(secondFrameAt0x000a).not.toBe(-1);
+      const thirdFrameAt0x000a = frameTable.address.indexOf(
+        0x000a,
+        secondFrameAt0x000a + 1
+      );
+      // There should be no third frame for 0x000a.
+      expect(thirdFrameAt0x000a).toBe(-1);
+
+      // 0x000a at inline depth 0 should be at line 14, in the first symbol.
+      expect(frameTable.line[firstFrameAt0x000a]).toBe(14);
+      expect(frameTable.inlineDepth[firstFrameAt0x000a]).toBe(0);
+      expect(frameTable.func[firstFrameAt0x000a]).toBe(firstSymbolFuncIndex);
+
+      // 0x000a at inline depth 1 should be at line 37, in the second symbol.
+      expect(frameTable.line[secondFrameAt0x000a]).toBe(37);
+      expect(frameTable.inlineDepth[secondFrameAt0x000a]).toBe(1);
+      expect(frameTable.func[secondFrameAt0x000a]).toBe(secondSymbolFuncIndex);
     });
 
     it('updates the symbolication status', async () => {
@@ -380,7 +402,9 @@ describe('doSymbolicateProfile', function () {
       // "overencompassing first symbol" gets split into "first symbol",
       // "second symbol" and "third symbol".
       '- first symbol (total: 2, self: —)',
-      '  - last symbol (total: 2, self: 2)',
+      '  - second symbol (total: 1, self: —)',
+      '    - last symbol (total: 1, self: 1)',
+      '  - last symbol (total: 1, self: 1)',
       '- third symbol (total: 1, self: 1)',
       '- second symbol (total: 1, self: 1)',
     ]);
@@ -463,7 +487,9 @@ describe('doSymbolicateProfile', function () {
       // "overencompassing first symbol" gets split into "first symbol",
       // "second symbol" and "third symbol".
       '- first symbol (total: 2, self: —)',
-      '  - last symbol (total: 2, self: 2)',
+      '  - second symbol (total: 1, self: —)',
+      '    - last symbol (total: 1, self: 1)',
+      '  - last symbol (total: 1, self: 1)',
       '- third symbol (total: 1, self: 1)',
       '- second symbol (total: 1, self: 1)',
     ]);
