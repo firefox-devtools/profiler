@@ -638,9 +638,9 @@ export function changeTimelineTrackOrganization(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const profile = getProfile(getState());
-    // We are resetting the selected thread index, because we are not sure if
-    // the selected thread will be availabe in the next view.
-    const selectedThreadIndexes = new Set([0]);
+    // We are resetting the selected thread index and the url state, because we
+    // are not sure if the selected thread will be availabe in the next view.
+    const selectedThreadIndexes = null;
     dispatch({
       type: 'DATA_RELOAD',
     });
