@@ -618,10 +618,15 @@ export function getGlobalTrackName(
         // The pid is a number, make a label for it.
         return `Process ${pid}`;
       }
+
+      // Getting the friendly thread name and removing the scheme in case we
+      // have any eTLD+1 returned. This can happen if the thread is an Isolated
+      // Web Content process' main thread that has an `eTLD+1` field. Removing the
+      // scheme to fit the complete url in this limited space in the timeline.
       return getFriendlyThreadName(
         threads,
         threads[globalTrack.mainThreadIndex]
-      );
+      ).replace(/^https?:\/\//i, '');
     }
     case 'screenshots':
       return 'Screenshots';

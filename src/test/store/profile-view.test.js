@@ -3073,6 +3073,19 @@ describe('getFriendlyThreadName', function () {
       'C (2/2)',
     ]);
   });
+
+  it('uses the eTLD+1 field if provided', function () {
+    const { getFriendlyThreadNames } = setup([
+      { name: 'GeckoMain', processType: 'default' },
+      { name: 'GeckoMain', 'eTLD+1': 'https://firefox.com' },
+      { name: 'GeckoMain', 'eTLD+1': 'http://w3c.github.io' },
+    ]);
+    expect(getFriendlyThreadNames()).toEqual([
+      'Parent Process',
+      'https://firefox.com',
+      'http://w3c.github.io',
+    ]);
+  });
 });
 
 describe('counter selectors', function () {
