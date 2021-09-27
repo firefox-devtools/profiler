@@ -165,8 +165,14 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Documentación
 Home--menu-button = Activar botón de menú de { -profiler-brand-name }
 Home--menu-button-instructions = Habilita el botón de menú del perfilador para comenzar a registrar un perfil de rendimiento en { -firefox-brand-name }, luego analízalo y compártelo con profiler.firefox.com.
-Home--addon-button = Instalar complemento
-Home--addon-button-instructions = Instala el complemento de perfilador Gecko para comenzar a registrar un perfil de rendimiento en { -firefox-brand-name }, luego analízalo y compártelo con profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Esta instancia del perfilador no pudo conectarse a WebChannel, por lo que no puede activar el botón de menú del perfilador.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable = Esta instancia del perfilador no pudo conectarse a WebChannel. Esto usualmente significa que está ejecutándose en un servidor diferente del especificado en la preferencia <code>devtools.performance.recording.ui-base-url</code>. Si quieres capturar nuevos perfiles con esta instancia, y otorgarle control programático del botón del menú del perfilador, puedes ir a <code>about:config</code> y cambiar la preferencia.
 Home--record-instructions = Para empezar a perfilar, haz clic en el botón de perfilado o utiliza los atajos del teclado. El icono se torna azul cuando se está grabando un perfil. Pulsa <kbd>Capturar</kbd> para cargar los datos en profiler.firefox.com.
 Home--instructions-title = Cómo ver y registrar perfiles
 Home--instructions-content =

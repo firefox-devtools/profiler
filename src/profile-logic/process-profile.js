@@ -29,6 +29,7 @@ import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
   getOrCreateURIResource,
+  nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
@@ -1031,6 +1032,7 @@ function _processThread(
 
   const newThread: Thread = {
     name: thread.name,
+    'eTLD+1': thread['eTLD+1'],
     processType: thread.processType,
     processName:
       typeof thread.processName === 'string' ? thread.processName : '',
@@ -1097,7 +1099,7 @@ function _processThread(
 
   processJsTracer();
 
-  return newThread;
+  return nudgeReturnAddresses(newThread);
 }
 
 /**

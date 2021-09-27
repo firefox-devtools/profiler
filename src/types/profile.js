@@ -270,7 +270,15 @@ export type RawMarkerTable = {|
 export type FrameTable = {|
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
-  // The library is given by the frame's nativeSymbol: frame -> nativeSymbol -> lib.
+  //
+  // For frames obtained from stack walking, the address points into the call instruction.
+  // It is not a return address, it is a "nudged" return address (i.e. return address
+  // minus one byte). This is different from the Gecko profile format. The conversion
+  // is performed at the end of profile processing. See the big comment above
+  // nudgeReturnAddresses for more details.
+  //
+  // The library which this address is relative to is given by the frame's nativeSymbol:
+  // frame -> nativeSymbol -> lib.
   address: Array<Address | -1>,
 
   category: (IndexIntoCategoryList | null)[],
@@ -593,6 +601,13 @@ export type Thread = {|
   unregisterTime: Milliseconds | null,
   pausedRanges: PausedRange[],
   name: string,
+  // The eTLD+1 of the isolated content process if provided by the back-end.
+  // It will be undefined if:
+  // - Fission is not enabled.
+  // - It's not an isolated content process.
+  // - It's a sanitized profile.
+  // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
+  'eTLD+1'?: string,
   processName?: string,
   isJsTracer?: boolean,
   pid: Pid,

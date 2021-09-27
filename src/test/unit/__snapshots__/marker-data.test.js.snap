@@ -27,7 +27,7 @@ Array [
     "data": Object {
       "category": "Paint",
       "cause": Object {
-        "stack": 2,
+        "stack": 4,
         "tid": 1111,
         "time": 1,
       },
@@ -83,7 +83,7 @@ Array [
     "data": Object {
       "category": "Paint",
       "cause": Object {
-        "stack": 2,
+        "stack": 4,
         "tid": 1111,
         "time": 1,
       },
@@ -98,7 +98,7 @@ Array [
     "data": Object {
       "category": "Paint",
       "cause": Object {
-        "stack": 2,
+        "stack": 4,
         "tid": 1111,
         "time": 1,
       },
@@ -149,7 +149,7 @@ Array [
     "category": 0,
     "data": Object {
       "cause": Object {
-        "stack": 2,
+        "stack": 4,
         "tid": 1111,
         "time": 1,
       },

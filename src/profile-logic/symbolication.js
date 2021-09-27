@@ -111,6 +111,8 @@ import type {
  *    points to the lib object in the thread's "libs" list that contained this
  *    address. The frame's and func's address fields are relative to that lib.
  *  - All frames start out with their nativeSymbol field set to null.
+ *  - All return addresses are adjusted by subtracting one byte, to point into
+ *    the call instruction. See nudgeReturnAddresses for details.
  *
  * II. Address gathering per library: This step goes through all threads and
  * gathers up addresses per library that need to be symbolicated. It also keeps
@@ -140,10 +142,15 @@ import type {
  * Splitting up funcs means that a collection of frames which were all using the
  * same func before re-symbolication will be assigned to multiple funcs after
  * re-symbolication.
- * This is different to initial symbolication, which only ever needs to *merge*
- * funcs, not split them, because the initial profile starts out in a
- * "maximally-split" state: every frame has its own function at the beginning of
+ * This is different to initial symbolication, which usually only needs to
+ * *merge* funcs, not split them. That's because the initial profile mosty
+ * starts out with a unique func for every frame, except for frames whose
+ * address was observed both as a return address and as an instruction pointer
+ * value; for those frame addresses there will be two different frames (one with
+ * the original address and one with that address minus one byte) which share
+ * the same func. Nevertheless, "splitting funcs" is very uncommon during
  * initial symbolication.
+ *
  * When funcs are merged, oldFuncToNewFuncMap lets us update other parts of the
  * redux state that refer to func indexes. But when funcs are split, this is not
  * possible. But since function splitting is the rare case, we accept this

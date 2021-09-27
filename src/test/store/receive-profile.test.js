@@ -47,7 +47,10 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
-import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
+import {
+  getHumanReadableTracks,
+  getProfileWithNiceTracks,
+} from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
 
 import { compress } from '../../utils/gz';
@@ -527,13 +530,21 @@ describe('actions/receive-profile', function () {
   describe('changeTimelineTrackOrganization', function () {
     const tabID = 123;
     const innerWindowID = 111111;
-    function setup(initializeCtxId: boolean = false) {
+    function setup({
+      profile,
+      initializeCtxId = false,
+    }: {
+      profile?: Profile,
+      initializeCtxId?: boolean,
+    }) {
       const store = blankStore();
-      const profile = getEmptyProfile();
 
-      profile.threads.push(
-        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 1 })
-      );
+      if (!profile) {
+        profile = getEmptyProfile();
+        profile.threads.push(
+          getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 1 })
+        );
+      }
 
       profile.meta.configuration = {
         threads: [],
@@ -564,7 +575,7 @@ describe('actions/receive-profile', function () {
     }
 
     it('should be able to switch to active tab view from the full view', function () {
-      const { dispatch, getState } = setup();
+      const { dispatch, getState } = setup({ initializeCtxId: false });
       expect(
         UrlStateSelectors.getTimelineTrackOrganization(getState())
       ).toEqual({
@@ -585,7 +596,7 @@ describe('actions/receive-profile', function () {
     });
 
     it('should be able to switch to full view from the active tab', function () {
-      const { dispatch, getState } = setup(true);
+      const { dispatch, getState } = setup({ initializeCtxId: true });
       expect(
         UrlStateSelectors.getTimelineTrackOrganization(getState())
       ).toEqual({
@@ -598,6 +609,34 @@ describe('actions/receive-profile', function () {
       ).toEqual({
         type: 'full',
       });
+    });
+
+    it('should reset the url state while switching to the full view', function () {
+      // Get a profile with nice tracks, so we can test that it's not automatically
+      // select the first thread.
+      const profile = getProfileWithNiceTracks();
+      const { dispatch, getState } = setup({ profile, initializeCtxId: true });
+
+      // Make sure that we start with the active-tab view.
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'active-tab',
+        tabID,
+      });
+
+      // Now switch to the full view and test that it will select the second track.
+      dispatch(changeTimelineTrackOrganization({ type: 'full' }));
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'full',
+      });
+      // It should find the best non-idle thread instead of selecting the first
+      // one automatically.
+      expect(
+        UrlStateSelectors.getSelectedThreadIndexes(getState())
+      ).toMatchObject(new Set([1]));
     });
   });
 
@@ -1742,27 +1781,31 @@ describe('actions/receive-profile', function () {
     it('retrieves profiles and put them in the same view', async function () {
       const { profile1, profile2, resultProfile, globalTracks, rootRange } =
         await setupWithLongUrl(getSomeProfiles(), {
-          urlSearch1: 'thread=0',
+          urlSearch1: 'thread=0&profileName=name 1',
           urlSearch2: 'thread=1',
         });
 
-      const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
-        (thread, i) => ({
-          ...thread,
-          pid: `${thread.pid} from profile ${i + 1}`,
-          processName: `Profile ${i + 1}: ${thread.name}`,
-          unregisterTime: getTimeRangeForThread(thread, 1).end,
-        })
-      );
-
-      // comparison thread
-      expectedThreads.push(
+      const expectedThreads = [
+        {
+          ...profile1.threads[0],
+          pid: '0 from profile 1',
+          processName: 'name 1: Empty',
+          unregisterTime: getTimeRangeForThread(profile1.threads[0], 1).end,
+        },
+        {
+          ...profile2.threads[1],
+          pid: '0 from profile 2',
+          processName: 'Profile 2: Empty',
+          unregisterTime: getTimeRangeForThread(profile2.threads[1], 1).end,
+        },
+        // comparison thread
         expect.objectContaining({
           processType: 'comparison',
           pid: 'Diff between 1 and 2',
           name: 'Diff between 1 and 2',
-        })
-      );
+        }),
+      ];
+
       expect(resultProfile.threads).toEqual(expectedThreads);
       expect(globalTracks).toHaveLength(3); // each thread + comparison track
       expect(rootRange).toEqual({ start: 0, end: 9 });
