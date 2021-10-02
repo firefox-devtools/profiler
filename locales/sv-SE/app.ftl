@@ -79,6 +79,8 @@ CallNodeContextMenu--transform-collapse-resource = Fäll ihop <strong> { $nameFo
     .title =
         Att fälla ihop en resurs plattar ut alla anrop till den
         resursen till en enda ihopfälld anropsnod.
+CallNodeContextMenu--transform-collapse-direct-recursion = Dölj direkt rekursion
+    .title = Dölj direkt rekursion tar bort anrop som upprepade gånger anropar samma funktion.
 CallNodeContextMenu--expand-all = Expandera alla
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -494,6 +496,7 @@ TrackContextMenu--only-show-this-process-group = Visa endast denna processgrupp
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Visa endast "{ $trackName }"
+TrackContextMenu--hide-other-screenshots-tracks = Dölj andra Skärmdump-spår
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
