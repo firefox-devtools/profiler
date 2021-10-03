@@ -473,10 +473,18 @@ StackSettings--implementation-native = Ursprunglig
 StackSettings--use-data-source-label = Datakälla:
 StackSettings--call-tree-strategy-timing = Tidpunkter
     .title = Sammanfatta med hjälp av samplade stackar av exekverad kod över tid
+StackSettings--call-tree-strategy-js-allocations = JavaScript-allokeringar
+    .title = Sammanfatta med hjälp av byte av JavaScript allokerat (inga avallokeringar)
 StackSettings--call-tree-strategy-native-retained-allocations = Lagrat minne
     .title = Sammanfatta med hjälp av byte av minne som tilldelades och som aldrig frigjordes i det aktuella förhandsgranskningsvalet
 StackSettings--call-tree-native-allocations = Tilldelat minne
     .title = Sammanfatta med byte av tilldelat minne
+StackSettings--call-tree-strategy-native-deallocations-memory = Tilldelat minne
+    .title = Sammanfatta med hjälp av byte av minne som delas ut på platsen där minnet tilldelades
+StackSettings--call-tree-strategy-native-deallocations-sites = Tilldelningswebbplatser
+    .title = Sammanfatta med hjälp av byte av minne som delas ut efter webbplatsen där minnet tilldelades
+StackSettings--invert-call-stack = Invertera anropsstack
+    .title = Sortera efter tiden i en anropsnod, utan att ignorera dess barn.
 StackSettings--show-user-timing = Visa användartiming
 
 ## Tab Bar for the bottom half of the analysis UI.
