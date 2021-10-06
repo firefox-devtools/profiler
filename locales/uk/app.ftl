@@ -456,6 +456,7 @@ MenuButtons--publish--compressing = Стиснення…
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Чи знаєте ви, що для використання кількох термінів можна використовувати кому (,)?
 
 ## Profile Delete Button
 
@@ -489,6 +490,7 @@ ProfileLoaderAnimation--loading-message-compare =
 ## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Назад до початку
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
