@@ -418,11 +418,16 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Розширення:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Ресурси, які використовує { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Середнє
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Витрачені на роботу ресурси
+    .title = Час отримання всіх потоків.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очищення
     .title = Час викинути застарілі дані.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Лічильник
+    .title = Час збору всіх лічильників
 MenuButtons--metaOverheadStatistics-statkeys-interval = Інтервал:
     .title = Зафіксований інтервал між двома зразками.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Блокування
