@@ -378,6 +378,7 @@ MenuButtons--metaInfo--recording-started = Запис розпочато:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--profile-version = Версія профілю:
 MenuButtons--metaInfo--buffer-capacity = Обсяг буфера:
+MenuButtons--metaInfo--buffer-duration = Тривалість буфера:
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
 #   $configurationDuration (Number) - Configuration Duration in Seconds
@@ -408,6 +409,8 @@ MenuButtons--metaInfo--device = Пристрій:
 MenuButtons--metaInfo--os = ОС:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Візуальні показники
+MenuButtons--metaInfo--speed-index = Індекс швидкості:
 MenuButtons--metaInfo-renderRowOfList-label-features = Можливості:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Фільтр потоків:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Розширення:
@@ -420,6 +423,8 @@ MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очищення
     .title = Час викинути застарілі дані.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Інтервал:
+    .title = Зафіксований інтервал між двома зразками.
 
 ## Publish panel
 ## These strings are used in the publishing panel.
