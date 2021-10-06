@@ -425,6 +425,8 @@ MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очищення
     .title = Час викинути застарілі дані.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Інтервал:
     .title = Зафіксований інтервал між двома зразками.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Блокування
+    .title = Час до блокування перед виконанням вимірювань.
 
 ## Publish panel
 ## These strings are used in the publishing panel.
