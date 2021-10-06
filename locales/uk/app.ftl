@@ -418,11 +418,11 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Розширення:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
-MenuButtons--metaOverheadStatistics-subtitle = Ресурси, які використовує { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-subtitle = Ресурси, які споживає { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Середнє
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
-MenuButtons--metaOverheadStatistics-statkeys-overhead = Витрачені на роботу ресурси
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Спожиті для роботи ресурси
     .title = Час отримання всіх потоків.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очищення
     .title = Час викинути застарілі дані.
@@ -432,6 +432,9 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Інтервал:
     .title = Зафіксований інтервал між двома зразками.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Блокування
     .title = Час до блокування перед виконанням вимірювань.
+MenuButtons--metaOverheadStatistics-overhead-duration = Тривалість споживання ресурсів на роботу:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Відсоток спожитих на роботу ресурсів:
+MenuButtons--metaOverheadStatistics-profiled-duration = Тривалість запису профілю:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -506,6 +509,9 @@ ProfileRootMessage--additional = Повернутися на початок
 ServiceWorkerManager--installing-button = Встановлення…
 ServiceWorkerManager--pending-button = Застосувати та перезавантажити
 ServiceWorkerManager--installed-button = Перезавантажити застосунок
+ServiceWorkerManager--updated-while-not-ready =
+    Нова версія програми була застосована до повного
+    завантаження цієї сторінки. Ви можете зіткнутися з несправностями.
 ServiceWorkerManager--new-version-is-ready = Нова версія застосунку завантажена та готова до використання.
 ServiceWorkerManager--hide-notice-button =
     .title = Сховати сповіщення про перезавантаження
