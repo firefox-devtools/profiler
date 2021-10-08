@@ -8,6 +8,17 @@ Array [
   ],
   Array [
     "fillRect",
+    -0.4,
+    0,
+    0.8,
+    0,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
     -5,
     0,
     10,
