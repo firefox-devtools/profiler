@@ -126,6 +126,8 @@ Home--compare-recordings-info = Vous pouvez également comparer des enregistreme
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Informations du profil
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
