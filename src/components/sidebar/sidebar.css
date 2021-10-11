@@ -139,6 +139,11 @@
   background-color: var(--grey-50);
 }
 
+.sidebar-histogram-bar-color.category-color-grey {
+  /* The grey category color is the same our background color, choose a darker grey instead. */
+  background-color: var(--grey-50);
+}
+
 .sidebar-toggle {
   padding: 0;
   border: 0;
