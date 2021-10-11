@@ -30,6 +30,8 @@ AppViewRouter--error-message-local =
     .message = Pas encore implémenté.
 AppViewRouter--error-message-public =
     .message = Impossible de télécharger le profil.
+AppViewRouter--error-message-from-url =
+    .message = Impossible de télécharger le profil.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -92,6 +94,7 @@ Home--load-from-url-submit-button =
 Home--additional-content-title = Charger des profils existants
 Home--additional-content-content = Vous pouvez <strong>glisser-déposer</strong> un fichier de profil ici pour le charger, ou :
 Home--compare-recordings-info = Vous pouvez également comparer des enregistrements. <a>Ouvrir l’interface de comparaison.</a>
+Home--recent-uploaded-recordings-title = Enregistrements récemment envoyés
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
