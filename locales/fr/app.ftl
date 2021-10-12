@@ -22,6 +22,8 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--github-icon =
+    .title = Accédez à notre dépôt Git (cela ouvrira une nouvelle fenêtre)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
