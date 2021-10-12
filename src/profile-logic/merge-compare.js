@@ -1036,7 +1036,11 @@ export function mergeThreads(threads: Thread[]): Thread {
     threads
   );
 
-  const { markerTable: newMarkers } = mergeMarkers(threads, newStringTable);
+  const { markerTable: newMarkers } = mergeMarkers(
+    translationMapsForStacks,
+    newStringTable,
+    threads
+  );
 
   let processStartupTime = Infinity;
   let processShutdownTime = -Infinity;
@@ -1168,8 +1172,9 @@ type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
  * Merge markers from different threads. And update the new string table while doing it.
  */
 function mergeMarkers(
-  threads: Thread[],
-  newStringTable: UniqueStringArray
+  translationMapsForStacks: TranslationMapForStacks[],
+  newStringTable: UniqueStringArray,
+  threads: Thread[]
 ): {
   markerTable: RawMarkerTable,
   translationMaps: TranslationMapForMarkers[],
@@ -1177,7 +1182,8 @@ function mergeMarkers(
   const newMarkerTable = getEmptyRawMarkerTable();
   const translationMaps = [];
 
-  threads.forEach((thread) => {
+  threads.forEach((thread, threadIndex) => {
+    const translationMapForStacks = translationMapsForStacks[threadIndex];
     const translationMap = new Map();
     const { markers, stringTable } = thread;
 
@@ -1186,8 +1192,33 @@ function mergeMarkers(
       const nameIndex = markers.name[markerIndex];
       const newName = nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
 
-      // Move marker data to the new marker table.
-      newMarkerTable.data.push(markers.data[markerIndex]);
+      // Move marker data to the new marker table
+      const oldData = markers.data[markerIndex];
+
+      if (oldData && 'cause' in oldData && oldData.cause) {
+        // The old data has a cause, we need to convert the stack.
+        const oldStack = oldData.cause.stack;
+        const newStack = translationMapForStacks.get(oldStack);
+        if (newStack === undefined) {
+          throw new Error(
+            `Missing old stack entry ${oldStack} in the translation map.`
+          );
+        }
+
+        // Flow doesn't know well how to handle the spread operator with our
+        // MarkerPayload type.
+        // $FlowExpectError
+        newMarkerTable.data.push({
+          ...oldData,
+          cause: {
+            ...oldData.cause,
+            stack: newStack,
+          },
+        });
+      } else {
+        newMarkerTable.data.push(oldData);
+      }
+
       newMarkerTable.name.push(
         newName === null ? -1 : newStringTable.indexForString(newName)
       );
