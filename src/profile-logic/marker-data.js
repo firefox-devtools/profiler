@@ -26,6 +26,7 @@ import type {
   InnerWindowID,
   Marker,
   MarkerIndex,
+  MarkerPayload,
   IPCSharedData,
   IPCMarkerPayload,
   NetworkPayload,
@@ -445,6 +446,21 @@ export function deriveMarkersFromRawMarkerTable(
     markers.push(marker);
   }
 
+  // In the case of separate markers for the start and end of an interval,
+  // merge the payloads together, with the end data overriding the start.
+  function mergeIntervalData(
+    startData: MarkerPayload,
+    endData: MarkerPayload
+  ): MarkerPayload {
+    if (!startData && !endData) {
+      return null;
+    }
+    return ({
+      ...startData,
+      ...endData,
+    }: any);
+  }
+
   // We don't add a screenshot marker as we find it, because to know its
   // duration we need to wait until the next one or the end of the profile. So
   // we keep it here.
@@ -732,7 +748,7 @@ export function deriveMarkersFromRawMarkerTable(
               name: stringTable.getString(name),
               end: endTime,
               category,
-              data: rawMarkers.data[startIndex],
+              data: mergeIntervalData(rawMarkers.data[startIndex], data),
             });
           } else {
             // No matching "start" marker has been encountered before this "end".
