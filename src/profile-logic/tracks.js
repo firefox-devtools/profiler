@@ -726,18 +726,18 @@ function _isContentThreadWithNoPaint(thread: Thread): boolean {
 // indicates they were not painted to, and most likely idle. This is just
 // a heuristic to help users.
 function _isThreadWithNoPaint({ markers, stringTable }: Thread): boolean {
-  let isPaintMarkerFound = false;
+  let paintMarkerFound = false;
   if (stringTable.hasString('RefreshDriverTick')) {
     const paintStringIndex = stringTable.indexForString('RefreshDriverTick');
 
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
       if (paintStringIndex === markers.name[markerIndex]) {
-        isPaintMarkerFound = true;
+        paintMarkerFound = true;
         break;
       }
     }
   }
-  if (!isPaintMarkerFound) {
+  if (!paintMarkerFound) {
     return true;
   }
   return false;
