@@ -52,16 +52,29 @@ describe('app/DragAndDrop', () => {
   it('responds to dragging', () => {
     const { container } = render(
       <Provider store={createStore()}>
-        <DragAndDrop>Target area here</DragAndDrop>
+        <DragAndDrop>
+          Target area here, and a <span>nested element</span>.
+        </DragAndDrop>
       </Provider>
     );
     const [dragAndDrop, overlay] = container.children;
+    const nestedSpan = dragAndDrop.querySelector('span');
+    if (nestedSpan === null) {
+      throw new Error('span should exist');
+    }
+
     expect(overlay.classList).not.toContain('dragging');
 
     fireEvent.dragEnter(dragAndDrop);
     expect(overlay.classList).toContain('dragging');
 
-    fireEvent.dragExit(dragAndDrop);
+    fireEvent.dragEnter(nestedSpan);
+    expect(overlay.classList).toContain('dragging');
+
+    fireEvent.dragLeave(dragAndDrop);
+    expect(overlay.classList).toContain('dragging');
+
+    fireEvent.dragLeave(nestedSpan);
     expect(overlay.classList).not.toContain('dragging');
   });
 
@@ -88,7 +101,7 @@ describe('app/DragAndDrop', () => {
         <DragAndDrop>Target area here</DragAndDrop>
       </Provider>
     );
-    const [dragAndDrop] = container.children;
+    const [dragAndDrop, overlay] = container.children;
 
     const { profile } = getProfileFromTextSamples('A');
     const file = new File([serializeProfile(profile)], 'profile.json', {
@@ -96,10 +109,20 @@ describe('app/DragAndDrop', () => {
     });
     const files = [file];
 
+    fireEvent.dragEnter(dragAndDrop);
     fireEvent.drop(dragAndDrop, { dataTransfer: { files } });
     await waitFor(() =>
       expect(getView(store.getState()).phase).toBe('DATA_LOADED')
     );
     expect(spy).toHaveBeenCalled();
+
+    // Make sure that dragging after a drop still works correctly.
+    expect(overlay.classList).not.toContain('dragging');
+
+    fireEvent.dragEnter(dragAndDrop);
+    expect(overlay.classList).toContain('dragging');
+
+    fireEvent.dragLeave(dragAndDrop);
+    expect(overlay.classList).not.toContain('dragging');
   });
 });
