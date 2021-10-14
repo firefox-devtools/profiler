@@ -51,7 +51,7 @@ Array [
     "category": 0,
     "data": Object {
       "eventType": "mouseout",
-      "latency": 7,
+      "latency": 8,
       "type": "DOMEvent",
     },
     "end": 10,

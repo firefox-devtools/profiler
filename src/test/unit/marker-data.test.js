@@ -102,18 +102,36 @@ describe('Derive markers from Gecko phase markers', function () {
         startTime: 5,
         endTime: null,
         phase: INTERVAL_START,
+        data: {
+          category: 'CC',
+          type: 'tracing',
+          first: 'Hello',
+          second: 'World',
+        },
       },
       {
         startTime: null,
         endTime: 6,
         phase: INTERVAL_END,
+        data: {
+          category: 'CC',
+          type: 'tracing',
+          first: 'Goodbye',
+          desc: 'O Cruel',
+        },
       },
     ]);
 
     expect(markers).toEqual([
       {
         category: 0,
-        data: null,
+        data: {
+          category: 'CC',
+          type: 'tracing',
+          first: 'Goodbye',
+          desc: 'O Cruel',
+          second: 'World',
+        },
         end: 6,
         name: 'TestDefinedMarker',
         start: 5,
