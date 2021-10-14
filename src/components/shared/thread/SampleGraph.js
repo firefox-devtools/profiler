@@ -13,6 +13,7 @@ import {
   getSampleIndexClosestToCenteredTime,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 
 import './SampleGraph.css';
@@ -25,6 +26,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 type Props = {|
   +className: string,
@@ -41,9 +43,10 @@ type Props = {|
     sampleIndex: IndexIntoSamplesTable
   ) => void,
   +trackName: string,
+  ...SizeProps,
 |};
 
-export class ThreadSampleGraph extends PureComponent<Props> {
+export class ThreadSampleGraphImpl extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
@@ -78,14 +81,15 @@ export class ThreadSampleGraph extends PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       categories,
+      width,
+      height,
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
       ? canvas.ownerDocument.defaultView.devicePixelRatio
       : 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.round(rect.width * devicePixelRatio);
-    canvas.height = Math.round(rect.height * devicePixelRatio);
+    canvas.width = Math.round(width * devicePixelRatio);
+    canvas.height = Math.round(height * devicePixelRatio);
     const ctx = canvas.getContext('2d');
     let maxDepth = 0;
     const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
@@ -239,3 +243,5 @@ export class ThreadSampleGraph extends PureComponent<Props> {
     );
   }
 }
+
+export const ThreadSampleGraph = withSize<Props>(ThreadSampleGraphImpl);

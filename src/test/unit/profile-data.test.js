@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import {
-  getContainingLibrary,
   symbolicateProfile,
   applySymbolicationStep,
 } from '../../profile-logic/symbolication';
+import { AddressLocator } from '../../profile-logic/address-locator';
 import {
   processGeckoProfile,
   processGeckoOrDevToolsProfile,
@@ -593,13 +593,14 @@ describe('profile-data', function () {
 });
 
 describe('symbolication', function () {
-  describe('getContainingLibrary', function () {
+  describe('AddressLocator', function () {
     const libs = [
-      { start: 0, end: 20, name: 'first' },
-      { start: 20, end: 40, name: 'second' },
-      { start: 40, end: 50, name: 'third' },
-      { start: 60, end: 80, name: 'fourth' },
-      { start: 80, end: 100, name: 'fifth' },
+      { start: 0, end: 0x20, name: 'first' },
+      { start: 0x20, end: 0x40, name: 'second' },
+      { start: 0x40, end: 0x50, name: 'third' },
+      { start: 0x60, end: 0x80, name: 'fourth' },
+      { start: 0x80, end: 0xa0, name: 'fifth' },
+      { start: 0xfffff80130000000, end: 0xfffff80131046000, name: 'kernel' },
     ].map((lib) => {
       // Make sure our fixtures are correctly typed.
       return Object.assign({}, lib, {
@@ -620,34 +621,45 @@ describe('symbolication', function () {
       return null;
     }
 
+    const locator = new AddressLocator(libs);
+
     it('should return the first library for addresses inside the first library', function () {
-      expect(getLibName(getContainingLibrary(libs, 0))).toEqual('first');
-      expect(getLibName(getContainingLibrary(libs, 10))).toEqual('first');
-      expect(getLibName(getContainingLibrary(libs, 19))).toEqual('first');
+      expect(getLibName(locator.locateAddress('0x0').lib)).toEqual('first');
+      expect(getLibName(locator.locateAddress('0x10').lib)).toEqual('first');
+      expect(getLibName(locator.locateAddress('0x1f').lib)).toEqual('first');
     });
 
     it('should return the second library for addresses inside the second library', function () {
-      expect(getLibName(getContainingLibrary(libs, 20))).toEqual('second');
-      expect(getLibName(getContainingLibrary(libs, 21))).toEqual('second');
-      expect(getLibName(getContainingLibrary(libs, 27))).toEqual('second');
-      expect(getLibName(getContainingLibrary(libs, 39))).toEqual('second');
+      expect(getLibName(locator.locateAddress('0x20').lib)).toEqual('second');
+      expect(getLibName(locator.locateAddress('0x21').lib)).toEqual('second');
+      expect(getLibName(locator.locateAddress('0x2b').lib)).toEqual('second');
+      expect(getLibName(locator.locateAddress('0x3f').lib)).toEqual('second');
     });
 
     it('should return the third library for addresses inside the third library', function () {
-      expect(getLibName(getContainingLibrary(libs, 40))).toEqual('third');
-      expect(getLibName(getContainingLibrary(libs, 41))).toEqual('third');
-      expect(getLibName(getContainingLibrary(libs, 47))).toEqual('third');
-      expect(getLibName(getContainingLibrary(libs, 49))).toEqual('third');
+      expect(getLibName(locator.locateAddress('0x40').lib)).toEqual('third');
+      expect(getLibName(locator.locateAddress('0x41').lib)).toEqual('third');
+      expect(getLibName(locator.locateAddress('0x4c').lib)).toEqual('third');
+      expect(getLibName(locator.locateAddress('0x4f').lib)).toEqual('third');
+    });
+
+    it('should return correct relative addresses for large absolute addresses', function () {
+      expect(
+        getLibName(locator.locateAddress('0xfffff80130004123').lib)
+      ).toEqual('kernel');
+      // Regular JS number subtraction would give the wrong value:
+      // (0xfffff80130004123 - 0xfffff80130000000).toString(16) === "4000"
+      expect(
+        locator.locateAddress('0xfffff80130004123').relativeAddress
+      ).toEqual(0x4123);
     });
 
     it('should return no library when outside or in holes', function () {
-      expect(getContainingLibrary(libs, -1)).toEqual(null);
-      expect(getContainingLibrary(libs, -10)).toEqual(null);
-      expect(getContainingLibrary(libs, 100)).toEqual(null);
-      expect(getContainingLibrary(libs, 256)).toEqual(null);
-      expect(getContainingLibrary(libs, 50)).toEqual(null);
-      expect(getContainingLibrary(libs, 55)).toEqual(null);
-      expect(getContainingLibrary(libs, 59)).toEqual(null);
+      expect(locator.locateAddress('0xa0').lib).toEqual(null);
+      expect(locator.locateAddress('0x100').lib).toEqual(null);
+      expect(locator.locateAddress('0x50').lib).toEqual(null);
+      expect(locator.locateAddress('0x5a').lib).toEqual(null);
+      expect(locator.locateAddress('0x5f').lib).toEqual(null);
     });
   });
 

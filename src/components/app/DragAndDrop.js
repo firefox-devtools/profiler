@@ -75,8 +75,47 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  * </DragAndDrop>
  * (no default overlay added here anymore)
  */
+type DragLocation = 'INSIDE' | 'OUTSIDE';
 
 class DragAndDropImpl extends React.PureComponent<Props> {
+  // Keeps track of the nesting of dragenter / dragleave events.
+  // As the mouse moves over various nested elements inside this element,
+  // every time the mouse enters a new element, we first get the dragenter
+  // event for that new element and then a dragleave for the previous element.
+  _enteredElements: Set<HTMLElement> = new Set();
+
+  _updateDragLocation(
+    event: SyntheticDragEvent<HTMLDivElement>
+  ): [DragLocation, DragLocation] {
+    const before = this._enteredElements.size > 0 ? 'INSIDE' : 'OUTSIDE';
+
+    // Remove any elements which have been removed from our container since the
+    // last enter / leave, for example via react DOM updates.
+    // `container` is always our container div; we use currentTarget here so that
+    // we don't have to set up a react ref for the element.
+    const container = event.currentTarget;
+    this._enteredElements = new Set(
+      [...this._enteredElements].filter((el) => container.contains(el))
+    );
+
+    // Add or remove event.target to/from this._enteredElements.
+    if (event.target instanceof HTMLElement) {
+      const target = event.target;
+      if (event.type === 'dragenter') {
+        this._enteredElements.add(target);
+      } else if (event.type === 'dragleave') {
+        this._enteredElements.delete(target);
+      }
+    }
+
+    const after = this._enteredElements.size > 0 ? 'INSIDE' : 'OUTSIDE';
+    return [before, after];
+  }
+
+  _resetDragLocation() {
+    this._enteredElements = new Set();
+  }
+
   componentDidMount() {
     // Prevent dropping files on the document.
     document.addEventListener('drag', _dragPreventDefault, false);
@@ -90,18 +129,28 @@ class DragAndDropImpl extends React.PureComponent<Props> {
     document.removeEventListener('drop', _dragPreventDefault, false);
   }
 
-  _startDragging = (event: Event) => {
+  _onDragEnter = (event: SyntheticDragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    this.props.startDragging();
+
+    const [before, after] = this._updateDragLocation(event);
+    if (before === 'OUTSIDE' && after === 'INSIDE') {
+      this.props.startDragging();
+    }
   };
 
-  _stopDragging = (event: Event) => {
+  _onDragLeave = (event: SyntheticDragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    this.props.stopDragging();
+
+    const [before, after] = this._updateDragLocation(event);
+    if (before === 'INSIDE' && after === 'OUTSIDE') {
+      this.props.stopDragging();
+    }
   };
 
   _handleProfileDrop = (event: DragEvent) => {
     event.preventDefault();
+
+    this._resetDragLocation();
     this.props.stopDragging();
 
     if (!event.dataTransfer || !this.props.isNewProfileLoadAllowed) {
@@ -121,8 +170,8 @@ class DragAndDropImpl extends React.PureComponent<Props> {
       <>
         <div
           className={classNames(className, 'dragAndDropArea')}
-          onDragEnter={this._startDragging}
-          onDragExit={this._stopDragging}
+          onDragEnter={this._onDragEnter}
+          onDragLeave={this._onDragLeave}
           onDrop={this._handleProfileDrop}
         >
           {children}

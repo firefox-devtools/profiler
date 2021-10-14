@@ -943,7 +943,7 @@ function getSymbolStore(
         symbolServerUrl
       ).map(async (libPromise, i) => {
         try {
-          const result = libPromise;
+          const result = await libPromise;
           dispatch(receivedSymbolTableReply(requests[i].lib));
           return result;
         } catch (error) {
