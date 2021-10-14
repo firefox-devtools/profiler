@@ -39,6 +39,8 @@ AppViewRouter--error-message-from-url =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-focus-function = Focus sur la fonction
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Tout développer
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
