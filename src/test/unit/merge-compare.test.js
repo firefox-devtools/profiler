@@ -10,7 +10,9 @@ import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
+  addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
+import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 
 import type { Thread } from 'firefox-profiler/types';
 
@@ -313,5 +315,69 @@ describe('mergeThreads function', function () {
     // are getting it from selector anyway.
     expect(markerStartTimes).toEqual([2, 3, 6, 1, 3, 8]);
     expect(markerEndTimes).toEqual([null, 5, 7, null, 4, 9]);
+  });
+
+  it('merges markers with stacks properly', function () {
+    const { profile, funcNamesDictPerThread: funcNames } =
+      getProfileFromTextSamples(
+        `
+          A  A
+          B  B
+          C  D
+        `,
+        `
+          A  A
+          B  B
+          E  C
+        `
+      );
+
+    // Get a useful marker schema
+    profile.meta.markerSchema = markerSchemaForTests;
+
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      [
+        'Paint',
+        2,
+        3,
+        {
+          type: 'tracing',
+          category: 'Paint',
+          cause: { time: 2, stack: funcNames[0].C },
+        },
+      ],
+    ]);
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+      [
+        'Paint',
+        2,
+        3,
+        {
+          type: 'tracing',
+          category: 'Paint',
+          cause: { time: 2, stack: funcNames[1].C },
+        },
+      ],
+    ]);
+
+    const mergedThread = mergeThreads(profile.threads);
+    const mergedMarkers = mergedThread.markers;
+    expect(mergedMarkers).toHaveLength(2);
+
+    const markerStacksBeforeMerge = [funcNames[0].C, funcNames[1].C];
+
+    const markerStacksAfterMerge = mergedMarkers.data.map((markerData) =>
+      markerData && 'cause' in markerData && markerData.cause
+        ? markerData.cause.stack
+        : null
+    );
+
+    // The stack from the marker in the first thread shouldn't have been touched
+    expect(markerStacksAfterMerge[0]).toBe(markerStacksBeforeMerge[0]);
+    // But the stack from the marker in the second thread was touched and was
+    // offset by the size of the first thread's stack table.
+    expect(markerStacksAfterMerge[1]).toBe(
+      markerStacksBeforeMerge[1] + profile.threads[0].stackTable.length
+    );
   });
 });

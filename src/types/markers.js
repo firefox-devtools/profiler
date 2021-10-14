@@ -194,6 +194,9 @@ export type ArbitraryEventTracing = {|
 export type CcMarkerTracing = {|
   type: 'tracing',
   category: 'CC',
+  first?: string,
+  desc?: string,
+  second?: string,
 |};
 
 export type PhaseTimes<Unit> = { [phase: string]: Unit };
