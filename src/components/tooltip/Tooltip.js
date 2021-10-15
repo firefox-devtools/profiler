@@ -93,6 +93,9 @@ export class Tooltip extends React.PureComponent<Props> {
       <div
         className="tooltip"
         data-testid="tooltip"
+        // This will be overridden in setPositioningStyle, but they are
+        // necessary so that the measurements are correct.
+        style={{ left: 0, top: 0 }}
         ref={this._interiorElementRef}
       >
         {this.props.children}
