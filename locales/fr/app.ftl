@@ -178,25 +178,117 @@ MenuButtons--index--full-view = Vue complète
 MenuButtons--index--cancel-upload = Annuler l’envoi
 MenuButtons--index--share-upload =
     .label = Envoyer le profil local
+MenuButtons--index--share-re-upload =
+    .label = Envoyer à nouveau
+MenuButtons--index--share-error-uploading =
+    .label = Erreur lors de l’envoi
+MenuButtons--index--revert = Revenir au profil d’origine
+MenuButtons--index--docs = Documentation
+MenuButtons--permalink--button =
+    .label = Lien permanent
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Envoyé :
+MenuButtons--index--profile-info-uploaded-actions = Supprimer
+MenuButtons--index--metaInfo-subtitle = Informations sur le profil
+MenuButtons--metaInfo--symbols = Symboles :
+MenuButtons--metaInfo--profile-symbolicated = Le profil est symbolisé
+MenuButtons--metaInfo--profile-not-symbolicated = Le profil n’est pas symbolisé
+MenuButtons--metaInfo--cpu = Processeur :
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } cœur physique
+       *[other] { $physicalCPUs } cœurs physiques
+    }, { $logicalCPUs ->
+        [one] { $logicalCPUs } cœur logique
+       *[other] { $logicalCPUs } cœurs logiques
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } cœur physique
+       *[other] { $physicalCPUs } cœurs physiques
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } cœur logique
+       *[other] { $logicalCPUs } cœurs logiques
+    }
+MenuButtons--metaInfo--recording-started = Enregistrement commencé :
+MenuButtons--metaInfo--interval = Intervalle :
+MenuButtons--metaInfo--profile-version = Version du profil :
+MenuButtons--metaInfo--buffer-capacity = Capacité de la mémoire tampon :
+MenuButtons--metaInfo--buffer-duration = Durée de la mémoire tampon :
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } seconde
+       *[other] { $configurationDuration } secondes
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Illimitée
+MenuButtons--metaInfo--application = Applications
+MenuButtons--metaInfo--name-and-version = Nom et version :
+MenuButtons--metaInfo--update-channel = Canal de mise à jour :
+MenuButtons--metaInfo--build-id = Identifiant de compilation :
+MenuButtons--metaInfo--build-type = Type de compilation :
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Debug
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
+MenuButtons--metaInfo--platform = Plateforme
+MenuButtons--metaInfo--device = Appareil :
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = Système d’exploitation :
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI :
+MenuButtons--metaInfo--speed-index = Indice de vitesse :
+MenuButtons--metaInfo-renderRowOfList-label-features = Fonctionnalités :
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensions :
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-mean = Moyenne
+MenuButtons--metaOverheadStatistics-max = Max
+MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Nettoyage
+    .title = Temps de suppression des données expirées.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Intervalle
+    .title = Intervalle observé entre deux échantillons.
+MenuButtons--metaOverheadStatistics-profiled-duration = Durée profilée :
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Inclure les threads cachés
+MenuButtons--publish--button-upload = Envoyer
+MenuButtons--publish--upload-title = Envoi du profil…
+MenuButtons--publish--cancel-upload = Annuler l’envoi
+MenuButtons--publish--message-something-went-wrong = Oups, une erreur s’est produite lors de l’envoi du profil.
+MenuButtons--publish--message-try-again = Réessayer
+MenuButtons--publish--download = Télécharger
+MenuButtons--publish--compressing = Compression…
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -208,6 +300,12 @@ MenuButtons--index--share-upload =
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Supprimer
+    .title = Cliquer ici pour supprimer le profil { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -215,19 +313,43 @@ MenuButtons--index--share-upload =
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Importation du profil directement depuis { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Lecture du fichier et traitement du profil…
+ProfileLoaderAnimation--loading-message-local =
+    .message = Pas encore implémenté
+ProfileLoaderAnimation--loading-message-public =
+    .message = Téléchargement et traitement du profil…
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Téléchargement et traitement du profil…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Lecture et traitement des profils…
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = Vue introuvable
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Retourner à la page d’accueil
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Installation en cours…
+ServiceWorkerManager--pending-button = Appliquer et recharger
+ServiceWorkerManager--installed-button = Recharger l’application
+ServiceWorkerManager--updated-while-not-ready = Une nouvelle version de l’application a été appliquée avant que cette page ne soit complètement chargée. Vous pourriez constater des dysfonctionnements.
+ServiceWorkerManager--new-version-is-ready = Une nouvelle version de l’application a été téléchargée et est prête à être utilisée.
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Toutes les piles
+StackSettings--implementation-javascript = JavaScript
+StackSettings--use-data-source-label = Source des données :
 
 ## Tab Bar for the bottom half of the analysis UI.
 
