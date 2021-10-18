@@ -53,6 +53,7 @@ CallNodeContextMenu--expand-all = Tout développer
 CallNodeContextMenu--searchfox = Rechercher le nom de la fonction sur Searchfox
 CallNodeContextMenu--copy-function-name = Copier le nom de la fonction
 CallNodeContextMenu--copy-script-url = Copier l’URL du script
+CallNodeContextMenu--copy-stack = Copier la pile
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -149,6 +150,8 @@ ListOfPublishedProfiles--published-profiles-link =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--copy-description = Copier la description
+MarkerContextMenu--copy-url = Copier l’URL
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -161,12 +164,20 @@ ListOfPublishedProfiles--published-profiles-link =
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Début
+MarkerTable--duration = Durée
+MarkerTable--type = Type
+MarkerTable--description = Description
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
 MenuButtons--index--metaInfo-button =
     .label = Informations du profil
+MenuButtons--index--full-view = Vue complète
+MenuButtons--index--cancel-upload = Annuler l’envoi
+MenuButtons--index--share-upload =
+    .label = Envoyer le profil local
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
