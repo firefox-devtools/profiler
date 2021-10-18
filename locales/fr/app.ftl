@@ -28,12 +28,18 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = Impossible de récupérer le profil depuis { -firefox-brand-name }.
+AppViewRouter--error-message-from-file =
+    .message = Impossible de lire le fichier ou d’analyser le profil qu’il contient.
 AppViewRouter--error-message-local =
     .message = Pas encore implémenté.
 AppViewRouter--error-message-public =
     .message = Impossible de télécharger le profil.
 AppViewRouter--error-message-from-url =
     .message = Impossible de télécharger le profil.
+AppViewRouter--route-not-found--home =
+    .specialMessage = L’URL que vous avez tenté d’atteindre n’a pas été trouvée
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -45,6 +51,7 @@ CallNodeContextMenu--expand-all = Tout développer
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
 CallNodeContextMenu--searchfox = Rechercher le nom de la fonction sur Searchfox
+CallNodeContextMenu--copy-function-name = Copier le nom de la fonction
 CallNodeContextMenu--copy-script-url = Copier l’URL du script
 
 ## CallTree
@@ -54,13 +61,17 @@ CallNodeContextMenu--copy-script-url = Copier l’URL du script
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Sélectionnez un nœud pour afficher des informations le concernant.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Saisissez les URL des profils que vous souhaitez comparer
 CompareHome--form-label-profile1 = Profil 1 :
 CompareHome--form-label-profile2 = Profil 2 :
+CompareHome--submit-button =
+    .value = Récupérer les profils
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -89,12 +100,28 @@ FooterLinks--Cookies = Cookies
 ## page.
 
 FullTimeline--graph-type = Type de graphique :
+FullTimeline--categories-with-cpu = Catégories avec CPU
 FullTimeline--categories = Catégories
+FullTimeline--stack-height = Hauteur de la pile
 
 ## Home page
 
+Home--upload-from-file-input-button = Charger un profil à partir d’un fichier
+Home--upload-from-url-button = Charger un profil à partir d’une URL
 Home--load-from-url-submit-button =
     .value = Charger
+Home--documentation-button = Documentation
+Home--menu-button = Activer le bouton de menu { -profiler-brand-name }
+Home--menu-button-instructions = Activez le bouton de menu du profileur pour commencer à enregistrer un profil des performances dans { -firefox-brand-name }, puis analysez-le et partagez-le avec profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Cette instance de profileur n’a pas pu se connecter à WebChannel, elle ne peut donc pas activer le bouton de menu du profileur.
+Home--instructions-title = Comment afficher et enregistrer des profils
+Home--record-instructions-start-stop = Arrêter et démarrer le profilage
+Home--record-instructions-capture-load = Capturer et charger un profil
+Home--profiler-motto = Capturez un profil de performances. Analysez-le. Partagez-le. Rendez le Web plus rapide.
 Home--additional-content-title = Charger des profils existants
 Home--additional-content-content = Vous pouvez <strong>glisser-déposer</strong> un fichier de profil ici pour le charger, ou :
 Home--compare-recordings-info = Vous pouvez également comparer des enregistrements. <a>Ouvrir l’interface de comparaison.</a>
@@ -112,6 +139,11 @@ Home--recent-uploaded-recordings-title = Enregistrements récemment envoyés
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Cliquez ici pour charger le profil { $smallProfileName }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
