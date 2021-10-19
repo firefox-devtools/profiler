@@ -22,6 +22,7 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Application web pour l’analyse des performances de { -firefox-brand-name }</subheader>
 AppHeader--github-icon =
     .title = Accédez à notre dépôt Git (cela ouvrira une nouvelle fenêtre)
 
@@ -104,6 +105,13 @@ FullTimeline--graph-type = Type de graphique :
 FullTimeline--categories-with-cpu = Catégories avec CPU
 FullTimeline--categories = Catégories
 FullTimeline--stack-height = Hauteur de la pile
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> pistes visibles
 
 ## Home page
 
@@ -368,6 +376,7 @@ StackSettings--use-data-source-label = Source des données :
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--network-tab = Réseau
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
