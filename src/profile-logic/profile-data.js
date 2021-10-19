@@ -2043,26 +2043,24 @@ export function getFriendlyThreadName(
   thread: Thread
 ): string {
   let label;
+  let homonymThreads;
 
   switch (thread.name) {
     case 'GeckoMain': {
       if (thread['eTLD+1']) {
-        // Return the host name if it's provided by the back-end and it's not sanitized.
-        return thread['eTLD+1'];
-      }
-
-      if (thread.processName) {
+        // Use the site name if it's provided by the back-end and it's not sanitized.
+        label = thread['eTLD+1'];
+        homonymThreads = threads.filter((thread) => {
+          return thread.name === 'GeckoMain' && thread['eTLD+1'] === label;
+        });
+      } else if (thread.processName) {
         // If processName is present, use that as it should contain a friendly name.
         // We want to use that for the GeckoMain thread because it is shown as the
         // root of other threads in each process group.
         label = thread.processName;
-        const homonymThreads = threads.filter((thread) => {
+        homonymThreads = threads.filter((thread) => {
           return thread.name === 'GeckoMain' && thread.processName === label;
         });
-        if (homonymThreads.length > 1) {
-          const index = 1 + homonymThreads.indexOf(thread);
-          label += ` (${index}/${homonymThreads.length})`;
-        }
       } else {
         switch (thread.processType) {
           case 'default':
@@ -2075,17 +2073,12 @@ export function getFriendlyThreadName(
             label = 'Remote Data Decoder';
             break;
           case 'tab': {
-            const contentThreads = threads.filter((thread) => {
+            label = 'Content Process';
+            homonymThreads = threads.filter((thread) => {
               return (
                 thread.name === 'GeckoMain' && thread.processType === 'tab'
               );
             });
-            if (contentThreads.length > 1) {
-              const index = 1 + contentThreads.indexOf(thread);
-              label = `Content Process (${index}/${contentThreads.length})`;
-            } else {
-              label = 'Content Process';
-            }
             break;
           }
           case 'plugin':
@@ -2106,6 +2099,14 @@ export function getFriendlyThreadName(
   if (!label) {
     label = thread.name;
   }
+
+  // Check if homonymThreads are provided and append "(index/total)" numbers to
+  // the label if that's the case.
+  if (homonymThreads && homonymThreads.length > 1) {
+    const index = 1 + homonymThreads.indexOf(thread);
+    label += ` (${index}/${homonymThreads.length})`;
+  }
+
   return label;
 }
 
