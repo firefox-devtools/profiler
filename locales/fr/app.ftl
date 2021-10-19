@@ -320,6 +320,11 @@ MenuButtons--publish--renderCheckbox-label-resource = Inclure les URL et les che
 MenuButtons--publish--renderCheckbox-label-extension = Inclure les informations des extensions
 MenuButtons--publish--renderCheckbox-label-preference = Inclure les valeurs des paramètres
 MenuButtons--publish--reupload-performance-profile = Envoyer à nouveau le profil de performances
+MenuButtons--publish--share-performance-profile = Partager le profil de performance
+MenuButtons--publish--info-description = Envoyez votre profil et rendez-le accessible à toute personne disposant du lien.
+MenuButtons--publish--info-description-default = Par défaut, vos données personnelles sont supprimées.
+MenuButtons--publish--info-description-firefox-nightly = Ce profil provient de { -firefox-nightly-brand-name }, donc par défaut toutes les informations sont incluses.
+MenuButtons--publish--include-additional-data = Inclure des données supplémentaires qui peuvent être identifiables
 MenuButtons--publish--button-upload = Envoyer
 MenuButtons--publish--upload-title = Envoi du profil…
 MenuButtons--publish--cancel-upload = Annuler l’envoi
@@ -331,10 +336,14 @@ MenuButtons--publish--compressing = Compression…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Filtrer les réseaux :
+    .title = Afficher uniquement les requêtes réseau qui correspondent à un certain nom
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Saviez-vous que vous pouvez utiliser la virgule (,) pour effectuer une recherche à l’aide de plusieurs termes ?
 
 ## Profile Delete Button
 
@@ -418,6 +427,12 @@ TrackContextMenu--show-all-tracks = Afficher toutes les pistes
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = « { $item } » complet
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
