@@ -90,7 +90,7 @@ CallNodeContextMenu--transform-collapse-direct-recursion = Collaber directe recu
         le mesme function.
 CallNodeContextMenu--transform-drop-function = Lassar cader specimens con iste function
     .title =
-        Lassar cader specimens remove lor tempore ab le profilo. Isto es utile pro¶
+        Lassar cader specimens remove lor tempore ab le profilo. Isto es utile pro
         eliminar informationes temporal que non es pertinente al analyse.
 CallNodeContextMenu--expand-all = Expander toto
 # Searchfox is a source code indexing tool for Mozilla Firefox.
