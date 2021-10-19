@@ -70,6 +70,7 @@ CallTreeSidebar--select-a-node = Sélectionnez un nœud pour afficher des inform
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Saisissez les URL des profils que vous souhaitez comparer
+CompareHome--instruction-content = L’outil extraira les données de la piste et de la plage sélectionnées pour chaque profil et les placera dans la même vue pour faciliter la comparaison.
 CompareHome--form-label-profile1 = Profil 1 :
 CompareHome--form-label-profile2 = Profil 2 :
 CompareHome--submit-button =
@@ -127,7 +128,11 @@ Home--menu-button-instructions = Activez le bouton de menu du profileur pour com
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Cette instance de profileur n’a pas pu se connecter à WebChannel, elle ne peut donc pas activer le bouton de menu du profileur.
+Home--record-instructions = Pour démarrer le profilage, cliquez sur le bouton de profilage ou utilisez le raccourci clavier. L’icône est bleue lorsqu’un profil est en cours d’enregistrement. Appuyez sur <kbd>Capturer</kbd> pour charger les données dans profiler.firefox.com.
 Home--instructions-title = Comment afficher et enregistrer des profils
+Home--instructions-content =
+    L’enregistrement de profils de performances nécessite <a>{ -firefox-brand-name }</a>.
+    Cependant, les profils existants peuvent être consultés dans n’importe quel navigateur moderne.
 Home--record-instructions-start-stop = Arrêter et démarrer le profilage
 Home--record-instructions-capture-load = Capturer et charger un profil
 Home--profiler-motto = Capturez un profil de performances. Analysez-le. Partagez-le. Rendez le Web plus rapide.
@@ -153,6 +158,8 @@ Home--recent-uploaded-recordings-title = Enregistrements récemment envoyés
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
     .title = Cliquez ici pour charger le profil { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Supprimer
+    .title = Ce profil ne peut pas être supprimé, car les informations d’autorisation sont manquantes.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Aucun profil n’a encore été envoyé.
 # This string is used below the 'Recent uploaded recordings' list section.
 # Variables:
@@ -174,6 +181,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 MarkerContextMenu--start-selection-here = Commencer la sélection ici
 MarkerContextMenu--end-selection-here = Terminer la sélection ici
 MarkerContextMenu--copy-description = Copier la description
+MarkerContextMenu--copy-call-stack = Copier la pile d’appels
 MarkerContextMenu--copy-url = Copier l’URL
 
 ## MarkerSettings
@@ -299,12 +307,19 @@ MenuButtons--metaOverheadStatistics-statkeys-cleaning = Nettoyage
     .title = Temps de suppression des données expirées.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Intervalle
     .title = Intervalle observé entre deux échantillons.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Verrouillages
+    .title = Temps d’acquisition du verrou avant l’échantillonnage.
 MenuButtons--metaOverheadStatistics-profiled-duration = Durée profilée :
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Inclure les threads cachés
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Inclure des captures d’écran
+MenuButtons--publish--renderCheckbox-label-resource = Inclure les URL et les chemins des ressources
+MenuButtons--publish--renderCheckbox-label-extension = Inclure les informations des extensions
+MenuButtons--publish--renderCheckbox-label-preference = Inclure les valeurs des paramètres
+MenuButtons--publish--reupload-performance-profile = Envoyer à nouveau le profil de performances
 MenuButtons--publish--button-upload = Envoyer
 MenuButtons--publish--upload-title = Envoi du profil…
 MenuButtons--publish--cancel-upload = Annuler l’envoi
