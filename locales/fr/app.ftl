@@ -145,11 +145,26 @@ Home--recent-uploaded-recordings-title = Enregistrements récemment envoyés
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
     .title = Cliquez ici pour charger le profil { $smallProfileName }
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Aucun profil n’a encore été envoyé.
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Voir et gérer tous vos enregistrements ({ $profilesRestCount } de plus)
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Gérer cet enregistrement
+       *[other] Gérer ces enregistrements
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Commencer la sélection ici
+MarkerContextMenu--end-selection-here = Terminer la sélection ici
 MarkerContextMenu--copy-description = Copier la description
 MarkerContextMenu--copy-url = Copier l’URL
 
