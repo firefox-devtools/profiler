@@ -189,6 +189,10 @@ Home--menu-button-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Αυτή η διεργασία εργαλείου προφίλ δεν ήταν δυνατό να συνδεθεί στο WebChannel, ώστε να μην μπορεί να ενεργοποιήσει το κουμπί του μενού του εργαλείου προφίλ.
+Home--record-instructions =
+    Για να αρχίσει η καταγραφή προφίλ, κάντε κλικ στο αντίστοιχο κουμπί ή χρησιμοποιήστε
+    τις συντομεύσεις πληκτρολογίου. Το εικονίδιο είναι μπλε κατά την καταγραφή ενός προφίλ.
+    Πατήστε το <kbd>Καταγραφή</kbd> για να φορτώσετε τα δεδομένα στο profiler.firefox.com.
 Home--instructions-title = Τρόπος προβολής και καταγραφής προφίλ
 Home--instructions-content =
     Η καταγραφή των προφίλ επιδόσεων απαιτεί το <a>{ -firefox-brand-name }</a>.
@@ -496,12 +500,16 @@ StackSettings--implementation-all-stacks = Όλες οι στοίβες
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Εγγενές
 StackSettings--use-data-source-label = Πηγή δεδομένων:
+StackSettings--call-tree-strategy-timing = Χρονισμοί
+    .title = Περίληψη με δειγματοληπτικές στοίβες σταδιακά εκτελεσμένου κώδικα
 StackSettings--call-tree-strategy-js-allocations = Κατανομές JavaScript
     .title = Περίληψη με bytes των κατανομών JavaScript (όχι ακυρώσεις κατανομών)
 StackSettings--call-tree-strategy-native-retained-allocations = Κρατημένη μνήμη
     .title = Περίληψη με bytes μνήμης που κατανεμήθηκαν και δεν απελευθερώθηκαν ποτέ στην τρέχουσα επιλογή προεπισκόπησης
 StackSettings--call-tree-native-allocations = Κατανεμημένη Μνήμη
     .title = Περίληψη με bytes κατανεμημένης μνήμης
+StackSettings--call-tree-strategy-native-deallocations-memory = Απελευθερωμένη μνήμη
+    .title = Περίληψη με τα bytes της απελευθερωμένης μνήμης, κατά τον ιστότοπο όπου είχε εκχωρηθεί η μνήμη
 StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσεων
     .title = Ταξινόμηση κατά χρόνο που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
 StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
