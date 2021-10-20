@@ -24,7 +24,7 @@
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Application web pour l’analyse des performances de { -firefox-brand-name }</subheader>
 AppHeader--github-icon =
-    .title = Accédez à notre dépôt Git (cela ouvrira une nouvelle fenêtre)
+    .title = Accéder à notre dépôt Git (cela ouvrira une nouvelle fenêtre)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
