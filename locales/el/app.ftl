@@ -189,6 +189,14 @@ Home--menu-button-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Αυτή η διεργασία εργαλείου προφίλ δεν ήταν δυνατό να συνδεθεί στο WebChannel, ώστε να μην μπορεί να ενεργοποιήσει το κουμπί του μενού του εργαλείου προφίλ.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Αυτή η διεργασία του εργαλείου προφίλ δεν μπόρεσε να συνδεθεί στο WebChannel. Αυτό συνήθως σημαίνει
+    ότι εκτελείται σε διαφορετικό κεντρικό υπολογιστή από αυτόν που καθορίστηκε στην προτίμηση
+    <code>devtools.performance.recording.ui-base-url</code>. Αν θέλετε να καταγράψετε νέα προφίλ
+    με αυτή τη διεργασία και να της δώσετε προγραμματικό έλεγχο του κουμπιού του μενού του εργαλείου,
+    μπορείτε να μεταβείτε στο <code>about:config</code> και να αλλάξετε την προτίμηση.
 Home--record-instructions =
     Για να αρχίσει η καταγραφή προφίλ, κάντε κλικ στο αντίστοιχο κουμπί ή χρησιμοποιήστε
     τις συντομεύσεις πληκτρολογίου. Το εικονίδιο είναι μπλε κατά την καταγραφή ενός προφίλ.
@@ -508,8 +516,10 @@ StackSettings--call-tree-strategy-native-retained-allocations = Κρατημέν
     .title = Περίληψη με bytes μνήμης που κατανεμήθηκαν και δεν απελευθερώθηκαν ποτέ στην τρέχουσα επιλογή προεπισκόπησης
 StackSettings--call-tree-native-allocations = Κατανεμημένη Μνήμη
     .title = Περίληψη με bytes κατανεμημένης μνήμης
-StackSettings--call-tree-strategy-native-deallocations-memory = Απελευθερωμένη μνήμη
-    .title = Περίληψη με τα bytes της απελευθερωμένης μνήμης, κατά τον ιστότοπο όπου είχε εκχωρηθεί η μνήμη
+StackSettings--call-tree-strategy-native-deallocations-memory = Αποδεσμευμένη μνήμη
+    .title = Περίληψη με τα bytes της μνήμης που απελευθερώθηκαν, κατά τον ιστότοπο όπου είχε εκχωρηθεί η μνήμη
+StackSettings--call-tree-strategy-native-deallocations-sites = Ιστότοποι αποδέσμευσης
+    .title = Περίληψη με τα bytes της μνήμης που απελευθερώθηκαν, κατά τον ιστότοπο όπου αποδεσμεύθηκε η μνήμη
 StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσεων
     .title = Ταξινόμηση κατά χρόνο που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
 StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
