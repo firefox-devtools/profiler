@@ -14,7 +14,12 @@ import type {
   TrackIndex,
 } from 'firefox-profiler/types';
 
-import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
+import {
+  defaultThreadOrder,
+  getFriendlyThreadName,
+  isThreadWithNoPaint,
+  isContentThreadWithNoPaint,
+} from './profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 /**
@@ -688,10 +693,10 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     // This is a profile without any sample (taken with no periodic sampling mode)
     // and we can't take a look at the samples to decide whether that thread is
     // active or not. So we are checking if we have a paint marker instead.
-    return _isThreadWithNoPaint(thread);
+    return isThreadWithNoPaint(thread);
   }
 
-  if (_isContentThreadWithNoPaint(thread)) {
+  if (isContentThreadWithNoPaint(thread)) {
     // If content thread doesn't have any paint markers, set it idle if the
     // thread has at least 80% idle samples.
     return _isThreadMostlyFullOfIdleSamples(
@@ -712,35 +717,6 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
   }
 
   return _isThreadMostlyFullOfIdleSamples(profile, thread);
-}
-
-function _isContentThreadWithNoPaint(thread: Thread): boolean {
-  if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
-    return _isThreadWithNoPaint(thread);
-  }
-
-  return false;
-}
-
-// Returns true if the thread doesn't include any RefreshDriverTick. This
-// indicates they were not painted to, and most likely idle. This is just
-// a heuristic to help users.
-function _isThreadWithNoPaint({ markers, stringTable }: Thread): boolean {
-  let paintMarkerFound = false;
-  if (stringTable.hasString('RefreshDriverTick')) {
-    const paintStringIndex = stringTable.indexForString('RefreshDriverTick');
-
-    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-      if (paintStringIndex === markers.name[markerIndex]) {
-        paintMarkerFound = true;
-        break;
-      }
-    }
-  }
-  if (!paintMarkerFound) {
-    return true;
-  }
-  return false;
 }
 
 // Any thread, except content thread with no RefreshDriverTick, with less than
