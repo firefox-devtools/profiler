@@ -1602,13 +1602,21 @@ export function addActiveTabInformationToProfile(
  * Creates a profile that includes a thread with threadCPUDelta values.
  */
 export function getProfileWithThreadCPUDelta(
-  userThreadCPUDelta?: Array<number | null>,
+  threadCPUDeltaPerThread: Array<Array<number | null> | void>,
   unit: ThreadCPUDeltaUnit = 'ns',
   interval: Milliseconds = 1
 ): Profile {
+  if (threadCPUDeltaPerThread.length === 0) {
+    throw new Error(
+      'getProfileWithThreadCPUDelta expected to get at least one array of threadCPUDelta.'
+    );
+  }
+
   const profile = getEmptyProfile();
   profile.meta.markerSchema = markerSchemaForTests;
-  profile.threads = [getThreadWithThreadCPUDelta(userThreadCPUDelta, interval)];
+  profile.threads = threadCPUDeltaPerThread.map((threadCPUDelta) =>
+    getThreadWithThreadCPUDelta(threadCPUDelta, interval)
+  );
   profile.meta.sampleUnits = {
     time: 'ms',
     eventDelay: 'ms',

@@ -19,7 +19,7 @@ describe('processThreadCPUDelta', function () {
     interval: Milliseconds = 1
   ) {
     const profile = getProfileWithThreadCPUDelta(
-      threadCPUDelta,
+      [threadCPUDelta],
       unit,
       interval
     );
