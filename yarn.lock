@@ -6481,10 +6481,10 @@ icss-utils@^5.0.0, icss-utils@^5.1.0:
   resolved "https://registry.yarnpkg.com/icss-utils/-/icss-utils-5.1.0.tgz#c6be6858abd013d768e98366ae47e25d5887b1ae"
   integrity sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==
 
-idb@^6.1.4:
-  version "6.1.4"
-  resolved "https://registry.yarnpkg.com/idb/-/idb-6.1.4.tgz#ec77519fe2591be616eaf3bbdedc3662bb558a99"
-  integrity sha512-DshI5yxIB3NYc47cPpfipYX8MSIgQPqVR+WoaGI9EDq6cnLGgGYR1fp6z8/Bq9vMS8Jq1bS3eWUgXpFO5+ypSA==
+idb@^6.1.5:
+  version "6.1.5"
+  resolved "https://registry.yarnpkg.com/idb/-/idb-6.1.5.tgz#dbc53e7adf1ac7c59f9b2bf56e00b4ea4fce8c7b"
+  integrity sha512-IJtugpKkiVXQn5Y+LteyBCNk1N8xpGV3wWZk9EVtZWH8DYkjBn0bX1XnGP9RkyZF0sAcywa6unHqSWKe7q4LGw==
 
 ieee754@^1.1.4:
   version "1.1.13"
