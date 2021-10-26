@@ -47,9 +47,13 @@ AppViewRouter--route-not-found--home =
 ## panels.
 
 CallNodeContextMenu--transform-merge-function = Fusionner la fonction
-    .title = La fusion d’une fonction la supprime du profil et attribue sa durée d’exécution à la fonction qui l’a appelée. Cela se produit partout où la fonction a été appelée dans l’arborescence.
+    .title = La fusion d’une fonction la supprime du profil et attribue son temps d’exécution à la fonction qui l’a appelée. Cela se produit partout où la fonction a été appelée dans l’arborescence.
+CallNodeContextMenu--transform-merge-call-node = Fusionner le nœud uniquement
+    .title = La fusion d’un nœud le supprime du profil et attribue son temps d’exécution au nœud de la fonction qui l’a appelé. Il supprime uniquement la fonction de cette partie spécifique de l’arborescence. Tous les autres endroits à partir desquels la fonction a été appelée resteront dans le profil.
 CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
+    .title = Réduire une fonction supprimera tout ce qu’elle appelait et attribuera tout le temps d’exécution à la fonction. Cela peut aider à simplifier un profil qui appelle du code qui n’a pas besoin d’être analysé.
 CallNodeContextMenu--expand-all = Tout développer
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -399,9 +403,13 @@ ServiceWorkerManager--new-version-is-ready = Une nouvelle version de l’applica
 StackSettings--implementation-all-stacks = Toutes les piles
 StackSettings--implementation-javascript = JavaScript
 StackSettings--use-data-source-label = Source des données :
+StackSettings--panel-search =
+    .label = Filtrer les piles :
+    .title = Afficher uniquement les piles qui contiennent une fonction dont le nom correspond à cette sous-chaîne
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Arbre d’appels
 TabBar--network-tab = Réseau
 
 ## TrackContextMenu
