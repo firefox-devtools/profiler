@@ -46,6 +46,8 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Fusionner la fonction
+    .title = La fusion d’une fonction la supprime du profil et attribue sa durée d’exécution à la fonction qui l’a appelée. Cela se produit partout où la fonction a été appelée dans l’arborescence.
 CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Tout développer
