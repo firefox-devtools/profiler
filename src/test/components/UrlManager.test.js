@@ -56,7 +56,7 @@ describe('UrlManager', function () {
 
   function setup(urlPath: ?string) {
     if (typeof urlPath === 'string') {
-      window.location.replace(urlPath);
+      window.location.replace(`http://localhost${urlPath}`);
     }
     const store = blankStore();
     const { dispatch, getState } = store;
@@ -135,6 +135,18 @@ describe('UrlManager', function () {
 
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('from-browser');
+  });
+
+  it('sets the data source to from-browser when coming from the legacy URL /from-addon even when there are double slashes', async function () {
+    jest.spyOn(console, 'error');
+    const { getState, createUrlManager, waitUntilUrlSetupPhase } =
+      setup('//from-addon');
+    expect(getDataSource(getState())).toMatch('none');
+    createUrlManager();
+
+    await waitUntilUrlSetupPhase('done');
+    expect(getDataSource(getState())).toMatch('from-browser');
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   it('redirects from-file back to no data source', async function () {
