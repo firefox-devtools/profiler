@@ -212,6 +212,8 @@ const CPU_IDLENESS_PERCENTAGE = 0.1;
  * Compute the activity percentages for each threads by looking at their CPU usage
  * per thread. This will be used to determine the idle threads and also to
  * visualize the activity of threads in the UI.
+ * A sample is considered active if its CPU value is above
+ * `maxThreadCPUDelta * CPU_IDLENESS_PERCENTAGE`.
  */
 export function computeThreadActivityPercentages(
   threads: Thread[],
@@ -220,13 +222,13 @@ export function computeThreadActivityPercentages(
   maxThreadCPUDelta: number
 ): Map<ThreadIndex, number> {
   const activityPercentages = new Map();
-  const cpuThresholdPerInterval = maxThreadCPUDelta * CPU_IDLENESS_PERCENTAGE;
 
   if (!sampleUnits) {
     // There is no CPU value in this thread, return empty map.
     return activityPercentages;
   }
 
+  const cpuThresholdPerInterval = maxThreadCPUDelta * CPU_IDLENESS_PERCENTAGE;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
     const thread = threads[threadIndex];
     const { samples } = thread;
@@ -240,7 +242,7 @@ export function computeThreadActivityPercentages(
     }
 
     let activeStackCount = 0;
-    // Starting from zero because we know for sure that the first index will be null.
+    // Skipping zero because we know for sure that the first index will be null.
     for (let sampleIndex = 1; sampleIndex < samples.length; sampleIndex++) {
       const currentThreadCPUDelta = threadCPUDelta[sampleIndex] || 0;
       // Interval is not always steady depending on the overhead.
@@ -298,8 +300,9 @@ export function computeIdleThreadsByCPU(
 
   // We have two thresholds for activeness. The first one is used most of the time.
   // But if there are any content process main threads with no paint markers,
-  // then the second threshold will be used, which is higher.
-  const threshold = maxActivityPercentage * ACTIVE_SAMPLE_PERCENTAGE;
+  // then the second threshold will be used, which is higher. This means that
+  // we're more agressively hiding content processes with no paint markers.
+  const defaultThreshold = maxActivityPercentage * ACTIVE_SAMPLE_PERCENTAGE;
   const thresholdForContentProcessWithNoPaint =
     maxActivityPercentage * ACTIVE_SAMPLE_PERCENTAGE_CONTENT_PROCESS_NO_PAINT;
 
@@ -307,13 +310,13 @@ export function computeIdleThreadsByCPU(
     threadIndex,
     activityPercentage,
   ] of threadActivityPercentages.entries()) {
-    // Threshold changes for each sample. If it's a content process main thread
+    // Threshold changes for each thread. If it's a content process main thread
     // with no paint markers, the threshold will be higher.
-    const thresholdForSample = isContentThreadWithNoPaint(threads[threadIndex])
+    const thresholdForThread = isContentThreadWithNoPaint(threads[threadIndex])
       ? thresholdForContentProcessWithNoPaint
-      : threshold;
+      : defaultThreshold;
 
-    if (activityPercentage < thresholdForSample) {
+    if (activityPercentage < thresholdForThread) {
       idleThreads.add(threadIndex);
     }
   }

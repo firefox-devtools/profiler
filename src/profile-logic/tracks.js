@@ -710,7 +710,7 @@ function _isThreadIdle(
   if (isContentThreadWithNoPaint(thread)) {
     // If content thread doesn't have any paint markers, set it idle if the
     // thread has at least 80% idle samples.
-    return _isThreadIdleByEitherCPUOrCategory(
+    return _isThreadIdleByEitherCpuOrCategory(
       profile,
       thread,
       threadIndex,
@@ -731,7 +731,7 @@ function _isThreadIdle(
 
   // Detect the idleness by either looking at the thread CPU usage (if it has),
   // or by looking at the sample categories.
-  return _isThreadIdleByEitherCPUOrCategory(
+  return _isThreadIdleByEitherCpuOrCategory(
     profile,
     thread,
     threadIndex,
@@ -744,11 +744,10 @@ function _isThreadIdle(
  * This function check if the thread has threadCPUDelta values and uses it to
  * detect the thread idleness if it has these. Otherwise, falls back to using
  * the sample categories for idleness detection. CPU values are more accurate
- * compared to sample categories because there might be some places that are
- * marked as idle or non-idle in the Firefox codebase, but the precision of the
- * CPU values are very high.
+ * than sample categories: for example some places could be marked "idle" but
+ * still consume CPU in some situations.
  */
-function _isThreadIdleByEitherCPUOrCategory(
+function _isThreadIdleByEitherCpuOrCategory(
   profile: Profile,
   thread: Thread,
   threadIndex: ThreadIndex,
