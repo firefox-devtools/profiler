@@ -481,6 +481,8 @@ export type Page = {|
   // no embedder, which means that it's the top-most frame. That way all pages
   // can create a tree of pages that can be navigated.
   embedderInnerWindowID: number,
+  // If present and true, this page has been opened in a private browsing window.
+  isPrivateBrowsing?: boolean,
 |};
 
 export type PageList = Array<Page>;
@@ -654,6 +656,11 @@ export type Thread = {|
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
   jsTracer?: JsTracerTable,
+  // If present and true, this thread was launched for a private browsing
+  // session only.
+  isPrivateBrowsing?: boolean,
+  // If present, the number represents the container this thread was loaded in.
+  userContextId?: number,
 |};
 
 export type ExtensionTable = {|

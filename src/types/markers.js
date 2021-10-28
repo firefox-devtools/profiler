@@ -451,6 +451,10 @@ export type NetworkPayload = {|
   // older version of the Gecko profiler without content type support.
   contentType?: string | null,
 
+  // If present and true, this network marker originated from a request in a
+  // private browsing session.
+  isPrivateBrowsing?: boolean,
+
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look
   // `src/profile-logic/marker-data.js` for more information.

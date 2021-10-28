@@ -235,6 +235,11 @@ export type GeckoThread = {|
   // - It's not an isolated content process.
   // - It's a profile from an older Firefox which doesn't include this field (introduced in Firefox 80).
   'eTLD+1'?: string,
+  // If present and true, this thread was launched for a private browsing
+  // session only.
+  isPrivateBrowsing?: boolean,
+  // If present, the number represents the container this thread was loaded in.
+  userContextId?: number,
   registerTime: number,
   processType: string,
   processName?: string,

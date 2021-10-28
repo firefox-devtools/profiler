@@ -1060,6 +1060,8 @@ function _processThread(
   const newThread: Thread = {
     name: thread.name,
     'eTLD+1': thread['eTLD+1'],
+    isPrivateBrowsing: thread.isPrivateBrowsing,
+    userContextId: thread.userContextId,
     processType: thread.processType,
     processName:
       typeof thread.processName === 'string' ? thread.processName : '',
