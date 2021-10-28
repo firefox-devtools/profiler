@@ -30,6 +30,7 @@ describe('sanitizePII', function () {
       shouldFilterToCommittedRange: null,
       shouldRemoveExtensions: false,
       shouldRemovePreferenceValues: false,
+      shouldRemovePrivateBrowsingData: false,
       ...piiConfig,
     };
 

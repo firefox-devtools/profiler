@@ -413,20 +413,22 @@ export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */
-export type RemoveProfileInformation = {
+export type RemoveProfileInformation = {|
   // Remove the given hidden threads if they are provided.
-  shouldRemoveThreads: Set<ThreadIndex>,
+  +shouldRemoveThreads: Set<ThreadIndex>,
   // Remove the screenshots if they are provided.
-  shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
+  +shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
   // Remove the full time range if StartEndRange is provided.
-  shouldFilterToCommittedRange: StartEndRange | null,
+  +shouldFilterToCommittedRange: StartEndRange | null,
   // Remove all the URLs if it's true.
-  shouldRemoveUrls: boolean,
+  +shouldRemoveUrls: boolean,
   // Remove the extension list if it's true.
-  shouldRemoveExtensions: boolean,
+  +shouldRemoveExtensions: boolean,
   // Remove the preference values if it's true.
-  shouldRemovePreferenceValues: boolean,
-};
+  +shouldRemovePreferenceValues: boolean,
+  // Remove the private browsing data if it's true.
+  +shouldRemovePrivateBrowsingData: boolean,
+|};
 
 /**
  * This type is used to decide how to highlight and stripe areas in the

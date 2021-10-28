@@ -509,6 +509,7 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Include screens
 MenuButtons--publish--renderCheckbox-label-resource = Include resource URLs and paths
 MenuButtons--publish--renderCheckbox-label-extension = Include extension information
 MenuButtons--publish--renderCheckbox-label-preference = Include preference values
+MenuButtons--publish--renderCheckbox-label-private-browsing = Include data from private browsing windows
 MenuButtons--publish--reupload-performance-profile = Re-upload Performance Profile
 MenuButtons--publish--share-performance-profile = Share Performance Profile
 MenuButtons--publish--info-description = Upload your profile and make it accessible to anyone with the link.

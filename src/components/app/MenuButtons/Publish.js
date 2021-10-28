@@ -15,6 +15,7 @@ import {
   getProfile,
   getProfileRootRange,
   getHasPreferenceMarkers,
+  getContainsPrivateBrowsingInformation,
 } from 'firefox-profiler/selectors/profile';
 import {
   getAbortFunction,
@@ -53,6 +54,7 @@ type StateProps = {|
   +profile: Profile,
   +rootRange: StartEndRange,
   +shouldShowPreferenceOption: boolean,
+  +shouldShowPrivateBrowsingOption: boolean,
   +checkedSharingOptions: CheckedSharingOptions,
   +downloadSizePromise: Promise<string>,
   +compressedProfileBlobPromise: Promise<Blob>,
@@ -86,6 +88,8 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       this.props.toggleCheckedSharingOptions('includeExtension'),
     includePreferenceValues: () =>
       this.props.toggleCheckedSharingOptions('includePreferenceValues'),
+    includePrivateBrowsingData: () =>
+      this.props.toggleCheckedSharingOptions('includePrivateBrowsingData'),
   };
 
   _renderCheckbox(slug: $Keys<CheckedSharingOptions>, labelL10nId: string) {
@@ -108,6 +112,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   _renderPublishPanel() {
     const {
       shouldShowPreferenceOption,
+      shouldShowPrivateBrowsingOption,
       downloadSizePromise,
       attemptToPublish,
       downloadFileName,
@@ -179,6 +184,12 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
               ? this._renderCheckbox(
                   'includePreferenceValues',
                   'MenuButtons--publish--renderCheckbox-label-preference'
+                )
+              : null}
+            {shouldShowPrivateBrowsingOption
+              ? this._renderCheckbox(
+                  'includePrivateBrowsingData',
+                  'MenuButtons--publish--renderCheckbox-label-private-browsing'
                 )
               : null}
           </div>
@@ -322,6 +333,8 @@ export const MenuButtonsPublish = explicitConnect<
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     shouldShowPreferenceOption: getHasPreferenceMarkers(state),
+    shouldShowPrivateBrowsingOption:
+      getContainsPrivateBrowsingInformation(state),
     checkedSharingOptions: getCheckedSharingOptions(state),
     downloadSizePromise: getDownloadSize(state),
     downloadFileName: getFilenameString(state),
