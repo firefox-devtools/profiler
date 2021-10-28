@@ -336,11 +336,11 @@ describe('actions/receive-profile', function () {
       ]);
     });
 
-    it('will not hide the Compositor thread', function () {
+    it('will not hide the Renderer thread', function () {
       const store = blankStore();
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
-      idleThread.name = 'Compositor';
+      idleThread.name = 'Renderer';
       idleThread.processType = 'default';
       workThread.name = 'GeckoMain';
       workThread.processType = 'default';
@@ -348,7 +348,7 @@ describe('actions/receive-profile', function () {
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
-        '  - show [thread Compositor]',
+        '  - show [thread Renderer]',
       ]);
     });
 
