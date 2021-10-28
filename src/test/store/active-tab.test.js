@@ -200,7 +200,7 @@ describe('finalizeProfileView', function () {
 
   it('sets the timeline type to "categories with CPU" if there are CPU usage values in the profile', function () {
     const { profile } = addActiveTabInformationToProfile(
-      getProfileWithThreadCPUDelta([1, 2])
+      getProfileWithThreadCPUDelta([[1, 2]])
     );
     const { getState } = setup({
       profile,

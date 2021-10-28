@@ -14,7 +14,12 @@ import type {
   TrackIndex,
 } from 'firefox-profiler/types';
 
-import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
+import {
+  defaultThreadOrder,
+  getFriendlyThreadName,
+  isThreadWithNoPaint,
+  isContentThreadWithNoPaint,
+} from './profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 /**
@@ -163,7 +168,8 @@ export function initializeHiddenLocalTracksByPid(
   urlHiddenTracksByPid: Map<Pid, Set<TrackIndex>> | null,
   localTracksByPid: Map<Pid, LocalTrack[]>,
   profile: Profile,
-  legacyHiddenThreads: ThreadIndex[] | null
+  legacyHiddenThreads: ThreadIndex[] | null,
+  idleThreadsByCPU: Set<ThreadIndex>
 ): Map<Pid, Set<TrackIndex>> {
   const hiddenTracksByPid = new Map();
 
@@ -186,7 +192,7 @@ export function initializeHiddenLocalTracksByPid(
         const track = tracks[trackIndex];
         if (
           track.type === 'thread' &&
-          _isThreadIdle(profile, profile.threads[track.threadIndex])
+          _isThreadIdle(profile, track.threadIndex, idleThreadsByCPU)
         ) {
           hiddenTracks.add(trackIndex);
         }
@@ -499,7 +505,8 @@ export function initializeHiddenGlobalTracks(
   profile: Profile,
   validTrackIndexes: TrackIndex[],
   urlHiddenGlobalTracks: Set<TrackIndex> | null,
-  legacyHiddenThreads: ThreadIndex[] | null
+  legacyHiddenThreads: ThreadIndex[] | null,
+  idleThreadsByCPU: Set<ThreadIndex>
 ): Set<TrackIndex> {
   const hiddenGlobalTracks = new Set();
 
@@ -516,17 +523,21 @@ export function initializeHiddenGlobalTracks(
   }
 
   if (urlHiddenGlobalTracks === null) {
-    // No hidden global tracks exist, generate the default Set.
-    for (let trackIndex = 0; trackIndex < globalTracks.length; trackIndex++) {
-      const track = globalTracks[trackIndex];
-      if (track.type === 'process' && track.mainThreadIndex !== null) {
-        const { mainThreadIndex } = track;
-        const thread = profile.threads[mainThreadIndex];
-        if (_isThreadIdle(profile, thread)) {
-          hiddenGlobalTracks.add(trackIndex);
+    // No hidden global tracks exist, generate the default Set if there are more
+    // than one global tracks. If there is only one, skip checking and not hide
+    // it by default.
+    if (globalTracks.length > 1) {
+      for (let trackIndex = 0; trackIndex < globalTracks.length; trackIndex++) {
+        const track = globalTracks[trackIndex];
+        if (track.type === 'process' && track.mainThreadIndex !== null) {
+          const { mainThreadIndex } = track;
+          if (_isThreadIdle(profile, mainThreadIndex, idleThreadsByCPU)) {
+            hiddenGlobalTracks.add(trackIndex);
+          }
         }
       }
     }
+
     return hiddenGlobalTracks;
   }
 
@@ -672,7 +683,12 @@ export function getLocalTrackName(
  * end user to load a profile full of empty and idle threads. This function uses
  * various rules to determine if a thread is idle.
  */
-function _isThreadIdle(profile: Profile, thread: Thread): boolean {
+function _isThreadIdle(
+  profile: Profile,
+  threadIndex: ThreadIndex,
+  idleThreadsByCPU: Set<ThreadIndex>
+): boolean {
+  const thread = profile.threads[threadIndex];
   if (
     // Don't hide the compositor.
     thread.name === 'Compositor' ||
@@ -688,15 +704,17 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     // This is a profile without any sample (taken with no periodic sampling mode)
     // and we can't take a look at the samples to decide whether that thread is
     // active or not. So we are checking if we have a paint marker instead.
-    return _isThreadWithNoPaint(thread);
+    return isThreadWithNoPaint(thread);
   }
 
-  if (_isContentThreadWithNoPaint(thread)) {
+  if (isContentThreadWithNoPaint(thread)) {
     // If content thread doesn't have any paint markers, set it idle if the
     // thread has at least 80% idle samples.
-    return _isThreadMostlyFullOfIdleSamples(
+    return _isThreadIdleByEitherCpuOrCategory(
       profile,
       thread,
+      threadIndex,
+      idleThreadsByCPU,
       PERCENTAGE_ACTIVE_SAMPLES_NON_PAINT
     );
   }
@@ -711,36 +729,43 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     return !_hasThreadAtLeastOneNonIdleSample(profile, thread);
   }
 
-  return _isThreadMostlyFullOfIdleSamples(profile, thread);
+  // Detect the idleness by either looking at the thread CPU usage (if it has),
+  // or by looking at the sample categories.
+  return _isThreadIdleByEitherCpuOrCategory(
+    profile,
+    thread,
+    threadIndex,
+    idleThreadsByCPU,
+    PERCENTAGE_ACTIVE_SAMPLES
+  );
 }
 
-function _isContentThreadWithNoPaint(thread: Thread): boolean {
-  if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
-    return _isThreadWithNoPaint(thread);
+/**
+ * This function check if the thread has threadCPUDelta values and uses it to
+ * detect the thread idleness if it has these. Otherwise, falls back to using
+ * the sample categories for idleness detection. CPU values are more accurate
+ * than sample categories: for example some places could be marked "idle" but
+ * still consume CPU in some situations.
+ */
+function _isThreadIdleByEitherCpuOrCategory(
+  profile: Profile,
+  thread: Thread,
+  threadIndex: ThreadIndex,
+  idleThreadsByCPU: Set<ThreadIndex>,
+  activeSamplePercentage: number
+): boolean {
+  const { sampleUnits } = profile.meta;
+  if (thread.samples.threadCPUDelta && sampleUnits) {
+    // Use the thread CPU usage numbers to detect the idleness.
+    return idleThreadsByCPU.has(threadIndex);
   }
 
-  return false;
-}
-
-// Returns true if the thread doesn't include any RefreshDriverTick. This
-// indicates they were not painted to, and most likely idle. This is just
-// a heuristic to help users.
-function _isThreadWithNoPaint({ markers, stringTable }: Thread): boolean {
-  let isPaintMarkerFound = false;
-  if (stringTable.hasString('RefreshDriverTick')) {
-    const paintStringIndex = stringTable.indexForString('RefreshDriverTick');
-
-    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-      if (paintStringIndex === markers.name[markerIndex]) {
-        isPaintMarkerFound = true;
-        break;
-      }
-    }
-  }
-  if (!isPaintMarkerFound) {
-    return true;
-  }
-  return false;
+  // Fall back to using the sample categories to detect the idleness.
+  return _isThreadMostlyFullOfIdleSamples(
+    profile,
+    thread,
+    activeSamplePercentage
+  );
 }
 
 // Any thread, except content thread with no RefreshDriverTick, with less than
@@ -758,7 +783,7 @@ const PERCENTAGE_ACTIVE_SAMPLES_NON_PAINT = 0.2;
 function _isThreadMostlyFullOfIdleSamples(
   profile: Profile,
   thread: Thread,
-  activeSamplePercentage: number = PERCENTAGE_ACTIVE_SAMPLES
+  activeSamplePercentage: number
 ): boolean {
   let maxActiveStackCount = activeSamplePercentage * thread.samples.length;
   let activeStackCount = 0;

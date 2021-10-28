@@ -3361,3 +3361,37 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
     mapForBacktraceSelfStacks
   );
 }
+
+/**
+ * Returns true if the thread doesn't include any RefreshDriverTick. This
+ * indicates they were not painted to, and most likely idle. This is just
+ * a heuristic to help users.
+ */
+export function isThreadWithNoPaint({ markers, stringTable }: Thread): boolean {
+  let paintMarkerFound = false;
+  if (stringTable.hasString('RefreshDriverTick')) {
+    const paintStringIndex = stringTable.indexForString('RefreshDriverTick');
+
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      if (paintStringIndex === markers.name[markerIndex]) {
+        paintMarkerFound = true;
+        break;
+      }
+    }
+  }
+  if (!paintMarkerFound) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Returns true if a thread is a content process main thread with no paint markers.
+ */
+export function isContentThreadWithNoPaint(thread: Thread): boolean {
+  if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
+    return isThreadWithNoPaint(thread);
+  }
+
+  return false;
+}

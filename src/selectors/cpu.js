@@ -12,9 +12,18 @@ import {
   getMeta,
 } from './profile';
 import { getThreadSelectors } from './per-thread';
-import { computeMaxThreadCPUDelta } from 'firefox-profiler/profile-logic/cpu';
+import {
+  computeMaxThreadCPUDelta,
+  computeThreadActivityPercentages,
+  computeIdleThreadsByCPU,
+} from 'firefox-profiler/profile-logic/cpu';
 
-import type { Selector, State, Thread } from 'firefox-profiler/types';
+import type {
+  Selector,
+  State,
+  Thread,
+  ThreadIndex,
+} from 'firefox-profiler/types';
 
 export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
   getSampleUnits,
@@ -60,4 +69,26 @@ export const getMaxThreadCPUDelta: Selector<number> = createSelector(
   getCPUProcessedThreads,
   getProfileInterval,
   computeMaxThreadCPUDelta
+);
+
+/**
+ * Get the map of thread index -> activity percentage for each thread if the CPU
+ * usage values are provided in the profile.
+ */
+export const getThreadActivityPercentages: Selector<Map<ThreadIndex, number>> =
+  createSelector(
+    getThreads,
+    getSampleUnits,
+    getProfileInterval,
+    getMaxThreadCPUDelta,
+    computeThreadActivityPercentages
+  );
+
+/**
+ * Get the idle threads by looking at their CPU activity.
+ */
+export const getIdleThreadsByCPU: Selector<Set<ThreadIndex>> = createSelector(
+  getThreads,
+  getThreadActivityPercentages,
+  computeIdleThreadsByCPU
 );
