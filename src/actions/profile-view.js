@@ -648,6 +648,55 @@ export function showAllTracks(): ThunkAction<void> {
 }
 
 /**
+ * This action makes the tracks that are provided visible.
+ */
+export function showProvidedTracks(
+  globalTracksToShow: Set<TrackIndex>,
+  localTracksByPidToShow: Map<Pid, Set<TrackIndex>>
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'show provided tracks',
+    });
+
+    // We need to check each global tracks and add their local tracks to the
+    // filter as well to make them visible.
+    const globalTracks = getGlobalTracks(getState());
+    for (const globalTrackIndex of globalTracksToShow) {
+      const globalTrack = globalTracks[globalTrackIndex];
+      if (!globalTrack.pid) {
+        // There is no local track for this one, skip it.
+        continue;
+      }
+
+      // Get all the local tracks and provided ones.
+      const localTracks = getLocalTracks(getState(), globalTrack.pid);
+      const localTracksToShow = localTracksByPidToShow.get(globalTrack.pid);
+      // Check if their lengths are the same. If not, we must add all the local
+      // track indexes.
+      if (
+        localTracksToShow === undefined ||
+        localTracks.length !== localTracksToShow.size
+      ) {
+        // If they don't match, automatically show all the local tracks.
+        localTracksByPidToShow.set(
+          globalTrack.pid,
+          new Set(localTracks.keys())
+        );
+      }
+    }
+
+    dispatch({
+      type: 'SHOW_PROVIDED_TRACKS',
+      globalTracksToShow,
+      localTracksByPidToShow,
+    });
+  };
+}
+
+/**
  * This action shows a specific global track.
  */
 export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {

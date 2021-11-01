@@ -18,6 +18,7 @@ import {
   isolateScreenshot,
   hideLocalTrack,
   showLocalTrack,
+  showProvidedTracks,
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -80,6 +81,7 @@ type DispatchProps = {|
   +isolateLocalTrack: typeof isolateLocalTrack,
   +isolateProcessMainThread: typeof isolateProcessMainThread,
   +isolateScreenshot: typeof isolateScreenshot,
+  +showProvidedTracks: typeof showProvidedTracks,
 |};
 
 type TimelineTrackContextMenuProps = ConnectedProps<
@@ -103,6 +105,42 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   _showAllTracks = (): void => {
     const { showAllTracks } = this.props;
     showAllTracks();
+  };
+
+  _showProvidedTracks = (): void => {
+    const {
+      showProvidedTracks,
+      globalTracks,
+      globalTrackNames,
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+    } = this.props;
+    const { searchFilter } = this.state;
+    const searchFilteredGlobalTracks = getSearchFilteredGlobalTracks(
+      globalTracks,
+      globalTrackNames,
+      threads,
+      searchFilter
+    );
+    const searchFilteredLocalTracksByPid = getSearchFilteredLocalTracksByPid(
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+      searchFilter
+    );
+
+    if (
+      searchFilteredGlobalTracks === null ||
+      searchFilteredLocalTracksByPid === null
+    ) {
+      // This shouldn't happen!
+      return;
+    }
+    showProvidedTracks(
+      searchFilteredGlobalTracks,
+      searchFilteredLocalTracksByPid
+    );
   };
 
   _toggleGlobalTrackVisibility = (
@@ -676,6 +714,24 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     );
   }
 
+  renderShowProvidedTracks() {
+    const { rightClickedTrack } = this.props;
+    if (rightClickedTrack !== null) {
+      return null;
+    }
+
+    return (
+      <React.Fragment>
+        <MenuItem onClick={this._showProvidedTracks}>
+          <Localized id="TrackContextMenu--show-all-tracks-below">
+            Show all tracks below
+          </Localized>
+        </MenuItem>
+        <div className="react-contextmenu-separator" />
+      </React.Fragment>
+    );
+  }
+
   renderTrackSearchField() {
     const { rightClickedTrack } = this.props;
     const { searchFilter } = this.state;
@@ -774,7 +830,9 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           // visible depending on the current state.
         }
         {this.renderTrackSearchField()}
-        {this.renderShowAllTracks()}
+        {searchFilter
+          ? this.renderShowProvidedTracks()
+          : this.renderShowAllTracks()}
         {isolateProcessMainThread}
         {isolateProcess}
         {isolateLocalTrack}
@@ -857,6 +915,7 @@ export const TimelineTrackContextMenu = explicitConnect<
     isolateScreenshot,
     hideLocalTrack,
     showLocalTrack,
+    showProvidedTracks,
   },
   component: TimelineTrackContextMenuImpl,
 });
