@@ -1,0 +1,55 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+form.trackSearchField {
+  width: 100%;
+}
+
+.trackSearchField {
+  position: relative; /* to properly position the button */
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.photon-input.trackSearchFieldInput {
+  /* the chain class selectors are used here
+  to override the styling for the photon-input class */
+  width: calc(100% - 10px);
+  height: 25px;
+  padding: 0 18px 0 17px; /* right padding for the reset button, left padding for the search icon */
+  border: 0.5px solid #aaa;
+  margin: 0 5px;
+}
+
+.trackSearchFieldInput {
+  position: relative;
+  flex: 1;
+  margin: 0;
+  background: url(../../../res/img/svg/searchfield-icon.svg) 3px center
+    no-repeat white;
+  background-size: 11px 11px;
+}
+
+.trackSearchFieldButton {
+  position: absolute;
+
+  /* 5px is margin and the other 5px is the location inside the input */
+  right: 10px;
+  overflow: hidden;
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border: 0;
+  background: url(../../../res/img/svg/searchfield-cancel.svg) top left
+    no-repeat;
+  background-size: contain;
+  color: transparent;
+  -moz-user-focus: ignore;
+  vertical-align: middle;
+}
+
+.trackSearchFieldInput:invalid + .trackSearchFieldButton {
+  visibility: hidden;
+}
