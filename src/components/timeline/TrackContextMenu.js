@@ -217,25 +217,30 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     }
 
     return (
-      <MenuItem
-        key={trackIndex}
-        preventClose={true}
-        data={{ trackIndex }}
-        onClick={this._toggleGlobalTrackVisibility}
-        attributes={{
-          className: classNames('timelineTrackContextMenuItem', {
-            checkable: true,
-            checked: !isHidden,
-          }),
-          title,
-        }}
-      >
-        <span>{globalTrackNames[trackIndex]}</span>
-        <span className="timelineTrackContextMenuSpacer" />
-        {track.type === 'process' && (
-          <span className="timelineTrackContextMenuPid">({track.pid})</span>
-        )}
-      </MenuItem>
+      <React.Fragment>
+        <MenuItem
+          key={trackIndex}
+          preventClose={true}
+          data={{ trackIndex }}
+          onClick={this._toggleGlobalTrackVisibility}
+          attributes={{
+            className: classNames('timelineTrackContextMenuItem', {
+              checkable: true,
+              checked: !isHidden,
+            }),
+            title,
+          }}
+        >
+          <span>{globalTrackNames[trackIndex]}</span>
+          <span className="timelineTrackContextMenuSpacer" />
+          {track.type === 'process' && (
+            <span className="timelineTrackContextMenuPid">({track.pid})</span>
+          )}
+        </MenuItem>
+        {track.type === 'process'
+          ? this.renderLocalTracks(trackIndex, track.pid)
+          : null}
+      </React.Fragment>
     );
   }
 
@@ -619,9 +624,6 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
             return (
               <div key={globalTrackIndex}>
                 {this.renderGlobalTrack(globalTrackIndex)}
-                {globalTrack.type === 'process'
-                  ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                  : null}
               </div>
             );
           } else if (
@@ -631,9 +633,6 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
             return (
               <div key={globalTrackIndex}>
                 {this.renderGlobalTrack(globalTrackIndex)}
-                {globalTrack.type === 'process'
-                  ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                  : null}
               </div>
             );
           } else if (
@@ -644,9 +643,6 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
               return (
                 <div key={globalTrackIndex}>
                   {this.renderGlobalTrack(globalTrackIndex)}
-                  {globalTrack.type === 'process'
-                    ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                    : null}
                 </div>
               );
             }
