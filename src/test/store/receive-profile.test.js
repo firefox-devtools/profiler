@@ -46,6 +46,7 @@ import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
   getProfileWithMarkers,
+  getProfileWithThreadCPUDelta,
 } from '../fixtures/profiles/processed-profile';
 import {
   getHumanReadableTracks,
@@ -335,11 +336,11 @@ describe('actions/receive-profile', function () {
       ]);
     });
 
-    it('will not hide the Compositor thread', function () {
+    it('will not hide the Renderer thread', function () {
       const store = blankStore();
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
-      idleThread.name = 'Compositor';
+      idleThread.name = 'Renderer';
       idleThread.processType = 'default';
       workThread.name = 'GeckoMain';
       workThread.processType = 'default';
@@ -347,7 +348,7 @@ describe('actions/receive-profile', function () {
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
-        '  - show [thread Compositor]',
+        '  - show [thread Renderer]',
       ]);
     });
 
@@ -524,6 +525,120 @@ describe('actions/receive-profile', function () {
         '  - hide [thread MediaPlayback idle]',
         '  - hide [thread MediaDecoderStateMachine idle]',
       ]);
+    });
+
+    describe('with threadCPUDelta', function () {
+      it('will show a thread when the relative CPU percentage is above 10%', function () {
+        const store = blankStore();
+        // A profile with max value of 100 in the first thread. Therefore threshold
+        // for each sample idleness is > 10. Since there are 10 sample, threshold
+        // for idle samples per thread is > 1.
+        const profile = getProfileWithThreadCPUDelta([
+          [15, 20, 100, 50, 80, 40, 60, 20, 20, 24], // Thread with 10 active sample
+          [15, 6, 1, 11, 4, 7, 0, 5, 4, 9], // Thread with 2 active sample
+        ]);
+        profile.threads[0].name = 'Thread with 100% CPU';
+        profile.threads[1].name = 'Thread with 20% CPU';
+        profile.threads[0].pid = 1;
+        profile.threads[1].pid = 1;
+
+        store.dispatch(viewProfile(profile));
+        expect(getHumanReadableTracks(store.getState())).toEqual([
+          'show [process]',
+          '  - show [thread Thread with 100% CPU] SELECTED',
+          '  - show [thread Thread with 20% CPU]', // <- Ensure this thread is not hidden.
+        ]);
+      });
+
+      it('will hide a thread when the relative CPU percentage is below 10%', function () {
+        const store = blankStore();
+        // A profile with max value of 100 in the first thread. Therefore threshold
+        // for each sample idleness is > 10. Since there are 10 sample, threshold
+        // for idle samples per thread is > 1.
+        const profile = getProfileWithThreadCPUDelta([
+          [15, 20, 100, 50, 80, 40, 60, 20, 20, 24], // Thread with 10 active sample
+          [15, 6, 1, 9, 4, 7, 0, 5, 4, 9], // Thread with 1 active sample
+        ]);
+        profile.threads[0].name = 'Thread with 100% CPU';
+        profile.threads[1].name = 'Thread with 10% CPU';
+        profile.threads[0].pid = 1;
+        profile.threads[1].pid = 1;
+
+        store.dispatch(viewProfile(profile));
+        expect(getHumanReadableTracks(store.getState())).toEqual([
+          'show [process]',
+          '  - show [thread Thread with 100% CPU] SELECTED',
+          '  - hide [thread Thread with 10% CPU]', // <- Ensure this thread is hidden.
+        ]);
+      });
+
+      it('will show the only thread with below 10% CPU activity', function () {
+        const store = blankStore();
+        // A profile with max value of 100 in the first thread. Therefore threshold
+        // for each sample idleness is > 10. Since there are 10 sample, threshold
+        // for idle samples per thread is > 1.
+        const profile = getProfileWithThreadCPUDelta([
+          // Thread with 1 active sample. It would be hidden if there was another
+          // thread but it will not be because this is the only thread.
+          [1, 2, 100, 4, 1, 2, 6, 8, 6, 9],
+        ]);
+        profile.threads[0].name = 'Thread with 10% CPU';
+        profile.threads[0].pid = 1;
+
+        store.dispatch(viewProfile(profile));
+        expect(getHumanReadableTracks(store.getState())).toEqual([
+          'show [process]',
+          '  - show [thread Thread with 10% CPU] SELECTED', // <- Ensure this thread is hidden.
+        ]);
+      });
+
+      it('will hide the content process with no paint markers if the relative CPU percentage is below 20%', function () {
+        const store = blankStore();
+        // A profile with max value of 100 in the first thread. Therefore threshold
+        // for each sample idleness is > 10. Since there are 10 sample, threshold
+        // for idle samples per thread is > 2 for the content process main threads
+        // with no paint markers.
+        const profile = getProfileWithThreadCPUDelta([
+          [15, 20, 100, 50, 80, 40, 60, 20, 20, 24], // Thread with 10 active sample
+          [15, 6, 1, 11, 4, 7, 0, 5, 4, 9], // Thread with 2 active sample
+        ]);
+        profile.threads[0].name = 'Thread with 100% CPU';
+        profile.threads[1].name = 'GeckoMain';
+        profile.threads[1].processType = 'tab';
+        profile.threads[0].pid = 1;
+        profile.threads[1].pid = 2;
+
+        store.dispatch(viewProfile(profile));
+        expect(getHumanReadableTracks(store.getState())).toEqual([
+          'show [process]',
+          '  - show [thread Thread with 100% CPU] SELECTED',
+          'hide [thread GeckoMain tab]', // <- Ensure this process is hidden.
+        ]);
+      });
+
+      it('will show the content process with no paint markers if the relative CPU percentage is above 20%', function () {
+        const store = blankStore();
+        // A profile with max value of 100 in the first thread. Therefore threshold
+        // for each sample idleness is > 10. Since there are 10 sample, threshold
+        // for idle samples per thread is > 2 for the content process main threads
+        // with no paint markers.
+        const profile = getProfileWithThreadCPUDelta([
+          [15, 20, 100, 50, 80, 40, 60, 20, 20, 24], // Thread with 10 active sample
+          [15, 6, 1, 11, 4, 7, 15, 5, 4, 9], // Thread with 3 active sample
+        ]);
+        profile.threads[0].name = 'Thread with 100% CPU';
+        profile.threads[1].name = 'GeckoMain';
+        profile.threads[1].processType = 'tab';
+        profile.threads[0].pid = 1;
+        profile.threads[1].pid = 2;
+
+        store.dispatch(viewProfile(profile));
+        expect(getHumanReadableTracks(store.getState())).toEqual([
+          'show [process]',
+          '  - show [thread Thread with 100% CPU]',
+          'show [thread GeckoMain tab] SELECTED', // <- Ensure this process is not hidden.
+        ]);
+      });
     });
   });
 

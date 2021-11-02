@@ -36,6 +36,7 @@ import {
   getIsCPUUtilizationProvided,
   getSymbolServerUrl,
   getActiveTabID,
+  getIdleThreadsByCPU,
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
@@ -280,6 +281,7 @@ export function finalizeFullProfileView(
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
+    const idleThreadsByCPU = getIdleThreadsByCPU(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
       hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
@@ -290,7 +292,8 @@ export function finalizeFullProfileView(
       profile,
       globalTrackOrder,
       hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
-      getLegacyHiddenThreads(getState())
+      getLegacyHiddenThreads(getState()),
+      idleThreadsByCPU
     );
     const localTracksByPid = computeLocalTracksByPid(profile);
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
@@ -302,7 +305,8 @@ export function finalizeFullProfileView(
       hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
       localTracksByPid,
       profile,
-      getLegacyHiddenThreads(getState())
+      getLegacyHiddenThreads(getState()),
+      idleThreadsByCPU
     );
     let visibleThreadIndexes = getVisibleThreads(
       globalTracks,

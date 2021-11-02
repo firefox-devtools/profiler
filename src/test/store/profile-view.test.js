@@ -3086,6 +3086,23 @@ describe('getFriendlyThreadName', function () {
       'http://w3c.github.io',
     ]);
   });
+
+  it('adds indexes to the tracks with homonym eTLD+1 fields', function () {
+    const { getFriendlyThreadNames } = setup([
+      { name: 'GeckoMain', processType: 'default' },
+      { name: 'GeckoMain', 'eTLD+1': 'https://firefox.com' },
+      { name: 'GeckoMain', 'eTLD+1': 'https://firefox.com' },
+      { name: 'GeckoMain', 'eTLD+1': 'https://firefox.com' },
+      { name: 'GeckoMain', 'eTLD+1': 'http://w3c.github.io' },
+    ]);
+    expect(getFriendlyThreadNames()).toEqual([
+      'Parent Process',
+      'https://firefox.com (1/3)',
+      'https://firefox.com (2/3)',
+      'https://firefox.com (3/3)',
+      'http://w3c.github.io',
+    ]);
+  });
 });
 
 describe('counter selectors', function () {
