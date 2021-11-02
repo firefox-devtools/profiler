@@ -34,10 +34,15 @@ describe('shared/Tooltip', () => {
   });
 
   describe('positioning', () => {
-    it('is rendered at the default location if there is some space', () => {
+    it('is rendered at the right and bottom of the cursor if there is some space', () => {
+      // The jsdom window size is 1024x768.
+      let mouseX = 0;
+      let mouseY = 0;
+      const tooltipWidth = 300;
+      const tooltipHeight = 200;
       const { rerender, getTooltipStyle } = setup({
-        box: { width: 500, height: 200 },
-        mouse: { x: 0, y: 0 },
+        box: { width: tooltipWidth, height: tooltipHeight },
+        mouse: { x: mouseX, y: mouseY },
       });
 
       expect(getTooltipStyle()).toEqual({
@@ -45,35 +50,77 @@ describe('shared/Tooltip', () => {
         top: `${MOUSE_OFFSET}px`,
       });
 
-      const mouseX = 50;
-      const mouseY = 70;
+      mouseX = 50;
+      mouseY = 70;
       rerender({ x: mouseX, y: mouseY });
 
       expect(getTooltipStyle()).toEqual({
         left: `${mouseX + MOUSE_OFFSET}px`,
         top: `${mouseY + MOUSE_OFFSET}px`,
       });
+
+      // Moving the mouse to a location where the space is available both
+      // below/right and above/left will still render the tooltip below/right.
+      mouseX = 510;
+      mouseY = 310;
+      rerender({ x: mouseX, y: mouseY });
+      expect(getTooltipStyle()).toEqual({
+        left: `${mouseX + MOUSE_OFFSET}px`,
+        top: `${mouseY + MOUSE_OFFSET}px`,
+      });
+
+      // But moving the mouse to a location where the space right/below isn't
+      // available will move the tooltip left/above.
+      mouseX = 800;
+      mouseY = 700;
+      rerender({ x: mouseX, y: mouseY });
+      expect(getTooltipStyle()).toEqual({
+        left: `${mouseX - MOUSE_OFFSET - tooltipWidth}px`,
+        top: `${mouseY - MOUSE_OFFSET - tooltipHeight}px`,
+      });
     });
 
     it('is rendered at the left and top of the cursor if the space is missing at the right and below', () => {
-      const mouseX = 600;
-      const mouseY = 500;
-      const tooltipWidth = 500;
-      const tooltipHeight = 300;
-      const { getTooltipStyle } = setup({
+      // The jsdom window size is 1024x768.
+      let mouseX = 800;
+      let mouseY = 700;
+      const tooltipWidth = 300;
+      const tooltipHeight = 200;
+      const { getTooltipStyle, rerender } = setup({
         box: { width: tooltipWidth, height: tooltipHeight },
         mouse: { x: mouseX, y: mouseY },
       });
 
-      const expectedLeft = mouseX - MOUSE_OFFSET - tooltipWidth;
-      const expectedTop = mouseY - MOUSE_OFFSET - tooltipHeight;
+      const expectedLeft = () => mouseX - MOUSE_OFFSET - tooltipWidth;
+      const expectedTop = () => mouseY - MOUSE_OFFSET - tooltipHeight;
       expect(getTooltipStyle()).toEqual({
-        left: `${expectedLeft}px`,
-        top: `${expectedTop}px`,
+        left: `${expectedLeft()}px`,
+        top: `${expectedTop()}px`,
+      });
+
+      // Moving the mouse to a location where the space is available both
+      // below/right and above/left will still render the tooltip above/left.
+      mouseX = 510;
+      mouseY = 310;
+      rerender({ x: mouseX, y: mouseY });
+      expect(getTooltipStyle()).toEqual({
+        left: `${expectedLeft()}px`,
+        top: `${expectedTop()}px`,
+      });
+
+      // But moving the mouse to a location where the space left/above isn't
+      // available will move the tooltip right/below.
+      mouseX = 50;
+      mouseY = 30;
+      rerender({ x: mouseX, y: mouseY });
+      expect(getTooltipStyle()).toEqual({
+        left: `${mouseX + MOUSE_OFFSET}px`,
+        top: `${mouseY + MOUSE_OFFSET}px`,
       });
     });
 
     it('is rendered at the left and top of the window if the space is missing elsewhere', () => {
+      // The jsdom window size is 1024x768.
       const { getTooltipStyle } = setup({
         box: { width: 700, height: 500 },
         mouse: { x: 500, y: 300 },

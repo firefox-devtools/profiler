@@ -55,6 +55,7 @@ Object {
   "profilerOverhead": Array [],
   "threads": Array [
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -435,6 +436,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -653,6 +655,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -871,6 +874,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -1400,6 +1404,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -1652,6 +1657,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -2005,6 +2011,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -2191,6 +2198,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -2407,6 +2415,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -2627,6 +2636,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -2843,6 +2853,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -3119,6 +3130,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -4109,6 +4121,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -5099,6 +5112,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -6093,6 +6107,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,
@@ -7087,6 +7102,7 @@ Object {
       "unregisterTime": null,
     },
     Object {
+      "eTLD+1": undefined,
       "frameTable": Object {
         "address": Array [
           -1,

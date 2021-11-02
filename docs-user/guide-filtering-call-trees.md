@@ -13,7 +13,7 @@ The following are the different types of filtering operations that are supported
 
 ## Search filter
 
-![A screenshot of the search box](./images/search-2018-05.jpg)
+![A screenshot of the search box](./images/search-2021-10-21.png)
 
 Searching will exclude samples that do not match a search string. The search filter looks at every function in the sample's stack. If the function's name, resource, or URL match, then the sample will be retained; otherwise, it will be filtered out. Multiple search terms can be added, as long as they are separated by commas.
 

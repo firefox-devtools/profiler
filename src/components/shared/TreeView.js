@@ -30,6 +30,16 @@ import './TreeView.css';
  */
 const PAGE_KEYS_DELTA = 15;
 
+/**
+ * A component that accepts falsy values as the `id` prop for `Localized`.
+ * `Localized` throws a warning if the `id` field is empty or null. This is made
+ * to silence those warnings by directy rendering the children for that case instead.
+ */
+function PermissiveLocalized(props: React.ElementConfig<typeof Localized>) {
+  const { children, id } = props;
+  return id ? <Localized {...props}>{children}</Localized> : children;
+}
+
 // This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
 // See https://github.com/facebook/flow/issues/4099
 type RegExpResult = null | ({ index: number, input: string } & string[]);
@@ -59,7 +69,7 @@ const TreeViewHeader = <DisplayData: Object>({
   return (
     <div className="treeViewHeader">
       {fixedColumns.map((col) => (
-        <Localized
+        <PermissiveLocalized
           id={col.titleL10nId}
           attrs={{ title: true }}
           key={col.propName}
@@ -67,13 +77,13 @@ const TreeViewHeader = <DisplayData: Object>({
           <span
             className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
           ></span>
-        </Localized>
+        </PermissiveLocalized>
       ))}
-      <Localized id={mainColumn.titleL10nId} attrs={{ title: true }}>
+      <PermissiveLocalized id={mainColumn.titleL10nId} attrs={{ title: true }}>
         <span
           className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
         ></span>
-      </Localized>
+      </PermissiveLocalized>
     </div>
   );
 };

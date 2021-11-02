@@ -163,8 +163,14 @@ Home--menu-button = Ativar botão de menu do { -profiler-brand-name }
 Home--menu-button-instructions =
     Ative o botão de menu do profiler para iniciar a gravação de um profile de desempenho
     no { -firefox-brand-name }, depois analisar e compartilhar com profiler.firefox.com.
-Home--addon-button = Instalar extensão
-Home--addon-button-instructions = Instale a extensão Gecko Profiler para iniciar a gravação de um profile de desempenho no { -firefox-brand-name }, depois analisar e compartilhar com profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Esta instância do profiler não conseguiu se conectar ao WebChannel, por isso não pode ativar o botão de menu do profiler.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable = Esta instância do profiler não conseguiu se conectar ao WebChannel. Isso geralmente significa que está sendo executado em um host diferente daquele especificado na preferência <code>devtools.performance.recording.ui-base-url</code>. Se você quiser capturar novos profiles com esta instância e dar a ela controle programático do botão de menu do profiler, pode ir em <code>about: config</code> e alterar a preferência.
 Home--record-instructions = Para iniciar a gravação de um profile, clique no botão de gravação de profile ou use os atalhos de teclado. O ícone fica azul quando um profile está sendo gravado. Use <kbd>Capturar</kbd> para carregar os dados no profiler.firefox.com.
 Home--instructions-title = Como ver e gravar profiles
 Home--instructions-content =

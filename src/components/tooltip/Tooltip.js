@@ -7,7 +7,10 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
 
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import {
+  ensureExists,
+  assertExhaustiveCheck,
+} from 'firefox-profiler/utils/flow';
 import './Tooltip.css';
 
 export const MOUSE_OFFSET = 11;
@@ -20,64 +23,127 @@ type Props = {|
   +children: React.Node,
 |};
 
+// These types represent the tooltip's position. They will be used when storing
+// the previous position as well as when defining the new one.
+type PositionFromMouse = 'before-mouse' | 'after-mouse';
+type TooltipPosition = PositionFromMouse | 'window-edge';
+
 export class Tooltip extends React.PureComponent<Props> {
   _isMounted: boolean = false;
   _isLayoutScheduled: boolean = false;
   _interiorElementRef: {| current: HTMLDivElement | null |} = React.createRef();
+
+  // This keeps the previous tooltip positioning relatively to the mouse cursor.
+  // "after" / "after" is the prefered positioning, so it's our default.
+  // "edge" means aligned to the window's left or top edge.
+  _previousPosition: {
+    horizontal: TooltipPosition,
+    vertical: TooltipPosition,
+  } = { horizontal: 'after-mouse', vertical: 'after-mouse' };
 
   _overlayElement = ensureExists(
     document.querySelector('#root-overlay'),
     'Expected to find a root overlay element.'
   );
 
+  // This function computes the position of the tooltip in one of the directions
+  // horizontal or vertical, leading respectively to the CSS value for
+  // properties "left" and "top".
+  _computeNewPosition({
+    mousePosition,
+    elementSize,
+    windowSize,
+    previousPosition,
+  }: {
+    mousePosition: CssPixels,
+    elementSize: CssPixels,
+    windowSize: CssPixels,
+    previousPosition: TooltipPosition,
+  }): { position: TooltipPosition, style: CssPixels } {
+    // 1. Compute the possible tooltip positions depending on the mouse position,
+    // the tooltip's size, as well as the available space in the window.
+    const possiblePositions: Array<PositionFromMouse> = [];
+
+    if (mousePosition + MOUSE_OFFSET + elementSize < windowSize) {
+      possiblePositions.push('after-mouse');
+    }
+
+    if (mousePosition - MOUSE_OFFSET - elementSize >= 0) {
+      possiblePositions.push('before-mouse');
+    }
+
+    // 2. From the found possible positions as well as the previous tooltip
+    // position, decide the new position.
+    let newPosition;
+    switch (possiblePositions.length) {
+      case 0:
+        newPosition = 'window-edge';
+        break;
+      case 1:
+        newPosition = possiblePositions[0];
+        break;
+      case 2:
+        newPosition = previousPosition;
+        break;
+      default:
+        throw new Error(
+          `We got more than 2 possible positions ${possiblePositions.length}, which shouldn't happen.`
+        );
+    }
+
+    // 3. From the new position, calculate the new CSS value for this direction,
+    // from the mouse position and the element's size.
+    let cssStyle;
+    switch (newPosition) {
+      case 'after-mouse':
+        cssStyle = mousePosition + MOUSE_OFFSET;
+        break;
+      case 'before-mouse':
+        cssStyle = mousePosition - elementSize - MOUSE_OFFSET;
+        break;
+      case 'window-edge':
+        cssStyle = VISUAL_MARGIN;
+        break;
+      default:
+        throw assertExhaustiveCheck(newPosition);
+    }
+
+    // 4. Return all the values, so that they can be applied and saved.
+    return {
+      position: newPosition,
+      style: cssStyle,
+    };
+  }
+
   setPositioningStyle() {
     const { mouseX, mouseY } = this.props;
 
-    // By default, position the tooltip below and at the right of the mouse cursor.
-    let top = mouseY + MOUSE_OFFSET;
-    let left = mouseX + MOUSE_OFFSET;
-
     const interiorElement = this._interiorElementRef.current;
-    if (interiorElement) {
-      // Let's check the vertical position.
-      if (
-        mouseY + MOUSE_OFFSET + interiorElement.offsetHeight >=
-        window.innerHeight
-      ) {
-        // The tooltip doesn't fit below the mouse cursor (which is our
-        // default strategy). Therefore we try to position it either above the
-        // mouse cursor or finally aligned with the window's top edge.
-        if (mouseY - MOUSE_OFFSET - interiorElement.offsetHeight > 0) {
-          // We position the tooltip above the mouse cursor if it fits there.
-          top = mouseY - interiorElement.offsetHeight - MOUSE_OFFSET;
-        } else {
-          // Otherwise we align the tooltip with the window's top edge.
-          top = VISUAL_MARGIN;
-        }
-      }
-
-      // Now let's check the horizontal position.
-      if (
-        mouseX + MOUSE_OFFSET + interiorElement.offsetWidth >=
-        window.innerWidth
-      ) {
-        // The tooltip doesn't fit at the right of the mouse cursor (which is
-        // our default strategy). Therefore we try to position it either at the
-        // left of the mouse cursor or finally aligned with the window's left
-        // edge.
-        if (mouseX - MOUSE_OFFSET - interiorElement.offsetWidth > 0) {
-          // We position the tooltip at the left of the mouse cursor if it fits
-          // there.
-          left = mouseX - interiorElement.offsetWidth - MOUSE_OFFSET;
-        } else {
-          // Otherwise, align the tooltip with the window's left edge.
-          left = VISUAL_MARGIN;
-        }
-      }
-
-      interiorElement.style.left = left + 'px';
-      interiorElement.style.top = top + 'px';
+    if (!interiorElement) {
+      return;
     }
+
+    const horizontalResult = this._computeNewPosition({
+      mousePosition: mouseX,
+      elementSize: interiorElement.offsetWidth,
+      windowSize: window.innerWidth,
+      previousPosition: this._previousPosition.horizontal,
+    });
+
+    const verticalResult = this._computeNewPosition({
+      mousePosition: mouseY,
+      elementSize: interiorElement.offsetHeight,
+      windowSize: window.innerHeight,
+      previousPosition: this._previousPosition.vertical,
+    });
+
+    interiorElement.style.left = horizontalResult.style + 'px';
+    interiorElement.style.top = verticalResult.style + 'px';
+
+    this._previousPosition = {
+      horizontal: horizontalResult.position,
+      vertical: verticalResult.position,
+    };
   }
 
   componentDidMount() {
@@ -93,6 +159,9 @@ export class Tooltip extends React.PureComponent<Props> {
       <div
         className="tooltip"
         data-testid="tooltip"
+        // This will be overridden in setPositioningStyle, but they are
+        // necessary so that the measurements are correct.
+        style={{ left: 0, top: 0 }}
         ref={this._interiorElementRef}
       >
         {this.props.children}

@@ -5,7 +5,7 @@
 
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
-import { getContainingLibrary } from './symbolication';
+import { AddressLocator } from './address-locator';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import {
   resourceTypes,
@@ -57,7 +57,6 @@ import type {
   Milliseconds,
   Microseconds,
   Address,
-  MemoryOffset,
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoThread,
@@ -159,7 +158,7 @@ type ExtractionInfo = {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   stringTable: UniqueStringArray,
-  libs: Lib[],
+  addressLocator: AddressLocator,
   libToResourceIndex: Map<Lib, IndexIntoResourceTable>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
   libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable>,
@@ -202,7 +201,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
     funcTable,
     resourceTable,
     stringTable,
-    libs,
+    addressLocator: new AddressLocator(libs),
     libToResourceIndex: new Map(),
     originToResourceIndex: new Map(),
     libNameToResourceIndex: new Map(),
@@ -296,37 +295,51 @@ function _extractUnsymbolicatedFunction(
   if (!locationString.startsWith('0x')) {
     return null;
   }
-  const { libs, libToResourceIndex, resourceTable, funcTable, stringTable } =
-    extractionInfo;
+  const {
+    addressLocator,
+    libToResourceIndex,
+    resourceTable,
+    funcTable,
+    stringTable,
+  } = extractionInfo;
 
   let resourceIndex = -1;
   let addressRelativeToLib: Address = -1;
 
-  // The frame address, as observed in the profiled process. This address was
-  // valid in the (virtual memory) address space of the profiled process.
-  const address: MemoryOffset = parseInt(locationString.substr(2), 16);
+  try {
+    // The frame address, as observed in the profiled process. This address was
+    // valid in the (virtual memory) address space of the profiled process.
+    // It can be a very large u64 value, larger than Number.MAX_SAFE_INTEGER.
+    // To make sure we don't lose precision, we leave it as a hex string.
+    const addressHex = locationString;
 
-  // We want to turn this address into a library-relative offset.
-  // Look up to see if it falls into one of the libraries that were mapped into
-  // the profiled process, according to the libs list.
-  const lib = getContainingLibrary(libs, address);
-  if (lib) {
-    // Yes, we found the library whose mapping covers this address!
-    const libBaseAddress = lib.start - lib.offset;
-    addressRelativeToLib = address - libBaseAddress;
+    // We want to turn this address into a library-relative offset.
+    // Look up to see if it falls into one of the libraries that were mapped into
+    // the profiled process, according to the libs list.
+    // This call will throw if addressHex is not a valid hex number.
+    const { lib, libIndex, relativeAddress } =
+      addressLocator.locateAddress(addressHex);
+    if (lib !== null && libIndex !== null) {
+      // Yes, we found the library whose mapping covers this address!
+      addressRelativeToLib = relativeAddress;
 
-    resourceIndex = libToResourceIndex.get(lib);
-    if (resourceIndex === undefined) {
-      // This library doesn't exist in the libs array, insert it. This resou
-      // A lib resource is a systems-level compiled library, for example "XUL",
-      // "AppKit", or "CoreFoundation".
-      resourceIndex = resourceTable.length++;
-      resourceTable.lib[resourceIndex] = libs.indexOf(lib);
-      resourceTable.name[resourceIndex] = stringTable.indexForString(lib.name);
-      resourceTable.host[resourceIndex] = undefined;
-      resourceTable.type[resourceIndex] = resourceTypes.library;
-      libToResourceIndex.set(lib, resourceIndex);
+      resourceIndex = libToResourceIndex.get(lib);
+      if (resourceIndex === undefined) {
+        // This library doesn't exist in the libs array, insert it. This resou
+        // A lib resource is a systems-level compiled library, for example "XUL",
+        // "AppKit", or "CoreFoundation".
+        resourceIndex = resourceTable.length++;
+        resourceTable.lib[resourceIndex] = libIndex;
+        resourceTable.name[resourceIndex] = stringTable.indexForString(
+          lib.name
+        );
+        resourceTable.host[resourceIndex] = undefined;
+        resourceTable.type[resourceIndex] = resourceTypes.library;
+        libToResourceIndex.set(lib, resourceIndex);
+      }
     }
+  } catch (e) {
+    // Probably a hex parse error. Ignore.
   }
   // Add the function to the funcTable.
   const funcIndex = funcTable.length++;
@@ -1033,6 +1046,7 @@ function _processThread(
 
   const newThread: Thread = {
     name: thread.name,
+    'eTLD+1': thread['eTLD+1'],
     processType: thread.processType,
     processName:
       typeof thread.processName === 'string' ? thread.processName : '',

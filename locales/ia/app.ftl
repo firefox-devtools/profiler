@@ -103,12 +103,12 @@ CallNodeContextMenu--copy-stack = Copiar pila
 ## CallTree
 ## This is the component for Call Tree panel.
 
-CallTree--tracing-ms-total = Tempore executive (ms)
+CallTree--tracing-ms-total = Tempore de execution (ms)
     .title =
-        Le tempore executive “total” include un summario de tote le tempore que iste
-        function ha essite presente in le pila. Isto include le tempore que
-        le function era realmente exequite e le tempore passate in le visitatores de
-        iste function.
+        Le tempore de execution “total” include un summario de tote le
+        tempore que iste function ha essite presente in le pila. Isto
+        include le tempore que le function esseva realmente in execution
+        e le tempore passate in le appellatores de iste function.
 CallTree--tracing-ms-self = Proprie (ms)
     .title =
         Le tempore"proprie" solo include le tempore que le function era
@@ -213,10 +213,14 @@ Home--menu-button = Activar le button { -profiler-brand-name } del menu
 Home--menu-button-instructions =
     Activa le button de menu profilator pro initiar registrar un profilo de
     prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
-Home--addon-button = Installar additivo
-Home--addon-button-instructions =
-    Installa le additivo Gecko Profiler pro initiar registrar un profilo de
-    prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Iste instantia del profilator non pute connecter se a WebChannel, perque non pote activar le button de menu del profilator.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable = Iste instantia de profilator non ha potite connecter se al WebChannel. Isto usualmente significa que illo se executa sur un hospite differente de illo que es specificate in le preferentia <code>devtools.performance.recording.ui-base-url</code>. Si tu vole capturar nove profilos con iste instantia, e dar a illo le controlo programmatic del button de menu profilator, tu pote ir a <code>about:config</code> e cambiar le preferentia.
 Home--record-instructions =
     Pro initiar profilar, clicca sur le button profila o usa le
     vias breve de claviero. Le icone es blau quando un profilo es in registration.

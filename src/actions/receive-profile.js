@@ -36,6 +36,7 @@ import {
   getIsCPUUtilizationProvided,
   getSymbolServerUrl,
   getActiveTabID,
+  getIdleThreadsByCPU,
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
@@ -280,6 +281,7 @@ export function finalizeFullProfileView(
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
+    const idleThreadsByCPU = getIdleThreadsByCPU(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
       hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
@@ -290,7 +292,8 @@ export function finalizeFullProfileView(
       profile,
       globalTrackOrder,
       hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
-      getLegacyHiddenThreads(getState())
+      getLegacyHiddenThreads(getState()),
+      idleThreadsByCPU
     );
     const localTracksByPid = computeLocalTracksByPid(profile);
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
@@ -302,7 +305,8 @@ export function finalizeFullProfileView(
       hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
       localTracksByPid,
       profile,
-      getLegacyHiddenThreads(getState())
+      getLegacyHiddenThreads(getState()),
+      idleThreadsByCPU
     );
     let visibleThreadIndexes = getVisibleThreads(
       globalTracks,
@@ -638,9 +642,9 @@ export function changeTimelineTrackOrganization(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const profile = getProfile(getState());
-    // We are resetting the selected thread index, because we are not sure if
-    // the selected thread will be availabe in the next view.
-    const selectedThreadIndexes = new Set([0]);
+    // We are resetting the selected thread index and the url state, because we
+    // are not sure if the selected thread will be availabe in the next view.
+    const selectedThreadIndexes = null;
     dispatch({
       type: 'DATA_RELOAD',
     });
@@ -943,7 +947,7 @@ function getSymbolStore(
         symbolServerUrl
       ).map(async (libPromise, i) => {
         try {
-          const result = libPromise;
+          const result = await libPromise;
           dispatch(receivedSymbolTableReply(requests[i].lib));
           return result;
         } catch (error) {

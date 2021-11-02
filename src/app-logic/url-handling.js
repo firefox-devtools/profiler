@@ -794,8 +794,11 @@ export function upgradeLocationToCurrentVersion(
 ): ProcessedLocation {
   // Forward /from-addon to /from-browser immediately, outside of the versioning process.
   // This ensures compatibility with Firefox versions < 93.
+  // It's possible we get 2 '/' characters if the user changes their base-url
+  // preference in about:config, so we should handle this case so that we don't
+  // get errors later in the loading process.
   processedLocation.pathname = processedLocation.pathname.replace(
-    /^\/from-addon/,
+    /^\/+from-addon/,
     '/from-browser'
   );
 

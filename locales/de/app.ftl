@@ -208,10 +208,14 @@ Home--menu-button = { -profiler-brand-name }-Menüschaltfläche aktivieren
 Home--menu-button-instructions =
     Aktivieren Sie die Profiler-Menüschaltfläche, um Leistung in einem Profil von { -firefox-brand-name }
     aufzuzeichnen, dann analysieren Sie sie und teilen Sie das Ergebnis auf profiler.firefox.com.
-Home--addon-button = Add-on installieren
-Home--addon-button-instructions =
-    Installieren Sie das Gecko-Profiler-Add-on, um Leistung in einem Profil von { -firefox-brand-name }
-    aufzuzeichnen, dann analysieren Sie sie und teilen Sie das Ergebnis auf profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Diese Profiler-Instanz konnte sich nicht mit dem WebChannel verbinden, sodass die Menüschaltfläche des Profilers nicht aktiviert werden kann.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable = Diese Profiler-Instanz konnte keine Verbindung zum WebChannel herstellen. Dies bedeutet normalerweise, dass sie auf einem anderen Host als dem ausgeführt wird, der in der Einstellung <code>devtools.performance.recording.ui-base-url</code> angegeben ist. Wenn Sie neue Profile mit dieser Instanz erfassen und ihm programmatische Kontrolle über die Profiler-Menüschaltfläche geben möchten, öffnen Sie <code>about:config</code> und ändern Sie die Einstellung.
 Home--record-instructions =
     Um die Profilerstellung zu starten, klicken Sie auf die Schaltfläche Profilerstellung oder verwenden Sie die
     Tastatürkürzel. Das Symbol ist blau, wenn ein Profil aufzeichnet.

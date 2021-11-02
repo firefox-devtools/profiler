@@ -4401,8 +4401,9 @@ Object {
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getThreadProcessDetails 1`] = `
-"thread: \\"Thread with samples\\" (0)
-process: \\"default\\" (0)"
+"Thread with samples
+Thread: \\"Thread with samples\\" (0)
+Process: \\"default\\" (0)"
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `

@@ -1,4 +1,4 @@
-# Remote profiling on Android
+# Remote Profiling Firefox for Android
 
 You can use the Firefox Profiler to investigate performance issues on Android, not only Windows, macOS and Linux.
 

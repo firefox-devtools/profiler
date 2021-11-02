@@ -16,14 +16,12 @@ import type {
   Profile,
   Thread,
   ThreadIndex,
-  Lib,
   IndexIntoFuncTable,
   IndexIntoFrameTable,
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   IndexIntoStackTable,
-  MemoryOffset,
   Address,
   StackTable,
 } from 'firefox-profiler/types';
@@ -225,35 +223,6 @@ export type SymbolicationStepInfo = {|
 export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
 
 type ThreadSymbolicationInfo = Map<LibKey, ThreadLibSymbolicationInfo>;
-
-/**
- * Return the library object that contains the address such that
- * rv.start <= address < rv.end, or null if no such lib object exists.
- * The libs array needs to be sorted in ascending address order, and the address
- * ranges of the libraries need to be non-overlapping.
- */
-export function getContainingLibrary(
-  libs: Lib[],
-  address: MemoryOffset
-): Lib | null {
-  if (isNaN(address)) {
-    return null;
-  }
-
-  let left = 0;
-  let right = libs.length - 1;
-  while (left <= right) {
-    const mid = ((left + right) / 2) | 0;
-    if (address >= libs[mid].end) {
-      left = mid + 1;
-    } else if (address < libs[mid].start) {
-      right = mid - 1;
-    } else {
-      return libs[mid];
-    }
-  }
-  return null;
-}
 
 /**
  * Like `new Map(iterableOfEntryPairs)`: Creates a map from an iterable of
