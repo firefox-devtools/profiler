@@ -690,8 +690,10 @@ function _isThreadIdle(
 ): boolean {
   const thread = profile.threads[threadIndex];
   if (
-    // Don't hide the compositor.
-    thread.name === 'Compositor' ||
+    // Don't hide the Renderer thread. This is because Renderer thread is pretty
+    // useful for understanding the painting with WebRender and it's an important
+    // thread for the users.
+    thread.name === 'Renderer' ||
     // Don't hide the main thread of the parent process.
     (thread.name === 'GeckoMain' && thread.processType === 'default') ||
     // Don't hide the GPU thread on Windows.
