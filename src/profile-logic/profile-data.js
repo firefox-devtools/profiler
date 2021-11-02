@@ -2159,7 +2159,7 @@ export type ParsedFileNameFromSymbolication =
       path: string,
     |}
   | {|
-      type: 'hg' | 'git',
+      type: 'hg' | 'git' | 'gitiles',
       repo: string,
       path: string,
       rev: string,
@@ -2189,9 +2189,14 @@ export type ParsedFileNameFromSymbolication =
 // "s3:gecko-generated-sources:4fd754dd7ca7565035aaa3357b8cd99959a2dddceba0fc2f7018ef99fd78ea63d03f9bf928afdc29873089ee15431956791130b97f66ab8fcb88ec75f4ba6b04/aarch64-apple-darwin/release/build/swgl-580c7d646d09cf59/out/ps_text_run_ALPHA_PASS_TEXTURE_2D.h:"
 // "cargo:github.com-1ecc6299db9ec823:tokio-1.6.1:src/runtime/task/mod.rs"
 // "cargo:github.com-1ecc6299db9ec823:addr2line-0.16.0:src/function.rs"
+// "gitiles:chromium.googlesource.com/chromium/src:content/gpu/gpu_main.cc:4dac2548d4812df2aa4a90ac1fc8912363f4d59c"
+// "gitiles:pdfium.googlesource.com/pdfium:core/fdrm/fx_crypt.cpp:dab1161c861cc239e48a17e1a5d729aa12785a53"
 //
-// This smart filename substitution is implemented here:
+// This smart filename substitution is implemented in various places. For official Firefox builds, this code creates them:
 // https://searchfox.org/mozilla-central/rev/f213971fbd82ada22c2c4e2072f729c3799ec563/toolkit/crashreporter/tools/symbolstore.py#605-636
+// When symbols come from profiler-get-symbols, the substitution happens here:
+// https://github.com/mstange/profiler-get-symbols/blob/aa88b56c26a0cbb31d5540b335fe1ea7fc404e2d/lib/src/windows.rs#L226-L232
+// https://github.com/mstange/profiler-get-symbols/blob/aa88b56c26a0cbb31d5540b335fe1ea7fc404e2d/lib/src/symbolicate/v5/mod.rs#L254
 //
 // It should be noted that this doesn't work perfectly. Sometimes, the paths
 // returned by the symbolication API still contain the raw paths from the build
@@ -2205,7 +2210,7 @@ export type ParsedFileNameFromSymbolication =
 // Some rust stdlib functions: (https://bugzilla.mozilla.org/show_bug.cgi?id=1717973)
 //   "/builds/worker/fetches/rustc/lib/rustlib/src/rust/library/std/src/sys_common/backtrace.rs"
 const repoPathRegex =
-  /^(?<vcs>hg|git):(?<repo>[^:]*):(?<path>[^:]*):(?<rev>[0-9a-f]*)$/;
+  /^(?<vcs>hg|git|gitiles):(?<repo>[^:]*):(?<path>[^:]*):(?<rev>[0-9a-f]*)$/;
 const s3PathRegex =
   /^s3:(?<bucket>[^:]*):(?<digest>[0-9a-f]*)\/(?<path>[^:]*):$/;
 const cargoPathRegex =
@@ -2216,9 +2221,9 @@ export function parseFileNameFromSymbolication(
   const repoMatch = repoPathRegex.exec(file);
   if (repoMatch !== null && repoMatch.groups) {
     const { vcs, repo, path, rev } = repoMatch.groups;
-    if (vcs !== 'hg' && vcs !== 'git') {
+    if (vcs !== 'hg' && vcs !== 'git' && vcs !== 'gitiles') {
       throw new Error(
-        'The regexp ensures that "vcs" is "hg" or "git", so this cannot happen.'
+        'The regexp ensures that "vcs" is "hg" or "git" or "gitiles", so this cannot happen.'
       );
     }
     return {
@@ -2273,10 +2278,23 @@ export function getUrlsForSourceFile(
   switch (parsedFile.type) {
     case 'hg': {
       const { repo, rev, path } = parsedFile;
+      const hgWebRaw = `https://${repo}/raw-file/${rev}/${path}`;
+      const hgWebPage = `https://${repo}/file/${rev}/${path}`;
+      const searchfoxProjectName = _getSearchfoxProjectNameForRepo(repo);
+
+      if (searchfoxProjectName !== null) {
+        const searchfoxPage = `https://searchfox.org/${searchfoxProjectName}/hgrev/${rev}/${path}`;
+        return {
+          corsFetchableRawSource: hgWebRaw,
+          userCopyableRawSource: `view-source:${hgWebRaw}`,
+          userViewablePrettySource: searchfoxPage,
+        };
+      }
+
       return {
-        corsFetchableRawSource: `https://${repo}/raw-file/${rev}/${path}`,
-        userCopyableRawSource: `view-source:https://${repo}/raw-file/${rev}/${path}`,
-        userViewablePrettySource: `https://${repo}/file/${rev}/${path}`,
+        corsFetchableRawSource: hgWebRaw,
+        userCopyableRawSource: `view-source:${hgWebRaw}`,
+        userViewablePrettySource: hgWebPage,
       };
     }
     case 'git': {
@@ -2310,6 +2328,53 @@ export function getUrlsForSourceFile(
         corsFetchableCrate: `https://crates.io/api/v1/crates/${crate}/${version}/download`,
       };
     }
+    case 'gitiles': {
+      const { repo, rev, path } = parsedFile;
+
+      // Example repo: "chromium.googlesource.com/chromium/src"
+      const slashPos = repo.indexOf('/');
+      if (slashPos === -1) {
+        return { userViewablePrettySource: undefined };
+      }
+      const server = repo.slice(0, slashPos);
+      const repoPath = repo.slice(slashPos + 1);
+      const urlPath = `${repoPath}.git/+/${rev}/${path}`;
+
+      // E.g. https://pdfium.googlesource.com/pdfium.git/+/dab1161c861cc239e48a17e1a5d729aa12785a53/core/fdrm/fx_crypt.cpp
+      const gitilesPage = `https://${server}/${urlPath}`;
+
+      if (server.endsWith('.googlesource.com')) {
+        const subdomain = server.slice(
+          0,
+          server.length - '.googlesource.com'.length
+        );
+        const rawSource = `https://googlesource-proxy.mstange.workers.dev/${subdomain}/${urlPath}`;
+        if (
+          subdomain === 'chromium' ||
+          subdomain === 'chromiumos' ||
+          subdomain === 'gn'
+        ) {
+          // Use source.chromium.org for the "user viewable pretty source", e.g.
+          // https://source.chromium.org/chromium/chromium/src/+/4dac2548d4812df2aa4a90ac1fc8912363f4d59c:third_party/blink/renderer/platform/graphics/cpu/x86/webgl_image_conversion_sse.h
+          const sourceChromiumPage = `https://source.chromium.org/${subdomain}/${repoPath}/+/${rev}:${path}`;
+          return {
+            corsFetchableRawSource: rawSource,
+            userCopyableRawSource: rawSource,
+            userViewablePrettySource: sourceChromiumPage,
+          };
+        }
+        return {
+          corsFetchableRawSource: rawSource,
+          userCopyableRawSource: rawSource,
+          userViewablePrettySource: gitilesPage,
+        };
+      }
+
+      return {
+        userCopyableRawSource: gitilesPage,
+        userViewablePrettySource: gitilesPage,
+      };
+    }
     case 'normal': {
       const { path } = parsedFile;
       // if (path.startsWith('resource://') || path.startsWith('chrome://')) {
@@ -2321,6 +2386,37 @@ export function getUrlsForSourceFile(
     default:
       throw assertExhaustiveCheck(parsedFile.type, 'unhandled ParsedFile type');
   }
+}
+
+// This list was imported from https://github.com/mozsearch/mozsearch-mozilla/blob/master/config1.json through config4.json.
+const searchfoxProjects = [
+  { name: 'nss', repo: 'hg.mozilla.org/projects/nss' },
+  { name: 'mozilla-central', repo: 'hg.mozilla.org/mozilla-central' },
+  { name: 'comm-central', repo: 'hg.mozilla.org/comm-central' },
+  { name: 'mozilla-beta', repo: 'hg.mozilla.org/releases/mozilla-beta' },
+  { name: 'mozilla-release', repo: 'hg.mozilla.org/releases/mozilla-release' },
+  { name: 'mozilla-esr91', repo: 'hg.mozilla.org/releases/mozilla-esr91' },
+  { name: 'mozilla-esr78', repo: 'hg.mozilla.org/releases/mozilla-esr78' },
+  { name: 'comm-esr78', repo: 'hg.mozilla.org/releases/comm-esr78' },
+  { name: 'comm-esr91', repo: 'hg.mozilla.org/releases/comm-esr91' },
+  { name: 'mozilla-esr60', repo: 'hg.mozilla.org/releases/mozilla-esr60' },
+  { name: 'mozilla-esr45', repo: 'hg.mozilla.org/releases/mozilla-esr45' },
+  { name: 'mozilla-esr31', repo: 'hg.mozilla.org/releases/mozilla-esr31' },
+  { name: 'mozilla-esr17', repo: 'hg.mozilla.org/releases/mozilla-esr17' },
+  { name: 'comm-esr60', repo: 'hg.mozilla.org/releases/comm-esr60' },
+  { name: 'mozilla-esr68', repo: 'hg.mozilla.org/releases/mozilla-esr68' },
+  { name: 'comm-esr68', repo: 'hg.mozilla.org/releases/comm-esr68' },
+  { name: 'mozilla-build', repo: 'hg.mozilla.org/mozilla-build' },
+  {
+    name: 'version-control-tools',
+    repo: 'hg.mozilla.org/hgcustom/version-control-tools',
+  },
+  { name: 'kaios', repo: 'hg.mozilla.org/projects/kaios' },
+  { name: 'mozilla-pine', repo: 'hg.mozilla.org/projects/pine' },
+];
+function _getSearchfoxProjectNameForRepo(repo: string): string | null {
+  const project = searchfoxProjects.find((p) => p.repo === repo);
+  return project ? project.name : null;
 }
 
 // Determines which information to show in the "origin annotation" if both an
