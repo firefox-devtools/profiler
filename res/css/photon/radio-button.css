@@ -4,8 +4,6 @@
 
 .photon-radio {
   border: 1px solid var(--grey-90-a30);
-  -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
   background: none;
   background-color: var(--grey-90-a10);
