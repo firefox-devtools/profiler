@@ -23,10 +23,10 @@
 
 .backtraceStackFrameOrigin {
   margin-left: 10px;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgb(0 0 0 / 0.55);
   font-style: normal;
 }
 
 .backtraceStackFrame_isFrameLabel {
-  color: rgba(0, 0, 0, 0.6);
+  color: rgb(0 0 0 / 0.6);
 }

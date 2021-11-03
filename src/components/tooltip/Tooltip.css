@@ -6,7 +6,7 @@
   padding: 8px;
   border: 1px solid #ccc;
   background-color: var(--grey-10);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
   line-height: 1.4;
   pointer-events: none;
   text-align: left;

@@ -19,7 +19,7 @@
   align-items: stretch;
   justify-content: center;
   padding: 1em;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgb(255 255 255 / 0.9);
   opacity: 0;
   pointer-events: none;
   transition: opacity 200ms;

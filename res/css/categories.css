@@ -9,7 +9,7 @@
  * They're global css classes that can be used across the project.
  */
 .category-color-transparent {
-  border-color: rgba(0, 0, 0, 0.4);
+  border-color: rgb(0 0 0 / 0.4);
   background-color: #fff;
 }
 

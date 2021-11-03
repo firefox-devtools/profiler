@@ -21,7 +21,7 @@
 .tooltipNetworkTitle3 {
   /* Reset most default properties of h3. */
   padding: 0;
-  margin: 5px 0 3px 0;
+  margin: 5px 0 3px;
   font: inherit;
 
   /* Make the title take the 2 columns. */

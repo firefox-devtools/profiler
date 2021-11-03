@@ -109,23 +109,23 @@
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgb(0 0 0 / 0.1);
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarRootItem):not(.filterNavigatorBarLeafItem):hover::before,
 .filterNavigatorBarItem.filterNavigatorBarRootItem:hover,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover::after {
-  border-color: rgba(0, 0, 0, 0.1);
+  border-color: rgb(0 0 0 / 0.1);
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgb(0 0 0 / 0.2);
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarRootItem):not(.filterNavigatorBarLeafItem):active:hover::before,
 .filterNavigatorBarItem.filterNavigatorBarRootItem:active:hover,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover::after {
-  border-color: rgba(0, 0, 0, 0.2);
+  border-color: rgb(0 0 0 / 0.2);
 }
 
 .filterNavigatorBarUncommittedItem {

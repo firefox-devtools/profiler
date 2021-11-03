@@ -19,7 +19,7 @@
   z-index: -1; /* it needs to be below the input field */
   padding: 0 5px;
   background-color: white;
-  box-shadow: 0 1px 4px rgba(12, 12, 13, 0.1); /* This is grey-90 with 10% opacity, according to the photon design document */
+  box-shadow: 0 1px 4px rgb(12 12 13 / 0.1); /* This is grey-90 with 10% opacity, according to the photon design document */
   color: var(--grey-50);
   font-size: 0.9em;
   line-height: 2;

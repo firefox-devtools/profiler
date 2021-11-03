@@ -30,8 +30,8 @@
   animation: arrowPanelAppear 0.2s cubic-bezier(0.07, 0.95, 0, 1);
   background: #fff;
   border-radius: 5px;
-  filter: drop-shadow(0 0 0.5px rgba(0, 0, 0, 0.4))
-    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 0 0.5px rgb(0 0 0 / 0.4))
+    drop-shadow(0 4px 5px rgb(0 0 0 / 0.4));
 }
 
 .appKeyboardShortcutsScroll {
@@ -54,9 +54,9 @@
   display: inline-flex;
   align-items: center;
   padding: 0 5px;
-  background: rgba(222, 222, 227, 0.79);
+  background: rgb(222 222 227 / 0.79);
   border-radius: 3px;
-  box-shadow: 1px 1px rgba(0, 0, 0, 0.27);
+  box-shadow: 1px 1px rgb(0 0 0 / 0.27);
   color: #000;
   margin-inline-start: 6px;
 }
