@@ -189,6 +189,16 @@ function sanitizeThreadPII(
     // inside `serializeProfile` function.
     return null;
   }
+
+  if (
+    PIIToBeRemoved.shouldRemovePrivateBrowsingData &&
+    thread.isPrivateBrowsing
+  ) {
+    // This thread contains only private browsing data and the user wants that
+    // we remove it.
+    return null;
+  }
+
   // Deep copying the thread since we are gonna mutate it and we don't want to alter
   // current thread.
   // We need to update the stringTable. It's not possible with UniqueStringArray.
@@ -202,7 +212,8 @@ function sanitizeThreadPII(
     PIIToBeRemoved.shouldRemoveUrls ||
     PIIToBeRemoved.shouldRemovePreferenceValues ||
     PIIToBeRemoved.shouldRemoveExtensions ||
-    PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0
+    PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0 ||
+    PIIToBeRemoved.shouldRemovePrivateBrowsingData
   ) {
     for (let i = 0; i < markerTable.length; i++) {
       let currentMarker = markerTable.data[i];
@@ -211,7 +222,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemovePreferenceValues &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'PreferenceRead'
       ) {
         // Remove the preference value field from the marker payload.
@@ -222,7 +232,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveUrls &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'Network'
       ) {
         // Remove the URI fields from marker payload.
@@ -237,7 +246,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveUrls &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'FileIO'
       ) {
         // Remove the filename path from marker payload.
@@ -247,7 +255,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveUrls &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'Text'
       ) {
         // Sanitize all the name fields of text markers in case they contain URLs.
@@ -260,7 +267,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveExtensions &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'Text'
       ) {
         const markerName = stringArray[markerTable.name[i]];
@@ -276,7 +282,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.has(threadIndex) &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'CompositorScreenshot'
       ) {
         const urlIndex = currentMarker.url;
@@ -285,6 +290,27 @@ function sanitizeThreadPII(
         // to string array.
         stringArray[urlIndex] = '';
         markersToDelete.add(i);
+      }
+
+      if (PIIToBeRemoved.shouldRemovePrivateBrowsingData) {
+        if (
+          currentMarker &&
+          currentMarker.type === 'Network' &&
+          currentMarker.isPrivateBrowsing
+        ) {
+          // Remove network requests coming from private browsing sessions
+          markersToDelete.add(i);
+        }
+
+        if (
+          currentMarker &&
+          currentMarker.data &&
+          currentMarker.data.innerWindowID &&
+          windowIdToBeSanitized.has(currentMarker.data.innerWindowID)
+        ) {
+          // Remove any marker that we know they come from private browsing sessions
+          markersToDelete.add(i);
+        }
       }
     }
   }
