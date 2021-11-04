@@ -462,6 +462,9 @@ MenuButtons--publish--compressing = Стиснення…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Фільтрувати мережі:
+    .title = Показувати лише запити мережі, яка відповідає певній назві
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
@@ -496,6 +499,8 @@ ProfileLoaderAnimation--loading-message-from-url =
     .message = Завантаження та обробка профілю…
 ProfileLoaderAnimation--loading-message-compare =
     .message = Читання та обробка профілів…
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = Вигляд не знайдено
 
 ## ProfileRootMessage
 
