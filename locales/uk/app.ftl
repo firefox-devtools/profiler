@@ -532,6 +532,18 @@ StackSettings--implementation-native = Нативні
 StackSettings--use-data-source-label = Джерело даних:
 StackSettings--call-tree-strategy-timing = Таймінги
     .title = Створити підсумок окремих стеків виконаного впродовж певного часу коду
+StackSettings--call-tree-strategy-js-allocations = Розподіл ресурсів JavaScript
+    .title = Підсумовувати розподілені байти JavaScript (без вивільнених)
+StackSettings--call-tree-strategy-native-retained-allocations = Утримана пам'ять
+    .title = Підсумовувати байти пам'яті, яку було розподілено, але ніколи не звільнено у поточній виборці вигляду
+StackSettings--call-tree-native-allocations = Розподілена пам'ять
+    .title = Підсумовувати байти розподіленої пам'яті
+StackSettings--call-tree-strategy-native-deallocations-memory = Вивільнена пам'ять
+    .title = Підсумовувати байти вивільненої сайтом пам'яті, для якого її було виділено
+StackSettings--call-tree-strategy-native-deallocations-sites = Вивільнені сайти
+    .title = Підсумовувати байти вивільненої сайтом пам'яті, на якому її було вивільнено
+StackSettings--invert-call-stack = Інвертувати стек викликів
+    .title = Сортувати за часом, витраченим у вузлі виклику, ігноруючи його дочірні вузли.
 StackSettings--show-user-timing = Показати таймінги користувача
 StackSettings--panel-search =
     .label = Фільтр стеків:
@@ -545,6 +557,7 @@ TabBar--stack-chart-tab = Діаграма стека
 TabBar--marker-chart-tab = Маркерна діаграма
 TabBar--marker-table-tab = Маркерна таблиця
 TabBar--network-tab = Мережа
+TabBar--js-tracer-tab = JS Tracer
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
@@ -555,6 +568,7 @@ TrackContextMenu--only-show-this-process-group = Показати лише цю 
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Показати лише “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Сховати доріжки інших знімків
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
@@ -570,6 +584,12 @@ TrackContextMenu--show-all-tracks = Показати всі доріжки
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Виконано “{ $item }”
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
@@ -595,6 +615,11 @@ TransformNavigator--merge-call-node = Об’єднати вузол: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Об’єднати: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Відкинуто: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
