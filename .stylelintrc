@@ -12,6 +12,10 @@
       true,
       { "parser": "css" }
     ],
-    "length-zero-no-unit": null
+    "alpha-value-notation": null,
+    "function-url-quotes": null,
+    "keyframes-name-pattern": null,
+    "length-zero-no-unit": null,
+    "selector-class-pattern": null,
   }
 }

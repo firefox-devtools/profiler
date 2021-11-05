@@ -6,8 +6,6 @@
   position: relative;
   padding: 0;
   border: 1px solid var(--grey-90-a30);
-  -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
   background-color: var(--grey-90-a10);
   border-radius: 2px;
