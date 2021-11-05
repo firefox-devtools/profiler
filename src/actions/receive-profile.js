@@ -879,51 +879,6 @@ async function _unpackGeckoProfileFromBrowser(
   return profile;
 }
 
-/**
- * Gets the profile from the browser.
- * This either happens via a WebChannel (starting with Firefox 93) or via a frame script, whose
- * API is encapsulated in a GeckoProfiler object.
- * The GeckoProfiler API and frame script can be removed once Firefox ESR is 93 or newer.
- *
- * @param {Dispatch} dispatch
- * @param {boolean} shouldUseWebChannel Whether the profile and symbolication information should be
- *   obtained via the WebChannel.
- * @param {$GeckoProfiler | void} geckoProfiler A GeckoProfiler object to interact with the framescript.
- *   Only needed if shouldUseWebChannel is false.
- * @returns {Promise<Profile>}
- */
-async function getProfileFromBrowser(
-  dispatch: Dispatch,
-  shouldUseWebChannel: boolean,
-  geckoProfiler?: $GeckoProfiler
-): Promise<Profile> {
-  dispatch(waitingForProfileFromBrowser());
-
-  // XXX update state to show that we're connected to the browser
-
-  async function getRawGeckoProfile(): Promise<ArrayBuffer | MixedObject> {
-    // On Firefox 93 and above, we can get the profile from the WebChannel.
-    if (shouldUseWebChannel) {
-      return getProfileViaWebChannel();
-    }
-    // For older versions, fall back to the geckoProfiler frame script API.
-    // This fallback can be removed once the oldest supported Firefox ESR version is 93 or newer.
-    if (!geckoProfiler) {
-      throw new Error(
-        'geckoProfiler object must be supplied if shouldUseWebChannel is false'
-      );
-    }
-    return geckoProfiler.getProfile();
-  }
-
-  const rawGeckoProfile = await getRawGeckoProfile();
-  const unpackedProfile = await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
-  const profile = processGeckoProfile(unpackedProfile);
-  await dispatch(loadProfile(profile, { geckoProfiler, shouldUseWebChannel }));
-
-  return profile;
-}
-
 function getSymbolStore(
   dispatch: Dispatch,
   symbolServerUrl: string,
@@ -1094,9 +1049,16 @@ export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
         }
       }
 
-      let geckoProfiler;
+      // XXX update state to show that we're connected to the browser
 
-      if (!shouldUseWebChannel) {
+      dispatch(waitingForProfileFromBrowser());
+
+      let geckoProfiler;
+      let rawGeckoProfile;
+
+      if (shouldUseWebChannel) {
+        rawGeckoProfile = await getProfileViaWebChannel();
+      } else {
         const timeoutId = setTimeout(() => {
           dispatch(
             temporaryError(
@@ -1109,10 +1071,17 @@ export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
           );
         }, 30000);
         geckoProfiler = await window.geckoProfilerPromise;
+        rawGeckoProfile = await geckoProfiler.getProfile();
         clearTimeout(timeoutId);
       }
 
-      await getProfileFromBrowser(dispatch, shouldUseWebChannel, geckoProfiler);
+      const unpackedProfile = await _unpackGeckoProfileFromBrowser(
+        rawGeckoProfile
+      );
+      const profile = processGeckoProfile(unpackedProfile);
+      await dispatch(
+        loadProfile(profile, { geckoProfiler, shouldUseWebChannel })
+      );
     } catch (error) {
       dispatch(fatalError(error));
       console.error(error);
