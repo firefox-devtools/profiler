@@ -30,7 +30,7 @@ import {
   retrieveProfileFromFile,
   retrieveProfilesToCompare,
   _fetchProfile,
-  getProfilesFromRawUrl,
+  retrieveProfileForRawUrl,
   changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
@@ -2087,7 +2087,7 @@ describe('actions/receive-profile', function () {
     });
   });
 
-  describe('getProfilesFromRawUrl', function () {
+  describe('retrieveProfileForRawUrl', function () {
     function fetch200Response(profile: string) {
       return {
         ok: true,
@@ -2129,7 +2129,7 @@ describe('actions/receive-profile', function () {
       jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
-      await store.dispatch(getProfilesFromRawUrl(location));
+      await store.dispatch(retrieveProfileForRawUrl(location));
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
       // error here. If we got one, let's rethrow the error.
