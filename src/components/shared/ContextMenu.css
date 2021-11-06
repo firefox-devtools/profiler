@@ -11,11 +11,10 @@
   margin: 2px 0 0;
   background-color: #fff;
   border-radius: 3px;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 10px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 10px 12px rgb(0 0 0 / 0.3);
   color: #000;
   font-size: 12px;
   text-align: left;
-  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -58,7 +57,7 @@
 
 .react-contextmenu-item--divider {
   padding: 2px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgb(0 0 0 / 0.15);
   margin-bottom: 3px;
 }
 

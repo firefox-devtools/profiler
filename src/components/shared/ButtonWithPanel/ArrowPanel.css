@@ -19,11 +19,11 @@
   top: var(--internal-offset-from-top);
   right: calc(var(--internal-offset-from-right) * -1);
   min-width: var(--internal-width);
-  background: hsla(0, 0%, 97%, 0.95);
+  background: hsl(0deg 0% 97% / 0.95);
   border-radius: 5px;
   color: black;
-  filter: drop-shadow(0 0 0.5px rgba(0, 0, 0, 0.4))
-    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 0 0.5px rgb(0 0 0 / 0.4))
+    drop-shadow(0 4px 5px rgb(0 0 0 / 0.4));
   filter: url(../../../../res/img/svg/shadowfilter.svg#menushadow);
   line-height: 1.3;
   text-align: left;
@@ -82,7 +82,7 @@
   display: block;
   width: calc(1.42 * var(--internal-offset-from-top));
   height: calc(1.42 * var(--internal-offset-from-top));
-  background: hsla(0, 0%, 97%, 0.95);
+  background: hsl(0deg 0% 97% / 0.95);
   content: '';
   transform: rotate(45deg);
   transform-origin: top left;

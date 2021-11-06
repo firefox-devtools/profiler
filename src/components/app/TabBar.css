@@ -28,7 +28,7 @@
   min-width: 8em;
   padding: 6px 4px;
   border: solid transparent;
-  border-width: 0 1px 0 1px;
+  border-width: 0 1px;
   background-clip: padding-box;
   cursor: default;
   font-size: 12px;
@@ -36,7 +36,6 @@
   text-overflow: ellipsis;
   transition: background-color 200ms, border-color 200ms;
   transition-timing-function: var(--animation-timing);
-  -webkit-user-select: none;
   user-select: none;
   white-space: nowrap;
 }

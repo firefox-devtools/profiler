@@ -28,7 +28,7 @@
   margin: 12px 0;
   background: #fff;
   border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
   color: var(--grey-70);
   font-family: monospace;
   line-height: 1.3;
