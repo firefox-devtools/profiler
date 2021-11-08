@@ -14,7 +14,7 @@
   padding-left: 10px;
   background: var(--grey-20);
   border-radius: 0 0 5px 5px;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 2px 4px rgb(0 0 0 / 0.1);
   line-height: 20px;
   text-align: center;
   text-overflow: ellipsis;

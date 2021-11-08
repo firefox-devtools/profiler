@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .timelineEmptyThreadIndicator {
-  --empty-buffer-color1: rgba(69, 160, 255, 0.225);
-  --empty-buffer-color2: rgba(69, 160, 255, 0.075);
+  --empty-buffer-color1: rgb(69 160 255 / 0.225);
+  --empty-buffer-color2: rgb(69 160 255 / 0.075);
 
   /* The following color is based off grey-20, but uses opacity instead. */
-  --shutdown-startup-color: rgba(0, 0, 50, 0.07);
+  --shutdown-startup-color: rgb(0 0 50 / 0.07);
 }
 
 .timelineEmptyThreadIndicatorBlock {
@@ -22,13 +22,13 @@
 .timelineEmptyThreadIndicatorStartup {
   border-right: solid 1px var(--grey-30);
   background-color: var(--shutdown-startup-color);
-  box-shadow: inset -4px 0 4px rgba(0, 0, 0, 0.05);
+  box-shadow: inset -4px 0 4px rgb(0 0 0 / 0.05);
 }
 
 .timelineEmptyThreadIndicatorShutdown {
   border-left: solid 1px var(--grey-30);
   background-color: var(--shutdown-startup-color);
-  box-shadow: inset 4px 0 4px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 4px 0 4px rgb(0 0 0 / 0.05);
 }
 
 .timelineEmptyThreadIndicatorEmptyBuffer {

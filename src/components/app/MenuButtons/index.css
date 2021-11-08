@@ -28,12 +28,12 @@
 /* stylelint-enable order/properties-order */
 
 .menuButtonsButton:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgb(0 0 0 / 0.1);
 }
 
 .buttonWithPanel.open > .menuButtonsButton,
 .menuButtonsButton:hover:active {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgb(0 0 0 / 0.2);
 }
 
 /* Use this class if a button has an icon */
@@ -106,7 +106,7 @@
 
 .profileInfoUploadedActions {
   padding: 8px 0 8px 40px; /* The 40px padding leaves the room for the cloud image */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgb(0 0 0 / 0.05);
   font-size: 13px;
 }
 
