@@ -79,10 +79,10 @@ import type {
 import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
-  getProfileViaWebChannel,
-  getSymbolTableViaWebChannel,
-  querySupportsGetProfileAndSymbolicationViaWebChannel,
-} from '../app-logic/web-channel';
+  BrowserConnection,
+  createBrowserConnection,
+} from '../app-logic/browser-connection';
+import { querySupportsGetProfileAndSymbolicationViaWebChannel } from '../app-logic/web-channel';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -113,8 +113,7 @@ export function loadProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    geckoProfiler: $GeckoProfiler,
-    shouldUseWebChannel: boolean,
+    browserConnection: BrowserConnection,
     skipSymbolication: boolean, // Please use this in tests only.
   |}> = {},
   initialLoad: boolean = false
@@ -153,8 +152,7 @@ export function loadProfile(
     if (initialLoad === false) {
       await dispatch(
         finalizeProfileView(
-          config.shouldUseWebChannel,
-          config.geckoProfiler,
+          config.browserConnection,
           config.timelineTrackOrganization,
           config.skipSymbolication
         )
@@ -173,8 +171,7 @@ export function loadProfile(
  * Note: skipSymbolication is used in tests only, this is enforced.
  */
 export function finalizeProfileView(
-  shouldUseWebChannel: boolean = false,
-  geckoProfiler?: $GeckoProfiler,
+  browserConnection: BrowserConnection | null = null,
   timelineTrackOrganization?: TimelineTrackOrganization,
   skipSymbolication?: boolean
 ): ThunkAction<Promise<void>> {
@@ -255,8 +252,7 @@ export function finalizeProfileView(
       const symbolStore = getSymbolStore(
         dispatch,
         getSymbolServerUrl(getState()),
-        shouldUseWebChannel,
-        geckoProfiler
+        browserConnection
       );
       if (symbolStore) {
         // Only symbolicate if a symbol store is available. In tests we may not
@@ -694,7 +690,8 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     const symbolStore = getSymbolStore(
       dispatch,
-      getSymbolServerUrl(getState())
+      getSymbolServerUrl(getState()),
+      null
     );
     const profile = getProfile(getState());
     if (!symbolStore) {
@@ -719,9 +716,8 @@ export function viewProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    geckoProfiler: $GeckoProfiler,
     skipSymbolication: boolean,
-    shouldUseWebChannel: boolean,
+    browserConnection: BrowserConnection,
   |}> = {}
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
@@ -882,8 +878,7 @@ async function _unpackGeckoProfileFromBrowser(
 function getSymbolStore(
   dispatch: Dispatch,
   symbolServerUrl: string,
-  shouldUseWebChannel: boolean = false,
-  geckoProfiler?: $GeckoProfiler
+  browserConnection: BrowserConnection | null
 ): SymbolStore | null {
   if (!window.indexedDB) {
     // We could be running in a test environment with no indexedDB support. Do not
@@ -912,33 +907,16 @@ function getSymbolStore(
       });
     },
     requestSymbolTableFromBrowser: async (lib) => {
-      // On Firefox 93 and above, we can get the symbol table from the WebChannel.
-      if (shouldUseWebChannel) {
-        const { debugName, breakpadId } = lib;
-        dispatch(requestingSymbolTable(lib));
-        try {
-          const symbolTable = await getSymbolTableViaWebChannel(
-            debugName,
-            breakpadId
-          );
-          dispatch(receivedSymbolTableReply(lib));
-          return symbolTable;
-        } catch (error) {
-          dispatch(receivedSymbolTableReply(lib));
-          throw error;
-        }
-      }
-
-      // If not using the WebChannel, fall back to the geckoProfiler frame script API.
-      // This can be removed once the oldest supported Firefox ESR version is 93 or newer.
-      if (!geckoProfiler) {
-        throw new Error("There's no connection to the browser.");
+      if (browserConnection === null) {
+        throw new Error(
+          'No connection to the browser, cannot obtain symbol tables'
+        );
       }
 
       const { debugName, breakpadId } = lib;
       dispatch(requestingSymbolTable(lib));
       try {
-        const symbolTable = await geckoProfiler.getSymbolTable(
+        const symbolTable = await browserConnection.getSymbolTable(
           debugName,
           breakpadId
         );
@@ -1015,51 +993,40 @@ export async function checkIfWebChannelUsableForSymbolication(): Promise<boolean
 export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     try {
-      let shouldUseWebChannel = false;
-      try {
-        shouldUseWebChannel = await Promise.race([
-          querySupportsGetProfileAndSymbolicationViaWebChannel(),
-          makeTimeoutRejectionPromise(5000),
-        ]);
-      } catch (e) {
-        if (e instanceof TimeoutError) {
-          // The browser never reacted to our WebChannelMessageToChrome event.
-          // This can happen if we're running on a browser that's not Firefox, or if we're running
-          // on an old version of Firefox which does not have support for any WebChannels.
-          // Ignore the timeout and fall back to window.geckoProfilerPromise below.
-        } else {
-          // The WebChannel responded with an error. This usually means that this profiler
-          // instance is running on a different host than the one that's specified in the
-          // preference `devtools.performance.recording.ui-base-url`.
-          // That's unusual, because we get here only for the /from-browser entry point,
-          // which is usually accessed from the new tab that the browser opens when a
-          // profile is captured - and that tab gets opened on the profiler instance that's
-          // configured in the base URL.
-          // We completely stop trying to connect to the browser and display an error message.
-          // (We don't fall back to the frame script, because we'd most likely display
-          // the waiting animation indefinitely and never connect to a frame script.)
-          throw new Error(oneLine`
-            This profiler instance was unable to connect to the
-            WebChannel. This usually means that it’s running on a
-            different host from the one that is specified in the
-            preference devtools.performance.recording.ui-base-url. If
-            you would like to capture new profiles with this instance, you can go to about:config
-            and change the preference. Error: ${e.name}: ${e.message}
-          `);
-        }
+      // Attempt to establish a connection to the browser.
+      // Disable the userAgent check by supplying a fake userAgent that
+      // pretends we're Firefox. This will make us attempt to establish
+      // a connection to the WebChannel even if we're running in the test
+      // suite.
+      const connectionStatus = await createBrowserConnection('Firefox/123.0');
+      switch (connectionStatus.status) {
+        case 'ESTABLISHED':
+          // Good. This is the normal case.
+          break;
+        // The other cases are error cases.
+        case 'NOT_FIREFOX':
+          throw new Error('/from-browser only works in Firefox browsers');
+        case 'WAITING':
+          throw new Error('unexpected WAITING from createBrowserConnection');
+        case 'DENIED':
+          throw connectionStatus.error;
+        case 'TIMED_OUT':
+          throw new Error(
+            'Timed out when waiting for reply to WebChannel message'
+          );
+        default:
+          throw assertExhaustiveCheck(connectionStatus.status);
       }
+
+      // Now we know that connectionStatus.status === 'ESTABLISHED'.
+      const browserConnection = connectionStatus.browserConnection;
 
       // XXX update state to show that we're connected to the browser
 
       dispatch(waitingForProfileFromBrowser());
 
-      let geckoProfiler;
-      let rawGeckoProfile;
-
-      if (shouldUseWebChannel) {
-        rawGeckoProfile = await getProfileViaWebChannel();
-      } else {
-        const timeoutId = setTimeout(() => {
+      await browserConnection.establishConnectionViaFrameScriptIfNeeded({
+        onThirtySecondTimeout: () => {
           dispatch(
             temporaryError(
               new TemporaryError(oneLine`
@@ -1069,19 +1036,15 @@ export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
               `)
             )
           );
-        }, 30000);
-        geckoProfiler = await window.geckoProfilerPromise;
-        rawGeckoProfile = await geckoProfiler.getProfile();
-        clearTimeout(timeoutId);
-      }
+        },
+      });
 
+      const rawGeckoProfile = await browserConnection.getProfile();
       const unpackedProfile = await _unpackGeckoProfileFromBrowser(
         rawGeckoProfile
       );
       const profile = processGeckoProfile(unpackedProfile);
-      await dispatch(
-        loadProfile(profile, { geckoProfiler, shouldUseWebChannel })
-      );
+      await dispatch(loadProfile(profile, { browserConnection }));
     } catch (error) {
       dispatch(fatalError(error));
       console.error(error);
@@ -1450,11 +1413,21 @@ export function retrieveProfileFromFile(
           throw new Error('Unable to parse the profile.');
         }
 
-        const shouldUseWebChannel =
-          await checkIfWebChannelUsableForSymbolication();
+        // Attempt to establish a connection to the browser, for symbolication.
+        // Disable the userAgent check by supplying a fake userAgent that
+        // pretends we're Firefox. This will make us attempt to establish
+        // a connection to the WebChannel even if we're running in the test
+        // suite.
+        const browserConnectionStatus = await createBrowserConnection(
+          'Firefox/123.0'
+        );
+        const browserConnection =
+          browserConnectionStatus.status === 'ESTABLISHED'
+            ? browserConnectionStatus.browserConnection
+            : undefined;
 
         await withHistoryReplaceStateAsync(async () => {
-          await dispatch(viewProfile(profile, { shouldUseWebChannel }));
+          await dispatch(viewProfile(profile, { browserConnection }));
         });
       }
     } catch (error) {
