@@ -16,25 +16,30 @@ import type {
 export function mockWebChannel() {
   const messagesSentToBrowser = [];
   const listeners = [];
+  const originalAddEventListener = window.addEventListener;
+  const originalRemoveEventListener = window.removeEventListener;
+  const originalDispatchEvent = window.dispatchEvent;
   let onMessageToChrome = null;
 
   jest
     .spyOn(window, 'addEventListener')
-    .mockImplementation((name, listener) => {
+    .mockImplementation((name, listener, options) => {
       if (name === 'WebChannelMessageToContent') {
         listeners.push(listener);
       }
+      originalAddEventListener.call(window, name, listener, options);
     });
 
   jest
     .spyOn(window, 'removeEventListener')
-    .mockImplementation((name, listener) => {
+    .mockImplementation((name, listener, options) => {
       if (name === 'WebChannelMessageToContent') {
         const index = listeners.indexOf(listener);
         if (index !== -1) {
           listeners.splice(index, 1);
         }
       }
+      originalRemoveEventListener.call(window, name, listener, options);
     });
 
   jest.spyOn(window, 'dispatchEvent').mockImplementation((event) => {
@@ -46,6 +51,8 @@ export function mockWebChannel() {
       if (onMessageToChrome) {
         onMessageToChrome(JSON.parse(event.detail).message);
       }
+    } else {
+      originalDispatchEvent.call(window, event);
     }
   });
 
