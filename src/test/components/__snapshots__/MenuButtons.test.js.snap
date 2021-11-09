@@ -874,6 +874,29 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         <span
           class="metaInfoLabel"
         >
+          Buffer Capacity:
+        </span>
+        8MB
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Buffer Duration:
+        </span>
+        Unlimited
+      </div>
+      <div
+        class="metaInfoSection"
+      />
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
           Symbols:
         </span>
         Profile is not symbolicated
@@ -1207,6 +1230,29 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         </span>
         38
       </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Buffer Capacity:
+        </span>
+        8MB
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Buffer Duration:
+        </span>
+        Unlimited
+      </div>
+      <div
+        class="metaInfoSection"
+      />
       <div
         class="metaInfoRow"
       >
