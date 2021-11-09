@@ -16,38 +16,47 @@ import type {
 export function mockWebChannel() {
   const messagesSentToBrowser = [];
   const listeners = [];
+  const originalAddEventListener = window.addEventListener;
+  const originalRemoveEventListener = window.removeEventListener;
+  const originalDispatchEvent = window.dispatchEvent;
   let onMessageToChrome = null;
 
-  jest
+  const spyAddEventListener = jest
     .spyOn(window, 'addEventListener')
-    .mockImplementation((name, listener) => {
+    .mockImplementation((name, listener, options) => {
       if (name === 'WebChannelMessageToContent') {
         listeners.push(listener);
       }
+      originalAddEventListener.call(window, name, listener, options);
     });
 
-  jest
+  const spyRemoveEventListener = jest
     .spyOn(window, 'removeEventListener')
-    .mockImplementation((name, listener) => {
+    .mockImplementation((name, listener, options) => {
       if (name === 'WebChannelMessageToContent') {
         const index = listeners.indexOf(listener);
         if (index !== -1) {
           listeners.splice(index, 1);
         }
       }
+      originalRemoveEventListener.call(window, name, listener, options);
     });
 
-  jest.spyOn(window, 'dispatchEvent').mockImplementation((event) => {
-    if (
-      event instanceof CustomEvent &&
-      event.type === 'WebChannelMessageToChrome'
-    ) {
-      messagesSentToBrowser.push(JSON.parse(event.detail));
-      if (onMessageToChrome) {
-        onMessageToChrome(JSON.parse(event.detail).message);
+  const spyDispatchEvent = jest
+    .spyOn(window, 'dispatchEvent')
+    .mockImplementation((event) => {
+      if (
+        event instanceof CustomEvent &&
+        event.type === 'WebChannelMessageToChrome'
+      ) {
+        messagesSentToBrowser.push(JSON.parse(event.detail));
+        if (onMessageToChrome) {
+          onMessageToChrome(JSON.parse(event.detail).message);
+        }
+      } else {
+        originalDispatchEvent.call(window, event);
       }
-    }
-  });
+    });
 
   function triggerResponse<R: ResponseFromBrowser>(
     message: MessageFromBrowser<R>
@@ -68,6 +77,12 @@ export function mockWebChannel() {
     onMessageToChrome = listener;
   }
 
+  function restoreOriginals() {
+    spyAddEventListener.mockRestore();
+    spyRemoveEventListener.mockRestore();
+    spyDispatchEvent.mockRestore();
+  }
+
   return {
     messagesSentToBrowser,
     listeners,
@@ -84,6 +99,7 @@ export function mockWebChannel() {
       }
       return requestId;
     },
+    restoreOriginals,
   };
 }
 
