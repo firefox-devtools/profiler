@@ -721,7 +721,7 @@ function _isThreadIdle(
     );
   }
 
-  if (/^(?:Audio|Media|GraphRunner)/.test(thread.name)) {
+  if (/^(?:Audio|Media|GraphRunner|WebrtcWorker)/.test(thread.name)) {
     // This is a media thread: they are usually very idle, but are interesting
     // as soon as there's at least one sample. They're present with the media
     // preset, but not usually captured otherwise.

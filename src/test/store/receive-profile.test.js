@@ -996,7 +996,7 @@ describe('actions/receive-profile', function () {
             'Could not obtain symbols for libxul/SOMETHING_FAKE.\n' +
             ' - SymbolsNotFoundError: There was a problem with the JSON returned by the symbolication API.\n' +
             ' - Error: Expected an object with property `results`\n' +
-            " - Error: There's no connection to the browser.",
+            ' - Error: No connection to the browser, cannot obtain symbol tables',
         })
       );
     });
