@@ -45,6 +45,7 @@ import type {
   UploadedProfileInformation,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -121,7 +122,8 @@ export function setHasZoomedViaMousewheel() {
  */
 export function setupInitialUrlState(
   location: Location,
-  profile: Profile | null
+  profile: Profile | null,
+  browserConnection: BrowserConnection | null
 ): ThunkAction<void> {
   return (dispatch) => {
     let urlState;
@@ -157,7 +159,7 @@ export function setupInitialUrlState(
     // load process.
     withHistoryReplaceStateSync(() => {
       dispatch(updateUrlState(urlState));
-      dispatch(finalizeProfileView());
+      dispatch(finalizeProfileView(browserConnection));
       dispatch(urlSetupDone());
     });
   };

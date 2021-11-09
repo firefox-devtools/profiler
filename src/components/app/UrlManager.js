@@ -95,17 +95,21 @@ class UrlManagerImpl extends React.PureComponent<Props> {
 
     try {
       // Process the raw url and fetch the profile.
-      // We try to fetch the profile before setting the url state, because
-      // while processing and especially upgrading the url information we may
-      // need the profile data.
+      // We try to fetch the profile before setting the url state, because we
+      // may need the profile data during URL upgrading.
       //
-      // Also note the profile may be null for the `from-browser` dataSource since
-      // we do not `await` for retrieveProfileFromBrowser function, but also in
-      // case of fatal errors in the process of retrieving and processing a
-      // profile. To handle the latter case properly, we won't `pushState` if
-      // we're in a FATAL_ERROR state.
-      const profile = await retrieveProfileForRawUrl(window.location);
-      setupInitialUrlState(window.location, profile);
+      // In some cases, the returned profile will be null:
+      //  - If the response is a zip file (even if the URL tells us which file
+      //    to pick from the zip file).
+      //  - If a fatal error was encountered in the process of retrieving and
+      //    processing the profile.
+      //
+      // To handle the latter case properly, we won't `pushState` if we're in
+      // a FATAL_ERROR state.
+      const { profile, browserConnection } = await retrieveProfileForRawUrl(
+        window.location
+      );
+      setupInitialUrlState(window.location, profile, browserConnection);
     } catch (error) {
       // Complete the URL setup, as values can come from the user, so we should
       // still proceed with loading the app.
