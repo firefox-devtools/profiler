@@ -31,6 +31,7 @@ import {
 jest.mock('../../profile-logic/symbol-store');
 
 import { TextEncoder, TextDecoder } from 'util';
+import { simulateOldWebChannelAndFrameScript } from '../fixtures/mocks/web-channel';
 
 describe('UrlManager', function () {
   autoMockFullNavigation();
@@ -74,6 +75,8 @@ describe('UrlManager', function () {
     return { dispatch, getState, createUrlManager, waitUntilUrlSetupPhase };
   }
 
+  let simulatedWebChannel;
+
   beforeEach(function () {
     const profileJSON = createGeckoProfile();
     const mockGetProfile = jest.fn().mockResolvedValue(profileJSON);
@@ -87,11 +90,12 @@ describe('UrlManager', function () {
     window.fetch = jest
       .fn()
       .mockRejectedValue(new Error('Simulated network error'));
-    window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
     window.TextDecoder = TextDecoder;
+    simulatedWebChannel = simulateOldWebChannelAndFrameScript(geckoProfiler);
   });
 
   afterEach(function () {
+    simulatedWebChannel.restoreOriginals();
     delete window.geckoProfilerPromise;
     delete window.TextDecoder;
     delete window.fetch;

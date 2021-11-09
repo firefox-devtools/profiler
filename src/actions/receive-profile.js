@@ -990,7 +990,9 @@ export async function checkIfWebChannelUsableForSymbolication(): Promise<boolean
   }
 }
 
-export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
+export function retrieveProfileFromBrowser(
+  initialLoad: boolean = false
+): ThunkAction<Promise<BrowserConnection | null>> {
   return async (dispatch) => {
     try {
       // Attempt to establish a connection to the browser.
@@ -1044,10 +1046,12 @@ export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
         rawGeckoProfile
       );
       const profile = processGeckoProfile(unpackedProfile);
-      await dispatch(loadProfile(profile, { browserConnection }));
+      await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
+      return browserConnection;
     } catch (error) {
       dispatch(fatalError(error));
       console.error(error);
+      return null;
     }
   };
 }
@@ -1535,9 +1539,12 @@ export function retrieveProfilesToCompare(
 // and loads the profile in that given location, then returns the profile data.
 // This function is being used to get the initial profile data before upgrading
 // the url and processing the UrlState.
-export function retrieveProfileForRawUrl(
-  location: Location
-): ThunkAction<Promise<Profile | null>> {
+export function retrieveProfileForRawUrl(location: Location): ThunkAction<
+  Promise<{|
+    profile: Profile | null,
+    browserConnection: BrowserConnection | null,
+  |}>
+> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter((d) => d);
     let possibleDataSource = pathParts[0];
@@ -1555,14 +1562,11 @@ export function retrieveProfileForRawUrl(
     }
     dispatch(setDataSource(dataSource));
 
+    let browserConnection = null;
+
     switch (dataSource) {
       case 'from-browser':
-        // We don't need to `await` the result because there's no url upgrading
-        // when retrieving the profile from the browser and we don't need to wait
-        // for the process. Moreover we don't want to wait for the end of
-        // symbolication and rather want to show the UI as soon as we get
-        // the profile data.
-        dispatch(retrieveProfileFromBrowser());
+        browserConnection = await dispatch(retrieveProfileFromBrowser(true));
         break;
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
@@ -1595,8 +1599,10 @@ export function retrieveProfileForRawUrl(
         );
     }
 
-    // Profile may be null only for the `from-browser` dataSource since we do
-    // not `await` for retrieveProfileFromBrowser function.
-    return getProfileOrNull(getState());
+    // Profile may be null if the response was a zip file.
+    return {
+      profile: getProfileOrNull(getState()),
+      browserConnection,
+    };
   };
 }

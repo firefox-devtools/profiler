@@ -104,8 +104,10 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       // case of fatal errors in the process of retrieving and processing a
       // profile. To handle the latter case properly, we won't `pushState` if
       // we're in a FATAL_ERROR state.
-      const profile = await retrieveProfileForRawUrl(window.location);
-      setupInitialUrlState(window.location, profile);
+      const { profile, browserConnection } = await retrieveProfileForRawUrl(
+        window.location
+      );
+      setupInitialUrlState(window.location, profile, browserConnection);
     } catch (error) {
       // Complete the URL setup, as values can come from the user, so we should
       // still proceed with loading the app.

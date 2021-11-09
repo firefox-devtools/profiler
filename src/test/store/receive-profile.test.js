@@ -2035,7 +2035,9 @@ describe('actions/receive-profile', function () {
       jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
-      await store.dispatch(retrieveProfileForRawUrl(location));
+      const { browserConnection } = await store.dispatch(
+        retrieveProfileForRawUrl(location)
+      );
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
       // error here. If we got one, let's rethrow the error.
@@ -2059,6 +2061,7 @@ describe('actions/receive-profile', function () {
         geckoProfile,
         waitUntilPhase,
         waitUntilSymbolication,
+        browserConnection,
         ...store,
       };
     }
@@ -2147,19 +2150,25 @@ describe('actions/receive-profile', function () {
     });
 
     it('retrieves profile from a `from-browser` data source and loads it', async function () {
-      const { geckoProfile, getState, waitUntilPhase } = await setup(
-        {
-          pathname: '/from-browser/',
-          search: '',
-          hash: '',
-        },
-        0
-      );
+      const { geckoProfile, getState, dispatch, browserConnection } =
+        await setup(
+          {
+            pathname: '/from-browser/',
+            search: '',
+            hash: '',
+          },
+          0
+        );
 
-      // Differently, `from-browser` calls the finalizeProfileView internally,
-      // we don't need to call it again.
-      await waitUntilPhase('DATA_LOADED');
+      // Check if we loaded the profile data successfully.
+      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+
+      // Check if we can successfully finalize the profile view.
+      await dispatch(finalizeProfileView(browserConnection));
+      expect(getView(getState()).phase).toBe('DATA_LOADED');
+
       const processedProfile = processGeckoProfile(geckoProfile);
+      processedProfile.meta.symbolicated = true;
       expect(ProfileViewSelectors.getProfile(getState())).toEqual(
         processedProfile
       );
