@@ -1329,8 +1329,8 @@ describe('actions/receive-profile', function () {
         isJSON: true,
       });
 
-      const { profile: profileFetched } = await _fetchProfile(args);
-      expect(profileFetched).toEqual(profile);
+      const profileOrZip = await _fetchProfile(args);
+      expect(profileOrZip).toEqual({ responseType: 'PROFILE', profile });
     });
 
     it('fetches a zipped profile with correct content-type headers', async function () {
@@ -1340,8 +1340,8 @@ describe('actions/receive-profile', function () {
         isZipped: true,
       });
 
-      const { zip } = await _fetchProfile(args);
-      expect(zip).toBeTruthy();
+      const profileOrZip = await _fetchProfile(args);
+      expect(profileOrZip.responseType).toBe('ZIP');
       expect(reportError.mock.calls.length).toBe(0);
     });
 
@@ -1351,8 +1351,8 @@ describe('actions/receive-profile', function () {
         isZipped: true,
       });
 
-      const { zip } = await _fetchProfile(args);
-      expect(zip).toBeTruthy();
+      const profileOrZip = await _fetchProfile(args);
+      expect(profileOrZip.responseType).toBe('ZIP');
       expect(reportError.mock.calls.length).toBe(0);
     });
 
@@ -1362,8 +1362,8 @@ describe('actions/receive-profile', function () {
         isJSON: true,
       });
 
-      const { profile: profileFetched } = await _fetchProfile(args);
-      expect(profileFetched).toEqual(profile);
+      const profileOrZip = await _fetchProfile(args);
+      expect(profileOrZip).toEqual({ responseType: 'PROFILE', profile });
       expect(reportError.mock.calls.length).toBe(0);
     });
 
@@ -1373,8 +1373,8 @@ describe('actions/receive-profile', function () {
         isJSON: true,
       });
 
-      const { profile: profileFetched } = await _fetchProfile(args);
-      expect(profileFetched).toEqual(profile);
+      const profileOrZip = await _fetchProfile(args);
+      expect(profileOrZip).toEqual({ responseType: 'PROFILE', profile });
       expect(reportError.mock.calls.length).toBe(0);
     });
 
