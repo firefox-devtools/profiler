@@ -1535,7 +1535,7 @@ export function retrieveProfilesToCompare(
 // and loads the profile in that given location, then returns the profile data.
 // This function is being used to get the initial profile data before upgrading
 // the url and processing the UrlState.
-export function getProfilesFromRawUrl(
+export function retrieveProfileForRawUrl(
   location: Location
 ): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {
