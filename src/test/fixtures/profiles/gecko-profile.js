@@ -180,6 +180,8 @@ export function createGeckoProfile(): GeckoProfile {
     },
   ];
 
+  const tabID = 123;
+
   const parentProcessMeta: GeckoProfileFullMeta = {
     abi: 'x86_64-gcc3',
     appBuildID: '20181126165837',
@@ -234,7 +236,22 @@ export function createGeckoProfile(): GeckoProfile {
       eventDelay: 'ms',
       threadCPUDelta: 'ns',
     },
+    configuration: {
+      threads: [],
+      features: [],
+      capacity: 1000000,
+      activeTabID: tabID,
+    },
   };
+
+  const parentProcessPages = [
+    {
+      tabID: tabID,
+      innerWindowID: 111111,
+      url: 'URL',
+      embedderInnerWindowID: 0,
+    },
+  ];
 
   const [
     startIPCMarker,
@@ -295,7 +312,7 @@ export function createGeckoProfile(): GeckoProfile {
   const profile = {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
-    pages: [],
+    pages: parentProcessPages,
     counters: parentProcessCounters,
     profilerOverhead: parentProcessOverhead,
     pausedRanges: [],
