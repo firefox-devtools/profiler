@@ -73,7 +73,6 @@ jest.mock('../../utils/shorten-url');
 
 import { TextEncoder, TextDecoder } from 'util';
 import {
-  mockWebChannel,
   simulateOldWebChannelAndFrameScript,
   simulateWebChannel,
 } from '../fixtures/mocks/web-channel';
@@ -1506,24 +1505,10 @@ describe('actions/receive-profile', function () {
     }
 
     async function setupTestWithFile(mockFileOptions) {
-      // When the file is loaded, the profiler tries to connect to the WebChannel
-      // for symbolication. Handle that request so that we don't time out.
-      // We handle it by rejecting it.
-      const { registerMessageToChromeListener, triggerResponse } =
-        mockWebChannel();
-      registerMessageToChromeListener(() => {
-        triggerResponse({
-          errno: 2, // ERRNO_NO_SUCH_CHANNEL
-          error: 'No such channel',
-        });
-      });
-      // Ignore the console.error from the the WebChannel error.
-      jest.spyOn(console, 'error').mockImplementation(() => {});
-
       // Load a profile from the supplied mockFileOptions.
       const file = mockFile(mockFileOptions);
       const { dispatch, getState } = blankStore();
-      await dispatch(retrieveProfileFromFile(file, mockFileReader));
+      await dispatch(retrieveProfileFromFile(file, undefined, mockFileReader));
       const view = getView(getState());
       return { getState, dispatch, view };
     }

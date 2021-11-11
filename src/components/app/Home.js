@@ -17,6 +17,7 @@ import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
 } from 'firefox-profiler/actions/receive-profile';
+import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
@@ -67,9 +68,22 @@ class ActionButtons extends React.PureComponent<
     this._fileInput = input;
   };
 
-  _uploadProfileFromFile = () => {
+  _uploadProfileFromFile = async () => {
     if (this._fileInput) {
-      this.props.retrieveProfileFromFile(this._fileInput.files[0]);
+      const file = this._fileInput.files[0];
+      // Attempt to establish a connection to the browser, for symbolication.
+      // Disable the userAgent check by supplying a fake userAgent that
+      // pretends we're Firefox. This will make us attempt to establish
+      // a connection to the WebChannel even if we're running in the test
+      // suite.
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      const browserConnection =
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : undefined;
+      this.props.retrieveProfileFromFile(file, browserConnection);
     }
   };
 

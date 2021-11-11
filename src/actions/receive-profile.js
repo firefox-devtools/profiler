@@ -81,7 +81,6 @@ import type {
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
-import { createBrowserConnection } from '../app-logic/browser-connection';
 import type {
   BrowserConnection,
   BrowserConnectionStatus,
@@ -1411,6 +1410,7 @@ function _fileReader(input: File) {
  */
 export function retrieveProfileFromFile(
   file: File,
+  browserConnection?: BrowserConnection,
   // Allow tests to inject a custom file reader to bypass the DOM APIs.
   fileReader: typeof _fileReader = _fileReader
 ): ThunkAction<Promise<void>> {
@@ -1443,19 +1443,6 @@ export function retrieveProfileFromFile(
         if (profile === undefined) {
           throw new Error('Unable to parse the profile.');
         }
-
-        // Attempt to establish a connection to the browser, for symbolication.
-        // Disable the userAgent check by supplying a fake userAgent that
-        // pretends we're Firefox. This will make us attempt to establish
-        // a connection to the WebChannel even if we're running in the test
-        // suite.
-        const browserConnectionStatus = await createBrowserConnection(
-          'Firefox/123.0'
-        );
-        const browserConnection =
-          browserConnectionStatus.status === 'ESTABLISHED'
-            ? browserConnectionStatus.browserConnection
-            : undefined;
 
         await withHistoryReplaceStateAsync(async () => {
           await dispatch(viewProfile(profile, { browserConnection }));
