@@ -80,7 +80,8 @@ describe('app/AppViewRouter', function () {
     navigateToFromBrowserProfileLoadingPage();
     dispatch(waitingForProfileFromBrowser());
     expect(container.firstChild).toMatchSnapshot();
-    expect(retrieveProfileFromBrowser).toBeCalled();
+    // We do not check that retrieveProfileFromBrowser gets called, because the call
+    // happens asynchronously.
 
     const { profile } = getProfileFromTextSamples(`A`);
     dispatch(viewProfile(profile));

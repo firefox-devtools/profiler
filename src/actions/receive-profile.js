@@ -78,9 +78,10 @@ import type {
 
 import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
-import {
+import { createBrowserConnection } from '../app-logic/browser-connection';
+import type {
   BrowserConnection,
-  createBrowserConnection,
+  BrowserConnectionStatus,
 } from '../app-logic/browser-connection';
 import { querySupportsGetProfileAndSymbolicationViaWebChannel } from '../app-logic/web-channel';
 
@@ -991,17 +992,12 @@ export async function checkIfWebChannelUsableForSymbolication(): Promise<boolean
 }
 
 export function retrieveProfileFromBrowser(
+  browserConnectionStatus: BrowserConnectionStatus,
   initialLoad: boolean = false
-): ThunkAction<Promise<BrowserConnection | null>> {
+): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     try {
-      // Attempt to establish a connection to the browser.
-      // Disable the userAgent check by supplying a fake userAgent that
-      // pretends we're Firefox. This will make us attempt to establish
-      // a connection to the WebChannel even if we're running in the test
-      // suite.
-      const connectionStatus = await createBrowserConnection('Firefox/123.0');
-      switch (connectionStatus.status) {
+      switch (browserConnectionStatus.status) {
         case 'ESTABLISHED':
           // Good. This is the normal case.
           break;
@@ -1009,19 +1005,21 @@ export function retrieveProfileFromBrowser(
         case 'NOT_FIREFOX':
           throw new Error('/from-browser only works in Firefox browsers');
         case 'WAITING':
-          throw new Error('unexpected WAITING from createBrowserConnection');
+          throw new Error(
+            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
+          );
         case 'DENIED':
-          throw connectionStatus.error;
+          throw browserConnectionStatus.error;
         case 'TIMED_OUT':
           throw new Error(
             'Timed out when waiting for reply to WebChannel message'
           );
         default:
-          throw assertExhaustiveCheck(connectionStatus.status);
+          throw assertExhaustiveCheck(browserConnectionStatus.status);
       }
 
-      // Now we know that connectionStatus.status === 'ESTABLISHED'.
-      const browserConnection = connectionStatus.browserConnection;
+      // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
+      const browserConnection = browserConnectionStatus.browserConnection;
 
       // XXX update state to show that we're connected to the browser
 
@@ -1047,11 +1045,9 @@ export function retrieveProfileFromBrowser(
       );
       const profile = processGeckoProfile(unpackedProfile);
       await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
-      return browserConnection;
     } catch (error) {
       dispatch(fatalError(error));
       console.error(error);
-      return null;
     }
   };
 }
@@ -1539,12 +1535,10 @@ export function retrieveProfilesToCompare(
 // and loads the profile in that given location, then returns the profile data.
 // This function is being used to get the initial profile data before upgrading
 // the url and processing the UrlState.
-export function retrieveProfileForRawUrl(location: Location): ThunkAction<
-  Promise<{|
-    profile: Profile | null,
-    browserConnection: BrowserConnection | null,
-  |}>
-> {
+export function retrieveProfileForRawUrl(
+  location: Location,
+  browserConnectionStatus?: BrowserConnectionStatus
+): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter((d) => d);
     let possibleDataSource = pathParts[0];
@@ -1562,11 +1556,16 @@ export function retrieveProfileForRawUrl(location: Location): ThunkAction<
     }
     dispatch(setDataSource(dataSource));
 
-    let browserConnection = null;
-
     switch (dataSource) {
       case 'from-browser':
-        browserConnection = await dispatch(retrieveProfileFromBrowser(true));
+        if (browserConnectionStatus === undefined) {
+          throw new Error(
+            'Error: all callers of this function should supply a browserConnectionStatus argument for from-browser'
+          );
+        }
+        await dispatch(
+          retrieveProfileFromBrowser(browserConnectionStatus, true)
+        );
         break;
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
@@ -1600,9 +1599,6 @@ export function retrieveProfileForRawUrl(location: Location): ThunkAction<
     }
 
     // Profile may be null if the response was a zip file.
-    return {
-      profile: getProfileOrNull(getState()),
-      browserConnection,
-    };
+    return getProfileOrNull(getState());
   };
 }

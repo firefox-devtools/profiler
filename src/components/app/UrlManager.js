@@ -19,6 +19,7 @@ import {
   stateFromLocation,
   getIsHistoryReplaceState,
 } from 'firefox-profiler/app-logic/url-handling';
+import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import {
   retrieveProfileForRawUrl,
   typeof retrieveProfileForRawUrl as RetrieveProfileForRawUrl,
@@ -93,6 +94,16 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     // Notify the UI that we are starting to fetch profiles.
     startFetchingProfiles();
 
+    // Establish a connection to the browser, for certain URLs. This isn't the best
+    // place to do it, but hopefully this code will be cleaned up soon;
+    // in the future, this will have a normal (non-overridden) UserAgent check and
+    // will be done for all URLs.
+    let browserConnectionStatus;
+    const route = window.location.pathname.split('/').filter((s) => s)[0];
+    if (['from-browser', 'from-addon', 'from-file'].includes(route)) {
+      browserConnectionStatus = await createBrowserConnection('Firefox/123.0');
+    }
+
     try {
       // Process the raw url and fetch the profile.
       // We try to fetch the profile before setting the url state, because
@@ -104,9 +115,16 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       // case of fatal errors in the process of retrieving and processing a
       // profile. To handle the latter case properly, we won't `pushState` if
       // we're in a FATAL_ERROR state.
-      const { profile, browserConnection } = await retrieveProfileForRawUrl(
-        window.location
+
+      const profile = await retrieveProfileForRawUrl(
+        window.location,
+        browserConnectionStatus
       );
+      const browserConnection =
+        browserConnectionStatus !== undefined &&
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : null;
       setupInitialUrlState(window.location, profile, browserConnection);
     } catch (error) {
       // Complete the URL setup, as values can come from the user, so we should
