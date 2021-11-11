@@ -412,9 +412,9 @@ MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Візуальні показники
 MenuButtons--metaInfo--speed-index = Індекс швидкості:
 # “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
-MenuButtons--metaInfo--perceptual-speed-index = Індекс швидкості Perceptual:
+MenuButtons--metaInfo--perceptual-speed-index = Індекс "Perceptual Speed":
 # “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
-MenuButtons--metaInfo--contentful-speed-Index = Індекс швидкості Contentful:
+MenuButtons--metaInfo--contentful-speed-Index = Індекс "Contentful Speed":
 MenuButtons--metaInfo-renderRowOfList-label-features = Можливості:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Фільтр потоків:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Розширення:
