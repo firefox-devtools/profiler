@@ -25,10 +25,7 @@ import {
 } from 'firefox-profiler/app-logic/web-channel';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type {
-  ConnectedProps,
-  WrapFunctionInDispatch,
-} from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { Localized } from '@fluent/react';
 import './Home.css';
@@ -36,10 +33,8 @@ import './Home.css';
 import { DragAndDropOverlay } from './DragAndDrop';
 
 type ActionButtonsProps = {|
-  +retrieveProfileFromFile: WrapFunctionInDispatch<
-    typeof retrieveProfileFromFile
-  >,
-  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  +onLoadProfileFromFileRequested: (file: File) => void,
+  +onLoadProfileFromUrlRequested: (url: string) => void,
 |};
 
 type ActionButtonsState = {
@@ -47,7 +42,7 @@ type ActionButtonsState = {
 };
 
 type LoadFromUrlProps = {
-  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  +onLoadProfileFromUrlRequested: (url: string) => void,
 };
 
 type LoadFromUrlState = {
@@ -70,20 +65,7 @@ class ActionButtons extends React.PureComponent<
 
   _uploadProfileFromFile = async () => {
     if (this._fileInput) {
-      const file = this._fileInput.files[0];
-      // Attempt to establish a connection to the browser, for symbolication.
-      // Disable the userAgent check by supplying a fake userAgent that
-      // pretends we're Firefox. This will make us attempt to establish
-      // a connection to the WebChannel even if we're running in the test
-      // suite.
-      const browserConnectionStatus = await createBrowserConnection(
-        'Firefox/123.0'
-      );
-      const browserConnection =
-        browserConnectionStatus.status === 'ESTABLISHED'
-          ? browserConnectionStatus.browserConnection
-          : undefined;
-      this.props.retrieveProfileFromFile(file, browserConnection);
+      this.props.onLoadProfileFromFileRequested(this._fileInput.files[0]);
     }
   };
 
@@ -133,7 +115,11 @@ class ActionButtons extends React.PureComponent<
           </Localized>
         </div>
         {this.state.isLoadFromUrlPressed ? (
-          <LoadFromUrl {...this.props} />
+          <LoadFromUrl
+            onLoadProfileFromUrlRequested={
+              this.props.onLoadProfileFromUrlRequested
+            }
+          />
         ) : null}
       </div>
     );
@@ -158,7 +144,7 @@ class LoadFromUrl extends React.PureComponent<
   _upload = (event: SyntheticEvent<>) => {
     event.preventDefault();
     if (this.state.value) {
-      this.props.triggerLoadingFromUrl(this.state.value);
+      this.props.onLoadProfileFromUrlRequested(this.state.value);
     }
   };
 
@@ -464,6 +450,25 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     );
   }
 
+  _onLoadProfileFromFileRequested = (file: File) => {
+    // Attempt to establish a connection to the browser, for symbolication.
+    // Disable the userAgent check by supplying a fake userAgent that
+    // pretends we're Firefox. This will make us attempt to establish
+    // a connection to the WebChannel even if we're running in the test
+    // suite.
+    createBrowserConnection('Firefox/123.0').then((browserConnectionStatus) => {
+      const browserConnection =
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : undefined;
+      this.props.retrieveProfileFromFile(file, browserConnection);
+    });
+  };
+
+  _onLoadProfileFromUrlRequested = (url: string) => {
+    this.props.triggerLoadingFromUrl(url);
+  };
+
   render() {
     const { specialMessage } = this.props;
 
@@ -503,9 +508,12 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 </p>
               </Localized>
               <ActionButtons
-                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-                retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-                triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+                onLoadProfileFromFileRequested={
+                  this._onLoadProfileFromFileRequested
+                }
+                onLoadProfileFromUrlRequested={
+                  this._onLoadProfileFromUrlRequested
+                }
               />
 
               <Localized
