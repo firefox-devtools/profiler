@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import { retrieveProfileFromFile } from 'firefox-profiler/actions/receive-profile';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 import {
   startDragging,
@@ -147,7 +148,7 @@ class DragAndDropImpl extends React.PureComponent<Props> {
     }
   };
 
-  _handleProfileDrop = (event: DragEvent) => {
+  _handleProfileDrop = async (event: DragEvent) => {
     event.preventDefault();
 
     this._resetDragLocation();
@@ -159,7 +160,19 @@ class DragAndDropImpl extends React.PureComponent<Props> {
 
     const { files } = event.dataTransfer;
     if (files.length > 0) {
-      this.props.retrieveProfileFromFile(files[0]);
+      // Attempt to establish a connection to the browser, for symbolication.
+      // Disable the userAgent check by supplying a fake userAgent that
+      // pretends we're Firefox. This will make us attempt to establish
+      // a connection to the WebChannel even if we're running in the test
+      // suite.
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      const browserConnection =
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : undefined;
+      this.props.retrieveProfileFromFile(files[0], browserConnection);
     }
   };
 

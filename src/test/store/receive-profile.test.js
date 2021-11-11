@@ -1419,7 +1419,16 @@ describe('actions/receive-profile', function () {
       // Load a profile from the supplied mockFileOptions.
       const file = mockFile(mockFileOptions);
       const { dispatch, getState } = blankStore();
-      await dispatch(retrieveProfileFromFile(file, mockFileReader));
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      const browserConnection =
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : undefined;
+      await dispatch(
+        retrieveProfileFromFile(file, browserConnection, mockFileReader)
+      );
       const view = getView(getState());
       return { getState, dispatch, view };
     }
