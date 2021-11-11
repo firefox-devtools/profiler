@@ -1090,10 +1090,9 @@ type FetchProfileArgs = {
   reportError?: (...data: Array<any>) => void,
 };
 
-type ProfileOrZip = {
-  profile?: any,
-  zip?: JSZip,
-};
+type ProfileOrZip =
+  | {| responseType: 'PROFILE', profile: mixed |}
+  | {| responseType: 'ZIP', zip: JSZip |};
 
 /**
  * Tries to fetch a profile on `url`. If the profile is not found,
@@ -1188,6 +1187,7 @@ async function _extractProfileOrZipFromResponse(
   switch (contentType) {
     case 'application/zip':
       return {
+        responseType: 'ZIP',
         zip: await _extractZipFromResponse(response, reportError),
       };
     case 'application/json':
@@ -1195,6 +1195,7 @@ async function _extractProfileOrZipFromResponse(
       // The content type is null if it is unknown, or an unsupported type. Go ahead
       // and try to process it as a profile.
       return {
+        responseType: 'PROFILE',
         profile: await _extractJsonFromResponse(
           response,
           reportError,
@@ -1313,30 +1314,36 @@ export function retrieveProfileOrZipFromUrl(
     dispatch(waitingForProfileFromUrl(profileUrl));
 
     try {
-      const response = await _fetchProfile({
+      const response: ProfileOrZip = await _fetchProfile({
         url: profileUrl,
         onTemporaryError: (e: TemporaryError) => {
           dispatch(temporaryError(e));
         },
       });
 
-      const serializedProfile = response.profile;
-      const zip = response.zip;
-      if (serializedProfile) {
-        const profile = await unserializeProfileOfArbitraryFormat(
-          serializedProfile
-        );
-        if (profile === undefined) {
-          throw new Error('Unable to parse the profile.');
-        }
+      switch (response.responseType) {
+        case 'PROFILE': {
+          const serializedProfile = response.profile;
+          const profile = await unserializeProfileOfArbitraryFormat(
+            serializedProfile
+          );
+          if (profile === undefined) {
+            throw new Error('Unable to parse the profile.');
+          }
 
-        await dispatch(loadProfile(profile, {}, initialLoad));
-      } else if (zip) {
-        await dispatch(receiveZipFile(zip));
-      } else {
-        throw new Error(
-          'Expected to receive a zip file or profile from _fetchProfile.'
-        );
+          await dispatch(loadProfile(profile, {}, initialLoad));
+          break;
+        }
+        case 'ZIP': {
+          const zip = response.zip;
+          await dispatch(receiveZipFile(zip));
+          break;
+        }
+        default:
+          throw assertExhaustiveCheck(
+            response.responseType,
+            'Expected to receive a zip file or profile from _fetchProfile.'
+          );
       }
     } catch (error) {
       dispatch(fatalError(error));
@@ -1476,16 +1483,16 @@ export function retrieveProfilesToCompare(
       // and process them if needed.
       const promises = profileStates.map(async ({ hash }) => {
         const profileUrl = getProfileUrlForHash(hash);
-        const response = await _fetchProfile({
+        const response: ProfileOrZip = await _fetchProfile({
           url: profileUrl,
           onTemporaryError: (e: TemporaryError) => {
             dispatch(temporaryError(e));
           },
         });
-        const serializedProfile = response.profile;
-        if (!serializedProfile) {
+        if (response.responseType !== 'PROFILE') {
           throw new Error('Expected to receive a profile from _fetchProfile');
         }
+        const serializedProfile = response.profile;
 
         const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
         return profile;
@@ -1528,7 +1535,7 @@ export function retrieveProfilesToCompare(
 // and loads the profile in that given location, then returns the profile data.
 // This function is being used to get the initial profile data before upgrading
 // the url and processing the UrlState.
-export function getProfilesFromRawUrl(
+export function retrieveProfileForRawUrl(
   location: Location
 ): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {

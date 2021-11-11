@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        // Run the current file with Jest. Only works if the current tab is a test file.
+        {
+            "name": "Run Jest",
+            "type": "node",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+            "args": ["--runInBand", "${file}"],
+            "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart",
+            "request": "launch",
+            "outputCapture": "std",
+            "skipFiles": ["<node_internals>/**"],
+        },
+    ]
+}
