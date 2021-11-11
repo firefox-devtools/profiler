@@ -486,6 +486,9 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Tilldelningswebbp
 StackSettings--invert-call-stack = Invertera anropsstack
     .title = Sortera efter tiden i en anropsnod, utan att ignorera dess barn.
 StackSettings--show-user-timing = Visa användartiming
+StackSettings--panel-search =
+    .label = Filtrera stackar:
+    .title = Visa endast stackar som innehåller en funktion vars namn matchar denna delsträng
 
 ## Tab Bar for the bottom half of the analysis UI.
 
