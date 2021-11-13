@@ -56,6 +56,9 @@ CallNodeContextMenu--transform-focus-function = Siḍes ef twuri
 CallNodeContextMenu--transform-focus-function-inverted = Siḍeṣ ɣef twuri (imitti)
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Snefli akk
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Nadi isem n twuri ɣef Searchfox
 CallNodeContextMenu--copy-function-name = Nɣel isem n tmahalt
 CallNodeContextMenu--copy-script-url = Nɣel URL n usekript
 CallNodeContextMenu--copy-stack = Nqel tanebdant
@@ -86,6 +89,8 @@ CompareHome--form-label-profile2 = Amaɣnu 2:
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = Ldi afeggag adisan
 Details--close-sidebar-button =
     .title = Mdel agalis adisan
 
