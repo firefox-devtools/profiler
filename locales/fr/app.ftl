@@ -54,6 +54,8 @@ CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
     .title = Réduire une fonction supprimera tout ce qu’elle appelait et attribuera tout le temps d’exécution à la fonction. Cela peut aider à simplifier un profil qui appelle du code qui n’a pas besoin d’être analysé.
+CallNodeContextMenu--transform-drop-function = Supprimer les échantillons avec cette fonction
+    .title = La suppression des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
