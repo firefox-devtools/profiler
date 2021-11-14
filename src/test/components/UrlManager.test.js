@@ -23,6 +23,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { CURRENT_URL_VERSION } from '../../app-logic/url-handling';
 import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
 import { profilePublished } from 'firefox-profiler/actions/publish';
+import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import {
   changeCallTreeSearchString,
   setDataSource,
@@ -65,7 +66,9 @@ describe('UrlManager', function () {
     const createUrlManager = () =>
       render(
         <Provider store={store}>
-          <UrlManager>Contents</UrlManager>
+          <UrlManager browserConnectionStatus={browserConnectionStatus}>
+            Contents
+          </UrlManager>
         </Provider>
       );
 
@@ -76,8 +79,9 @@ describe('UrlManager', function () {
   }
 
   let simulatedWebChannel;
+  let browserConnectionStatus;
 
-  beforeEach(function () {
+  beforeEach(async function () {
     const profileJSON = createGeckoProfile();
     const mockGetProfile = jest.fn().mockResolvedValue(profileJSON);
 
@@ -92,6 +96,7 @@ describe('UrlManager', function () {
       .mockRejectedValue(new Error('Simulated network error'));
     window.TextDecoder = TextDecoder;
     simulatedWebChannel = simulateOldWebChannelAndFrameScript(geckoProfiler);
+    browserConnectionStatus = await createBrowserConnection('Firefox/123.0');
   });
 
   afterEach(function () {

@@ -17,7 +17,6 @@ import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
 } from 'firefox-profiler/actions/receive-profile';
-import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
@@ -26,6 +25,7 @@ import {
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 import { Localized } from '@fluent/react';
 import './Home.css';
@@ -196,6 +196,7 @@ function InstructionTransition(props: { children: React.Node }) {
 
 type OwnHomeProps = {|
   +specialMessage?: string,
+  +browserConnectionStatus: BrowserConnectionStatus,
 |};
 
 type DispatchHomeProps = {|
@@ -451,18 +452,12 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   }
 
   _onLoadProfileFromFileRequested = (file: File) => {
-    // Attempt to establish a connection to the browser, for symbolication.
-    // Disable the userAgent check by supplying a fake userAgent that
-    // pretends we're Firefox. This will make us attempt to establish
-    // a connection to the WebChannel even if we're running in the test
-    // suite.
-    createBrowserConnection('Firefox/123.0').then((browserConnectionStatus) => {
-      const browserConnection =
-        browserConnectionStatus.status === 'ESTABLISHED'
-          ? browserConnectionStatus.browserConnection
-          : undefined;
-      this.props.retrieveProfileFromFile(file, browserConnection);
-    });
+    const { browserConnectionStatus } = this.props;
+    const browserConnection =
+      browserConnectionStatus.status === 'ESTABLISHED'
+        ? browserConnectionStatus.browserConnection
+        : undefined;
+    this.props.retrieveProfileFromFile(file, browserConnection);
   };
 
   _onLoadProfileFromUrlRequested = (url: string) => {

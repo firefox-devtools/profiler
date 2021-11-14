@@ -23,6 +23,7 @@ import { UploadedRecordingsHome } from './UploadedRecordingsHome';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { Localized } from '@fluent/react';
@@ -37,6 +38,10 @@ const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
   compare: 'AppViewRouter--error-message-compare',
 });
 
+type AppViewRouterOwnProps = {|
+  browserConnectionStatus: BrowserConnectionStatus,
+|};
+
 type AppViewRouterStateProps = {|
   +view: AppViewState,
   +dataSource: DataSource,
@@ -44,11 +49,21 @@ type AppViewRouterStateProps = {|
   +hasZipFile: boolean,
 |};
 
-type AppViewRouterProps = ConnectedProps<{||}, AppViewRouterStateProps, {||}>;
+type AppViewRouterProps = ConnectedProps<
+  AppViewRouterOwnProps,
+  AppViewRouterStateProps,
+  {||}
+>;
 
 class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
   render() {
-    const { view, dataSource, profilesToCompare, hasZipFile } = this.props;
+    const {
+      view,
+      dataSource,
+      profilesToCompare,
+      hasZipFile,
+      browserConnectionStatus,
+    } = this.props;
     const phase = view.phase;
 
     // We're using a switch to assert that all values for the dataSource has
@@ -56,7 +71,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
     // error here if we forget to update this code.
     switch (dataSource) {
       case 'none':
-        return <Home />;
+        return <Home browserConnectionStatus={browserConnectionStatus} />;
       case 'compare':
         if (profilesToCompare === null) {
           return <CompareHome />;
@@ -119,7 +134,10 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
             id="AppViewRouter--route-not-found--home"
             attrs={{ specialMessage: true }}
           >
-            <Home specialMessage="The URL you tried to reach was not recognized." />
+            <Home
+              specialMessage="The URL you tried to reach was not recognized."
+              browserConnectionStatus={browserConnectionStatus}
+            />
           </Localized>
         );
     }
@@ -127,7 +145,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
 }
 
 export const AppViewRouter = explicitConnect<
-  {||},
+  AppViewRouterOwnProps,
   AppViewRouterStateProps,
   {||}
 >({

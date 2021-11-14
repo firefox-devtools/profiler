@@ -19,7 +19,6 @@ import {
   stateFromLocation,
   getIsHistoryReplaceState,
 } from 'firefox-profiler/app-logic/url-handling';
-import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import {
   retrieveProfileForRawUrl,
   typeof retrieveProfileForRawUrl as RetrieveProfileForRawUrl,
@@ -32,6 +31,7 @@ import type {
   WrapFunctionInDispatch,
 } from 'firefox-profiler/utils/connect';
 import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {|
   +phase: Phase,
@@ -50,6 +50,7 @@ type DispatchProps = {|
 
 type OwnProps = {|
   +children: React.Node,
+  +browserConnectionStatus: BrowserConnectionStatus,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -85,24 +86,18 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  */
 class UrlManagerImpl extends React.PureComponent<Props> {
   async _processInitialUrls() {
-    const { startFetchingProfiles, setupInitialUrlState, urlSetupDone } =
-      this.props;
+    const {
+      startFetchingProfiles,
+      setupInitialUrlState,
+      urlSetupDone,
+      browserConnectionStatus,
+    } = this.props;
     // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
     const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileForRawUrl> =
       (this.props.retrieveProfileForRawUrl: any);
 
     // Notify the UI that we are starting to fetch profiles.
     startFetchingProfiles();
-
-    // Establish a connection to the browser, for certain URLs. This isn't the best
-    // place to do it, but hopefully this code will be cleaned up soon;
-    // in the future, this will have a normal (non-overridden) UserAgent check and
-    // will be done for all URLs.
-    let browserConnectionStatus;
-    const route = window.location.pathname.split('/').filter((s) => s)[0];
-    if (['from-browser', 'from-addon', 'from-file'].includes(route)) {
-      browserConnectionStatus = await createBrowserConnection('Firefox/123.0');
-    }
 
     try {
       // Process the raw url and fetch the profile.

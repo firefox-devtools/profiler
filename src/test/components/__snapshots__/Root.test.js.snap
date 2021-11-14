@@ -38,9 +38,17 @@ exports[`app/AppViewRouter renders an home when the user pressed back after an e
 </div>
 `;
 
-exports[`app/AppViewRouter renders an home when the user pressed back after an error 2`] = `<home />`;
+exports[`app/AppViewRouter renders an home when the user pressed back after an error 2`] = `
+<home
+  browserconnectionstatus="[object Object]"
+/>
+`;
 
-exports[`app/AppViewRouter renders an initial home 1`] = `<home />`;
+exports[`app/AppViewRouter renders an initial home 1`] = `
+<home
+  browserconnectionstatus="[object Object]"
+/>
+`;
 
 exports[`app/AppViewRouter renders temporary errors 1`] = `
 <div

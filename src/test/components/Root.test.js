@@ -65,6 +65,7 @@ import { TemporaryError } from '../../utils/errors';
 
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { createMockBrowserConnection } from '../fixtures/mocks/browser-connection';
 
 describe('app/AppViewRouter', function () {
   it('renders an initial home', function () {
@@ -181,11 +182,13 @@ function setup() {
   (retrieveProfilesToCompare: any).mockImplementation(() => async () => {});
 
   const store = blankStore();
+  const browserConnection = createMockBrowserConnection();
+  const browserConnectionStatus = { status: 'ESTABLISHED', browserConnection };
   const renderResult = render(
     <Provider store={store}>
       <>
-        <ProfileLoader />
-        <AppViewRouter />
+        <ProfileLoader browserConnectionStatus={browserConnectionStatus} />
+        <AppViewRouter browserConnectionStatus={browserConnectionStatus} />
       </>
     </Provider>
   );
