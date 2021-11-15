@@ -66,6 +66,11 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
     } = this.props;
     const phase = view.phase;
 
+    const browserConnection =
+      browserConnectionStatus.status === 'ESTABLISHED'
+        ? browserConnectionStatus.browserConnection
+        : null;
+
     // We're using a switch to assert that all values for the dataSource has
     // been checked. This is useful when we add a new dataSource, as Flow will
     // error here if we forget to update this code.
@@ -121,7 +126,11 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         // The data is now loaded. This could be either a single profile, or a zip file
         // with multiple profiles. Only show the ZipFileViewer if the data loaded is a
         // Zip file, and there is no stored path into the zip file.
-        return hasZipFile ? <ZipFileViewer /> : <ProfileViewer />;
+        return hasZipFile ? (
+          <ZipFileViewer browserConnection={browserConnection} />
+        ) : (
+          <ProfileViewer browserConnection={browserConnection} />
+        );
       case 'TRANSITIONING_FROM_STALE_PROFILE':
         return null;
       case 'ROUTE_NOT_FOUND':

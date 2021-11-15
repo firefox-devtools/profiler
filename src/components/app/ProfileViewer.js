@@ -35,6 +35,7 @@ import classNames from 'classnames';
 import { DebugWarning } from 'firefox-profiler/components/app/DebugWarning';
 
 import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './ProfileViewer.css';
@@ -54,7 +55,11 @@ type DispatchProps = {|
   +invalidatePanelLayout: typeof invalidatePanelLayout,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type OwnProps = {|
+  +browserConnection: BrowserConnection | null,
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class ProfileViewerImpl extends PureComponent<Props> {
   render() {
@@ -68,6 +73,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
       isHidingStaleProfile,
       hasSanitizedProfile,
       icons,
+      browserConnection,
     } = this.props;
 
     return (
@@ -116,7 +122,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
               // with actual content in them do.
             }
             <div className="profileViewerSpacer" />
-            <MenuButtons />
+            <MenuButtons browserConnection={browserConnection} />
             {isUploading ? (
               <div
                 className="menuButtonsPublishUploadBarInner"
@@ -147,7 +153,11 @@ class ProfileViewerImpl extends PureComponent<Props> {
   }
 }
 
-export const ProfileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
+export const ProfileViewer = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state) => ({
     hasZipFile: getHasZipFile(state),
     timelineHeight: getTimelineHeight(state),

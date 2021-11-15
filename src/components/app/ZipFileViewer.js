@@ -27,6 +27,7 @@ import { ProfileViewer } from './ProfileViewer';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { ZipFileState } from 'firefox-profiler/types';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import type {
   ZipDisplayData,
   ZipFileTree,
@@ -55,7 +56,11 @@ type DispatchProps = {|
   +returnToZipFileList: typeof returnToZipFileList,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type OwnProps = {|
+  +browserConnection: BrowserConnection | null,
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type ZipFileRowDispatchProps = {|
   +viewProfileFromZip: typeof viewProfileFromZip,
@@ -234,6 +239,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
       changeExpandedZipFile,
       pathInZipFile,
       zipFileErrorMessage,
+      browserConnection,
     } = this.props;
 
     if (!zipFileTree) {
@@ -311,7 +317,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
           this._renderBackButton(),
         ]);
       case 'VIEW_PROFILE_IN_ZIP_FILE':
-        return <ProfileViewer />;
+        return <ProfileViewer browserConnection={browserConnection} />;
       default:
         (phase: empty);
         throw new Error('Unknown zip file phase.');
@@ -319,7 +325,11 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
   }
 }
 
-export const ZipFileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
+export const ZipFileViewer = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state) => {
     const zipFileTree = getZipFileTree(state);
     if (zipFileTree === null) {

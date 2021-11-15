@@ -686,12 +686,14 @@ export function changeTimelineTrackOrganization(
  * provides the ability to kick off symbolication again after it has already been
  * attempted once.
  */
-export function resymbolicateProfile(): ThunkAction<Promise<void>> {
+export function resymbolicateProfile(
+  browserConnection: BrowserConnection | null
+): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     const symbolStore = getSymbolStore(
       dispatch,
       getSymbolServerUrl(getState()),
-      null
+      browserConnection
     );
     const profile = getProfile(getState());
     if (!symbolStore) {

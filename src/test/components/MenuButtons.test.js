@@ -119,7 +119,7 @@ describe('app/MenuButtons', function () {
       <Provider store={store}>
         <>
           <CurrentProfileUploadedInformationLoader />
-          <MenuButtons />
+          <MenuButtons browserConnection={null} />
         </>
       </Provider>
     );
