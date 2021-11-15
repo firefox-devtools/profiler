@@ -91,17 +91,6 @@ export function processThreadCPUDelta(
     return newThread;
   }
 
-  // Check to see the CPU delta numbers are all null and if they are, remove
-  // this array completely. For example on JVM threads, all the threadCPUDelta
-  // values will be null and therefore it will fail to paint the activity graph.
-  // Instead we should remove the whole array. This call will be quick for most
-  // of the cases because we usually have values at least in the second sample.
-  const hasCPUDeltaValues = threadCPUDelta.some((val) => val !== null);
-  if (!hasCPUDeltaValues) {
-    // Remove the threadCPUDelta array and return the new thread.
-    return _newThreadWithNewThreadCPUDelta(undefined);
-  }
-
   const newThreadCPUDelta: Array<number | null> = new Array(samples.length);
   const cpuDeltaTimeUnitMultiplier = getCpuDeltaTimeUnitMultiplier(
     sampleUnits.threadCPUDelta
