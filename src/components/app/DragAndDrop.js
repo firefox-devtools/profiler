@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import { retrieveProfileFromFile } from 'firefox-profiler/actions/receive-profile';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 import {
   startDragging,
@@ -31,6 +32,7 @@ function _dragPreventDefault(event: DragEvent) {
 type OwnProps = {|
   +className?: string,
   +children?: React.Node,
+  +browserConnection: BrowserConnection | null,
 |};
 
 type StateProps = {|
@@ -147,7 +149,7 @@ class DragAndDropImpl extends React.PureComponent<Props> {
     }
   };
 
-  _handleProfileDrop = (event: DragEvent) => {
+  _handleProfileDrop = async (event: DragEvent) => {
     event.preventDefault();
 
     this._resetDragLocation();
@@ -159,7 +161,10 @@ class DragAndDropImpl extends React.PureComponent<Props> {
 
     const { files } = event.dataTransfer;
     if (files.length > 0) {
-      this.props.retrieveProfileFromFile(files[0]);
+      this.props.retrieveProfileFromFile(
+        files[0],
+        this.props.browserConnection ?? undefined
+      );
     }
   };
 

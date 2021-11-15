@@ -34,7 +34,7 @@ describe('calltree/ZipFileTree', function () {
 
     const renderResult = render(
       <Provider store={store}>
-        <ZipFileViewer />
+        <ZipFileViewer browserConnection={null} />
       </Provider>
     );
     const { getState, dispatch } = store;

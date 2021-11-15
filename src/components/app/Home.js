@@ -24,10 +24,8 @@ import {
 } from 'firefox-profiler/app-logic/web-channel';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type {
-  ConnectedProps,
-  WrapFunctionInDispatch,
-} from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 import { Localized } from '@fluent/react';
 import './Home.css';
@@ -35,10 +33,8 @@ import './Home.css';
 import { DragAndDropOverlay } from './DragAndDrop';
 
 type ActionButtonsProps = {|
-  +retrieveProfileFromFile: WrapFunctionInDispatch<
-    typeof retrieveProfileFromFile
-  >,
-  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  +onLoadProfileFromFileRequested: (file: File) => void,
+  +onLoadProfileFromUrlRequested: (url: string) => void,
 |};
 
 type ActionButtonsState = {
@@ -46,7 +42,7 @@ type ActionButtonsState = {
 };
 
 type LoadFromUrlProps = {
-  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  +onLoadProfileFromUrlRequested: (url: string) => void,
 };
 
 type LoadFromUrlState = {
@@ -67,9 +63,9 @@ class ActionButtons extends React.PureComponent<
     this._fileInput = input;
   };
 
-  _uploadProfileFromFile = () => {
+  _uploadProfileFromFile = async () => {
     if (this._fileInput) {
-      this.props.retrieveProfileFromFile(this._fileInput.files[0]);
+      this.props.onLoadProfileFromFileRequested(this._fileInput.files[0]);
     }
   };
 
@@ -119,7 +115,11 @@ class ActionButtons extends React.PureComponent<
           </Localized>
         </div>
         {this.state.isLoadFromUrlPressed ? (
-          <LoadFromUrl {...this.props} />
+          <LoadFromUrl
+            onLoadProfileFromUrlRequested={
+              this.props.onLoadProfileFromUrlRequested
+            }
+          />
         ) : null}
       </div>
     );
@@ -144,7 +144,7 @@ class LoadFromUrl extends React.PureComponent<
   _upload = (event: SyntheticEvent<>) => {
     event.preventDefault();
     if (this.state.value) {
-      this.props.triggerLoadingFromUrl(this.state.value);
+      this.props.onLoadProfileFromUrlRequested(this.state.value);
     }
   };
 
@@ -196,6 +196,7 @@ function InstructionTransition(props: { children: React.Node }) {
 
 type OwnHomeProps = {|
   +specialMessage?: string,
+  +browserConnectionStatus: BrowserConnectionStatus,
 |};
 
 type DispatchHomeProps = {|
@@ -450,6 +451,19 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     );
   }
 
+  _onLoadProfileFromFileRequested = (file: File) => {
+    const { browserConnectionStatus } = this.props;
+    const browserConnection =
+      browserConnectionStatus.status === 'ESTABLISHED'
+        ? browserConnectionStatus.browserConnection
+        : undefined;
+    this.props.retrieveProfileFromFile(file, browserConnection);
+  };
+
+  _onLoadProfileFromUrlRequested = (url: string) => {
+    this.props.triggerLoadingFromUrl(url);
+  };
+
   render() {
     const { specialMessage } = this.props;
 
@@ -489,9 +503,12 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 </p>
               </Localized>
               <ActionButtons
-                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-                retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-                triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+                onLoadProfileFromFileRequested={
+                  this._onLoadProfileFromFileRequested
+                }
+                onLoadProfileFromUrlRequested={
+                  this._onLoadProfileFromUrlRequested
+                }
               />
 
               <Localized

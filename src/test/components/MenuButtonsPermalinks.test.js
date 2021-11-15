@@ -37,7 +37,10 @@ describe('<Permalink>', function () {
 
     const renderResult = render(
       <Provider store={store}>
-        <MenuButtons injectedUrlShortener={injectedUrlShortener} />
+        <MenuButtons
+          injectedUrlShortener={injectedUrlShortener}
+          browserConnection={null}
+        />
       </Provider>
     );
 

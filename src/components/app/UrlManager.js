@@ -31,6 +31,7 @@ import type {
   WrapFunctionInDispatch,
 } from 'firefox-profiler/utils/connect';
 import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {|
   +phase: Phase,
@@ -49,6 +50,7 @@ type DispatchProps = {|
 
 type OwnProps = {|
   +children: React.Node,
+  +browserConnectionStatus: BrowserConnectionStatus,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -84,8 +86,12 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  */
 class UrlManagerImpl extends React.PureComponent<Props> {
   async _processInitialUrls() {
-    const { startFetchingProfiles, setupInitialUrlState, urlSetupDone } =
-      this.props;
+    const {
+      startFetchingProfiles,
+      setupInitialUrlState,
+      urlSetupDone,
+      browserConnectionStatus,
+    } = this.props;
     // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
     const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileForRawUrl> =
       (this.props.retrieveProfileForRawUrl: any);
@@ -104,8 +110,17 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       // case of fatal errors in the process of retrieving and processing a
       // profile. To handle the latter case properly, we won't `pushState` if
       // we're in a FATAL_ERROR state.
-      const profile = await retrieveProfileForRawUrl(window.location);
-      setupInitialUrlState(window.location, profile);
+
+      const profile = await retrieveProfileForRawUrl(
+        window.location,
+        browserConnectionStatus
+      );
+      const browserConnection =
+        browserConnectionStatus !== undefined &&
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : null;
+      setupInitialUrlState(window.location, profile, browserConnection);
     } catch (error) {
       // Complete the URL setup, as values can come from the user, so we should
       // still proceed with loading the app.

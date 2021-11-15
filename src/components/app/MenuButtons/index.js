@@ -55,6 +55,7 @@ import type {
   TimelineTrackOrganization,
   UploadedProfileInformation,
 } from 'firefox-profiler/types';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -64,6 +65,8 @@ type OwnProps = {|
   // correctly (perhaps due to ES6 modules), so I just went with dependency injection
   // instead.
   injectedUrlShortener?: (string) => Promise<string>,
+
+  browserConnection: BrowserConnection | null,
 |};
 
 type StateProps = {|
@@ -172,7 +175,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   }
 
   _renderMetaInfoPanel() {
-    const { currentProfileUploadedInformation } = this.props;
+    const { currentProfileUploadedInformation, browserConnection } = this.props;
     const { metaInfoPanelState } = this.state;
     switch (metaInfoPanelState) {
       case 'initial': {
@@ -188,7 +191,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
                   currentProfileUploadedInformation
                 )
               : null}
-            <MetaInfoPanel />
+            <MetaInfoPanel browserConnection={browserConnection} />
           </>
         );
       }

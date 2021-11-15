@@ -21,6 +21,7 @@ import * as UrlStateSelectors from '../../selectors/url-state';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
 import { urlFromState } from '../../app-logic/url-handling';
+import { createBrowserConnection } from '../../app-logic/browser-connection';
 import {
   viewProfile,
   finalizeProfileView,
@@ -71,7 +72,11 @@ import { expandUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
 import { TextEncoder, TextDecoder } from 'util';
-import { mockWebChannel } from '../fixtures/mocks/web-channel';
+import {
+  mockWebChannel,
+  simulateOldWebChannelAndFrameScript,
+  simulateWebChannel,
+} from '../fixtures/mocks/web-channel';
 
 function simulateSymbolStoreHasNoCache() {
   // SymbolStoreDB is a mock, but Flow doesn't know this. That's why we use
@@ -88,104 +93,6 @@ function simulateSymbolStoreHasNoCache() {
         )
       ),
   }));
-}
-
-function simulateOldWebChannelAndFrameScript(geckoProfiler) {
-  const webChannel = mockWebChannel();
-
-  const { registerMessageToChromeListener, triggerResponse } = webChannel;
-  // Pretend that this browser does not support obtaining the profile via
-  // the WebChannel. This will trigger fallback to the frame script /
-  // geckoProfiler API.
-  registerMessageToChromeListener((message) => {
-    switch (message.type) {
-      case 'STATUS_QUERY': {
-        triggerResponse(
-          ({
-            type: 'STATUS_RESPONSE',
-            requestId: message.requestId,
-            menuButtonIsEnabled: true,
-          }: any)
-        );
-        break;
-      }
-      default: {
-        triggerResponse(
-          ({
-            error: `Unexpected message ${message.type}`,
-          }: any)
-        );
-        break;
-      }
-    }
-  });
-
-  // Simulate the frame script's geckoProfiler API.
-  window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
-
-  return webChannel;
-}
-
-function simulateWebChannel(profileGetter) {
-  const webChannel = mockWebChannel();
-
-  const { registerMessageToChromeListener, triggerResponse } = webChannel;
-  async function simulateBrowserSide(message) {
-    switch (message.type) {
-      case 'STATUS_QUERY': {
-        triggerResponse({
-          type: 'SUCCESS_RESPONSE',
-          requestId: message.requestId,
-          response: {
-            menuButtonIsEnabled: true,
-            version: 1,
-          },
-        });
-        break;
-      }
-      case 'ENABLE_MENU_BUTTON': {
-        triggerResponse({
-          type: 'ERROR_RESPONSE',
-          requestId: message.requestId,
-          error:
-            'ENABLE_MENU_BUTTON is a valid message but not covered by this test.',
-        });
-        break;
-      }
-      case 'GET_PROFILE': {
-        const profile: ArrayBuffer | MixedObject = await profileGetter();
-        triggerResponse({
-          type: 'SUCCESS_RESPONSE',
-          requestId: message.requestId,
-          response: profile,
-        });
-        break;
-      }
-      case 'GET_SYMBOL_TABLE':
-      case 'QUERY_SYMBOLICATION_API': {
-        triggerResponse({
-          type: 'ERROR_RESPONSE',
-          requestId: message.requestId,
-          error: 'No symbol tables available',
-        });
-        break;
-      }
-      default: {
-        triggerResponse({
-          type: 'ERROR_RESPONSE',
-          requestId: message.requestId,
-          error: `Unexpected message ${message.type}`,
-        });
-        break;
-      }
-    }
-  }
-
-  registerMessageToChromeListener((message) => {
-    simulateBrowserSide(message);
-  });
-
-  return webChannel;
 }
 
 describe('actions/receive-profile', function () {
@@ -856,7 +763,10 @@ describe('actions/receive-profile', function () {
             'web-channel': setupWithWebChannel,
           }[setupWith];
           const { dispatch, getState } = setupFn(profileAs);
-          await dispatch(retrieveProfileFromBrowser());
+          const browserConnectionStatus = await createBrowserConnection(
+            'Firefox/123.0'
+          );
+          await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
           expect(console.warn).toHaveBeenCalledTimes(2);
 
           const state = getState();
@@ -880,7 +790,10 @@ describe('actions/receive-profile', function () {
     it('tries to symbolicate the received profile, frame script version', async () => {
       const { dispatch, geckoProfiler } = setupWithFrameScript();
 
-      await dispatch(retrieveProfileFromBrowser());
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
 
       expect(geckoProfiler.getSymbolTable).toHaveBeenCalledWith(
         'firefox',
@@ -898,7 +811,10 @@ describe('actions/receive-profile', function () {
     it('tries to symbolicate the received profile, webchannel version', async () => {
       const { dispatch } = setupWithWebChannel();
 
-      await dispatch(retrieveProfileFromBrowser());
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
 
       expect(window.fetch).toHaveBeenCalledWith(
         'https://symbols.mozilla.org/symbolicate/v5',
@@ -1503,7 +1419,16 @@ describe('actions/receive-profile', function () {
       // Load a profile from the supplied mockFileOptions.
       const file = mockFile(mockFileOptions);
       const { dispatch, getState } = blankStore();
-      await dispatch(retrieveProfileFromFile(file, mockFileReader));
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      const browserConnection =
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : undefined;
+      await dispatch(
+        retrieveProfileFromFile(file, browserConnection, mockFileReader)
+      );
       const view = getView(getState());
       return { getState, dispatch, view };
     }
@@ -2129,7 +2054,17 @@ describe('actions/receive-profile', function () {
       jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
-      await store.dispatch(retrieveProfileForRawUrl(location));
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      const browserConnection =
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : null;
+
+      await store.dispatch(
+        retrieveProfileForRawUrl(location, browserConnectionStatus)
+      );
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
       // error here. If we got one, let's rethrow the error.
@@ -2153,6 +2088,7 @@ describe('actions/receive-profile', function () {
         geckoProfile,
         waitUntilPhase,
         waitUntilSymbolication,
+        browserConnection,
         ...store,
       };
     }
@@ -2241,19 +2177,25 @@ describe('actions/receive-profile', function () {
     });
 
     it('retrieves profile from a `from-browser` data source and loads it', async function () {
-      const { geckoProfile, getState, waitUntilPhase } = await setup(
-        {
-          pathname: '/from-browser/',
-          search: '',
-          hash: '',
-        },
-        0
-      );
+      const { geckoProfile, getState, dispatch, browserConnection } =
+        await setup(
+          {
+            pathname: '/from-browser/',
+            search: '',
+            hash: '',
+          },
+          0
+        );
 
-      // Differently, `from-browser` calls the finalizeProfileView internally,
-      // we don't need to call it again.
-      await waitUntilPhase('DATA_LOADED');
+      // Check if we loaded the profile data successfully.
+      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+
+      // Check if we can successfully finalize the profile view.
+      await dispatch(finalizeProfileView(browserConnection));
+      expect(getView(getState()).phase).toBe('DATA_LOADED');
+
       const processedProfile = processGeckoProfile(geckoProfile);
+      processedProfile.meta.symbolicated = true;
       expect(ProfileViewSelectors.getProfile(getState())).toEqual(
         processedProfile
       );

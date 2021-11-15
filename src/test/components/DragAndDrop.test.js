@@ -19,6 +19,8 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { serializeProfile } from '../../profile-logic/process-profile';
 import { getView } from 'firefox-profiler/selectors';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
+import { createMockBrowserConnection } from '../fixtures/mocks/browser-connection';
+import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 describe('app/DragAndDrop', () => {
   afterEach(function () {
@@ -28,7 +30,9 @@ describe('app/DragAndDrop', () => {
   it('matches the snapshot with default overlay', () => {
     const { container } = render(
       <Provider store={createStore()}>
-        <DragAndDrop>Target area here</DragAndDrop>
+        <DragAndDrop browserConnection={createMockBrowserConnection()}>
+          Target area here
+        </DragAndDrop>
       </Provider>
     );
     const [dragAndDrop, overlay] = container.children;
@@ -39,7 +43,7 @@ describe('app/DragAndDrop', () => {
   it('matches the snapshot with custom overlay', () => {
     const { container } = render(
       <Provider store={createStore()}>
-        <DragAndDrop>
+        <DragAndDrop browserConnection={createMockBrowserConnection()}>
           Target area here
           <DragAndDropOverlay />
         </DragAndDrop>
@@ -52,7 +56,7 @@ describe('app/DragAndDrop', () => {
   it('responds to dragging', () => {
     const { container } = render(
       <Provider store={createStore()}>
-        <DragAndDrop>
+        <DragAndDrop browserConnection={createMockBrowserConnection()}>
           Target area here, and a <span>nested element</span>.
         </DragAndDrop>
       </Provider>
@@ -94,11 +98,21 @@ describe('app/DragAndDrop', () => {
     });
     // Ignore the console.error from the the WebChannel error.
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const browserConnectionStatus = await createBrowserConnection(
+      'Firefox/123.0'
+    );
+    expect(spy).toHaveBeenCalled();
+    const browserConnection =
+      browserConnectionStatus.status === 'ESTABLISHED'
+        ? browserConnectionStatus.browserConnection
+        : null;
 
     const store = createStore();
     const { container } = render(
       <Provider store={store}>
-        <DragAndDrop>Target area here</DragAndDrop>
+        <DragAndDrop browserConnection={browserConnection}>
+          Target area here
+        </DragAndDrop>
       </Provider>
     );
     const [dragAndDrop, overlay] = container.children;
@@ -114,7 +128,6 @@ describe('app/DragAndDrop', () => {
     await waitFor(() =>
       expect(getView(store.getState()).phase).toBe('DATA_LOADED')
     );
-    expect(spy).toHaveBeenCalled();
 
     // Make sure that dragging after a drop still works correctly.
     expect(overlay.classList).not.toContain('dragging');

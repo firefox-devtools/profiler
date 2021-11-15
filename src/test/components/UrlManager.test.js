@@ -23,6 +23,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { CURRENT_URL_VERSION } from '../../app-logic/url-handling';
 import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
 import { profilePublished } from 'firefox-profiler/actions/publish';
+import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import {
   changeCallTreeSearchString,
   setDataSource,
@@ -31,6 +32,7 @@ import {
 jest.mock('../../profile-logic/symbol-store');
 
 import { TextEncoder, TextDecoder } from 'util';
+import { simulateOldWebChannelAndFrameScript } from '../fixtures/mocks/web-channel';
 
 describe('UrlManager', function () {
   autoMockFullNavigation();
@@ -64,7 +66,9 @@ describe('UrlManager', function () {
     const createUrlManager = () =>
       render(
         <Provider store={store}>
-          <UrlManager>Contents</UrlManager>
+          <UrlManager browserConnectionStatus={browserConnectionStatus}>
+            Contents
+          </UrlManager>
         </Provider>
       );
 
@@ -74,7 +78,10 @@ describe('UrlManager', function () {
     return { dispatch, getState, createUrlManager, waitUntilUrlSetupPhase };
   }
 
-  beforeEach(function () {
+  let simulatedWebChannel;
+  let browserConnectionStatus;
+
+  beforeEach(async function () {
     const profileJSON = createGeckoProfile();
     const mockGetProfile = jest.fn().mockResolvedValue(profileJSON);
 
@@ -87,11 +94,13 @@ describe('UrlManager', function () {
     window.fetch = jest
       .fn()
       .mockRejectedValue(new Error('Simulated network error'));
-    window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
     window.TextDecoder = TextDecoder;
+    simulatedWebChannel = simulateOldWebChannelAndFrameScript(geckoProfiler);
+    browserConnectionStatus = await createBrowserConnection('Firefox/123.0');
   });
 
   afterEach(function () {
+    simulatedWebChannel.restoreOriginals();
     delete window.geckoProfilerPromise;
     delete window.TextDecoder;
     delete window.fetch;

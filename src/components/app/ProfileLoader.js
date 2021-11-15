@@ -23,6 +23,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { DataSource } from 'firefox-profiler/types';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {|
   +dataSource: DataSource,
@@ -38,10 +39,14 @@ type DispatchProps = {|
   +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type OwnProps = {|
+  +browserConnectionStatus: BrowserConnectionStatus,
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class ProfileLoaderImpl extends PureComponent<Props> {
-  _retrieveProfileFromDataSource = () => {
+  _retrieveProfileFromDataSource = async () => {
     const {
       dataSource,
       hash,
@@ -51,11 +56,13 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       retrieveProfileFromStore,
       retrieveProfileOrZipFromUrl,
       retrieveProfilesToCompare,
+      browserConnectionStatus,
     } = this.props;
     switch (dataSource) {
-      case 'from-browser':
-        retrieveProfileFromBrowser();
+      case 'from-browser': {
+        retrieveProfileFromBrowser(browserConnectionStatus);
         break;
+      }
       case 'from-file':
         // retrieveProfileFromFile should already have been called
         break;
@@ -99,7 +106,11 @@ class ProfileLoaderImpl extends PureComponent<Props> {
   }
 }
 
-export const ProfileLoader = explicitConnect<{||}, StateProps, DispatchProps>({
+export const ProfileLoader = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state) => ({
     dataSource: getDataSource(state),
     hash: getHash(state),

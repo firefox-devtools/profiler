@@ -54,7 +54,7 @@ describe('ProfileViewer', function () {
 
     const renderResult = render(
       <Provider store={store}>
-        <ProfileViewer />
+        <ProfileViewer browserConnection={null} />
       </Provider>
     );
 

@@ -10,6 +10,7 @@ import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { Home } from '../../components/app/Home';
 import createStore from '../../app-logic/create-store';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
+import { createMockBrowserConnection } from '../fixtures/mocks/browser-connection';
 import { fireFullClick } from '../fixtures/utils';
 
 // ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
@@ -34,9 +35,18 @@ let userAgent;
 describe('app/Home', function () {
   function setup(userAgentToConfigure: string) {
     userAgent = userAgentToConfigure;
+    const browserConnection = createMockBrowserConnection();
+    const browserConnectionStatus = {
+      status: 'ESTABLISHED',
+      browserConnection,
+    };
+
     const renderResults = render(
       <Provider store={createStore()}>
-        <Home specialMessage="This is a special message" />
+        <Home
+          specialMessage="This is a special message"
+          browserConnectionStatus={browserConnectionStatus}
+        />
       </Provider>
     );
 

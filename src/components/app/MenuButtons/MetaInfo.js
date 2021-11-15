@@ -26,6 +26,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './MetaInfo.css';
@@ -39,18 +40,27 @@ type DispatchProps = $ReadOnly<{|
   resymbolicateProfile: typeof resymbolicateProfile,
 |}>;
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type OwnProps = {|
+  browserConnection: BrowserConnection | null,
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 /**
  * This component formats the profile's meta information into a dropdown panel.
  */
 class MetaInfoPanelImpl extends React.PureComponent<Props> {
+  onResymbolicationButtonClick = () => {
+    const { browserConnection, resymbolicateProfile } = this.props;
+    resymbolicateProfile(browserConnection);
+  };
+
   /**
    * This method provides information about the symbolication status, and a button
    * to re-trigger symbolication.
    */
   renderSymbolication() {
-    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
+    const { profile, symbolicationStatus } = this.props;
     const isSymbolicated = profile.meta.symbolicated;
 
     switch (symbolicationStatus) {
@@ -74,7 +84,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
             <div className="metaInfoRow">
               <span className="metaInfoLabel"></span>
               <button
-                onClick={resymbolicateProfile}
+                onClick={this.onResymbolicationButtonClick}
                 type="button"
                 className="photon-button photon-button-micro"
               >
@@ -414,7 +424,11 @@ function _formatDate(timestamp: number): string {
   return timestampDate;
 }
 
-export const MetaInfoPanel = explicitConnect<{||}, StateProps, DispatchProps>({
+export const MetaInfoPanel = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state) => ({
     profile: getProfile(state),
     symbolicationStatus: getSymbolicationStatus(state),
