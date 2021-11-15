@@ -592,6 +592,58 @@ describe('gecko samples table processing', function () {
   });
 });
 
+describe('threadCPUDelta processing', function () {
+  it('removes threadCPUDelta data when the array is filled with null values', () => {
+    const geckoProfile = createGeckoProfile();
+    const geckoSamples = geckoProfile.threads[0].samples;
+    const geckoSchema = geckoSamples.schema;
+    if (!geckoSchema.threadCPUDelta) {
+      throw new Error(
+        'This test works with threads that can contain threadCPUDelta data.'
+      );
+    }
+
+    // Fill the threadCPUDelta with null values.
+    for (const item of geckoSamples.data) {
+      // $FlowExpectError because Flow thinks this access can be out of bounds, but it is not.
+      item[geckoSchema.threadCPUDelta] = null;
+    }
+
+    // Process the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedSamples = processedProfile.threads[0].samples;
+
+    // Check that the threadCPUdelta array has been removed.
+    expect(processedSamples.threadCPUDelta).not.toBeDefined();
+  });
+
+  it('keeps threadCPUDelta data when the array contains at least one non-null value', () => {
+    const geckoProfile = createGeckoProfile();
+    const geckoSamples = geckoProfile.threads[0].samples;
+    const geckoSchema = geckoSamples.schema;
+    if (!geckoSchema.threadCPUDelta) {
+      throw new Error(
+        'This test works with threads that can contain threadCPUDelta data.'
+      );
+    }
+
+    // Fill the threadCPUDelta with null values except the first.
+    for (const item of geckoSamples.data) {
+      // $FlowExpectError because Flow thinks this access can be out of bounds, but it is not.
+      item[geckoSchema.threadCPUDelta] = null;
+    }
+    // $FlowExpectError same reason as above
+    geckoSamples.data[0][geckoSchema.threadCPUDelta] = 2;
+
+    // Process the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedSamples = processedProfile.threads[0].samples;
+
+    // Check that the threadCPUdelta array has been removed.
+    expect(processedSamples.threadCPUDelta).toBeDefined();
+  });
+});
+
 describe('profile meta processing', function () {
   it('keeps the sampleUnits object successfully', function () {
     const geckoProfile = createGeckoProfile();
