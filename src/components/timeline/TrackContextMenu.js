@@ -137,10 +137,38 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       // This shouldn't happen!
       return;
     }
-    showProvidedTracks(
-      searchFilteredGlobalTracks,
-      searchFilteredLocalTracksByPid
-    );
+
+    // We need to check each global tracks and add their local tracks to the
+    // filter as well to make them visible.
+    const localTracksByPidToShow = new Map(searchFilteredLocalTracksByPid);
+    for (const globalTrackIndex of searchFilteredGlobalTracks) {
+      const globalTrack = globalTracks[globalTrackIndex];
+      if (!globalTrack.pid) {
+        // There is no local track for this one, skip it.
+        continue;
+      }
+
+      // Get all the local tracks and provided ones.
+      const localTracks = ensureExists(
+        localTracksByPid.get(globalTrack.pid),
+        'Expected to find local tracks for the given pid'
+      );
+      const localTracksToShow = localTracksByPidToShow.get(globalTrack.pid);
+      // Check if their lengths are the same. If not, we must add all the local
+      // track indexes.
+      if (
+        localTracksToShow === undefined ||
+        localTracks.length !== localTracksToShow.size
+      ) {
+        // If they don't match, automatically show all the local tracks.
+        localTracksByPidToShow.set(
+          globalTrack.pid,
+          new Set(localTracks.keys())
+        );
+      }
+    }
+
+    showProvidedTracks(searchFilteredGlobalTracks, localTracksByPidToShow);
   };
 
   _toggleGlobalTrackVisibility = (
