@@ -3,10 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
 import { ensureExists, getFirstItemFromSet } from '../utils/flow';
-import { urlFromState } from '../app-logic/url-handling';
+import {
+  urlFromState,
+  splitSearchString,
+  stringsToRegExp,
+} from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
@@ -159,37 +162,6 @@ export const getLocalTrackOrder: DangerousSelectorWithArguments<
     getLocalTrackOrderByPid(state).get(pid),
     'Unable to get the track order from the given pid'
   );
-
-/**
- * Divide a search string into several parts by splitting on comma.
- */
-const splitSearchString = (searchString: string): string[] | null => {
-  if (!searchString) {
-    return null;
-  }
-  const result = searchString
-    .split(',')
-    .map((part) => part.trim())
-    .filter((part) => part);
-
-  if (result.length) {
-    return result;
-  }
-
-  return null;
-};
-
-/**
- * Concatenate an array of strings into a RegExp that matches on all
- * the strings.
- */
-const stringsToRegExp = (strings: string[] | null): RegExp | null => {
-  if (!strings || !strings.length) {
-    return null;
-  }
-  const regexpStr = strings.map(escapeStringRegexp).join('|');
-  return new RegExp(regexpStr, 'gi');
-};
 
 /**
  * Search strings filter a thread to only samples that match the strings.
