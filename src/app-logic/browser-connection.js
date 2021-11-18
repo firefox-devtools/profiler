@@ -38,16 +38,10 @@ export type BrowserConnectionStatus =
  * Only exists if at least an old version of the WebChannel is available in this browser.
  */
 export interface BrowserConnection {
-  // Only called when we must obtain the profile from the browser, i.e. if we
-  // cannot proceed without a connection to the browser. This method falls back
-  // to the frame script API (window.geckoProfilerPromise) if this browser has
-  // an old version of the WebChannel.
-  establishConnectionViaFrameScriptIfNeeded(options: {|
-    onThirtySecondTimeout: () => void,
-  |}): Promise<void>;
-
   // Get the profile for this tab from the browser.
-  getProfile(): Promise<ArrayBuffer | MixedObject>;
+  getProfile(options: {|
+    onThirtySecondTimeout: () => void,
+  |}): Promise<ArrayBuffer | MixedObject>;
 
   // Get a symbol table from the browser.
   getSymbolTable(
@@ -72,33 +66,38 @@ class BrowserConnectionImpl implements BrowserConnection {
       webChannelSupportsGetProfileAndSymbolication;
   }
 
-  async establishConnectionViaFrameScriptIfNeeded(options: {|
-    onThirtySecondTimeout: () => void,
-  |}) {
-    // If the profiler was opened at the /from-browser URL, and this is not a restored
-    // Firefox session, then we're likely to have a geckoProfiler object. Wait forever.
-    const timeoutId = setTimeout(options.onThirtySecondTimeout, 30000);
-    this._geckoProfiler = await window.geckoProfilerPromise;
-    clearTimeout(timeoutId);
+  // Only called when we must obtain the profile from the browser, i.e. if we
+  // cannot proceed without a connection to the browser. This method falls back
+  // to the frame script API (window.geckoProfilerPromise) if this browser has
+  // an old version of the WebChannel.
+  async _getConnectionViaFrameScript(): Promise<$GeckoProfiler> {
+    if (!this._geckoProfiler) {
+      this._geckoProfiler = await window.geckoProfilerPromise;
+    }
+    return this._geckoProfiler;
   }
 
-  async getProfile(): Promise<ArrayBuffer | MixedObject> {
+  async getProfile(options: {|
+    onThirtySecondTimeout: () => void,
+  |}): Promise<ArrayBuffer | MixedObject> {
+    const timeoutId = setTimeout(options.onThirtySecondTimeout, 30000);
+
     // On Firefox 96 and above, we can get the profile from the WebChannel.
     if (this._webChannelSupportsGetProfileAndSymbolication) {
-      return getProfileViaWebChannel();
+      const profile = await getProfileViaWebChannel();
+      clearTimeout(timeoutId);
+      return profile;
     }
+
     // For older versions, fall back to the geckoProfiler frame script API.
     // This fallback can be removed once the oldest supported Firefox ESR version is 96 or newer.
-    if (this._geckoProfiler) {
-      return this._geckoProfiler.getProfile();
-    }
-
-    throw new Error(
-      'Cannot obtain a profile: have neither WebChannel nor a GeckoProfiler object'
-    );
+    const geckoProfiler = await this._getConnectionViaFrameScript();
+    const profile = await geckoProfiler.getProfile();
+    clearTimeout(timeoutId);
+    return profile;
   }
 
-  getSymbolTable(
+  async getSymbolTable(
     debugName: string,
     breakpadId: string
   ): Promise<SymbolTableAsTuple> {
@@ -106,8 +105,13 @@ class BrowserConnectionImpl implements BrowserConnection {
     if (this._webChannelSupportsGetProfileAndSymbolication) {
       return getSymbolTableViaWebChannel(debugName, breakpadId);
     }
+
     // For older versions, fall back to the geckoProfiler frame script API.
     // This fallback can be removed once the oldest supported Firefox ESR version is 96 or newer.
+    // Note that we use this._geckoProfiler directly instead of
+    // _getConnectionViaFrameScript so that we're not waiting forever when the
+    // user opens an unsymbolicated profile with a Firefox that doesn't support
+    // the WebChannel.
     if (this._geckoProfiler) {
       return this._geckoProfiler.getSymbolTable(debugName, breakpadId);
     }
