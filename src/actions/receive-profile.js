@@ -82,7 +82,6 @@ import {
   BrowserConnection,
   createBrowserConnection,
 } from '../app-logic/browser-connection';
-import { querySupportsGetProfileAndSymbolicationViaWebChannel } from '../app-logic/web-channel';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -966,30 +965,6 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
-class TimeoutError extends Error {
-  name = 'TimeoutError';
-}
-
-function makeTimeoutRejectionPromise(durationInMs) {
-  return new Promise((_resolve, reject) => {
-    setTimeout(() => {
-      reject(new TimeoutError(`Timed out after ${durationInMs}ms`));
-    }, durationInMs);
-  });
-}
-
-export async function checkIfWebChannelUsableForSymbolication(): Promise<boolean> {
-  try {
-    return await Promise.race([
-      querySupportsGetProfileAndSymbolicationViaWebChannel(),
-      makeTimeoutRejectionPromise(5000),
-    ]);
-  } catch (e) {
-    // It timed out or some other error happened. Don't use the WebChannel.
-    return false;
-  }
-}
-
 export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     try {
@@ -1025,7 +1000,7 @@ export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
 
       dispatch(waitingForProfileFromBrowser());
 
-      await browserConnection.establishConnectionViaFrameScriptIfNeeded({
+      const rawGeckoProfile = await browserConnection.getProfile({
         onThirtySecondTimeout: () => {
           dispatch(
             temporaryError(
@@ -1038,8 +1013,6 @@ export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
           );
         },
       });
-
-      const rawGeckoProfile = await browserConnection.getProfile();
       const unpackedProfile = await _unpackGeckoProfileFromBrowser(
         rawGeckoProfile
       );
