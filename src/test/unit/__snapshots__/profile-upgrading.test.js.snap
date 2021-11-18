@@ -38,7 +38,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 38,
+    "preprocessedProfileVersion": 39,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -313,7 +313,6 @@ Object {
           7,
           8,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592839.818,
           2574592839.836,
@@ -579,7 +578,6 @@ Object {
           2,
           2,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592843.0039997,
           2574592843.027,
@@ -793,7 +791,6 @@ Object {
           2,
           1,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592868.3659997,
           2574592868.39,
@@ -1212,7 +1209,6 @@ Object {
           8,
           13,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592869.355,
           2574592869.37,
@@ -1542,7 +1538,6 @@ Object {
           2,
           4,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592877.46,
           2574592877.474,
@@ -1854,7 +1849,6 @@ Object {
           7,
           8,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592878.268,
           2574592878.282,
@@ -2092,7 +2086,6 @@ Object {
           1,
           0,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592938.803,
           2574592938.827,
@@ -2296,7 +2289,6 @@ Object {
           2,
           1,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592945.456,
           2574592945.4709997,
@@ -2508,7 +2500,6 @@ Object {
           2,
           3,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592945.7780004,
           2574592945.79,
@@ -2724,7 +2715,6 @@ Object {
           2,
           1,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592946.053,
           2574592946.069,
@@ -2957,7 +2947,6 @@ Object {
           10,
           10,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.093,
           2574592948.128,
@@ -3708,7 +3697,6 @@ Object {
           33,
           32,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.301,
           2574592948.32,
@@ -4665,7 +4653,6 @@ Object {
           33,
           32,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.3170004,
           2574592948.3269997,
@@ -5622,7 +5609,6 @@ Object {
           33,
           34,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.38,
           2574592948.391,
@@ -6583,7 +6569,6 @@ Object {
           33,
           34,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.3989997,
           2574592948.4100003,
@@ -7326,7 +7311,6 @@ Object {
         "stack": Array [
           19,
         ],
-        "threadCPUDelta": undefined,
         "time": Array [
           2574592949.428,
         ],
@@ -10901,7 +10885,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 38,
+    "preprocessedProfileVersion": 39,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -12585,7 +12569,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 38,
+    "preprocessedProfileVersion": 39,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -14421,7 +14405,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 38,
+    "preprocessedProfileVersion": 39,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
