@@ -413,6 +413,14 @@ export function getNetworkMarkerDetails(
     );
   }
 
+  if (payload.isPrivateBrowsing) {
+    details.push(
+      <TooltipDetail label="Private Browsing" key="Network-Private Browsing">
+        yes
+      </TooltipDetail>
+    );
+  }
+
   if (typeof payload.count === 'number') {
     details.push(
       <TooltipDetail label="Requested bytes" key="Network-Requested Bytes">
