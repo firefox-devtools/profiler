@@ -4,6 +4,8 @@
 
 // @flow
 
+import escapeStringRegexp from 'escape-string-regexp';
+
 // Initializing this RegExp outside of removeURLs because that function is in a
 // hot path during sanitization and it's good to avoid the initialization of the
 // RegExp which is costly.
@@ -75,3 +77,34 @@ export function removeFilePath(
 
   return redactedText + pathSeparator + filePath.slice(lastSeparatorIndex + 1);
 }
+
+/**
+ * Divide a search string into several parts by splitting on comma.
+ */
+export const splitSearchString = (searchString: string): string[] | null => {
+  if (!searchString) {
+    return null;
+  }
+  const result = searchString
+    .split(',')
+    .map((part) => part.trim())
+    .filter((part) => part);
+
+  if (result.length) {
+    return result;
+  }
+
+  return null;
+};
+
+/**
+ * Concatenate an array of strings into a RegExp that matches on all
+ * the strings.
+ */
+export const stringsToRegExp = (strings: string[] | null): RegExp | null => {
+  if (!strings || !strings.length) {
+    return null;
+  }
+  const regexpStr = strings.map(escapeStringRegexp).join('|');
+  return new RegExp(regexpStr, 'gi');
+};

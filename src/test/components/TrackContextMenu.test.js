@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
+import { fireEvent } from '@testing-library/react';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { ensureExists } from '../../utils/flow';
@@ -32,6 +33,10 @@ import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 
 describe('timeline/TrackContextMenu', function () {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   /**
    *  getProfileWithNiceTracks() looks like: [
    *    'show [thread GeckoMain process]',
@@ -50,12 +55,21 @@ describe('timeline/TrackContextMenu', function () {
       </Provider>
     );
 
+    const changeSearchFilter = (searchText: string) => {
+      fireEvent.change(screen.getByPlaceholderText(/Enter filter terms/), {
+        target: { value: searchText },
+      });
+
+      jest.runAllTimers();
+    };
+
     return {
       ...renderResult,
       dispatch,
       getState,
       profile,
       store,
+      changeSearchFilter,
     };
   }
 
@@ -106,6 +120,155 @@ describe('timeline/TrackContextMenu', function () {
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
+      ]);
+    });
+  });
+
+  describe('show all tracks below', function () {
+    function setupAllTracks() {
+      const results = setup();
+      const selectAllTracksBelowItem = () =>
+        screen.getByText('Show all tracks below');
+
+      const hideAllTracks = () => {
+        // To hide the tracks before testing 'Show all tracks'
+        fireFullClick(screen.getByText('GeckoMain'));
+        fireFullClick(screen.getByText('DOM Worker'));
+        fireFullClick(screen.getByText('Style'));
+      };
+
+      return {
+        ...results,
+        selectAllTracksBelowItem,
+        hideAllTracks,
+      };
+    }
+
+    it('shows a single track', () => {
+      const {
+        getState,
+        selectAllTracksBelowItem,
+        hideAllTracks,
+        changeSearchFilter,
+      } = setupAllTracks();
+      // Hide all tracks to test the behavior.
+      hideAllTracks();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        // Check if the tracks have been hidden.
+        'hide [thread GeckoMain process]',
+        // There must be at least one visible track.
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('GeckoMain');
+      // Click the button.
+      fireFullClick(selectAllTracksBelowItem());
+
+      // GeckoMain should be visible now.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    it('shows children of a global track', () => {
+      const {
+        getState,
+        selectAllTracksBelowItem,
+        hideAllTracks,
+        changeSearchFilter,
+      } = setupAllTracks();
+      // Hide all tracks to test the behavior.
+      hideAllTracks();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        // Check if the tracks have been hidden.
+        'hide [thread GeckoMain process]',
+        // There must be at least one visible track.
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('Content Process');
+      // Click the button.
+      fireFullClick(selectAllTracksBelowItem());
+
+      // Children of Content Process should be visible now.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('shows a local track', () => {
+      const {
+        getState,
+        selectAllTracksBelowItem,
+        hideAllTracks,
+        changeSearchFilter,
+      } = setupAllTracks();
+      // Hide all tracks to test the behavior.
+      hideAllTracks();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        // Check if the tracks have been hidden.
+        'hide [thread GeckoMain process]',
+        // There must be at least one visible track.
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('DOM Worker');
+      // Click the button.
+      fireFullClick(selectAllTracksBelowItem());
+
+      // DOM Worker track should be visible now.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    it('does not show anything if the list is empty', () => {
+      const {
+        getState,
+        selectAllTracksBelowItem,
+        hideAllTracks,
+        changeSearchFilter,
+      } = setupAllTracks();
+      // Hide all tracks to test the behavior.
+      hideAllTracks();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        // Check if the tracks have been hidden.
+        'hide [thread GeckoMain process]',
+        // There must be at least one visible track.
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+
+      // Search something to filter the tracks. This time it's something random.
+      changeSearchFilter('this should not be in the tracks list');
+      // Click the button.
+      fireFullClick(selectAllTracksBelowItem());
+
+      // No new track should be visible.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
       ]);
     });
   });
@@ -435,6 +598,94 @@ describe('timeline/TrackContextMenu', function () {
         '  - show [thread DOM Worker]',
         '  - hide [thread Style]',
       ]);
+    });
+  });
+
+  describe('track search', function () {
+    it('can filter a single global track', () => {
+      const { changeSearchFilter } = setup();
+      const searchText = 'GeckoMain';
+
+      // Check if all the tracks are visible at first.
+      expect(screen.getByText('GeckoMain')).toBeInTheDocument();
+      expect(screen.getByText('Content Process')).toBeInTheDocument();
+      expect(screen.getByText('Style')).toBeInTheDocument();
+
+      changeSearchFilter(searchText);
+
+      jest.runAllTimers();
+
+      // Check if only the GeckoMain is in the document and not the others.
+      expect(screen.getByText('GeckoMain')).toBeInTheDocument();
+      expect(screen.queryByText('Content Process')).not.toBeInTheDocument();
+      expect(screen.queryByText('Style')).not.toBeInTheDocument();
+    });
+
+    it('can filter a global track with its local track', () => {
+      const { changeSearchFilter } = setup();
+      const searchText = 'Content Process';
+
+      // Check if all the tracks are visible at first.
+      expect(screen.getByText('GeckoMain')).toBeInTheDocument();
+      expect(screen.getByText('Content Process')).toBeInTheDocument();
+      expect(screen.getByText('Style')).toBeInTheDocument();
+
+      changeSearchFilter(searchText);
+
+      jest.runAllTimers();
+
+      // Check if only Content Process and its children are in the document.
+      expect(screen.queryByText('GeckoMain')).not.toBeInTheDocument();
+      expect(screen.getByText('Content Process')).toBeInTheDocument();
+      expect(screen.getByText('Style')).toBeInTheDocument();
+    });
+
+    it('can filter a local track with its global track', () => {
+      const { changeSearchFilter } = setup();
+      const searchText = 'Style';
+
+      // Check if all the tracks are visible at first.
+      expect(screen.getByText('GeckoMain')).toBeInTheDocument();
+      expect(screen.getByText('Content Process')).toBeInTheDocument();
+      expect(screen.getByText('Style')).toBeInTheDocument();
+
+      changeSearchFilter(searchText);
+
+      jest.runAllTimers();
+
+      // Check if only Content Process and its children are in the document.
+      expect(screen.queryByText('GeckoMain')).not.toBeInTheDocument();
+      expect(screen.getByText('Content Process')).toBeInTheDocument();
+      expect(screen.getByText('Style')).toBeInTheDocument();
+    });
+
+    it('can filter a track with pid or processType', () => {
+      const { changeSearchFilter } = setup();
+      let searchText = '111'; // pid of GeckoMain
+
+      // Check if all the tracks are visible at first.
+      expect(screen.getByText('GeckoMain')).toBeInTheDocument();
+      expect(screen.getByText('Content Process')).toBeInTheDocument();
+      expect(screen.getByText('Style')).toBeInTheDocument();
+
+      changeSearchFilter(searchText);
+
+      jest.runAllTimers();
+
+      // Check if only GeckoMain is in the document.
+      expect(screen.getByText('GeckoMain')).toBeInTheDocument();
+      expect(screen.queryByText('Content Process')).not.toBeInTheDocument();
+      expect(screen.queryByText('Style')).not.toBeInTheDocument();
+
+      searchText = 'tab'; // processType of Content Process
+      changeSearchFilter(searchText);
+
+      jest.runAllTimers();
+
+      // Check if Content Process and its children are in the document.
+      expect(screen.queryByText('GeckoMain')).not.toBeInTheDocument();
+      expect(screen.getByText('Content Process')).toBeInTheDocument();
+      expect(screen.getByText('Style')).toBeInTheDocument();
     });
   });
 });
