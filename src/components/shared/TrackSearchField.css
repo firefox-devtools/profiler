@@ -2,13 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-form.trackSearchField {
-  width: 100%;
-}
-
 .trackSearchField {
   position: relative; /* to properly position the button */
   display: inline-flex;
+
+  /* If context menu has long items, we should make sure to take the 100% of the width. */
+  width: 100%;
   flex-flow: row nowrap;
   align-items: center;
 }

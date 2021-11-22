@@ -208,7 +208,7 @@ describe('timeline/TrackContextMenu', function () {
       ]);
     });
 
-    it('shows a global track', () => {
+    it('shows a local track', () => {
       const {
         getState,
         selectAllTracksBelowItem,

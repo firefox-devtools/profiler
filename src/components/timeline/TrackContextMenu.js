@@ -90,9 +90,9 @@ type TimelineTrackContextMenuProps = ConnectedProps<
   DispatchProps
 >;
 
-type TimelineTrackContextMenuState = {
+type TimelineTrackContextMenuState = {|
   searchFilter: string,
-};
+|};
 
 class TimelineTrackContextMenuImpl extends PureComponent<
   TimelineTrackContextMenuProps,
@@ -335,8 +335,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       return null;
     }
 
-    // If a global track is explicitly filtered by search, we should show all of
-    // its children.
+    // If a global track is selected by search, we should show all of its children.
     const skipSearchFilterInChildren =
       searchFilteredGlobalTracks !== null && !isHiddenBySearch;
 
@@ -791,23 +790,18 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     if (
       // We need to focus the track search filter. But we can't use autoFocus
       // property because this context menu is already rendered and hidden during
-      // the load of the web page. So, when user clicks on the track context menu
-      // button, focus will be moved to that component and search filter will not
-      // be focused anymore. To fix this, we are manually calling the focus.
+      // the load of the web page.
       trackFieldElement
     ) {
-      // Allow time for React to let the event bubble up. Otherwise clicked button
-      // will steal the focus.
-      requestAnimationFrame(() => {
+      // Allow time for React contect menu to show itself first.
+      setTimeout(() => {
         trackFieldElement.focus();
       });
     }
   };
 
   _onHide = () => {
-    if (this.state.searchFilter) {
-      this.setState({ searchFilter: '' });
-    }
+    this.setState({ searchFilter: '' });
   };
 
   render() {
