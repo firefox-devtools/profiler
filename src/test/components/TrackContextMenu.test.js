@@ -33,6 +33,10 @@ import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 
 describe('timeline/TrackContextMenu', function () {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   /**
    *  getProfileWithNiceTracks() looks like: [
    *    'show [thread GeckoMain process]',
@@ -51,12 +55,21 @@ describe('timeline/TrackContextMenu', function () {
       </Provider>
     );
 
+    const changeSearchFilter = (searchText: string) => {
+      fireEvent.change(screen.getByPlaceholderText(/Enter filter terms/), {
+        target: { value: searchText },
+      });
+
+      jest.runAllTimers();
+    };
+
     return {
       ...renderResult,
       dispatch,
       getState,
       profile,
       store,
+      changeSearchFilter,
     };
   }
 
@@ -112,10 +125,6 @@ describe('timeline/TrackContextMenu', function () {
   });
 
   describe('show all tracks below', function () {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
     function setupAllTracks() {
       const results = setup();
       const selectAllTracksBelowItem = () =>
@@ -128,19 +137,10 @@ describe('timeline/TrackContextMenu', function () {
         fireFullClick(screen.getByText('Style'));
       };
 
-      const changeSearchFilter = (searchText: string) => {
-        fireEvent.change(screen.getByPlaceholderText(/Enter filter terms/), {
-          target: { value: searchText },
-        });
-
-        jest.runAllTimers();
-      };
-
       return {
         ...results,
         selectAllTracksBelowItem,
         hideAllTracks,
-        changeSearchFilter,
       };
     }
 
@@ -602,36 +602,16 @@ describe('timeline/TrackContextMenu', function () {
   });
 
   describe('track search', function () {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
-    function setupAllTracks() {
-      const results = setup();
-      const selectTrackFilterInput = () =>
-        ((screen.getByPlaceholderText(
-          /Enter filter terms/
-        ): any): HTMLInputElement);
-
-      return {
-        ...results,
-        selectTrackFilterInput,
-      };
-    }
-
     it('can filter a single global track', () => {
-      const { selectTrackFilterInput } = setupAllTracks();
+      const { changeSearchFilter } = setup();
       const searchText = 'GeckoMain';
-      const input = selectTrackFilterInput();
 
       // Check if all the tracks are visible at first.
       expect(screen.getByText('GeckoMain')).toBeInTheDocument();
       expect(screen.getByText('Content Process')).toBeInTheDocument();
       expect(screen.getByText('Style')).toBeInTheDocument();
 
-      fireEvent.change(input, {
-        target: { value: searchText },
-      });
+      changeSearchFilter(searchText);
 
       jest.runAllTimers();
 
@@ -642,18 +622,15 @@ describe('timeline/TrackContextMenu', function () {
     });
 
     it('can filter a global track with its local track', () => {
-      const { selectTrackFilterInput } = setupAllTracks();
+      const { changeSearchFilter } = setup();
       const searchText = 'Content Process';
-      const input = selectTrackFilterInput();
 
       // Check if all the tracks are visible at first.
       expect(screen.getByText('GeckoMain')).toBeInTheDocument();
       expect(screen.getByText('Content Process')).toBeInTheDocument();
       expect(screen.getByText('Style')).toBeInTheDocument();
 
-      fireEvent.change(input, {
-        target: { value: searchText },
-      });
+      changeSearchFilter(searchText);
 
       jest.runAllTimers();
 
@@ -664,18 +641,15 @@ describe('timeline/TrackContextMenu', function () {
     });
 
     it('can filter a local track with its global track', () => {
-      const { selectTrackFilterInput } = setupAllTracks();
+      const { changeSearchFilter } = setup();
       const searchText = 'Style';
-      const input = selectTrackFilterInput();
 
       // Check if all the tracks are visible at first.
       expect(screen.getByText('GeckoMain')).toBeInTheDocument();
       expect(screen.getByText('Content Process')).toBeInTheDocument();
       expect(screen.getByText('Style')).toBeInTheDocument();
 
-      fireEvent.change(input, {
-        target: { value: searchText },
-      });
+      changeSearchFilter(searchText);
 
       jest.runAllTimers();
 
@@ -686,18 +660,15 @@ describe('timeline/TrackContextMenu', function () {
     });
 
     it('can filter a track with pid or processType', () => {
-      const { selectTrackFilterInput } = setupAllTracks();
+      const { changeSearchFilter } = setup();
       let searchText = '111'; // pid of GeckoMain
-      const input = selectTrackFilterInput();
 
       // Check if all the tracks are visible at first.
       expect(screen.getByText('GeckoMain')).toBeInTheDocument();
       expect(screen.getByText('Content Process')).toBeInTheDocument();
       expect(screen.getByText('Style')).toBeInTheDocument();
 
-      fireEvent.change(input, {
-        target: { value: searchText },
-      });
+      changeSearchFilter(searchText);
 
       jest.runAllTimers();
 
@@ -707,9 +678,7 @@ describe('timeline/TrackContextMenu', function () {
       expect(screen.queryByText('Style')).not.toBeInTheDocument();
 
       searchText = 'tab'; // processType of Content Process
-      fireEvent.change(input, {
-        target: { value: searchText },
-      });
+      changeSearchFilter(searchText);
 
       jest.runAllTimers();
 
