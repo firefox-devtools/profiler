@@ -36,6 +36,7 @@ module.exports = {
     'react/no-did-update-set-state': 'error',
     'react/no-will-update-set-state': 'error',
     'react/no-redundant-should-component-update': 'error',
+    'react/no-unused-class-component-methods': 'error',
     'react/no-this-in-sfc': 'error',
     'react/no-typos': 'error',
     // Flow provides enough coverage over the prop types, and there can be errors
@@ -128,8 +129,8 @@ module.exports = {
   settings: {
     react: {
       pragma: 'React',
-      version: '15.0',
-      flowVersion: '0.63.1',
+      version: '17.0',
+      flowVersion: '0.96.0',
     },
     'import/resolver': {
       alias: {

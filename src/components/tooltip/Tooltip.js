@@ -29,8 +29,6 @@ type PositionFromMouse = 'before-mouse' | 'after-mouse';
 type TooltipPosition = PositionFromMouse | 'window-edge';
 
 export class Tooltip extends React.PureComponent<Props> {
-  _isMounted: boolean = false;
-  _isLayoutScheduled: boolean = false;
   _interiorElementRef: {| current: HTMLDivElement | null |} = React.createRef();
 
   // This keeps the previous tooltip positioning relatively to the mouse cursor.

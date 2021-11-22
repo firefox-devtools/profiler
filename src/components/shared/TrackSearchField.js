@@ -21,6 +21,8 @@ export class TrackSearchField extends React.PureComponent<Props> {
     this.props.onSearch(e.currentTarget.value);
   };
 
+  /* This is called from TrackContextMenu directly */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   focus = () => {
     if (this.searchFieldInput.current) {
       this.searchFieldInput.current.focus();

@@ -72,7 +72,9 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
   /**
    * This method collects the initially selected track's HTMLElement. This allows the timeline
    * to scroll the initially selected track into view once the page is loaded.
-   */
+   * It's not used currently but it will be used when we implement this
+   * component better. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   setInitialSelected = (el: InitialSelectedTrackReference) => {
     this.setState({ initialSelected: el });
   };
