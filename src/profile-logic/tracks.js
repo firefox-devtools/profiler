@@ -20,7 +20,7 @@ import {
   isThreadWithNoPaint,
   isContentThreadWithNoPaint,
 } from './profile-data';
-import { splitSearchString, stringsToRegExp } from '../app-logic/url-handling';
+import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 /**

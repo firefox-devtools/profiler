@@ -5,15 +5,12 @@
 // @flow
 import { createSelector } from 'reselect';
 import { ensureExists, getFirstItemFromSet } from '../utils/flow';
-import {
-  urlFromState,
-  splitSearchString,
-  stringsToRegExp,
-} from '../app-logic/url-handling';
+import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
+import { splitSearchString, stringsToRegExp } from '../utils/string';
 
 import type {
   ThreadIndex,

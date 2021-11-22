@@ -4,7 +4,6 @@
 
 // @flow
 import queryString from 'query-string';
-import escapeStringRegexp from 'escape-string-regexp';
 import {
   stringifyCommittedRanges,
   stringifyStartEnd,
@@ -1184,34 +1183,3 @@ function validateTimelineType(type: ?string): TimelineType {
       return 'category';
   }
 }
-
-/**
- * Divide a search string into several parts by splitting on comma.
- */
-export const splitSearchString = (searchString: string): string[] | null => {
-  if (!searchString) {
-    return null;
-  }
-  const result = searchString
-    .split(',')
-    .map((part) => part.trim())
-    .filter((part) => part);
-
-  if (result.length) {
-    return result;
-  }
-
-  return null;
-};
-
-/**
- * Concatenate an array of strings into a RegExp that matches on all
- * the strings.
- */
-export const stringsToRegExp = (strings: string[] | null): RegExp | null => {
-  if (!strings || !strings.length) {
-    return null;
-  }
-  const regexpStr = strings.map(escapeStringRegexp).join('|');
-  return new RegExp(regexpStr, 'gi');
-};
