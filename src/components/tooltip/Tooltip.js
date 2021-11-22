@@ -83,7 +83,14 @@ export class Tooltip extends React.PureComponent<Props> {
         newPosition = possiblePositions[0];
         break;
       case 2:
-        newPosition = previousPosition;
+        // In case both positions before/after work, let's reuse the previous
+        // position if it's one of those, for more stability. If the previous
+        // position was window-edge, before-mouse looks more appropriate.
+        // Ideally we would try to keep the tooltip below the cursor.
+        newPosition =
+          previousPosition !== 'window-edge'
+            ? previousPosition
+            : 'before-mouse';
         break;
       default:
         throw new Error(
