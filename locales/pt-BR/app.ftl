@@ -523,6 +523,16 @@ TrackContextMenu--hide-other-screenshots-tracks = Ocultar outras faixas de captu
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Ocultar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Mostrar todas as faixas
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Exibir todas as faixas abaixo
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Digitar termos de filtragem
+    .title = Só exibir faixas que correspondem a determinado texto
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
