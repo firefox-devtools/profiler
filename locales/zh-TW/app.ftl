@@ -513,6 +513,16 @@ TrackContextMenu--hide-other-screenshots-tracks = 隱藏其他畫面擷圖軌
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = 隱藏「{ $trackName }」
 TrackContextMenu--show-all-tracks = 顯示所有軌道
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = 在下方顯示所有軌道
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = 輸入過濾條件
+    .title = 只顯示符合特定文字的軌道
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
