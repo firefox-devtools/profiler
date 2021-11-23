@@ -576,6 +576,16 @@ TrackContextMenu--hide-other-screenshots-tracks = Celar altere tracias de instan
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Celar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Monstrar tote le tracias
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Monstrar tote le tracias infra
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Insere terminos del filtro
+    .title = Solo monstra tracias que concorda un certe texto
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
