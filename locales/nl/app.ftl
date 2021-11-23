@@ -583,6 +583,16 @@ TrackContextMenu--hide-other-screenshots-tracks = Andere schermafdruktracks verb
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = ‘{ $trackName }’ verbergen
 TrackContextMenu--show-all-tracks = Alle tracks tonen
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Alle tracks hieronder tonen
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Voer filtertermen in
+    .title = Alleen tracks tonen die overeenkomen met een bepaalde tekst
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
