@@ -18,6 +18,7 @@ import {
   isolateScreenshot,
   hideLocalTrack,
   showLocalTrack,
+  showProvidedTracks,
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -36,6 +37,11 @@ import {
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
 } from 'firefox-profiler/selectors/url-state';
+import { TrackSearchField } from 'firefox-profiler/components/shared/TrackSearchField';
+import {
+  getSearchFilteredGlobalTracks,
+  getSearchFilteredLocalTracksByPid,
+} from 'firefox-profiler/profile-logic/tracks';
 import classNames from 'classnames';
 
 import type {
@@ -75,14 +81,94 @@ type DispatchProps = {|
   +isolateLocalTrack: typeof isolateLocalTrack,
   +isolateProcessMainThread: typeof isolateProcessMainThread,
   +isolateScreenshot: typeof isolateScreenshot,
+  +showProvidedTracks: typeof showProvidedTracks,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type TimelineTrackContextMenuProps = ConnectedProps<
+  {||},
+  StateProps,
+  DispatchProps
+>;
 
-class TimelineTrackContextMenuImpl extends PureComponent<Props> {
+type TimelineTrackContextMenuState = {|
+  searchFilter: string,
+|};
+
+class TimelineTrackContextMenuImpl extends PureComponent<
+  TimelineTrackContextMenuProps,
+  TimelineTrackContextMenuState
+> {
+  state = { searchFilter: '' };
+  _trackSearchFieldElem: {| current: TrackSearchField | null |} =
+    React.createRef();
+
   _showAllTracks = (): void => {
     const { showAllTracks } = this.props;
     showAllTracks();
+  };
+
+  _showProvidedTracks = (): void => {
+    const {
+      showProvidedTracks,
+      globalTracks,
+      globalTrackNames,
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+    } = this.props;
+    const { searchFilter } = this.state;
+    const searchFilteredGlobalTracks = getSearchFilteredGlobalTracks(
+      globalTracks,
+      globalTrackNames,
+      threads,
+      searchFilter
+    );
+    const searchFilteredLocalTracksByPid = getSearchFilteredLocalTracksByPid(
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+      searchFilter
+    );
+
+    if (
+      searchFilteredGlobalTracks === null ||
+      searchFilteredLocalTracksByPid === null
+    ) {
+      // This shouldn't happen!
+      return;
+    }
+
+    // We need to check each global tracks and add their local tracks to the
+    // filter as well to make them visible.
+    const localTracksByPidToShow = new Map(searchFilteredLocalTracksByPid);
+    for (const globalTrackIndex of searchFilteredGlobalTracks) {
+      const globalTrack = globalTracks[globalTrackIndex];
+      if (!globalTrack.pid) {
+        // There is no local track for this one, skip it.
+        continue;
+      }
+
+      // Get all the local tracks and provided ones.
+      const localTracks = ensureExists(
+        localTracksByPid.get(globalTrack.pid),
+        'Expected to find local tracks for the given pid'
+      );
+      const localTracksToShow = localTracksByPidToShow.get(globalTrack.pid);
+      // Check if their lengths are the same. If not, we must add all the local
+      // track indexes.
+      if (
+        localTracksToShow === undefined ||
+        localTracks.length !== localTracksToShow.size
+      ) {
+        // If they don't match, automatically show all the local tracks.
+        localTracksByPidToShow.set(
+          globalTrack.pid,
+          new Set(localTracks.keys())
+        );
+      }
+    }
+
+    showProvidedTracks(searchFilteredGlobalTracks, localTracksByPidToShow);
   };
 
   _toggleGlobalTrackVisibility = (
@@ -206,10 +292,52 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     isolateLocalTrack(pid, trackIndex);
   };
 
-  renderGlobalTrack(trackIndex: TrackIndex) {
+  // Check if the global track has a local track that also matches the filter.
+  // We should still show the global tracks that have them.
+  _globalTrackHasSearchFilterMatchedChildren(
+    track: GlobalTrack,
+    searchFilteredLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null
+  ): boolean {
+    if (!track.pid || searchFilteredLocalTracksByPid === null) {
+      return false;
+    }
+
+    const searchFilteredLocalTracks = searchFilteredLocalTracksByPid.get(
+      track.pid
+    );
+    if (!searchFilteredLocalTracks) {
+      // This should not happen, but fail with a false if it does.
+      return false;
+    }
+    return searchFilteredLocalTracks.size !== 0;
+  }
+
+  renderGlobalTrack(
+    trackIndex: TrackIndex,
+    searchFilteredGlobalTracks: Set<TrackIndex> | null,
+    searchFilteredLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null
+  ) {
     const { hiddenGlobalTracks, globalTrackNames, globalTracks } = this.props;
     const isHidden = hiddenGlobalTracks.has(trackIndex);
     const track = globalTracks[trackIndex];
+    const hasSearchFilterMatchedChildren =
+      this._globalTrackHasSearchFilterMatchedChildren(
+        track,
+        searchFilteredLocalTracksByPid
+      );
+    const isHiddenBySearch =
+      searchFilteredGlobalTracks && !searchFilteredGlobalTracks.has(trackIndex);
+
+    if (isHiddenBySearch && !hasSearchFilterMatchedChildren) {
+      // This means that both search filter doesn't match this global track, and
+      // it doesn't have any local track that matches to the filter. In this
+      // case, don't show it.
+      return null;
+    }
+
+    // If a global track is selected by search, we should show all of its children.
+    const skipSearchFilterInChildren =
+      searchFilteredGlobalTracks !== null && !isHiddenBySearch;
 
     let title = `${globalTrackNames[trackIndex]}`;
     if (track.type === 'process') {
@@ -217,29 +345,44 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     }
 
     return (
-      <MenuItem
-        key={trackIndex}
-        preventClose={true}
-        data={{ trackIndex }}
-        onClick={this._toggleGlobalTrackVisibility}
-        attributes={{
-          className: classNames('timelineTrackContextMenuItem', {
-            checkable: true,
-            checked: !isHidden,
-          }),
-          title,
-        }}
-      >
-        <span>{globalTrackNames[trackIndex]}</span>
-        <span className="timelineTrackContextMenuSpacer" />
-        {track.type === 'process' && (
-          <span className="timelineTrackContextMenuPid">({track.pid})</span>
-        )}
-      </MenuItem>
+      <React.Fragment>
+        <MenuItem
+          key={trackIndex}
+          preventClose={true}
+          data={{ trackIndex }}
+          onClick={this._toggleGlobalTrackVisibility}
+          attributes={{
+            className: classNames('timelineTrackContextMenuItem', {
+              checkable: true,
+              checked: !isHidden,
+            }),
+            title,
+          }}
+        >
+          <span>{globalTrackNames[trackIndex]}</span>
+          <span className="timelineTrackContextMenuSpacer" />
+          {track.type === 'process' && (
+            <span className="timelineTrackContextMenuPid">({track.pid})</span>
+          )}
+        </MenuItem>
+        {track.type === 'process'
+          ? this.renderLocalTracks(
+              trackIndex,
+              track.pid,
+              skipSearchFilterInChildren,
+              searchFilteredLocalTracksByPid
+            )
+          : null}
+      </React.Fragment>
     );
   }
 
-  renderLocalTracks(globalTrackIndex: TrackIndex, pid: Pid) {
+  renderLocalTracks(
+    globalTrackIndex: TrackIndex,
+    pid: Pid,
+    skipSearchFilter: boolean,
+    searchFilteredLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null
+  ) {
     const {
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
@@ -253,6 +396,15 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
     const localTrackNames = localTrackNamesByPid.get(pid);
     const localTracks = localTracksByPid.get(pid);
+    // If it's null, include everything without filtering.
+    let searchFilteredLocalTracks = null;
+    // skipSearchFilter will be true when the parent global track matches the filter.
+    // It means that we can include all the local tracks without checking.
+    if (searchFilteredLocalTracksByPid !== null && !skipSearchFilter) {
+      // If there is a search filter AND we can't skip the search filter, then
+      // get the filtered local tracks, so we can filter.
+      searchFilteredLocalTracks = searchFilteredLocalTracksByPid.get(pid);
+    }
 
     if (
       localTrackOrder === undefined ||
@@ -269,6 +421,14 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
 
     const localTrackMenuItems = [];
     for (const trackIndex of localTrackOrder) {
+      if (
+        searchFilteredLocalTracks &&
+        !searchFilteredLocalTracks.has(trackIndex)
+      ) {
+        // Search filter doesn't match this track, skip it.
+        continue;
+      }
+
       localTrackMenuItems.push(
         <MenuItem
           key={trackIndex}
@@ -581,14 +741,85 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     );
   }
 
+  renderShowProvidedTracks() {
+    const { rightClickedTrack } = this.props;
+    if (rightClickedTrack !== null) {
+      return null;
+    }
+
+    return (
+      <React.Fragment>
+        <MenuItem onClick={this._showProvidedTracks}>
+          <Localized id="TrackContextMenu--show-all-tracks-below">
+            Show all tracks below
+          </Localized>
+        </MenuItem>
+        <div className="react-contextmenu-separator" />
+      </React.Fragment>
+    );
+  }
+
+  renderTrackSearchField() {
+    const { rightClickedTrack } = this.props;
+    const { searchFilter } = this.state;
+    if (rightClickedTrack !== null) {
+      // This option should only be visible in the top context menu and not when
+      // user right clicks.
+      return null;
+    }
+
+    return (
+      <React.Fragment>
+        <TrackSearchField
+          className="trackContextMenuSearchField"
+          currentSearchString={searchFilter}
+          onSearch={this._onSearch}
+          ref={this._trackSearchFieldElem}
+        />
+        <div className="react-contextmenu-separator" />
+      </React.Fragment>
+    );
+  }
+
+  _onSearch = (value: string) => {
+    this.setState({ searchFilter: value });
+  };
+
+  _onShow = () => {
+    const trackFieldElement = this._trackSearchFieldElem.current;
+    if (
+      // We need to focus the track search filter. But we can't use autoFocus
+      // property because this context menu is already rendered and hidden during
+      // the load of the web page.
+      trackFieldElement
+    ) {
+      // Allow time for React contect menu to show itself first.
+      setTimeout(() => {
+        trackFieldElement.focus();
+      });
+    }
+  };
+
+  _onHide = () => {
+    this.setState({ searchFilter: '' });
+  };
+
   render() {
-    const { globalTrackOrder, globalTracks, rightClickedTrack } = this.props;
+    const {
+      threads,
+      globalTrackOrder,
+      globalTracks,
+      globalTrackNames,
+      localTracksByPid,
+      localTrackNamesByPid,
+      rightClickedTrack,
+    } = this.props;
+    const { searchFilter } = this.state;
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
     const isolateScreenshot = this.renderIsolateScreenshot();
     const hideTrack = this.renderHideTrack();
-    const showAllTracksMenu = this.renderShowAllTracks();
     const separator =
       isolateProcessMainThread ||
       isolateProcess ||
@@ -596,17 +827,34 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
       isolateScreenshot ? (
         <div className="react-contextmenu-separator" />
       ) : null;
+    const searchFilteredGlobalTracks = getSearchFilteredGlobalTracks(
+      globalTracks,
+      globalTrackNames,
+      threads,
+      searchFilter
+    );
+    const searchFilteredLocalTracksByPid = getSearchFilteredLocalTracksByPid(
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+      searchFilter
+    );
 
     return (
       <ContextMenu
         id="TimelineTrackContextMenu"
         className="timelineTrackContextMenu"
+        onShow={this._onShow}
+        onHide={this._onHide}
       >
         {
           // The menu items header items to isolate tracks may or may not be
           // visible depending on the current state.
         }
-        {showAllTracksMenu}
+        {this.renderTrackSearchField()}
+        {searchFilter
+          ? this.renderShowProvidedTracks()
+          : this.renderShowAllTracks()}
         {isolateProcessMainThread}
         {isolateProcess}
         {isolateLocalTrack}
@@ -618,10 +866,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
           if (rightClickedTrack === null) {
             return (
               <div key={globalTrackIndex}>
-                {this.renderGlobalTrack(globalTrackIndex)}
-                {globalTrack.type === 'process'
-                  ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                  : null}
+                {this.renderGlobalTrack(
+                  globalTrackIndex,
+                  searchFilteredGlobalTracks,
+                  searchFilteredLocalTracksByPid
+                )}
               </div>
             );
           } else if (
@@ -630,10 +879,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
           ) {
             return (
               <div key={globalTrackIndex}>
-                {this.renderGlobalTrack(globalTrackIndex)}
-                {globalTrack.type === 'process'
-                  ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                  : null}
+                {this.renderGlobalTrack(
+                  globalTrackIndex,
+                  searchFilteredGlobalTracks,
+                  searchFilteredLocalTracksByPid
+                )}
               </div>
             );
           } else if (
@@ -643,10 +893,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
             if (rightClickedTrack.pid === globalTrack.pid) {
               return (
                 <div key={globalTrackIndex}>
-                  {this.renderGlobalTrack(globalTrackIndex)}
-                  {globalTrack.type === 'process'
-                    ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                    : null}
+                  {this.renderGlobalTrack(
+                    globalTrackIndex,
+                    searchFilteredGlobalTracks,
+                    searchFilteredLocalTracksByPid
+                  )}
                 </div>
               );
             }
@@ -686,6 +937,7 @@ export const TimelineTrackContextMenu = explicitConnect<
     isolateScreenshot,
     hideLocalTrack,
     showLocalTrack,
+    showProvidedTracks,
   },
   component: TimelineTrackContextMenuImpl,
 });

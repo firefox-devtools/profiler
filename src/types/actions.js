@@ -228,6 +228,11 @@ type ProfileAction =
       +type: 'SHOW_ALL_TRACKS',
     |}
   | {|
+      +type: 'SHOW_PROVIDED_TRACKS',
+      +globalTracksToShow: Set<TrackIndex>,
+      +localTracksByPidToShow: Map<Pid, Set<TrackIndex>>,
+    |}
+  | {|
       +type: 'SHOW_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
     |}
