@@ -170,11 +170,31 @@ function getV5ResultForLibRequest(
     if (info.function !== undefined && info.function_offset !== undefined) {
       const name = info.function;
       const functionOffset = parseInt(info.function_offset.substr(2), 16);
+
+      // Some symbolication API implementations return an inline stack for each
+      // address. These are function calls that were inlined into the outer
+      // function by the compiler.
+      let inlines;
+      if (info.inlines !== undefined) {
+        const inlineCount = info.inlines.length;
+        inlines = info.inlines.map(({ function: name, file, line }, i) => {
+          const depth = inlineCount - i;
+          return {
+            name:
+              name ??
+              `<unknown at ${info.module_offset} at inline depth ${depth}>`,
+            file,
+            line,
+          };
+        });
+      }
+
       addressResult = {
         name,
         symbolAddress: address - functionOffset,
         file: info.file,
         line: info.line,
+        inlines,
       };
     } else {
       // This can happen if the address is between functions, or before the first
