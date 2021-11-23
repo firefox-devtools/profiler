@@ -578,6 +578,16 @@ TrackContextMenu--hide-other-screenshots-tracks = Сховати доріжки 
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Сховати “{ $trackName }”
 TrackContextMenu--show-all-tracks = Показати всі доріжки
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Показати всі треки нижче
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Введіть умови фільтра
+    .title = Показ лише доріжок, які збігаються з певним текстом
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
