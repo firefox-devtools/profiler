@@ -525,6 +525,9 @@ TrackContextMenu--show-all-tracks-below = Mostra tutte le tracce sottostanti
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Inserisci i termini da cercare
+    .title = Mostra solo le tracce che contengono un testo specifico
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
