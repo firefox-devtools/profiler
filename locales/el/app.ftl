@@ -552,6 +552,16 @@ TrackContextMenu--hide-other-screenshots-tracks = Απόκρυψη άλλων κ
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
 TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομματιών
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Εμφάνιση όλων των κομματιών παρακάτω
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Εισαγάγετε όρους φίλτρου
+    .title = Προβολή μόνο των κομματιών που αντιστοιχούν σε συγκεκριμένο κείμενο
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
