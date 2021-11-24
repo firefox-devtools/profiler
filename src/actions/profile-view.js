@@ -648,6 +648,28 @@ export function showAllTracks(): ThunkAction<void> {
 }
 
 /**
+ * This action makes the tracks that are provided visible.
+ */
+export function showProvidedTracks(
+  globalTracksToShow: Set<TrackIndex>,
+  localTracksByPidToShow: Map<Pid, Set<TrackIndex>>
+): ThunkAction<void> {
+  return (dispatch) => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'show provided tracks',
+    });
+
+    dispatch({
+      type: 'SHOW_PROVIDED_TRACKS',
+      globalTracksToShow,
+      localTracksByPidToShow,
+    });
+  };
+}
+
+/**
  * This action shows a specific global track.
  */
 export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
