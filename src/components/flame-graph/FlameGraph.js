@@ -122,6 +122,8 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     this._viewport = viewport;
   };
 
+  /* This method is called from MaybeFlameGraph. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   focus = () => {
     if (this._viewport) {
       this._viewport.focus();

@@ -201,21 +201,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
     );
   }
 
-  _closePanelAfterUpload = () => {
-    const { resetUploadState } = this.props;
-    // Only reset it after the panel animation disappears.
-    setTimeout(resetUploadState, 300);
-
-    const { body } = document;
-    if (body) {
-      // This is a hack to close the arrow panel. See the following issue on
-      // moving this to the Redux state.
-      //
-      // https://github.com/firefox-devtools/profiler/issues/1888
-      body.dispatchEvent(new MouseEvent('mousedown'));
-    }
-  };
-
   _renderUploadPanel() {
     const {
       uploadProgress,

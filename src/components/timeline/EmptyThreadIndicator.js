@@ -38,9 +38,6 @@ type Props = {|
  * thread was shut down.
  */
 class EmptyThreadIndicatorImpl extends PureComponent<Props> {
-  _canvas: HTMLCanvasElement | null;
-  _requestedAnimationFrame: boolean | null;
-
   render() {
     const style = getIndicatorPositions(this.props);
     return (
