@@ -873,6 +873,12 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       return null;
     });
 
+    // If every global track is null, it means that they are all filtered out.
+    // In that case, we should show a warning explaining this.
+    const isTrackListEmpty = filteredGlobalTracks.every(
+      (track) => track === null
+    );
+
     return (
       <ContextMenuNoHidingOnEnter
         id="TimelineTrackContextMenu"
@@ -894,7 +900,18 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {isolateScreenshot}
         {hideTrack}
         {separator}
-        {filteredGlobalTracks}
+        {isTrackListEmpty ? (
+          <Localized
+            id="TrackContextMenu--no-track-matching"
+            vars={{ searchFilter: searchFilter }}
+          >
+            <MenuItem disabled={true}>
+              No track matching “{searchFilter}”
+            </MenuItem>
+          </Localized>
+        ) : (
+          filteredGlobalTracks
+        )}
       </ContextMenuNoHidingOnEnter>
     );
   }
