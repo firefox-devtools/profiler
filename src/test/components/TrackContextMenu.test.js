@@ -723,5 +723,20 @@ describe('timeline/TrackContextMenu', function () {
       // Make sure that the context menu is still visible.
       expect(isContextMenuVisible()).toBeTruthy();
     });
+
+    it('escape key closes the context menu', () => {
+      const { showContextMenu, isContextMenuVisible } = setup();
+      showContextMenu();
+      // Make sure that the context menu is open.
+      expect(isContextMenuVisible()).toBeTruthy();
+
+      // Now press escape to test this behavior.
+      fireFullKeyPress(screen.getByPlaceholderText('Enter filter terms'), {
+        key: 'Escape',
+      });
+
+      // Make sure that the context menu is closed now.
+      expect(isContextMenuVisible()).toBeFalsy();
+    });
   });
 });
