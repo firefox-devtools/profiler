@@ -4,7 +4,7 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import { ContextMenu, MenuItem } from 'react-contextmenu';
+import { MenuItem } from 'react-contextmenu';
 import { Localized } from '@fluent/react';
 
 import './TrackContextMenu.css';
@@ -42,6 +42,7 @@ import {
   getSearchFilteredGlobalTracks,
   getSearchFilteredLocalTracksByPid,
 } from 'firefox-profiler/profile-logic/tracks';
+import { ContextMenuNoHidingOnEnter } from 'firefox-profiler/components/shared/ContextMenuNoHidingOnEnter';
 import classNames from 'classnames';
 
 import type {
@@ -841,7 +842,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     );
 
     return (
-      <ContextMenu
+      <ContextMenuNoHidingOnEnter
         id="TimelineTrackContextMenu"
         className="timelineTrackContextMenu"
         onShow={this._onShow}
@@ -904,7 +905,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           }
           return null;
         })}
-      </ContextMenu>
+      </ContextMenuNoHidingOnEnter>
     );
   }
 }
