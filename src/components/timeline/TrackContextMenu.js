@@ -346,7 +346,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     }
 
     return (
-      <React.Fragment>
+      <React.Fragment key={trackIndex}>
         <MenuItem
           key={trackIndex}
           preventClose={true}
@@ -865,41 +865,29 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {globalTrackOrder.map((globalTrackIndex) => {
           const globalTrack = globalTracks[globalTrackIndex];
           if (rightClickedTrack === null) {
-            return (
-              <div key={globalTrackIndex}>
-                {this.renderGlobalTrack(
-                  globalTrackIndex,
-                  searchFilteredGlobalTracks,
-                  searchFilteredLocalTracksByPid
-                )}
-              </div>
+            return this.renderGlobalTrack(
+              globalTrackIndex,
+              searchFilteredGlobalTracks,
+              searchFilteredLocalTracksByPid
             );
           } else if (
             rightClickedTrack.type === 'global' &&
             rightClickedTrack.trackIndex === globalTrackIndex
           ) {
-            return (
-              <div key={globalTrackIndex}>
-                {this.renderGlobalTrack(
-                  globalTrackIndex,
-                  searchFilteredGlobalTracks,
-                  searchFilteredLocalTracksByPid
-                )}
-              </div>
+            return this.renderGlobalTrack(
+              globalTrackIndex,
+              searchFilteredGlobalTracks,
+              searchFilteredLocalTracksByPid
             );
           } else if (
             rightClickedTrack.type === 'local' &&
             globalTrack.type === 'process'
           ) {
             if (rightClickedTrack.pid === globalTrack.pid) {
-              return (
-                <div key={globalTrackIndex}>
-                  {this.renderGlobalTrack(
-                    globalTrackIndex,
-                    searchFilteredGlobalTracks,
-                    searchFilteredLocalTracksByPid
-                  )}
-                </div>
+              return this.renderGlobalTrack(
+                globalTrackIndex,
+                searchFilteredGlobalTracks,
+                searchFilteredLocalTracksByPid
               );
             }
           }
