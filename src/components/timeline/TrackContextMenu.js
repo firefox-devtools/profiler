@@ -841,6 +841,38 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       searchFilter
     );
 
+    const filteredGlobalTracks = globalTrackOrder.map((globalTrackIndex) => {
+      const globalTrack = globalTracks[globalTrackIndex];
+      if (rightClickedTrack === null) {
+        return this.renderGlobalTrack(
+          globalTrackIndex,
+          searchFilteredGlobalTracks,
+          searchFilteredLocalTracksByPid
+        );
+      } else if (
+        rightClickedTrack.type === 'global' &&
+        rightClickedTrack.trackIndex === globalTrackIndex
+      ) {
+        return this.renderGlobalTrack(
+          globalTrackIndex,
+          searchFilteredGlobalTracks,
+          searchFilteredLocalTracksByPid
+        );
+      } else if (
+        rightClickedTrack.type === 'local' &&
+        globalTrack.type === 'process'
+      ) {
+        if (rightClickedTrack.pid === globalTrack.pid) {
+          return this.renderGlobalTrack(
+            globalTrackIndex,
+            searchFilteredGlobalTracks,
+            searchFilteredLocalTracksByPid
+          );
+        }
+      }
+      return null;
+    });
+
     return (
       <ContextMenuNoHidingOnEnter
         id="TimelineTrackContextMenu"
@@ -862,37 +894,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {isolateScreenshot}
         {hideTrack}
         {separator}
-        {globalTrackOrder.map((globalTrackIndex) => {
-          const globalTrack = globalTracks[globalTrackIndex];
-          if (rightClickedTrack === null) {
-            return this.renderGlobalTrack(
-              globalTrackIndex,
-              searchFilteredGlobalTracks,
-              searchFilteredLocalTracksByPid
-            );
-          } else if (
-            rightClickedTrack.type === 'global' &&
-            rightClickedTrack.trackIndex === globalTrackIndex
-          ) {
-            return this.renderGlobalTrack(
-              globalTrackIndex,
-              searchFilteredGlobalTracks,
-              searchFilteredLocalTracksByPid
-            );
-          } else if (
-            rightClickedTrack.type === 'local' &&
-            globalTrack.type === 'process'
-          ) {
-            if (rightClickedTrack.pid === globalTrack.pid) {
-              return this.renderGlobalTrack(
-                globalTrackIndex,
-                searchFilteredGlobalTracks,
-                searchFilteredLocalTracksByPid
-              );
-            }
-          }
-          return null;
-        })}
+        {filteredGlobalTracks}
       </ContextMenuNoHidingOnEnter>
     );
   }
