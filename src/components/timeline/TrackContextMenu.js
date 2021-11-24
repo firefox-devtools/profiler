@@ -42,7 +42,7 @@ import {
   getSearchFilteredGlobalTracks,
   getSearchFilteredLocalTracksByPid,
 } from 'firefox-profiler/profile-logic/tracks';
-import { TrackContextMenu } from 'firefox-profiler/components/shared/TrackContextMenu';
+import { ContextMenuNoHidingOnEnter } from 'firefox-profiler/components/shared/ContextMenuNoHidingOnEnter';
 import classNames from 'classnames';
 
 import type {
@@ -842,7 +842,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     );
 
     return (
-      <TrackContextMenu
+      <ContextMenuNoHidingOnEnter
         id="TimelineTrackContextMenu"
         className="timelineTrackContextMenu"
         onShow={this._onShow}
@@ -905,7 +905,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           }
           return null;
         })}
-      </TrackContextMenu>
+      </ContextMenuNoHidingOnEnter>
     );
   }
 }

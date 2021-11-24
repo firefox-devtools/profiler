@@ -6,13 +6,13 @@
 import { ContextMenu, hideMenu as hideContextMenu } from 'react-contextmenu';
 
 /**
- * This is the track context menu component that is used mainly in the timeline.
+ * This is a context menu component with adjusted hide menu behavior.
  * This implementation changes the behavior of the extended ContextMenu component
- * slightly by overriding the hideMenu method. For track context menu, we don't
+ * slightly by overriding the hideMenu method. For some context menus, we don't
  * want enter key to close the context menu completely because we would like to
  * select multiple items in a row without closing the context menu with it.
  */
-export class TrackContextMenu extends ContextMenu {
+export class ContextMenuNoHidingOnEnter extends ContextMenu {
   /**
    * This hideMenu method is the overriden version of the ContextMenu component.
    * See the original function here:
