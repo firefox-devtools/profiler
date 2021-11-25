@@ -88,9 +88,6 @@ const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
 
 class StackChartCanvasImpl extends React.PureComponent<Props> {
-  _leftMarginGradient: null | CanvasGradient = null;
-  _rightMarginGradient: null | CanvasGradient = null;
-
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
     // is mounted, but using componentDidMount won't work here as the

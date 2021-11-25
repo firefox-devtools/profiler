@@ -19,7 +19,7 @@
   color: var(--grey-90-a60);
 }
 
-.react-contextmenu-item:hover .timelineTrackContextMenuPid {
+.react-contextmenu-item--selected .timelineTrackContextMenuPid {
   color: #fff;
 }
 

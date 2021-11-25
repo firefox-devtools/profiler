@@ -52,7 +52,7 @@ describe('shared/Tooltip', () => {
 
       mouseX = 50;
       mouseY = 70;
-      rerender({ x: mouseX, y: mouseY });
+      rerender({ mouse: { x: mouseX, y: mouseY } });
 
       expect(getTooltipStyle()).toEqual({
         left: `${mouseX + MOUSE_OFFSET}px`,
@@ -63,7 +63,7 @@ describe('shared/Tooltip', () => {
       // below/right and above/left will still render the tooltip below/right.
       mouseX = 510;
       mouseY = 310;
-      rerender({ x: mouseX, y: mouseY });
+      rerender({ mouse: { x: mouseX, y: mouseY } });
       expect(getTooltipStyle()).toEqual({
         left: `${mouseX + MOUSE_OFFSET}px`,
         top: `${mouseY + MOUSE_OFFSET}px`,
@@ -73,7 +73,7 @@ describe('shared/Tooltip', () => {
       // available will move the tooltip left/above.
       mouseX = 800;
       mouseY = 700;
-      rerender({ x: mouseX, y: mouseY });
+      rerender({ mouse: { x: mouseX, y: mouseY } });
       expect(getTooltipStyle()).toEqual({
         left: `${mouseX - MOUSE_OFFSET - tooltipWidth}px`,
         top: `${mouseY - MOUSE_OFFSET - tooltipHeight}px`,
@@ -102,7 +102,7 @@ describe('shared/Tooltip', () => {
       // below/right and above/left will still render the tooltip above/left.
       mouseX = 510;
       mouseY = 310;
-      rerender({ x: mouseX, y: mouseY });
+      rerender({ mouse: { x: mouseX, y: mouseY } });
       expect(getTooltipStyle()).toEqual({
         left: `${expectedLeft()}px`,
         top: `${expectedTop()}px`,
@@ -112,7 +112,7 @@ describe('shared/Tooltip', () => {
       // available will move the tooltip right/below.
       mouseX = 50;
       mouseY = 30;
-      rerender({ x: mouseX, y: mouseY });
+      rerender({ mouse: { x: mouseX, y: mouseY } });
       expect(getTooltipStyle()).toEqual({
         left: `${mouseX + MOUSE_OFFSET}px`,
         top: `${mouseY + MOUSE_OFFSET}px`,
@@ -121,13 +121,32 @@ describe('shared/Tooltip', () => {
 
     it('is rendered at the left and top of the window if the space is missing elsewhere', () => {
       // The jsdom window size is 1024x768.
-      const { getTooltipStyle } = setup({
-        box: { width: 700, height: 500 },
-        mouse: { x: 500, y: 300 },
+      let mouseX = 500;
+      let mouseY = 300;
+      let tooltipWidth = 700;
+      const tooltipHeight = 500;
+      const { getTooltipStyle, rerender } = setup({
+        box: { width: tooltipWidth, height: tooltipHeight },
+        mouse: { x: mouseX, y: mouseY },
       });
 
-      const expectedLeft = VISUAL_MARGIN;
+      let expectedLeft = VISUAL_MARGIN;
       const expectedTop = VISUAL_MARGIN;
+      expect(getTooltipStyle()).toEqual({
+        left: `${expectedLeft}px`,
+        top: `${expectedTop}px`,
+      });
+
+      // We change the size of the box and move the mouse slightly to trigger a render.
+      tooltipWidth = 300;
+      mouseX = 510;
+      mouseY = 310;
+      rerender({
+        box: { width: tooltipWidth, height: tooltipHeight },
+        mouse: { x: mouseX, y: mouseY },
+      });
+
+      expectedLeft = mouseX - MOUSE_OFFSET - tooltipWidth;
       expect(getTooltipStyle()).toEqual({
         left: `${expectedLeft}px`,
         top: `${expectedTop}px`,
@@ -181,7 +200,12 @@ function setup({ box, mouse }: Setup) {
   }
 
   return {
-    rerender: (mouse: Position) => {
+    rerender: ({ mouse, box: newBox }: $Shape<Setup>) => {
+      if (newBox) {
+        box.width = newBox.width;
+        box.height = newBox.height;
+      }
+
       rerender(
         <Tooltip mouseX={mouse.x} mouseY={mouse.y}>
           <p>Lorem ipsum</p>

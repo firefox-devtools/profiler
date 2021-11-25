@@ -29,8 +29,6 @@ type PositionFromMouse = 'before-mouse' | 'after-mouse';
 type TooltipPosition = PositionFromMouse | 'window-edge';
 
 export class Tooltip extends React.PureComponent<Props> {
-  _isMounted: boolean = false;
-  _isLayoutScheduled: boolean = false;
   _interiorElementRef: {| current: HTMLDivElement | null |} = React.createRef();
 
   // This keeps the previous tooltip positioning relatively to the mouse cursor.
@@ -83,7 +81,14 @@ export class Tooltip extends React.PureComponent<Props> {
         newPosition = possiblePositions[0];
         break;
       case 2:
-        newPosition = previousPosition;
+        // In case both positions before/after work, let's reuse the previous
+        // position if it's one of those, for more stability. If the previous
+        // position was window-edge, before-mouse looks more appropriate.
+        // Ideally we would try to keep the tooltip below the cursor.
+        newPosition =
+          previousPosition !== 'window-edge'
+            ? previousPosition
+            : 'before-mouse';
         break;
       default:
         throw new Error(

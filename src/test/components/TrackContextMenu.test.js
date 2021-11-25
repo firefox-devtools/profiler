@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
+import { showMenu } from 'react-contextmenu';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { ensureExists } from '../../utils/flow';
@@ -30,7 +31,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 
 import { storeWithProfile } from '../fixtures/stores';
-import { fireFullClick } from '../fixtures/utils';
+import { fireFullClick, fireFullKeyPress } from '../fixtures/utils';
 
 describe('timeline/TrackContextMenu', function () {
   beforeEach(() => {
@@ -63,6 +64,22 @@ describe('timeline/TrackContextMenu', function () {
       jest.runAllTimers();
     };
 
+    const isContextMenuVisible = (): boolean => {
+      const contextMenu = ensureExists(
+        document.querySelector('.react-contextmenu'),
+        `Couldn't find the context menu.`
+      );
+      return contextMenu.classList.contains('react-contextmenu--visible');
+    };
+
+    const showContextMenu = () => {
+      showMenu({
+        data: null,
+        id: 'TimelineTrackContextMenu',
+        position: { x: 0, y: 0 },
+      });
+    };
+
     return {
       ...renderResult,
       dispatch,
@@ -70,6 +87,8 @@ describe('timeline/TrackContextMenu', function () {
       profile,
       store,
       changeSearchFilter,
+      isContextMenuVisible,
+      showContextMenu,
     };
   }
 
@@ -686,6 +705,38 @@ describe('timeline/TrackContextMenu', function () {
       expect(screen.queryByText('GeckoMain')).not.toBeInTheDocument();
       expect(screen.getByText('Content Process')).toBeInTheDocument();
       expect(screen.getByText('Style')).toBeInTheDocument();
+    });
+  });
+
+  describe('keyboard controls', function () {
+    it('enter key would not close the context menu', () => {
+      const { showContextMenu, isContextMenuVisible } = setup();
+      showContextMenu();
+      // Make sure that the context menu is open.
+      expect(isContextMenuVisible()).toBeTruthy();
+
+      // Now press enter to test this behavior.
+      fireFullKeyPress(screen.getByPlaceholderText('Enter filter terms'), {
+        key: 'Enter',
+      });
+
+      // Make sure that the context menu is still visible.
+      expect(isContextMenuVisible()).toBeTruthy();
+    });
+
+    it('escape key closes the context menu', () => {
+      const { showContextMenu, isContextMenuVisible } = setup();
+      showContextMenu();
+      // Make sure that the context menu is open.
+      expect(isContextMenuVisible()).toBeTruthy();
+
+      // Now press escape to test this behavior.
+      fireFullKeyPress(screen.getByPlaceholderText('Enter filter terms'), {
+        key: 'Escape',
+      });
+
+      // Make sure that the context menu is closed now.
+      expect(isContextMenuVisible()).toBeFalsy();
     });
   });
 });

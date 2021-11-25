@@ -40,8 +40,6 @@ type StateProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class JsTracerImpl extends React.PureComponent<Props> {
-  _rafGeneration: number = 0;
-
   render() {
     const { profile, jsTracerTable, showJsTracerSummary, threadsKey } =
       this.props;

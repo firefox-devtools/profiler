@@ -152,10 +152,6 @@ export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
     }
   };
 
-  onCancelDeletion = () => {
-    this.props.onProfileDeleteCanceled();
-  };
-
   preventClick(e: SyntheticMouseEvent<>) {
     e.preventDefault();
   }

@@ -160,6 +160,8 @@ class VirtualListInner<Item> extends React.PureComponent<
     this._container = element;
   };
 
+  /* This method is used by users of this component. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   getBoundingClientRect() {
     if (this._container) {
       return this._container.getBoundingClientRect();
@@ -339,6 +341,8 @@ export class VirtualList<Item> extends React.PureComponent<
     return { visibleRangeStart, visibleRangeEnd };
   }
 
+  /* This method is used by users of this component. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
     const container = this._container.current;
     if (!container) {
@@ -370,6 +374,8 @@ export class VirtualList<Item> extends React.PureComponent<
     }
   }
 
+  /* This method is used by users of this component. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   focus() {
     const container = this._container.current;
     if (container) {

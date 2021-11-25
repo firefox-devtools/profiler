@@ -370,6 +370,7 @@ export function fireFullKeyPress(
   const optionsConfigured = {
     code: codes[options.key.toLowerCase()],
     charCode: codes[options.key.toLowerCase()],
+    keyCode: codes[options.key.toLowerCase()],
     ...options,
   };
 

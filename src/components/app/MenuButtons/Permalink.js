@@ -26,11 +26,7 @@ type State = {|
 |};
 
 export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
-  _permalinkButton: ButtonWithPanel | null;
   _permalinkTextField: HTMLInputElement | null;
-  _takePermalinkButtonRef = (elem: ButtonWithPanel | null) => {
-    this._permalinkButton = elem;
-  };
   _takePermalinkTextFieldRef = (elem: HTMLInputElement | null) => {
     this._permalinkTextField = elem;
   };
@@ -74,7 +70,6 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
       <Localized id="MenuButtons--permalink--button" attrs={{ label: true }}>
         <ButtonWithPanel
           buttonClassName="menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
-          ref={this._takePermalinkButtonRef}
           label="Permalink"
           initialOpen={this.props.isNewlyPublished}
           onPanelOpen={this._shortenUrlAndFocusTextFieldOnCompletion}
