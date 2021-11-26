@@ -23,7 +23,8 @@
 }
 
 .rootMessageText,
-.rootMessageAdditional {
+.rootMessageAdditional,
+.rootBackHomeLink {
   line-height: 1.5;
 }
 
