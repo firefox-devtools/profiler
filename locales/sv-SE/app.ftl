@@ -515,6 +515,13 @@ TrackContextMenu--hide-other-screenshots-tracks = Dölj andra Skärmdump-spår
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Dölj "{ $trackName }"
 TrackContextMenu--show-all-tracks = Visa alla spår
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Visa alla spår nedan
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
