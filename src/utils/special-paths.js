@@ -4,6 +4,8 @@
 
 // @flow
 
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+
 export type ParsedFileNameFromSymbolication =
   | {|
       type: 'normal',
@@ -28,6 +30,11 @@ export type ParsedFileNameFromSymbolication =
       version: string,
       path: string,
     |};
+
+export type SourceFileDownloadRecipe =
+  | { type: 'CORS_ENABLED_SINGLE_FILE', url: string }
+  | { type: 'CORS_ENABLED_ARCHIVE', archiveUrl: string, pathInArchive: string }
+  | { type: 'NO_KNOWN_CORS_URL' };
 
 // For native code, the symbolication API returns special filenames that allow
 // you to find the exact source code that was used for the profiled build.
@@ -118,4 +125,77 @@ export function parseFileNameFromSymbolication(
     type: 'normal',
     path: file,
   };
+}
+
+// Find out where the raw source code for this file can be obtained.
+// Since we want to fetch the source code with the browser, the server needs
+// to send permissive CORS headers.
+// Some files cannot be obtained from the internet at all. Others can only be
+// obtained as part of an archive.
+export function getDownloadRecipeForSourceFile(
+  parsedFile: ParsedFileNameFromSymbolication
+): SourceFileDownloadRecipe {
+  switch (parsedFile.type) {
+    case 'hg': {
+      // Assume that there is a hgweb instance running on the server.
+      // It serves raw files with permissive CORS headers at /raw-file/.
+      // This is true at least for hg.mozilla.org.
+      const { repo, rev, path } = parsedFile;
+      return {
+        type: 'CORS_ENABLED_SINGLE_FILE',
+        url: `https://${repo}/raw-file/${rev}/${path}`,
+      };
+    }
+    case 'git': {
+      // For git, special-case the URL based on the repository host.
+      const { repo, rev, path } = parsedFile;
+      // Example repo strings:
+      // "github.com/rust-lang/rust"
+      // "chromium.googlesource.com/chromium/src"
+      const slashPos = repo.indexOf('/');
+      if (slashPos === -1) {
+        return { type: 'NO_KNOWN_CORS_URL' };
+      }
+      const server = repo.slice(0, slashPos);
+      const repoPath = repo.slice(slashPos + 1);
+      if (server === 'github.com') {
+        return {
+          type: 'CORS_ENABLED_SINGLE_FILE',
+          url: `https://raw.githubusercontent.com/${repoPath}/${rev}/${path}`,
+        };
+      }
+      if (server.endsWith('.googlesource.com')) {
+        const subdomain = server.slice(
+          0,
+          server.length - '.googlesource.com'.length
+        );
+        return {
+          type: 'CORS_ENABLED_SINGLE_FILE',
+          url: `https://googlesource-proxy.mstange.workers.dev/${subdomain}/${repoPath}.git/+/${rev}/${path}`,
+        };
+      }
+      // We don't know the URL for other cases.
+      return { type: 'NO_KNOWN_CORS_URL' };
+    }
+    case 's3': {
+      const { bucket, digest, path } = parsedFile;
+      return {
+        type: 'CORS_ENABLED_SINGLE_FILE',
+        url: `https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
+      };
+    }
+    case 'cargo': {
+      const { crate, version, path } = parsedFile;
+      return {
+        type: 'CORS_ENABLED_ARCHIVE',
+        archiveUrl: `https://crates.io/api/v1/crates/${crate}/${version}/download`,
+        pathInArchive: path,
+      };
+    }
+    case 'normal': {
+      return { type: 'NO_KNOWN_CORS_URL' };
+    }
+    default:
+      throw assertExhaustiveCheck(parsedFile.type, 'unhandled ParsedFile type');
+  }
 }
