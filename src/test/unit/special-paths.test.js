@@ -78,6 +78,31 @@ describe('parseFileNameFromSymbolication', function () {
     });
   });
 
+  it('parses cargo paths', function () {
+    expect(
+      parseFileNameFromSymbolication(
+        'cargo:github.com-1ecc6299db9ec823:addr2line-0.16.0:src/function.rs'
+      )
+    ).toEqual({
+      type: 'cargo',
+      registry: 'github.com-1ecc6299db9ec823',
+      crate: 'addr2line',
+      version: '0.16.0',
+      path: 'addr2line-0.16.0/src/function.rs',
+    });
+    expect(
+      parseFileNameFromSymbolication(
+        'cargo:github.com-1ecc6299db9ec823:tokio-1.6.1:src/runtime/task/mod.rs'
+      )
+    ).toEqual({
+      type: 'cargo',
+      registry: 'github.com-1ecc6299db9ec823',
+      crate: 'tokio',
+      version: '1.6.1',
+      path: 'tokio-1.6.1/src/runtime/task/mod.rs',
+    });
+  });
+
   it('returns absolute file paths unchanged', function () {
     expect(
       parseFileNameFromSymbolication(
