@@ -145,6 +145,21 @@
   text-align: left;
 }
 
+.treeBadge {
+  display: inline-block;
+  overflow: hidden;
+  width: 12px;
+  height: 12px;
+  margin-right: 2px;
+  color: transparent;
+  vertical-align: -2px;
+}
+
+.treeBadge.inlined,
+.treeBadge.divergent-inlining {
+  background: url(../../../res/img/svg/inlined-icon.svg);
+}
+
 .treeRowIndentSpacer {
   flex-shrink: 0;
 }

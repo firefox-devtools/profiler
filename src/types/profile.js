@@ -281,6 +281,34 @@ export type FrameTable = {|
   // frame -> nativeSymbol -> lib.
   address: Array<Address | -1>,
 
+  // The inline depth for this frame. If there is an inline stack at an address,
+  // we create multiple frames with the same address, one for each depth.
+  // The outermost frame always has depth 0.
+  //
+  // Example:
+  // If the raw stack is 0x10 -> 0x20 -> 0x30, and symbolication adds two inline frames
+  // for 0x10, no inline frame for 0x20, and one inline frame for 0x30, then the
+  // symbolicated stack will be the following:
+  //
+  // func:        outer1 -> inline1a -> inline1b -> outer2 -> outer3 -> inline3a
+  // address:     0x10   -> 0x10     -> 0x10     -> 0x20   -> 0x30   -> 0x30
+  // inlineDepth:    0   ->    1     ->    2     ->    0   ->    0   ->    1
+  //
+  // Background:
+  // When a compiler performs an inlining optimization, it removes a call to a function
+  // and instead generates the code for the called function directly into the outer
+  // function. But it remembers which instructions were the result of this inlining,
+  // so that information about the inlined function can be recovered from the debug
+  // information during symbolication, based on the instruction address.
+  // The compiler can choose to do inlining multiple levels deep: An instruction can
+  // be the result of a whole "inline stack" of functions.
+  // Before symbolication, all frames have depth 0. During symbolication, we resolve
+  // addresses to inline stacks, and create extra frames with non-zero depths as needed.
+  //
+  // The frames of an inline stack at an address all have the same address and the same
+  // nativeSymbol, but each has a different func and line.
+  inlineDepth: number[],
+
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
