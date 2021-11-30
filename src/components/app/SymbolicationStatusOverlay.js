@@ -51,7 +51,7 @@ class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
         return (
           <div className="symbolicationStatusOverlay">
             <span className="symbolicationStatusOverlayThrobber" />
-            {`Waiting for symbol tables for ${englishSgPlLibrary(
+            {`Waiting for symbols for ${englishSgPlLibrary(
               libNames.length
             )} ${englishListJoin(libNames)}...`}
           </div>
