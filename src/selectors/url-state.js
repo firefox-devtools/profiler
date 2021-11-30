@@ -318,6 +318,7 @@ function _shouldAllowSymbolServerUrl(symbolServerUrl) {
     // For non-localhost hosts, we require HTTPS.
     const otherAllowedHostnames = [
       'symbols.mozilla.org',
+      'symbolication.services.mozilla.com',
       'symbolication.stage.mozaws.net',
     ];
     if (!otherAllowedHostnames.includes(url.hostname)) {

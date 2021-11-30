@@ -794,7 +794,7 @@ describe('actions/receive-profile', function () {
       );
 
       expect(window.fetch).toHaveBeenCalledWith(
-        'https://symbols.mozilla.org/symbolicate/v5',
+        'https://symbolication.services.mozilla.com/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
         })
@@ -807,7 +807,7 @@ describe('actions/receive-profile', function () {
       await dispatch(retrieveProfileFromBrowser());
 
       expect(window.fetch).toHaveBeenCalledWith(
-        'https://symbols.mozilla.org/symbolicate/v5',
+        'https://symbolication.services.mozilla.com/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
         })
@@ -890,7 +890,7 @@ describe('actions/receive-profile', function () {
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
 
       expect(window.fetch).toHaveBeenLastCalledWith(
-        'https://symbols.mozilla.org/symbolicate/v5',
+        'https://symbolication.services.mozilla.com/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*libxul/),
         })
@@ -1446,7 +1446,7 @@ describe('actions/receive-profile', function () {
       });
 
       expect(window.fetch).toHaveBeenCalledWith(
-        'https://symbols.mozilla.org/symbolicate/v5',
+        'https://symbolication.services.mozilla.com/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*firefox/),
         })

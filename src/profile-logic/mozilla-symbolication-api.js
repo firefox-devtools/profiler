@@ -198,6 +198,11 @@ export function requestSymbols(
     body: JSON.stringify(body),
     method: 'POST',
     mode: 'cors',
+    // Use a profiler-specific user agent, so that the symbolication server knows
+    // what's making this request.
+    headers: new Headers({
+      'User-Agent': `FirefoxProfiler/1.0 (+${location.origin}) ${navigator.userAgent}`,
+    }),
   })
     .then((response) => response.json())
     .then(_ensureIsAPIResultV5);
