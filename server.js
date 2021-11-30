@@ -16,6 +16,8 @@ const localConfigExists = fs.existsSync(
 
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],
+  host,
+  port,
   // We disable hot reloading because this takes lot of CPU and memory in the
   // case of the profiler, which is a quite heavy program.
   hot: false,
@@ -63,13 +65,10 @@ if (localConfigExists) {
   }
 }
 
-new WebpackDevServer(serverConfig, webpack(config)).listen(
-  port,
-  host,
-  function (err) {
-    if (err) {
-      console.log(err);
-    }
+const server = new WebpackDevServer(serverConfig, webpack(config));
+server
+  .start()
+  .then(() => {
     const barAscii =
       '------------------------------------------------------------------------------------------';
 
@@ -86,11 +85,11 @@ new WebpackDevServer(serverConfig, webpack(config)).listen(
       );
     } else {
       console.log(stripIndent`
-      > You can customize the webpack dev server by creating a webpack.local-config.js
-      > file that exports a single function that mutates the config values:
-      >  (webpackConfig, serverConfig) => void
-    `);
+        > You can customize the webpack dev server by creating a webpack.local-config.js
+        > file that exports a single function that mutates the config values:
+        >  (webpackConfig, serverConfig) => void
+        `);
     }
     console.log(barAscii);
-  }
-);
+  })
+  .catch((err) => console.log(err));
