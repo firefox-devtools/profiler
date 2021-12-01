@@ -660,7 +660,7 @@ TrackContextMenu--show-all-tracks-below = Show all tracks below
 # any track.
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
-TrackContextMenu--no-track-matching = No track matching “{ $searchFilter }”
+TrackContextMenu--no-results-found = No results found for “<span>{ $searchFilter }</span>”
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

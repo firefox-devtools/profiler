@@ -726,11 +726,9 @@ describe('timeline/TrackContextMenu', function () {
       expect(screen.queryByText('Content Process')).not.toBeInTheDocument();
       expect(screen.queryByText('Style')).not.toBeInTheDocument();
 
-      // Also there should be a text explaining that there is no track matching that text.
-      // Fluent adds isolation characters \u2068 and \u2069 around Content Process.
-      expect(
-        screen.getByText(/No track matching “\u2068search term\u2069”/)
-      ).toBeInTheDocument();
+      // Also there should be a text explaining that there is no results found
+      // for that text.
+      expect(screen.getByText(/No results found for/)).toBeInTheDocument();
     });
   });
 

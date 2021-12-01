@@ -348,7 +348,6 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     return (
       <React.Fragment key={trackIndex}>
         <MenuItem
-          key={trackIndex}
           preventClose={true}
           data={{ trackIndex }}
           onClick={this._toggleGlobalTrackVisibility}
@@ -902,11 +901,18 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {separator}
         {isTrackListEmpty ? (
           <Localized
-            id="TrackContextMenu--no-track-matching"
+            id="TrackContextMenu--no-results-found"
             vars={{ searchFilter: searchFilter }}
+            elems={{
+              span: <span className="trackContextMenuSearchFilter" />,
+            }}
           >
             <MenuItem disabled={true}>
-              No track matching “{searchFilter}”
+              No results found for “
+              <span className="trackContextMenuSearchFilter">
+                {searchFilter}
+              </span>
+              ”
             </MenuItem>
           </Localized>
         ) : (
