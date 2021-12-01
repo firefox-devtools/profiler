@@ -140,6 +140,13 @@ CallTree--bytes-self = Власний (байти)
         байти “інших” функцій не включаються. "Власний" обсяг байтів корисний для розуміння того,
         скільки пам'яті було фактично виділено чи звільнено у програмі.
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
