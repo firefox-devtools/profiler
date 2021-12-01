@@ -94,6 +94,22 @@ CallTree--bytes-total = 總大小（位元組數）
 CallTree--bytes-self = Self（位元組）
     .title = 「Self」位元組數只包含函數在堆疊底部分配到或取消分配到的記憶體用量。若此函數是透過其他函數呼叫的，則不會包含「該函數」的用量。「self」位元組數適合用來了解程式當中實際花費了多少記憶體在哪些函數上。
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = 編譯器內聯了一些對 { $calledFunction } 函數的呼叫。
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = （內聯）
+    .title = 編譯器已將一些對 { $calledFunction } 函數的呼叫內聯到 { $outerFunction } 函數。
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
