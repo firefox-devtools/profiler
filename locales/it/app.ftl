@@ -94,6 +94,22 @@ CallTree--bytes-total = Dimensione totale (byte)
 CallTree--bytes-self = Self (bytes)
     .title = “Self“ include i byte allocati o deallocati quando questa funzione si trovava alla fine dello stack. Se questa funzione ha chiamato altre funzioni, il conteggio dei byte "altro" di queste funzioni non è incluso. Il conteggio “self” è utile per capire come la memoria viene realmente allocata e deallocata all’interno di un programma.
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Alcune chiamate a { $calledFunction } sono state incorporate dal compilatore.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (incorporata)
+    .title = Le chiamate a { $calledFunction } sono state incorporate in { $outerFunction } dal compilatore.
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
