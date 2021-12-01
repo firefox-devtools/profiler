@@ -27,3 +27,9 @@
   max-height: 43.5vh;
   overflow-y: auto;
 }
+
+.trackContextMenuSearchFilter {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
