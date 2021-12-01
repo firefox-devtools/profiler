@@ -20,6 +20,17 @@ type APIFoundModulesV5 = {
   [string]: null | boolean,
 };
 
+type APIInlineFrameInfoV5 = {
+  // The name of the function this inline frame was in, if known.
+  function?: string,
+  // The path of the file that contains the function this inline frame was in, optional.
+  file?: string,
+  // The line number that contains the source code for this inline frame that
+  // contributed to the instruction at the looked-up address, optional.
+  // e.g. 543
+  line?: number,
+};
+
 type APIFrameInfoV5 = {
   // The hex version of the address that we requested (e.g. "0x5ab").
   module_offset: string,
@@ -41,6 +52,12 @@ type APIFrameInfoV5 = {
   // (Same support as file.)
   // e.g. 543
   line?: number,
+  // Information about functions that were inlined at this address.
+  // Ordered from inside to outside.
+  // As of November 2021, this is only supported by profiler-symbol-server.
+  // Adding this functionality to the Mozilla symbol server is tracked in
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=1636194
+  inlines?: APIInlineFrameInfoV5[],
 };
 
 type APIStackV5 = APIFrameInfoV5[];
@@ -105,6 +122,17 @@ function _ensureIsAPIResultV5(result: any): APIResultV5 {
         if ('line' in frameInfo && typeof frameInfo.line !== 'number') {
           throw new Error('Expected frameInfo.line to be a number, if present');
         }
+        if ('inlines' in frameInfo) {
+          const inlines = frameInfo.inlines;
+          if (!Array.isArray(inlines)) {
+            throw new Error('Expected `inlines` to be an array');
+          }
+          for (const inlineFrame of inlines) {
+            if (!(inlineFrame instanceof Object)) {
+              throw new Error('Expected `inlineFrame` to be an object');
+            }
+          }
+        }
       }
     }
   }
@@ -142,11 +170,31 @@ function getV5ResultForLibRequest(
     if (info.function !== undefined && info.function_offset !== undefined) {
       const name = info.function;
       const functionOffset = parseInt(info.function_offset.substr(2), 16);
+
+      // Some symbolication API implementations return an inline stack for each
+      // address. These are function calls that were inlined into the outer
+      // function by the compiler.
+      let inlines;
+      if (info.inlines !== undefined) {
+        const inlineCount = info.inlines.length;
+        inlines = info.inlines.map(({ function: name, file, line }, i) => {
+          const depth = inlineCount - i;
+          return {
+            name:
+              name ??
+              `<unknown at ${info.module_offset} at inline depth ${depth}>`,
+            file,
+            line,
+          };
+        });
+      }
+
       addressResult = {
         name,
         symbolAddress: address - functionOffset,
         file: info.file,
         line: info.line,
+        inlines,
       };
     } else {
       // This can happen if the address is between functions, or before the first

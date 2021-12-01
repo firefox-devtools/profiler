@@ -76,7 +76,10 @@ import type {
   OriginsTimelineRoot,
 } from 'firefox-profiler/types';
 
-import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import type {
+  FuncToFuncsMap,
+  SymbolicationStepInfo,
+} from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
   BrowserConnection,
@@ -762,27 +765,27 @@ export function bulkProcessSymbolicationSteps(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const { threads } = getProfile(getState());
-    const oldFuncToNewFuncMaps = new Map();
+    const oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap> = new Map();
     const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
       const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
       if (symbolicationSteps === undefined) {
         return oldThread;
       }
-      const oldFuncToNewFuncMap = new Map();
+      const oldFuncToNewFuncsMap = new Map();
       let thread = oldThread;
       for (const symbolicationStep of symbolicationSteps) {
         thread = applySymbolicationStep(
           thread,
           symbolicationStep,
-          oldFuncToNewFuncMap
+          oldFuncToNewFuncsMap
         );
       }
-      oldFuncToNewFuncMaps.set(threadIndex, oldFuncToNewFuncMap);
+      oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
       return thread;
     });
     dispatch({
       type: 'BULK_SYMBOLICATION',
-      oldFuncToNewFuncMaps,
+      oldFuncToNewFuncsMaps,
       symbolicatedThreads,
     });
   };

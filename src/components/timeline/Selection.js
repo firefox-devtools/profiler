@@ -22,7 +22,6 @@ import { Draggable } from 'firefox-profiler/components/shared/Draggable';
 import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
 import './Selection.css';
 
-import type { OnMove } from 'firefox-profiler/components/shared/Draggable';
 import type {
   Milliseconds,
   CssPixels,
@@ -64,9 +63,6 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   };
 
   _container: ?HTMLElement;
-  _rangeStartOnMove: OnMove;
-  _moveRangeOnMove: OnMove;
-  _rangeEndOnMove: OnMove;
 
   state = {
     hoverLocation: null,
