@@ -98,6 +98,22 @@ CallTree--bytes-total = Tamaño total (bytes)
 CallTree--bytes-self = Propio (bytes)
     .title = Los bytes "propios" incluyen los bytes asignados o desasignados donde la función estuvo como finalización de la pila. Si esta función es llamada en otras funciones, entonces los bytes de las "otras" funciones no son incluidos. Los bytes "propios" son útiles para entender dónde fue realmente asignada o desasignada la memoria dentro del programa.
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Algunas llamadas a { $callFunction } fueron incorporadas por el compilador.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (incorporada)
+    .title = Las llamadas a { $calledFunction } fueron incorporadas a { $outerFunction } por el compilador.
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
