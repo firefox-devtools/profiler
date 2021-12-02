@@ -346,9 +346,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     }
 
     return (
-      <React.Fragment>
+      <React.Fragment key={trackIndex}>
         <MenuItem
-          key={trackIndex}
           preventClose={true}
           data={{ trackIndex }}
           onClick={this._toggleGlobalTrackVisibility}
@@ -841,6 +840,44 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       searchFilter
     );
 
+    const filteredGlobalTracks = globalTrackOrder.map((globalTrackIndex) => {
+      const globalTrack = globalTracks[globalTrackIndex];
+      if (rightClickedTrack === null) {
+        return this.renderGlobalTrack(
+          globalTrackIndex,
+          searchFilteredGlobalTracks,
+          searchFilteredLocalTracksByPid
+        );
+      } else if (
+        rightClickedTrack.type === 'global' &&
+        rightClickedTrack.trackIndex === globalTrackIndex
+      ) {
+        return this.renderGlobalTrack(
+          globalTrackIndex,
+          searchFilteredGlobalTracks,
+          searchFilteredLocalTracksByPid
+        );
+      } else if (
+        rightClickedTrack.type === 'local' &&
+        globalTrack.type === 'process'
+      ) {
+        if (rightClickedTrack.pid === globalTrack.pid) {
+          return this.renderGlobalTrack(
+            globalTrackIndex,
+            searchFilteredGlobalTracks,
+            searchFilteredLocalTracksByPid
+          );
+        }
+      }
+      return null;
+    });
+
+    // If every global track is null, it means that they are all filtered out.
+    // In that case, we should show a warning explaining this.
+    const isTrackListEmpty = filteredGlobalTracks.every(
+      (track) => track === null
+    );
+
     return (
       <ContextMenuNoHidingOnEnter
         id="TimelineTrackContextMenu"
@@ -862,49 +899,25 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {isolateScreenshot}
         {hideTrack}
         {separator}
-        {globalTrackOrder.map((globalTrackIndex) => {
-          const globalTrack = globalTracks[globalTrackIndex];
-          if (rightClickedTrack === null) {
-            return (
-              <div key={globalTrackIndex}>
-                {this.renderGlobalTrack(
-                  globalTrackIndex,
-                  searchFilteredGlobalTracks,
-                  searchFilteredLocalTracksByPid
-                )}
-              </div>
-            );
-          } else if (
-            rightClickedTrack.type === 'global' &&
-            rightClickedTrack.trackIndex === globalTrackIndex
-          ) {
-            return (
-              <div key={globalTrackIndex}>
-                {this.renderGlobalTrack(
-                  globalTrackIndex,
-                  searchFilteredGlobalTracks,
-                  searchFilteredLocalTracksByPid
-                )}
-              </div>
-            );
-          } else if (
-            rightClickedTrack.type === 'local' &&
-            globalTrack.type === 'process'
-          ) {
-            if (rightClickedTrack.pid === globalTrack.pid) {
-              return (
-                <div key={globalTrackIndex}>
-                  {this.renderGlobalTrack(
-                    globalTrackIndex,
-                    searchFilteredGlobalTracks,
-                    searchFilteredLocalTracksByPid
-                  )}
-                </div>
-              );
-            }
-          }
-          return null;
-        })}
+        {isTrackListEmpty ? (
+          <Localized
+            id="TrackContextMenu--no-results-found"
+            vars={{ searchFilter: searchFilter }}
+            elems={{
+              span: <span className="trackContextMenuSearchFilter" />,
+            }}
+          >
+            <MenuItem disabled={true}>
+              No results found for “
+              <span className="trackContextMenuSearchFilter">
+                {searchFilter}
+              </span>
+              ”
+            </MenuItem>
+          </Localized>
+        ) : (
+          filteredGlobalTracks
+        )}
       </ContextMenuNoHidingOnEnter>
     );
   }

@@ -706,6 +706,30 @@ describe('timeline/TrackContextMenu', function () {
       expect(screen.getByText('Content Process')).toBeInTheDocument();
       expect(screen.getByText('Style')).toBeInTheDocument();
     });
+
+    it('shows a message when search filter does not match any track', () => {
+      const { changeSearchFilter } = setup();
+      const searchText = 'search term';
+
+      // Check if all the tracks are visible at first.
+      expect(screen.getByText('GeckoMain')).toBeInTheDocument();
+      expect(screen.getByText('Content Process')).toBeInTheDocument();
+      expect(screen.getByText('Style')).toBeInTheDocument();
+
+      // Change the search filter with something that doesn't match any track.
+      changeSearchFilter(searchText);
+
+      jest.runAllTimers();
+
+      // There shouldn't be any tracks visible now.
+      expect(screen.queryByText('GeckoMain')).not.toBeInTheDocument();
+      expect(screen.queryByText('Content Process')).not.toBeInTheDocument();
+      expect(screen.queryByText('Style')).not.toBeInTheDocument();
+
+      // Also there should be a text explaining that there is no results found
+      // for that text.
+      expect(screen.getByText(/No results found for/)).toBeInTheDocument();
+    });
   });
 
   describe('keyboard controls', function () {
