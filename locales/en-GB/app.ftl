@@ -602,6 +602,11 @@ TrackContextMenu--show-all-tracks = Show all tracks
 # This is used in the tracks context menu as a button to show all the tracks
 # below it.
 TrackContextMenu--show-all-tracks-below = Show all tracks below
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = No results found for “<span>{ $searchFilter }</span>”
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
