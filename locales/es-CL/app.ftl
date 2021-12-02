@@ -542,6 +542,11 @@ TrackContextMenu--show-all-tracks = Mostrar todas las pistas
 # This is used in the tracks context menu as a button to show all the tracks
 # below it.
 TrackContextMenu--show-all-tracks-below = Mostrar todas las pistas a continuación
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = No se encontraron resultados para "<span>{ $searchFilter }</span>"
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
