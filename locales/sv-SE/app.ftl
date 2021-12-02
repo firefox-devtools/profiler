@@ -98,6 +98,13 @@ CallTree--tracing-ms-total = Körningstid (ms)
         funktion observerades vara på stacken. Detta inkluderar den tid då funktionen
         faktiskt kördes och den tid som tillbringades i anropen från den här funktionen.
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
@@ -518,10 +525,18 @@ TrackContextMenu--show-all-tracks = Visa alla spår
 # This is used in the tracks context menu as a button to show all the tracks
 # below it.
 TrackContextMenu--show-all-tracks-below = Visa alla spår nedan
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Inga resultat hittades för “<span>{ $searchFilter }</span>”
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Ange filtertermer
+    .title = Visa endast spår som matchar en viss text
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
