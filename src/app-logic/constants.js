@@ -10,7 +10,7 @@ import type { MarkerPhase } from 'firefox-profiler/types';
 export const GECKO_PROFILE_VERSION = 24;
 
 // The current version of the "processed" profile format.
-export const PROCESSED_PROFILE_VERSION = 38;
+export const PROCESSED_PROFILE_VERSION = 40;
 
 // The following are the margin sizes for the left and right of the timeline. Independent
 // components need to share these values.
@@ -107,7 +107,7 @@ export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
 // [1] https://github.com/mstange/profiler-symbol-server/
 
 // This is the default server.
-export const SYMBOL_SERVER_URL = 'https://symbols.mozilla.org';
+export const SYMBOL_SERVER_URL = 'https://symbolication.services.mozilla.com';
 
 // See the MarkerPhase type for more information.
 export const INSTANT: MarkerPhase = 0;

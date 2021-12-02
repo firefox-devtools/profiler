@@ -537,6 +537,7 @@ function _processFrameTable(
 ): FrameTable {
   return {
     address: frameAddresses.map((a) => a ?? -1),
+    inlineDepth: Array(geckoFrameStruct.length).fill(0),
     category: geckoFrameStruct.category,
     subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,
@@ -861,11 +862,24 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
   const samples: SamplesTable = {
     stack: geckoSamples.stack,
     time: geckoSamples.time,
-    threadCPUDelta: geckoSamples.threadCPUDelta,
     weightType: 'samples',
     weight: null,
     length: geckoSamples.length,
   };
+
+  if (geckoSamples.threadCPUDelta) {
+    // Check to see the CPU delta numbers are all null and if they are, remove
+    // this array completely. For example on JVM threads, all the threadCPUDelta
+    // values will be null and therefore it will fail to paint the activity graph.
+    // Instead we should remove the whole array. This call will be quick for most
+    // of the cases because we usually have values at least in the second sample.
+    const hasCPUDeltaValues = geckoSamples.threadCPUDelta.some(
+      (val) => val !== null
+    );
+    if (hasCPUDeltaValues) {
+      samples.threadCPUDelta = geckoSamples.threadCPUDelta;
+    }
+  }
 
   if (geckoSamples.eventDelay) {
     samples.eventDelay = geckoSamples.eventDelay;

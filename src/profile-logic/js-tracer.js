@@ -632,6 +632,7 @@ export function convertJsTracerToThreadWithoutSamples(
     // Every event gets a unique frame entry.
     const frameIndex = frameTable.length++;
     frameTable.address.push(blankStringIndex);
+    frameTable.inlineDepth.push(0);
     frameTable.category.push(otherCategory);
     frameTable.func.push(funcIndex);
     frameTable.nativeSymbol.push(null);

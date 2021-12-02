@@ -8,7 +8,7 @@
   * [Profiling Firefox Startup & Shutdown](./guide-startup-shutdown.md)
   * [Remote Profiling Firefox for Android](./guide-remote-profiling.md)
   * [Perf profiling on Linux](./guide-perf-profiling.md)
-  * [Perf profiling on Android](./guide-perf-profiling.md)
+  * [Perf profiling on Android](./guide-android-profiling.md)
   * [Memory Allocations](./memory-allocations.md)
   * [IPC Messages](./ipc-messages.md)
 * [Video Tutorials](./videos.md)

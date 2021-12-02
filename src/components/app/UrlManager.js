@@ -20,8 +20,8 @@ import {
   getIsHistoryReplaceState,
 } from 'firefox-profiler/app-logic/url-handling';
 import {
-  getProfilesFromRawUrl,
-  typeof getProfilesFromRawUrl as GetProfilesFromRawUrl,
+  retrieveProfileForRawUrl,
+  typeof retrieveProfileForRawUrl as RetrieveProfileForRawUrl,
 } from 'firefox-profiler/actions/receive-profile';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
@@ -43,7 +43,7 @@ type DispatchProps = {|
   +startFetchingProfiles: typeof startFetchingProfiles,
   +urlSetupDone: typeof urlSetupDone,
   +show404: typeof show404,
-  +getProfilesFromRawUrl: typeof getProfilesFromRawUrl,
+  +retrieveProfileForRawUrl: typeof retrieveProfileForRawUrl,
   +setupInitialUrlState: typeof setupInitialUrlState,
 |};
 
@@ -87,25 +87,29 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     const { startFetchingProfiles, setupInitialUrlState, urlSetupDone } =
       this.props;
     // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
-    const getProfilesFromRawUrl: WrapFunctionInDispatch<GetProfilesFromRawUrl> =
-      (this.props.getProfilesFromRawUrl: any);
+    const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileForRawUrl> =
+      (this.props.retrieveProfileForRawUrl: any);
 
     // Notify the UI that we are starting to fetch profiles.
     startFetchingProfiles();
 
     try {
       // Process the raw url and fetch the profile.
-      // We try to fetch the profile before setting the url state, because
-      // while processing and especially upgrading the url information we may
-      // need the profile data.
+      // We try to fetch the profile before setting the url state, because we
+      // may need the profile data during URL upgrading.
       //
-      // Also note the profile may be null for the `from-browser` dataSource since
-      // we do not `await` for retrieveProfileFromBrowser function, but also in
-      // case of fatal errors in the process of retrieving and processing a
-      // profile. To handle the latter case properly, we won't `pushState` if
-      // we're in a FATAL_ERROR state.
-      const profile = await getProfilesFromRawUrl(window.location);
-      setupInitialUrlState(window.location, profile);
+      // In some cases, the returned profile will be null:
+      //  - If the response is a zip file (even if the URL tells us which file
+      //    to pick from the zip file).
+      //  - If a fatal error was encountered in the process of retrieving and
+      //    processing the profile.
+      //
+      // To handle the latter case properly, we won't `pushState` if we're in
+      // a FATAL_ERROR state.
+      const { profile, browserConnection } = await retrieveProfileForRawUrl(
+        window.location
+      );
+      setupInitialUrlState(window.location, profile, browserConnection);
     } catch (error) {
       // Complete the URL setup, as values can come from the user, so we should
       // still proceed with loading the app.
@@ -238,7 +242,7 @@ export const UrlManager = explicitConnect<OwnProps, StateProps, DispatchProps>({
     urlSetupDone,
     show404,
     setupInitialUrlState,
-    getProfilesFromRawUrl,
+    retrieveProfileForRawUrl,
   },
   component: UrlManagerImpl,
 });

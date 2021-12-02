@@ -762,6 +762,8 @@ type ProcessedLocationBeforeUpgrade = {|
   query: any,
 |};
 
+// URL upgrading is skipped if the profile argument is null.
+// URL upgrading is performed if the profile argument is missing (undefined) or if it's an actual profile.
 export function upgradeLocationToCurrentVersion(
   processedLocation: ProcessedLocationBeforeUpgrade,
   profile?: Profile | null
@@ -798,7 +800,8 @@ export function upgradeLocationToCurrentVersion(
     destVersion++
   ) {
     if (destVersion in _upgraders) {
-      _upgraders[destVersion](processedLocation, profile);
+      const upgrader = _upgraders[destVersion];
+      upgrader(processedLocation, profile);
     }
   }
 
@@ -807,10 +810,16 @@ export function upgradeLocationToCurrentVersion(
 }
 
 // _upgraders[i] converts from version i - 1 to version i.
-// Every "upgrader" takes the processedLocation as its single argument and mutates it.
+// Every "upgrader" takes the processedLocation as its first argument and mutates it.
+// If available, the profile is passed as the second argument, for any upgraders that need it.
 /* eslint-disable no-useless-computed-key */
-const _upgraders = {
-  [1]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
+const _upgraders: {|
+  [number]: (
+    location: ProcessedLocationBeforeUpgrade,
+    profile?: Profile
+  ) => void,
+|} = {
+  [1]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     // Version 1 is the first versioned url. Do some best-effort upgrading from
     // un-versioned URLs.
 
@@ -865,7 +874,7 @@ const _upgraders = {
       delete processedLocation.query.callTreeFilters;
     }
   },
-  [2]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
+  [2]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     // Map the tab "timeline" to "stack-chart".
     // Map the tab "markers" to "marker-table".
     processedLocation.pathname = processedLocation.pathname
@@ -876,7 +885,7 @@ const _upgraders = {
       // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/marker-table/');
   },
-  [3]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
+  [3]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     const { query } = processedLocation;
     // Removed "Hide platform details" checkbox from the stack chart.
     if ('hidePlatformDetails' in query) {
@@ -886,7 +895,7 @@ const _upgraders = {
   },
   [4]: (
     processedLocation: ProcessedLocationBeforeUpgrade,
-    profile: Profile
+    profile?: Profile
   ) => {
     // 'js' implementation filter has been changed to include 'relevantForJS' label frames.
     // Iterate through all transforms and upgrade the ones that has callNodePath with JS

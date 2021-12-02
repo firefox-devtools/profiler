@@ -808,6 +808,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.address.push(
           funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1
         );
+        frameTable.inlineDepth.push(0);
         frameTable.category.push(category);
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);

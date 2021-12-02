@@ -150,6 +150,23 @@ CallTree--bytes-self = Self (bytes)
         The “self” bytes are useful for understanding where memory was actually
         allocated or deallocated in the program.
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Some calls to { $calledFunction } were inlined by the compiler.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (inlined)
+    .title = Calls to { $calledFunction } were inlined into { $outerFunction } by the compiler.
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
@@ -634,6 +651,23 @@ TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Hide “{ $trackName }”
 TrackContextMenu--show-all-tracks = Show all tracks
+
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Show all tracks below
+
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = No results found for “<span>{ $searchFilter }</span>”
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Enter filter terms
+    .title = Only display tracks that match a certain text
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack

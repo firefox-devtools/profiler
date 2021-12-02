@@ -1697,11 +1697,11 @@ describe('symbolServerUrl', function () {
 
   it('will error when switching to an unknown host', function () {
     const { symbolServerUrl, queryString } = setup(
-      '?symbolServer=https://symbols.mozilla.org.example.com/symbols'
+      '?symbolServer=https://symbolication.services.mozilla.com.example.com/symbols'
     );
     expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
     expect(queryString).toContain(
-      'symbolServer=https%3A%2F%2Fsymbols.mozilla.org.example.com%2Fsymbols'
+      'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com.example.com%2Fsymbols'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
   });
@@ -1715,11 +1715,11 @@ describe('symbolServerUrl', function () {
 
   it('will error when switching to an allowed but non-https host', function () {
     const { symbolServerUrl, queryString } = setup(
-      '?symbolServer=http://symbols.mozilla.org/'
+      '?symbolServer=http://symbolication.services.mozilla.com/'
     );
     expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
     expect(queryString).toContain(
-      'symbolServer=http%3A%2F%2Fsymbols.mozilla.org%2F'
+      'symbolServer=http%3A%2F%2Fsymbolication.services.mozilla.com%2F'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
   });

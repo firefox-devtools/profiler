@@ -57,7 +57,7 @@
 .overflowEdgeIndicatorEdge.topEdge {
   background: radial-gradient(
     ellipse at center top,
-    rgba(0, 0, 0, 0.4),
+    rgb(0 0 0 / 0.4),
     transparent 60%
   );
 }
@@ -65,7 +65,7 @@
 .overflowEdgeIndicatorEdge.rightEdge {
   background: radial-gradient(
     ellipse at right center,
-    rgba(0, 0, 0, 0.4),
+    rgb(0 0 0 / 0.4),
     transparent 60%
   );
 }
@@ -73,7 +73,7 @@
 .overflowEdgeIndicatorEdge.bottomEdge {
   background: radial-gradient(
     ellipse at center bottom,
-    rgba(0, 0, 0, 0.4),
+    rgb(0 0 0 / 0.4),
     transparent 60%
   );
 }
@@ -81,7 +81,7 @@
 .overflowEdgeIndicatorEdge.leftEdge {
   background: radial-gradient(
     ellipse at left center,
-    rgba(0, 0, 0, 0.4),
+    rgb(0 0 0 / 0.4),
     transparent 60%
   );
 }

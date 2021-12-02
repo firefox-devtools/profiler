@@ -19,11 +19,17 @@
   color: var(--grey-90-a60);
 }
 
-.react-contextmenu-item:hover .timelineTrackContextMenuPid {
+.react-contextmenu-item--selected .timelineTrackContextMenuPid {
   color: #fff;
 }
 
 .timelineTrackContextMenu {
   max-height: 43.5vh;
   overflow-y: auto;
+}
+
+.trackContextMenuSearchFilter {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

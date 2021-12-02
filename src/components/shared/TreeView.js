@@ -322,6 +322,20 @@ class TreeViewRowScrolledColumns<
             }
           )}
         >
+          {displayData.badge ? (
+            <Localized
+              id={displayData.badge.localizationId}
+              vars={displayData.badge.vars}
+              attrs={{ title: true }}
+            >
+              <span
+                className={`treeBadge ${displayData.badge.name}`}
+                title={displayData.badge.titleFallback}
+              >
+                {displayData.badge.contentFallback}
+              </span>
+            </Localized>
+          ) : null}
           {RenderComponent ? (
             <RenderComponent displayData={displayData} />
           ) : (
@@ -429,6 +443,8 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     { limit: 1 }
   );
 
+  /* This method is used by users of this component. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   scrollSelectionIntoView() {
     const { selectedNodeId, tree } = this.props;
     if (this._list && selectedNodeId !== null) {
@@ -703,6 +719,8 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   };
 
+  /* This method is used by users of this component. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   focus() {
     if (this._list) {
       this._list.focus();

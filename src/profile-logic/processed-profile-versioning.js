@@ -2002,5 +2002,32 @@ const _upgraders = {
       }
     }
   },
+  [39]: (profile) => {
+    for (const thread of profile.threads) {
+      if (thread.samples.threadCPUDelta) {
+        // Check to see the CPU delta numbers are all null and if they are, remove
+        // this array completely. For example on JVM threads, all the threadCPUDelta
+        // values will be null and therefore it will fail to paint the activity graph.
+        // Instead we should remove the whole array. This call will be quick for most
+        // of the cases because we usually have values at least in the second sample.
+        const hasCPUDeltaValues = thread.samples.threadCPUDelta.some(
+          (val) => val !== null
+        );
+        if (!hasCPUDeltaValues) {
+          delete thread.samples.threadCPUDelta;
+        }
+      }
+    }
+  },
+  [40]: (profile) => {
+    // The FrameTable has a new column: inlineDepth.
+    // We can initialize this column to zero for all frames. Zero means "this is
+    // the frame for the outer function at this address". That's correct because
+    // old profiles have not been symbolicated with inline frames, and the function
+    // name we got from symbolication was always the name for the "outer" function.
+    for (const thread of profile.threads) {
+      thread.frameTable.inlineDepth = Array(thread.frameTable.length).fill(0);
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

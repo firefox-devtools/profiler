@@ -20,6 +20,7 @@ import {
   isThreadWithNoPaint,
   isContentThreadWithNoPaint,
 } from './profile-data';
+import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 /**
@@ -721,7 +722,7 @@ function _isThreadIdle(
     );
   }
 
-  if (/^(?:Audio|Media|GraphRunner)/.test(thread.name)) {
+  if (/^(?:Audio|Media|GraphRunner|WebrtcWorker)/.test(thread.name)) {
     // This is a media thread: they are usually very idle, but are interesting
     // as soon as there's at least one sample. They're present with the media
     // preset, but not usually captured otherwise.
@@ -890,4 +891,197 @@ function _indexesAreValid(listLength: number, indexes: number[]) {
       .sort((a, b) => a - b) // sort numerically
       .every((value, arrayIndex) => value === arrayIndex)
   );
+}
+
+/**
+ * Get the search filter and return the search filtered global tracks.
+ * The search includes the fields like, track name, pid, tid, process type,
+ * process name, and eTLD+1.
+ */
+export function getSearchFilteredGlobalTracks(
+  tracks: GlobalTrack[],
+  globalTrackNames: string[],
+  threads: Thread[],
+  searchFilter: string
+): Set<TrackIndex> | null {
+  if (!searchFilter) {
+    // Nothing is filtered, returning null.
+    return null;
+  }
+  const searchRegExp = stringsToRegExp(splitSearchString(searchFilter));
+  if (!searchRegExp) {
+    // There is no search query, returning null.
+    return null;
+  }
+
+  const searchFilteredGlobalTracks = new Set();
+  for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+    const globalTrack = tracks[trackIndex];
+
+    // Reset regexp for each iteration. Otherwise state from previous
+    // iterations can cause matches to fail if the search is global or
+    // sticky.
+    searchRegExp.lastIndex = 0;
+
+    switch (globalTrack.type) {
+      case 'process': {
+        const { mainThreadIndex } = globalTrack;
+        // Check the pid of the global track first.
+        if (searchRegExp.test(globalTrack.pid.toString())) {
+          searchFilteredGlobalTracks.add(trackIndex);
+          continue;
+        }
+
+        // Get the thread of the global track and check thread information.
+        if (mainThreadIndex !== null) {
+          const thread = threads[mainThreadIndex];
+
+          const threadName = globalTrackNames[trackIndex];
+          if (searchRegExp.test(threadName)) {
+            searchFilteredGlobalTracks.add(trackIndex);
+            continue;
+          }
+
+          const { tid } = thread;
+          if (tid && searchRegExp.test(tid.toString())) {
+            searchFilteredGlobalTracks.add(trackIndex);
+            continue;
+          }
+
+          if (searchRegExp.test(thread.processType)) {
+            searchFilteredGlobalTracks.add(trackIndex);
+            continue;
+          }
+
+          const { processName } = thread;
+          if (processName && searchRegExp.test(processName)) {
+            searchFilteredGlobalTracks.add(trackIndex);
+            continue;
+          }
+
+          const etldPlus1 = thread['eTLD+1'];
+          if (etldPlus1 && searchRegExp.test(etldPlus1)) {
+            searchFilteredGlobalTracks.add(trackIndex);
+            continue;
+          }
+        }
+
+        break;
+      }
+      case 'screenshots':
+      case 'visual-progress':
+      case 'perceptual-visual-progress':
+      case 'contentful-visual-progress': {
+        const { type } = globalTrack;
+        if (searchRegExp.test(type)) {
+          searchFilteredGlobalTracks.add(trackIndex);
+          continue;
+        }
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(globalTrack, 'Unhandled GlobalTrack type.');
+    }
+  }
+
+  return searchFilteredGlobalTracks;
+}
+
+/**
+ * Get the search filter and return the search filtered local tracks by Pid.
+ * The search includes the fields like, track name, pid, tid, process type,
+ * process name, and eTLD+1.
+ */
+export function getSearchFilteredLocalTracksByPid(
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+  localTrackNamesByPid: Map<Pid, string[]>,
+  threads: Thread[],
+  searchFilter: string
+): Map<Pid, Set<TrackIndex>> | null {
+  if (!searchFilter) {
+    // Nothing is filtered, returning null.
+    return null;
+  }
+  const searchRegExp = stringsToRegExp(splitSearchString(searchFilter));
+  if (!searchRegExp) {
+    // There is no search query, returning null.
+    return null;
+  }
+
+  const searchFilteredLocalTracksByPid = new Map();
+  for (const [pid, tracks] of localTracksByPid) {
+    const searchFilteredLocalTracks = new Set();
+    const localTrackNames = localTrackNamesByPid.get(pid);
+    if (localTrackNames === undefined) {
+      throw new Error('Failed to get the local track names');
+    }
+
+    for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+      const localTrack = tracks[trackIndex];
+      // Reset regexp for each iteration. Otherwise state from previous
+      // iterations can cause matches to fail if the search is global or
+      // sticky.
+      searchRegExp.lastIndex = 0;
+
+      if (searchRegExp.test(pid.toString())) {
+        searchFilteredLocalTracks.add(trackIndex);
+        continue;
+      }
+
+      switch (localTrack.type) {
+        case 'thread': {
+          const { threadIndex } = localTrack;
+          // Get the thread of the local track and check thread information.
+          const thread = threads[threadIndex];
+
+          const threadName = localTrackNames[trackIndex];
+          if (searchRegExp.test(threadName)) {
+            searchFilteredLocalTracks.add(trackIndex);
+            continue;
+          }
+
+          const { tid } = thread;
+          if (tid && searchRegExp.test(tid.toString())) {
+            searchFilteredLocalTracks.add(trackIndex);
+            continue;
+          }
+
+          if (searchRegExp.test(thread.processType)) {
+            searchFilteredLocalTracks.add(trackIndex);
+            continue;
+          }
+
+          const { processName } = thread;
+          if (processName && searchRegExp.test(processName)) {
+            searchFilteredLocalTracks.add(trackIndex);
+            continue;
+          }
+
+          const etldPlus1 = thread['eTLD+1'];
+          if (etldPlus1 && searchRegExp.test(etldPlus1)) {
+            searchFilteredLocalTracks.add(trackIndex);
+            continue;
+          }
+          break;
+        }
+        case 'network':
+        case 'memory':
+        case 'ipc':
+        case 'event-delay': {
+          const { type } = localTrack;
+          if (searchRegExp.test(type)) {
+            searchFilteredLocalTracks.add(trackIndex);
+            continue;
+          }
+          break;
+        }
+        default:
+          throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
+      }
+    }
+
+    searchFilteredLocalTracksByPid.set(pid, searchFilteredLocalTracks);
+  }
+
+  return searchFilteredLocalTracksByPid;
 }

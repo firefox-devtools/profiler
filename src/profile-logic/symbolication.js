@@ -5,8 +5,10 @@
 
 import {
   resourceTypes,
+  getEmptyStackTable,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
+  shallowCloneFrameTable,
 } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
 
@@ -19,13 +21,18 @@ import type {
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
+  IndexIntoStackTable,
   Address,
+  CallNodePath,
+  StackTable,
 } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
   AddressResult,
   LibSymbolicationRequest,
 } from './symbol-store';
+import { PathSet } from '../utils/path';
+import { replaceStackReferences } from './profile-data';
 
 // Contains functions to symbolicate a profile.
 
@@ -75,7 +82,7 @@ import type {
  *    expanded call nodes should survive symbolication-triggered adjustments of
  *    the funcTable as much as possible. More specifically, if all frames that
  *    used to be assigned to function A get reassigned to function B, we want to
- *    create an A -> B entry in an oldFuncToNewFuncMap that gets dispatched in
+ *    create an A -> B entry in an oldFuncToNewFuncsMap that gets dispatched in
  *    a redux action so that the appropriate parts of the redux state can react.
  *  - Multiple processes and threads in the profile will require symbols from
  *    the same set of native libraries, and the number and size of the
@@ -124,12 +131,13 @@ import type {
  *
  * V. Profile substitution: Invoked from from a thunk action. Processes the
  * symbolication result, groups frame addresses by symbol addresses, finds or
- * creates nativeSymbols for these symbolAddresses, and groups funcs by the
- * function name. At the end, it creates a new thread object with an updated
- * frameTable, funcTable, nativeSymbols and stringTable, with the
- * symbols substituted in the right places. This usually causes many funcs to
- * be orphaned (no frames will use them any more); these orphaned funcs remain
- * in the funcTable. It also creates the oldFuncToNewFuncMap.
+ * creates nativeSymbols for these symbolAddresses, groups funcs by the function
+ * name + filename, creates new funcs and frames for inlined calls, and sets
+ * line numbers on frames. At the end, it creates a new thread object with an
+ * updated frameTable, stackTable, funcTable, nativeSymbols and stringTable,
+ * with the symbols substituted in the right places. This often causes many funcs
+ * to be orphaned (no frames will use them any more); these orphaned funcs remain
+ * in the funcTable. It also creates the oldFuncToNewFuncsMap.
  *
  * Re-symbolication only re-runs phases II through V. At the beginning of
  * re-symbolication, the frameTable, funcTable and nativeSymbols are in the
@@ -149,12 +157,12 @@ import type {
  * the same func. Nevertheless, "splitting funcs" is very uncommon during
  * initial symbolication.
  *
- * When funcs are merged, oldFuncToNewFuncMap lets us update other parts of the
+ * When funcs are merged, oldFuncToNewFuncsMap lets us update other parts of the
  * redux state that refer to func indexes. But when funcs are split, this is not
  * possible. But since function splitting is the rare case, we accept this
  * imperfection.
  *
- * Example for oldFuncToNewFuncMap:
+ * Example for oldFuncToNewFuncsMap:
  *
  * Let's say we have a frameTable [0, 1, 2, 3, 4, 5, 6, 7, 8] and all frames are
  * from the same lib. Profile processing creates an initial funcTable with one
@@ -166,7 +174,7 @@ import type {
  * The user selects the call node with the call path A-B-C-D-H in the call tree.
  * Now we look up symbols for all frame addresses, and frames 4 and 7 turn out
  * to belong to the same function. We choose function E as the shared function.
- * We update the thread with an oldFuncToNewFuncMap that contains an entry H -> E.
+ * We update the thread with an oldFuncToNewFuncsMap that contains an entry H -> E.
  * This collapses both call paths into the call path A-B-C-D-E, and A-B-C-D-E
  * becomes the selected call node.
  * Now, let's say initial symbolication used an incomplete symbol table that
@@ -180,7 +188,7 @@ import type {
  * are assigned to different functions again; this time we happened to pick the
  * assignment 0 -> A, 1 -> D, 2 -> B, 3 -> C. So now our samples' call paths
  * become A-D-B-C-E.
- * There is no way to choose oldFuncToNewFuncMap so that the selected call path
+ * There is no way to choose oldFuncToNewFuncsMap so that the selected call path
  * A-A-A-A-E can become A-D-B-C-E. So in the case of splitting functions we
  * accept that the current selection is lost and that some expanded call nodes
  * will close.
@@ -215,7 +223,7 @@ export type SymbolicationStepInfo = {|
   resultsForLib: Map<Address, AddressResult>,
 |};
 
-export type FuncToFuncMap = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
+export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
 
 type ThreadSymbolicationInfo = Map<LibKey, ThreadLibSymbolicationInfo>;
 
@@ -376,26 +384,148 @@ function finishSymbolicationForLib(
   }
 }
 
+// Create a new stack table where all stack nodes with frames in framesToRemove
+// are removed. Their child nodes are reparented to the removed node's parent.
+function _removeFramesFromStackTable(
+  stackTable: StackTable,
+  framesToRemove: Set<IndexIntoFrameTable>
+): {
+  stackTable: StackTable,
+  oldStackToNewStack: Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  > | null,
+} {
+  if (framesToRemove.size === 0) {
+    return { stackTable, oldStackToNewStack: null };
+  }
+  const newStackTable = getEmptyStackTable();
+  const oldStackToNewStack: Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  > = new Map();
+  for (let stack = 0; stack < stackTable.length; stack++) {
+    const frame = stackTable.frame[stack];
+    const prefix = stackTable.prefix[stack];
+    const newPrefix =
+      prefix === null ? null : oldStackToNewStack.get(prefix) ?? null;
+    if (framesToRemove.has(frame)) {
+      // Don't add this stack node to the new stack table. Instead, make it
+      // so that this node's children use our prefix as their prefix.
+      oldStackToNewStack.set(stack, newPrefix);
+      continue;
+    }
+    const newStackIndex = newStackTable.length;
+    newStackTable.frame.push(frame);
+    newStackTable.prefix.push(newPrefix);
+    newStackTable.category.push(stackTable.category[stack]);
+    newStackTable.subcategory.push(stackTable.subcategory[stack]);
+    newStackTable.length++;
+    oldStackToNewStack.set(stack, newStackIndex);
+  }
+  return { stackTable: newStackTable, oldStackToNewStack };
+}
+
+// Create a new stack table where all stack nodes with frames in
+// frameIndexToInlineExpansionFrames have been replaced by a straight path
+// of stack nodes for that frame's new inline frames.
+//
+// Example:
+//  stack table:
+//  - stack A with frame 0
+//    - stack B with frame 1
+//      - stack C with frame 2
+//    - stack D with frame 3
+//      - stack E with frame 4
+//      - stack F with frame 5
+//
+//  frameIndexToInlineExpansionFrames:
+//  1 => [1, 6, 7]
+//  4 => [4, 8]
+//
+//  result:
+//  - stack A with frame 0
+//    - stack B with frame 1
+//      - stack B' with frame 6
+//        - stack B'' with frame 7
+//          - stack C with frame 2
+//    - stack D with frame 3
+//      - stack E with frame 4
+//        - stack E' with frame 8
+//      - stack F with frame 5
+function _addExpansionStacksToStackTable(
+  stackTable: StackTable,
+  frameIndexToInlineExpansionFrames: Map<
+    IndexIntoFrameTable,
+    IndexIntoFrameTable[]
+  >
+): {
+  stackTable: StackTable,
+  oldStackToNewStack: Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  > | null,
+} {
+  if (frameIndexToInlineExpansionFrames.size === 0) {
+    return {
+      stackTable: stackTable,
+      oldStackToNewStack: null,
+    };
+  }
+  const newStackTable = getEmptyStackTable();
+  const prefixMap = new Map();
+  for (let stack = 0; stack < stackTable.length; stack++) {
+    const oldFrame = stackTable.frame[stack];
+    const oldPrefix = stackTable.prefix[stack];
+    const category = stackTable.category[stack];
+    const subcategory = stackTable.subcategory[stack];
+    let expansionFrames = frameIndexToInlineExpansionFrames.get(oldFrame);
+    if (expansionFrames === undefined) {
+      expansionFrames = [oldFrame];
+    }
+    let prefix = oldPrefix === null ? null : prefixMap.get(oldPrefix) ?? null;
+    for (
+      let inlineDepth = 0;
+      inlineDepth < expansionFrames.length;
+      inlineDepth++
+    ) {
+      const frame = expansionFrames[inlineDepth];
+      const newStack = newStackTable.length;
+      newStackTable.frame.push(frame);
+      newStackTable.prefix.push(prefix);
+      newStackTable.category.push(category);
+      newStackTable.subcategory.push(subcategory);
+      newStackTable.length++;
+      prefix = newStack;
+    }
+    if (prefix !== null) {
+      prefixMap.set(stack, prefix);
+    }
+  }
+  return { stackTable: newStackTable, oldStackToNewStack: prefixMap };
+}
+
 /**
  * Apply symbolication to the thread, based on the information that was prepared
  * in symbolicationStepInfo. This involves updating the funcTable to contain the
  * right symbol string and funcAddress, and updating the frameTable to assign
  * frames to the right funcs. When multiple frames are merged into one func,
  * some funcs can become orphaned; they remain in the funcTable.
- * oldFuncToNewFuncMap is mutated to include the new mappings that result from
- * this symbolication step. oldFuncToNewFuncMap is allowed to contain existing
+ * oldFuncToNewFuncsMap is mutated to include the new mappings that result from
+ * this symbolication step. oldFuncToNewFuncsMap is allowed to contain existing
  * content; the existing entries are assumed to be for other libs, i.e. they're
  * expected to have no overlap with allFuncsForThisLib.
  */
 export function applySymbolicationStep(
   thread: Thread,
   symbolicationStepInfo: SymbolicationStepInfo,
-  oldFuncToNewFuncMap: FuncToFuncMap
+  oldFuncToNewFuncsMap: FuncToFuncsMap
 ): Thread {
   const {
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     nativeSymbols: oldNativeSymbols,
+    stackTable: oldStackTable,
     stringTable,
   } = thread;
   const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
@@ -418,6 +548,25 @@ export function applySymbolicationStep(
     IndexIntoNativeSymbolTable
   > = new Map();
 
+  // If this profile was symbolicated before, we may have frames for inlined functions
+  // in the profile. Partition those out because their frame addresses are also present
+  // in non-inlined frames. Then remove any stack nodes for inline frames from the stack
+  // table, because and having a "clean" stack table with no inline frames makes the
+  // rest of symbolication easier.
+  const inlinedFrames = new Set();
+  const nonInlinedFrames = new Set();
+  for (const frameIndex of allFramesForThisLib) {
+    if (oldFrameTable.inlineDepth[frameIndex] > 0) {
+      inlinedFrames.add(frameIndex);
+    } else {
+      nonInlinedFrames.add(frameIndex);
+    }
+  }
+  const { stackTable, oldStackToNewStack } = _removeFramesFromStackTable(
+    oldStackTable,
+    inlinedFrames
+  );
+
   // We want to group frames into nativeSymbols, and give each nativeSymbol a name.
   // We group frames to the same nativeSymbol if the addresses for these frames resolve
   // to the same symbolAddress.
@@ -427,7 +576,7 @@ export function applySymbolicationStep(
   // All frames with the same symbolAddress are grouped into the same nativeSymbol.
   // Afterwards, we create funcs for symbols with the same name, and then group frames
   // into funcs.
-  for (const frameIndex of allFramesForThisLib) {
+  for (const frameIndex of nonInlinedFrames) {
     const oldFrameSymbol = oldFrameTable.nativeSymbol[frameIndex];
     const address = oldFrameTable.address[frameIndex];
     let addressResult: AddressResult | void = resultsForLib.get(address);
@@ -535,6 +684,13 @@ export function applySymbolicationStep(
     newFrameTableNativeSymbolsColumn[frameIndex] = symbolIndex;
   }
 
+  // Integrate the new native symbol column into the frame table and make a
+  // copy so that we can add new frames below.
+  const frameTable = shallowCloneFrameTable({
+    ...oldFrameTable,
+    nativeSymbol: newFrameTableNativeSymbolsColumn,
+  });
+
   // Now it is time to look at funcs.
   // For funcs belonging to a native library, we group frames into funcs based
   // on the function name string and the file name. (We don't expect there to
@@ -546,11 +702,14 @@ export function applySymbolicationStep(
   // funcKey -> funcIndex, where funcKey = `${nameStringIndex}:${fileStringIndex}`
   const funcKeyToFuncMap = new Map();
 
-  const oldFuncToNewFuncEntries = [];
+  const availableFrameIter = inlinedFrames.values();
+  const frameIndexToInlineExpansionFrames: Map<
+    IndexIntoFrameTable,
+    IndexIntoFrameTable[]
+  > = new Map();
+  const oldFuncToNewFuncsEntries: Array<[IndexIntoFuncTable, string]> = [];
 
-  const newFrameTableFuncColumn = oldFrameTable.func.slice();
-  const newFrameTableLineColumn = oldFrameTable.line.slice();
-  for (const frameIndex of allFramesForThisLib) {
+  for (const frameIndex of nonInlinedFrames) {
     const oldFunc = oldFrameTable.func[frameIndex];
     const nativeSymbolIndex = newFrameTableNativeSymbolsColumn[frameIndex];
     if (nativeSymbolIndex === null) {
@@ -571,56 +730,147 @@ export function applySymbolicationStep(
         line: oldFrameTable.line[frameIndex] ?? undefined,
       };
     }
-    const functionStringIndex = stringTable.indexForString(addressResult.name);
-    const fileNameStringIndex =
-      addressResult.file !== undefined
-        ? stringTable.indexForString(addressResult.file)
-        : null;
-    // Group frames into the same function if the have the same function name
-    // and the same file.
-    const funcKey = `${functionStringIndex}:${fileNameStringIndex ?? ''}`;
-    let funcIndex = funcKeyToFuncMap.get(funcKey);
-    if (funcIndex === undefined) {
-      funcIndex = availableFuncIter.next().value;
-      if (funcIndex === undefined) {
-        // Need a new func.
-        funcIndex = funcTable.length;
-        funcTable.isJS[funcIndex] = false;
-        funcTable.relevantForJS[funcIndex] = false;
-        funcTable.resource[funcIndex] = resourceIndex;
-        funcTable.lineNumber[funcIndex] = null;
-        funcTable.columnNumber[funcIndex] = null;
-        // The name and fileName fields will be filled below.
-        funcTable.length++;
-      }
-      funcTable.name[funcIndex] = functionStringIndex;
-      funcTable.fileName[funcIndex] = fileNameStringIndex;
-      funcKeyToFuncMap.set(funcKey, funcIndex);
-    }
+    // Make a combined list which contains both the outer function and the inlines.
+    const framesAtThisAddress = addressResult.inlines
+      ? addressResult.inlines.slice()
+      : [];
+    framesAtThisAddress.push({
+      name: addressResult.name,
+      file: addressResult.file,
+      line: addressResult.line,
+    });
+    framesAtThisAddress.reverse(); // Now the frames are from outside to inside.
 
-    newFrameTableFuncColumn[frameIndex] = funcIndex;
-    newFrameTableLineColumn[frameIndex] = addressResult.line ?? null;
-    oldFuncToNewFuncEntries.push([oldFunc, funcIndex]);
+    const inlineExpansionFrames = [];
+    const inlineExpansionFuncIndexes = [];
+    for (
+      let inlineDepth = 0;
+      inlineDepth < framesAtThisAddress.length;
+      inlineDepth++
+    ) {
+      const frameInfo = framesAtThisAddress[inlineDepth];
+      const functionStringIndex = stringTable.indexForString(frameInfo.name);
+      const fileNameStringIndex =
+        frameInfo.file !== undefined
+          ? stringTable.indexForString(frameInfo.file)
+          : null;
+      // Group frames into the same function if the have the same function name
+      // and the same file.
+      const funcKey = `${functionStringIndex}:${fileNameStringIndex ?? ''}`;
+      let funcIndex = funcKeyToFuncMap.get(funcKey);
+      if (funcIndex === undefined) {
+        funcIndex = availableFuncIter.next().value;
+        if (funcIndex === undefined) {
+          // Need a new func.
+          funcIndex = funcTable.length;
+          funcTable.isJS[funcIndex] = false;
+          funcTable.relevantForJS[funcIndex] = false;
+          funcTable.resource[funcIndex] = resourceIndex;
+          funcTable.fileName[funcIndex] = null;
+          funcTable.lineNumber[funcIndex] = null;
+          funcTable.columnNumber[funcIndex] = null;
+          // The name field will be filled below.
+          funcTable.length++;
+        }
+        funcTable.name[funcIndex] = functionStringIndex;
+        funcTable.fileName[funcIndex] = fileNameStringIndex;
+        funcKeyToFuncMap.set(funcKey, funcIndex);
+      }
+      inlineExpansionFuncIndexes.push(funcIndex);
+      let expansionFrameIndex;
+      if (inlineDepth === 0) {
+        // This is an outer frame.
+        expansionFrameIndex = frameIndex;
+      } else {
+        // This is an inline frame.
+        // Add a frame at this depth. Try to use an unused existing frame, or
+        // create a completely new frame if no frames are available.
+        expansionFrameIndex = availableFrameIter.next().value;
+        if (expansionFrameIndex === undefined) {
+          expansionFrameIndex = frameTable.length;
+          frameTable.length++;
+        }
+
+        // Copy most fields over from the outer frame, unchanged.
+        const category = frameTable.category[frameIndex];
+        const subcategory = frameTable.subcategory[frameIndex];
+        const innerWindowID = frameTable.innerWindowID[frameIndex];
+        const implementation = frameTable.implementation[frameIndex];
+        const optimizations = frameTable.optimizations[frameIndex];
+        frameTable.category[expansionFrameIndex] = category;
+        frameTable.subcategory[expansionFrameIndex] = subcategory;
+        frameTable.innerWindowID[expansionFrameIndex] = innerWindowID;
+        frameTable.implementation[expansionFrameIndex] = implementation;
+        frameTable.optimizations[expansionFrameIndex] = optimizations;
+        frameTable.address[expansionFrameIndex] = address;
+        frameTable.nativeSymbol[expansionFrameIndex] = nativeSymbolIndex;
+
+        // These remaining fields are filled below.
+      }
+      frameTable.inlineDepth[expansionFrameIndex] = inlineDepth;
+      frameTable.func[expansionFrameIndex] = funcIndex;
+      frameTable.line[expansionFrameIndex] = frameInfo.line ?? null;
+      frameTable.column[expansionFrameIndex] = null;
+      inlineExpansionFrames.push(expansionFrameIndex);
+    }
+    if (inlineExpansionFrames.length > 1) {
+      frameIndexToInlineExpansionFrames.set(frameIndex, inlineExpansionFrames);
+    }
+    oldFuncToNewFuncsEntries.push([
+      oldFunc,
+      inlineExpansionFuncIndexes.join('#'),
+    ]);
   }
-  const frameTable = {
-    ...oldFrameTable,
-    func: newFrameTableFuncColumn,
-    nativeSymbol: newFrameTableNativeSymbolsColumn,
-    line: newFrameTableLineColumn,
+
+  // Build oldFuncToNewFuncsMapForThisLib.
+  // If (oldFunc, newFuncs) is in oldFuncToNewFuncsMapForThisLib, this means
+  // that all frames that used to belong to oldFunc have been resolved to
+  // the same sequence of funcs newFuncs.
+  const oldFuncToNewFuncsMapForThisLib = makeConsensusMap(
+    oldFuncToNewFuncsEntries
+  );
+  for (const [oldFunc, newFuncs] of oldFuncToNewFuncsMapForThisLib) {
+    oldFuncToNewFuncsMap.set(
+      oldFunc,
+      newFuncs.split('#').map((strFuncIndex) => +strFuncIndex)
+    );
+  }
+
+  let newThread = {
+    ...thread,
+    frameTable,
+    stackTable,
+    funcTable,
+    nativeSymbols,
+    stringTable,
   };
 
-  // Build oldFuncToNewFuncMapForThisLib.
-  // If (oldFunc, newFunc) is in oldFuncToNewFuncMapForThisLib, this means
-  // that all frames that used to belong to oldFunc have been resolved to
-  // the same func newFunc.
-  const oldFuncToNewFuncMapForThisLib = makeConsensusMap(
-    oldFuncToNewFuncEntries
-  );
-  for (const [oldFunc, newFunc] of oldFuncToNewFuncMapForThisLib) {
-    oldFuncToNewFuncMap.set(oldFunc, newFunc);
+  if (oldStackToNewStack !== null) {
+    newThread = replaceStackReferences(
+      newThread,
+      oldStackToNewStack,
+      oldStackToNewStack
+    );
   }
 
-  return { ...thread, frameTable, funcTable, nativeSymbols, stringTable };
+  // We have the finished new frameTable and new funcTable.
+  // Build a new stackTable.
+  const {
+    stackTable: finalStackTable,
+    oldStackToNewStack: finalOldStackToNewStack,
+  } = _addExpansionStacksToStackTable(
+    stackTable,
+    frameIndexToInlineExpansionFrames
+  );
+  if (finalOldStackToNewStack !== null) {
+    newThread = replaceStackReferences(
+      { ...newThread, stackTable: finalStackTable },
+      finalOldStackToNewStack,
+      finalOldStackToNewStack
+    );
+  }
+
+  return newThread;
 }
 
 /**
@@ -659,4 +909,74 @@ export async function symbolicateProfile(
       console.warn(error);
     }
   );
+}
+
+// Create a new call path, where each func in the old call path is
+// replaced with one or more funcs from the FuncToFuncsMap.
+// This is used during symbolication, where some previously separate
+// funcs can be mapped onto the same new func, or a previously "flat"
+// func can expand into a path of new funcs (from inlined functions).
+// Any func that is not present as a key in the map stays unchanged.
+//
+// Example:
+// path: [1, 2, 3]
+// oldFuncToNewFuncsMap: (1 => [1, 4], 2 => [1])
+// result: [1, 4, 1, 3]
+export function applyFuncSubstitutionToCallPath(
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  path: CallNodePath
+): CallNodePath {
+  return path.reduce((accum, oldFunc) => {
+    const newFuncs = oldFuncToNewFuncsMap.get(oldFunc);
+    return newFuncs === undefined
+      ? [...accum, oldFunc]
+      : [...accum, ...newFuncs];
+  }, []);
+}
+
+// This function is used for the path set of expanded call nodes in the call tree
+// when symbolication is applied. We want to keep all open ("expanded") tree nodes open.
+// The tree nodes are represented as a set of call paths, each call path is an array
+// of funcs. Symbolication substitutes funcs.
+export function applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  pathSet: PathSet
+): PathSet {
+  const newPathSet = [];
+  for (const callPath of pathSet) {
+    // Apply substitution to this path and add it.
+    const newCallPath = applyFuncSubstitutionToCallPath(
+      oldFuncToNewFuncsMap,
+      callPath
+    );
+    newPathSet.push(newCallPath);
+
+    // Additionally, we want to make sure that all new ancestors of the substituted call path
+    // are in the new path set. Example:
+    //
+    // callPath = [1, 2, 3, 4] and map = (4 => [5, 6, 7])
+    // newCallPath = [1, 2, 3, 5, 6, 7]
+    //
+    // We need to add these three new call paths:
+    //
+    //  1. [1, 2, 3, 5, 6, 7] (this one is already done)
+    //  2. [1, 2, 3, 5, 6]
+    //  3. [1, 2, 3, 5]
+
+    const oldLeaf = callPath[callPath.length - 1];
+    const mappedOldLeaf = applyFuncSubstitutionToCallPath(
+      oldFuncToNewFuncsMap,
+      [oldLeaf]
+    );
+    const mappedOldLeafSubpathLen = mappedOldLeaf.length;
+    // "assert(newCallPath.endsWith(mappedOldLeaf))"
+    if (mappedOldLeafSubpathLen > 1) {
+      // The leaf has been replaced by multiple funcs.
+      for (let i = 1; i < mappedOldLeafSubpathLen; i++) {
+        newPathSet.push(newCallPath.slice(0, newCallPath.length - i));
+      }
+    }
+  }
+
+  return new PathSet(newPathSet);
 }

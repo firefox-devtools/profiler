@@ -16,25 +16,30 @@ import type {
 export function mockWebChannel() {
   const messagesSentToBrowser = [];
   const listeners = [];
+  const originalAddEventListener = window.addEventListener;
+  const originalRemoveEventListener = window.removeEventListener;
+  const originalDispatchEvent = window.dispatchEvent;
   let onMessageToChrome = null;
 
   jest
     .spyOn(window, 'addEventListener')
-    .mockImplementation((name, listener) => {
+    .mockImplementation((name, listener, options) => {
       if (name === 'WebChannelMessageToContent') {
         listeners.push(listener);
       }
+      originalAddEventListener.call(window, name, listener, options);
     });
 
   jest
     .spyOn(window, 'removeEventListener')
-    .mockImplementation((name, listener) => {
+    .mockImplementation((name, listener, options) => {
       if (name === 'WebChannelMessageToContent') {
         const index = listeners.indexOf(listener);
         if (index !== -1) {
           listeners.splice(index, 1);
         }
       }
+      originalRemoveEventListener.call(window, name, listener, options);
     });
 
   jest.spyOn(window, 'dispatchEvent').mockImplementation((event) => {
@@ -46,6 +51,8 @@ export function mockWebChannel() {
       if (onMessageToChrome) {
         onMessageToChrome(JSON.parse(event.detail).message);
       }
+    } else {
+      originalDispatchEvent.call(window, event);
     }
   });
 
@@ -85,4 +92,104 @@ export function mockWebChannel() {
       return requestId;
     },
   };
+}
+
+export function simulateOldWebChannelAndFrameScript(
+  geckoProfiler: $GeckoProfiler
+) {
+  const webChannel = mockWebChannel();
+
+  const { registerMessageToChromeListener, triggerResponse } = webChannel;
+  // Pretend that this browser does not support obtaining the profile via
+  // the WebChannel. This will trigger fallback to the frame script /
+  // geckoProfiler API.
+  registerMessageToChromeListener((message) => {
+    switch (message.type) {
+      case 'STATUS_QUERY': {
+        triggerResponse(
+          ({
+            type: 'STATUS_RESPONSE',
+            requestId: message.requestId,
+            menuButtonIsEnabled: true,
+          }: any)
+        );
+        break;
+      }
+      default: {
+        triggerResponse(
+          ({
+            error: `Unexpected message ${message.type}`,
+          }: any)
+        );
+        break;
+      }
+    }
+  });
+
+  // Simulate the frame script's geckoProfiler API.
+  window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
+
+  return webChannel;
+}
+
+export function simulateWebChannel(profileGetter: () => mixed) {
+  const webChannel = mockWebChannel();
+
+  const { registerMessageToChromeListener, triggerResponse } = webChannel;
+  async function simulateBrowserSide(message) {
+    switch (message.type) {
+      case 'STATUS_QUERY': {
+        triggerResponse({
+          type: 'SUCCESS_RESPONSE',
+          requestId: message.requestId,
+          response: {
+            menuButtonIsEnabled: true,
+            version: 1,
+          },
+        });
+        break;
+      }
+      case 'ENABLE_MENU_BUTTON': {
+        triggerResponse({
+          type: 'ERROR_RESPONSE',
+          requestId: message.requestId,
+          error:
+            'ENABLE_MENU_BUTTON is a valid message but not covered by this test.',
+        });
+        break;
+      }
+      case 'GET_PROFILE': {
+        const profile: ArrayBuffer | MixedObject = await profileGetter();
+        triggerResponse({
+          type: 'SUCCESS_RESPONSE',
+          requestId: message.requestId,
+          response: profile,
+        });
+        break;
+      }
+      case 'GET_SYMBOL_TABLE':
+      case 'QUERY_SYMBOLICATION_API': {
+        triggerResponse({
+          type: 'ERROR_RESPONSE',
+          requestId: message.requestId,
+          error: 'No symbol tables available',
+        });
+        break;
+      }
+      default: {
+        triggerResponse({
+          type: 'ERROR_RESPONSE',
+          requestId: message.requestId,
+          error: `Unexpected message ${message.type}`,
+        });
+        break;
+      }
+    }
+  }
+
+  registerMessageToChromeListener((message) => {
+    simulateBrowserSide(message);
+  });
+
+  return webChannel;
 }

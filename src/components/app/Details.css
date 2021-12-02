@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: space-between; /* This pushes the sidebar button to the right */
   border: solid var(--grey-30);
-  border-width: 1px 0 1px;
+  border-width: 1px 0;
   background: var(--grey-10);
 }
 

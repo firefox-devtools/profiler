@@ -38,15 +38,8 @@ describe('processThreadCPUDelta', function () {
     return { profile, thread, processedThread };
   }
 
-  it('removes the threadCPUDelta array if all of its values are null', function () {
-    const { processedThread } = setup([null, null, null, null, null, null]);
-    expect(processedThread.samples.threadCPUDelta).toBe(undefined);
-  });
-
-  it('does not remove the values if there is at least one non-null value ', function () {
-    const { processedThread } = setup([null, null, null, null, 0.1]);
-    // We do the processing for null elements, see the following test for a more specific assertion.
-    expect(processedThread.samples.threadCPUDelta).not.toBe(undefined);
+  it('throws if all of its values are null', function () {
+    expect(() => setup([null, null, null, null, null, null])).toThrow();
   });
 
   it('throws if there are no threadCPUDelta values', function () {

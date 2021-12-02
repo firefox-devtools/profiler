@@ -11,6 +11,7 @@ import type {
   Pid,
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
+  IndexIntoNativeSymbolTable,
   CounterIndex,
   InnerWindowID,
   Page,
@@ -51,6 +52,10 @@ export type CallNodeTable = {
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
+  // null: no inlining
+  // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
+  // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
   depth: number[],
   length: number,
 };
@@ -126,6 +131,14 @@ export type CallNodeData = {
   selfRelative: number,
 };
 
+export type ExtraBadgeInfo = {|
+  name: string,
+  localizationId: string,
+  vars: mixed,
+  titleFallback: string,
+  contentFallback: string,
+|};
+
 export type CallNodeDisplayData = $Exact<
   $ReadOnly<{
     total: string,
@@ -139,6 +152,7 @@ export type CallNodeDisplayData = $Exact<
     categoryName: string,
     categoryColor: string,
     iconSrc: string | null,
+    badge?: ExtraBadgeInfo,
     icon: string | null,
     ariaLabel: string,
   }>
