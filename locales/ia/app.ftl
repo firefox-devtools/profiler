@@ -595,6 +595,11 @@ TrackContextMenu--show-all-tracks = Monstrar tote le tracias
 # This is used in the tracks context menu as a button to show all the tracks
 # below it.
 TrackContextMenu--show-all-tracks-below = Monstrar tote le tracias infra
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Nulle resultatos trovate pro “<span>{ $searchFilter }</span>”
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
