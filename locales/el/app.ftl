@@ -112,6 +112,17 @@ CallTree--tracing-ms-total = Χρόνος εκτέλεσης (ms)
         εκτέλεσης της συνάρτησης και τον χρόνο που χρησιμοποιήθηκε στους καλούντες από
         αυτή τη συνάρτηση.
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Ορισμένες κλήσεις στην { $calledFunction } ενσωματώθηκαν από τον μεταγλωττιστή.
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
@@ -555,6 +566,11 @@ TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομμα�
 # This is used in the tracks context menu as a button to show all the tracks
 # below it.
 TrackContextMenu--show-all-tracks-below = Εμφάνιση όλων των κομματιών παρακάτω
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Δεν βρέθηκαν αποτελέσματα για «<span>{ $searchFilter }</span>»
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
