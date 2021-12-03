@@ -446,137 +446,100 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     return (
       <>
-        <Localized
-          id="CallNodeContextMenu--transform-merge-function"
-          attrs={{ title: true }}
-        >
-          <TransformMenuItem
-            shortcut="m"
-            icon="Merge"
-            onClick={this._handleClick}
-            transform="merge-function"
-            title=""
-          >
-            Merge function
-          </TransformMenuItem>
-        </Localized>
+        {this.renderTransformMenuItem({
+          l10nId: 'CallNodeContextMenu--transform-merge-function',
+          shortcut: 'm',
+          icon: 'Merge',
+          onClick: this._handleClick,
+          transform: 'merge-function',
+          title: '',
+          content: 'Merge function',
+        })}
 
-        {inverted ? null : (
-          <Localized
-            id="CallNodeContextMenu--transform-merge-call-node"
-            attrs={{ title: true }}
-          >
-            <TransformMenuItem
-              shortcut="M"
-              icon="Merge"
-              onClick={this._handleClick}
-              transform="merge-call-node"
-              title=""
-            >
-              Merge node only
-            </TransformMenuItem>
-          </Localized>
-        )}
+        {inverted
+          ? null
+          : this.renderTransformMenuItem({
+              l10nId: 'CallNodeContextMenu--transform-merge-call-node',
+              shortcut: 'M',
+              icon: 'Merge',
+              onClick: this._handleClick,
+              transform: 'merge-call-node',
+              title: '',
+              content: 'Merge node only',
+            })}
 
-        <Localized
-          id={
-            inverted
-              ? 'CallNodeContextMenu--transform-focus-function-inverted'
-              : 'CallNodeContextMenu--transform-focus-function'
-          }
-          attrs={{ title: true }}
-        >
-          <TransformMenuItem
-            shortcut="f"
-            icon="Focus"
-            onClick={this._handleClick}
-            transform="focus-function"
-            title=""
-          >
-            {inverted ? 'Focus on function (inverted)' : 'Focus on function'}
-          </TransformMenuItem>
-        </Localized>
+        {this.renderTransformMenuItem({
+          l10nId: inverted
+            ? 'CallNodeContextMenu--transform-focus-function-inverted'
+            : 'CallNodeContextMenu--transform-focus-function',
+          shortcut: 'f',
+          icon: 'Focus',
+          onClick: this._handleClick,
+          transform: 'focus-function',
+          title: '',
+          content: inverted
+            ? 'Focus on function (inverted)'
+            : 'Focus on function',
+        })}
 
-        <Localized
-          id="CallNodeContextMenu--transform-focus-subtree"
-          attrs={{ title: true }}
-        >
-          <TransformMenuItem
-            shortcut="F"
-            icon="Focus"
-            onClick={this._handleClick}
-            transform="focus-subtree"
-            title=""
-          >
-            Focus on subtree only
-          </TransformMenuItem>
-        </Localized>
+        {this.renderTransformMenuItem({
+          l10nId: 'CallNodeContextMenu--transform-focus-subtree',
+          shortcut: 'F',
+          icon: 'Focus',
+          onClick: this._handleClick,
+          transform: 'focus-subtree',
+          title: '',
+          content: 'Focus on subtree only',
+        })}
 
-        <Localized
-          id="CallNodeContextMenu--transform-collapse-function-subtree"
-          attrs={{ title: true }}
-        >
-          <TransformMenuItem
-            shortcut="c"
-            icon="Collapse"
-            onClick={this._handleClick}
-            transform="collapse-function-subtree"
-            title=""
-          >
-            Collapse function
-          </TransformMenuItem>
-        </Localized>
+        {this.renderTransformMenuItem({
+          l10nId: 'CallNodeContextMenu--transform-collapse-function-subtree',
+          shortcut: 'c',
+          icon: 'Collapse',
+          onClick: this._handleClick,
+          transform: 'collapse-function-subtree',
+          title: '',
+          content: 'Collapse function',
+        })}
 
-        {nameForResource ? (
-          <Localized
-            id="CallNodeContextMenu--transform-collapse-resource"
-            attrs={{ title: true }}
-            vars={{ nameForResource: nameForResource }}
-            elems={{ strong: <strong /> }}
-          >
-            <TransformMenuItem
-              shortcut="C"
-              icon="Collapse"
-              onClick={this._handleClick}
-              transform="collapse-resource"
-              title=""
-            >
-              Collapse <strong>{nameForResource}</strong>
-            </TransformMenuItem>
-          </Localized>
-        ) : null}
+        {nameForResource
+          ? this.renderTransformMenuItem({
+              l10nId: 'CallNodeContextMenu--transform-collapse-resource',
+              additionalLocalizedProps: {
+                vars: { nameForResource: nameForResource },
+                elems: { strong: <strong /> },
+              },
+              shortcut: 'C',
+              icon: 'Collapse',
+              onClick: this._handleClick,
+              transform: 'collapse-resource',
+              title: '',
+              content: `Collapse <strong>${nameForResource}</strong>`,
+            })
+          : null}
 
-        {this.isRecursiveCall() ? (
-          <Localized
-            id="CallNodeContextMenu--transform-collapse-direct-recursion"
-            attrs={{ title: true }}
-          >
-            <TransformMenuItem
-              shortcut="r"
-              icon="Collapse"
-              onClick={this._handleClick}
-              transform="collapse-direct-recursion"
-              title=""
-            >
-              Collapse direct recursion
-            </TransformMenuItem>
-          </Localized>
-        ) : null}
+        {this.isRecursiveCall()
+          ? this.renderTransformMenuItem({
+              l10nId:
+                'CallNodeContextMenu--transform-collapse-direct-recursion',
+              shortcut: 'r',
+              icon: 'Collapse',
+              onClick: this._handleClick,
+              transform: 'collapse-direct-recursion',
+              title: '',
+              content: 'Collapse direct recursion',
+            })
+          : null}
 
-        <Localized
-          id="CallNodeContextMenu--transform-drop-function"
-          attrs={{ title: true }}
-        >
-          <TransformMenuItem
-            shortcut="d"
-            icon="Drop"
-            onClick={this._handleClick}
-            transform="drop-function"
-            title=""
-          >
-            Drop samples with this function
-          </TransformMenuItem>
-        </Localized>
+        {this.renderTransformMenuItem({
+          l10nId: 'CallNodeContextMenu--transform-drop-function',
+          shortcut: 'd',
+          icon: 'Drop',
+          onClick: this._handleClick,
+          transform: 'drop-function',
+          title: '',
+          content: 'Drop samples with this function',
+        })}
 
         <div className="react-contextmenu-separator" />
 
@@ -620,6 +583,38 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           </MenuItem>
         </Localized>
       </>
+    );
+  }
+
+  renderTransformMenuItem(props: {|
+    +l10nId: string,
+    +additionalLocalizedProps?: mixed,
+    +content: React.Node,
+    +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
+    +transform: string,
+    +shortcut: string,
+    +icon: string,
+    +title: string,
+  |}) {
+    return (
+      <MenuItem onClick={props.onClick} data={{ type: props.transform }}>
+        <span
+          className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
+        />
+        <Localized
+          id={props.l10nId}
+          attrs={{ title: true }}
+          {...props.additionalLocalizedProps}
+        >
+          <DivWithTitle
+            className="react-contextmenu-item-content"
+            title={props.title}
+          >
+            {props.content}
+          </DivWithTitle>
+        </Localized>
+        <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
+      </MenuItem>
     );
   }
 
@@ -688,29 +683,6 @@ export const CallNodeContextMenu = explicitConnect<
   component: CallNodeContextMenuImpl,
 });
 
-function TransformMenuItem(props: {|
-  +children: React.Node,
-  +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
-  +transform: string,
-  +shortcut: string,
-  +icon: string,
-  +title: string,
-|}) {
-  return (
-    <MenuItem
-      onClick={props.onClick}
-      data={{ type: props.transform }}
-      attributes={{ title: oneLine`${props.title}` }}
-    >
-      <span
-        className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
-      />
-      <div className="react-contextmenu-item-content">{props.children}</div>
-      <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
-    </MenuItem>
-  );
-}
-
 function MenuItemWithShortcut(props: {|
   +children: React.Node,
   +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
@@ -722,5 +694,17 @@ function MenuItemWithShortcut(props: {|
       <div className="react-contextmenu-item-content">{props.children}</div>
       <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
     </MenuItem>
+  );
+}
+
+function DivWithTitle(props: {|
+  +className: string,
+  +children: React.Node,
+  +title: string,
+|}) {
+  return (
+    <div className={props.className} title={oneLine`${props.title}`}>
+      {props.children}
+    </div>
   );
 }

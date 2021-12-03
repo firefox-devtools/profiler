@@ -12,13 +12,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Merging a function removes it from the profile, and assigns its time to the function that called it. This happens anywhere the function was called in the tree."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconMerge"
     />
     <div
       class="react-contextmenu-item-content"
+      title="Merging a function removes it from the profile, and assigns its time to the function that called it. This happens anywhere the function was called in the tree."
     >
       Merge function
     </div>
@@ -33,13 +33,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Merging a node removes it from the profile, and assigns its time to the function’s node that called it. It only removes the function from that specific part of the tree. Any other places the function was called from will remain in the profile."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconMerge"
     />
     <div
       class="react-contextmenu-item-content"
+      title="Merging a node removes it from the profile, and assigns its time to the function’s node that called it. It only removes the function from that specific part of the tree. Any other places the function was called from will remain in the profile."
     >
       Merge node only
     </div>
@@ -54,13 +54,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Focusing on a function will remove any sample that does not include that function. In addition, it re-roots the call tree so that the function is the only root of the tree. This can combine multiple function call sites across a profile into one call node."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconFocus"
     />
     <div
       class="react-contextmenu-item-content"
+      title="Focusing on a function will remove any sample that does not include that function. In addition, it re-roots the call tree so that the function is the only root of the tree. This can combine multiple function call sites across a profile into one call node."
     >
       Focus on function
     </div>
@@ -75,13 +75,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Focusing on a subtree will remove any sample that does not include that specific part of the call tree. It pulls out a branch of the call tree, however it only does it for that single call node. All other calls of the function are ignored."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconFocus"
     />
     <div
       class="react-contextmenu-item-content"
+      title="Focusing on a subtree will remove any sample that does not include that specific part of the call tree. It pulls out a branch of the call tree, however it only does it for that single call node. All other calls of the function are ignored."
     >
       Focus on subtree only
     </div>
@@ -96,13 +96,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Collapsing a function will remove everything it called, and assign all of the time to the function. This can help simplify a profile that calls into code that does not need to be analyzed."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconCollapse"
     />
     <div
       class="react-contextmenu-item-content"
+      title="Collapsing a function will remove everything it called, and assign all of the time to the function. This can help simplify a profile that calls into code that does not need to be analyzed."
     >
       Collapse function
     </div>
@@ -117,13 +117,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Collapsing a resource will flatten out all the calls to that resource into a single collapsed call node."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconCollapse"
     />
     <div
       class="react-contextmenu-item-content"
+      title="Collapsing a resource will flatten out all the calls to that resource into a single collapsed call node."
     >
       Collapse 
       <strong>
@@ -141,13 +141,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Collapsing direct recursion removes calls that repeatedly recurse into the same function."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconCollapse"
     />
     <div
       class="react-contextmenu-item-content"
+      title="Collapsing direct recursion removes calls that repeatedly recurse into the same function."
     >
       Collapse direct recursion
     </div>
@@ -162,13 +162,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Dropping samples removes their time from the profile. This is useful to eliminate timing information that is not relevant for the analysis."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconDrop"
     />
     <div
       class="react-contextmenu-item-content"
+      title="Dropping samples removes their time from the profile. This is useful to eliminate timing information that is not relevant for the analysis."
     >
       Drop samples with this function
     </div>
