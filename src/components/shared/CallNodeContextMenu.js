@@ -545,15 +545,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
         {showExpandAll ? (
           <>
-            <Localized id="CallNodeContextMenu--expand-all">
-              <MenuItemWithShortcut
-                onClick={this._handleClick}
-                data={{ type: 'expand-all' }}
-                shortcut="*"
-              >
-                Expand all
-              </MenuItemWithShortcut>
-            </Localized>
+            {this.renderMenuItemWithShortcut({
+              l10nId: 'CallNodeContextMenu--expand-all',
+              onClick: this._handleClick,
+              data: { type: 'expand-all' },
+              shortcut: '*',
+              content: 'Expand all',
+            })}
             <div className="react-contextmenu-separator" />
           </>
         ) : null}
@@ -612,6 +610,23 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           >
             {props.content}
           </DivWithTitle>
+        </Localized>
+        <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
+      </MenuItem>
+    );
+  }
+
+  renderMenuItemWithShortcut(props: {|
+    +l10nId: string,
+    +content: React.Node,
+    +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
+    +shortcut: string,
+    +data: { type: string },
+  |}) {
+    return (
+      <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
+        <Localized id={props.l10nId}>
+          <div className="react-contextmenu-item-content">{props.content}</div>
         </Localized>
         <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
       </MenuItem>
@@ -682,20 +697,6 @@ export const CallNodeContextMenu = explicitConnect<
   },
   component: CallNodeContextMenuImpl,
 });
-
-function MenuItemWithShortcut(props: {|
-  +children: React.Node,
-  +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
-  +shortcut: string,
-  +data: { type: string },
-|}) {
-  return (
-    <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
-      <div className="react-contextmenu-item-content">{props.children}</div>
-      <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
-    </MenuItem>
-  );
-}
 
 function DivWithTitle(props: {|
   +className: string,
