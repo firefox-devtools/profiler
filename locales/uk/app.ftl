@@ -146,6 +146,15 @@ CallTree--bytes-self = Власний (байти)
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Деякі виклики до { $calledFunction } не були вбудовані компілятором.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (вбудовані)
+    .title = Виклики до { $calledFunction } були вбудовані компілятором в { $outerFunction }.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -588,6 +597,11 @@ TrackContextMenu--show-all-tracks = Показати всі доріжки
 # This is used in the tracks context menu as a button to show all the tracks
 # below it.
 TrackContextMenu--show-all-tracks-below = Показати всі треки нижче
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Не знайдено результатів за запитом “<span>{ $searchFilter }</span>”
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
