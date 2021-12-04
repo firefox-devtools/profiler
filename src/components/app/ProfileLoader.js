@@ -13,6 +13,7 @@ import {
   retrieveProfileOrZipFromUrl,
   retrieveProfilesToCompare,
 } from 'firefox-profiler/actions/receive-profile';
+import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import {
   getDataSource,
   getHash,
@@ -41,7 +42,7 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class ProfileLoaderImpl extends PureComponent<Props> {
-  _retrieveProfileFromDataSource = () => {
+  _retrieveProfileFromDataSource = async () => {
     const {
       dataSource,
       hash,
@@ -53,9 +54,13 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       retrieveProfilesToCompare,
     } = this.props;
     switch (dataSource) {
-      case 'from-browser':
-        retrieveProfileFromBrowser();
+      case 'from-browser': {
+        const browserConnectionStatus = await createBrowserConnection(
+          'Firefox/123.0'
+        );
+        retrieveProfileFromBrowser(browserConnectionStatus);
         break;
+      }
       case 'from-file':
         // retrieveProfileFromFile should already have been called
         break;
