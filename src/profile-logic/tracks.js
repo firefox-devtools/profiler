@@ -470,35 +470,48 @@ export function initializeGlobalTrackOrder(
     : _getDefaultGlobalTrackOrder(globalTracks);
 }
 
+function _intersectSets<T>(set1: Set<T>, set2: Set<T>): Set<T> {
+  return new Set([...set1].filter((x) => set2.has(x)));
+}
+
+// Returns the selected thread (set), intersected with the set of visible threads.
+// Falls back to the default thread selection.
 export function initializeSelectedThreadIndex(
   selectedThreadIndexes: Set<ThreadIndex> | null,
   visibleThreadIndexes: ThreadIndex[],
   profile: Profile
 ): Set<ThreadIndex> {
-  if (selectedThreadIndexes !== null) {
-    // Make sure all of the selected thread indexes are actually visible.
-    const visibleSelectedThreadIndexes = new Set();
-    for (const threadIndex of visibleThreadIndexes) {
-      if (selectedThreadIndexes.has(threadIndex)) {
-        visibleSelectedThreadIndexes.add(threadIndex);
-      }
-    }
-    if (visibleSelectedThreadIndexes.size > 0) {
-      return visibleSelectedThreadIndexes;
-    }
+  if (selectedThreadIndexes === null) {
+    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
   }
 
-  // Select either the GeckoMain [tab] thread, or the first thread in the thread
-  // order.
-  const threadIndex = profile.threads.indexOf(
-    _findDefaultThread(
-      visibleThreadIndexes.map((threadIndex) => profile.threads[threadIndex])
-    )
+  // Filter out hidden threads from the set of selected threads.
+  const visibleSelectedThreadIndexes = _intersectSets(
+    selectedThreadIndexes,
+    new Set(visibleThreadIndexes)
   );
-  if (threadIndex === -1) {
+  if (visibleSelectedThreadIndexes.size === 0) {
+    // No selected threads were visible. Fall back to default selection.
+    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
+  }
+  return visibleSelectedThreadIndexes;
+}
+
+// Select either the GeckoMain [tab] thread, or the first thread in the thread
+// order.
+function getDefaultSelectedThreadIndexes(
+  visibleThreadIndexes: ThreadIndex[],
+  profile: Profile
+): Set<ThreadIndex> {
+  const visibleThreads = visibleThreadIndexes.map(
+    (threadIndex) => profile.threads[threadIndex]
+  );
+  const defaultThread = _findDefaultThread(visibleThreads);
+  const defaultThreadIndex = profile.threads.indexOf(defaultThread);
+  if (defaultThreadIndex === -1) {
     throw new Error('Expected to find a thread index to select.');
   }
-  return new Set([threadIndex]);
+  return new Set([defaultThreadIndex]);
 }
 
 export function initializeHiddenGlobalTracks(
