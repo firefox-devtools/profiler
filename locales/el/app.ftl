@@ -122,6 +122,11 @@ CallTree--tracing-ms-total = Χρόνος εκτέλεσης (ms)
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
     .title = Ορισμένες κλήσεις στην { $calledFunction } ενσωματώθηκαν από τον μεταγλωττιστή.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (ενσωματωμένη)
+    .title = Οι κλήσεις στη { $calledFunction } ενσωματώθηκαν στη { $outerFunction } από τον μεταγλωττιστή.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
