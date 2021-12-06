@@ -50,12 +50,16 @@ describe('SymbolStore', function () {
   it('should only request symbols from the symbol provider once per library', async function () {
     symbolProvider = {
       requestSymbolsFromServer: jest.fn((requests) =>
-        requests.map((request) => {
-          expect(request.lib.breakpadId).not.toBe('');
-          return Promise.reject(
-            new Error('this example only supports symbol tables')
-          );
-        })
+        Promise.resolve(
+          requests.map((request) => {
+            expect(request.lib.breakpadId).not.toBe('');
+            return {
+              type: 'ERROR',
+              request,
+              error: new Error('this example only supports symbol tables'),
+            };
+          })
+        )
       ),
       requestSymbolTableFromBrowser: jest.fn(() =>
         Promise.resolve(completeSymbolTableAsTuple)
@@ -140,8 +144,12 @@ describe('SymbolStore', function () {
   it('should persist in DB', async function () {
     symbolProvider = {
       requestSymbolsFromServer: jest.fn((requests) =>
-        requests.map(() =>
-          Promise.reject(new Error('this example only supports symbol tables'))
+        Promise.resolve(
+          requests.map((request) => ({
+            type: 'ERROR',
+            request,
+            error: new Error('this example only supports symbol tables'),
+          }))
         )
       ),
       requestSymbolTableFromBrowser: jest.fn(() =>
@@ -191,18 +199,29 @@ describe('SymbolStore', function () {
     let symbolsForAddressesRequestCount = 0;
 
     symbolProvider = {
-      requestSymbolsFromServer: jest.fn((requests) => {
+      requestSymbolsFromServer: jest.fn(async (requests) => {
         symbolsForAddressesRequestCount += requests.length;
-        return requests.map(
-          (request) =>
-            new Promise((resolve, reject) => {
-              fakeSymbolStore.getSymbols(
-                [request],
-                (_request, results) => resolve(results),
-                (_request, error) => reject(error)
-              );
-            })
-        );
+        const responses = [];
+        for (const request of requests) {
+          await fakeSymbolStore.getSymbols(
+            [request],
+            (lib, results) => {
+              responses.push({
+                type: 'SUCCESS',
+                lib,
+                results,
+              });
+            },
+            (request, error) => {
+              responses.push({
+                type: 'ERROR',
+                request,
+                error,
+              });
+            }
+          );
+        }
+        return responses;
       }),
       requestSymbolTableFromBrowser: jest
         .fn()
@@ -226,8 +245,8 @@ describe('SymbolStore', function () {
         { lib: lib1, addresses: new Set([0xf01, 0x1a50]) },
         { lib: lib2, addresses: new Set([0x33, 0x2000]) },
       ],
-      (request, results) => {
-        symbolsPerLibrary.set(request.lib, results);
+      (lib, results) => {
+        symbolsPerLibrary.set(lib, results);
       },
       errorCallback
     );
@@ -334,19 +353,31 @@ describe('SymbolStore', function () {
       ])
     );
     symbolProvider = {
-      requestSymbolsFromServer: (requests) => {
-        return requests.map((request) => {
+      requestSymbolsFromServer: async (requests) => {
+        const responses = [];
+        for (const request of requests) {
           const { debugName, breakpadId } = request.lib;
           expect(debugName).not.toEqual('');
           expect(breakpadId).not.toEqual('');
-          return new Promise((resolve, reject) => {
-            fakeSymbolStore.getSymbols(
-              [request],
-              (_request, results) => resolve(results),
-              (_request, error) => reject(error)
-            );
-          });
-        });
+          await fakeSymbolStore.getSymbols(
+            [request],
+            (lib, results) => {
+              responses.push({
+                type: 'SUCCESS',
+                lib,
+                results,
+              });
+            },
+            (request, error) => {
+              responses.push({
+                type: 'ERROR',
+                request,
+                error,
+              });
+            }
+          );
+        }
+        return responses;
       },
       requestSymbolTableFromBrowser: async ({ debugName, breakpadId }) => {
         expect(debugName).not.toEqual('');
@@ -367,8 +398,8 @@ describe('SymbolStore', function () {
     const failedLibs = new Map();
     await symbolStore.getSymbols(
       libs.map((lib) => ({ lib, addresses })),
-      (request, _results) => {
-        succeededLibs.add(request.lib);
+      (lib, _results) => {
+        succeededLibs.add(lib);
       },
       (request, error) => {
         failedLibs.set(request.lib.debugName, error);
