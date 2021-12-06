@@ -46,10 +46,12 @@ export const getUrlState: Selector<UrlState> = (state): UrlState =>
 export const getProfileSpecificState: Selector<ProfileSpecificUrlState> = (
   state
 ) => getUrlState(state).profileSpecific;
-export const getFullProfileSpecificState: Selector<FullProfileSpecificUrlState> =
-  (state) => getProfileSpecificState(state).full;
-export const getActiveTabProfileSpecificState: Selector<ActiveTabSpecificProfileUrlState> =
-  (state) => getProfileSpecificState(state).activeTab;
+export const getFullProfileSpecificState: Selector<
+  FullProfileSpecificUrlState
+> = (state) => getProfileSpecificState(state).full;
+export const getActiveTabProfileSpecificState: Selector<
+  ActiveTabSpecificProfileUrlState
+> = (state) => getProfileSpecificState(state).activeTab;
 
 export const getDataSource: Selector<DataSource> = (state) =>
   getUrlState(state).dataSource;
@@ -65,16 +67,19 @@ export const getAllCommittedRanges: Selector<StartEndRange[]> = (state) =>
 export const getImplementationFilter: Selector<ImplementationFilter> = (
   state
 ) => getProfileSpecificState(state).implementation;
-export const getLastSelectedCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> =
-  (state) => getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
+export const getLastSelectedCallTreeSummaryStrategy: Selector<
+  CallTreeSummaryStrategy
+> = (state) =>
+  getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
 export const getInvertCallstack: Selector<boolean> = (state) =>
   getProfileSpecificState(state).invertCallstack;
 export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getFullProfileSpecificState(state).showJsTracerSummary;
-export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> =
-  (state) => getUrlState(state).timelineTrackOrganization;
+export const getTimelineTrackOrganization: Selector<
+  TimelineTrackOrganization
+> = (state) => getUrlState(state).timelineTrackOrganization;
 
 /**
  * Active tab specific url state selectors
@@ -94,8 +99,9 @@ export const getNetworkSearchString: Selector<string> = (state) =>
 
 export const getSelectedTab: Selector<TabSlug> = (state) =>
   getUrlState(state).selectedTab;
-export const getSelectedThreadIndexesOrNull: Selector<Set<ThreadIndex> | null> =
-  (state) => getProfileSpecificState(state).selectedThreads;
+export const getSelectedThreadIndexesOrNull: Selector<
+  Set<ThreadIndex> | null
+> = (state) => getProfileSpecificState(state).selectedThreads;
 export const getSelectedThreadIndexes: Selector<Set<ThreadIndex>> = (state) =>
   ensureExists(
     getSelectedThreadIndexesOrNull(state),

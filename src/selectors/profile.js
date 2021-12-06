@@ -375,12 +375,14 @@ export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = (state) =>
  * and finally returns the local tracks for a specific Pid. It does not need memoization
  * and is a very inexpensive function to run.
  */
-export const getLocalTracks: DangerousSelectorWithArguments<LocalTrack[], Pid> =
-  (state, pid) =>
-    ensureExists(
-      getFullProfileView(state).localTracksByPid.get(pid),
-      'Unable to get the tracks for the given pid.'
-    );
+export const getLocalTracks: DangerousSelectorWithArguments<
+  LocalTrack[],
+  Pid
+> = (state, pid) =>
+  ensureExists(
+    getFullProfileView(state).localTracksByPid.get(pid),
+    'Unable to get the tracks for the given pid.'
+  );
 
 /**
  * This selector does an inexpensive look-up for the local track from a reference.
