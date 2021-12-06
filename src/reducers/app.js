@@ -271,15 +271,16 @@ const cpuGraphs: Reducer<boolean> = (state = false, action) => {
  * yet) or if this profile hasn't been uploaded by this user and we don't have
  * its uploaded information in the IndexedDB.
  */
-const currentProfileUploadedInformation: Reducer<UploadedProfileInformation | null> =
-  (state = null, action) => {
-    switch (action.type) {
-      case 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION':
-        return action.uploadedProfileInformation;
-      default:
-        return state;
-    }
-  };
+const currentProfileUploadedInformation: Reducer<
+  UploadedProfileInformation | null
+> = (state = null, action) => {
+  switch (action.type) {
+    case 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION':
+      return action.uploadedProfileInformation;
+    default:
+      return state;
+  }
+};
 
 /**
  * Experimental features that are mostly disabled by default. You need to enable

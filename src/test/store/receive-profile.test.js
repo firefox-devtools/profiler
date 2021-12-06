@@ -21,6 +21,7 @@ import * as UrlStateSelectors from '../../selectors/url-state';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
 import { urlFromState } from '../../app-logic/url-handling';
+import { createBrowserConnection } from '../../app-logic/browser-connection';
 import {
   viewProfile,
   finalizeProfileView,
@@ -762,7 +763,10 @@ describe('actions/receive-profile', function () {
             'web-channel': setupWithWebChannel,
           }[setupWith];
           const { dispatch, getState } = setupFn(profileAs);
-          await dispatch(retrieveProfileFromBrowser());
+          const browserConnectionStatus = await createBrowserConnection(
+            'Firefox/123.0'
+          );
+          await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
           expect(console.warn).toHaveBeenCalledTimes(2);
 
           const state = getState();
@@ -786,7 +790,10 @@ describe('actions/receive-profile', function () {
     it('tries to symbolicate the received profile, frame script version', async () => {
       const { dispatch, geckoProfiler } = setupWithFrameScript();
 
-      await dispatch(retrieveProfileFromBrowser());
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
 
       expect(geckoProfiler.getSymbolTable).toHaveBeenCalledWith(
         'firefox',
@@ -804,7 +811,10 @@ describe('actions/receive-profile', function () {
     it('tries to symbolicate the received profile, webchannel version', async () => {
       const { dispatch } = setupWithWebChannel();
 
-      await dispatch(retrieveProfileFromBrowser());
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
 
       expect(window.fetch).toHaveBeenCalledWith(
         'https://symbolication.services.mozilla.com/symbolicate/v5',
@@ -2035,8 +2045,16 @@ describe('actions/receive-profile', function () {
       jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
-      const { browserConnection } = await store.dispatch(
-        retrieveProfileForRawUrl(location)
+      const browserConnectionStatus = await createBrowserConnection(
+        'Firefox/123.0'
+      );
+      const browserConnection =
+        browserConnectionStatus.status === 'ESTABLISHED'
+          ? browserConnectionStatus.browserConnection
+          : null;
+
+      await store.dispatch(
+        retrieveProfileForRawUrl(location, browserConnectionStatus)
       );
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
