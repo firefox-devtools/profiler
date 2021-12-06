@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-import { showMenu } from 'react-contextmenu';
+import { showMenu } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
 
 import { TimelineGlobalTrack } from './GlobalTrack';
