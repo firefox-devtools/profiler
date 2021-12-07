@@ -885,6 +885,10 @@ function getSymbolStore(
         requests,
         callback
       );
+    } catch (e) {
+      throw new Error(
+        `There was a problem with the symbolication API request to the ${symbolSupplierName}: ${e.message}`
+      );
     } finally {
       for (const { lib } of requests) {
         dispatch(receivedSymbolTableReply(lib));

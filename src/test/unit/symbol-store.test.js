@@ -456,6 +456,7 @@ describe('SymbolStore', function () {
       new SymbolsNotFoundError(
         'Could not obtain symbols for available-from-neither/dont-care.\n' +
           ' - Error: symbol table not found\n' +
+          ' - Error: requestSymbolsFromBrowser unsupported in this test\n' +
           ' - Error: The browser does not have symbols for this library.',
         {
           debugName: 'available-from-neither',
