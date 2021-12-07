@@ -443,10 +443,8 @@ describe('timeline/TrackContextMenu', function () {
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(false);
     });
 
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('can present a disabled isolate item on non-process tracks', function () {
-      // TODO - We should wait until we have some real tracks without a thread index.
-    });
+    // TODO - We should wait until we have some real tracks without a thread index.
+    it.todo('can present a disabled isolate item on non-process tracks');
 
     it('network track will be displayed when a number is not set for ctxId', () => {
       const { container } = setupGlobalTrack(getNetworkTrackProfile(), 0);
@@ -555,10 +553,10 @@ describe('timeline/TrackContextMenu', function () {
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(false);
     });
 
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('can isolate a non-thread track, as long as there process has a thread index', function () {
-      // TODO - We should wait until we have some real non-thread tracks
-    });
+    // TODO - We should wait until we have some real non-thread tracks
+    it.todo(
+      'can isolate a non-thread track, as long as there process has a thread index'
+    );
   });
 
   describe('global / local track visibility interplay', function () {
