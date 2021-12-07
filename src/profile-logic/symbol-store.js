@@ -63,6 +63,12 @@ interface SymbolProvider {
   ): Promise<LibSymbolicationResponse[]>;
 
   // Expensive, should be called if requestSymbolsFromServer was unsuccessful.
+  requestSymbolsFromBrowser(
+    requests: LibSymbolicationRequest[]
+  ): Promise<LibSymbolicationResponse[]>;
+
+  // Expensive, should be called if the other two options were unsuccessful.
+  // Does not carry file + line + inlines information.
   requestSymbolTableFromBrowser(lib: RequestedLib): Promise<SymbolTableAsTuple>;
 }
 

@@ -13,9 +13,16 @@ import type {
 // on https://tecken.readthedocs.io/en/latest/symbolication.html .
 // Specifically, it uses version 5 of the API, which was implemented in
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1377479 .
-// The actual request happens via a callback. The current callback sends the
-// request to the Mozilla Symbolication Server, or to an alternative symbol server
-// which was configured with a ?symbolServer URL parameter.
+//
+// The actual request happens via a callback. We use two different callbacks:
+//
+//  - When requesting symbols via HTTP, we use a callback which calls fetch.
+//    This is used to request symbols from the Mozilla Symbolication Server,
+//    or from an alternative symbol server which was configured with a
+//    ?symbolServer URL parameter.
+//  - When requesting symbols from the browser, we use a callback which sends a
+//    WebChannel message. The WebChannel has a querySymbolicationApi entry point
+//    which uses the same API as the server.
 
 // The type for the callback, see comment above.
 export type QuerySymbolicationApiCallback = (

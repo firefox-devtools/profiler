@@ -61,6 +61,9 @@ describe('SymbolStore', function () {
           })
         )
       ),
+      requestSymbolsFromBrowser: async (_path, _requestJson) => {
+        throw new Error('requestSymbolsFromBrowser unsupported in this test');
+      },
       requestSymbolTableFromBrowser: jest.fn(() =>
         Promise.resolve(completeSymbolTableAsTuple)
       ),
@@ -152,6 +155,11 @@ describe('SymbolStore', function () {
           }))
         )
       ),
+      requestSymbolsFromBrowser: jest.fn((_path, _requestJson) =>
+        Promise.reject(
+          new Error('requestSymbolsFromBrowser unsupported in this test')
+        )
+      ),
       requestSymbolTableFromBrowser: jest.fn(() =>
         Promise.resolve(completeSymbolTableAsTuple)
       ),
@@ -223,6 +231,11 @@ describe('SymbolStore', function () {
         }
         return responses;
       }),
+      requestSymbolsFromBrowser: jest.fn((_path, _requestJson) =>
+        Promise.reject(
+          new Error('requestSymbolsFromBrowser unsupported in this test')
+        )
+      ),
       requestSymbolTableFromBrowser: jest
         .fn()
         .mockResolvedValue(completeSymbolTableAsTuple),
@@ -379,6 +392,11 @@ describe('SymbolStore', function () {
         }
         return responses;
       },
+      requestSymbolsFromBrowser: jest.fn((_path, _requestJson) =>
+        Promise.reject(
+          new Error('requestSymbolsFromBrowser unsupported in this test')
+        )
+      ),
       requestSymbolTableFromBrowser: async ({ debugName, breakpadId }) => {
         expect(debugName).not.toEqual('');
         expect(breakpadId).not.toEqual('');
