@@ -281,10 +281,11 @@ export class SymbolStore {
     // First, try option 1 for all libraries and partition them by whether it
     // was successful.
     const requestsForNonCachedLibs = [];
-    const requestsForCachedLibs = [];
+    const resultsForCachedLibs = [];
     await Promise.all(
       requests.map(async (request) => {
-        const { debugName, breakpadId } = request.lib;
+        const { lib, addresses } = request;
+        const { debugName, breakpadId } = lib;
         try {
           // Try to get the symbol table from the database.
           // This call will throw if the symbol table is not present.
@@ -294,8 +295,9 @@ export class SymbolStore {
           );
 
           // Did not throw, option 1 was successful!
-          requestsForCachedLibs.push({
-            request,
+          resultsForCachedLibs.push({
+            lib,
+            addresses,
             symbolTable,
           });
         } catch (e) {
@@ -343,14 +345,10 @@ export class SymbolStore {
     // We also need a demangling function for this, which is in an async module.
     const demangleCallback = await _getDemangleCallback();
 
-    for (const { request, symbolTable } of requestsForCachedLibs) {
+    for (const { lib, addresses, symbolTable } of resultsForCachedLibs) {
       successCb(
-        request.lib,
-        readSymbolsFromSymbolTable(
-          request.addresses,
-          symbolTable,
-          demangleCallback
-        )
+        lib,
+        readSymbolsFromSymbolTable(addresses, symbolTable, demangleCallback)
       );
     }
 
