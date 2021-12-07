@@ -4,7 +4,8 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
+import { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -18,13 +19,13 @@ import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 const LOADING_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
-  'from-browser': 'ProfileLoaderAnimation--loading-message-unpublished',
-  unpublished: 'ProfileLoaderAnimation--loading-message-unpublished',
-  'from-file': 'ProfileLoaderAnimation--loading-message-from-file',
-  local: 'ProfileLoaderAnimation--loading-message-local',
-  public: 'ProfileLoaderAnimation--loading-message-public',
-  'from-url': 'ProfileLoaderAnimation--loading-message-from-url',
-  compare: 'ProfileLoaderAnimation--loading-message-compare',
+  'from-browser': 'ProfileLoaderAnimation--loading-unpublished',
+  unpublished: 'ProfileLoaderAnimation--loading-unpublished',
+  'from-file': 'ProfileLoaderAnimation--loading-from-file',
+  local: 'ProfileLoaderAnimation--loading-local',
+  public: 'ProfileLoaderAnimation--loading-public',
+  'from-url': 'ProfileLoaderAnimation--loading-from-url',
+  compare: 'ProfileLoaderAnimation--loading-compare',
 });
 
 // TODO Switch to a proper i18n library
@@ -56,31 +57,37 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
     const loadingMessage = LOADING_MESSAGES_L10N_ID[dataSource];
     const message = loadingMessage
       ? loadingMessage
-      : 'ProfileLoaderAnimation--loading-message-view-not-found';
+      : 'ProfileLoaderAnimation--loading-view-not-found';
     const showLoader = Boolean(loadingMessage);
-
-    let additionalMessage = '';
-    if (view.additionalData) {
-      if (view.additionalData.message) {
-        additionalMessage = view.additionalData.message;
-      }
-
-      if (view.additionalData.attempt) {
-        const attempt = view.additionalData.attempt;
-        additionalMessage += `\nTried ${fewTimes(attempt.count)} out of ${
-          attempt.total
-        }.`;
-      }
-    }
+    const showBackHomeLink = Boolean(
+      view.additionalData && view.additionalData.message
+    );
 
     return (
-      <Localized id={message} attrs={{ message: true }}>
+      <Localized id={message} attrs={{ title: true }} elems={{ a: <span /> }}>
         <ProfileRootMessage
-          message={message}
-          additionalMessage={additionalMessage}
+          additionalMessage={this._renderAdditionalMessage()}
           showLoader={showLoader}
-        />
+          showBackHomeLink={showBackHomeLink}
+        >{`Untranslated ${message}`}</ProfileRootMessage>
       </Localized>
+    );
+  }
+
+  _renderAdditionalMessage(): React.Node {
+    const { view } = this.props;
+    if (!view.additionalData) {
+      return null;
+    }
+
+    const { message, attempt } = view.additionalData;
+    return (
+      <>
+        {message ? <p>{message}</p> : null}
+        {attempt ? (
+          <p>{`Tried ${fewTimes(attempt.count)} out of ${attempt.total}.`}</p>
+        ) : null}
+      </>
     );
   }
 }
