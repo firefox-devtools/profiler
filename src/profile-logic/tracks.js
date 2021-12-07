@@ -20,6 +20,7 @@ import {
   isThreadWithNoPaint,
   isContentThreadWithNoPaint,
 } from './profile-data';
+import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
@@ -430,14 +431,6 @@ export function initializeGlobalTrackOrder(
     : _getDefaultGlobalTrackOrder(globalTracks);
 }
 
-function _intersectSets<T>(set1: Set<T>, set2: Set<T>): Set<T> {
-  return new Set([...set1].filter((x) => set2.has(x)));
-}
-
-function _subtractSets<T>(set1: Set<T>, set2: Set<T>): Set<T> {
-  return new Set([...set1].filter((x) => !set2.has(x)));
-}
-
 // Returns the selected thread (set), intersected with the set of visible threads.
 // Falls back to the default thread selection.
 export function initializeSelectedThreadIndex(
@@ -450,7 +443,7 @@ export function initializeSelectedThreadIndex(
   }
 
   // Filter out hidden threads from the set of selected threads.
-  const visibleSelectedThreadIndexes = _intersectSets(
+  const visibleSelectedThreadIndexes = intersectSets(
     selectedThreadIndexes,
     new Set(visibleThreadIndexes)
   );
@@ -487,7 +480,7 @@ export function tryInitializeHiddenTracksLegacy(
 ): HiddenTracks | null {
   const allThreads = new Set(profile.threads.map((_thread, i) => i));
   const hiddenThreadsSet = new Set(legacyHiddenThreads);
-  const visibleThreads = _subtractSets(allThreads, hiddenThreadsSet);
+  const visibleThreads = subtractSets(allThreads, hiddenThreadsSet);
   if (visibleThreads.size === 0) {
     return null;
   }
@@ -505,7 +498,7 @@ export function tryInitializeHiddenTracksFromUrl(
   urlHiddenGlobalTracks: Set<TrackIndex>,
   urlHiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>
 ): HiddenTracks | null {
-  const hiddenGlobalTracks = _intersectSets(
+  const hiddenGlobalTracks = intersectSets(
     new Set(tracksWithOrder.globalTrackOrder),
     urlHiddenGlobalTracks
   );
@@ -513,7 +506,7 @@ export function tryInitializeHiddenTracksFromUrl(
   const hiddenLocalTracksByPid = new Map();
   for (const [pid, localTrackOrder] of tracksWithOrder.localTrackOrderByPid) {
     const localTracks = new Set(localTrackOrder);
-    const hiddenLocalTracks = _intersectSets(
+    const hiddenLocalTracks = intersectSets(
       localTracks,
       urlHiddenLocalTracksByPid.get(pid) || new Set()
     );
