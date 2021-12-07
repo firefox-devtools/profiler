@@ -8,7 +8,6 @@ import type {
   LibSymbolicationRequest,
   LibSymbolicationResponse,
 } from './symbol-store';
-import { SymbolsNotFoundError } from './errors';
 
 // This file handles requesting symbolication information from the Mozilla
 // symbol server using the API described on
@@ -152,17 +151,15 @@ function getV5ResultForLibRequest(
   const { debugName, breakpadId } = lib;
 
   if (!json.found_modules[`${debugName}/${breakpadId}`]) {
-    throw new SymbolsNotFoundError(
-      `The symbol server does not have symbols for ${debugName}/${breakpadId}.`,
-      lib
+    throw new Error(
+      `The symbol server does not have symbols for ${debugName}/${breakpadId}.`
     );
   }
 
   const addressInfo = json.stacks[0];
   if (addressInfo.length !== addressArray.length) {
-    throw new SymbolsNotFoundError(
-      'The result from the symbol server has an unexpected length.',
-      lib
+    throw new Error(
+      'The result from the symbol server has an unexpected length.'
     );
   }
 
