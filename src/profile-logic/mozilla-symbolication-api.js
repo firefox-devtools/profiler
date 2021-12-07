@@ -9,11 +9,19 @@ import type {
   LibSymbolicationResponse,
 } from './symbol-store';
 
-// This file handles requesting symbolication information from the Mozilla
-// symbol server using the API described on
-// https://tecken.readthedocs.io/en/latest/symbolication.html .
+// This file handles requesting symbolication information using the API described
+// on https://tecken.readthedocs.io/en/latest/symbolication.html .
 // Specifically, it uses version 5 of the API, which was implemented in
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1377479 .
+// The actual request happens via a callback. The current callback sends the
+// request to the Mozilla Symbolication Server, or to an alternative symbol server
+// which was configured with a ?symbolServer URL parameter.
+
+// The type for the callback, see comment above.
+export type QuerySymbolicationApiCallback = (
+  path: string,
+  requestJson: string
+) => Promise<MixedObject>;
 
 type APIFoundModulesV5 = {
   // For every requested library in the memoryMap, this object contains a string
@@ -76,7 +84,7 @@ type APIResultV5 = {
 
 // Make sure that the JSON blob we receive from the API conforms to our flow
 // type definition.
-function _ensureIsAPIResultV5(result: any): APIResultV5 {
+function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
   if (!(result instanceof Object) || !('results' in result)) {
     throw new Error('Expected an object with property `results`');
   }
@@ -143,6 +151,7 @@ function _ensureIsAPIResultV5(result: any): APIResultV5 {
 }
 
 function getV5ResultForLibRequest(
+  symbolSupplierName: string,
   request: LibSymbolicationRequest,
   addressArray: number[],
   json: APIJobResultV5
@@ -152,14 +161,14 @@ function getV5ResultForLibRequest(
 
   if (!json.found_modules[`${debugName}/${breakpadId}`]) {
     throw new Error(
-      `The symbol server does not have symbols for ${debugName}/${breakpadId}.`
+      `The ${symbolSupplierName} does not have symbols for ${debugName}/${breakpadId}.`
     );
   }
 
   const addressInfo = json.stacks[0];
   if (addressInfo.length !== addressArray.length) {
     throw new Error(
-      'The result from the symbol server has an unexpected length.'
+      `The result from the ${symbolSupplierName} has an unexpected length.`
     );
   }
 
@@ -216,9 +225,13 @@ function getV5ResultForLibRequest(
 // one response per LibSymbolicationRequest in requests. If the server does
 // not have symbol information for a given library, the LibSymbolicationResponse
 // for that library will have .type === 'ERROR'.
+// `querySymbolicationApiCallback` should be a callback that receives the actual
+// request in the Mozilla symbolication API format. See the comment about the
+// callback at the top of this file for more details.
 export async function requestSymbols(
+  symbolSupplierName: string,
   requests: LibSymbolicationRequest[],
-  symbolsUrl: string
+  querySymbolicationApiCallback: QuerySymbolicationApiCallback
 ): Promise<LibSymbolicationResponse[]> {
   // For each request, turn its set of addresses into an array.
   // We need there to be a defined order in each addressArray so that we can
@@ -241,19 +254,20 @@ export async function requestSymbols(
     }),
   };
 
-  const response = await fetch(symbolsUrl + '/symbolicate/v5', {
-    body: JSON.stringify(body),
-    method: 'POST',
-    mode: 'cors',
-  });
-
-  const responseJson = _ensureIsAPIResultV5(await response.json());
+  const responseJson = _ensureIsAPIResultV5(
+    await querySymbolicationApiCallback('/symbolicate/v5', JSON.stringify(body))
+  );
   return requestsWithAddressArrays.map(
     ({ request, addressArray }, requestIndex) => {
       const json = responseJson.results[requestIndex];
       try {
         const { lib } = request;
-        const results = getV5ResultForLibRequest(request, addressArray, json);
+        const results = getV5ResultForLibRequest(
+          symbolSupplierName,
+          request,
+          addressArray,
+          json
+        );
         return { type: 'SUCCESS', lib, results };
       } catch (error) {
         return { type: 'ERROR', request, error };

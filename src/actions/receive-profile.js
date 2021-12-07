@@ -878,8 +878,16 @@ function getSymbolStore(
       }
       try {
         return await MozillaSymbolicationAPI.requestSymbols(
+          'symbol server',
           requests,
-          symbolServerUrl
+          async (path, json) => {
+            const response = await fetch(symbolServerUrl + path, {
+              body: json,
+              method: 'POST',
+              mode: 'cors',
+            });
+            return response.json();
+          }
         );
       } finally {
         for (const { lib } of requests) {
