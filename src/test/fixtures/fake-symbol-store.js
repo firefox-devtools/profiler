@@ -6,12 +6,14 @@
 
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
+import type { RequestedLib } from 'firefox-profiler/types';
 import type {
   LibSymbolicationRequest,
   AddressResult,
+  AbstractSymbolStore,
 } from '../../profile-logic/symbol-store';
 
-export class FakeSymbolStore {
+export class FakeSymbolStore implements AbstractSymbolStore {
   _symbolTables: Map<string, {| addrs: Uint32Array, syms: string[] |}>;
 
   constructor(symbolTables: Map<string, Map<number, string>>) {
@@ -28,7 +30,7 @@ export class FakeSymbolStore {
 
   async getSymbols(
     requests: LibSymbolicationRequest[],
-    successCb: (LibSymbolicationRequest, Map<number, AddressResult>) => void,
+    successCb: (RequestedLib, Map<number, AddressResult>) => void,
     errorCb: (LibSymbolicationRequest, Error) => void
   ): Promise<void> {
     // Make sure that the callbacks are never called synchronously, by enforcing
@@ -47,7 +49,7 @@ export class FakeSymbolStore {
             symbolAddress: symbolTable.addrs[index],
           });
         }
-        successCb(request, results);
+        successCb(lib, results);
       } else {
         errorCb(request, new Error('symbol table not found'));
       }

@@ -3,7 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { AddressResult, LibSymbolicationRequest } from './symbol-store';
+import type {
+  AddressResult,
+  LibSymbolicationRequest,
+  LibSymbolicationResponse,
+} from './symbol-store';
 import { SymbolsNotFoundError } from './errors';
 
 // This file handles requesting symbolication information from the Mozilla
@@ -211,16 +215,14 @@ function getV5ResultForLibRequest(
 
 // Request symbols for the given addresses and libraries using the Mozilla
 // symbolication API.
-// Returns an array of promises, one promise per LibSymbolicationRequest in
-// requests. If the server does not have symbol information for a given library,
-// the promise for that library will fail.
-// That's the reason why this function does not return just one promise: We want
-// to indicate failure status for each library independently. Under the hood,
-// only one request is made to the server.
-export function requestSymbols(
+// Returns a promise that resolves to an array LibSymbolicationResponses,
+// one response per LibSymbolicationRequest in requests. If the server does
+// not have symbol information for a given library, the LibSymbolicationResponse
+// for that library will have .type === 'ERROR'.
+export async function requestSymbols(
   requests: LibSymbolicationRequest[],
   symbolsUrl: string
-): Array<Promise<Map<number, AddressResult>>> {
+): Promise<LibSymbolicationResponse[]> {
   // For each request, turn its set of addresses into an array.
   // We need there to be a defined order in each addressArray so that we can
   // match the results to the request.
@@ -242,31 +244,23 @@ export function requestSymbols(
     }),
   };
 
-  const jsonPromise = fetch(symbolsUrl + '/symbolicate/v5', {
+  const response = await fetch(symbolsUrl + '/symbolicate/v5', {
     body: JSON.stringify(body),
     method: 'POST',
     mode: 'cors',
-  })
-    .then((response) => response.json())
-    .then(_ensureIsAPIResultV5);
-
-  return requestsWithAddressArrays.map(async function (
-    { request, addressArray },
-    requestIndex
-  ) {
-    const { lib } = request;
-
-    let json;
-    try {
-      json = (await jsonPromise).results[requestIndex];
-    } catch (error) {
-      throw new SymbolsNotFoundError(
-        'There was a problem with the JSON returned by the symbolication API.',
-        lib,
-        error
-      );
-    }
-
-    return getV5ResultForLibRequest(request, addressArray, json);
   });
+
+  const responseJson = _ensureIsAPIResultV5(await response.json());
+  return requestsWithAddressArrays.map(
+    ({ request, addressArray }, requestIndex) => {
+      const json = responseJson.results[requestIndex];
+      try {
+        const { lib } = request;
+        const results = getV5ResultForLibRequest(request, addressArray, json);
+        return { type: 'SUCCESS', lib, results };
+      } catch (error) {
+        return { type: 'ERROR', request, error };
+      }
+    }
+  );
 }

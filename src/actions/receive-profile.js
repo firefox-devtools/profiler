@@ -891,23 +891,20 @@ function getSymbolStore(
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
-    requestSymbolsFromServer: (requests) => {
+    requestSymbolsFromServer: async (requests) => {
       for (const { lib } of requests) {
         dispatch(requestingSymbolTable(lib));
       }
-      return MozillaSymbolicationAPI.requestSymbols(
-        requests,
-        symbolServerUrl
-      ).map(async (libPromise, i) => {
-        try {
-          const result = await libPromise;
-          dispatch(receivedSymbolTableReply(requests[i].lib));
-          return result;
-        } catch (error) {
-          dispatch(receivedSymbolTableReply(requests[i].lib));
-          throw error;
+      try {
+        return await MozillaSymbolicationAPI.requestSymbols(
+          requests,
+          symbolServerUrl
+        );
+      } finally {
+        for (const { lib } of requests) {
+          dispatch(receivedSymbolTableReply(lib));
         }
-      });
+      }
     },
     requestSymbolTableFromBrowser: async (lib) => {
       if (browserConnection === null) {
