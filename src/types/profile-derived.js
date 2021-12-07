@@ -70,6 +70,33 @@ export type CallNodeInfo = {
   stackIndexToCallNodeIndex: Uint32Array,
 };
 
+export type LineNumber = number;
+
+// Stores, for all stacks of a thread and for one specific file, the line
+// numbers in that file that are hit by each stack.
+// This can be computed once for a filtered thread, and then queried cheaply
+// as the preview selection changes.
+// The order of these arrays is the same as the order of thread.stackTable;
+// the array index is a stackIndex.
+export type StackLineInfo = {|
+  // An array that contains, for each stack, the line number that this stack
+  // spends its self time in, in this file, or null if the self time of the
+  // stack is in a different file or if the line number is not known.
+  selfLine: Array<LineNumber | null>,
+  // An array that contains, for each stack, all the lines that the frames in
+  // this stack hit in this file, or null if this stack does not hit any line
+  // in the given file.
+  stackLines: Array<Set<LineNumber> | null>,
+|};
+
+// Stores, for all lines of one specific file, how many times each line is hit
+// by samples in a thread. The maps only contain non-zero values.
+// So map.get(line) === undefined should be treated as zero.
+export type LineTimings = {|
+  totalLineHits: Map<LineNumber, number>,
+  selfLineHits: Map<LineNumber, number>,
+|};
+
 /**
  * When working with call trees, individual nodes in the tree are not stable across
  * different types of transformations and filtering operations. In order to refer
