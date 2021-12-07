@@ -17,7 +17,9 @@ exports[`app/AppViewRouter renders an home when the user pressed back after an e
     <div
       class="rootMessageText"
     >
-      Could not download the profile.
+      <p>
+        Could not download the profile.
+      </p>
     </div>
     <div
       class="rootMessageAdditional"
@@ -28,6 +30,10 @@ exports[`app/AppViewRouter renders an home when the user pressed back after an e
       <p>
         The full stack has been written to the Web Console.
       </p>
+    </div>
+    <div
+      class="rootBackHomeLink"
+    >
       <a
         href="/"
       >
@@ -57,7 +63,9 @@ exports[`app/AppViewRouter renders temporary errors 1`] = `
     <div
       class="rootMessageText"
     >
-      Downloading and processing the profile…
+      <p>
+        Downloading and processing the profile…
+      </p>
     </div>
     <div
       class="rootMessageAdditional"
@@ -68,6 +76,10 @@ exports[`app/AppViewRouter renders temporary errors 1`] = `
       <p>
         Tried 3 times out of 10.
       </p>
+    </div>
+    <div
+      class="rootBackHomeLink"
+    >
       <a
         href="/"
       >
@@ -127,7 +139,9 @@ exports[`app/AppViewRouter renders the addon loading page, and the profile view 
     <div
       class="rootMessageText"
     >
-      Importing the profile directly from ⁨Firefox⁩…
+      <p>
+        Importing the profile directly from ⁨Firefox⁩…
+      </p>
     </div>
     <div
       class="loading"
@@ -184,7 +198,9 @@ exports[`app/AppViewRouter renders the profile view 1`] = `
     <div
       class="rootMessageText"
     >
-      Downloading and processing the profile…
+      <p>
+        Downloading and processing the profile…
+      </p>
     </div>
     <div
       class="loading"

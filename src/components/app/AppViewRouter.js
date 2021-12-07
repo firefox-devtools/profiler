@@ -28,13 +28,13 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { Localized } from '@fluent/react';
 
 const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
-  'from-browser': 'AppViewRouter--error-message-unpublished',
-  unpublished: 'AppViewRouter--error-message-unpublished',
-  'from-file': 'AppViewRouter--error-message-from-file',
-  local: 'AppViewRouter--error-message-local',
-  public: 'AppViewRouter--error-message-public',
-  'from-url': 'AppViewRouter--error-message-from-url',
-  compare: 'AppViewRouter--error-message-compare',
+  'from-browser': 'AppViewRouter--error-unpublished',
+  unpublished: 'AppViewRouter--error-unpublished',
+  'from-file': 'AppViewRouter--error-from-file',
+  local: 'AppViewRouter--error-local',
+  public: 'AppViewRouter--error-public',
+  'from-url': 'AppViewRouter--error-from-url',
+  compare: 'AppViewRouter--error-compare',
 });
 
 type AppViewRouterStateProps = {|
@@ -81,24 +81,43 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
       case 'DATA_RELOAD':
         return <ProfileLoaderAnimation />;
       case 'FATAL_ERROR': {
-        const message =
-          ERROR_MESSAGES_L10N_ID[dataSource] ||
-          'AppViewRouter--error-message-public';
+        let message =
+          ERROR_MESSAGES_L10N_ID[dataSource] || 'AppViewRouter--error-public';
         let additionalMessage = null;
         if (view.error) {
-          console.error(view.error);
-          additionalMessage =
-            `${view.error.toString()}\n` +
-            'The full stack has been written to the Web Console.';
+          if (view.error.name === 'SafariLocalhostHTTPLoadError') {
+            message = 'AppViewRouter--error-from-localhost-url-safari';
+          } else {
+            console.error(view.error);
+            additionalMessage = (
+              <>
+                <p>{view.error.toString()}</p>
+                <p>The full stack has been written to the Web Console.</p>
+              </>
+            );
+          }
         }
 
         return (
-          <Localized id={message} attrs={{ message: true }}>
+          <Localized
+            id={message}
+            attrs={{ title: true }}
+            elems={{
+              // WebKit bug link, only used for AppViewRouter--message-from-localhost-url-safari
+              a: (
+                <a
+                  href="https://bugs.webkit.org/show_bug.cgi?id=171934"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              ),
+            }}
+          >
             <ProfileRootMessage
-              message={message}
               additionalMessage={additionalMessage}
               showLoader={false}
-            />
+              showBackHomeLink={true}
+            >{`missing translation for ${message}`}</ProfileRootMessage>
           </Localized>
         );
       }
