@@ -81,8 +81,9 @@ export const getIsDragAndDropDragging: Selector<boolean> = (state) =>
 export const getIsDragAndDropOverlayRegistered: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropOverlayRegistered;
 
-export const getCurrentProfileUploadedInformation: Selector<UploadedProfileInformation | null> =
-  (state) => getApp(state).currentProfileUploadedInformation;
+export const getCurrentProfileUploadedInformation: Selector<
+  UploadedProfileInformation | null
+> = (state) => getApp(state).currentProfileUploadedInformation;
 
 /**
  * Height of screenshot track is different depending on the view.
