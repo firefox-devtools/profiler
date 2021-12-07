@@ -306,12 +306,14 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
           )}
         </div>
         <TimelineSelection width={timelineWidth}>
-          <TimelineRuler
-            zeroAt={zeroAt}
-            rangeStart={committedRange.start}
-            rangeEnd={committedRange.end}
-            width={timelineWidth}
-          />
+          <div className="timelineHeader">
+            <TimelineRuler
+              zeroAt={zeroAt}
+              rangeStart={committedRange.start}
+              rangeEnd={committedRange.end}
+              width={timelineWidth}
+            />
+          </div>
           <OverflowEdgeIndicator
             className="timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}

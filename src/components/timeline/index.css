@@ -102,3 +102,8 @@
 .timelineSettingsHiddenTracksNumber {
   font-weight: bold;
 }
+
+.timelineHeader {
+  display: flex;
+  flex-direction: row;
+}
