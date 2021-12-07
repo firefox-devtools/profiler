@@ -20,8 +20,21 @@ import {
   isThreadWithNoPaint,
   isContentThreadWithNoPaint,
 } from './profile-data';
+import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
+
+export type TracksWithOrder = {|
+  +globalTracks: GlobalTrack[],
+  +globalTrackOrder: TrackIndex[],
+  +localTracksByPid: Map<Pid, LocalTrack[]>,
+  +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+|};
+
+export type HiddenTracks = {|
+  +hiddenGlobalTracks: Set<TrackIndex>,
+  +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+|};
 
 /**
  * This file collects all the logic that goes into validating URL-encoded view options.
@@ -163,58 +176,6 @@ export function initializeLocalTrackOrderByPid(
   }
 
   return trackOrderByPid;
-}
-
-export function initializeHiddenLocalTracksByPid(
-  urlHiddenTracksByPid: Map<Pid, Set<TrackIndex>> | null,
-  localTracksByPid: Map<Pid, LocalTrack[]>,
-  profile: Profile,
-  legacyHiddenThreads: ThreadIndex[] | null,
-  idleThreadsByCPU: Set<ThreadIndex>
-): Map<Pid, Set<TrackIndex>> {
-  const hiddenTracksByPid = new Map();
-
-  // Go through each set of tracks, determine the sort order.
-  for (const [pid, tracks] of localTracksByPid) {
-    const hiddenTracks = new Set();
-
-    if (legacyHiddenThreads !== null) {
-      for (const threadIndex of legacyHiddenThreads) {
-        const trackIndex = tracks.findIndex(
-          (track) =>
-            track.type === 'thread' && track.threadIndex === threadIndex
-        );
-        if (trackIndex !== -1) {
-          hiddenTracks.add(trackIndex);
-        }
-      }
-    } else if (urlHiddenTracksByPid === null) {
-      for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
-        const track = tracks[trackIndex];
-        if (
-          track.type === 'thread' &&
-          _isThreadIdle(profile, track.threadIndex, idleThreadsByCPU)
-        ) {
-          hiddenTracks.add(trackIndex);
-        }
-      }
-    } else {
-      const urlHiddenTracks = urlHiddenTracksByPid.get(pid);
-      const trackIndexes = tracks.map((_, index) => index);
-
-      if (urlHiddenTracks !== undefined) {
-        for (const index of urlHiddenTracks) {
-          if (trackIndexes.includes(index)) {
-            hiddenTracks.add(index);
-          }
-        }
-      }
-    }
-
-    hiddenTracksByPid.set(pid, hiddenTracks);
-  }
-
-  return hiddenTracksByPid;
 }
 
 /**
@@ -470,92 +431,196 @@ export function initializeGlobalTrackOrder(
     : _getDefaultGlobalTrackOrder(globalTracks);
 }
 
+// Returns the selected thread (set), intersected with the set of visible threads.
+// Falls back to the default thread selection.
 export function initializeSelectedThreadIndex(
   selectedThreadIndexes: Set<ThreadIndex> | null,
   visibleThreadIndexes: ThreadIndex[],
   profile: Profile
 ): Set<ThreadIndex> {
-  if (selectedThreadIndexes !== null) {
-    // Make sure all of the selected thread indexes are actually visible.
-    const visibleSelectedThreadIndexes = new Set();
-    for (const threadIndex of visibleThreadIndexes) {
-      if (selectedThreadIndexes.has(threadIndex)) {
-        visibleSelectedThreadIndexes.add(threadIndex);
-      }
-    }
-    if (visibleSelectedThreadIndexes.size > 0) {
-      return visibleSelectedThreadIndexes;
-    }
+  if (selectedThreadIndexes === null) {
+    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
   }
 
-  // Select either the GeckoMain [tab] thread, or the first thread in the thread
-  // order.
-  const threadIndex = profile.threads.indexOf(
-    _findDefaultThread(
-      visibleThreadIndexes.map((threadIndex) => profile.threads[threadIndex])
-    )
+  // Filter out hidden threads from the set of selected threads.
+  const visibleSelectedThreadIndexes = intersectSets(
+    selectedThreadIndexes,
+    new Set(visibleThreadIndexes)
   );
-  if (threadIndex === -1) {
+  if (visibleSelectedThreadIndexes.size === 0) {
+    // No selected threads were visible. Fall back to default selection.
+    return getDefaultSelectedThreadIndexes(visibleThreadIndexes, profile);
+  }
+  return visibleSelectedThreadIndexes;
+}
+
+// Select either the GeckoMain [tab] thread, or the first thread in the thread
+// order.
+function getDefaultSelectedThreadIndexes(
+  visibleThreadIndexes: ThreadIndex[],
+  profile: Profile
+): Set<ThreadIndex> {
+  const visibleThreads = visibleThreadIndexes.map(
+    (threadIndex) => profile.threads[threadIndex]
+  );
+  const defaultThread = _findDefaultThread(visibleThreads);
+  const defaultThreadIndex = profile.threads.indexOf(defaultThread);
+  if (defaultThreadIndex === -1) {
     throw new Error('Expected to find a thread index to select.');
   }
-  return new Set([threadIndex]);
+  return new Set([defaultThreadIndex]);
 }
 
-export function initializeHiddenGlobalTracks(
-  globalTracks: GlobalTrack[],
-  profile: Profile,
-  validTrackIndexes: TrackIndex[],
-  urlHiddenGlobalTracks: Set<TrackIndex> | null,
-  legacyHiddenThreads: ThreadIndex[] | null,
-  idleThreadsByCPU: Set<ThreadIndex>
-): Set<TrackIndex> {
-  const hiddenGlobalTracks = new Set();
+// Returns either a configuration of hidden tracks that has at least one
+// visible thread, or null.
+export function tryInitializeHiddenTracksLegacy(
+  tracksWithOrder: TracksWithOrder,
+  legacyHiddenThreads: ThreadIndex[],
+  profile: Profile
+): HiddenTracks | null {
+  const allThreads = new Set(profile.threads.map((_thread, i) => i));
+  const hiddenThreadsSet = new Set(legacyHiddenThreads);
+  const visibleThreads = subtractSets(allThreads, hiddenThreadsSet);
+  if (visibleThreads.size === 0) {
+    return null;
+  }
+  return _computeHiddenTracksForVisibleThreads(
+    profile,
+    visibleThreads,
+    tracksWithOrder
+  );
+}
 
-  if (legacyHiddenThreads !== null) {
-    for (const threadIndex of legacyHiddenThreads) {
-      const trackIndex = globalTracks.findIndex(
-        (track) =>
-          track.type === 'process' && track.mainThreadIndex === threadIndex
+// Returns either a configuration of hidden tracks that has at least one
+// visible thread, or null.
+export function tryInitializeHiddenTracksFromUrl(
+  tracksWithOrder: TracksWithOrder,
+  urlHiddenGlobalTracks: Set<TrackIndex>,
+  urlHiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>
+): HiddenTracks | null {
+  const hiddenGlobalTracks = intersectSets(
+    new Set(tracksWithOrder.globalTrackOrder),
+    urlHiddenGlobalTracks
+  );
+
+  const hiddenLocalTracksByPid = new Map();
+  for (const [pid, localTrackOrder] of tracksWithOrder.localTrackOrderByPid) {
+    const localTracks = new Set(localTrackOrder);
+    const hiddenLocalTracks = intersectSets(
+      localTracks,
+      urlHiddenLocalTracksByPid.get(pid) || new Set()
+    );
+    hiddenLocalTracksByPid.set(pid, hiddenLocalTracks);
+    if (hiddenLocalTracks.size === localTracks.size) {
+      // All local tracks of this process were hidden.
+      // If the main thread was not recorded for this process, hide the (empty) process track as well.
+      const globalTrackIndex = tracksWithOrder.globalTracks.findIndex(
+        (globalTrack) =>
+          globalTrack.type === 'process' &&
+          globalTrack.pid === pid &&
+          globalTrack.mainThreadIndex === null
       );
-      if (trackIndex !== -1) {
-        hiddenGlobalTracks.add(trackIndex);
+      if (globalTrackIndex !== -1) {
+        // An empty global track was found, hide it.
+        hiddenGlobalTracks.add(globalTrackIndex);
       }
     }
   }
 
-  if (urlHiddenGlobalTracks === null) {
-    // No hidden global tracks exist, generate the default Set if there are more
-    // than one global tracks. If there is only one, skip checking and not hide
-    // it by default.
-    if (globalTracks.length > 1) {
-      for (let trackIndex = 0; trackIndex < globalTracks.length; trackIndex++) {
-        const track = globalTracks[trackIndex];
-        if (track.type === 'process' && track.mainThreadIndex !== null) {
-          const { mainThreadIndex } = track;
-          if (_isThreadIdle(profile, mainThreadIndex, idleThreadsByCPU)) {
-            hiddenGlobalTracks.add(trackIndex);
-          }
-        }
-      }
-    }
-
-    return hiddenGlobalTracks;
+  const hiddenTracks = { hiddenGlobalTracks, hiddenLocalTracksByPid };
+  if (getVisibleThreads(tracksWithOrder, hiddenTracks).length === 0) {
+    return null;
   }
 
-  // Validate the global tracks to hide.
-  for (const trackIndex of urlHiddenGlobalTracks) {
-    if (validTrackIndexes.includes(trackIndex)) {
-      hiddenGlobalTracks.add(trackIndex);
-    }
-  }
-  return hiddenGlobalTracks;
+  return hiddenTracks;
 }
 
+// Returns the default configuration of hidden global and local tracks.
+// The result is guaranteed to have a non-empty number of visible threads.
+export function computeDefaultHiddenTracks(
+  tracksWithOrder: TracksWithOrder,
+  profile: Profile,
+  idleThreadsByCPU: Set<ThreadIndex>
+): HiddenTracks {
+  return _computeHiddenTracksForVisibleThreads(
+    profile,
+    computeDefaultVisibleThreads(profile, idleThreadsByCPU),
+    tracksWithOrder
+  );
+}
+
+// Return a non-empty set of threads that should be shown by default.
+export function computeDefaultVisibleThreads(
+  profile: Profile,
+  idleThreadsByCPU: Set<ThreadIndex>
+): Set<ThreadIndex> {
+  const validThreadIndexes = profile.threads.map((_thread, i) => i);
+  const nonIdleThreads = validThreadIndexes.filter((threadIndex) => {
+    return !_isThreadIdle(profile, threadIndex, idleThreadsByCPU);
+  });
+  if (nonIdleThreads.length === 0) {
+    // All threads idle. Show all threads.
+    return new Set(validThreadIndexes);
+  }
+  return new Set(nonIdleThreads);
+}
+
+// Create the sets of global and local tracks so that the requested
+// threads are visible. Non-process global tracks and non-thread local
+// tracks are always visible.
+// Some main threads can be visible even if they were not requested to
+// be visible. This happens if their global track contains visible local
+// tracks.
+function _computeHiddenTracksForVisibleThreads(
+  profile: Profile,
+  visibleThreadIndexes: Set<ThreadIndex>,
+  tracksWithOrder: TracksWithOrder
+): HiddenTracks {
+  const visiblePids = new Set(
+    [...visibleThreadIndexes].map((i) => profile.threads[i].pid)
+  );
+
+  const hiddenGlobalTracks = new Set(
+    tracksWithOrder.globalTrackOrder.filter((trackIndex) => {
+      const globalTrack = tracksWithOrder.globalTracks[trackIndex];
+      if (globalTrack.type !== 'process') {
+        // Keep non-process global tracks visible.
+        return false;
+      }
+      return !visiblePids.has(globalTrack.pid);
+    })
+  );
+
+  const hiddenLocalTracksByPid = new Map();
+  for (const [pid, localTrackOrder] of tracksWithOrder.localTrackOrderByPid) {
+    if (!visiblePids.has(pid)) {
+      // Hide all local tracks.
+      hiddenLocalTracksByPid.set(pid, new Set(localTrackOrder));
+      continue;
+    }
+
+    const localTracks = tracksWithOrder.localTracksByPid.get(pid) ?? [];
+    const hiddenLocalTracks = new Set(
+      localTrackOrder.filter((localTrackIndex) => {
+        const localTrack = localTracks[localTrackIndex];
+        if (localTrack.type !== 'thread') {
+          // Keep non-thread local tracks visible.
+          return false;
+        }
+        return !visibleThreadIndexes.has(localTrack.threadIndex);
+      })
+    );
+    hiddenLocalTracksByPid.set(pid, hiddenLocalTracks);
+  }
+
+  return { hiddenGlobalTracks, hiddenLocalTracksByPid };
+}
+
+// Return the list of threads which are visible in the supplied hidden
+// tracks configuration.
 export function getVisibleThreads(
-  globalTracks: GlobalTrack[],
-  hiddenGlobalTracks: Set<TrackIndex>,
-  localTracksByPid: Map<Pid, LocalTrack[]>,
-  hiddenTracksByPid: Map<Pid, Set<TrackIndex>>
+  { globalTracks, localTracksByPid }: TracksWithOrder,
+  { hiddenGlobalTracks, hiddenLocalTracksByPid }: HiddenTracks
 ): ThreadIndex[] {
   const visibleThreads = [];
   for (
@@ -577,7 +642,7 @@ export function getVisibleThreads(
         'A local track was expected to exist for the given pid.'
       );
       const hiddenTracks = ensureExists(
-        hiddenTracksByPid.get(pid),
+        hiddenLocalTracksByPid.get(pid),
         'Hidden tracks were expected to exists for the given pid.'
       );
       for (
