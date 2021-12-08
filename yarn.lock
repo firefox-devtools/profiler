@@ -1033,6 +1033,14 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@firefox-devtools/react-contextmenu@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@firefox-devtools/react-contextmenu/-/react-contextmenu-4.0.0.tgz#0ff0569b342aedef3a822f4aa24c370d4e645805"
+  integrity sha512-tZrxjwPIO5Ey7HETAHKVPlNs8VUFNVkpCKUCablGF3rDUMcTS/DVWROAV855l8OvmRPF9PVSnhvkGc+0BUn4tw==
+  dependencies:
+    classnames "^2.3.1"
+    object-assign "^4.1.0"
+
 "@fluent/bundle@^0.17.0":
   version "0.17.0"
   resolved "https://registry.yarnpkg.com/@fluent/bundle/-/bundle-0.17.0.tgz#02f51f2ca8b85f80dd6b07df93e7ba421b124d52"
@@ -3388,7 +3396,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.5, classnames@^2.3.1:
+classnames@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.3.1.tgz#dfcfa3891e306ec1dad105d0e88f4417b8535e8e"
   integrity sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==
@@ -11153,14 +11161,6 @@ rc@^1.2.8:
     ini "~1.3.0"
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
-
-react-contextmenu@~2.14.0:
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/react-contextmenu/-/react-contextmenu-2.14.0.tgz#d8966f30614b9b780b928be4c8d92bd740d55cdd"
-  integrity sha512-ktqMOuad6sCFNJs/ltEwppN8F0YeXmqoZfwycgtZR/MxOXMYx1xgYC44SzWH259HdGyshk1/7sXGuIRwj9hzbw==
-  dependencies:
-    classnames "^2.2.5"
-    object-assign "^4.1.0"
 
 react-dom@^16.13.1:
   version "16.14.0"
