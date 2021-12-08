@@ -7,11 +7,20 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getStackLineInfo,
+  getStackLineInfoForCallNode,
   getLineTimings,
 } from 'firefox-profiler/profile-logic/line-timings';
-import { invertCallstack } from '../../profile-logic/profile-data';
+import {
+  invertCallstack,
+  getCallNodeInfo,
+  getCallNodeIndexFromPath,
+} from '../../profile-logic/profile-data';
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import type { Thread } from 'firefox-profiler/types';
+import type {
+  CallNodePath,
+  Thread,
+  IndexIntoCategoryList,
+} from 'firefox-profiler/types';
 
 describe('getStackLineInfo', function () {
   it('computes results for all stacks', function () {
@@ -129,5 +138,155 @@ describe('getLineTimings for getStackLineInfo', function () {
     const lineTimingsTwo = getTimings(thread, 'two.js', false);
     const lineTimingsInvertedTwo = getTimings(invertedThread, 'two.js', true);
     expect(lineTimingsInvertedTwo).toEqual(lineTimingsTwo);
+  });
+});
+
+describe('getLineTimings for getStackLineInfoForCallNode', function () {
+  function getTimings(
+    thread: Thread,
+    callNodePath: CallNodePath,
+    defaultCat: IndexIntoCategoryList,
+    isInverted: boolean
+  ) {
+    const { stackTable, frameTable, funcTable, samples } = thread;
+    const callNodeInfo = getCallNodeInfo(
+      stackTable,
+      frameTable,
+      funcTable,
+      defaultCat
+    );
+    const callNodeIndex = ensureExists(
+      getCallNodeIndexFromPath(callNodePath, callNodeInfo.callNodeTable),
+      'invalid call node path'
+    );
+    const stackLineInfo = getStackLineInfoForCallNode(
+      stackTable,
+      frameTable,
+      callNodeIndex,
+      callNodeInfo,
+      isInverted
+    );
+    return getLineTimings(stackLineInfo, samples);
+  }
+
+  it('passes a basic test', function () {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:file.js][line:20]
+      B[file:file.js][line:30]
+    `);
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCat = categories.findIndex((c) => c.color === 'grey');
+
+    const [{ A, B }] = funcNamesDictPerThread;
+    const [thread] = profile.threads;
+
+    // Compute the line timings for the root call node.
+    // No self line hit, one total line hit in line 20.
+    const lineTimingsRoot = getTimings(thread, [A], defaultCat, false);
+    expect(lineTimingsRoot.totalLineHits.get(20)).toBe(1);
+    expect(lineTimingsRoot.totalLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsRoot.selfLineHits.size).toBe(0); // no self hits
+
+    // Compute the line timings for the child call node.
+    // One self line hit in line 30, which is also the only total line hit.
+    const lineTimingsChild = getTimings(thread, [A, B], defaultCat, false);
+    expect(lineTimingsChild.totalLineHits.get(30)).toBe(1);
+    expect(lineTimingsChild.totalLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsChild.selfLineHits.get(30)).toBe(1);
+    expect(lineTimingsChild.selfLineHits.size).toBe(1); // no other hits
+  });
+
+  it('passes a basic test with recursion', function () {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:file.js][line:20]
+      B[file:file.js][line:30]
+      A[file:file.js][line:21]
+    `);
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCat = categories.findIndex((c) => c.color === 'grey');
+
+    const [{ A, B }] = funcNamesDictPerThread;
+    const [thread] = profile.threads;
+
+    // Compute the line timings for the root call node.
+    // No self line hit, one total line hit in line 20.
+    const lineTimingsRoot = getTimings(thread, [A], defaultCat, false);
+    expect(lineTimingsRoot.totalLineHits.get(20)).toBe(1);
+    expect(lineTimingsRoot.totalLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsRoot.selfLineHits.size).toBe(0); // no self hits
+
+    // Compute the line timings for the leaf call node.
+    // One self line hit in line 21, which is also the only total line hit.
+    // In particular, we shouldn't record a hit for line 20, even though
+    // the hit at line 20 is also in A. But it's in the wrong call node.
+    const lineTimingsChild = getTimings(thread, [A, B, A], defaultCat, false);
+    expect(lineTimingsChild.totalLineHits.get(21)).toBe(1);
+    expect(lineTimingsChild.totalLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsChild.selfLineHits.get(21)).toBe(1);
+    expect(lineTimingsChild.selfLineHits.size).toBe(1); // no other hits
+  });
+
+  it('passes a test where the same function is called via different call paths', function () {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
+      B[file:one.js][line:30]  D[file:one.js][line:50]  B[file:one.js][line:31]
+      C[file:two.js][line:10]  C[file:two.js][line:11]  C[file:two.js][line:12]
+                                                        D[file:one.js][line:51]
+    `);
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCat = categories.findIndex((c) => c.color === 'grey');
+
+    const [{ A, B, C }] = funcNamesDictPerThread;
+    const [thread] = profile.threads;
+
+    const lineTimingsABC = getTimings(thread, [A, B, C], defaultCat, false);
+    expect(lineTimingsABC.totalLineHits.get(10)).toBe(1);
+    expect(lineTimingsABC.totalLineHits.get(12)).toBe(1);
+    expect(lineTimingsABC.totalLineHits.size).toBe(2); // no other hits
+    expect(lineTimingsABC.selfLineHits.get(10)).toBe(1);
+    expect(lineTimingsABC.selfLineHits.size).toBe(1); // no other hits
+  });
+
+  it('passes a test with an inverted thread', function () {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
+      B[file:one.js][line:30]  D[file:one.js][line:50]  B[file:one.js][line:31]
+      D[file:one.js][line:51]  D[file:one.js][line:52]  C[file:two.js][line:12]
+                                                        D[file:one.js][line:51]
+    `);
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCat = categories.findIndex((c) => c.color === 'grey');
+
+    const [{ C, D }] = funcNamesDictPerThread;
+    const [thread] = profile.threads;
+    const invertedThread = invertCallstack(thread, defaultCat);
+
+    // For the root D of the inverted tree, we have 3 self line hits.
+    const lineTimingsD = getTimings(invertedThread, [D], defaultCat, true);
+    expect(lineTimingsD.totalLineHits.get(51)).toBe(2);
+    expect(lineTimingsD.totalLineHits.get(52)).toBe(1);
+    expect(lineTimingsD.totalLineHits.size).toBe(2); // no other hits
+    expect(lineTimingsD.selfLineHits.get(51)).toBe(2);
+    expect(lineTimingsD.selfLineHits.get(52)).toBe(1);
+    expect(lineTimingsD.selfLineHits.size).toBe(2); // no other hits
+
+    // For the C call node which is a child (direct caller) of D, we have
+    // no self line hit and one hit in line 12.
+    const lineTimingsDC = getTimings(invertedThread, [D, C], defaultCat, true);
+    expect(lineTimingsDC.totalLineHits.get(12)).toBe(1);
+    expect(lineTimingsDC.totalLineHits.size).toBe(1); // no other hits
+    expect(lineTimingsDC.selfLineHits.size).toBe(0); // no self line hits
   });
 });
