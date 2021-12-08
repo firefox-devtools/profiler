@@ -42,6 +42,8 @@ CallNodeContextMenu--transform-merge-call-node = Fusionner le nœud uniquement
     .title = La fusion d’un nœud le supprime du profil et attribue son temps d’exécution au nœud de la fonction qui l’a appelé. Il supprime uniquement la fonction de cette partie spécifique de l’arborescence. Tous les autres endroits à partir desquels la fonction a été appelée resteront dans le profil.
 CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Focus sur la fonction (inversé)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Se concentrer sur le sous-arbre uniquement
     .title = Se concentrer sur un sous-arbre supprime tout échantillon qui n’inclut pas cette partie spécifique de l’arbre d’appels. Il extrait une branche de l’arborescence des appels, mais il ne le fait que pour ce seul nœud d’appel. Tous les autres appels de la fonction sont ignorés.
 CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
@@ -475,6 +477,9 @@ TrackContextMenu--hide-other-screenshots-tracks = Masquer les autres pistes de c
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Masquer « { $trackName } »
 TrackContextMenu--show-all-tracks = Afficher toutes les pistes
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Afficher toutes les pistes ci-dessous
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:
@@ -484,6 +489,9 @@ TrackContextMenu--no-results-found = Aucun résultat pour « <span>{ $searchFil
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Saisissez les termes du filtre
+    .title = Afficher uniquement les pistes correspondant à certains termes
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -505,6 +513,16 @@ TransformNavigator--complete = « { $item } » complet
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = Réduire : { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Focus sur le nœud : { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Focus : { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
