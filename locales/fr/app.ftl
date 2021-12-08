@@ -40,6 +40,9 @@ CallNodeContextMenu--transform-merge-function = Fusionner la fonction
     .title = La fusion d’une fonction la supprime du profil et attribue son temps d’exécution à la fonction qui l’a appelée. Cela se produit partout où la fonction a été appelée dans l’arborescence.
 CallNodeContextMenu--transform-merge-call-node = Fusionner le nœud uniquement
     .title = La fusion d’un nœud le supprime du profil et attribue son temps d’exécution au nœud de la fonction qui l’a appelé. Il supprime uniquement la fonction de cette partie spécifique de l’arborescence. Tous les autres endroits à partir desquels la fonction a été appelée resteront dans le profil.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title = Mettre le focus sur une fonction supprimera tout échantillon qui ne l’inclut pas. De plus, il ré-enracine l’arbre d’appels afin que cette fonction soit l’unique racine de l’arbre. Il peut être nécessaire de combiner plusieurs sites d’appel de fonction d’un profil dans un nœud d’appel.
 CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Focus sur la fonction (inversé)
@@ -53,6 +56,8 @@ CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Réduire <strong>{ $nameForResource }</strong>
     .title = Réduire une ressource aplatit tous les appels à cette ressource en un seul nœud d’appel réduit.
+CallNodeContextMenu--transform-collapse-direct-recursion = Réduire la récursivité directe
+    .title = La réduction de la récursivité directe supprime les appels qui reviennent à plusieurs reprises dans la même fonction.
 CallNodeContextMenu--transform-drop-function = Supprimer les échantillons avec cette fonction
     .title = La suppression des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
@@ -192,6 +197,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Afficher uniquement le temps individuel
+    .title = Affiche uniquement le temps passé dans un nœud d’appel, en ignorant ses enfants.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
