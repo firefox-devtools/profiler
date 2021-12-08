@@ -368,10 +368,13 @@ MenuButtons--metaOverheadStatistics-statkeys-overhead = Surcharge
     .title = Temps utilisé pour échantillonner tous les threads.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Nettoyage
     .title = Temps de suppression des données expirées.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Compteurs
+    .title = Temps nécessaire au rassemblement de tous les compteurs.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Intervalle
     .title = Intervalle observé entre deux échantillons.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Verrouillages
     .title = Temps d’acquisition du verrou avant l’échantillonnage.
+MenuButtons--metaOverheadStatistics-overhead-duration = Durées de la surcharge :
 MenuButtons--metaOverheadStatistics-overhead-percentage = Taux de surcharge :
 MenuButtons--metaOverheadStatistics-profiled-duration = Durée profilée :
 
@@ -379,6 +382,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Durée profilée :
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Inclure les threads cachés
+MenuButtons--publish--renderCheckbox-label-hidden-time = Inclure la plage de temps masquée
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Inclure des captures d’écran
 MenuButtons--publish--renderCheckbox-label-resource = Inclure les URL et les chemins des ressources
 MenuButtons--publish--renderCheckbox-label-extension = Inclure les informations des extensions
@@ -501,6 +505,31 @@ TransformNavigator--complete = « { $item } » complet
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = Réduire : { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Fusion de nœuds : { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Fusion : { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Abandon : { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Réduction de la récursivité : { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Réduction de la sous-arborescence : { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
