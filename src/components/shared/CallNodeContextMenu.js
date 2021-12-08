@@ -505,7 +505,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         {nameForResource
           ? this.renderTransformMenuItem({
               l10nId: 'CallNodeContextMenu--transform-collapse-resource',
-              additionalLocalizedProps: {
+              l10nProps: {
                 vars: { nameForResource: nameForResource },
                 elems: { strong: <strong /> },
               },
@@ -586,7 +586,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
   renderTransformMenuItem(props: {|
     +l10nId: string,
-    +additionalLocalizedProps?: mixed,
+    +l10nProps?: mixed,
     +content: React.Node,
     +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
     +transform: string,
@@ -602,7 +602,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         <Localized
           id={props.l10nId}
           attrs={{ title: true }}
-          {...props.additionalLocalizedProps}
+          {...props.l10nProps}
         >
           <DivWithTitle
             className="react-contextmenu-item-content"
@@ -699,7 +699,7 @@ export const CallNodeContextMenu = explicitConnect<
 });
 
 function DivWithTitle(props: {|
-  +className: string,
+  +className?: string,
   +children: React.Node,
   +title: string,
 |}) {
