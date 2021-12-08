@@ -488,7 +488,9 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Arbre d’appels
+TabBar--marker-table-tab = Tableau des marqueurs
 TabBar--network-tab = Réseau
+TabBar--js-tracer-tab = Traceur JS
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
