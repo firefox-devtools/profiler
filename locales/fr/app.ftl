@@ -494,6 +494,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Arbre d’appels
+TabBar--marker-chart-tab = Graphique des marqueurs
 TabBar--marker-table-tab = Tableau des marqueurs
 TabBar--network-tab = Réseau
 TabBar--js-tracer-tab = Traceur JS
