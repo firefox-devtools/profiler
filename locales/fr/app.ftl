@@ -52,8 +52,15 @@ CallNodeContextMenu--transform-merge-call-node = Fusionner le nœud uniquement
     .title = La fusion d’un nœud le supprime du profil et attribue son temps d’exécution au nœud de la fonction qui l’a appelé. Il supprime uniquement la fonction de cette partie spécifique de l’arborescence. Tous les autres endroits à partir desquels la fonction a été appelée resteront dans le profil.
 CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Se concentrer sur le sous-arbre uniquement
+    .title = Se concentrer sur un sous-arbre supprime tout échantillon qui n’inclut pas cette partie spécifique de l’arbre d’appels. Il extrait une branche de l’arborescence des appels, mais il ne le fait que pour ce seul nœud d’appel. Tous les autres appels de la fonction sont ignorés.
 CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
     .title = Réduire une fonction supprimera tout ce qu’elle appelait et attribuera tout le temps d’exécution à la fonction. Cela peut aider à simplifier un profil qui appelle du code qui n’a pas besoin d’être analysé.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Réduire <strong>{ $nameForResource }</strong>
+    .title = Réduire une ressource aplatit tous les appels à cette ressource en un seul nœud d’appel réduit.
 CallNodeContextMenu--transform-drop-function = Supprimer les échantillons avec cette fonction
     .title = La suppression des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
@@ -67,6 +74,24 @@ CallNodeContextMenu--copy-stack = Copier la pile
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Temps d’exécution (ms)
+    .title = Le temps d’exécution « total » comprend un résumé de tout le temps où cette fonction a été observée sur la pile. Cela inclut le temps pendant lequel la fonction était réellement en cours d’exécution et le temps passé dans le code appelant cette fonction.
+
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Certains appels à { $callFunction } ont été regroupés par le compilateur.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (regroupés)
+    .title = Les appels à { $calledFunction } ont été regroupés dans { $outerFunction } par le compilateur.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -88,6 +113,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Ce profil a été enregistré dans une version compilée sans les optimisations pour la version finale.
+        Les observations de performance peuvent ne pas être comparables à celles de la version finale.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -136,6 +165,9 @@ Home--menu-button-instructions = Activez le bouton de menu du profileur pour com
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Cette instance de profileur n’a pas pu se connecter à WebChannel, elle ne peut donc pas activer le bouton de menu du profileur.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable = Cette instance du profileur n’a pas pu se connecter à WebChannel. Généralement, cela signifie qu’il s’exécute sur un hôte différent de celui spécifié dans la préférence <code>devtools.performance.recording.ui-base-url</code>. Si vous souhaitez capturer de nouveaux profils avec cette instance, et lui donner par programmation le contrôle du bouton de menu du profileur, vous pouvez ouvrir <code>about:config</code> et modifier la préférence.
 Home--record-instructions = Pour démarrer le profilage, cliquez sur le bouton de profilage ou utilisez le raccourci clavier. L’icône est bleue lorsqu’un profil est en cours d’enregistrement. Appuyez sur <kbd>Capturer</kbd> pour charger les données dans profiler.firefox.com.
 Home--instructions-title = Comment afficher et enregistrer des profils
 Home--instructions-content =
@@ -311,12 +343,15 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensions :
 MenuButtons--metaOverheadStatistics-mean = Moyenne
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Surcharge
+    .title = Temps utilisé pour échantillonner tous les threads.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Nettoyage
     .title = Temps de suppression des données expirées.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Intervalle
     .title = Intervalle observé entre deux échantillons.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Verrouillages
     .title = Temps d’acquisition du verrou avant l’échantillonnage.
+MenuButtons--metaOverheadStatistics-overhead-percentage = Taux de surcharge :
 MenuButtons--metaOverheadStatistics-profiled-duration = Durée profilée :
 
 ## Publish panel
@@ -429,6 +464,15 @@ TrackContextMenu--hide-other-screenshots-tracks = Masquer les autres pistes de c
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Masquer « { $trackName } »
 TrackContextMenu--show-all-tracks = Afficher toutes les pistes
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Aucun résultat pour « <span>{ $searchFilter }</span> »
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
