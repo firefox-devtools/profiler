@@ -50,6 +50,18 @@ type SourceViewProps = {|
 
 type LineNumber = number;
 
+function _mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | void {
+  let maxValue = -Infinity;
+  let keyForMaxValue;
+  for (const [key, value] of map) {
+    if (value > maxValue) {
+      maxValue = value;
+      keyForMaxValue = key;
+    }
+  }
+  return keyForMaxValue;
+}
+
 export class SourceView extends React.PureComponent<SourceViewProps> {
   _specialItems: [] = [];
   _list: VirtualList<LineNumber> | null = null;
@@ -141,6 +153,23 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   _getItems(): LineNumber[] {
     const { timings } = this.props;
     return this._computeAllLineNumbersMemoized(this._getSourceLines(), timings);
+  }
+
+  /* This method is used by users of this component. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  scrollToHotSpot(timingsForScrolling: LineTimings) {
+    const heaviestLine =
+      _mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
+      _mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
+    if (heaviestLine !== undefined) {
+      this._scrollToLine(heaviestLine - 5);
+    }
+  }
+
+  _scrollToLine(lineNumber: number) {
+    if (this._list) {
+      this._list.scrollToItem(lineNumber - 1, 0);
+    }
   }
 
   render() {

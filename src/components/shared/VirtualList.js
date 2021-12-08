@@ -377,6 +377,20 @@ export class VirtualList<Item> extends React.PureComponent<
 
   /* This method is used by users of this component. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
+  scrollToItem(itemIndex: number, offsetX: CssPixels) {
+    const container = this._container.current;
+    if (!container) {
+      return;
+    }
+    const itemTop = itemIndex * this.props.itemHeight;
+    container.scrollTop = itemTop;
+
+    const itemLeft = offsetX;
+    container.scrollLeft = itemLeft;
+  }
+
+  /* This method is used by users of this component. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
   focus() {
     const container = this._container.current;
     if (container) {

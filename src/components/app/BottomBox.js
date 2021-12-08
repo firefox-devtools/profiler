@@ -7,7 +7,10 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { SourceView } from '../shared/SourceView';
-import { getSourceViewFile } from 'firefox-profiler/selectors/url-state';
+import {
+  getSourceViewFile,
+  getSourceViewActivationGeneration,
+} from 'firefox-profiler/selectors/url-state';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
@@ -28,6 +31,7 @@ type StateProps = {|
   +sourceViewSource: FileSourceStatus | void,
   +globalLineTimings: LineTimings,
   +selectedCallNodeLineTimings: LineTimings,
+  +sourceViewActivationGeneration: number,
 |};
 
 type DispatchProps = {|
@@ -127,12 +131,29 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
 }
 
 class BottomBoxImpl extends React.PureComponent<Props> {
+  _sourceView: SourceView | null = null;
+  _takeSourceViewRef = (sourceView: SourceView | null) => {
+    this._sourceView = sourceView;
+  };
+
   componentDidMount() {
     this._triggerSourceLoadingIfNeeded();
+
+    if (this._sourceView) {
+      this._sourceView.scrollToHotSpot(this.props.selectedCallNodeLineTimings);
+    }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps: Props) {
     this._triggerSourceLoadingIfNeeded();
+
+    if (
+      this._sourceView &&
+      prevProps.sourceViewActivationGeneration <
+        this.props.sourceViewActivationGeneration
+    ) {
+      this._sourceView.scrollToHotSpot(this.props.selectedCallNodeLineTimings);
+    }
   }
 
   _triggerSourceLoadingIfNeeded() {
@@ -181,6 +202,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               timings={globalLineTimings}
               source={source}
               rowHeight={16}
+              ref={this._takeSourceViewRef}
             />
           ) : null}
           {sourceViewSource !== undefined &&
@@ -202,6 +224,7 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
       selectedThreadSelectors.getSourceViewLineTimingsForSelectedCallNode(
         state
       ),
+    sourceViewActivationGeneration: getSourceViewActivationGeneration(state),
   }),
   mapDispatchToProps: {
     closeBottomBox,
