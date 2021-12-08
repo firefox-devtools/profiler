@@ -29,16 +29,19 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = Не вдалося отримати профіль з { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = Не вдалося прочитати файл або проаналізувати профіль у ньому.
-AppViewRouter--error-message-local =
-    .message = Ще не впроваджено.
-AppViewRouter--error-message-public =
-    .message = Не вдалося завантажити профіль.
-AppViewRouter--error-message-from-url =
-    .message = Не вдалося завантажити профіль.
+AppViewRouter--error-unpublished = Не вдалося відновити профіль із { -firefox-brand-name }.
+AppViewRouter--error-from-file = Не вдалося прочитати файл або проаналізувати профіль у ньому.
+AppViewRouter--error-local = Ще не впроваджено.
+AppViewRouter--error-public = Не вдалося завантажити профіль.
+AppViewRouter--error-from-url = Не вдалося завантажити профіль.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Через <a>обмеження в Safari</a> { -profiler-brand-name } не може
+    імпортувати профілі з локальної машини у цей браузер. Натомість
+    відкрийте цю сторінку в { -firefox-brand-name } або Chrome.
+    .title = Safari не може імпортувати локальні профілі
 AppViewRouter--route-not-found--home =
     .specialMessage = URL-адреса, до якої ви намагаєтеся отримати доступ, не розпізнана.
 
@@ -507,20 +510,13 @@ ProfileFilterNavigator--full-range = Повний спектр
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Імпортування профілю безпосередньо з { -firefox-brand-name }…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Читання файлу та обробка профілю…
-ProfileLoaderAnimation--loading-message-local =
-    .message = Ще не впроваджено.
-ProfileLoaderAnimation--loading-message-public =
-    .message = Завантаження та обробка профілю…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Завантаження та обробка профілю…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Читання та обробка профілів…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Вигляд не знайдено
+ProfileLoaderAnimation--loading-unpublished = Імпортування профілю безпосередньо з { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Читання файлу та обробка профілю…
+ProfileLoaderAnimation--loading-local = Ще не впроваджено.
+ProfileLoaderAnimation--loading-public = Завантаження та обробка профілю…
+ProfileLoaderAnimation--loading-from-url = Завантаження та обробка профілю…
+ProfileLoaderAnimation--loading-compare = Читання та обробка профілів…
+ProfileLoaderAnimation--loading-view-not-found = Перегляд не знайдено
 
 ## ProfileRootMessage
 
