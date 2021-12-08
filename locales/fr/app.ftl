@@ -469,6 +469,9 @@ ServiceWorkerManager--pending-button = Appliquer et recharger
 ServiceWorkerManager--installed-button = Recharger l’application
 ServiceWorkerManager--updated-while-not-ready = Une nouvelle version de l’application a été appliquée avant que cette page ne soit complètement chargée. Vous pourriez constater des dysfonctionnements.
 ServiceWorkerManager--new-version-is-ready = Une nouvelle version de l’application a été téléchargée et est prête à être utilisée.
+ServiceWorkerManager--hide-notice-button =
+    .title = Masquer l’avis de rechargement
+    .aria-label = Masquer l’avis de rechargement
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -476,6 +479,7 @@ ServiceWorkerManager--new-version-is-ready = Une nouvelle version de l’applica
 
 StackSettings--implementation-all-stacks = Toutes les piles
 StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Native
 StackSettings--use-data-source-label = Source des données :
 StackSettings--panel-search =
     .label = Filtrer les piles :
