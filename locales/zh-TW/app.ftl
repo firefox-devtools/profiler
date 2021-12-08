@@ -29,16 +29,11 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = 無法從 { -firefox-brand-name } 取得效能檢測檔。
-AppViewRouter--error-message-from-file =
-    .message = 無法讀取檔案或剖析檔案當中的效能檢測資訊。
-AppViewRouter--error-message-local =
-    .message = 尚未實作。
-AppViewRouter--error-message-public =
-    .message = 無法下載效能檢測檔。
-AppViewRouter--error-message-from-url =
-    .message = 無法下載效能檢測檔。
+AppViewRouter--error-unpublished = 無法從 { -firefox-brand-name } 取得效能檢測檔。
+AppViewRouter--error-from-file = 無法讀取檔案或剖析檔案當中的效能檢測資訊。
+AppViewRouter--error-local = 尚未實作。
+AppViewRouter--error-public = 無法下載效能檢測檔。
+AppViewRouter--error-from-url = 無法下載效能檢測檔。
 AppViewRouter--route-not-found--home =
     .specialMessage = 無法處理您嘗試開啟的網址。
 
@@ -441,20 +436,13 @@ ProfileFilterNavigator--full-range = 完整範圍
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = 正在直接從 { -firefox-brand-name } 匯入檢測檔…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = 正在讀取檔案並處理檢測檔…
-ProfileLoaderAnimation--loading-message-local =
-    .message = 尚未實作。
-ProfileLoaderAnimation--loading-message-public =
-    .message = 正在下載處理檢測檔…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = 正在下載處理檢測檔…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = 正在讀取與處理檢測檔…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = 找不到畫面
+ProfileLoaderAnimation--loading-unpublished = 直接從 { -firefox-brand-name } 匯入檢測檔…
+ProfileLoaderAnimation--loading-from-file = 正在讀取檔案並處理檢測檔…
+ProfileLoaderAnimation--loading-local = 尚未實作。
+ProfileLoaderAnimation--loading-public = 正在下載處理檢測檔…
+ProfileLoaderAnimation--loading-from-url = 正在下載處理檢測檔…
+ProfileLoaderAnimation--loading-compare = 正在讀取與處理檢測檔…
+ProfileLoaderAnimation--loading-view-not-found = 找不到畫面
 
 ## ProfileRootMessage
 
