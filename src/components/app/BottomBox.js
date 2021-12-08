@@ -16,6 +16,7 @@ import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
 import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
+import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
@@ -32,6 +33,7 @@ type StateProps = {|
   +globalLineTimings: LineTimings,
   +selectedCallNodeLineTimings: LineTimings,
   +sourceViewActivationGeneration: number,
+  +disableOverscan: boolean,
 |};
 
 type DispatchProps = {|
@@ -168,7 +170,12 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   };
 
   render() {
-    const { sourceViewFile, sourceViewSource, globalLineTimings } = this.props;
+    const {
+      sourceViewFile,
+      sourceViewSource,
+      globalLineTimings,
+      disableOverscan,
+    } = this.props;
     const source =
       sourceViewSource && sourceViewSource.type === 'AVAILABLE'
         ? sourceViewSource.source
@@ -198,7 +205,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
           {sourceViewFile !== null ? (
             <SourceView
               key={sourceViewFile}
-              disableOverscan={false}
+              disableOverscan={disableOverscan}
               timings={globalLineTimings}
               source={source}
               rowHeight={16}
@@ -225,6 +232,7 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
         state
       ),
     sourceViewActivationGeneration: getSourceViewActivationGeneration(state),
+    disableOverscan: getPreviewSelection(state).isModifying,
   }),
   mapDispatchToProps: {
     closeBottomBox,
