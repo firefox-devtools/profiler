@@ -40,6 +40,7 @@ import type {
   Milliseconds,
   MarkerPhase,
   ThreadCPUDeltaUnit,
+  LineNumber,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -686,6 +687,7 @@ function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
 
   return null;
 }
+
 function _findFileNameFromFuncName(
   funcNameWithModifier: string
 ): string | null {
@@ -693,6 +695,17 @@ function _findFileNameFromFuncName(
   if (findFileNameResult) {
     const fileName = findFileNameResult[1];
     return fileName;
+  }
+
+  return null;
+}
+
+function _findLineNumberFromFuncName(
+  funcNameWithModifier: string
+): LineNumber | null {
+  const findLineNumberResult = /\[line:([0-9]+)\]/.exec(funcNameWithModifier);
+  if (findLineNumberResult) {
+    return +findLineNumberResult[1];
   }
 
   return null;
@@ -788,15 +801,17 @@ function _buildThreadFromTextOnlyStacks(
         funcName,
         categories
       );
+      const lineNumber = _findLineNumberFromFuncName(funcNameWithModifier);
 
-      // Attempt to find a frame that satisfies the given funcIndex, jit type
-      // and category..
+      // Attempt to find a frame that satisfies the given funcIndex, jit type,
+      // category, and line number.
       let frameIndex;
       for (let i = 0; i < frameTable.length; i++) {
         if (
           funcIndex === frameTable.func[i] &&
           jitTypeIndex === frameTable.implementation[i] &&
-          category === frameTable.category[i]
+          category === frameTable.category[i] &&
+          lineNumber === frameTable.line[i]
         ) {
           frameIndex = i;
           break;
@@ -814,7 +829,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.innerWindowID.push(0);
         frameTable.nativeSymbol.push(null);
         frameTable.implementation.push(jitTypeIndex);
-        frameTable.line.push(null);
+        frameTable.line.push(lineNumber);
         frameTable.column.push(null);
         frameTable.optimizations.push(null);
         frameIndex = frameTable.length++;
