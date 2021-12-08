@@ -46,12 +46,13 @@ import {
 } from 'firefox-profiler/app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
-  initializeHiddenLocalTracksByPid,
   computeLocalTracksByPid,
   computeGlobalTracks,
   initializeGlobalTrackOrder,
   initializeSelectedThreadIndex,
-  initializeHiddenGlobalTracks,
+  tryInitializeHiddenTracksLegacy,
+  tryInitializeHiddenTracksFromUrl,
+  computeDefaultHiddenTracks,
   getVisibleThreads,
 } from 'firefox-profiler/profile-logic/tracks';
 import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
@@ -280,82 +281,63 @@ export function finalizeFullProfileView(
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
-    const idleThreadsByCPU = getIdleThreadsByCPU(getState());
+    const localTracksByPid = computeLocalTracksByPid(profile);
+
+    const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
       hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
-      getLegacyThreadOrder(getState())
+      legacyThreadOrder
     );
-    let hiddenGlobalTracks = initializeHiddenGlobalTracks(
-      globalTracks,
-      profile,
-      globalTrackOrder,
-      hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
-      getLegacyHiddenThreads(getState()),
-      idleThreadsByCPU
-    );
-    const localTracksByPid = computeLocalTracksByPid(profile);
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
       localTracksByPid,
-      getLegacyThreadOrder(getState())
-    );
-    let hiddenLocalTracksByPid = initializeHiddenLocalTracksByPid(
-      hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
-      localTracksByPid,
-      profile,
-      getLegacyHiddenThreads(getState()),
-      idleThreadsByCPU
-    );
-    let visibleThreadIndexes = getVisibleThreads(
-      globalTracks,
-      hiddenGlobalTracks,
-      localTracksByPid,
-      hiddenLocalTracksByPid
+      legacyThreadOrder
     );
 
-    // This validity check can't be extracted into a separate function, as it needs
-    // to update a lot of the local variables in this function.
-    if (visibleThreadIndexes.length === 0) {
-      // All threads are hidden, since this can't happen normally, revert them all.
-      visibleThreadIndexes = profile.threads.map(
-        (_, threadIndex) => threadIndex
+    const tracksWithOrder = {
+      globalTracks,
+      globalTrackOrder,
+      localTracksByPid,
+      localTrackOrderByPid,
+    };
+
+    let hiddenTracks = null;
+
+    // For non-initial profile loads, initialize the set of hidden tracks from
+    // information in the URL.
+    const legacyHiddenThreads = getLegacyHiddenThreads(getState());
+    if (legacyHiddenThreads !== null) {
+      hiddenTracks = tryInitializeHiddenTracksLegacy(
+        tracksWithOrder,
+        legacyHiddenThreads,
+        profile
       );
-      hiddenGlobalTracks = new Set();
-      const newHiddenTracksByPid = new Map();
-      for (const [pid] of hiddenLocalTracksByPid) {
-        newHiddenTracksByPid.set(pid, new Set());
-      }
-      hiddenLocalTracksByPid = newHiddenTracksByPid;
+    } else if (hasUrlInfo) {
+      hiddenTracks = tryInitializeHiddenTracksFromUrl(
+        tracksWithOrder,
+        getHiddenGlobalTracks(getState()),
+        getHiddenLocalTracksByPid(getState())
+      );
+    }
+
+    if (hiddenTracks === null) {
+      // Compute a default set of hidden tracks.
+      // This is the case for the initial profile load.
+      // We also get here if the URL info was ignored, for example if
+      // respecting it would have caused all threads to become hidden.
+      hiddenTracks = computeDefaultHiddenTracks(
+        tracksWithOrder,
+        profile,
+        getIdleThreadsByCPU(getState())
+      );
     }
 
     const selectedThreadIndexes = initializeSelectedThreadIndex(
       maybeSelectedThreadIndexes,
-      visibleThreadIndexes,
+      getVisibleThreads(tracksWithOrder, hiddenTracks),
       profile
     );
-
-    // If all of the local tracks were hidden for a process, and the main thread was
-    // not recorded for that process, hide the (empty) process track as well.
-    for (const [pid, localTracks] of localTracksByPid) {
-      const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
-      if (!hiddenLocalTracks) {
-        continue;
-      }
-      if (hiddenLocalTracks.size === localTracks.length) {
-        // All of the local tracks were hidden.
-        const globalTrackIndex = globalTracks.findIndex(
-          (globalTrack) =>
-            globalTrack.type === 'process' &&
-            globalTrack.pid === pid &&
-            globalTrack.mainThreadIndex === null
-        );
-        if (globalTrackIndex !== -1) {
-          // An empty global track was found, hide it.
-          hiddenGlobalTracks.add(globalTrackIndex);
-        }
-      }
-    }
 
     // Check the profile to see if we have threadCPUDelta values and switch to
     // the category view with CPU if we have. This is needed only while we are
@@ -379,11 +361,10 @@ export function finalizeFullProfileView(
         selectedThreadIndexes,
         globalTracks,
         globalTrackOrder,
-        hiddenGlobalTracks,
         localTracksByPid,
-        hiddenLocalTracksByPid,
         localTrackOrderByPid,
         timelineType,
+        ...hiddenTracks,
       });
     });
   };
@@ -891,23 +872,20 @@ function getSymbolStore(
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
-    requestSymbolsFromServer: (requests) => {
+    requestSymbolsFromServer: async (requests) => {
       for (const { lib } of requests) {
         dispatch(requestingSymbolTable(lib));
       }
-      return MozillaSymbolicationAPI.requestSymbols(
-        requests,
-        symbolServerUrl
-      ).map(async (libPromise, i) => {
-        try {
-          const result = await libPromise;
-          dispatch(receivedSymbolTableReply(requests[i].lib));
-          return result;
-        } catch (error) {
-          dispatch(receivedSymbolTableReply(requests[i].lib));
-          throw error;
+      try {
+        return await MozillaSymbolicationAPI.requestSymbols(
+          requests,
+          symbolServerUrl
+        );
+      } finally {
+        for (const { lib } of requests) {
+          dispatch(receivedSymbolTableReply(lib));
         }
-      });
+      }
     },
     requestSymbolTableFromBrowser: async (lib) => {
       if (browserConnection === null) {
@@ -1059,6 +1037,29 @@ function _wait(delayMs: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
+function _loadProbablyFailedDueToSafariLocalhostHTTPRestriction(
+  url: string,
+  error: Error
+): boolean {
+  if (!navigator.userAgent.match(/Safari\/\d+\.\d+/)) {
+    return false;
+  }
+  // Check if Safari considers this mixed content.
+  const parsedUrl = new URL(url);
+  return (
+    error.name === 'TypeError' &&
+    parsedUrl.protocol === 'http:' &&
+    (parsedUrl.hostname === 'localhost' ||
+      parsedUrl.hostname === '127.0.0.1' ||
+      parsedUrl.hostname === '::1') &&
+    location.protocol === 'https:'
+  );
+}
+
+class SafariLocalhostHTTPLoadError extends Error {
+  name = 'SafariLocalhostHTTPLoadError';
+}
+
 type FetchProfileArgs = {
   url: string,
   onTemporaryError: (TemporaryError) => void,
@@ -1088,21 +1089,31 @@ export async function _fetchProfile(
   const reportError = args.reportError || console.error;
 
   while (true) {
-    const response = await fetch(url);
-    // Case 1: successful answer.
+    let response;
+    try {
+      response = await fetch(url);
+    } catch (e) {
+      // Case 1: Exception.
+      if (_loadProbablyFailedDueToSafariLocalhostHTTPRestriction(url, e)) {
+        throw new SafariLocalhostHTTPLoadError();
+      }
+      throw e;
+    }
+
+    // Case 2: successful answer.
     if (response.ok) {
       return _extractProfileOrZipFromResponse(url, response, reportError);
     }
 
-    // case 2: unrecoverable error.
+    // case 3: unrecoverable error.
     if (response.status !== 403) {
       throw new Error(oneLine`
-        Could not fetch the profile on remote server.
-        Response was: ${response.status} ${response.statusText}.
-      `);
+          Could not fetch the profile on remote server.
+          Response was: ${response.status} ${response.statusText}.
+        `);
     }
 
-    // case 3: 403 errors can be transient while a profile is uploaded.
+    // case 4: 403 errors can be transient while a profile is uploaded.
 
     if (i++ === MAX_WAIT_SECONDS) {
       // In the last iteration we don't send a temporary error because we'll

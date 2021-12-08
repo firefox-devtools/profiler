@@ -26,20 +26,20 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = Couldn’t retrieve the profile from { -firefox-brand-name }.
+AppViewRouter--error-unpublished = Couldn’t retrieve the profile from { -firefox-brand-name }.
+AppViewRouter--error-from-file = Couldn’t read the file or parse the profile in it.
+AppViewRouter--error-local = Not implemented yet.
+AppViewRouter--error-public = Could not download the profile.
+AppViewRouter--error-from-url = Could not download the profile.
 
-AppViewRouter--error-message-from-file =
-    .message = Couldn’t read the file or parse the profile in it.
-
-AppViewRouter--error-message-local =
-    .message = Not implemented yet.
-
-AppViewRouter--error-message-public =
-    .message = Could not download the profile.
-
-AppViewRouter--error-message-from-url =
-    .message = Could not download the profile.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Due to a <a>specific limitation in Safari</a>, { -profiler-brand-name } is unable
+    to import profiles from the local machine in this browser. Please open 
+    this page in { -firefox-brand-name } or Chrome instead.
+    .title = Safari cannot import local profiles
 
 AppViewRouter--route-not-found--home =
     .specialMessage = The URL you tried to reach was not recognized.
@@ -552,26 +552,13 @@ ProfileFilterNavigator--full-range = Full Range
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Importing the profile directly from { -firefox-brand-name }…
-
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Reading the file and processing the profile…
-
-ProfileLoaderAnimation--loading-message-local =
-    .message = Not implemented yet.
-
-ProfileLoaderAnimation--loading-message-public =
-    .message = Downloading and processing the profile…
-
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Downloading and processing the profile…
-
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Reading and processing profiles…
-
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = View not found
+ProfileLoaderAnimation--loading-unpublished = Importing the profile directly from { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Reading the file and processing the profile…
+ProfileLoaderAnimation--loading-local = Not implemented yet.
+ProfileLoaderAnimation--loading-public = Downloading and processing the profile…
+ProfileLoaderAnimation--loading-from-url = Downloading and processing the profile…
+ProfileLoaderAnimation--loading-compare = Reading and processing profiles…
+ProfileLoaderAnimation--loading-view-not-found = View not found
 
 ## ProfileRootMessage
 
