@@ -29,16 +29,6 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = Impossible de récupérer le profil depuis { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = Impossible de lire le fichier ou d’analyser le profil qu’il contient.
-AppViewRouter--error-message-local =
-    .message = Pas encore implémenté.
-AppViewRouter--error-message-public =
-    .message = Impossible de télécharger le profil.
-AppViewRouter--error-message-from-url =
-    .message = Impossible de télécharger le profil.
 AppViewRouter--route-not-found--home =
     .specialMessage = L’URL que vous avez tenté d’atteindre n’a pas été trouvée
 
@@ -76,6 +66,16 @@ CallNodeContextMenu--copy-stack = Copier la pile
 
 CallTree--tracing-ms-total = Temps d’exécution (ms)
     .title = Le temps d’exécution « total » comprend un résumé de tout le temps où cette fonction a été observée sur la pile. Cela inclut le temps pendant lequel la fonction était réellement en cours d’exécution et le temps passé dans le code appelant cette fonction.
+CallTree--tracing-ms-self = Individuel (ms)
+    .title = Le temps « individuel » n’inclut que le temps où la fonction était en haut de la pile. Si cette fonction a fait appel à d’autres fonctions, alors le temps des « autres » fonctions n’est pas inclus. Le temps « individuel » est utile pour comprendre où le temps a été réellement passé dans un programme.
+CallTree--samples-total = Total (échantillons)
+    .title = Le nombre d’échantillons « total » comprend un résumé de chaque échantillon où cette fonction a été observée sur la pile. Cela inclut le temps où la fonction était réellement en cours d’exécution et le temps passé dans le code appelant cette fonction.
+CallTree--samples-self = Individuel
+    .title = Le nombre d’échantillons « individuels » comprend uniquement les échantillons pour lesquels la fonction était en haut de la pile. Si cette fonction a fait appel à d’autres fonctions, alors le nombre d’« autres » fonctions n’est pas inclus. Le nombre « individuel » est utile pour comprendre où le temps a été réellement passé dans un programme.
+CallTree--bytes-total = Taille totale (octets)
+    .title = La « taille totale » comprend un résumé de tous les octets alloués ou désalloués lorsque cette fonction était observée sur la pile. Cela inclut à la fois les octets où la fonction s’exécutait réellement et les octets du code appelant cette fonction.
+CallTree--bytes-self = Individuel (octets)
+    .title = Les octets « individuels » comprennent les octets alloués ou désalloués lorsque cette fonction était en haut de la pile. Si cette fonction a fait appel à d’autres fonctions, alors les octets des « autres » fonctions ne sont pas inclus. Les octets « individuels » sont utiles pour comprendre où la mémoire a été réellement allouée ou désallouée dans le programme.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -184,6 +184,8 @@ Home--recent-uploaded-recordings-title = Enregistrements récemment envoyés
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Saisissez le filtre
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -218,19 +220,29 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Définir la sélection à partir de la durée du marqueur
 MarkerContextMenu--start-selection-here = Commencer la sélection ici
 MarkerContextMenu--end-selection-here = Terminer la sélection ici
+MarkerContextMenu--start-selection-at-marker-start = Commencer la sélection au <strong>début</strong> du marqueur
+MarkerContextMenu--start-selection-at-marker-end = Commencer la sélection à la <strong>fin</strong> du marqueur
+MarkerContextMenu--end-selection-at-marker-start = Terminer la sélection au <strong>début</strong> du marqueur
+MarkerContextMenu--end-selection-at-marker-end = Terminer la sélection à la <strong>fin</strong> du marqueur
 MarkerContextMenu--copy-description = Copier la description
 MarkerContextMenu--copy-call-stack = Copier la pile d’appels
 MarkerContextMenu--copy-url = Copier l’URL
+MarkerContextMenu--copy-full-payload = Copier la charge utile complète
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Filtre de marqueur :
+    .title = Afficher uniquement les marqueurs qui correspondent à un certain nom
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Sélectionnez un marqueur pour afficher des informations le concernant.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -268,6 +280,10 @@ MenuButtons--index--metaInfo-subtitle = Informations sur le profil
 MenuButtons--metaInfo--symbols = Symboles :
 MenuButtons--metaInfo--profile-symbolicated = Le profil est symbolisé
 MenuButtons--metaInfo--profile-not-symbolicated = Le profil n’est pas symbolisé
+MenuButtons--metaInfo--resymbolicate-profile = Re-symboliser le profil
+MenuButtons--metaInfo--symbolicate-profile = Profil symbolique
+MenuButtons--metaInfo--attempting-resymbolicate = Tenter de re-symboliser le profil
+MenuButtons--metaInfo--currently-symbolicating = Re-symbolisation du profil en cours
 MenuButtons--metaInfo--cpu = Processeur :
 # This string is used when we have the information about both physical and
 # logical CPU cores.
@@ -333,13 +349,18 @@ MenuButtons--metaInfo--device = Appareil :
 MenuButtons--metaInfo--os = Système d’exploitation :
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI :
+MenuButtons--metaInfo--visual-metrics = Métriques visuelles
 MenuButtons--metaInfo--speed-index = Indice de vitesse :
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Indice de vitesse perceptuel :
 MenuButtons--metaInfo-renderRowOfList-label-features = Fonctionnalités :
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtrer les threads :
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensions :
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Surcharge de { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Moyenne
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
@@ -403,20 +424,6 @@ ProfileDeleteButton--delete-button =
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Importation du profil directement depuis { -firefox-brand-name }…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Lecture du fichier et traitement du profil…
-ProfileLoaderAnimation--loading-message-local =
-    .message = Pas encore implémenté
-ProfileLoaderAnimation--loading-message-public =
-    .message = Téléchargement et traitement du profil…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Téléchargement et traitement du profil…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Lecture et traitement des profils…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Vue introuvable
 
 ## ProfileRootMessage
 
