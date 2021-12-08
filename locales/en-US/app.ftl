@@ -720,6 +720,11 @@ TransformNavigator--collapse-direct-recursion = Collapse recursion: { $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Collapse subtree: { $item }
 
+## Source code view in a box at the bottom of the UI.
+
+SourceView--close-button =
+    .title = Close the source view
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
