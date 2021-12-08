@@ -9,9 +9,12 @@ import classNames from 'classnames';
 import { getSourceViewFile } from 'firefox-profiler/selectors/url-state';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
+import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
+import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { FileSourceStatus } from 'firefox-profiler/types';
 
 import { Localized } from '@fluent/react';
 
@@ -19,21 +22,38 @@ import './BottomBox.css';
 
 type StateProps = {|
   +sourceViewFile: string | null,
+  +sourceViewSource: FileSourceStatus | void,
 |};
 
 type DispatchProps = {|
   +closeBottomBox: typeof closeBottomBox,
+  +fetchSourceForFile: typeof fetchSourceForFile,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class BottomBoxImpl extends React.PureComponent<Props> {
+  componentDidMount() {
+    this._triggerSourceLoadingIfNeeded();
+  }
+
+  componentDidUpdate() {
+    this._triggerSourceLoadingIfNeeded();
+  }
+
+  _triggerSourceLoadingIfNeeded() {
+    const { sourceViewFile, sourceViewSource, fetchSourceForFile } = this.props;
+    if (sourceViewFile && !sourceViewSource) {
+      fetchSourceForFile(sourceViewFile);
+    }
+  }
+
   _onClickCloseButton = () => {
     this.props.closeBottomBox();
   };
 
   render() {
-    const { sourceViewFile } = this.props;
+    const { sourceViewFile, sourceViewSource } = this.props;
     return (
       <div className="bottom-box">
         <div className="bottom-box-bar">
@@ -55,7 +75,12 @@ class BottomBoxImpl extends React.PureComponent<Props> {
             />
           </Localized>
         </div>
-        <div className="bottom-main" id="bottom-main"></div>
+        <div className="bottom-main" id="bottom-main">
+          {sourceViewSource !== undefined &&
+          sourceViewSource.type === 'AVAILABLE' ? (
+            <pre>{sourceViewSource.source}</pre>
+          ) : null}
+        </div>
       </div>
     );
   }
@@ -64,9 +89,11 @@ class BottomBoxImpl extends React.PureComponent<Props> {
 export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
+    sourceViewSource: getSourceViewSource(state),
   }),
   mapDispatchToProps: {
     closeBottomBox,
+    fetchSourceForFile,
   },
   component: BottomBoxImpl,
 });
