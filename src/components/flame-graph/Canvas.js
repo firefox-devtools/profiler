@@ -57,6 +57,7 @@ export type OwnProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +onRightClick: (IndexIntoCallNodeTable | null) => void,
+  +onDoubleClick: (IndexIntoCallNodeTable | null) => void,
   +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
@@ -373,6 +374,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     this.props.onRightClick(callNodeIndex);
   };
 
+  _onDoubleClick = (hoveredItem: HoveredStackTiming | null) => {
+    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
+    this.props.onDoubleClick(callNodeIndex);
+  };
+
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
     const {
       flameGraphTiming,
@@ -398,8 +404,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     return null;
   };
 
-  _noOp = () => {};
-
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
@@ -410,7 +414,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         containerHeight={containerHeight}
         isDragging={isDragging}
         scaleCtxToCssPixels={true}
-        onDoubleClickItem={this._noOp}
+        onDoubleClickItem={this._onDoubleClick}
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
