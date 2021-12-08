@@ -33,23 +33,6 @@ exports[`Timeline renders the header 1`] = `
       </label>
     </div>
   </form>
-  <button
-    class="timelineSettingsHiddenTracks"
-    type="button"
-  >
-    <span
-      class="timelineSettingsHiddenTracksNumber"
-    >
-      ⁨4⁩
-    </span>
-     / 
-    <span
-      class="timelineSettingsHiddenTracksNumber"
-    >
-      ⁨4⁩
-    </span>
-     tracks visible
-  </button>
 </div>
 `;
 
