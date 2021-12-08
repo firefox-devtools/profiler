@@ -230,6 +230,19 @@ export type SourceViewState = {|
   file: string | null,
 |};
 
+export type FileSourceStatus =
+  | {| type: 'LOADING', url: string |}
+  | {| type: 'ERROR', errors: SourceLoadingError[] |}
+  | {| type: 'AVAILABLE', source: string |};
+
+export type SourceLoadingError =
+  | {| type: 'NO_KNOWN_CORS_URL' |}
+  | {|
+      type: 'NETWORK_ERROR',
+      url: string,
+      networkErrorMessage: string,
+    |};
+
 /**
  * Full profile specific url state
  * They should not be used from the active tab view.
@@ -319,6 +332,7 @@ export type State = {|
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
   +l10n: L10nState,
+  +sources: Map<string, FileSourceStatus>,
 |};
 
 export type IconWithClassName = {|

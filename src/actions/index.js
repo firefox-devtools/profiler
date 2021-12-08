@@ -10,6 +10,7 @@ import * as profileView from './profile-view';
 import * as publish from './publish';
 import * as receiveProfile from './receive-profile';
 import * as zippedProfiles from './zipped-profiles';
+import * as sources from './sources';
 
 export default Object.assign(
   {},
@@ -19,5 +20,6 @@ export default Object.assign(
   profileView,
   publish,
   receiveProfile,
-  zippedProfiles
+  zippedProfiles,
+  sources
 );
