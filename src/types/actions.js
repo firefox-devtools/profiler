@@ -296,6 +296,15 @@ type ProfileAction =
     |}
   | {|
       +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
+    |}
+  | {|
+      +type: 'OPEN_SOURCE_VIEW',
+      +file: string,
+      +currentTab: TabSlug,
+    |}
+  | {|
+      +type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
+      +tab: TabSlug,
     |};
 
 type ReceiveProfileAction =
