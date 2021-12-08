@@ -11,6 +11,7 @@ import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
 import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -31,6 +32,95 @@ type DispatchProps = {|
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+
+type SourceStatusOverlayProps = {| status: FileSourceStatus |};
+
+function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
+  switch (status.type) {
+    case 'AVAILABLE':
+      return null; // No overlay if we have source code.
+    case 'LOADING': {
+      const { url } = status;
+      let host;
+      try {
+        host = new URL(url).host;
+      } catch (e) {
+        host = url;
+      }
+      return (
+        <Localized id="SourceView--loading-url" vars={{ host }}>
+          <div className="sourceStatusOverlay loading">
+            {`Waiting for ${host}…`}
+          </div>
+        </Localized>
+      );
+    }
+    case 'ERROR': {
+      return (
+        <div className="sourceStatusOverlay error">
+          <div>
+            <Localized id="SourceView--source-not-available-title">
+              <h3>Source not available</h3>
+            </Localized>
+            <Localized
+              id="SourceView--source-not-available-text"
+              elems={{
+                a: (
+                  <a
+                    href="https://github.com/firefox-devtools/profiler/issues/3741"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                ),
+              }}
+            >
+              <p>
+                See
+                <a
+                  href="https://github.com/firefox-devtools/profiler/issues/3741"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  issue #3741
+                </a>
+                for supported scenarios and planned improvements.
+              </p>
+            </Localized>
+            <ul>
+              {status.errors.map((error, key) => {
+                switch (error.type) {
+                  case 'NO_KNOWN_CORS_URL': {
+                    return (
+                      <Localized key={key} id="SourceView--no-known-cors-url">
+                        <li>No known cross-origin-accessible URL.</li>
+                      </Localized>
+                    );
+                  }
+                  case 'NETWORK_ERROR': {
+                    const { url, networkErrorMessage } = error;
+                    return (
+                      <Localized
+                        key={key}
+                        id="SourceView--network-error-when-obtaining-source"
+                        vars={{ url, networkErrorMessage }}
+                      >
+                        <li>{`There was a network error when fetching the URL ${url}: ${networkErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
+                  default:
+                    throw assertExhaustiveCheck(error.type);
+                }
+              })}
+            </ul>
+          </div>
+        </div>
+      );
+    }
+    default:
+      throw assertExhaustiveCheck(status.type);
+  }
+}
 
 class BottomBoxImpl extends React.PureComponent<Props> {
   componentDidMount() {
@@ -79,6 +169,10 @@ class BottomBoxImpl extends React.PureComponent<Props> {
           {sourceViewSource !== undefined &&
           sourceViewSource.type === 'AVAILABLE' ? (
             <pre>{sourceViewSource.source}</pre>
+          ) : null}
+          {sourceViewSource !== undefined &&
+          sourceViewSource.type !== 'AVAILABLE' ? (
+            <SourceStatusOverlay status={sourceViewSource} />
           ) : null}
         </div>
       </div>
