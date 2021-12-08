@@ -34,6 +34,11 @@ AppViewRouter--error-from-file = 無法讀取檔案或剖析檔案當中的效�
 AppViewRouter--error-local = 尚未實作。
 AppViewRouter--error-public = 無法下載效能檢測檔。
 AppViewRouter--error-from-url = 無法下載效能檢測檔。
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari = 由於 <a>Safari 的特殊限制</a>，{ -profiler-brand-name } 無法從這套瀏覽器自本機匯入效能檢測檔。請改用 { -firefox-brand-name } 或 Chrome 開啟此頁面。
+    .title = 無法使用 Safari 匯入本機效能檢測檔
 AppViewRouter--route-not-found--home =
     .specialMessage = 無法處理您嘗試開啟的網址。
 
