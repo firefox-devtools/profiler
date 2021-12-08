@@ -372,6 +372,8 @@ MenuButtons--metaInfo--visual-metrics = Métriques visuelles
 MenuButtons--metaInfo--speed-index = Indice de vitesse :
 # “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--perceptual-speed-index = Indice de vitesse perceptuel :
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Indice de vitesse du contenu complet :
 MenuButtons--metaInfo-renderRowOfList-label-features = Fonctionnalités :
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtrer les threads :
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensions :
@@ -444,6 +446,7 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = Intervalle complet
 
 ## Profile Loader Animation
 
@@ -481,6 +484,9 @@ StackSettings--implementation-all-stacks = Toutes les piles
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Native
 StackSettings--use-data-source-label = Source des données :
+StackSettings--invert-call-stack = Inverser la pile d’appels
+    .title = Trier par le temps passé dans un nœud d’appel, en ignorant ses enfants.
+StackSettings--show-user-timing = Afficher le temps utilisateur
 StackSettings--panel-search =
     .label = Filtrer les piles :
     .title = Afficher uniquement les piles qui contiennent une fonction dont le nom correspond à cette sous-chaîne
