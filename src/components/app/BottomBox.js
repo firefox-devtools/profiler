@@ -6,12 +6,14 @@
 import React from 'react';
 import classNames from 'classnames';
 
+import { SourceView } from '../shared/SourceView';
 import { getSourceViewFile } from 'firefox-profiler/selectors/url-state';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
 import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { emptyLineTimings } from 'firefox-profiler/profile-logic/line-timings';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -144,6 +146,10 @@ class BottomBoxImpl extends React.PureComponent<Props> {
 
   render() {
     const { sourceViewFile, sourceViewSource } = this.props;
+    const source =
+      sourceViewSource && sourceViewSource.type === 'AVAILABLE'
+        ? sourceViewSource.source
+        : '';
     return (
       <div className="bottom-box">
         <div className="bottom-box-bar">
@@ -166,9 +172,14 @@ class BottomBoxImpl extends React.PureComponent<Props> {
           </Localized>
         </div>
         <div className="bottom-main" id="bottom-main">
-          {sourceViewSource !== undefined &&
-          sourceViewSource.type === 'AVAILABLE' ? (
-            <pre>{sourceViewSource.source}</pre>
+          {sourceViewFile !== null ? (
+            <SourceView
+              key={sourceViewFile}
+              disableOverscan={false}
+              timings={emptyLineTimings}
+              source={source}
+              rowHeight={16}
+            />
           ) : null}
           {sourceViewSource !== undefined &&
           sourceViewSource.type !== 'AVAILABLE' ? (
