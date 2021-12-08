@@ -29,6 +29,16 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-unpublished = Impossible de récupérer le profil depuis { -firefox-brand-name }.
+AppViewRouter--error-from-file = Impossible de lire le fichier ou d’analyser le profil qu’il contient.
+AppViewRouter--error-local = Pas encore implémenté.
+AppViewRouter--error-public = Impossible de télécharger le profil.
+AppViewRouter--error-from-url = Impossible de télécharger le profil.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari = En raison d’une <a>limitation spécifique à Safari</a>, { -profiler-brand-name } ne peut pas importer de profils depuis la machine locale dans ce navigateur. Veuillez ouvrir cette page dans { -firefox-brand-name } ou Chrome à la place.
+    .title = Safari ne peut pas importer de profils locaux
 AppViewRouter--route-not-found--home =
     .specialMessage = L’URL que vous avez tenté d’atteindre n’a pas été trouvée
 
@@ -437,6 +447,13 @@ ProfileDeleteButton--delete-button =
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Importation du profil directement depuis { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Lecture du fichier et traitement du profil…
+ProfileLoaderAnimation--loading-local = Pas encore implémenté.
+ProfileLoaderAnimation--loading-public = Téléchargement et traitement du profil…
+ProfileLoaderAnimation--loading-from-url = Téléchargement et traitement du profil…
+ProfileLoaderAnimation--loading-compare = Lecture et traitement des profils…
+ProfileLoaderAnimation--loading-view-not-found = Vue introuvable
 
 ## ProfileRootMessage
 
