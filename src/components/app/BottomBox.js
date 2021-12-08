@@ -8,16 +8,16 @@ import classNames from 'classnames';
 
 import { SourceView } from '../shared/SourceView';
 import { getSourceViewFile } from 'firefox-profiler/selectors/url-state';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
 import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import { emptyLineTimings } from 'firefox-profiler/profile-logic/line-timings';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { FileSourceStatus } from 'firefox-profiler/types';
+import type { LineTimings, FileSourceStatus } from 'firefox-profiler/types';
 
 import { Localized } from '@fluent/react';
 
@@ -26,6 +26,8 @@ import './BottomBox.css';
 type StateProps = {|
   +sourceViewFile: string | null,
   +sourceViewSource: FileSourceStatus | void,
+  +globalLineTimings: LineTimings,
+  +selectedCallNodeLineTimings: LineTimings,
 |};
 
 type DispatchProps = {|
@@ -145,7 +147,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   };
 
   render() {
-    const { sourceViewFile, sourceViewSource } = this.props;
+    const { sourceViewFile, sourceViewSource, globalLineTimings } = this.props;
     const source =
       sourceViewSource && sourceViewSource.type === 'AVAILABLE'
         ? sourceViewSource.source
@@ -176,7 +178,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
             <SourceView
               key={sourceViewFile}
               disableOverscan={false}
-              timings={emptyLineTimings}
+              timings={globalLineTimings}
               source={source}
               rowHeight={16}
             />
@@ -195,6 +197,11 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
     sourceViewSource: getSourceViewSource(state),
+    globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
+    selectedCallNodeLineTimings:
+      selectedThreadSelectors.getSourceViewLineTimingsForSelectedCallNode(
+        state
+      ),
   }),
   mapDispatchToProps: {
     closeBottomBox,
