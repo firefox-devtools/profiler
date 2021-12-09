@@ -29,16 +29,11 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = No se pudo recuperar el perfil de { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = No se pudo leer el archivo ni analizar el perfil que contiene.
-AppViewRouter--error-message-local =
-    .message = Aún no se ha implementado.
-AppViewRouter--error-message-public =
-    .message = No se pudo descargar el perfil.
-AppViewRouter--error-message-from-url =
-    .message = No se pudo descargar el perfil.
+AppViewRouter--error-unpublished = No se pudo recuperar el perfil de { -firefox-brand-name }.
+AppViewRouter--error-from-file = No se pudo leer el archivo ni analizar el perfil que contiene.
+AppViewRouter--error-local = Aún no se ha implementado.
+AppViewRouter--error-public = No se pudo descargar el perfil.
+AppViewRouter--error-from-url = No se pudo descargar el perfil.
 AppViewRouter--route-not-found--home =
     .specialMessage = La URL a la que intentaste acceder no fue reconocida.
 
@@ -454,20 +449,13 @@ ProfileFilterNavigator--full-range = Rango completo
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Importando el perfil directamente desde { -firefox-brand-name }…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Leyendo el archivo y procesando el perfil…
-ProfileLoaderAnimation--loading-message-local =
-    .message = Aún no se ha implementado.
-ProfileLoaderAnimation--loading-message-public =
-    .message = Bajando y procesando el perfil…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Bajando y procesando el perfil…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Leyendo y procesando perfiles…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Vista no encontrada
+ProfileLoaderAnimation--loading-unpublished = Importando el perfil directamente desde { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Leyendo el archivo y procesando el perfil…
+ProfileLoaderAnimation--loading-local = Aún no se ha implementado.
+ProfileLoaderAnimation--loading-public = Bajando y procesando el perfil…
+ProfileLoaderAnimation--loading-from-url = Bajando y procesando el perfil…
+ProfileLoaderAnimation--loading-compare = Leyendo y procesando perfiles…
+ProfileLoaderAnimation--loading-view-not-found = Vista no encontrada
 
 ## ProfileRootMessage
 
