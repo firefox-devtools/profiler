@@ -29,16 +29,9 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = 无法从 { -firefox-brand-name } 检索到分析记录。
-AppViewRouter--error-message-from-file =
-    .message = 无法读取或解析其中的分析记录。
-AppViewRouter--error-message-local =
-    .message = 尚未实现。
-AppViewRouter--error-message-public =
-    .message = 无法下载分析记录。
-AppViewRouter--error-message-from-url =
-    .message = 无法下载分析记录。
+AppViewRouter--error-local = 尚未实现。
+AppViewRouter--error-public = 无法下载分析记录。
+AppViewRouter--error-from-url = 无法下载分析记录。
 AppViewRouter--route-not-found--home =
     .specialMessage = 无法识别您尝试访问的 URL。
 
@@ -441,20 +434,11 @@ ProfileFilterNavigator--full-range = 完整范围
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = 正在直接从 { -firefox-brand-name } 导入分析记录…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = 正在读取文件并处理分析记录…
-ProfileLoaderAnimation--loading-message-local =
-    .message = 尚未实现。
-ProfileLoaderAnimation--loading-message-public =
-    .message = 正在下载处理分析记录…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = 正在下载处理分析记录…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = 正在读取和处理分析记录…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = 找不到视图
+ProfileLoaderAnimation--loading-local = 尚未实现。
+ProfileLoaderAnimation--loading-public = 正在下载处理分析记录…
+ProfileLoaderAnimation--loading-from-url = 正在下载处理分析记录…
+ProfileLoaderAnimation--loading-compare = 正在读取和处理分析记录…
+ProfileLoaderAnimation--loading-view-not-found = 找不到视图
 
 ## ProfileRootMessage
 
