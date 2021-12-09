@@ -34,6 +34,11 @@ AppViewRouter--error-from-file = 无法读取或解析其中的分析记录。
 AppViewRouter--error-local = 尚未实现。
 AppViewRouter--error-public = 无法下载分析记录。
 AppViewRouter--error-from-url = 无法下载分析记录。
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari = 由于 <a>Safari 的特殊限制</a>，{ -profiler-brand-name } 无法使用此浏览器从本地导入分析记录。请在 { -firefox-brand-name } 或 Chrome 中打开此页面。
+    .title = Safari 无法导入本地性能分析记录
 AppViewRouter--route-not-found--home =
     .specialMessage = 无法识别您尝试访问的 URL。
 
