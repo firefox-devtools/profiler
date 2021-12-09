@@ -57,8 +57,8 @@ CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Focus sur la fonction (inversé)
     .title = { CallNodeContextMenu--transform-focus-function-title }
-CallNodeContextMenu--transform-focus-subtree = Se concentrer sur le sous-arbre uniquement
-    .title = Se concentrer sur un sous-arbre supprime tout échantillon qui n’inclut pas cette partie spécifique de l’arbre d’appels. Il extrait une branche de l’arborescence des appels, mais il ne le fait que pour ce seul nœud d’appel. Tous les autres appels de la fonction sont ignorés.
+CallNodeContextMenu--transform-focus-subtree = Focus sur le sous-arbre uniquement
+    .title = Mettre le focus sur un sous-arbre supprime tout échantillon qui n’inclut pas cette partie spécifique de l’arbre d’appels. Il extrait une branche de l’arborescence des appels, mais il ne le fait que pour ce seul nœud d’appel. Tous les autres appels de la fonction sont ignorés.
 CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
     .title = Réduire une fonction supprimera tout ce qu’elle appelait et attribuera tout le temps d’exécution à la fonction. Cela peut aider à simplifier un profil qui appelle du code qui n’a pas besoin d’être analysé.
 # This is used as the context menu item to apply the "Collapse resource" transform.
