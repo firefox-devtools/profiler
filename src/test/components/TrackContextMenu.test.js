@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
-import { showMenu } from 'react-contextmenu';
+import { showMenu } from '@firefox-devtools/react-contextmenu';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { ensureExists } from '../../utils/flow';
