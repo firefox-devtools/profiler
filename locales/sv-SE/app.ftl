@@ -29,16 +29,6 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = Det gick inte att hämta profilen från { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = Det gick inte att läsa filen eller analysera profilen i den.
-AppViewRouter--error-message-local =
-    .message = Inte implementerat än.
-AppViewRouter--error-message-public =
-    .message = Det gick inte att ladda ner profilen.
-AppViewRouter--error-message-from-url =
-    .message = Det gick inte att ladda ner profilen.
 AppViewRouter--route-not-found--home =
     .specialMessage = Webbadressen du försökte nå kändes inte igen.
 
@@ -438,20 +428,7 @@ ProfileDeleteButton--delete-button =
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Importerar profilen direkt från { -firefox-brand-name }...
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Läser fil och bearbetar profil...
-ProfileLoaderAnimation--loading-message-local =
-    .message = Inte implementerat än.
-ProfileLoaderAnimation--loading-message-public =
-    .message = Laddar ner och bearbetar profil...
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Laddar ner och bearbetar profil...
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Läser och bearbetar profil...
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Vy hittades inte
+ProfileLoaderAnimation--loading-local = Inte implementerat ännu.
 
 ## ProfileRootMessage
 
