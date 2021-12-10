@@ -29,16 +29,9 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = Δεν ήταν δυνατή η ανάκτηση του προφίλ από το { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = Δεν ήταν δυνατή η ανάγνωση του αρχείου ή η ανάλυση του προφίλ σε αυτό.
-AppViewRouter--error-message-local =
-    .message = Δεν έχει υλοποιηθεί ακόμη.
-AppViewRouter--error-message-public =
-    .message = Δεν ήταν δυνατή η λήψη του προφίλ.
-AppViewRouter--error-message-from-url =
-    .message = Δεν ήταν δυνατή η λήψη του προφίλ.
+AppViewRouter--error-local = Δεν έχει υλοποιηθεί ακόμα.
+AppViewRouter--error-public = Δεν ήταν δυνατή η λήψη του προφίλ.
+AppViewRouter--error-from-url = Δεν ήταν δυνατή η λήψη του προφίλ.
 AppViewRouter--route-not-found--home =
     .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
 
@@ -481,20 +474,7 @@ ProfileFilterNavigator--full-range = Πλήρες εύρος
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Εισαγωγή προφίλ απευθείας από το { -firefox-brand-name }…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Ανάγνωση αρχείου και επεξεργασία προφίλ…
-ProfileLoaderAnimation--loading-message-local =
-    .message = Δεν έχει υλοποιηθεί ακόμη.
-ProfileLoaderAnimation--loading-message-public =
-    .message = Λήψη και επεξεργασία προφίλ…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Λήψη και επεξεργασία προφίλ…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Ανάγνωση και επεξεργασία προφίλ…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Η προβολή δεν βρέθηκε
+ProfileLoaderAnimation--loading-local = Δεν έχει υλοποιηθεί ακόμα.
 
 ## ProfileRootMessage
 
