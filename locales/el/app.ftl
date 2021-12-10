@@ -475,6 +475,10 @@ ProfileFilterNavigator--full-range = Πλήρες εύρος
 ## Profile Loader Animation
 
 ProfileLoaderAnimation--loading-local = Δεν έχει υλοποιηθεί ακόμα.
+ProfileLoaderAnimation--loading-public = Λήψη και επεξεργασία προφίλ…
+ProfileLoaderAnimation--loading-from-url = Λήψη και επεξεργασία προφίλ…
+ProfileLoaderAnimation--loading-compare = Ανάγνωση και επεξεργασία προφίλ…
+ProfileLoaderAnimation--loading-view-not-found = Η προβολή δεν βρέθηκε
 
 ## ProfileRootMessage
 
