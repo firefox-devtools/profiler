@@ -29,6 +29,11 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-unpublished = Det gick inte att hämta profilen från { -firefox-brand-name }.
+AppViewRouter--error-from-file = Det gick inte att läsa filen eller analysera profilen i den.
+AppViewRouter--error-local = Inte implementerat ännu.
+AppViewRouter--error-public = Det gick inte att ladda ner profilen.
+AppViewRouter--error-from-url = Det gick inte att ladda ner profilen.
 AppViewRouter--route-not-found--home =
     .specialMessage = Webbadressen du försökte nå kändes inte igen.
 
@@ -428,7 +433,13 @@ ProfileDeleteButton--delete-button =
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Importerar profilen direkt från { -firefox-brand-name }...
+ProfileLoaderAnimation--loading-from-file = Läser fil och bearbetar profil...
 ProfileLoaderAnimation--loading-local = Inte implementerat ännu.
+ProfileLoaderAnimation--loading-public = Laddar ner och bearbetar profil...
+ProfileLoaderAnimation--loading-from-url = Laddar ner och bearbetar profil...
+ProfileLoaderAnimation--loading-compare = Läser och bearbetar profil...
+ProfileLoaderAnimation--loading-view-not-found = Vy hittades inte
 
 ## ProfileRootMessage
 
@@ -442,6 +453,9 @@ ProfileRootMessage--additional = Tillbaka till hem
 ServiceWorkerManager--installing-button = Installerar…
 ServiceWorkerManager--pending-button = Applicera och ladda om
 ServiceWorkerManager--installed-button = Ladda om applikationen
+ServiceWorkerManager--updated-while-not-ready =
+    En ny version av applikationen tillämpades innan den här sidan
+    var helt laddad. Du kan se fel.
 ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har laddats ner och är redo att användas.
 ServiceWorkerManager--hide-notice-button =
     .title = Dölj omladdningsmeddelandet
