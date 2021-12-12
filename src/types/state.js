@@ -245,6 +245,16 @@ export type SourceLoadingError =
       networkErrorMessage: string,
     |}
   | {|
+      type: 'NOT_PRESENT_IN_ARCHIVE',
+      url: string,
+      pathInArchive: string,
+    |}
+  | {|
+      type: 'ARCHIVE_PARSING_ERROR',
+      url: string,
+      parsingErrorMessage: string,
+    |}
+  | {|
       type: 'SYMBOL_SERVER_API_ERROR',
       apiErrorMessage: string,
     |};

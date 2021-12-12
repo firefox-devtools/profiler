@@ -13,10 +13,10 @@ export class Response {
   status: number;
   statusText: string;
   ok: boolean;
-  _body: string | null;
+  _body: string | ArrayBuffer | null;
 
   constructor(
-    body: string | null,
+    body: string | ArrayBuffer | null,
     options: {|
       status: number,
       statusText?: string,
@@ -30,13 +30,26 @@ export class Response {
   }
 
   async json() {
-    if (this._body) {
-      return JSON.parse(this._body);
-    }
-    throw new Error('The body is missing.');
+    return JSON.parse(await this.text());
   }
 
-  async text() {
+  async text(): Promise<string> {
+    if (this._body === null) {
+      throw new Error('The body is missing.');
+    }
+    if (this._body instanceof ArrayBuffer) {
+      throw new Error('The body is an array buffer');
+    }
+    return this._body;
+  }
+
+  async arrayBuffer(): Promise<ArrayBuffer> {
+    if (this._body === null) {
+      throw new Error('The body is missing.');
+    }
+    if (!(this._body instanceof ArrayBuffer)) {
+      throw new Error('The body is not an array buffer');
+    }
     return this._body;
   }
 }
