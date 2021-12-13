@@ -4,7 +4,6 @@
 
 // @flow
 
-import { isContentThreadWithNoPaint } from './profile-data';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
@@ -12,7 +11,7 @@ import type {
   Milliseconds,
   SampleUnits,
   ThreadCPUDeltaUnit,
-  ThreadIndex,
+  Profile,
 } from 'firefox-profiler/types';
 
 /**
@@ -47,6 +46,51 @@ export function computeMaxThreadCPUDelta(
   }
 
   return maxThreadCPUDelta;
+}
+
+/**
+ * Returns the expected cpu delta per sample if cpu is at 100% and
+ * sampling happens at the declared interval.
+ *
+ * Returns null if the profile does not use cpu deltas.
+ * Otherwise, returns a ratio that can be used to compare activity
+ * between threads with cpu deltas and threads without cpu deltas.
+ *
+ * Examples:
+ *  - interval: 2 (ms), sampleUnits: undefined
+ *    Returns null.
+ *  - interval: 5 (ms), sampleUnits.threadCPUDelta: "µs"
+ *    Returns 5000, i.e. "5000µs cpu delta per sample if each sample ticks at
+ *    the declared 5ms interval and the CPU usage is at 100%".
+ *  - interval: 3 (ms), sampleUnits.threadCPUDelta: "variable CPU cycles",
+ *    max_{sample}(sample.cpuDelta / sample.timeDelta) == 1234567 cycles per ms
+ *    Returns 1234567 * 3, i.e. "3703701 cycles per sample if each sample ticks at
+ *    the declared 3ms interval and the CPU usage is at the observed maximum".
+ */
+export function computeMaxCPUDeltaPerInterval(profile: Profile): number | null {
+  const sampleUnits = profile.meta.sampleUnits;
+  if (!sampleUnits) {
+    return null;
+  }
+
+  const interval = profile.meta.interval;
+  const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
+
+  switch (threadCPUDeltaUnit) {
+    case 'µs':
+    case 'ns': {
+      const cpuDeltaTimeUnitMultiplier =
+        getCpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
+      return cpuDeltaTimeUnitMultiplier * interval;
+    }
+    case 'variable CPU cycles':
+      return computeMaxThreadCPUDelta(profile.threads, interval);
+    default:
+      throw assertExhaustiveCheck(
+        threadCPUDeltaUnit,
+        'Unhandled threadCPUDelta unit in computeMaxCPUDeltaPerInterval.'
+      );
+  }
 }
 
 /**
@@ -190,125 +234,4 @@ function findClosestNonNullValueToIdx(
   }
 
   return findClosestNonNullValueToIdx(array, idx, ++distance);
-}
-
-// Threshold to be used for checking if a single threadCPUDelta value is above
-// the maxThreadCPUDelta. If the sample CPU value is using more than 10% of CPU,
-// it's safe to assume that this sample is active and non-idle.
-const CPU_IDLENESS_PERCENTAGE = 0.1;
-
-/**
- * Compute the activity percentages for each threads by looking at their CPU usage
- * per thread. This will be used to determine the idle threads and also to
- * visualize the activity of threads in the UI.
- * A sample is considered active if its CPU value is above
- * `maxThreadCPUDelta * CPU_IDLENESS_PERCENTAGE`.
- */
-export function computeThreadActivityPercentages(
-  threads: Thread[],
-  sampleUnits: SampleUnits | void,
-  profileInterval: Milliseconds,
-  maxThreadCPUDelta: number
-): Map<ThreadIndex, number> {
-  const activityPercentages = new Map();
-
-  if (!sampleUnits) {
-    // There is no CPU value in this thread, return empty map.
-    return activityPercentages;
-  }
-
-  const cpuThresholdPerInterval = maxThreadCPUDelta * CPU_IDLENESS_PERCENTAGE;
-  for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
-    const thread = threads[threadIndex];
-    const { samples } = thread;
-    const { threadCPUDelta } = samples;
-
-    if (!threadCPUDelta) {
-      // This should not happen because this is checked before. But continue
-      // early just in case.
-      activityPercentages.set(threadIndex, 0);
-      continue;
-    }
-
-    let activeStackCount = 0;
-    // Skipping zero because we know for sure that the first index will be null.
-    for (let sampleIndex = 1; sampleIndex < samples.length; sampleIndex++) {
-      const currentThreadCPUDelta = threadCPUDelta[sampleIndex] || 0;
-      // Interval is not always steady depending on the overhead.
-      const intervalFactor =
-        (samples.time[sampleIndex] - samples.time[sampleIndex - 1]) /
-        profileInterval;
-      const currentCPUPerInterval = currentThreadCPUDelta / intervalFactor;
-
-      // Check if the sample's CPUDelta value is above the threshold.
-      if (
-        currentCPUPerInterval !== null &&
-        currentCPUPerInterval >= cpuThresholdPerInterval
-      ) {
-        activeStackCount++;
-      }
-    }
-
-    // Compute the activity percentage of the thread and add it to the map.
-    const threadActivityPercentage = activeStackCount / samples.length;
-    activityPercentages.set(threadIndex, threadActivityPercentage);
-  }
-
-  return activityPercentages;
-}
-
-// Threshold to be used for checking a thread's CPU activity percentage vs the
-// most active thread CPU activity percentage. Currently, we assume a thread
-// idle if it's activity below 10% compared to the most active thread.
-const ACTIVE_SAMPLE_PERCENTAGE = 0.1;
-// Threshold for only content processes with no paint markers. If there's no
-// paint marker, it's safe to assume that the content process is not interesting
-// for the user. So it should be marked as idle, even if it has slightly more CPU
-// usage. It will be marked as non-idle if it has more than 20% of CPU activity.
-const ACTIVE_SAMPLE_PERCENTAGE_CONTENT_PROCESS_NO_PAINT = 0.2;
-
-/**
- * Get the activity percentages for all threads, and find out the idle threads
- * by looking at the relative CPU usage for each thread. It's relative to the
- * most active thread in the whole profile.
- */
-export function computeIdleThreadsByCPU(
-  threads: Thread[],
-  threadActivityPercentages: Map<ThreadIndex, number>
-): Set<ThreadIndex> {
-  const idleThreads = new Set();
-  // Find the max percentage value across profile. This will be used to compute
-  // the idleness sample percentage threshold.
-  let maxActivityPercentage = 0;
-  threadActivityPercentages.forEach((activenessPercentage) => {
-    maxActivityPercentage = Math.max(
-      maxActivityPercentage,
-      activenessPercentage
-    );
-  });
-
-  // We have two thresholds for activeness. The first one is used most of the time.
-  // But if there are any content process main threads with no paint markers,
-  // then the second threshold will be used, which is higher. This means that
-  // we're more agressively hiding content processes with no paint markers.
-  const defaultThreshold = maxActivityPercentage * ACTIVE_SAMPLE_PERCENTAGE;
-  const thresholdForContentProcessWithNoPaint =
-    maxActivityPercentage * ACTIVE_SAMPLE_PERCENTAGE_CONTENT_PROCESS_NO_PAINT;
-
-  for (const [
-    threadIndex,
-    activityPercentage,
-  ] of threadActivityPercentages.entries()) {
-    // Threshold changes for each thread. If it's a content process main thread
-    // with no paint markers, the threshold will be higher.
-    const thresholdForThread = isContentThreadWithNoPaint(threads[threadIndex])
-      ? thresholdForContentProcessWithNoPaint
-      : defaultThreshold;
-
-    if (activityPercentage < thresholdForThread) {
-      idleThreads.add(threadIndex);
-    }
-  }
-
-  return idleThreads;
 }

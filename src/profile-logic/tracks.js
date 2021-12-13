@@ -14,12 +14,8 @@ import type {
   TrackIndex,
 } from 'firefox-profiler/types';
 
-import {
-  defaultThreadOrder,
-  getFriendlyThreadName,
-  isThreadWithNoPaint,
-  isContentThreadWithNoPaint,
-} from './profile-data';
+import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
+import { computeMaxCPUDeltaPerInterval } from './cpu';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
@@ -539,30 +535,13 @@ export function tryInitializeHiddenTracksFromUrl(
 // The result is guaranteed to have a non-empty number of visible threads.
 export function computeDefaultHiddenTracks(
   tracksWithOrder: TracksWithOrder,
-  profile: Profile,
-  idleThreadsByCPU: Set<ThreadIndex>
+  profile: Profile
 ): HiddenTracks {
   return _computeHiddenTracksForVisibleThreads(
     profile,
-    computeDefaultVisibleThreads(profile, idleThreadsByCPU),
+    computeDefaultVisibleThreads(profile),
     tracksWithOrder
   );
-}
-
-// Return a non-empty set of threads that should be shown by default.
-export function computeDefaultVisibleThreads(
-  profile: Profile,
-  idleThreadsByCPU: Set<ThreadIndex>
-): Set<ThreadIndex> {
-  const validThreadIndexes = profile.threads.map((_thread, i) => i);
-  const nonIdleThreads = validThreadIndexes.filter((threadIndex) => {
-    return !_isThreadIdle(profile, threadIndex, idleThreadsByCPU);
-  });
-  if (nonIdleThreads.length === 0) {
-    // All threads idle. Show all threads.
-    return new Set(validThreadIndexes);
-  }
-  return new Set(nonIdleThreads);
 }
 
 // Create the sets of global and local tracks so that the requested
@@ -744,180 +723,169 @@ export function getLocalTrackName(
   }
 }
 
-/**
- * Determine if a thread is idle, so that it can be hidden. It is really annoying for an
- * end user to load a profile full of empty and idle threads. This function uses
- * various rules to determine if a thread is idle.
- */
-function _isThreadIdle(
+// Consider threads whose sample score is 20% or less of the maximum sample score to be idle.
+const IDLE_THRESHOLD_FRACTION = 0.2;
+
+// Return a non-empty set of threads that should be shown by default.
+export function computeDefaultVisibleThreads(
+  profile: Profile
+): Set<ThreadIndex> {
+  const threads = profile.threads;
+  if (threads.length === 0) {
+    throw new Error('No threads');
+  }
+
+  // First, compute a score for every thread.
+  const maxCpuDeltaPerInterval = computeMaxCPUDeltaPerInterval(profile);
+  const scores = threads.map((thread, threadIndex) => {
+    const score = _computeThreadDefaultVisibilityScore(
+      profile,
+      thread,
+      maxCpuDeltaPerInterval
+    );
+    return { threadIndex, score };
+  });
+
+  // Next, sort the threads by score.
+  scores.sort(({ score: a }, { score: b }) => {
+    // Return:
+    //  < 0 for "A is more interesting than B",
+    //  > 0 for "B is more interesting than A",
+    // == 0 for "both threads are equally interesting"
+    if (a.isEssentialFirefoxThread !== b.isEssentialFirefoxThread) {
+      return a.isEssentialFirefoxThread ? -1 : 1;
+    }
+    return b.boostedSampleScore - a.boostedSampleScore;
+  });
+
+  // Take the top 15 threads and cull everything else.
+  const top15 = scores.slice(0, 15);
+
+  // As a last pass, cull very-idle threads, by comparing their activity
+  // to the thread with the most "sampleScore" activity.
+  // We keep all threads whose sampleScore is at least 20% of the highest
+  // sampleScore, and also any threads which are otherwise essential.
+  const highestSampleScore = Math.max(
+    ...scores.map(({ score }) => score.sampleScore)
+  );
+  const thresholdSampleScore = highestSampleScore * IDLE_THRESHOLD_FRACTION;
+  const finalList = top15.filter(({ score }) => {
+    if (score.isEssentialFirefoxThread) {
+      return true; // keep.
+    }
+    if (score.isInterestingEvenWithMinimalActivity && score.sampleScore > 0) {
+      return true; // keep.
+    }
+    return score.sampleScore >= thresholdSampleScore;
+  });
+
+  return new Set(finalList.map(({ threadIndex }) => threadIndex));
+}
+
+type DefaultVisibilityScore = {|
+  // Whether this thread is one of the essential threads that
+  // should always be kept (unless there's too many of them).
+  isEssentialFirefoxThread: boolean,
+  // Whether this thread should be kept even if it looks very idle,
+  // as long as there's a single sample with non-zero activity.
+  isInterestingEvenWithMinimalActivity: boolean,
+  // The accumulated CPU delta for the entire thread.
+  // If the thread does not have CPU delta information, we compute
+  // a "CPU-delta-like" number based on the number of samples which
+  // are in a non-idle category.
+  sampleScore: number,
+  // Like sampleScore, but with a boost factor applied if this thread
+  // is "interesting even with minimal activity".
+  boostedSampleScore: number,
+|};
+
+// Also called "padenot factor".
+const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 100;
+
+// Compute a "default visibility" score for this thread.
+// See the DefaultVisibilityScore type for details.
+// If we have too many threads, we use this score to compare between
+// "interesting" threads to make sure we keep the most interesting ones.
+function _computeThreadDefaultVisibilityScore(
   profile: Profile,
-  threadIndex: ThreadIndex,
-  idleThreadsByCPU: Set<ThreadIndex>
-): boolean {
-  const thread = profile.threads[threadIndex];
-  if (
+  thread: Thread,
+  maxCpuDeltaPerInterval: number | null
+): DefaultVisibilityScore {
+  const isEssentialFirefoxThread = _isEssentialFirefoxThread(thread);
+  const isInterestingEvenWithMinimalActivity =
+    _isFirefoxMediaThreadWhichIsUsuallyIdle(thread);
+  const sampleScore = _computeThreadSampleScore(
+    profile,
+    thread,
+    maxCpuDeltaPerInterval
+  );
+  const boostedSampleScore = isInterestingEvenWithMinimalActivity
+    ? sampleScore * AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR
+    : sampleScore;
+  return {
+    isEssentialFirefoxThread,
+    isInterestingEvenWithMinimalActivity,
+    sampleScore,
+    boostedSampleScore,
+  };
+}
+
+function _isEssentialFirefoxThread(thread: Thread): boolean {
+  return (
     // Don't hide the Renderer thread. This is because Renderer thread is pretty
     // useful for understanding the painting with WebRender and it's an important
     // thread for the users.
     thread.name === 'Renderer' ||
     // Don't hide the main thread of the parent process.
-    (thread.name === 'GeckoMain' && thread.processType === 'default') ||
+    (thread.name === 'GeckoMain' &&
+      thread.processType === 'default' &&
+      (!thread.processName || thread.processName === 'Parent Process')) ||
     // Don't hide the GPU thread on Windows.
     (thread.name === 'GeckoMain' && thread.processType === 'gpu')
-  ) {
-    return false;
-  }
+  );
+}
 
-  if (thread.samples.length === 0) {
-    // This is a profile without any sample (taken with no periodic sampling mode)
-    // and we can't take a look at the samples to decide whether that thread is
-    // active or not. So we are checking if we have a paint marker instead.
-    return isThreadWithNoPaint(thread);
-  }
+function _isFirefoxMediaThreadWhichIsUsuallyIdle(thread: Thread): boolean {
+  // Detect media threads: they are usually very idle, but are interesting
+  // as soon as there's at least one sample. They're present with the media
+  // preset, but not usually captured otherwise.
+  // Matched thread names: AudioIPC, MediaPDecoder, MediaTimer, MediaPlayback,
+  // MediaDecoderStateMachine, GraphRunner. They're enabled by the media
+  // preset.
+  return /^(?:Audio|Media|GraphRunner|WebrtcWorker)/.test(thread.name);
+}
 
-  if (isContentThreadWithNoPaint(thread)) {
-    // If content thread doesn't have any paint markers, set it idle if the
-    // thread has at least 80% idle samples.
-    return _isThreadIdleByEitherCpuOrCategory(
-      profile,
-      thread,
-      threadIndex,
-      idleThreadsByCPU,
-      PERCENTAGE_ACTIVE_SAMPLES_NON_PAINT
+// Compute the accumulated CPU delta for the entire thread.
+// If the thread does not have CPU delta information, we compute a
+// "CPU-delta-like" number based on the number of samples which are in a
+// non-idle category.
+// If the profile has no cpu delta units, the return value is the number of
+// non-idle samples.
+function _computeThreadSampleScore(
+  { meta }: Profile,
+  { samples, stackTable }: Thread,
+  maxCpuDeltaPerInterval: number | null
+): number {
+  if (samples.threadCPUDelta) {
+    // Sum up all CPU deltas in this thread, to compute a total
+    // CPU time for this thread (or a total CPU cycle count).
+    return samples.threadCPUDelta.reduce(
+      (accum, delta) => accum + (delta ?? 0),
+      0
     );
   }
 
-  if (/^(?:Audio|Media|GraphRunner|WebrtcWorker)/.test(thread.name)) {
-    // This is a media thread: they are usually very idle, but are interesting
-    // as soon as there's at least one sample. They're present with the media
-    // preset, but not usually captured otherwise.
-    // Matched thread names: AudioIPC, MediaPDecoder, MediaTimer, MediaPlayback,
-    // MediaDecoderStateMachine, GraphRunner. They're enabled by the media
-    // preset.
-    return !_hasThreadAtLeastOneNonIdleSample(profile, thread);
-  }
-
-  // Detect the idleness by either looking at the thread CPU usage (if it has),
-  // or by looking at the sample categories.
-  return _isThreadIdleByEitherCpuOrCategory(
-    profile,
-    thread,
-    threadIndex,
-    idleThreadsByCPU,
-    PERCENTAGE_ACTIVE_SAMPLES
-  );
-}
-
-/**
- * This function check if the thread has threadCPUDelta values and uses it to
- * detect the thread idleness if it has these. Otherwise, falls back to using
- * the sample categories for idleness detection. CPU values are more accurate
- * than sample categories: for example some places could be marked "idle" but
- * still consume CPU in some situations.
- */
-function _isThreadIdleByEitherCpuOrCategory(
-  profile: Profile,
-  thread: Thread,
-  threadIndex: ThreadIndex,
-  idleThreadsByCPU: Set<ThreadIndex>,
-  activeSamplePercentage: number
-): boolean {
-  const { sampleUnits } = profile.meta;
-  if (thread.samples.threadCPUDelta && sampleUnits) {
-    // Use the thread CPU usage numbers to detect the idleness.
-    return idleThreadsByCPU.has(threadIndex);
-  }
-
-  // Fall back to using the sample categories to detect the idleness.
-  return _isThreadMostlyFullOfIdleSamples(
-    profile,
-    thread,
-    activeSamplePercentage
-  );
-}
-
-// Any thread, except content thread with no RefreshDriverTick, with less than
-// 5% non-idle time will be hidden.
-const PERCENTAGE_ACTIVE_SAMPLES = 0.05;
-
-// Any content thread with no RefreshDriverTick with less than 20% non-idle
-// time will be hidden.
-const PERCENTAGE_ACTIVE_SAMPLES_NON_PAINT = 0.2;
-
-/**
- * This function goes through all of the samples in the thread, and sees if some large
- * percentage of them are idle. If the thread is mostly idle, then it should be hidden.
- */
-function _isThreadMostlyFullOfIdleSamples(
-  profile: Profile,
-  thread: Thread,
-  activeSamplePercentage: number
-): boolean {
-  let maxActiveStackCount = activeSamplePercentage * thread.samples.length;
-  let activeStackCount = 0;
-  let filteredStackCount = 0;
-
-  const { categories } = profile.meta;
-  if (!categories) {
-    // Profiles that are imported may not have categories. In this case do not try
-    // and deduce anything about idleness.
-    return false;
-  }
-
-  for (
-    let sampleIndex = 0;
-    sampleIndex < thread.samples.length;
-    sampleIndex++
-  ) {
-    const stackIndex = thread.samples.stack[sampleIndex];
-    if (stackIndex === null) {
-      // This stack was filtered out. Most likely this will never actually happen
-      // on a new profile, but keep this check here since the stacks are possibly
-      // null in the Flow type definitions.
-      filteredStackCount++;
-      // Adjust the maximum necessary active stacks to find based on null stacks.
-      maxActiveStackCount =
-        activeSamplePercentage * (thread.samples.length - filteredStackCount);
-    } else {
-      const categoryIndex = thread.stackTable.category[stackIndex];
-
-      const category = categories[categoryIndex];
-      if (category.name !== 'Idle') {
-        activeStackCount++;
-        if (activeStackCount > maxActiveStackCount) {
-          return false;
-        }
-      }
-    }
-  }
-
-  // Do one final check to see if we have enough active samples.
-  return activeStackCount <= maxActiveStackCount;
-}
-
-function _hasThreadAtLeastOneNonIdleSample(
-  profile: Profile,
-  thread: Thread
-): boolean {
-  const { categories } = profile.meta;
-  if (!categories) {
-    // Profiles that are imported may not have categories, assume that there are
-    // non-idle samples.
-    return true;
-  }
-
-  for (const stackIndex of thread.samples.stack) {
-    if (stackIndex === null) {
-      continue;
-    }
-
-    const categoryIndex = thread.stackTable.category[stackIndex];
-    const category = categories[categoryIndex];
-    if (category.name !== 'Idle') {
-      return true;
-    }
-  }
-  return false;
+  // This thread has no CPU delta information.
+  // Compute a score based on non-idle samples, in the same
+  // units as the cpu delta score.
+  const idleCategoryIndex = meta.categories
+    ? meta.categories.findIndex((c) => c.name === 'Idle')
+    : -1;
+  const nonIdleSampleCount = samples.stack.filter(
+    (stack) =>
+      stack !== null && stackTable.category[stack] !== idleCategoryIndex
+  ).length;
+  return nonIdleSampleCount * (maxCpuDeltaPerInterval ?? 1);
 }
 
 function _findDefaultThread(threads: Thread[]): Thread | null {
