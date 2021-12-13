@@ -5,6 +5,7 @@
 import * as React from 'react';
 
 import { getStackType } from 'firefox-profiler/profile-logic/transforms';
+import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { objectEntries } from 'firefox-profiler/utils/flow';
 import { formatCallNodeNumberWithUnit } from 'firefox-profiler/utils/format-numbers';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
@@ -196,10 +197,16 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
     let fileName = null;
 
-    // Only JavaScript functions have a filename.
     const fileNameIndex = thread.funcTable.fileName[funcIndex];
     if (fileNameIndex !== null) {
       let fileNameURL = thread.stringTable.getString(fileNameIndex);
+      // fileNameURL could be a path from symbolication (potentially using "special path"
+      // syntax, e.g. hg:...), or it could be a URL, if the function is a JS function.
+      // If it's a path from symbolication, strip it down to just the actual path.
+      fileNameURL = parseFileNameFromSymbolication(fileNameURL).path;
+
+      // JS functions have information about where the function starts.
+      // Add :<line>:<col> to the URL, if known.
       const lineNumber = thread.funcTable.lineNumber[funcIndex];
       if (lineNumber !== null) {
         fileNameURL += ':' + lineNumber;
@@ -214,7 +221,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       // the elements as direct children.
       fileName = [
         <div className="tooltipLabel" key="file">
-          Script URL:
+          File:
         </div>,
         <div className="tooltipDetailsUrl" key="fileVal">
           {fileNameURL}
