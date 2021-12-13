@@ -17,7 +17,10 @@ import {
   formatPercent,
 } from 'firefox-profiler/utils/format-numbers';
 import { TooltipCallNode } from 'firefox-profiler/components/tooltip/CallNode';
-import { getTimingsForCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getTimingsForCallNodeIndex,
+  resolveBucketColorNameForFunc,
+} from 'firefox-profiler/profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
 
 import type {
@@ -225,7 +228,16 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
         const categoryIndex = callNodeTable.category[callNodeIndex];
         const category = categories[categoryIndex];
-        const colorStyles = this._mapCategoryColorNameToStyles(category.color);
+        const bucketColorName =
+          category.color === 'dynamic'
+            ? resolveBucketColorNameForFunc(
+                funcIndex,
+                thread.funcTable,
+                thread.resourceTable,
+                thread.stringTable
+              )
+            : category.color;
+        const colorStyles = this._mapCategoryColorNameToStyles(bucketColorName);
 
         const background =
           isHovered || isSelected

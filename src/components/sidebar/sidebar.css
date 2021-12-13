@@ -144,6 +144,33 @@
   background-color: var(--grey-50);
 }
 
+.sidebar-histogram-bar-color.category-color-dynamic {
+  /* Execute the following on https://bottosson.github.io/misc/colorpicker/ :
+  function range(n) { const a = []; for (let i = 0; i < n; i++) a.push(i); return a; }
+  range(17).map(x => rgb_to_hex(...okhsl_to_srgb(x/16, 0.95, 0.7))).join(", ")
+  */
+  background-image: linear-gradient(
+    to right,
+    #fd79a7,
+    #fd817e,
+    #fc874e,
+    #ec951b,
+    #d0a612,
+    #aeb511,
+    #6ec628,
+    #26ca81,
+    #19c6af,
+    #15c2cd,
+    #22bceb,
+    #5eb2fc,
+    #8ca7fd,
+    #af99fe,
+    #d782fb,
+    #f970d8,
+    #fd79a7
+  );
+}
+
 .sidebar-toggle {
   padding: 0;
   border: 0;
