@@ -68,21 +68,14 @@
 
   /* 1px is allocated for the vertical separator line. */
   width: calc(var(--thread-label-column-width) - 1px);
-  height: 20px;
 
   /* 8px is intentional to align this text with the text above. */
   padding: 0 20px 0 8px;
   border: 0;
-  margin: 0;
   background: none;
   color: inherit;
-
-  /* Specific for links. */
-  cursor: default;
   font: inherit;
-  line-height: 20px;
   text-align: left;
-  text-decoration: none;
 }
 
 .timelineSettingsHiddenTracks:hover {
