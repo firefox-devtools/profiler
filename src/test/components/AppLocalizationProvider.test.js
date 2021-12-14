@@ -30,25 +30,37 @@ describe('AppLocalizationProvider', () => {
     delete window.fetch;
   });
 
-  function setup(language = 'en-US') {
+  function setup({
+    languages,
+    missingTranslation,
+  }: $Shape<{| languages: string[], missingTranslation: string[] |}> = {}) {
+    languages = languages ?? ['en-US'];
+    missingTranslation = missingTranslation ?? [];
+
     const store = blankStore();
     const { dispatch, getState } = store;
 
-    const translatedText = `This is ${language} Text`;
+    jest.spyOn(window.navigator, 'languages', 'get').mockReturnValue(languages);
 
-    jest
-      .spyOn(window.navigator, 'languages', 'get')
-      .mockReturnValue([language]);
-
+    const translatedText = (language) => `This is ${language} Text`;
+    const fetchUrlRe = /^\/locales\/(?<language>[^/]+)\/app.ftl$/;
     const fetch = jest.fn().mockImplementation((fetchUrl: string) => {
-      if (fetchUrl === `/locales/${language}/app.ftl`) {
+      const matchUrlResult = fetchUrlRe.exec(fetchUrl);
+      if (matchUrlResult) {
+        // $FlowExpectError Our Flow doesn't know about named groups.
+        const { language } = matchUrlResult.groups;
         const response = (({
           ok: true,
           status: 200,
           headers: {
             get: () => 'text/plain',
           },
-          text: () => Promise.resolve(`test-id = ${translatedText}`),
+          text: () =>
+            Promise.resolve(
+              missingTranslation.includes(language)
+                ? ``
+                : `test-id = ${translatedText(language)}`
+            ),
         }: any): Response);
 
         return Promise.resolve(response);
@@ -115,7 +127,9 @@ describe('AppLocalizationProvider', () => {
       </Provider>
     );
 
-    expect(await screen.findByText(translatedText)).toBeInTheDocument();
+    expect(
+      await screen.findByText(translatedText('en-US'))
+    ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
@@ -133,5 +147,55 @@ describe('AppLocalizationProvider', () => {
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('rtl');
+  });
+
+  it('fetches FTL strings for all available locales, but not others', async () => {
+    const { store, translatedText } = setup({
+      // At the time of this  writing, "de" is available but "und" isn't (and
+      // probably won't ever be, because this doesn't exist).
+      // Please replace the languages in this test if this changes in the future.
+      languages: ['de', 'und'],
+    });
+    render(
+      <Provider store={store}>
+        <AppLocalizationProvider>
+          <Localized id="test-id">
+            <span>Fallback String</span>
+          </Localized>
+        </AppLocalizationProvider>
+      </Provider>
+    );
+
+    expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute('lang', 'de');
+    expect(window.fetch).toBeCalledWith('/locales/de/app.ftl');
+    expect(window.fetch).toBeCalledWith('/locales/en-US/app.ftl');
+    expect(window.fetch).toBeCalledTimes(2);
+  });
+
+  it('falls back properly on en-US if the primary locale lacks a string', async () => {
+    const { store, translatedText } = setup({
+      // At the time of this  writing, "de" is available.
+      // Please replace the languages in this test if this changes in the future.
+      languages: ['de'],
+      missingTranslation: ['de'],
+    });
+    render(
+      <Provider store={store}>
+        <AppLocalizationProvider>
+          <Localized id="test-id">
+            <span>Fallback String</span>
+          </Localized>
+        </AppLocalizationProvider>
+      </Provider>
+    );
+
+    expect(
+      await screen.findByText(translatedText('en-US'))
+    ).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute('lang', 'de');
+    expect(window.fetch).toBeCalledWith('/locales/de/app.ftl');
+    expect(window.fetch).toBeCalledWith('/locales/en-US/app.ftl');
+    expect(window.fetch).toBeCalledTimes(2);
   });
 });
