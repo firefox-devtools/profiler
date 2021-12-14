@@ -164,7 +164,7 @@ FullTimeline--stack-height = 栈深度
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = 可见 <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> 轨
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> 轨
 
 ## Home page
 
