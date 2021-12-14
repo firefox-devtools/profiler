@@ -488,6 +488,8 @@ describe('Timeline', function () {
   });
 
   describe('TimelineSettingsHiddenTracks', () => {
+    autoMockDomRect();
+
     it('resets "rightClickedTrack" state when clicked', () => {
       const profile = _getProfileWithDroppedSamples();
 
@@ -506,7 +508,7 @@ describe('Timeline', function () {
         type: 'global',
       });
 
-      fireFullClick(screen.getByText('/ tracks visible'));
+      fireFullClick(screen.getByText('/ tracks'));
       expect(getRightClickedTrack(store.getState())).toEqual(null);
     });
   });
