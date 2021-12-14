@@ -224,6 +224,7 @@ function setupFlameGraph() {
   const {
     profile,
     funcNamesPerThread: [funcNames],
+    funcNamesDictPerThread: [funcNamesDict],
   } = getProfileFromTextSamples(`
     A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
     B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
@@ -241,6 +242,9 @@ function setupFlameGraph() {
     funcTable.columnNumber[funcIndex] = funcIndex + 100;
     funcTable.fileName[funcIndex] = stringTable.indexForString('path/to/file');
   }
+  funcTable.fileName[funcNamesDict.J] = stringTable.indexForString(
+    'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28'
+  );
 
   const store = storeWithProfile(profile);
 
