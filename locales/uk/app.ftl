@@ -217,7 +217,7 @@ FullTimeline--stack-height = Висота стеку
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = Показано доріжки <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span>
+FullTimeline--tracks-button = Доріжок: <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span>
 
 ## Home page
 
