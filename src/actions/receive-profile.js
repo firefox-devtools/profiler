@@ -87,6 +87,7 @@ import type {
   BrowserConnection,
   BrowserConnectionStatus,
 } from '../app-logic/browser-connection';
+import type { LibSymbolicationRequest } from '../profile-logic/symbol-store';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -869,24 +870,65 @@ function getSymbolStore(
     // return a symbol store in this case.
     return null;
   }
+
+  async function requestSymbolsWithCallback(
+    symbolSupplierName: string,
+    requests: LibSymbolicationRequest[],
+    callback: (path: string, requestJson: string) => Promise<MixedObject>
+  ) {
+    for (const { lib } of requests) {
+      dispatch(requestingSymbolTable(lib));
+    }
+    try {
+      return await MozillaSymbolicationAPI.requestSymbols(
+        symbolSupplierName,
+        requests,
+        callback
+      );
+    } catch (e) {
+      throw new Error(
+        `There was a problem with the symbolication API request to the ${symbolSupplierName}: ${e.message}`
+      );
+    } finally {
+      for (const { lib } of requests) {
+        dispatch(receivedSymbolTableReply(lib));
+      }
+    }
+  }
+
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
-    requestSymbolsFromServer: async (requests) => {
-      for (const { lib } of requests) {
-        dispatch(requestingSymbolTable(lib));
-      }
-      try {
-        return await MozillaSymbolicationAPI.requestSymbols(
-          requests,
-          symbolServerUrl
-        );
-      } finally {
-        for (const { lib } of requests) {
-          dispatch(receivedSymbolTableReply(lib));
+    requestSymbolsFromServer: (requests) =>
+      requestSymbolsWithCallback(
+        'symbol server',
+        requests,
+        async (path, json) => {
+          const response = await fetch(symbolServerUrl + path, {
+            body: json,
+            method: 'POST',
+            mode: 'cors',
+          });
+          return response.json();
         }
+      ),
+
+    requestSymbolsFromBrowser: async (requests) => {
+      if (browserConnection === null) {
+        throw new Error(
+          'No connection to the browser, cannot run querySymbolicationApi'
+        );
       }
+
+      const bc = browserConnection;
+      return requestSymbolsWithCallback(
+        'browser',
+        requests,
+        async (path, json) =>
+          JSON.parse(await bc.querySymbolicationApi(path, json))
+      );
     },
+
     requestSymbolTableFromBrowser: async (lib) => {
       if (browserConnection === null) {
         throw new Error(
