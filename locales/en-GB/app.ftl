@@ -221,7 +221,7 @@ FullTimeline--stack-height = Stack height
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks visible
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks
 
 ## Home page
 
