@@ -174,13 +174,6 @@ FullTimeline--graph-type = Τύπος γραφήματος:
 FullTimeline--categories-with-cpu = Κατηγορίες με CPU
 FullTimeline--categories = Κατηγορίες
 FullTimeline--stack-height = Ύψος στοίβας
-# This string is used as the text of the track selection button.
-# Displays the ratio of visible tracks count to total tracks count in the timeline.
-# We have spans here to make the numbers bold.
-# Variables:
-#   $visibleTrackCount (Number) - Visible track count in the timeline
-#   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> ορατά κομμάτια
 
 ## Home page
 
@@ -474,6 +467,7 @@ ProfileFilterNavigator--full-range = Πλήρες εύρος
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Εισαγωγή προφίλ απευθείας από το { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-local = Δεν έχει υλοποιηθεί ακόμα.
 ProfileLoaderAnimation--loading-public = Λήψη και επεξεργασία προφίλ…
 ProfileLoaderAnimation--loading-from-url = Λήψη και επεξεργασία προφίλ…
