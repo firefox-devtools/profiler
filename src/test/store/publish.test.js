@@ -107,8 +107,8 @@ describe('getCheckedSharingOptions', function () {
       expect(getDefaultsWith('nightly-autoland')).toEqual(isNotFiltering);
     });
 
-    it('does filter with aurora', function () {
-      expect(getDefaultsWith('aurora')).toEqual(isFiltering);
+    it('does filter with beta', function () {
+      expect(getDefaultsWith('beta')).toEqual(isFiltering);
     });
 
     it('does filter with release', function () {
@@ -119,6 +119,9 @@ describe('getCheckedSharingOptions', function () {
   describe('toggleCheckedSharingOptions', function () {
     it('can toggle options', function () {
       const { profile } = getProfileFromTextSamples('A');
+      // This will cause the profile to be sanitized by default when uploading.
+      profile.meta.updateChannel = 'release';
+
       const { getState, dispatch } = storeWithProfile(profile);
       expect(getCheckedSharingOptions(getState())).toMatchObject({
         includeHiddenThreads: false,
@@ -436,6 +439,10 @@ describe('attemptToPublish', function () {
       profile,
       funcNamesPerThread: [, funcNames],
     } = getProfileFromTextSamples('A', 'B');
+
+    // This will cause the profile to be sanitized by default when uploading.
+    profile.meta.updateChannel = 'release';
+
     // Setting those to make sure we are creating two global tracks.
     profile.threads[0].name = 'GeckoMain';
     profile.threads[1].name = 'GeckoMain';
@@ -598,6 +605,9 @@ describe('attemptToPublish', function () {
     it('stores properly sanitized profiles', async () => {
       // We create a 5-sample profile, to be able to assert ranges later.
       const { profile } = getProfileFromTextSamples('A  B  C  D  E');
+      // This will cause the profile to be sanitized by default when uploading.
+      profile.meta.updateChannel = 'release';
+
       const store = storeWithProfile(profile);
       const { dispatch, getState, resolveUpload, assertUploadSuccess } =
         setupFakeUploadsWithStore(store);
@@ -607,7 +617,7 @@ describe('attemptToPublish', function () {
 
       // We want to sanitize by removing the full time range, keeping only the
       // commited range.
-      // Profiles coming from getProfileFromTextSamples are sanitized by
+      // Profiles with updateChannel == 'release' are sanitized by
       // default, but let's make sure of that so that we don't have surprises in
       // the future.
       expect(getCheckedSharingOptions(getState()).includeFullTimeRange).toEqual(

@@ -236,12 +236,10 @@ describe('MarkerChart', function () {
   });
 
   // TODO implement selecting user timing markers #2355
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip('can select a marker when clicking the chart', function () {});
+  it.todo('can select a marker when clicking the chart');
 
   // TODO implement selecting user timing markers #2355
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip('can right click a marker and show a context menu', function () {});
+  it.todo('can right click a marker and show a context menu');
 
   it('shows a tooltip when hovering', () => {
     const { getTooltip, moveMouse, findFillTextPosition } = setupUserTimings({

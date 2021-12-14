@@ -46,12 +46,13 @@ import {
 } from 'firefox-profiler/app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
-  initializeHiddenLocalTracksByPid,
   computeLocalTracksByPid,
   computeGlobalTracks,
   initializeGlobalTrackOrder,
   initializeSelectedThreadIndex,
-  initializeHiddenGlobalTracks,
+  tryInitializeHiddenTracksLegacy,
+  tryInitializeHiddenTracksFromUrl,
+  computeDefaultHiddenTracks,
   getVisibleThreads,
 } from 'firefox-profiler/profile-logic/tracks';
 import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
@@ -81,10 +82,12 @@ import type {
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
-import {
+import { createBrowserConnection } from '../app-logic/browser-connection';
+import type {
   BrowserConnection,
-  createBrowserConnection,
+  BrowserConnectionStatus,
 } from '../app-logic/browser-connection';
+import type { LibSymbolicationRequest } from '../profile-logic/symbol-store';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -279,82 +282,63 @@ export function finalizeFullProfileView(
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
-    const idleThreadsByCPU = getIdleThreadsByCPU(getState());
+    const localTracksByPid = computeLocalTracksByPid(profile);
+
+    const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
       hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
-      getLegacyThreadOrder(getState())
+      legacyThreadOrder
     );
-    let hiddenGlobalTracks = initializeHiddenGlobalTracks(
-      globalTracks,
-      profile,
-      globalTrackOrder,
-      hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
-      getLegacyHiddenThreads(getState()),
-      idleThreadsByCPU
-    );
-    const localTracksByPid = computeLocalTracksByPid(profile);
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
       localTracksByPid,
-      getLegacyThreadOrder(getState())
-    );
-    let hiddenLocalTracksByPid = initializeHiddenLocalTracksByPid(
-      hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
-      localTracksByPid,
-      profile,
-      getLegacyHiddenThreads(getState()),
-      idleThreadsByCPU
-    );
-    let visibleThreadIndexes = getVisibleThreads(
-      globalTracks,
-      hiddenGlobalTracks,
-      localTracksByPid,
-      hiddenLocalTracksByPid
+      legacyThreadOrder
     );
 
-    // This validity check can't be extracted into a separate function, as it needs
-    // to update a lot of the local variables in this function.
-    if (visibleThreadIndexes.length === 0) {
-      // All threads are hidden, since this can't happen normally, revert them all.
-      visibleThreadIndexes = profile.threads.map(
-        (_, threadIndex) => threadIndex
+    const tracksWithOrder = {
+      globalTracks,
+      globalTrackOrder,
+      localTracksByPid,
+      localTrackOrderByPid,
+    };
+
+    let hiddenTracks = null;
+
+    // For non-initial profile loads, initialize the set of hidden tracks from
+    // information in the URL.
+    const legacyHiddenThreads = getLegacyHiddenThreads(getState());
+    if (legacyHiddenThreads !== null) {
+      hiddenTracks = tryInitializeHiddenTracksLegacy(
+        tracksWithOrder,
+        legacyHiddenThreads,
+        profile
       );
-      hiddenGlobalTracks = new Set();
-      const newHiddenTracksByPid = new Map();
-      for (const [pid] of hiddenLocalTracksByPid) {
-        newHiddenTracksByPid.set(pid, new Set());
-      }
-      hiddenLocalTracksByPid = newHiddenTracksByPid;
+    } else if (hasUrlInfo) {
+      hiddenTracks = tryInitializeHiddenTracksFromUrl(
+        tracksWithOrder,
+        getHiddenGlobalTracks(getState()),
+        getHiddenLocalTracksByPid(getState())
+      );
+    }
+
+    if (hiddenTracks === null) {
+      // Compute a default set of hidden tracks.
+      // This is the case for the initial profile load.
+      // We also get here if the URL info was ignored, for example if
+      // respecting it would have caused all threads to become hidden.
+      hiddenTracks = computeDefaultHiddenTracks(
+        tracksWithOrder,
+        profile,
+        getIdleThreadsByCPU(getState())
+      );
     }
 
     const selectedThreadIndexes = initializeSelectedThreadIndex(
       maybeSelectedThreadIndexes,
-      visibleThreadIndexes,
+      getVisibleThreads(tracksWithOrder, hiddenTracks),
       profile
     );
-
-    // If all of the local tracks were hidden for a process, and the main thread was
-    // not recorded for that process, hide the (empty) process track as well.
-    for (const [pid, localTracks] of localTracksByPid) {
-      const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
-      if (!hiddenLocalTracks) {
-        continue;
-      }
-      if (hiddenLocalTracks.size === localTracks.length) {
-        // All of the local tracks were hidden.
-        const globalTrackIndex = globalTracks.findIndex(
-          (globalTrack) =>
-            globalTrack.type === 'process' &&
-            globalTrack.pid === pid &&
-            globalTrack.mainThreadIndex === null
-        );
-        if (globalTrackIndex !== -1) {
-          // An empty global track was found, hide it.
-          hiddenGlobalTracks.add(globalTrackIndex);
-        }
-      }
-    }
 
     // Check the profile to see if we have threadCPUDelta values and switch to
     // the category view with CPU if we have. This is needed only while we are
@@ -378,11 +362,10 @@ export function finalizeFullProfileView(
         selectedThreadIndexes,
         globalTracks,
         globalTrackOrder,
-        hiddenGlobalTracks,
         localTracksByPid,
-        hiddenLocalTracksByPid,
         localTrackOrderByPid,
         timelineType,
+        ...hiddenTracks,
       });
     });
   };
@@ -887,27 +870,65 @@ function getSymbolStore(
     // return a symbol store in this case.
     return null;
   }
+
+  async function requestSymbolsWithCallback(
+    symbolSupplierName: string,
+    requests: LibSymbolicationRequest[],
+    callback: (path: string, requestJson: string) => Promise<MixedObject>
+  ) {
+    for (const { lib } of requests) {
+      dispatch(requestingSymbolTable(lib));
+    }
+    try {
+      return await MozillaSymbolicationAPI.requestSymbols(
+        symbolSupplierName,
+        requests,
+        callback
+      );
+    } catch (e) {
+      throw new Error(
+        `There was a problem with the symbolication API request to the ${symbolSupplierName}: ${e.message}`
+      );
+    } finally {
+      for (const { lib } of requests) {
+        dispatch(receivedSymbolTableReply(lib));
+      }
+    }
+  }
+
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
-    requestSymbolsFromServer: (requests) => {
-      for (const { lib } of requests) {
-        dispatch(requestingSymbolTable(lib));
-      }
-      return MozillaSymbolicationAPI.requestSymbols(
+    requestSymbolsFromServer: (requests) =>
+      requestSymbolsWithCallback(
+        'symbol server',
         requests,
-        symbolServerUrl
-      ).map(async (libPromise, i) => {
-        try {
-          const result = await libPromise;
-          dispatch(receivedSymbolTableReply(requests[i].lib));
-          return result;
-        } catch (error) {
-          dispatch(receivedSymbolTableReply(requests[i].lib));
-          throw error;
+        async (path, json) => {
+          const response = await fetch(symbolServerUrl + path, {
+            body: json,
+            method: 'POST',
+            mode: 'cors',
+          });
+          return response.json();
         }
-      });
+      ),
+
+    requestSymbolsFromBrowser: async (requests) => {
+      if (browserConnection === null) {
+        throw new Error(
+          'No connection to the browser, cannot run querySymbolicationApi'
+        );
+      }
+
+      const bc = browserConnection;
+      return requestSymbolsWithCallback(
+        'browser',
+        requests,
+        async (path, json) =>
+          JSON.parse(await bc.querySymbolicationApi(path, json))
+      );
     },
+
     requestSymbolTableFromBrowser: async (lib) => {
       if (browserConnection === null) {
         throw new Error(
@@ -969,17 +990,12 @@ export async function doSymbolicateProfile(
 }
 
 export function retrieveProfileFromBrowser(
+  browserConnectionStatus: BrowserConnectionStatus,
   initialLoad: boolean = false
-): ThunkAction<Promise<BrowserConnection | null>> {
+): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     try {
-      // Attempt to establish a connection to the browser.
-      // Disable the userAgent check by supplying a fake userAgent that
-      // pretends we're Firefox. This will make us attempt to establish
-      // a connection to the WebChannel even if we're running in the test
-      // suite.
-      const connectionStatus = await createBrowserConnection('Firefox/123.0');
-      switch (connectionStatus.status) {
+      switch (browserConnectionStatus.status) {
         case 'ESTABLISHED':
           // Good. This is the normal case.
           break;
@@ -987,19 +1003,21 @@ export function retrieveProfileFromBrowser(
         case 'NOT_FIREFOX':
           throw new Error('/from-browser only works in Firefox browsers');
         case 'WAITING':
-          throw new Error('unexpected WAITING from createBrowserConnection');
+          throw new Error(
+            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
+          );
         case 'DENIED':
-          throw connectionStatus.error;
+          throw browserConnectionStatus.error;
         case 'TIMED_OUT':
           throw new Error(
             'Timed out when waiting for reply to WebChannel message'
           );
         default:
-          throw assertExhaustiveCheck(connectionStatus.status);
+          throw assertExhaustiveCheck(browserConnectionStatus.status);
       }
 
-      // Now we know that connectionStatus.status === 'ESTABLISHED'.
-      const browserConnection = connectionStatus.browserConnection;
+      // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
+      const browserConnection = browserConnectionStatus.browserConnection;
 
       // XXX update state to show that we're connected to the browser
 
@@ -1023,11 +1041,9 @@ export function retrieveProfileFromBrowser(
       );
       const profile = processGeckoProfile(unpackedProfile);
       await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
-      return browserConnection;
     } catch (error) {
       dispatch(fatalError(error));
       console.error(error);
-      return null;
     }
   };
 }
@@ -1063,6 +1079,29 @@ function _wait(delayMs: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
+function _loadProbablyFailedDueToSafariLocalhostHTTPRestriction(
+  url: string,
+  error: Error
+): boolean {
+  if (!navigator.userAgent.match(/Safari\/\d+\.\d+/)) {
+    return false;
+  }
+  // Check if Safari considers this mixed content.
+  const parsedUrl = new URL(url);
+  return (
+    error.name === 'TypeError' &&
+    parsedUrl.protocol === 'http:' &&
+    (parsedUrl.hostname === 'localhost' ||
+      parsedUrl.hostname === '127.0.0.1' ||
+      parsedUrl.hostname === '::1') &&
+    location.protocol === 'https:'
+  );
+}
+
+class SafariLocalhostHTTPLoadError extends Error {
+  name = 'SafariLocalhostHTTPLoadError';
+}
+
 type FetchProfileArgs = {
   url: string,
   onTemporaryError: (TemporaryError) => void,
@@ -1092,21 +1131,31 @@ export async function _fetchProfile(
   const reportError = args.reportError || console.error;
 
   while (true) {
-    const response = await fetch(url);
-    // Case 1: successful answer.
+    let response;
+    try {
+      response = await fetch(url);
+    } catch (e) {
+      // Case 1: Exception.
+      if (_loadProbablyFailedDueToSafariLocalhostHTTPRestriction(url, e)) {
+        throw new SafariLocalhostHTTPLoadError();
+      }
+      throw e;
+    }
+
+    // Case 2: successful answer.
     if (response.ok) {
       return _extractProfileOrZipFromResponse(url, response, reportError);
     }
 
-    // case 2: unrecoverable error.
+    // case 3: unrecoverable error.
     if (response.status !== 403) {
       throw new Error(oneLine`
-        Could not fetch the profile on remote server.
-        Response was: ${response.status} ${response.statusText}.
-      `);
+          Could not fetch the profile on remote server.
+          Response was: ${response.status} ${response.statusText}.
+        `);
     }
 
-    // case 3: 403 errors can be transient while a profile is uploaded.
+    // case 4: 403 errors can be transient while a profile is uploaded.
 
     if (i++ === MAX_WAIT_SECONDS) {
       // In the last iteration we don't send a temporary error because we'll
@@ -1515,12 +1564,10 @@ export function retrieveProfilesToCompare(
 // and loads the profile in that given location, then returns the profile data.
 // This function is being used to get the initial profile data before upgrading
 // the url and processing the UrlState.
-export function retrieveProfileForRawUrl(location: Location): ThunkAction<
-  Promise<{|
-    profile: Profile | null,
-    browserConnection: BrowserConnection | null,
-  |}>
-> {
+export function retrieveProfileForRawUrl(
+  location: Location,
+  browserConnectionStatus?: BrowserConnectionStatus
+): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter((d) => d);
     let possibleDataSource = pathParts[0];
@@ -1538,11 +1585,16 @@ export function retrieveProfileForRawUrl(location: Location): ThunkAction<
     }
     dispatch(setDataSource(dataSource));
 
-    let browserConnection = null;
-
     switch (dataSource) {
       case 'from-browser':
-        browserConnection = await dispatch(retrieveProfileFromBrowser(true));
+        if (browserConnectionStatus === undefined) {
+          throw new Error(
+            'Error: all callers of this function should supply a browserConnectionStatus argument for from-browser'
+          );
+        }
+        await dispatch(
+          retrieveProfileFromBrowser(browserConnectionStatus, true)
+        );
         break;
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
@@ -1576,9 +1628,6 @@ export function retrieveProfileForRawUrl(location: Location): ThunkAction<
     }
 
     // Profile may be null if the response was a zip file.
-    return {
-      profile: getProfileOrNull(getState()),
-      browserConnection,
-    };
+    return getProfileOrNull(getState());
   };
 }

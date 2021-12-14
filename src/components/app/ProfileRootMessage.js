@@ -10,30 +10,32 @@ import * as React from 'react';
 import './ProfileRootMessage.css';
 
 type Props = {|
-  +message: string,
-  +additionalMessage: string | null,
+  +title?: string,
+  +additionalMessage: React.Node,
   +showLoader: boolean,
+  +showBackHomeLink: boolean,
+  +children: React.Node,
 |};
 
 export class ProfileRootMessage extends React.PureComponent<Props> {
-  toParagraphs(str: string): Array<React.Element<'p'>> {
-    return str.split('\n').map((s, i) => {
-      return <p key={i}>{s}</p>;
-    });
-  }
-
   render() {
-    const { message, additionalMessage, showLoader } = this.props;
+    const { children, additionalMessage, showLoader, showBackHomeLink, title } =
+      this.props;
     return (
       <div className="rootMessageContainer">
         <div className="rootMessage">
           <Localized id="ProfileRootMessage--title">
             <h1 className="rootMessageTitle">Firefox Profiler</h1>
           </Localized>
-          <div className="rootMessageText">{message}</div>
+          {title ? <h2>{title}</h2> : null}
+          <div className="rootMessageText">
+            <p>{children}</p>
+          </div>
           {additionalMessage ? (
-            <div className="rootMessageAdditional">
-              {this.toParagraphs(additionalMessage)}
+            <div className="rootMessageAdditional">{additionalMessage}</div>
+          ) : null}
+          {showBackHomeLink ? (
+            <div className="rootBackHomeLink">
               <a href="/">
                 <Localized id="ProfileRootMessage--additional">
                   Back to home

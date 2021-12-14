@@ -4,7 +4,7 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import { MenuItem } from 'react-contextmenu';
+import { MenuItem } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
 
 import { ContextMenu } from './ContextMenu';

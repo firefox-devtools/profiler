@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-import { showMenu } from 'react-contextmenu';
+import { showMenu } from '@firefox-devtools/react-contextmenu';
 import { Localized } from '@fluent/react';
 
 import { TimelineGlobalTrack } from './GlobalTrack';
@@ -167,7 +167,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
 
     return (
       <Localized
-        id="FullTimeline--tracks-visible"
+        id="FullTimeline--tracks-button"
         elems={{
           span: <span className="timelineSettingsHiddenTracksNumber" />,
         }}
@@ -188,7 +188,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
           <span className="timelineSettingsHiddenTracksNumber">
             {hiddenTrackCount.total}{' '}
           </span>
-          tracks visible
+          tracks
         </button>
       </Localized>
     );
@@ -288,10 +288,6 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
             changeTimelineType={changeTimelineType}
             isCPUUtilizationProvided={isCPUUtilizationProvided}
           />
-          <TimelineSettingsHiddenTracks
-            hiddenTrackCount={hiddenTrackCount}
-            changeRightClickedTrack={changeRightClickedTrack}
-          />
           {/*
             Removing the active tab view checkbox for now.
             TODO: Bring it back once we are done with the new active tab UI implementation.
@@ -306,12 +302,18 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
           )}
         </div>
         <TimelineSelection width={timelineWidth}>
-          <TimelineRuler
-            zeroAt={zeroAt}
-            rangeStart={committedRange.start}
-            rangeEnd={committedRange.end}
-            width={timelineWidth}
-          />
+          <div className="timelineHeader">
+            <TimelineSettingsHiddenTracks
+              hiddenTrackCount={hiddenTrackCount}
+              changeRightClickedTrack={changeRightClickedTrack}
+            />
+            <TimelineRuler
+              zeroAt={zeroAt}
+              rangeStart={committedRange.start}
+              rangeEnd={committedRange.end}
+              width={timelineWidth}
+            />
+          </div>
           <OverflowEdgeIndicator
             className="timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}

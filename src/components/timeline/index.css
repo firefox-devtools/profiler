@@ -65,30 +65,32 @@
 .timelineSettingsHiddenTracks {
   /* Make sure and override all rules that have to do with button defaults. */
   position: relative;
-  height: 17px;
-  padding: 0 7px 0 20px;
+
+  /* 1px is allocated for the vertical separator line. */
+  width: calc(var(--thread-label-column-width) - 1px);
+
+  /* 8px is intentional to align this text with the text above. */
+  padding: 0 20px 0 8px;
   border: 0;
-  margin: 4px 5px 0;
-  background-color: var(--blue-60);
-  border-radius: 12px;
-  color: #fff;
+  background: none;
+  color: inherit;
   font: inherit;
-  line-height: 17px;
+  text-align: left;
 }
 
 .timelineSettingsHiddenTracks:hover {
-  background-color: var(--blue-70);
+  background-color: rgb(0 0 0 / 0.1);
 }
 
-.timelineSettingsHiddenTracks:active {
-  background-color: var(--blue-80);
+.timelineSettingsHiddenTracks:hover:active {
+  background-color: rgb(0 0 0 / 0.2);
 }
 
 /* This is the dropdown arrow on the left of the button. */
 .timelineSettingsHiddenTracks::before {
   position: absolute;
-  top: 1px;
-  left: 2px;
+  top: 2px;
+  right: 2px;
   border-top: 6px solid;
   border-right: 4px solid transparent;
   border-bottom: 0 solid transparent;
@@ -96,9 +98,17 @@
   margin-top: 5px;
   margin-right: 5px;
   margin-left: 5px;
+  color: var(--grey-60);
   content: '';
 }
 
 .timelineSettingsHiddenTracksNumber {
   font-weight: bold;
+}
+
+.timelineHeader {
+  display: flex;
+  height: 20px;
+  flex-direction: row;
+  margin-left: calc(var(--thread-label-column-width) * -1);
 }

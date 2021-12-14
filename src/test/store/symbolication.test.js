@@ -67,30 +67,44 @@ describe('doSymbolicateProfile', function () {
     }
 
     const symbolProvider = {
-      requestSymbolsFromServer: (requests) =>
-        requests.map(async (request) => {
-          if (request.lib.debugName !== 'firefox.pdb') {
-            throw new SymbolsNotFoundError(
-              'Should only have lib called firefox.pdb',
-              request.lib
-            );
+      requestSymbolsFromServer: async (requests) =>
+        requests.map((request) => {
+          const { lib, addresses } = request;
+          if (lib.debugName !== 'firefox.pdb') {
+            return {
+              type: 'ERROR',
+              request,
+              error: new SymbolsNotFoundError(
+                'Should only have lib called firefox.pdb',
+                lib
+              ),
+            };
           }
+
           if (symbolicationProviderMode !== 'from-server') {
-            throw new SymbolsNotFoundError(
-              'Not in from-server mode, try requestSymbolTableFromBrowser.',
-              request.lib
-            );
+            return {
+              type: 'ERROR',
+              request,
+              error: new SymbolsNotFoundError(
+                'Not in from-server mode, try requestSymbolTableFromBrowser.',
+                lib
+              ),
+            };
           }
 
           const map = new Map();
-          for (const address of request.addresses) {
+          for (const address of addresses) {
             const addressResult = symbolTable.getAddressResult(address);
             if (addressResult !== null) {
               map.set(address, addressResult);
             }
           }
-          return map;
+          return { type: 'SUCCESS', lib, results: map };
         }),
+
+      requestSymbolsFromBrowser: async (_path, _requestJson) => {
+        throw new Error('requestSymbolsFromBrowser unsupported in this test');
+      },
 
       requestSymbolTableFromBrowser: async (lib) => {
         if (lib.debugName !== 'firefox.pdb') {

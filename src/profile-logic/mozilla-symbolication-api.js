@@ -3,14 +3,32 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { AddressResult, LibSymbolicationRequest } from './symbol-store';
-import { SymbolsNotFoundError } from './errors';
+import type {
+  AddressResult,
+  LibSymbolicationRequest,
+  LibSymbolicationResponse,
+} from './symbol-store';
 
-// This file handles requesting symbolication information from the Mozilla
-// symbol server using the API described on
-// https://tecken.readthedocs.io/en/latest/symbolication.html .
+// This file handles requesting symbolication information using the API described
+// on https://tecken.readthedocs.io/en/latest/symbolication.html .
 // Specifically, it uses version 5 of the API, which was implemented in
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1377479 .
+//
+// The actual request happens via a callback. We use two different callbacks:
+//
+//  - When requesting symbols via HTTP, we use a callback which calls fetch.
+//    This is used to request symbols from the Mozilla Symbolication Server,
+//    or from an alternative symbol server which was configured with a
+//    ?symbolServer URL parameter.
+//  - When requesting symbols from the browser, we use a callback which sends a
+//    WebChannel message. The WebChannel has a querySymbolicationApi entry point
+//    which uses the same API as the server.
+
+// The type for the callback, see comment above.
+export type QuerySymbolicationApiCallback = (
+  path: string,
+  requestJson: string
+) => Promise<MixedObject>;
 
 type APIFoundModulesV5 = {
   // For every requested library in the memoryMap, this object contains a string
@@ -73,7 +91,7 @@ type APIResultV5 = {
 
 // Make sure that the JSON blob we receive from the API conforms to our flow
 // type definition.
-function _ensureIsAPIResultV5(result: any): APIResultV5 {
+function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
   if (!(result instanceof Object) || !('results' in result)) {
     throw new Error('Expected an object with property `results`');
   }
@@ -140,6 +158,7 @@ function _ensureIsAPIResultV5(result: any): APIResultV5 {
 }
 
 function getV5ResultForLibRequest(
+  symbolSupplierName: string,
   request: LibSymbolicationRequest,
   addressArray: number[],
   json: APIJobResultV5
@@ -148,17 +167,15 @@ function getV5ResultForLibRequest(
   const { debugName, breakpadId } = lib;
 
   if (!json.found_modules[`${debugName}/${breakpadId}`]) {
-    throw new SymbolsNotFoundError(
-      `The symbol server does not have symbols for ${debugName}/${breakpadId}.`,
-      lib
+    throw new Error(
+      `The ${symbolSupplierName} does not have symbols for ${debugName}/${breakpadId}.`
     );
   }
 
   const addressInfo = json.stacks[0];
   if (addressInfo.length !== addressArray.length) {
-    throw new SymbolsNotFoundError(
-      'The result from the symbol server has an unexpected length.',
-      lib
+    throw new Error(
+      `The result from the ${symbolSupplierName} has an unexpected length.`
     );
   }
 
@@ -211,16 +228,18 @@ function getV5ResultForLibRequest(
 
 // Request symbols for the given addresses and libraries using the Mozilla
 // symbolication API.
-// Returns an array of promises, one promise per LibSymbolicationRequest in
-// requests. If the server does not have symbol information for a given library,
-// the promise for that library will fail.
-// That's the reason why this function does not return just one promise: We want
-// to indicate failure status for each library independently. Under the hood,
-// only one request is made to the server.
-export function requestSymbols(
+// Returns a promise that resolves to an array LibSymbolicationResponses,
+// one response per LibSymbolicationRequest in requests. If the server does
+// not have symbol information for a given library, the LibSymbolicationResponse
+// for that library will have .type === 'ERROR'.
+// `querySymbolicationApiCallback` should be a callback that receives the actual
+// request in the Mozilla symbolication API format. See the comment about the
+// callback at the top of this file for more details.
+export async function requestSymbols(
+  symbolSupplierName: string,
   requests: LibSymbolicationRequest[],
-  symbolsUrl: string
-): Array<Promise<Map<number, AddressResult>>> {
+  querySymbolicationApiCallback: QuerySymbolicationApiCallback
+): Promise<LibSymbolicationResponse[]> {
   // For each request, turn its set of addresses into an array.
   // We need there to be a defined order in each addressArray so that we can
   // match the results to the request.
@@ -242,31 +261,24 @@ export function requestSymbols(
     }),
   };
 
-  const jsonPromise = fetch(symbolsUrl + '/symbolicate/v5', {
-    body: JSON.stringify(body),
-    method: 'POST',
-    mode: 'cors',
-  })
-    .then((response) => response.json())
-    .then(_ensureIsAPIResultV5);
-
-  return requestsWithAddressArrays.map(async function (
-    { request, addressArray },
-    requestIndex
-  ) {
-    const { lib } = request;
-
-    let json;
-    try {
-      json = (await jsonPromise).results[requestIndex];
-    } catch (error) {
-      throw new SymbolsNotFoundError(
-        'There was a problem with the JSON returned by the symbolication API.',
-        lib,
-        error
-      );
+  const responseJson = _ensureIsAPIResultV5(
+    await querySymbolicationApiCallback('/symbolicate/v5', JSON.stringify(body))
+  );
+  return requestsWithAddressArrays.map(
+    ({ request, addressArray }, requestIndex) => {
+      const json = responseJson.results[requestIndex];
+      try {
+        const { lib } = request;
+        const results = getV5ResultForLibRequest(
+          symbolSupplierName,
+          request,
+          addressArray,
+          json
+        );
+        return { type: 'SUCCESS', lib, results };
+      } catch (error) {
+        return { type: 'ERROR', request, error };
+      }
     }
-
-    return getV5ResultForLibRequest(request, addressArray, json);
-  });
+  );
 }

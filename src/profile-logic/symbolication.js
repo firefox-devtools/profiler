@@ -889,8 +889,8 @@ export async function symbolicateProfile(
     buildLibSymbolicationRequestsForAllThreads(symbolicationInfo);
   await symbolStore.getSymbols(
     libSymbolicationRequests,
-    (request, results) => {
-      const { debugName, breakpadId } = request.lib;
+    (lib, results) => {
+      const { debugName, breakpadId } = lib;
       const libKey = `${debugName}/${breakpadId}`;
       finishSymbolicationForLib(
         profile,
@@ -900,7 +900,7 @@ export async function symbolicateProfile(
         symbolicationStepCallback
       );
     },
-    (request, error) => {
+    (_request, error: Error) => {
       if (!(error instanceof SymbolsNotFoundError)) {
         // rethrow JavaScript programming error
         throw error;

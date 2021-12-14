@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { ContextMenu, hideMenu as hideContextMenu } from 'react-contextmenu';
+import {
+  ContextMenu,
+  hideMenu as hideContextMenu,
+} from '@firefox-devtools/react-contextmenu';
 
 /**
  * This is a context menu component with adjusted hide menu behavior.
