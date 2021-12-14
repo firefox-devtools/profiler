@@ -166,7 +166,7 @@ FullTimeline--stack-height = Altura da pilha
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> faixas visíveis
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> faixas
 
 ## Home page
 
