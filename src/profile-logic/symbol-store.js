@@ -63,6 +63,12 @@ interface SymbolProvider {
   ): Promise<LibSymbolicationResponse[]>;
 
   // Expensive, should be called if requestSymbolsFromServer was unsuccessful.
+  requestSymbolsFromBrowser(
+    requests: LibSymbolicationRequest[]
+  ): Promise<LibSymbolicationResponse[]>;
+
+  // Expensive, should be called if the other two options were unsuccessful.
+  // Does not carry file + line + inlines information.
   requestSymbolTableFromBrowser(lib: RequestedLib): Promise<SymbolTableAsTuple>;
 }
 
@@ -259,7 +265,8 @@ export class SymbolStore {
     // it. We try all options in order, advancing to the next option on failure.
     // Option 1: Symbol tables cached in the database, this._db.
     // Option 2: Obtain symbols from the symbol server.
-    // Option 3: Obtain symbol tables from the browser.
+    // Option 3: Obtain symbols from the browser, using the symbolication API.
+    // Option 4: Obtain symbols from the browser, via individual symbol tables.
 
     // Check requests for validity first.
     requests = requests.filter((request) => {
@@ -281,10 +288,11 @@ export class SymbolStore {
     // First, try option 1 for all libraries and partition them by whether it
     // was successful.
     const requestsForNonCachedLibs = [];
-    const requestsForCachedLibs = [];
+    const resultsForCachedLibs = [];
     await Promise.all(
       requests.map(async (request) => {
-        const { debugName, breakpadId } = request.lib;
+        const { lib, addresses } = request;
+        const { debugName, breakpadId } = lib;
         try {
           // Try to get the symbol table from the database.
           // This call will throw if the symbol table is not present.
@@ -294,8 +302,9 @@ export class SymbolStore {
           );
 
           // Did not throw, option 1 was successful!
-          requestsForCachedLibs.push({
-            request,
+          resultsForCachedLibs.push({
+            lib,
+            addresses,
             symbolTable,
           });
         } catch (e) {
@@ -327,7 +336,7 @@ export class SymbolStore {
 
     // Kick off the requests to the symbolication API, and create a list of
     // promises, one promise per chunk.
-    const chunkResponsePromises: Array<
+    const symbolicationApiRequestsAndResponsesPerChunk: Array<
       [LibSymbolicationRequest[], Promise<LibSymbolicationResponse[]>]
     > = chunks.map((requests) => [
       requests,
@@ -343,96 +352,135 @@ export class SymbolStore {
     // We also need a demangling function for this, which is in an async module.
     const demangleCallback = await _getDemangleCallback();
 
-    for (const { request, symbolTable } of requestsForCachedLibs) {
+    for (const { lib, addresses, symbolTable } of resultsForCachedLibs) {
       successCb(
-        request.lib,
-        readSymbolsFromSymbolTable(
-          request.addresses,
-          symbolTable,
-          demangleCallback
-        )
+        lib,
+        readSymbolsFromSymbolTable(addresses, symbolTable, demangleCallback)
       );
     }
 
     // Process the results from the symbolication API request, as they arrive.
     // For unsuccessful requests, fall back to _getSymbolsFromBrowser.
     await Promise.all(
-      chunkResponsePromises.map(async ([requests, chunkResponsePromise]) => {
-        try {
-          // Await the response for this chunk.
-          const responses: LibSymbolicationResponse[] =
-            await chunkResponsePromise;
+      symbolicationApiRequestsAndResponsesPerChunk.map(
+        async ([option2Requests, option2ResponsePromise]) => {
+          // Store any errors encountered along the way in this map.
+          // We will report them if all avenues fail.
+          const errorMap: Map<LibSymbolicationRequest, Error[]> = new Map(
+            requests.map((r) => [r, []])
+          );
 
-          const requestsWithErrors = [];
-          for (const response of responses) {
-            if (response.type === 'SUCCESS') {
-              // We've found symbols for this library! Option 2 was successful.
-              const { lib, results } = response;
-              successCb(lib, results);
-            } else {
-              // Collect unsuccessful requests in requestsWithErrors.
-              // We keep the error around so that we can report it if all avenues fail.
-              const { request, error } = response;
-              requestsWithErrors.push({ request, error });
-            }
-          }
-
-          if (requestsWithErrors.length > 0) {
-            // Fall back to getting symbols from the browser for these.
-            await this._getSymbolsFromBrowser(
-              requestsWithErrors,
-              demangleCallback,
-              successCb,
-              errorCb
+          // Process the results of option 2: The response from the Mozilla symbolication APi.
+          const option3Requests =
+            await this._processSuccessfulResponsesAndReturnRemaining(
+              option2Requests,
+              option2ResponsePromise,
+              errorMap,
+              successCb
             );
+
+          if (option3Requests.length === 0) {
+            // Done!
+            return;
           }
-        } catch (error) {
-          // There was a problem for the entire chunk of requests, for example there
-          // might have been a problem parsing the response JSON.
-          // Map all requests to the same error, and then try to get symbols from the browser.
-          const requestsWithErrors = requests.map((request) => ({
-            request,
-            error: new SymbolsNotFoundError(
-              'There was a problem with the JSON returned by the symbolication API.',
-              request.lib,
-              error
-            ),
-          }));
-          await this._getSymbolsFromBrowser(
-            requestsWithErrors,
+
+          // Some libraries are still remaining, try option 3 for them.
+          // Option 3 is symbolProvider.requestSymbolsFromBrowser.
+          const option3ResponsePromise =
+            this._symbolProvider.requestSymbolsFromBrowser(option3Requests);
+          const option4Requests =
+            await this._processSuccessfulResponsesAndReturnRemaining(
+              option3Requests,
+              option3ResponsePromise,
+              errorMap,
+              successCb
+            );
+
+          if (option4Requests.length === 0) {
+            // Done!
+            return;
+          }
+
+          // Some libraries are still remaining, try option 4 for them.
+          // Option 4 is symbolProvider.requestSymbolTableFromBrowser.
+          await this._getSymbolTablesFromBrowser(
+            option4Requests,
+            errorMap,
             demangleCallback,
             successCb,
             errorCb
           );
         }
-      })
+      )
     );
   }
 
-  // Try to get symbols from the browser for any libraries which couldn't be
-  // symbolicated with the symbolication API.
-  async _getSymbolsFromBrowser(
-    requestsWithErrors: Array<{|
-      // A symbolication request for one library.
-      request: LibSymbolicationRequest,
-      // The error which was encountered when trying to obtain symbols for
-      // this library using the symbolication API.
-      // This gets reported in the final error if all avenues fail.
-      error: Error,
-    |}>,
+  // This method awaits `responsesPromise`. All successful responses are forwarded
+  // to successCb.
+  // Returns any requests which were not successful.
+  // Mutates errorMap by adding the error that was encountered for a failed request.
+  async _processSuccessfulResponsesAndReturnRemaining(
+    requests: LibSymbolicationRequest[],
+    responsesPromise: Promise<LibSymbolicationResponse[]>,
+    errorMap: Map<LibSymbolicationRequest, Error[]>,
+    successCb: (RequestedLib, Map<number, AddressResult>) => void
+  ): Promise<LibSymbolicationRequest[]> {
+    try {
+      const responses: LibSymbolicationResponse[] = await responsesPromise;
+
+      const failedRequests = [];
+      for (let i = 0; i < responses.length; i++) {
+        const response = responses[i];
+        if (response.type === 'SUCCESS') {
+          // We've found symbols for this library!
+          const { lib, results } = response;
+          successCb(lib, results);
+        } else {
+          // No symbols for this library, it'll need to try the next option.
+          const { request, error } = response;
+          failedRequests.push(request);
+          // Put the error into the errorMap.
+          // errorMap has been initialized for all requests, this .get() never returns undefined.
+          (errorMap.get(request) ?? []).push(error);
+        }
+      }
+      return failedRequests;
+    } catch (error) {
+      // There was a problem for the entire chunk of requests, for example there
+      // might have been a problem parsing the response JSON.
+      // Add this error for all requests.
+      for (const request of requests) {
+        // errorMap has been initialized for all requests, this .get() never returns undefined.
+        (errorMap.get(request) ?? []).push(error);
+      }
+      return requests;
+    }
+  }
+
+  // Try to get individual symbol tables from the browser, for any libraries
+  // which couldn't be symbolicated with the symbolication API.
+  // This is needed for two cases:
+  //  1. Firefox 95 and earlier, which didn't have a querySymbolicationApi
+  //     WebChannel access point, and only supports symbol tables.
+  //  2. Android system libraries, even in modern versions of Firefox. We don't
+  //     support querySymbolicationApi for them yet, see
+  //     https://bugzilla.mozilla.org/show_bug.cgi?id=1735897
+  async _getSymbolTablesFromBrowser(
+    requests: LibSymbolicationRequest[],
+    errorMap: Map<LibSymbolicationRequest, Error[]>,
     demangleCallback: DemangleFunction,
     successCb: (RequestedLib, Map<number, AddressResult>) => void,
     errorCb: (LibSymbolicationRequest, Error) => void
   ): Promise<void> {
-    for (const { request, error } of requestsWithErrors) {
+    for (const request of requests) {
       const { lib, addresses } = request;
       try {
-        // Option 3: Request a symbol table from the browser.
+        // Option 4: Request a symbol table from the browser.
         // This call will throw if the browser cannot obtain the symbol table.
         const symbolTable =
           await this._symbolProvider.requestSymbolTableFromBrowser(lib);
 
-        // Did not throw, option 3 was successful!
+        // Did not throw, option 4 was successful!
         successCb(
           lib,
           readSymbolsFromSymbolTable(addresses, symbolTable, demangleCallback)
@@ -442,13 +490,13 @@ export class SymbolStore {
         await this._storeSymbolTableInDB(lib, symbolTable);
       } catch (lastError) {
         // None of the symbolication methods were successful.
-        // Call the error callback.
+        // Call the error callback with all accumulated errors.
         errorCb(
           request,
           new SymbolsNotFoundError(
             `Could not obtain symbols for ${lib.debugName}/${lib.breakpadId}.`,
             lib,
-            error,
+            ...(errorMap.get(request) ?? []),
             lastError
           )
         );

@@ -8,6 +8,7 @@ import {
   getProfileViaWebChannel,
   getSymbolTableViaWebChannel,
   querySupportsGetProfileAndSymbolicationViaWebChannel,
+  querySymbolicationApiViaWebChannel,
 } from './web-channel';
 
 /**
@@ -42,6 +43,10 @@ export interface BrowserConnection {
   getProfile(options: {|
     onThirtySecondTimeout: () => void,
   |}): Promise<ArrayBuffer | MixedObject>;
+
+  // Query the browser-internal symbolication API. This provides richer
+  // information than getSymbolTable.
+  querySymbolicationApi(path: string, requestJson: string): Promise<string>;
 
   // Get a symbol table from the browser.
   getSymbolTable(
@@ -95,6 +100,20 @@ class BrowserConnectionImpl implements BrowserConnection {
     const profile = await geckoProfiler.getProfile();
     clearTimeout(timeoutId);
     return profile;
+  }
+
+  async querySymbolicationApi(
+    path: string,
+    requestJson: string
+  ): Promise<string> {
+    // This only works on Firefox 96 and above.
+    if (!this._webChannelSupportsGetProfileAndSymbolication) {
+      throw new Error(
+        "Can't use querySymbolicationApi in Firefox versions with the old WebChannel."
+      );
+    }
+
+    return querySymbolicationApiViaWebChannel(path, requestJson);
   }
 
   async getSymbolTable(

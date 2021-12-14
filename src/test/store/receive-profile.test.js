@@ -699,11 +699,8 @@ describe('actions/receive-profile', function () {
         expect(error.errors).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              errors: expect.arrayContaining([
-                expect.objectContaining({
-                  message: 'No symbolication API in place',
-                }),
-              ]),
+              message:
+                'There was a problem with the symbolication API request to the symbol server: No symbolication API in place',
             }),
             expect.objectContaining({ message: 'No symbol tables available' }),
           ])
@@ -910,8 +907,8 @@ describe('actions/receive-profile', function () {
         expect.objectContaining({
           message:
             'Could not obtain symbols for libxul/SOMETHING_FAKE.\n' +
-            ' - SymbolsNotFoundError: There was a problem with the JSON returned by the symbolication API.\n' +
-            ' - Error: Expected an object with property `results`\n' +
+            ' - Error: There was a problem with the symbolication API request to the symbol server: Expected an object with property `results`\n' +
+            ' - Error: No connection to the browser, cannot run querySymbolicationApi\n' +
             ' - Error: No connection to the browser, cannot obtain symbol tables',
         })
       );
