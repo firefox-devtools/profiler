@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import memoize from 'memoize-immutable';
+import memoize from 'memoize-one';
 import range from 'array-range';
 
 import { VirtualList } from './VirtualList';
@@ -67,10 +67,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   _list: VirtualList<LineNumber> | null = null;
   _takeListRef = (list: VirtualList<LineNumber> | null) => (this._list = list);
 
-  _computeSourceLinesMemoized = memoize(
-    (source: string) => source.split('\n'),
-    { limit: 1 }
-  );
+  _computeSourceLinesMemoized = memoize((source: string) => source.split('\n'));
 
   _computeAllLineNumbersMemoized = memoize(
     (sourceLines: string[], timings: LineTimings): number[] => {
@@ -86,17 +83,14 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         maxLineNumber = Math.max(1, ...timings.totalLineHits.keys()) + 10;
       }
       return range(1, maxLineNumber + 1);
-    },
-    { limit: 1 }
+    }
   );
 
-  _computeMaxLineLengthMemoized = memoize(
-    (sourceLines: string[]): number =>
-      sourceLines.reduce(
-        (prevMaxLen, line) => Math.max(prevMaxLen, line.length),
-        0
-      ),
-    { limit: 1 }
+  _computeMaxLineLengthMemoized = memoize((sourceLines: string[]): number =>
+    sourceLines.reduce(
+      (prevMaxLen, line) => Math.max(prevMaxLen, line.length),
+      0
+    )
   );
 
   _renderRow = (lineNumber: LineNumber, index: number, columnIndex: number) => {
