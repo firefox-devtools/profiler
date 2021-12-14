@@ -996,6 +996,10 @@ export function retrieveProfileFromBrowser(
         // The other cases are error cases.
         case 'NOT_FIREFOX':
           throw new Error('/from-browser only works in Firefox browsers');
+        case 'NO_ATTEMPT':
+          throw new Error(
+            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is NO_ATTEMPT'
+          );
         case 'WAITING':
           throw new Error(
             'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'

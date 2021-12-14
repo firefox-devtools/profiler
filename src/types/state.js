@@ -36,6 +36,7 @@ import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path.js';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 export type Reducer<T> = (T | void, Action) => T;
 
@@ -191,6 +192,7 @@ export type AppState = {|
   +isDragAndDropOverlayRegistered: boolean,
   +experimental: ExperimentalFlags,
   +currentProfileUploadedInformation: UploadedProfileInformation | null,
+  +browserConnectionStatus: BrowserConnectionStatus,
 |};
 
 export type UploadPhase =

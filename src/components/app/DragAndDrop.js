@@ -7,9 +7,9 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import { retrieveProfileFromFile } from 'firefox-profiler/actions/receive-profile';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 import {
   startDragging,
@@ -21,6 +21,7 @@ import {
   getIsDragAndDropDragging,
   getIsDragAndDropOverlayRegistered,
   getIsNewProfileLoadAllowed,
+  getBrowserConnection,
 } from 'firefox-profiler/selectors/app';
 
 import './DragAndDrop.css';
@@ -37,6 +38,7 @@ type OwnProps = {|
 type StateProps = {|
   +isNewProfileLoadAllowed: boolean,
   +useDefaultOverlay: boolean,
+  +browserConnection: BrowserConnection | null,
 |};
 
 type DispatchProps = {|
@@ -160,19 +162,10 @@ class DragAndDropImpl extends React.PureComponent<Props> {
 
     const { files } = event.dataTransfer;
     if (files.length > 0) {
-      // Attempt to establish a connection to the browser, for symbolication.
-      // Disable the userAgent check by supplying a fake userAgent that
-      // pretends we're Firefox. This will make us attempt to establish
-      // a connection to the WebChannel even if we're running in the test
-      // suite.
-      const browserConnectionStatus = await createBrowserConnection(
-        'Firefox/123.0'
+      this.props.retrieveProfileFromFile(
+        files[0],
+        this.props.browserConnection ?? undefined
       );
-      const browserConnection =
-        browserConnectionStatus.status === 'ESTABLISHED'
-          ? browserConnectionStatus.browserConnection
-          : undefined;
-      this.props.retrieveProfileFromFile(files[0], browserConnection);
     }
   };
 
@@ -208,6 +201,7 @@ export const DragAndDrop = explicitConnect<OwnProps, StateProps, DispatchProps>(
     mapStateToProps: (state) => ({
       isNewProfileLoadAllowed: getIsNewProfileLoadAllowed(state),
       useDefaultOverlay: !getIsDragAndDropOverlayRegistered(state),
+      browserConnection: getBrowserConnection(state),
     }),
     mapDispatchToProps: {
       retrieveProfileFromFile,

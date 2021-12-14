@@ -31,6 +31,7 @@ import type {
   SourceLoadingError,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
+import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
 
 export type DataSource =
   | 'none'
@@ -555,6 +556,11 @@ type SourcesAction =
       errors: SourceLoadingError[],
     |};
 
+type AppAction = {|
+  +type: 'UPDATE_BROWSER_CONNECTION_STATUS',
+  +browserConnectionStatus: BrowserConnectionStatus,
+|};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -566,4 +572,5 @@ export type Action =
   | DragAndDropAction
   | CurrentProfileUploadedInformationAction
   | L10nAction
-  | SourcesAction;
+  | SourcesAction
+  | AppAction;

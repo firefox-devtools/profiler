@@ -17,12 +17,13 @@ import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
 } from 'firefox-profiler/actions/receive-profile';
-import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
   enableMenuButton,
 } from 'firefox-profiler/app-logic/web-channel';
+import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -198,12 +199,20 @@ type OwnHomeProps = {|
   +specialMessage?: string,
 |};
 
+type StateHomeProps = {|
+  +browserConnection: BrowserConnection | null,
+|};
+
 type DispatchHomeProps = {|
   +retrieveProfileFromFile: typeof retrieveProfileFromFile,
   +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 |};
 
-type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
+type HomeProps = ConnectedProps<
+  OwnHomeProps,
+  StateHomeProps,
+  DispatchHomeProps
+>;
 
 type HomeState = {
   popupInstallPhase: PopupInstallPhase,
@@ -451,18 +460,10 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   }
 
   _onLoadProfileFromFileRequested = (file: File) => {
-    // Attempt to establish a connection to the browser, for symbolication.
-    // Disable the userAgent check by supplying a fake userAgent that
-    // pretends we're Firefox. This will make us attempt to establish
-    // a connection to the WebChannel even if we're running in the test
-    // suite.
-    createBrowserConnection('Firefox/123.0').then((browserConnectionStatus) => {
-      const browserConnection =
-        browserConnectionStatus.status === 'ESTABLISHED'
-          ? browserConnectionStatus.browserConnection
-          : undefined;
-      this.props.retrieveProfileFromFile(file, browserConnection);
-    });
+    this.props.retrieveProfileFromFile(
+      file,
+      this.props.browserConnection ?? undefined
+    );
   };
 
   _onLoadProfileFromUrlRequested = (url: string) => {
@@ -555,7 +556,14 @@ function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
 }
 
-export const Home = explicitConnect<OwnHomeProps, {||}, DispatchHomeProps>({
+export const Home = explicitConnect<
+  OwnHomeProps,
+  StateHomeProps,
+  DispatchHomeProps
+>({
+  mapStateToProps: (state) => ({
+    browserConnection: getBrowserConnection(state),
+  }),
   mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromUrl },
   component: HomeImpl,
 });
