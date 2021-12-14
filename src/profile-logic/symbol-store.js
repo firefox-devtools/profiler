@@ -8,6 +8,7 @@ import { SymbolsNotFoundError } from './errors';
 
 import type { RequestedLib } from 'firefox-profiler/types';
 import type { SymbolTableAsTuple } from './symbol-store-db';
+import { ensureExists } from '../utils/flow';
 
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
@@ -440,8 +441,7 @@ export class SymbolStore {
           const { request, error } = response;
           failedRequests.push(request);
           // Put the error into the errorMap.
-          // errorMap has been initialized for all requests, this .get() never returns undefined.
-          (errorMap.get(request) ?? []).push(error);
+          ensureExists(errorMap.get(request)).push(error);
         }
       }
       return failedRequests;
@@ -450,8 +450,7 @@ export class SymbolStore {
       // might have been a problem parsing the response JSON.
       // Add this error for all requests.
       for (const request of requests) {
-        // errorMap has been initialized for all requests, this .get() never returns undefined.
-        (errorMap.get(request) ?? []).push(error);
+        ensureExists(errorMap.get(request)).push(error);
       }
       return requests;
     }
