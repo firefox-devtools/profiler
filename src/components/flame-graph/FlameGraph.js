@@ -209,7 +209,18 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       rightClickedCallNodeIndex,
       changeSelectedCallNode,
       handleCallNodeTransformShortcut,
+      openSourceView,
     } = this.props;
+
+    if (event.key === 'Enter') {
+      if (selectedCallNodeIndex !== null) {
+        const file = callTree.getRawFileNameForCallNode(selectedCallNodeIndex);
+        if (file !== null) {
+          openSourceView(file, 'flame-graph');
+        }
+      }
+      return;
+    }
 
     if (
       // Please do not forget to update the switch/case below if changing the array to allow more keys.
