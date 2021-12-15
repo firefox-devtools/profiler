@@ -136,16 +136,15 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
 }
 
 class BottomBoxImpl extends React.PureComponent<Props> {
-  _sourceView: SourceView | null = null;
-  _takeSourceViewRef = (sourceView: SourceView | null) => {
-    this._sourceView = sourceView;
-  };
+  _sourceView = React.createRef<SourceView>();
 
   componentDidMount() {
     this._triggerSourceLoadingIfNeeded();
 
-    if (this._sourceView) {
-      this._sourceView.scrollToHotSpot(this.props.selectedCallNodeLineTimings);
+    if (this._sourceView.current) {
+      this._sourceView.current.scrollToHotSpot(
+        this.props.selectedCallNodeLineTimings
+      );
     }
   }
 
@@ -153,11 +152,13 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     this._triggerSourceLoadingIfNeeded();
 
     if (
-      this._sourceView &&
+      this._sourceView.current &&
       prevProps.sourceViewActivationGeneration <
         this.props.sourceViewActivationGeneration
     ) {
-      this._sourceView.scrollToHotSpot(this.props.selectedCallNodeLineTimings);
+      this._sourceView.current.scrollToHotSpot(
+        this.props.selectedCallNodeLineTimings
+      );
     }
   }
 
@@ -212,7 +213,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               timings={globalLineTimings}
               source={source}
               rowHeight={16}
-              ref={this._takeSourceViewRef}
+              ref={this._sourceView}
             />
           ) : null}
           {sourceViewSource !== undefined &&
