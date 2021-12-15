@@ -15,6 +15,7 @@ import type {
   VisualMetrics,
   ProfilerConfiguration,
   SampleUnits,
+  ExperimentalThreadType,
 } from './profile';
 import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
 import type { Milliseconds, Nanoseconds } from './units';
@@ -241,6 +242,10 @@ export type GeckoThread = {|
   unregisterTime: number | null,
   tid: number,
   pid: number,
+  // Experimental flag. If it's present in a thread, it means that the thread is
+  // experimental and therefore should be hidden. The value represents the
+  // experiment type, so they can be enabled by type when needed.
+  experimental?: ExperimentalThreadType,
   markers: GeckoMarkers,
   samples: GeckoSamples,
   frameTable: GeckoFrameTable,

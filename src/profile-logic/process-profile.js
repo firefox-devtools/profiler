@@ -1069,6 +1069,7 @@ function _processThread(
     unregisterTime: thread.unregisterTime,
     tid: thread.tid,
     pid: thread.pid,
+    experimental: thread.experimental,
     libs,
     pausedRanges: pausedRanges || [],
     frameTable,

@@ -604,6 +604,11 @@ export type ProfilerOverhead = {|
 |};
 
 /**
+ * Type for experimental threads that annotate the experiment type.
+ */
+export type ExperimentalThreadType = 'process-cpu' | string;
+
+/**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
@@ -640,6 +645,10 @@ export type Thread = {|
   isJsTracer?: boolean,
   pid: Pid,
   tid: Tid | void,
+  // Experimental flag. If it's present in a thread, it means that the thread is
+  // experimental and therefore should be hidden. The value represents the
+  // experiment type, so they can be enabled by type when needed.
+  experimental?: ExperimentalThreadType,
   samples: SamplesTable,
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
