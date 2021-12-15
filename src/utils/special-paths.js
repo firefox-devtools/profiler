@@ -31,6 +31,19 @@ export type ParsedFileNameFromSymbolication =
       path: string,
     |};
 
+// Describes how to obtain a source file from the web.
+// In the simplest case, the source code is served as a cross-origin accessible
+// single file, for example on hg.mozilla.org or github.com.
+// In some cases, the desired file is in a .tar.gz archive that's served as from
+// a cross-origin accessible location; this is the case for Rust packages from
+// crates.io.
+// In other cases, the desired file isn't served on the web at all, or served
+// without permissive CORS headers. For example, for local Firefox builds, the
+// file is stored on the local disk. In that case it can only be obtained with
+// some means of privileged access, for example via the profiler WebChannel, or
+// with the help of a locally-running server. Those cases are not covered by
+// SourceFileDownloadRecipe; SourceFileDownloadRecipe only covers sources that
+// can be downloaded from the web.
 export type SourceFileDownloadRecipe =
   | { type: 'CORS_ENABLED_SINGLE_FILE', url: string }
   | { type: 'CORS_ENABLED_ARCHIVE', archiveUrl: string, pathInArchive: string }

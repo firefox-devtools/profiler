@@ -6,6 +6,7 @@
 import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/flow';
+import { tabSlugs } from '../app-logic/tabs-handling';
 
 import type {
   ThreadIndex,
@@ -20,6 +21,8 @@ import type {
   UrlState,
   Reducer,
   TimelineTrackOrganization,
+  SourceViewState,
+  IsOpenPerPanelState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -498,6 +501,52 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
   }
 };
 
+const sourceView: Reducer<SourceViewState> = (
+  state = { activationGeneration: 0, file: null },
+  action
+) => {
+  switch (action.type) {
+    case 'OPEN_SOURCE_VIEW': {
+      return {
+        activationGeneration: state.activationGeneration + 1,
+        file: action.file,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
+function _getBottomBoxInitialState() {
+  const state = {};
+  tabSlugs.forEach((tabSlug) => (state[tabSlug] = false));
+  return state;
+}
+
+const isBottomBoxOpenPerPanel: Reducer<IsOpenPerPanelState> = (
+  state = _getBottomBoxInitialState(),
+  action
+) => {
+  switch (action.type) {
+    case 'OPEN_SOURCE_VIEW': {
+      const { currentTab } = action;
+      if (!state[currentTab]) {
+        return { ...state, [currentTab]: true };
+      }
+      return state;
+    }
+    case 'CLOSE_BOTTOM_BOX_FOR_TAB': {
+      const { tab } = action;
+      if (state[tab]) {
+        return { ...state, [tab]: false };
+      }
+      return state;
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * Active tab specific profile url states
  */
@@ -559,6 +608,8 @@ const profileSpecific = combineReducers({
   markersSearchString,
   networkSearchString,
   transforms,
+  sourceView,
+  isBottomBoxOpenPerPanel,
   timelineType,
   full: fullProfileSpecific,
   activeTab: activeTabProfileSpecific,

@@ -28,6 +28,7 @@ import {
   changeExpandedCallNodes,
   addTransformToStack,
   handleCallNodeTransformShortcut,
+  openSourceView,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -68,6 +69,7 @@ type DispatchProps = {|
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
   +addTransformToStack: typeof addTransformToStack,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
+  +openSourceView: typeof openSourceView,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -215,6 +217,15 @@ class CallTreeImpl extends PureComponent<Props> {
     handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
   };
 
+  _onEnterOrDoubleClick = (nodeId: IndexIntoCallNodeTable) => {
+    const { tree, openSourceView } = this.props;
+    const file = tree.getRawFileNameForCallNode(nodeId);
+    if (file === null) {
+      return;
+    }
+    openSourceView(file, 'calltree');
+  };
+
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
@@ -281,6 +292,8 @@ class CallTreeImpl extends PureComponent<Props> {
         rowHeight={16}
         indentWidth={10}
         onKeyDown={this._onKeyDown}
+        onEnterKey={this._onEnterOrDoubleClick}
+        onDoubleClick={this._onEnterOrDoubleClick}
       />
     );
   }
@@ -316,6 +329,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     changeExpandedCallNodes,
     addTransformToStack,
     handleCallNodeTransformShortcut,
+    openSourceView,
   },
   component: CallTreeImpl,
 });
