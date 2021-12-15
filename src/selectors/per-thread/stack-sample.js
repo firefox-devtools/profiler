@@ -14,7 +14,6 @@ import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
 import {
   getStackLineInfo,
-  getStackLineInfoForCallNode,
   getLineTimings,
 } from '../../profile-logic/line-timings';
 
@@ -211,42 +210,6 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileData.computeCallNodeMaxDepth
   );
 
-  const getSourceViewStackLineInfoForSelectedCallNode: Selector<StackLineInfo | null> =
-    createSelector(
-      threadSelectors.getFilteredThread,
-      UrlState.getSourceViewFile,
-      getCallNodeInfo,
-      getSelectedCallNodeIndex,
-      UrlState.getInvertCallstack,
-      (
-        { stackTable, frameTable, funcTable, stringTable }: Thread,
-        sourceViewFile,
-        callNodeInfo,
-        selectedCallNodeIndex,
-        invertCallStack
-      ): StackLineInfo | null => {
-        if (sourceViewFile === null || selectedCallNodeIndex === null) {
-          return null;
-        }
-        const selectedFunc =
-          callNodeInfo.callNodeTable.func[selectedCallNodeIndex];
-        const selectedFuncFile = funcTable.fileName[selectedFunc];
-        if (
-          selectedFuncFile === null ||
-          stringTable.getString(selectedFuncFile) !== sourceViewFile
-        ) {
-          return null;
-        }
-        return getStackLineInfoForCallNode(
-          stackTable,
-          frameTable,
-          selectedCallNodeIndex,
-          callNodeInfo,
-          invertCallStack
-        );
-      }
-    );
-
   /**
    * When computing the call tree, a "samples" table is used, which
    * can represent a variety of formats with different weight types.
@@ -284,13 +247,6 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getPreviewFilteredSamplesForCallTree,
     getLineTimings
   );
-
-  const getSourceViewLineTimingsForSelectedCallNode: Selector<LineTimings> =
-    createSelector(
-      getSourceViewStackLineInfoForSelectedCallNode,
-      threadSelectors.getPreviewFilteredSamplesForCallTree,
-      getLineTimings
-    );
 
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
     threadSelectors.getFilteredSamplesForCallTree,
@@ -341,7 +297,6 @@ export function getStackAndSampleSelectorsPerThread(
     getWeightTypeForCallTree,
     getCallNodeInfo,
     getSourceViewStackLineInfo,
-    getSourceViewStackLineInfoForSelectedCallNode,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
@@ -350,7 +305,6 @@ export function getStackAndSampleSelectorsPerThread(
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
     getSourceViewLineTimings,
-    getSourceViewLineTimingsForSelectedCallNode,
     getTracedTiming,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepth,

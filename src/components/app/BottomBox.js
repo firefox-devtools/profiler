@@ -11,7 +11,10 @@ import {
   getSourceViewFile,
   getSourceViewActivationGeneration,
 } from 'firefox-profiler/selectors/url-state';
-import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import {
+  selectedThreadSelectors,
+  selectedNodeSelectors,
+} from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
@@ -228,9 +231,7 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
     sourceViewSource: getSourceViewSource(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
     selectedCallNodeLineTimings:
-      selectedThreadSelectors.getSourceViewLineTimingsForSelectedCallNode(
-        state
-      ),
+      selectedNodeSelectors.getSourceViewLineTimings(state),
     sourceViewActivationGeneration: getSourceViewActivationGeneration(state),
     disableOverscan: getPreviewSelection(state).isModifying,
   }),
