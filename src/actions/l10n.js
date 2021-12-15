@@ -61,10 +61,23 @@ export function setupLocalization(
 
     // It's important to note that `languages` is the result of the negotiation,
     // and can be different than `locales`.
-    const primaryLocale = languages[0];
-    const fetchedMessages = await fetchMessages(primaryLocale);
-    const bundles = lazilyParsedBundles([fetchedMessages], pseudoStrategy);
+    // languages may contain the requested locale as well as some fallback
+    // locales. Also `negotiateLanguages` always adds the default locale if it's
+    // not present.
+    // Some examples:
+    // * navigator.locales == ['fr', 'en-US', 'en'] => languages == ['fr-FR', 'en-US', 'en-GB']
+    // * navigator.locales == ['fr'] => languages == ['fr-FR', 'en-US']
+    // Because our primary locale is en-US it's not useful to go past it and
+    // fetch more locales than necessary, so let's slice to that entry.
+    const indexOfDefaultLocale = languages.indexOf(DEFAULT_LOCALE); // Guaranteed to be positive
+    const localesToFetch = languages.slice(0, indexOfDefaultLocale + 1);
+    const fetchedMessages = await Promise.all(
+      localesToFetch.map(fetchMessages)
+    );
+    const bundles = lazilyParsedBundles(fetchedMessages, pseudoStrategy);
     const localization = new ReactLocalization(bundles);
+
+    const primaryLocale = languages[0];
     const direction = getLocaleDirection(primaryLocale, pseudoStrategy);
     dispatch(receiveL10n(localization, primaryLocale, direction));
   };

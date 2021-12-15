@@ -102,6 +102,10 @@ describe('doSymbolicateProfile', function () {
           return { type: 'SUCCESS', lib, results: map };
         }),
 
+      requestSymbolsFromBrowser: async (_path, _requestJson) => {
+        throw new Error('requestSymbolsFromBrowser unsupported in this test');
+      },
+
       requestSymbolTableFromBrowser: async (lib) => {
         if (lib.debugName !== 'firefox.pdb') {
           throw new SymbolsNotFoundError(
