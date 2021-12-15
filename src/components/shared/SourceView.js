@@ -149,6 +149,27 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     return this._computeAllLineNumbersMemoized(this._getSourceLines(), timings);
   }
 
+  /**
+   * Scroll to the line with the most hits, based on the timings in
+   * timingsForScrolling.
+   *
+   * How is timingsForScrolling different from this.props.timings?
+   * In the current implementation, this.props.timings are always the "global"
+   * timings, i.e. they show the line hits for all samples in the current view,
+   * regardless of the selected call node. However, when opening the source
+   * view from a specific call node, you really want to see the code that's
+   * relevant to that specific call node, or at least that specific function.
+   * So timingsForScrolling are the timings that indicate just the line hits
+   * in the selected call node. This means that the "hotspot" will be somewhere
+   * in the selected function, and it will even be in the line that's most
+   * relevant to that specific call node.
+   *
+   * Sometimes, timingsForScrolling can be completely empty. This happens, for
+   * example, when the source view is showing a different file than the
+   * selected call node's function's file, for example because we just loaded
+   * from a URL and ended up with an arbitrary selected call node.
+   * In that case, pick the hotspot from the global line timings.
+   */
   /* This method is used by users of this component. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
   scrollToHotSpot(timingsForScrolling: LineTimings) {
