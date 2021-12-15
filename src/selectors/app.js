@@ -75,6 +75,9 @@ export const getIsEventDelayTracksEnabled: Selector<boolean> = (state) =>
   getExperimental(state).eventDelayTracks;
 export const getIsExperimentalCPUGraphsEnabled: Selector<boolean> = (state) =>
   getExperimental(state).cpuGraphs;
+export const getIsExperimentalProcessCPUTracksEnabled: Selector<boolean> = (
+  state
+) => getExperimental(state).processCPUTracks;
 
 export const getIsDragAndDropDragging: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropDragging;

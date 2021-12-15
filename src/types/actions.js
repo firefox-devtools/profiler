@@ -299,6 +299,9 @@ type ProfileAction =
       +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
     |}
   | {|
+      +type: 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS',
+    |}
+  | {|
       +type: 'OPEN_SOURCE_VIEW',
       +file: string,
       +currentTab: TabSlug,

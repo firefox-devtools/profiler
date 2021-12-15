@@ -265,6 +265,20 @@ const cpuGraphs: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+/*
+ * This reducer hold the state for whether the process CPU tracks are enabled.
+ * This feature is still experimental and this will be removed once we have
+ * better handling for this data.
+ */
+const processCPUTracks: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
+      return true;
+    default:
+      return state;
+  }
+};
+
 /**
  * This keeps the information about the upload for the current profile, if any.
  * This is retrieved from the IndexedDB for published profiles information in
@@ -295,6 +309,7 @@ const currentProfileUploadedInformation: Reducer<
 const experimental: Reducer<ExperimentalFlags> = combineReducers({
   eventDelayTracks,
   cpuGraphs,
+  processCPUTracks,
 });
 
 const appStateReducer: Reducer<AppState> = combineReducers({
