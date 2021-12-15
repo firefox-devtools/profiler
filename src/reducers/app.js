@@ -136,6 +136,7 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     case 'ISOLATE_LOCAL_TRACK':
     case 'TOGGLE_RESOURCES_PANEL':
     case 'ENABLE_EXPERIMENTAL_CPU_GRAPHS':
+    case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
     // Committed range changes: (fallthrough)
     case 'COMMIT_RANGE':
     case 'POP_COMMITTED_RANGES':

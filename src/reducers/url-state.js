@@ -439,6 +439,7 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
     case 'ENABLE_EVENT_DELAY_TRACKS':
+    case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
       return action.localTrackOrderByPid;
     case 'CHANGE_LOCAL_TRACK_ORDER': {
       const localTrackOrderByPid = new Map(state);

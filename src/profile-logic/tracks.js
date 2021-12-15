@@ -12,6 +12,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   TrackIndex,
+  ExperimentalThreadType,
 } from 'firefox-profiler/types';
 
 import {
@@ -200,6 +201,11 @@ export function computeLocalTracksByPid(
       localTracksByPid.set(pid, tracks);
     }
 
+    if (thread.experimental) {
+      // Do not show the experimental threads by default.
+      continue;
+    }
+
     if (!isMainThread(thread)) {
       // This thread has not been added as a GlobalTrack, so add it as a local track.
       tracks.push({ type: 'thread', threadIndex });
@@ -271,6 +277,40 @@ export function addEventDelayTracksForThreads(
     }
 
     tracks.push({ type: 'event-delay', threadIndex });
+    newLocalTracksByPid.set(pid, tracks);
+  }
+
+  return newLocalTracksByPid;
+}
+
+/**
+ * Take threads and add the experimental threads that are hidden. Return the new
+ * localTracksByPid map.
+ */
+export function addExperimentalThreadsForType(
+  threads: Thread[],
+  type: ExperimentalThreadType,
+  localTracksByPid: Map<Pid, LocalTrack[]>
+): Map<Pid, LocalTrack[]> {
+  const newLocalTracksByPid = new Map(localTracksByPid);
+
+  for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+    const thread = threads[threadIndex];
+    if (!thread.experimental || thread.experimental !== type) {
+      // This is not an experimental thread, or not the type of experimental
+      // thread that we want to enable. Skip it.
+      continue;
+    }
+
+    const { pid } = thread;
+    // Get or create the tracks and trackOrder.
+    let tracks = newLocalTracksByPid.get(pid);
+    if (tracks === undefined) {
+      tracks = [];
+    }
+
+    // Copy it so we don't mutate the current state.
+    tracks = [...tracks, { type: 'thread', threadIndex }];
     newLocalTracksByPid.set(pid, tracks);
   }
 

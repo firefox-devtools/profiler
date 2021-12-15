@@ -32,6 +32,7 @@ import { fatalError } from './errors';
 import {
   addEventDelayTracksForThreads,
   initializeLocalTrackOrderByPid,
+  addExperimentalThreadsForType,
 } from 'firefox-profiler/profile-logic/tracks';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -367,8 +368,22 @@ export function enableExperimentalProcessCPUTracks(): ThunkAction<boolean> {
       return false;
     }
 
+    const oldLocalTracks = getLocalTracksByPid(getState());
+    const localTracksByPid = addExperimentalThreadsForType(
+      getThreads(getState()),
+      'process-cpu',
+      oldLocalTracks
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      getLocalTrackOrderByPid(getState()),
+      localTracksByPid,
+      null
+    );
+
     dispatch({
       type: 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS',
+      localTracksByPid,
+      localTrackOrderByPid,
     });
 
     return true;
