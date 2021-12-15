@@ -22,10 +22,21 @@ import {
   getComposedSelectorsPerThread,
   type ComposedSelectorsPerThread,
 } from './composed';
+import {
+  getStackLineInfoForCallNode,
+  getLineTimings,
+} from '../../profile-logic/line-timings';
 import * as ProfileSelectors from '../profile';
 import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
-import type { ThreadIndex, Selector, ThreadsKey } from 'firefox-profiler/types';
+import type {
+  Thread,
+  ThreadIndex,
+  Selector,
+  ThreadsKey,
+  StackLineInfo,
+  LineTimings,
+} from 'firefox-profiler/types';
 
 import type { TimingsForPath } from '../../profile-logic/profile-data';
 
@@ -178,6 +189,8 @@ export type NodeSelectors = {|
   +getIsJS: Selector<boolean>,
   +getLib: Selector<string>,
   +getTimingsForSidebar: Selector<TimingsForPath>,
+  +getSourceViewStackLineInfo: Selector<StackLineInfo | null>,
+  +getSourceViewLineTimings: Selector<LineTimings>,
 |};
 
 export const selectedNodeSelectors: NodeSelectors = (() => {
@@ -238,10 +251,54 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     ProfileData.getTimingsForPath
   );
 
+  const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
+    createSelector(
+      selectedThreadSelectors.getFilteredThread,
+      UrlState.getSourceViewFile,
+      selectedThreadSelectors.getCallNodeInfo,
+      selectedThreadSelectors.getSelectedCallNodeIndex,
+      UrlState.getInvertCallstack,
+      (
+        { stackTable, frameTable, funcTable, stringTable }: Thread,
+        sourceViewFile,
+        callNodeInfo,
+        selectedCallNodeIndex,
+        invertCallStack
+      ): StackLineInfo | null => {
+        if (sourceViewFile === null || selectedCallNodeIndex === null) {
+          return null;
+        }
+        const selectedFunc =
+          callNodeInfo.callNodeTable.func[selectedCallNodeIndex];
+        const selectedFuncFile = funcTable.fileName[selectedFunc];
+        if (
+          selectedFuncFile === null ||
+          stringTable.getString(selectedFuncFile) !== sourceViewFile
+        ) {
+          return null;
+        }
+        return getStackLineInfoForCallNode(
+          stackTable,
+          frameTable,
+          selectedCallNodeIndex,
+          callNodeInfo,
+          invertCallStack
+        );
+      }
+    );
+
+  const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
+    getSourceViewStackLineInfo,
+    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+    getLineTimings
+  );
+
   return {
     getName,
     getIsJS,
     getLib,
     getTimingsForSidebar,
+    getSourceViewStackLineInfo,
+    getSourceViewLineTimings,
   };
 })();

@@ -68,6 +68,7 @@ import type {
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import type { TabSlug } from '../app-logic/tabs-handling';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including
@@ -1456,6 +1457,24 @@ export function changeMouseTimePosition(
   return {
     type: 'CHANGE_MOUSE_TIME_POSITION',
     mouseTimePosition,
+  };
+}
+
+export function openSourceView(file: string, currentTab: TabSlug): Action {
+  return {
+    type: 'OPEN_SOURCE_VIEW',
+    file,
+    currentTab,
+  };
+}
+
+export function closeBottomBox(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const tab = getSelectedTab(getState());
+    dispatch({
+      type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
+      tab,
+    });
   };
 }
 

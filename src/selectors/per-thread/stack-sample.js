@@ -12,6 +12,10 @@ import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
+import {
+  getStackLineInfo,
+  getLineTimings,
+} from '../../profile-logic/line-timings';
 
 import type {
   Thread,
@@ -21,6 +25,8 @@ import type {
   WeightType,
   CallNodeInfo,
   CallNodePath,
+  StackLineInfo,
+  LineTimings,
   IndexIntoCallNodeTable,
   SelectedState,
   StartEndRange,
@@ -80,6 +86,29 @@ export function getStackAndSampleSelectorsPerThread(
       );
     }
   );
+
+  const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
+    createSelector(
+      threadSelectors.getFilteredThread,
+      UrlState.getSourceViewFile,
+      UrlState.getInvertCallstack,
+      (
+        { stackTable, frameTable, funcTable, stringTable }: Thread,
+        sourceViewFile,
+        invertCallStack
+      ): StackLineInfo | null => {
+        if (sourceViewFile === null) {
+          return null;
+        }
+        return getStackLineInfo(
+          stackTable,
+          frameTable,
+          funcTable,
+          stringTable.indexForString(sourceViewFile),
+          invertCallStack
+        );
+      }
+    );
 
   const getSelectedCallNodePath: Selector<CallNodePath> = createSelector(
     threadSelectors.getViewOptions,
@@ -213,6 +242,12 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.getCallTree
   );
 
+  const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
+    getSourceViewStackLineInfo,
+    threadSelectors.getPreviewFilteredSamplesForCallTree,
+    getLineTimings
+  );
+
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
     threadSelectors.getFilteredSamplesForCallTree,
     getCallNodeInfo,
@@ -261,6 +296,7 @@ export function getStackAndSampleSelectorsPerThread(
     unfilteredSamplesRange,
     getWeightTypeForCallTree,
     getCallNodeInfo,
+    getSourceViewStackLineInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
@@ -268,6 +304,7 @@ export function getStackAndSampleSelectorsPerThread(
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
+    getSourceViewLineTimings,
     getTracedTiming,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepth,

@@ -1,0 +1,95 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.bottom-box {
+  display: flex;
+  height: 100%;
+  flex-flow: column;
+}
+
+.bottom-main {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-flow: column;
+  background: var(--grey-20);
+}
+
+.bottom-box-bar {
+  display: flex;
+  overflow: hidden;
+  height: 24px;
+  flex-flow: row;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--grey-10);
+  box-shadow: inset 0 -1px var(--grey-30);
+  line-height: 18px;
+}
+
+.bottom-box-title {
+  margin: 0;
+  margin-left: 8px;
+  font: inherit;
+}
+
+.bottom-close-button {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: url(/res/img/svg/close-dark.svg) no-repeat center / 16px 16px;
+}
+
+.sourceStatusOverlay {
+  /**
+   * Put the overlay on top of everything in .bottom-main, but centered
+   * horizontally and vertically. We center using margin: auto, and enforce
+   * maximum sizes so that the line numbers and timings are still visible.
+   */
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: max-content;
+  min-width: 200px;
+  max-width: min(500px, 100%);
+  height: min-content;
+  flex-flow: row;
+  align-items: center;
+  padding: 15px;
+  margin: auto;
+  background-color: rgb(240 240 240 / 0.8);
+  border-radius: 10px;
+  gap: 15px;
+  word-break: break-word;
+}
+
+/* Use :before to add a loading spinner image */
+.sourceStatusOverlay.loading::before {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: url(/res/img/spinner.png) center center / 32px 32px no-repeat;
+  content: '';
+}
+
+/* Use :before to add an alert icon */
+.sourceStatusOverlay.error::before {
+  display: block;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  background: url(/res/img/svg/error.svg) center center / 32px 32px no-repeat;
+  content: '';
+  filter: brightness(70%) drop-shadow(0 1px rgb(255 255 255 / 0.5));
+}
+
+.sourceStatusOverlay ul {
+  padding-left: 20px;
+}

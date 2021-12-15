@@ -162,7 +162,7 @@ export type ZipFileState =
       +pathInZipFile: string,
     |};
 
-export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
+export type IsOpenPerPanelState = { [TabSlug]: boolean };
 
 export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
 
@@ -180,7 +180,7 @@ export type AppState = {|
   +view: AppViewState,
   +urlSetupPhase: UrlSetupPhase,
   +hasZoomedViaMousewheel: boolean,
-  +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
+  +isSidebarOpenPerPanel: IsOpenPerPanelState,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
   +trackThreadHeights: {
@@ -225,6 +225,24 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
+export type SourceViewState = {|
+  activationGeneration: number,
+  file: string | null,
+|};
+
+export type FileSourceStatus =
+  | {| type: 'LOADING', url: string |}
+  | {| type: 'ERROR', errors: SourceLoadingError[] |}
+  | {| type: 'AVAILABLE', source: string |};
+
+export type SourceLoadingError =
+  | {| type: 'NO_KNOWN_CORS_URL' |}
+  | {|
+      type: 'NETWORK_ERROR',
+      url: string,
+      networkErrorMessage: string,
+    |};
+
 /**
  * Full profile specific url state
  * They should not be used from the active tab view.
@@ -259,6 +277,8 @@ export type ProfileSpecificUrlState = {|
   networkSearchString: string,
   transforms: TransformStacksPerThread,
   timelineType: TimelineType,
+  sourceView: SourceViewState,
+  isBottomBoxOpenPerPanel: IsOpenPerPanelState,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
 |};
@@ -312,6 +332,7 @@ export type State = {|
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
   +l10n: L10nState,
+  +sources: Map<string, FileSourceStatus>,
 |};
 
 export type IconWithClassName = {|
