@@ -1,0 +1,137 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.sourceView {
+  display: flex;
+  flex: 1;
+  flex-flow: column;
+  background: white;
+}
+
+.sourceViewHeader {
+  display: flex;
+  height: 16px;
+  flex-flow: row;
+  padding: 1px 0;
+  border-bottom: 1px solid var(--grey-30);
+  background: white;
+}
+
+.sourceViewHeaderMainColumn {
+  flex: 1;
+}
+
+.sourceViewHeaderColumn {
+  position: relative;
+  box-sizing: border-box;
+  padding: 1px 5px;
+  line-height: 15px;
+  white-space: nowrap;
+}
+
+/* A small vertical separator line */
+.sourceViewHeaderColumn.sourceViewFixedColumn::after {
+  position: absolute;
+  top: 3px;
+  right: 0;
+  bottom: 3px;
+  width: 1px;
+  background: #e5e5e5;
+  content: '';
+}
+
+.sourceViewHeaderColumn.total,
+.sourceViewHeaderColumn.self {
+  text-align: right;
+}
+
+.sourceViewFixedColumn {
+  padding-right: 5px;
+  text-align: right;
+}
+
+.sourceViewRowColumn.sourceViewFixedColumn {
+  overflow: hidden;
+  box-sizing: border-box;
+  border-right: 1px solid var(--grey-30);
+  text-overflow: ellipsis;
+}
+
+.sourceViewFixedColumn.total,
+.sourceViewFixedColumn.self {
+  width: 50px;
+}
+
+.sourceViewFixedColumn.lineNumber {
+  width: 45px;
+  border-right: 0;
+  color: #aaa;
+  font-variant-numeric: tabular-nums;
+}
+
+.sourceViewHeaderColumn.sourceViewFixedColumn.lineNumber::after {
+  display: none;
+}
+
+.sourceViewBody {
+  position: relative;
+  z-index: 0;
+  overflow: auto;
+  flex: 1;
+  line-height: 16px;
+  outline: 0;
+  will-change: scroll-position;
+}
+
+.sourceViewBodyInnerWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  min-width: 100%;
+  flex-flow: row;
+}
+
+.sourceViewBodyInner0 {
+  position: sticky;
+  z-index: 2;
+  left: 0;
+}
+
+.sourceViewBodyInner1 {
+  /* This allows the right column to expand more than its content, so that the
+  * background always extends to the right edge. */
+  flex-grow: 1;
+}
+
+.sourceViewBodyInner {
+  overflow: hidden;
+  background: white;
+}
+
+.sourceViewRowFixedColumns {
+  display: flex;
+  flex-flow: row;
+  align-items: stretch;
+  justify-content: flex-start;
+  white-space: nowrap;
+}
+
+.sourceViewRowScrolledColumns {
+  padding-left: 3px;
+  white-space: pre;
+}
+
+.sourceViewRowNonZero {
+  background-color: #edf6ff;
+}
+
+.sourceViewRow > code {
+  font-family: ui-monospace, 'Roboto Mono', monospace;
+  hyphens: none;
+  tab-size: 4;
+  word-break: normal;
+  word-spacing: normal;
+  word-wrap: normal;
+}

@@ -236,8 +236,8 @@ type VirtualListProps<Item> = {|
   +items: $ReadOnlyArray<Item>,
   +focusable: boolean,
   +specialItems: $ReadOnlyArray<Item | void>,
-  +onKeyDown: (SyntheticKeyboardEvent<>) => void,
-  +onCopy: (ClipboardEvent) => void,
+  +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
+  +onCopy?: (ClipboardEvent) => void,
   // This is called when the mouse leaves the list as it is rendered. That is if
   // there isn't enough item to fill the component's height, and the user moves
   // the mouse below the items, this callback would be called.
@@ -306,8 +306,9 @@ export class VirtualList<Item> extends React.PureComponent<
   };
 
   _onCopy = (event: ClipboardEvent) => {
-    if (document.activeElement === this._container.current) {
-      this.props.onCopy(event);
+    const { onCopy } = this.props;
+    if (onCopy && document.activeElement === this._container.current) {
+      onCopy(event);
     }
   };
 
@@ -341,6 +342,13 @@ export class VirtualList<Item> extends React.PureComponent<
     return { visibleRangeStart, visibleRangeEnd };
   }
 
+  /**
+   * Scroll the minimum amount so that the requested item is fully visible
+   * in the viewport. If the item is not already visible, this means that
+   * it'll be shown at one of the edges of the viewport.
+   * This is different from scrollToItem, which always makes the item visible
+   * at the top of the viewport.
+   */
   /* This method is used by users of this component. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
   scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
@@ -372,6 +380,23 @@ export class VirtualList<Item> extends React.PureComponent<
         itemRight - container.clientWidth
       );
     }
+  }
+
+  /**
+   * Scroll such that the item is visible at the top left of the viewport.
+   */
+  /* This method is used by users of this component. */
+  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  scrollToItem(itemIndex: number, offsetX: CssPixels) {
+    const container = this._container.current;
+    if (!container) {
+      return;
+    }
+    const itemTop = itemIndex * this.props.itemHeight;
+    container.scrollTop = itemTop;
+
+    const itemLeft = offsetX;
+    container.scrollLeft = itemLeft;
   }
 
   /* This method is used by users of this component. */

@@ -8,6 +8,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { DetailsContainer } from './DetailsContainer';
+import { BottomBox } from './BottomBox';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
 import { CurrentProfileUploadedInformationLoader } from './CurrentProfileUploadedInformationLoader';
@@ -22,6 +23,7 @@ import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
 import SplitterLayout from 'react-splitter-layout';
 import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
 import { getTimelineHeight } from 'firefox-profiler/selectors/app';
+import { getIsBottomBoxOpen } from 'firefox-profiler/selectors/url-state';
 import {
   getUploadProgress,
   getUploadPhase,
@@ -47,6 +49,7 @@ type StateProps = {|
   +isHidingStaleProfile: boolean,
   +hasSanitizedProfile: boolean,
   +icons: IconWithClassName[],
+  +isBottomBoxOpen: boolean,
 |};
 
 type DispatchProps = {|
@@ -68,6 +71,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
       isHidingStaleProfile,
       hasSanitizedProfile,
       icons,
+      isBottomBoxOpen,
     } = this.props;
 
     return (
@@ -135,7 +139,18 @@ class ProfileViewerImpl extends PureComponent<Props> {
             onDragEnd={invalidatePanelLayout}
           >
             <Timeline />
-            <DetailsContainer />
+            <SplitterLayout
+              vertical
+              percentage={true}
+              // The DetailsContainer is primary.
+              primaryIndex={0}
+              // The BottomBox is secondary.
+              secondaryInitialSize={40}
+              onDragEnd={invalidatePanelLayout}
+            >
+              <DetailsContainer />
+              {isBottomBoxOpen ? <BottomBox /> : null}
+            </SplitterLayout>
           </SplitterLayout>
           <SymbolicationStatusOverlay />
           <BeforeUnloadManager />
@@ -156,6 +171,7 @@ export const ProfileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
     isHidingStaleProfile: getIsHidingStaleProfile(state),
     hasSanitizedProfile: getHasSanitizedProfile(state),
     icons: getIconsWithClassNames(state),
+    isBottomBoxOpen: getIsBottomBoxOpen(state),
   }),
   mapDispatchToProps: {
     returnToZipFileList,
