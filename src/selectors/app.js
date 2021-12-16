@@ -34,6 +34,7 @@ import {
   TRACK_EVENT_DELAY_HEIGHT,
   TIMELINE_MARGIN_LEFT,
   ACTIVE_TAB_TIMELINE_MARGIN_LEFT,
+  TRACK_PROCESS_CPU_HEIGHT,
 } from '../app-logic/constants';
 
 import type {
@@ -295,6 +296,9 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                   break;
                 case 'ipc':
                   height += TRACK_IPC_HEIGHT + border;
+                  break;
+                case 'process-cpu':
+                  height += TRACK_PROCESS_CPU_HEIGHT + border;
                   break;
                 default:
                   throw assertExhaustiveCheck(localTrack);

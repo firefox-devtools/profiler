@@ -53,6 +53,7 @@ const LOCAL_TRACK_INDEX_ORDER = {
   memory: 2,
   ipc: 3,
   'event-delay': 4,
+  'process-cpu': 5,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
@@ -60,6 +61,7 @@ const LOCAL_TRACK_DISPLAY_ORDER = {
   thread: 2,
   ipc: 3,
   'event-delay': 4,
+  'process-cpu': 5,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -718,6 +720,8 @@ export function getLocalTrackName(
         getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
         ' Event Delay'
       );
+    case 'process-cpu':
+      return 'Process CPU';
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -1100,7 +1104,8 @@ export function getSearchFilteredLocalTracksByPid(
         case 'network':
         case 'memory':
         case 'ipc':
-        case 'event-delay': {
+        case 'event-delay':
+        case 'process-cpu': {
           const { type } = localTrack;
           if (searchRegExp.test(type)) {
             searchFilteredLocalTracks.add(trackIndex);
