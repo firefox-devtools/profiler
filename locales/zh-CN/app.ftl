@@ -594,6 +594,17 @@ TransformNavigator--collapse-direct-recursion = 折叠递归：{ $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = 等待 { $host }…
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = 此文件没有已知的 cross-origin-accessible 网址。
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
