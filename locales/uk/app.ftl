@@ -672,6 +672,22 @@ SourceView--loading-url = Очікування відповіді з { $host }�
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Джерельний код недоступний
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Перегляньте <a>обговорення #3741</a>, щоб дізнатися про підтримувані сценарії та заплановані вдосконалення.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Для цього файлу немає відомої cross-origin-accessible URL-адреси.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Під час отримання URL-адреси { $url } сталася помилка мережі: { $networkErrorMessage }
+SourceView--close-button =
+    .title = Закрити вікно з кодом
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
