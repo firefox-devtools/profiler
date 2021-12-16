@@ -54,6 +54,7 @@ export const TIMELINE_RULER_HEIGHT = 20;
 
 // Height of the process cpu track.
 export const TRACK_PROCESS_CPU_HEIGHT = 25;
+export const TRACK_PROCESS_CPU_LINE_WIDTH = 2;
 
 // JS Tracer has very high fidelity information, and needs a more fine-grained zoom.
 export const JS_TRACER_MAXIMUM_CHART_ZOOM = 0.001;

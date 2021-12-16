@@ -1475,6 +1475,27 @@ export function accumulateCounterSamples(
 }
 
 /**
+ * The memory counter contains relative offsets of memory. In order to draw an interesting
+ * graph, take the memory counts, and find the minimum and maximum values, by
+ * accumulating them over the entire profile range. Then, map those values to the
+ * accumulatedCounts array.
+ */
+export function computeMaxCounterSampleCounts(
+  samplesArray: Array<CounterSamplesTable>
+): Array<number> {
+  const maxSampleCounts = samplesArray.map((samples) => {
+    let maxCount = 0;
+    for (let i = 0; i < samples.length; i++) {
+      maxCount = Math.max(samples.count[i], maxCount);
+    }
+
+    return maxCount;
+  });
+
+  return maxSampleCounts;
+}
+
+/**
  * Pre-processing of raw eventDelay values.
  *
  * We don't do 16ms event injection for responsiveness values anymore. Instead,
