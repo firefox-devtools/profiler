@@ -37,12 +37,14 @@ import type {
   CallNodePath,
   ThreadIndex,
   TimelineType,
+  SourceViewState,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
   encodeUintArrayForUrlComponent,
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
+import { tabSlugs } from '../app-logic/tabs-handling';
 
 export const CURRENT_URL_VERSION = 6;
 
@@ -178,6 +180,7 @@ type BaseQuery = {|
   view: string,
   implementation: string,
   timelineType: string,
+  sourceView: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -406,6 +409,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         'timing'
           ? undefined
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
+      const { sourceView, isBottomBoxOpenPerPanel } = urlState.profileSpecific;
+      query.sourceView =
+        sourceView.file !== null && isBottomBoxOpenPerPanel[selectedTab]
+          ? sourceView.file
+          : undefined;
       break;
     }
     case 'marker-table':
@@ -564,12 +572,25 @@ export function stateFromLocation(
     tabID = Number(query.ctxId);
   }
 
+  const selectedTab =
+    toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree';
+  const sourceView: SourceViewState = {
+    activationGeneration: 0,
+    file: null,
+  };
+  const isBottomBoxOpenPerPanel = {};
+  tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
+  if (query.sourceView) {
+    sourceView.file = query.sourceView;
+    isBottomBoxOpenPerPanel[selectedTab] = true;
+  }
+
   return {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     profilesToCompare: query.profiles || null,
-    selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
+    selectedTab,
     pathInZipFile: query.file || null,
     profileName: query.profileName,
     symbolServerUrl: query.symbolServer || null,
@@ -590,6 +611,8 @@ export function stateFromLocation(
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
       transforms,
+      sourceView,
+      isBottomBoxOpenPerPanel,
       timelineType: validateTimelineType(query.timelineType),
       full: {
         showJsTracerSummary: query.summary === undefined ? false : true,

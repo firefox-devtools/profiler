@@ -720,6 +720,41 @@ TransformNavigator--collapse-direct-recursion = Collapse recursion: { $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Collapse subtree: { $item }
 
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Waiting for { $host }…
+
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Source not available
+
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text =
+    See <a>issue #3741</a> for supported scenarios and planned improvements.
+
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url =
+    There is no known cross-origin-accessible URL for this file.
+
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source =
+    There was a network error when fetching the URL { $url }: { $networkErrorMessage }
+
+SourceView--close-button =
+    .title = Close the source view
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/

@@ -10,7 +10,7 @@ import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   AppState,
   AppViewState,
-  IsSidebarOpenPerPanelState,
+  IsOpenPerPanelState,
   Reducer,
   UrlSetupPhase,
   ThreadsKey,
@@ -91,7 +91,7 @@ function _getSidebarInitialState() {
   return state;
 }
 
-const isSidebarOpenPerPanel: Reducer<IsSidebarOpenPerPanelState> = (
+const isSidebarOpenPerPanel: Reducer<IsOpenPerPanelState> = (
   state = _getSidebarInitialState(),
   action
 ) => {
@@ -139,6 +139,9 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     // Committed range changes: (fallthrough)
     case 'COMMIT_RANGE':
     case 'POP_COMMITTED_RANGES':
+    // Bottom box: (fallthrough)
+    case 'OPEN_SOURCE_VIEW':
+    case 'CLOSE_BOTTOM_BOX_FOR_TAB':
       return state + 1;
     default:
       return state;
