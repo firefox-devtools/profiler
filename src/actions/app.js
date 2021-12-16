@@ -21,6 +21,7 @@ import {
   getActiveTabMainTrack,
   getLocalTracksByPid,
   getThreads,
+  getCounter,
 } from 'firefox-profiler/selectors/profile';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import {
@@ -32,6 +33,7 @@ import { fatalError } from './errors';
 import {
   addEventDelayTracksForThreads,
   initializeLocalTrackOrderByPid,
+  addProcessCPUTracksForProcess,
 } from 'firefox-profiler/profile-logic/tracks';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -370,8 +372,21 @@ export function enableExperimentalProcessCPUTracks(): ThunkAction<boolean> {
       return false;
     }
 
+    const oldLocalTracks = getLocalTracksByPid(getState());
+    const localTracksByPid = addProcessCPUTracksForProcess(
+      getCounter(getState()),
+      oldLocalTracks
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      getLocalTrackOrderByPid(getState()),
+      localTracksByPid,
+      null
+    );
+
     dispatch({
       type: 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS',
+      localTracksByPid,
+      localTrackOrderByPid,
     });
 
     return true;

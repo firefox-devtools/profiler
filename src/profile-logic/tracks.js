@@ -12,6 +12,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   TrackIndex,
+  Counter,
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
@@ -270,6 +271,42 @@ export function addEventDelayTracksForThreads(
 
     tracks.push({ type: 'event-delay', threadIndex });
     newLocalTracksByPid.set(pid, tracks);
+  }
+
+  return newLocalTracksByPid;
+}
+
+/**
+ * Take global tracks and add the experimental process CPU tracks. Return the new
+ * localTracksByPid map.
+ */
+export function addProcessCPUTracksForProcess(
+  counters: Counter[] | null,
+  localTracksByPid: Map<Pid, LocalTrack[]>
+): Map<Pid, LocalTrack[]> {
+  if (counters === null) {
+    // We don't have any counters to add.
+    return localTracksByPid;
+  }
+
+  const newLocalTracksByPid = new Map(localTracksByPid);
+
+  for (const [counterIndex, counter] of counters.entries()) {
+    if (counter.category !== 'CPU' || counter.name !== 'processCPU') {
+      // We only care about the process CPU counter types.
+      continue;
+    }
+
+    const { pid } = counter;
+    let localTracks = newLocalTracksByPid.get(pid);
+    if (localTracks === undefined) {
+      // It can't be undefined, but let's make sure.
+      localTracks = [];
+    }
+
+    // Do not mutate the current state.
+    localTracks = [...localTracks, { type: 'process-cpu', counterIndex }];
+    newLocalTracksByPid.set(pid, localTracks);
   }
 
   return newLocalTracksByPid;
