@@ -612,6 +612,12 @@ SourceView--source-not-available-text = 關於支援的使用情境與規劃中�
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = 這個檔案沒有已知的 cross-origin-accessible 網址。
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = 取得網址 { $url } 時發生網路錯誤: { $networkErrorMessage }
 SourceView--close-button =
     .title = 關閉原始碼畫面
 
