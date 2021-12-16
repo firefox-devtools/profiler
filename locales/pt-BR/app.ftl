@@ -611,6 +611,25 @@ TransformNavigator--collapse-function-subtree = Recolher subárvore: { $item }
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Aguardando { $host }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Informação não disponível
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Consulte <a>issue #3741</a> para ver cenários suportados e melhorias planejadas.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Não há nenhuma URL de origem cruzada conhecida para este arquivo.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Ocorreu um erro de rede ao buscar a URL { $url }: { $networkErrorMessage }
+SourceView--close-button =
+    .title = Fechar visão de código-fonte
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
