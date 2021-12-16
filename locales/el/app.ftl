@@ -618,6 +618,14 @@ TransformNavigator--collapse-direct-recursion = Σύμπτυξη αναδρομ�
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Σύμπτυξη υπόδεντρου: { $item }
 
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Αναμονή για { $host }…
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
