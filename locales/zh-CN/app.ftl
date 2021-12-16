@@ -601,9 +601,20 @@ TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = 等待 { $host }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #3741</a>。
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = 此文件没有已知的 cross-origin-accessible 网址。
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = 获取网址 { $url } 时发生网络错误：{ $networkErrorMessage }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
