@@ -1475,31 +1475,36 @@ describe('actions/ProfileView', function () {
 
       dispatch(
         ProfileView.addTransformToStack(0, {
-          type: 'merge-function',
-          funcIndex: 1,
+          type: 'merge-call-node',
+          callNodePath: [0, 1],
+          implementation: 'combined',
         })
       );
       dispatch(
         ProfileView.addTransformToStack(0, {
-          type: 'merge-function',
-          funcIndex: 2,
+          type: 'merge-call-node',
+          callNodePath: [0, 2],
+          implementation: 'combined',
         })
       );
       expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
         {
-          type: 'merge-function',
-          funcIndex: 1,
+          type: 'merge-call-node',
+          callNodePath: [0, 1],
+          implementation: 'combined',
         },
         {
-          type: 'merge-function',
-          funcIndex: 2,
+          type: 'merge-call-node',
+          callNodePath: [0, 2],
+          implementation: 'combined',
         },
       ]);
       dispatch(ProfileView.popTransformsFromStack(1));
       expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
         {
-          type: 'merge-function',
-          funcIndex: 1,
+          type: 'merge-call-node',
+          callNodePath: [0, 1],
+          implementation: 'combined',
         },
       ]);
     });

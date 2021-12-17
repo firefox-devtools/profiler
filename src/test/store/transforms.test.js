@@ -452,6 +452,8 @@ describe('"merge-function" transform', function () {
     `);
     const threadIndex = 0;
     const C = funcNames.indexOf('C');
+    const D = funcNames.indexOf('D');
+    const E = funcNames.indexOf('E');
 
     const { dispatch, getState } = storeWithProfile(profile);
     const originalCallTree = selectedThreadSelectors.getCallTree(getState());
@@ -487,6 +489,40 @@ describe('"merge-function" transform', function () {
         '      - G (total: 1, self: 1)',
         '    - H (total: 1, self: 1)',
       ]);
+
+      const transformStack = selectedThreadSelectors.getTransformStack(
+        getState()
+      );
+      expect(transformStack).toHaveLength(1);
+      expect(transformStack[0].type).toEqual('merge-function');
+    });
+
+    it('merging multiple functions results in a merged function set', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'merge-function',
+          funcIndex: D,
+        })
+      );
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'merge-function',
+          funcIndex: E,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 3, self: 1)',
+        '    - F (total: 1, self: —)',
+        '      - G (total: 1, self: 1)',
+        '    - H (total: 1, self: 1)',
+      ]);
+      const transformStack = selectedThreadSelectors.getTransformStack(
+        getState()
+      );
+      expect(transformStack).toHaveLength(1);
+      expect(transformStack[0].type).toEqual('merge-function-set');
     });
   });
 });

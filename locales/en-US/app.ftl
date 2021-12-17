@@ -702,6 +702,12 @@ TransformNavigator--merge-call-node = Merge Node: { $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Merge: { $item }
 
+# "Merge function set" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - The count of functions merged.
+TransformNavigator--merge-function-set = Merge Functions ({ $item })
+
 # "Drop function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
 # Variables:

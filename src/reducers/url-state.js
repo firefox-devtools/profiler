@@ -13,6 +13,7 @@ import type {
   Pid,
   TrackIndex,
   StartEndRange,
+  TransformStack,
   TransformStacksPerThread,
   DataSource,
   ImplementationFilter,
@@ -186,16 +187,59 @@ const networkSearchString: Reducer<string> = (state = '', action) => {
   }
 };
 
-const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
+const transforms: Reducer<TransformStacksPerThread> = (
+  state: TransformStacksPerThread = {},
+  action
+) => {
   switch (action.type) {
     case 'PROFILE_LOADED':
       return action.transformStacks || state;
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadsKey, transform } = action;
-      const transforms = state[threadsKey] || [];
-      return Object.assign({}, state, {
-        [threadsKey]: [...transforms, transform],
-      });
+      const oldTransforms: TransformStack = state[threadsKey] || [];
+      let newTransforms: TransformStack | null = null;
+
+      // Multiple "merge-function" transforms will combine into a "merge-function-set"
+      // transform, as the operation is commutative. This makes the transforms more
+      // performant when mashing the shortcut and radically adding many of them.
+      if (oldTransforms.length > 0 && transform.type === 'merge-function') {
+        const lastTransform = oldTransforms[oldTransforms.length - 1];
+        switch (lastTransform.type) {
+          case 'merge-function':
+            {
+              newTransforms = [...oldTransforms];
+              newTransforms.pop();
+              newTransforms.push({
+                type: 'merge-function-set',
+                funcIndexes: new Set([
+                  lastTransform.funcIndex,
+                  transform.funcIndex,
+                ]),
+              });
+            }
+            break;
+          case 'merge-function-set':
+            {
+              newTransforms = [...oldTransforms];
+              newTransforms.pop();
+              newTransforms.push({
+                type: 'merge-function-set',
+                funcIndexes: new Set([
+                  ...lastTransform.funcIndexes,
+                  transform.funcIndex,
+                ]),
+              });
+            }
+            break;
+          default:
+          // Do nothing.
+        }
+      }
+
+      return {
+        ...state,
+        [threadsKey]: newTransforms || [...oldTransforms, transform],
+      };
     }
     case 'POP_TRANSFORMS_FROM_STACK': {
       const { threadsKey, firstPoppedFilterIndex } = action;

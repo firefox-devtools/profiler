@@ -53,6 +53,7 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
   'focus-function',
   'merge-call-node',
   'merge-function',
+  'merge-function-set',
   'drop-function',
   'collapse-resource',
   'collapse-direct-recursion',
@@ -73,6 +74,9 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
       break;
     case 'merge-function':
       shortKey = 'mf';
+      break;
+    case 'merge-function-set':
+      shortKey = 'mfs';
       break;
     case 'drop-function':
       shortKey = 'df';
@@ -156,6 +160,19 @@ export function parseTransforms(transformString: string): TransformStack {
           type,
           funcIndex,
           implementation: toValidImplementationFilter(implementation),
+        });
+        break;
+      }
+      case 'merge-function-set': {
+        // e.g. "mfs-325-23-0-4"
+        const [, ...funcIndexesRaw] = tuple;
+        transforms.push({
+          type: 'merge-function-set',
+          funcIndexes: new Set(
+            funcIndexesRaw
+              .map<IndexIntoFuncTable>((index) => parseInt(index, 10))
+              .filter((index) => !isNaN(index) && index >= 0)
+          ),
         });
         break;
       }
@@ -256,6 +273,8 @@ export function stringifyTransforms(transformStack: TransformStack): string {
       // need only a funcIndex, while some care about the current implemention, or
       // other pieces of data.
       switch (transform.type) {
+        case 'merge-function-set':
+          return `${shortKey}-${[...transform.funcIndexes].join('-')}`;
         case 'merge-function':
         case 'drop-function':
         case 'collapse-function-subtree':
@@ -322,8 +341,10 @@ export function getTransformLabelL10nIds(
     }
 
     // Lookup function name.
-    let funcIndex;
+    let funcIndex = null;
     switch (transform.type) {
+      case 'merge-function-set':
+        break;
       case 'focus-subtree':
       case 'merge-call-node':
         funcIndex = transform.callNodePath[transform.callNodePath.length - 1];
@@ -338,8 +359,11 @@ export function getTransformLabelL10nIds(
       default:
         throw assertExhaustiveCheck(transform);
     }
-    const nameIndex = funcTable.name[funcIndex];
-    const funcName = getFunctionName(stringTable.getString(nameIndex));
+    const nameIndex = funcIndex === null ? null : funcTable.name[funcIndex];
+    const funcName =
+      nameIndex === null
+        ? ''
+        : getFunctionName(stringTable.getString(nameIndex));
 
     switch (transform.type) {
       case 'focus-subtree':
@@ -350,6 +374,11 @@ export function getTransformLabelL10nIds(
         return {
           l10nId: 'TransformNavigator--merge-call-node',
           item: funcName,
+        };
+      case 'merge-function-set':
+        return {
+          l10nId: 'TransformNavigator--merge-function-set',
+          item: `${transform.funcIndexes.size}`,
         };
       case 'merge-function':
         return { l10nId: 'TransformNavigator--merge-function', item: funcName };
@@ -393,6 +422,11 @@ export function applyTransformToCallNodePath(
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
     case 'merge-function':
       return _mergeFunctionInCallNodePath(transform.funcIndex, callNodePath);
+    case 'merge-function-set':
+      return _mergeFunctionSetInCallNodePath(
+        transform.funcIndexes,
+        callNodePath
+      );
     case 'drop-function':
       return _dropFunctionInCallNodePath(transform.funcIndex, callNodePath);
     case 'collapse-resource':
@@ -448,6 +482,13 @@ function _mergeFunctionInCallNodePath(
   callNodePath: CallNodePath
 ): CallNodePath {
   return callNodePath.filter((nodeFunc) => nodeFunc !== funcIndex);
+}
+
+function _mergeFunctionSetInCallNodePath(
+  funcIndexes: Set<IndexIntoFuncTable>,
+  callNodePath: CallNodePath
+): CallNodePath {
+  return callNodePath.filter((nodeFunc) => !funcIndexes.has(nodeFunc));
 }
 
 function _dropFunctionInCallNodePath(
@@ -687,6 +728,56 @@ export function mergeFunction(
     const funcIndex = frameTable.func[frameIndex];
 
     if (funcIndex === funcIndexToMerge) {
+      const newStackPrefix = oldStackToNewStack.get(prefix);
+      oldStackToNewStack.set(
+        stackIndex,
+        newStackPrefix === undefined ? null : newStackPrefix
+      );
+    } else {
+      const newStackIndex = newStackTable.length++;
+      const newStackPrefix = oldStackToNewStack.get(prefix);
+      newStackTable.prefix[newStackIndex] =
+        newStackPrefix === undefined ? null : newStackPrefix;
+      newStackTable.frame[newStackIndex] = frameIndex;
+      newStackTable.category[newStackIndex] = category;
+      newStackTable.subcategory[newStackIndex] = subcategory;
+      oldStackToNewStack.set(stackIndex, newStackIndex);
+    }
+  }
+
+  return updateThreadStacks(
+    thread,
+    newStackTable,
+    getMapStackUpdater(oldStackToNewStack)
+  );
+}
+
+/**
+ * Go through the StackTable and remove any stacks that are part of the set of functions.
+ * This operation effectively merges the timing of the stacks into their callers.
+ */
+export function mergeFunctionSet(
+  thread: Thread,
+  funcIndexesToMerge: Set<IndexIntoFuncTable>
+): Thread {
+  const { stackTable, frameTable } = thread;
+  const oldStackToNewStack: Map<
+    IndexIntoStackTable | null,
+    IndexIntoStackTable | null
+  > = new Map();
+  // A root stack's prefix will be null. Maintain that relationship from old to new
+  // stacks by mapping from null to null.
+  oldStackToNewStack.set(null, null);
+  const newStackTable = getEmptyStackTable();
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const category = stackTable.category[stackIndex];
+    const subcategory = stackTable.subcategory[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+
+    if (funcIndexesToMerge.has(funcIndex)) {
       const newStackPrefix = oldStackToNewStack.get(prefix);
       oldStackToNewStack.set(
         stackIndex,
@@ -1404,6 +1495,8 @@ export function applyTransform(
       );
     case 'merge-function':
       return mergeFunction(thread, transform.funcIndex);
+    case 'merge-function-set':
+      return mergeFunctionSet(thread, transform.funcIndexes);
     case 'drop-function':
       return dropFunction(thread, transform.funcIndex);
     case 'focus-function':

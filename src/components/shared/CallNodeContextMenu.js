@@ -299,6 +299,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         });
         break;
       }
+      case 'merge-function-set':
+        throw new Error(
+          'merge-function-set should not be triggered by a context menu'
+        );
       default:
         assertExhaustiveCheck(type);
     }
