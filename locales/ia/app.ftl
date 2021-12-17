@@ -678,6 +678,14 @@ SourceView--source-not-available-text = Vide <a>issue #3741</a> pro scenarios su
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Pro iste file il non ha un note URL cross-origin accessibile.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Il habeva un error de rete recuperante le URL { $url }: { $networkErrorMessage }
+SourceView--close-button =
+    .title = Clauder le vista fonte
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
