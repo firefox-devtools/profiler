@@ -615,6 +615,9 @@ SourceView--source-not-available-title = Source non disponible
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Consultez le <a>ticket n°3741</a> pour les scénarios pris en charge et les améliorations prévues.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Aucune URL multiorigine accessible n’est connue pour ce fichier.
 # Displayed below SourceView--cannot-obtain-source, if there was a network error
 # when fetching the source code for a file.
 # Variables:
