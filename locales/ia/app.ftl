@@ -670,6 +670,14 @@ SourceView--loading-url = Attendente { $host }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Fonte non disponibile
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Vide <a>issue #3741</a> pro scenarios supportate e meliorationes planate.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Pro iste file il non ha un note URL cross-origin accessibile.
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
