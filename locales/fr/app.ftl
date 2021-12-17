@@ -598,6 +598,19 @@ SourceView--loading-url = En attente de { $host }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Source non disponible
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Consultez le <a>ticket n°3741</a> pour les scénarios pris en charge et les améliorations prévues.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Une erreur réseau s’est produite lors de la récupération de l’URL { $url } : { $networkErrorMessage }
+SourceView--close-button =
+    .title = Fermer la vue du code source
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
