@@ -588,6 +588,17 @@ TransformNavigator--collapse-direct-recursion = Réduction de la récursivité 
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Réduction de la sous-arborescence : { $item }
 
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = En attente de { $host }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Source non disponible
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
