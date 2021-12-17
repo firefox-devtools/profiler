@@ -660,6 +660,17 @@ TransformNavigator--collapse-direct-recursion = Collaber recursion: { $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Collaber sub-arbore: { $item }
 
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Attendente { $host }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Fonte non disponibile
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
