@@ -84,6 +84,8 @@ CallNodeContextMenu--transform-collapse-resource = Fäll ihop <strong> { $nameFo
         resursen till en enda ihopfälld anropsnod.
 CallNodeContextMenu--transform-collapse-direct-recursion = Dölj direkt rekursion
     .title = Dölj direkt rekursion tar bort anrop som upprepade gånger anropar samma funktion.
+CallNodeContextMenu--transform-drop-function = Ta bort prover med denna funktion
+    .title = Genom att ta bort proverna kommer de tillhörande körtiderna att tas bort från profilen. Detta är användbart för att eliminera tidsinformation som inte är relevant för analysen.
 CallNodeContextMenu--expand-all = Expandera alla
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -100,6 +102,10 @@ CallTree--tracing-ms-total = Körningstid (ms)
         Den "totala" körtiden innehåller en sammanfattning av hela tiden där denna
         funktion observerades vara på stacken. Detta inkluderar den tid då funktionen
         faktiskt kördes och den tid som tillbringades i anropen från den här funktionen.
+CallTree--tracing-ms-self = Själv (ms)
+    .title = "Självtiden" inkluderar tiden då funktionen var i slutet av stacken. Om denna funktion har anropat andra funktioner, ingår inte den "övriga" tiden för dessa funktioner. "Självtiden" är användbar för att förstå var tiden verkligen spenderas inom ett program.
+CallTree--samples-total = Totalt (prov)
+    .title = Det "totala" urvalet inkluderar en sammanfattning av alla prover där denna funktion observerades på stacken. Detta inkluderar den tid som funktionen faktiskt kördes, men också den tid som spenderas i de funktioner som anropas av denna funktion.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -595,6 +601,30 @@ TransformNavigator--collapse-function-subtree = Dölj underträd: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Väntar på { $host }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Källa inte tillgänglig
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Se <a>problem #3741</a> för scenarier som stöds och planerade förbättringar.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Det finns ingen tillgänglig webbadress för den här filen.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Det uppstod ett nätverksfel när webbadressen { $url } skulle hämtas: { $networkErrorMessage }
+SourceView--close-button =
+    .title = Stäng källvyn
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
