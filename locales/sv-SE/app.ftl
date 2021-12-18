@@ -34,6 +34,14 @@ AppViewRouter--error-from-file = Det gick inte att läsa filen eller analysera p
 AppViewRouter--error-local = Inte implementerat ännu.
 AppViewRouter--error-public = Det gick inte att ladda ner profilen.
 AppViewRouter--error-from-url = Det gick inte att ladda ner profilen.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    På grund av en <a>specifik begränsning i Safari</a> kan inte
+    { -profiler-brand-name } importera profiler från den lokala datorn i den här webbläsaren. Öppna
+    den här sidan i { -firefox-brand-name } eller Chrome istället.
+    .title = Safari kan inte importera lokala profiler
 AppViewRouter--route-not-found--home =
     .specialMessage = Webbadressen du försökte nå kändes inte igen.
 
@@ -584,6 +592,9 @@ TransformNavigator--collapse-direct-recursion = Dölj rekursion: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Dölj underträd: { $item }
+
+## Source code view in a box at the bottom of the UI.
+
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
