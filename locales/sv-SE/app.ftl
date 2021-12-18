@@ -103,9 +103,17 @@ CallTree--tracing-ms-total = Körningstid (ms)
         funktion observerades vara på stacken. Detta inkluderar den tid då funktionen
         faktiskt kördes och den tid som tillbringades i anropen från den här funktionen.
 CallTree--tracing-ms-self = Själv (ms)
-    .title = "Självtiden" inkluderar tiden då funktionen var i slutet av stacken. Om denna funktion har anropat andra funktioner, ingår inte den "övriga" tiden för dessa funktioner. "Självtiden" är användbar för att förstå var tiden verkligen spenderas inom ett program.
+    .title =
+        "Självtiden" inkluderar tiden då funktionen var i slutet av stacken.
+        Om denna funktion har anropat andra funktioner, ingår inte den
+        "övriga" tiden för dessa funktioner. "Självtiden" är användbar för
+        att förstå var tiden verkligen spenderas inom ett program.
 CallTree--samples-total = Totalt (prov)
-    .title = Det "totala" urvalet inkluderar en sammanfattning av alla prover där denna funktion observerades på stacken. Detta inkluderar den tid som funktionen faktiskt kördes, men också den tid som spenderas i de funktioner som anropas av denna funktion.
+    .title =
+        Det "totala" urvalet inkluderar en sammanfattning av alla prover där
+        denna funktion observerades på stacken. Detta inkluderar den tid
+        som funktionen faktiskt kördes, men också den tid som spenderas
+        i de funktioner som anropas av denna funktion.
 
 ## Call tree "badges" (icons) with tooltips
 ##
