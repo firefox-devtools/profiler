@@ -29,17 +29,17 @@ This records the profile into a `perf.data` file, and pulls it to your host.
 
 ### Step 2: Convert the profile
 
-Then convert to a `perf script` format, using [`report_sample.py`](https://android.googlesource.com/platform/system/extras/+/master/simpleperf/doc/scripts_reference.md#report_sample_py):
+Then convert to a Gecko Profile (Firefox Profiler) format, using [`gecko_profile_generator.py`](https://android.googlesource.com/platform/system/extras/+/master/simpleperf/doc/scripts_reference.md#gecko_profile_generator_py):
 
 ```bash
-./report_sample.py > perf.txt
+./gecko_profile_generator.py | gzip > profile.json.gz
 ```
 
-`report_sample.py` takes the `perf.data` file that was written before as its implicit input.
+`gecko_profile_generator.py` takes the `perf.data` file that was written before as its implicit input.
 
 ### Step 3: View the profile in profiler.firefox.com
 
-You can now load the `perf.txt` file into [profiler.firefox.com](https://profiler.firefox.com): tell the Firefox Profiler to open the file and it should be auto-identified and loaded.
+Load `profile.json.gz` into [profiler.firefox.com](https://profiler.firefox.com), using drag-and-drop or "Load a profile from file".
 
 ## See also
 
