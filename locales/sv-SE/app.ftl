@@ -114,6 +114,18 @@ CallTree--samples-total = Totalt (prov)
         denna funktion observerades på stacken. Detta inkluderar den tid
         som funktionen faktiskt kördes, men också den tid som spenderas
         i de funktioner som anropas av denna funktion.
+CallTree--samples-self = Själv
+    .title =
+        Antalet "själv"-prov inkluderar bara de prov där funktionen var i slutet
+        av stacken. Om den här funktionen anropas till andra funktioner, ingår
+        inte antalet "andra" funktioner. "Själv"-räkningen är användbar för att
+        förstå var tiden faktiskt spenderades i ett program.
+CallTree--bytes-total = Total storlek (byte)
+    .title =
+        Den "totala storleken" inkluderar en sammanfattning av alla byte
+        som tilldelats eller avallokerats medan denna funktion observerades
+        vara i stacken. Detta inkluderar både byten där funktionen faktiskt
+        kördes och byten för anropen från denna funktion.
 
 ## Call tree "badges" (icons) with tooltips
 ##
