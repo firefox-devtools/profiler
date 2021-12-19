@@ -125,6 +125,11 @@ CallTree--samples-total = Totalt (prov)
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
     .title = Vissa anrop till { $calledFunction } infogades av kompilatorn.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (infogad)
+    .title = Anrop till { $calledFunction } infogades i { $outerFunction } av kompilatorn.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
