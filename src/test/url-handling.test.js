@@ -1344,7 +1344,8 @@ describe('url upgrading', function () {
 describe('URL serialization of the transform stack', function () {
   const transformString =
     'f-combined-0w2~mcn-combined-2w4~f-js-3w5-i~mf-6~ff-7~cr-combined-8-9~' +
-    'rec-combined-10~df-11~cfs-12~mfs-13-14-15';
+    'rec-combined-10~df-11~cfs-12~mfs-dwf';
+
   const { getState } = _getStoreWithURL({
     search: '?transforms=' + transformString,
   });

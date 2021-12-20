@@ -164,15 +164,12 @@ export function parseTransforms(transformString: string): TransformStack {
         break;
       }
       case 'merge-function-set': {
-        // e.g. "mfs-325-23-0-4"
-        const [, ...funcIndexesRaw] = tuple;
+        // e.g. "mfs-0KV4KV5KV61KV7KV8K"
+        const [, funcIndexesRaw] = tuple;
+        console.log({ tuple });
         transforms.push({
           type: 'merge-function-set',
-          funcIndexes: new Set(
-            funcIndexesRaw
-              .map<IndexIntoFuncTable>((index) => parseInt(index, 10))
-              .filter((index) => !isNaN(index) && index >= 0)
-          ),
+          funcIndexes: new Set(decodeUintArrayFromUrlComponent(funcIndexesRaw)),
         });
         break;
       }
@@ -274,7 +271,9 @@ export function stringifyTransforms(transformStack: TransformStack): string {
       // other pieces of data.
       switch (transform.type) {
         case 'merge-function-set':
-          return `${shortKey}-${[...transform.funcIndexes].join('-')}`;
+          return `${shortKey}-${encodeUintArrayForUrlComponent([
+            ...transform.funcIndexes,
+          ])}`;
         case 'merge-function':
         case 'drop-function':
         case 'collapse-function-subtree':
