@@ -614,6 +614,20 @@ SourceView--loading-url = Esperando a { $host }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Fuente no disponible
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Consulta el <a>problema #3741</a> para conocer los escenarios compatibles y las mejoras planificadas.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = No se conoce una URL accesible por origen cruzado para este archivo.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Hubo un error de red al obtener la URL { $url }: { $networkErrorMessage }
 SourceView--close-button =
     .title = Cerrar la vista de fuente
 
