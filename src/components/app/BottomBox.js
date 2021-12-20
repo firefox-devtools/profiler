@@ -18,7 +18,6 @@ import {
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
-import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
 import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -41,7 +40,6 @@ type StateProps = {|
 
 type DispatchProps = {|
   +closeBottomBox: typeof closeBottomBox,
-  +fetchSourceForFile: typeof fetchSourceForFile,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -139,8 +137,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView = React.createRef<SourceView>();
 
   componentDidMount() {
-    this._triggerSourceLoadingIfNeeded();
-
     if (this._sourceView.current) {
       this._sourceView.current.scrollToHotSpot(
         this.props.selectedCallNodeLineTimings
@@ -149,8 +145,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    this._triggerSourceLoadingIfNeeded();
-
     if (
       this._sourceView.current &&
       prevProps.sourceViewActivationGeneration <
@@ -159,13 +153,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       this._sourceView.current.scrollToHotSpot(
         this.props.selectedCallNodeLineTimings
       );
-    }
-  }
-
-  _triggerSourceLoadingIfNeeded() {
-    const { sourceViewFile, sourceViewSource, fetchSourceForFile } = this.props;
-    if (sourceViewFile && !sourceViewSource) {
-      fetchSourceForFile(sourceViewFile);
     }
   }
 
@@ -238,7 +225,6 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     closeBottomBox,
-    fetchSourceForFile,
   },
   component: BottomBoxImpl,
 });
