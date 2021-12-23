@@ -80,7 +80,7 @@
     "redux": "^4.1.2",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.4.1",
-    "reselect": "^4.1.4",
+    "reselect": "^4.1.5",
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0"
   },
