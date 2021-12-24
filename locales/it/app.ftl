@@ -609,6 +609,11 @@ SourceView--loading-url = In attesa di { $host }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Sorgente non disponibile
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Vedi <a>issue #3741</a> per gli scenari supportati e i miglioramenti in programma.
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Per questo file non è disponibile alcun URL cross-origin accessibile.
