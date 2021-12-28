@@ -1041,10 +1041,10 @@
     classnames "^2.3.1"
     object-assign "^4.1.0"
 
-"@fluent/bundle@^0.17.0":
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/@fluent/bundle/-/bundle-0.17.0.tgz#02f51f2ca8b85f80dd6b07df93e7ba421b124d52"
-  integrity sha512-G/9wDCTKGPyHgw4ON3vBlLUIBBGG7vq8ytExqh4uwTfoeOfQ5VU5Xr6F+UV8B72k9P9S72GqFTXvqjS48pBVpg==
+"@fluent/bundle@^0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@fluent/bundle/-/bundle-0.17.1.tgz#239388f55f115dca593f268d48a5ab8936dc9556"
+  integrity sha512-CRFNT9QcSFAeFDneTF59eyv3JXFGhIIN4boUO2y22YmsuuKLyDk+N1I/NQUYz9Ab63e6V7T6vItoZIG/2oOOuw==
 
 "@fluent/langneg@^0.6.0":
   version "0.6.0"
