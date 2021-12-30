@@ -22,6 +22,7 @@ import {
   getTreeOrderComparator,
   getSamplesSelectedStates,
   extractProfileFilterPageData,
+  findAddressProofForFile,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -1059,5 +1060,47 @@ describe('extractProfileFilterPageData', function () {
 
     expect(pageData).toEqual(null);
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe('findAddressProofForFile', function () {
+  it('finds a correct address for a file', function () {
+    const { profile } = getProfileFromTextSamples(`
+      wr_renderer_render[lib:XUL][file:/Users/mstange/code/mozilla/gfx/webrender_bindings/src/bindings.rs][line:622][address:0x49d67a7]
+      webrender::renderer::Renderer::render[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:1724][address:0x4bcff7b]
+      webrender::renderer::Renderer::render_impl[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2002][address:0x4bd0c57]
+      webrender::renderer::Renderer::draw_frame[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:4701][address:0x4bd8d8b]
+      webrender::renderer::Renderer::draw_picture_cache_target[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2808][address:0x4bd8d8b][inl:1]
+      webrender::renderer::Renderer::draw_alpha_batch_container[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2980][address:0x4bd4d43]
+      webrender::renderer::Renderer::draw_picture_cache_target[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2808][address:0x4bd8d8b][inl:1]
+      webrender::renderer::Renderer::draw_alpha_batch_container[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2980][address:0x4bd4d43]
+      webrender::renderer::shade::LazilyCompiledShader::bind[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/shade.rs][line:150][address:0x4a9f89b]
+    `);
+
+    const addressProof1 = findAddressProofForFile(
+      profile,
+      '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs'
+    );
+    expect(addressProof1).toEqual({
+      debugName: 'XUL',
+      breakpadId: 'SOMETHING_FAKE',
+      address: 0x4bcff7b,
+    });
+
+    const addressProof2 = findAddressProofForFile(
+      profile,
+      '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/shade.rs'
+    );
+    expect(addressProof2).toEqual({
+      debugName: 'XUL',
+      breakpadId: 'SOMETHING_FAKE',
+      address: 0x4a9f89b,
+    });
+
+    const missingAddressProof = findAddressProofForFile(
+      profile,
+      '/Users/mstange/code/mozilla/xpcom/threads/nsThreadUtils.cpp'
+    );
+    expect(missingAddressProof).toBeNull();
   });
 });
