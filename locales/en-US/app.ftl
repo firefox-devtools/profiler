@@ -752,6 +752,13 @@ SourceView--no-known-cors-url =
 SourceView--network-error-when-obtaining-source =
     There was a network error when fetching the URL { $url }: { $networkErrorMessage }
 
+# Displayed below SourceView--cannot-obtain-source, if querying the API for
+# source code returned in an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--api-error-when-obtaining-source =
+    The symbolication API returned an error: { $apiErrorMessage }
+
 SourceView--close-button =
     .title = Close the source view
 

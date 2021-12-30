@@ -119,6 +119,17 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
                       </Localized>
                     );
                   }
+                  case 'SYMBOL_SERVER_API_ERROR': {
+                    const { apiErrorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--api-error-when-obtaining-source"
+                        vars={{ apiErrorMessage }}
+                      >
+                        <li>{`The symbolication API returned an error: ${apiErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
                   default:
                     throw assertExhaustiveCheck(error.type);
                 }
