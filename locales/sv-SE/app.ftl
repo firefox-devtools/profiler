@@ -126,6 +126,11 @@ CallTree--bytes-total = Total storlek (byte)
         som tilldelats eller avallokerats medan denna funktion observerades
         vara i stacken. Detta inkluderar både byten där funktionen faktiskt
         kördes och byten för anropen från denna funktion.
+CallTree--bytes-self = Själv (bytes)
+    .title =
+        "Själv"-byten inkluderar de byte som allokerats eller avallokerats medan
+        denna funktion var i slutet av stacken. Om den här funktionen anropas till andra funktioner, så ingår inte de "andra" funktionernas bytes.
+        "Själv"-byten är användbara för att förstå var minnet faktiskt fanns.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -211,6 +216,19 @@ Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
 Home--menu-button-instructions =
     Aktivera profil-menyknappen för att börja spela in en prestandaprofil
     i { -firefox-brand-name }, analysera den och dela den med profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Den här profileringsinstansen kunde inte ansluta till WebChannel, så den kan inte aktivera menyknappen för profilering.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Den här profileringsinstansen kunde inte ansluta till WebChannel. Detta betyder
+    vanligtvis att den körs på en annan värd än den som anges i inställningen
+    <code>devtools.performance.recording.ui-base-url</code>. Om du vill fånga nya
+    profiler med den här instansen och ge den programmatisk kontroll av
+    profileringsmenyknappen, kan du gå till <code>about:config</code> och ändra inställningen.
 Home--record-instructions =
     För att starta profilering, klicka på profileringsknappen eller använd
     kortkommandona. Ikonen är blå när en profil spelas in. Tryck på
