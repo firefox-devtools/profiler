@@ -460,10 +460,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   }
 
   _onLoadProfileFromFileRequested = (file: File) => {
-    this.props.retrieveProfileFromFile(
-      file,
-      this.props.browserConnection ?? undefined
-    );
+    this.props.retrieveProfileFromFile(file, this.props.browserConnection);
   };
 
   _onLoadProfileFromUrlRequested = (url: string) => {

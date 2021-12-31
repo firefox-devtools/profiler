@@ -116,7 +116,7 @@ export function loadProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    browserConnection: BrowserConnection,
+    browserConnection: BrowserConnection | null,
     skipSymbolication: boolean, // Please use this in tests only.
   |}> = {},
   initialLoad: boolean = false
@@ -155,7 +155,7 @@ export function loadProfile(
     if (initialLoad === false) {
       await dispatch(
         finalizeProfileView(
-          config.browserConnection,
+          config.browserConnection ?? null,
           config.timelineTrackOrganization,
           config.skipSymbolication
         )
@@ -696,7 +696,7 @@ export function viewProfile(
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
     skipSymbolication: boolean,
-    browserConnection: BrowserConnection,
+    browserConnection: BrowserConnection | null,
   |}> = {}
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
@@ -1414,7 +1414,7 @@ function _fileReader(input: File) {
  */
 export function retrieveProfileFromFile(
   file: File,
-  browserConnection?: BrowserConnection,
+  browserConnection: BrowserConnection | null,
   // Allow tests to inject a custom file reader to bypass the DOM APIs.
   fileReader: typeof _fileReader = _fileReader
 ): ThunkAction<Promise<void>> {

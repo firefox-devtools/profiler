@@ -1508,7 +1508,7 @@ describe('actions/receive-profile', function () {
       // Load a profile from the supplied mockFileOptions.
       const file = mockFile(mockFileOptions);
       const { dispatch, getState } = blankStore();
-      await dispatch(retrieveProfileFromFile(file, undefined, mockFileReader));
+      await dispatch(retrieveProfileFromFile(file, null, mockFileReader));
       const view = getView(getState());
       return { getState, dispatch, view };
     }

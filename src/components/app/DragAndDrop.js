@@ -164,7 +164,7 @@ class DragAndDropImpl extends React.PureComponent<Props> {
     if (files.length > 0) {
       this.props.retrieveProfileFromFile(
         files[0],
-        this.props.browserConnection ?? undefined
+        this.props.browserConnection
       );
     }
   };
