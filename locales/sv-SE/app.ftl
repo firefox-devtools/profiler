@@ -60,6 +60,13 @@ CallNodeContextMenu--transform-merge-call-node = Sammanfoga endast nod
         funktionens nod som anropade den. Den tar bara bort funktionen från
         den specifika delen av trädet. Alla andra platser där funktionen
         anropades kommer att förbli i profilen.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Att fokusera på en funktion tar bort alla exempel som inte inkluderar
+    den funktionen. Dessutom rotar den om anropsträdet så att funktionen
+    är trädets enda rot. Detta kan kombinera flera funktionsanropsplatser
+    över en profil till en anropsnod.
 CallNodeContextMenu--transform-focus-function = Fokusera på funktion
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fokus på funktion (inverterad)
@@ -171,6 +178,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Den här profilen spelades in i ett bygge utan releaseoptimeringar.
+        Prestandaobservationer kanske inte gäller för releasepopulationen.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
