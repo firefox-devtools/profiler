@@ -233,9 +233,13 @@ export type SourceViewState = {|
 |};
 
 export type FileSourceStatus =
-  | {| type: 'LOADING', url: string |}
+  | {| type: 'LOADING', source: FileSourceLoadingSource |}
   | {| type: 'ERROR', errors: SourceLoadingError[] |}
   | {| type: 'AVAILABLE', source: string |};
+
+export type FileSourceLoadingSource =
+  | {| type: 'URL', url: string |}
+  | {| type: 'BROWSER_CONNECTION' |};
 
 export type SourceLoadingError =
   | {| type: 'NO_KNOWN_CORS_URL' |}
@@ -256,6 +260,14 @@ export type SourceLoadingError =
     |}
   | {|
       type: 'SYMBOL_SERVER_API_ERROR',
+      apiErrorMessage: string,
+    |}
+  | {|
+      type: 'BROWSER_CONNECTION_ERROR',
+      browserConnectionErrorMessage: string,
+    |}
+  | {|
+      type: 'BROWSER_API_ERROR',
       apiErrorMessage: string,
     |};
 

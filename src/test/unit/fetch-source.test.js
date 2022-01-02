@@ -31,6 +31,12 @@ describe('fetchSource', function () {
             });
             return (r: any);
           },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -66,6 +72,12 @@ describe('fetchSource', function () {
         return (r: any);
       }
     );
+    const queryBrowserSymbolicationApi = async (
+      _path: string,
+      _requestJson: string
+    ) => {
+      throw new Error('No browser connection');
+    };
 
     const archiveCache = new Map();
 
@@ -75,7 +87,7 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse }
+        { fetchUrlResponse, queryBrowserSymbolicationApi }
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -93,7 +105,7 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse }
+        { fetchUrlResponse, queryBrowserSymbolicationApi }
       )
     ).toEqual({
       type: 'SUCCESS',
@@ -109,7 +121,7 @@ describe('fetchSource', function () {
         'https://symbolication.services.mozilla.com',
         null,
         archiveCache,
-        { fetchUrlResponse }
+        { fetchUrlResponse, queryBrowserSymbolicationApi }
       )
     ).toEqual({
       type: 'ERROR',
@@ -136,6 +148,13 @@ describe('fetchSource', function () {
           fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
             throw new Error('Some network error');
           },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            // Shouldn't be called anyway because we're not providing an AddressProof.
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -147,6 +166,44 @@ describe('fetchSource', function () {
           url: 'https://hg.mozilla.org/mozilla-central/raw-file/997f00815e6bc28806b75448c8829f0259d2cb28/widget/cocoa/nsAppShell.mm',
         },
       ],
+    });
+  });
+
+  it('fetches files from the browser', async function () {
+    expect(
+      await fetchSource(
+        '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        'https://symbolication.services.mozilla.com',
+        {
+          debugName: 'FAKE_DEBUGNAME',
+          breakpadId: 'FAKE_DEBUGID',
+          address: 0x1234,
+        },
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+            throw new Error('Some network error');
+          },
+          queryBrowserSymbolicationApi: async (
+            path: string,
+            requestJson: string
+          ) => {
+            if (path !== '/source/v1') {
+              throw new Error(`Unrecognized API path ${path}`);
+            }
+            return JSON.stringify({
+              symbolsLastModified: null,
+              sourceLastModified: null,
+              file: '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+              source: `Fake source from browser symbolication API, for request JSON ${requestJson}`,
+            });
+          },
+        }
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source:
+        'Fake source from browser symbolication API, for request JSON {"debugName":"FAKE_DEBUGNAME","debugId":"FAKE_DEBUGID","moduleOffset":"0x1234","file":"/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs"}',
     });
   });
 
@@ -184,6 +241,12 @@ describe('fetchSource', function () {
               status: 200,
             });
             return (r: any);
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
           },
         }
       )
@@ -229,6 +292,12 @@ describe('fetchSource', function () {
             });
             return (r: any);
           },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -238,7 +307,7 @@ describe('fetchSource', function () {
     });
   });
 
-  it('falls back to CORS url for permalink-style paths if local server fails', async function () {
+  it('falls back to CORS url for permalink-style paths if local server and browser query fails', async function () {
     expect(
       await fetchSource(
         'git:github.com/rust-lang/rust:library/core/src/intrinsics.rs:acbe4443cc4c9695c0b74a7b64b60333c990a400',
@@ -271,6 +340,12 @@ describe('fetchSource', function () {
             });
             return (r: any);
           },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -295,11 +370,21 @@ describe('fetchSource', function () {
           fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
             throw new Error('Some network error');
           },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
       type: 'ERROR',
       errors: [
+        {
+          type: 'BROWSER_CONNECTION_ERROR',
+          browserConnectionErrorMessage: 'Error: No browser connection',
+        },
         {
           type: 'NETWORK_ERROR',
           url: 'http://127.0.0.1:3003/source/v1',
@@ -324,6 +409,12 @@ describe('fetchSource', function () {
         {
           fetchUrlResponse: async (_url: string) => {
             throw new Error('Some network error');
+          },
+          queryBrowserSymbolicationApi: async (
+            _path: string,
+            _requestJson: string
+          ) => {
+            throw new Error('No browser connection');
           },
         }
       )

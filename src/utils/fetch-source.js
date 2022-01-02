@@ -14,7 +14,16 @@ import { UntarFileStream } from './untar';
 import type { SourceLoadingError, AddressProof } from 'firefox-profiler/types';
 
 export type FetchSourceCallbacks = {|
+  // Fetch a cross-origin URL and return its Response. If postData is specified,
+  // the method should be POST.
   fetchUrlResponse: (url: string, postData?: MixedObject) => Promise<Response>,
+
+  // Query the symbolication API of the browser, if a connection to the browser
+  // is available.
+  queryBrowserSymbolicationApi: (
+    path: string,
+    requestJson: string
+  ) => Promise<string>,
 |};
 
 export type FetchSourceResult =
@@ -43,42 +52,67 @@ export async function fetchSource(
 ): Promise<FetchSourceResult> {
   const errors: SourceLoadingError[] = [];
 
-  // See if we can get sources from a local symbol server first.
-  if (_serverMightSupportSource(symbolServerUrl) && addressProof !== null) {
-    const { debugName, breakpadId, address } = addressProof;
-
-    // Make a request to /source/v1. The API format for this endpoint is documented
+  if (addressProof !== null) {
+    // Prepare a request to /source/v1. The API format for this endpoint is documented
     // at https://github.com/mstange/profiler-get-symbols/blob/master/API.md#sourcev1
-    const url = `${symbolServerUrl}/source/v1`;
-    const body = JSON.stringify({
+    // This API is used both by the browser connection's querySymbolicationApi method
+    // as well as by the local symbol server.
+    const path = '/source/v1';
+    const { debugName, breakpadId, address } = addressProof;
+    const requestJson = JSON.stringify({
       debugName,
       debugId: breakpadId,
       moduleOffset: `0x${address.toString(16)}`,
       file,
     });
 
+    // See if we can get sources from the browser.
     try {
-      const response = await callbacks.fetchUrlResponse(url, body);
-      const responseJson = await response.json();
+      const response = await callbacks.queryBrowserSymbolicationApi(
+        path,
+        requestJson
+      );
+      const responseJson = await JSON.parse(response);
       if (!responseJson.error) {
-        // Local symbol server gave us the source. Success!
+        // The browser gave us the source. Success!
         return { type: 'SUCCESS', source: responseJson.source };
       }
       errors.push({
-        type: 'SYMBOL_SERVER_API_ERROR',
+        type: 'BROWSER_API_ERROR',
         apiErrorMessage: responseJson.error,
       });
     } catch (e) {
       errors.push({
-        type: 'NETWORK_ERROR',
-        url,
-        networkErrorMessage: e.toString(),
+        type: 'BROWSER_CONNECTION_ERROR',
+        browserConnectionErrorMessage: e.toString(),
       });
+    }
+
+    // See if we can get sources from a local symbol server.
+    if (_serverMightSupportSource(symbolServerUrl)) {
+      const url = symbolServerUrl + path;
+      try {
+        const response = await callbacks.fetchUrlResponse(url, requestJson);
+        const responseJson = await response.json();
+        if (!responseJson.error) {
+          // Local symbol server gave us the source. Success!
+          return { type: 'SUCCESS', source: responseJson.source };
+        }
+        errors.push({
+          type: 'SYMBOL_SERVER_API_ERROR',
+          apiErrorMessage: responseJson.error,
+        });
+      } catch (e) {
+        errors.push({
+          type: 'NETWORK_ERROR',
+          url,
+          networkErrorMessage: e.toString(),
+        });
+      }
     }
   }
 
-  // We did not get the source from a local symbol server. Try to obtain it
-  // from the web instead.
+  // Try to obtain the source from the web.
 
   const parsedName = parseFileNameFromSymbolication(file);
   const downloadRecipe = getDownloadRecipeForSourceFile(parsedName);
