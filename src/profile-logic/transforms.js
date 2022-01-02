@@ -906,70 +906,90 @@ export function collapseDirectRecursion(
   funcToCollapse: IndexIntoFuncTable,
   implementation: ImplementationFilter
 ): Thread {
+  // Collapse recursion by reparenting stack nodes for all "inner" frames of a
+  // recursion to the same level as the outermost frame.
+  //
+  // Example with recursion on B:
+  //  - A1                    - A1
+  //    - B1                    - B1
+  //      - B2                  - B2
+  //        - B3        ->      - B3
+  //           - C1               - C1
+  //      - B4                  - B4
+  //        - C2                  - C2
+  //
+  // In the call tree, sibling stack nodes with the same function will be
+  // collapsed into one call node.
+  // We keep all the stack nodes and frames, we just rewire them such that the
+  // outer stack nodes of the recursion are skipped. We skip the outer nodes
+  // rather than the inner nodes, so that per-frame data such as line numbers and
+  // frame addresses are counted for the innermost frame in a stack. We prefer
+  // keeping this information for the innermost frame because the outer frames
+  // just have the line and instruction address of the recursive call, and the
+  // purpose of "collapsing recursion" is to ignore that recursive call.
+  //
+  // Applying the transform's implementation filter is done on a best effort
+  // basis and doesn't really have a clean solution. We want to make the
+  // following case work:
+  // Full:     Ajs -> Xcpp -> Bjs -> Ycpp -> Bjs -> Zcpp -> Bjs -> Wcpp
+  // JS-only:  Ajs -> Bjs -> Bjs -> Bjs
+  // Now collapse recursion on Bjs.
+  // Collapsed JS-only:  Ajs -> Bjs
+  // Now switch back to all stack types.
+  // Collapsed full:     Ajs -> Xcpp -> Bjs -> Wcpp
+
   const { stackTable, frameTable } = thread;
-  const oldStackToNewStack: Map<
-    IndexIntoStackTable | null,
-    IndexIntoStackTable | null
-  > = new Map();
-  // A root stack's prefix will be null. Maintain that relationship from old to new
-  // stacks by mapping from null to null.
-  oldStackToNewStack.set(null, null);
-  const recursiveStacks = new Set();
-  const newStackTable = getEmptyStackTable();
+  const recursionChainPrefixForStack = new Map();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
+  const newStackTablePrefixColumn = stackTable.prefix.slice();
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
-    const category = stackTable.category[stackIndex];
-    const subcategory = stackTable.subcategory[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
-    if (
-      // The previous stacks were collapsed or matched the funcToCollapse, check to see
-      // if this is a candidate for collapsing as well.
-      recursiveStacks.has(prefix) &&
-      // Either the function must match, or the implementation must be different.
-      (funcToCollapse === funcIndex ||
-        !funcMatchesImplementation(thread, funcIndex))
-    ) {
-      // Out of N consecutive stacks that match the function to collapse, only remove
-      // stacks that are N > 1.
-      const newPrefixStackIndex = oldStackToNewStack.get(prefix);
-      if (newPrefixStackIndex === undefined) {
-        throw new Error('newPrefixStackIndex cannot be undefined');
+    const recursionChainPrefix = recursionChainPrefixForStack.get(prefix);
+    if (recursionChainPrefix === undefined) {
+      // Our prefix was not part of a recursion chain.
+      // If this stack frame matches the collapsed func, this stack node is the root
+      // of a recursion chain.
+      if (funcIndex === funcToCollapse) {
+        recursionChainPrefixForStack.set(stackIndex, prefix);
       }
-      oldStackToNewStack.set(stackIndex, newPrefixStackIndex);
-      recursiveStacks.add(stackIndex);
     } else {
-      // Add a stack in two cases:
-      //   1. It doesn't match the collapse requirements.
-      //   2. It is the first instance of a stack to collapse, re-use the stack and frame
-      //      information for the collapsed stack.
-      const newStackIndex = newStackTable.length++;
-      const newStackPrefix = oldStackToNewStack.get(prefix);
-      if (newStackPrefix === undefined) {
-        throw new Error(
-          'The newStackPrefix must exist because prefix < stackIndex as the StackTable is ordered.'
-        );
-      }
-      newStackTable.prefix[newStackIndex] = newStackPrefix;
-      newStackTable.frame[newStackIndex] = frameIndex;
-      newStackTable.category[newStackIndex] = category;
-      newStackTable.subcategory[newStackIndex] = subcategory;
-      oldStackToNewStack.set(stackIndex, newStackIndex);
-
-      if (funcToCollapse === funcIndex) {
-        recursiveStacks.add(stackIndex);
+      // Our prefix is part of a recursion chain.
+      if (funcMatchesImplementation(thread, funcIndex)) {
+        if (funcIndex === funcToCollapse) {
+          // The recursion chain continues.
+          recursionChainPrefixForStack.set(stackIndex, recursionChainPrefix);
+          // Reparent this stack node to the recursion root's prefix.
+          newStackTablePrefixColumn[stackIndex] = recursionChainPrefix;
+        } else {
+          // The recursion chain ends here. Leave recursionChainPrefixForStack
+          // empty for stackIndex.
+        }
+      } else {
+        // This stack node doesn't match the transform's implementation filter.
+        // For example, this stack node could be Xcpp in the following recursive
+        // JS invocation: Ajs -> Xcpp -> Ajs
+        // Keep the recursion chain going.
+        recursionChainPrefixForStack.set(stackIndex, recursionChainPrefix);
       }
     }
   }
-  return updateThreadStacks(
-    thread,
-    newStackTable,
-    getMapStackUpdater(oldStackToNewStack)
-  );
+
+  // Since we're keeping all stack indexes unchanged, none of the other tables
+  // in the thread need to be updated. Only the stackTable's prefix column has
+  // changed.
+  return {
+    ...thread,
+    stackTable: {
+      ...stackTable,
+      prefix: newStackTablePrefixColumn,
+    },
+  };
 }
+
 const FUNC_MATCHES = {
   combined: (_thread: Thread, _funcIndex: IndexIntoFuncTable) => true,
   cpp: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {

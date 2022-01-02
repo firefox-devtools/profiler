@@ -12,6 +12,10 @@ import {
 import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+import {
+  getStackLineInfo,
+  getLineTimings,
+} from 'firefox-profiler/profile-logic/line-timings';
 
 import {
   addTransformToStack,
@@ -958,11 +962,11 @@ describe('"collapse-direct-recursion" transform', function () {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A  A  A  A
-      B  B  B  F
-      B  B  E
-      B  D
-      C
+      A[file:a][line:5]   A[file:a][line:5]   A[file:a][line:5]   A[file:a][line:8]
+      B[file:b][line:10]  B[file:b][line:10]  B[file:b][line:18]  F[file:f][line:50]
+      B[file:b][line:10]  B[file:b][line:17]  E[file:e][line:40]
+      B[file:b][line:15]  D[file:d][line:30]
+      C[file:c][line:20]
     `);
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
@@ -1001,6 +1005,41 @@ describe('"collapse-direct-recursion" transform', function () {
         '    - E (total: 1, self: 1)',
         '  - F (total: 1, self: 1)',
       ]);
+    });
+
+    it('keeps the line number and address of the innermost frame', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseDirectRecursion));
+      const filteredThread = selectedThreadSelectors.getFilteredThread(
+        getState()
+      );
+      const { stackTable, frameTable, funcTable, samples, stringTable } =
+        filteredThread;
+      const fileStringIndex = stringTable.indexForString('b');
+      const stackLineInfo = getStackLineInfo(
+        stackTable,
+        frameTable,
+        funcTable,
+        fileStringIndex,
+        false
+      );
+      const lineTimings = getLineTimings(stackLineInfo, samples);
+
+      // The hits in function B should be counted on the lines 15, 17 and 18,
+      // because the lines of the outer calls of the recursion are not interesting:
+      // They're just the line of the recursive call.
+      // In the example, B calls itself recursively on line 10, so we don't want
+      // to see line 10 after we collapse recursion.
+      expect(lineTimings.totalLineHits).toEqual(
+        new Map([
+          [15, 1],
+          [17, 1],
+          [18, 1],
+        ])
+      );
+
+      // There are no self line hits because no sample has B as the leaf.
+      expect(lineTimings.selfLineHits.size).toBe(0);
     });
 
     it('can update apply the transform to the selected CallNodePaths', function () {
@@ -1079,9 +1118,10 @@ describe('"collapse-direct-recursion" transform', function () {
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A.js (total: 5, self: —)',
-        '  - B.js (total: 4, self: 1)',
+        '  - B.js (total: 4, self: —)',
+        '    - C.cpp (total: 2, self: 1)',
+        '      - E.js (total: 1, self: 1)',
         '    - D.js (total: 1, self: 1)',
-        '    - E.js (total: 1, self: 1)',
         '    - F.js (total: 1, self: 1)',
         '  - G.js (total: 1, self: 1)',
       ]);
