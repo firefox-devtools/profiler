@@ -1051,14 +1051,13 @@
   resolved "https://registry.yarnpkg.com/@fluent/langneg/-/langneg-0.6.1.tgz#08d82751b330e1751777ebe4be3fbbee9d8867e8"
   integrity sha512-BlP1MNHEtTRKd2Mq/twrFtHIzIBK4snG3t3dKAE1OR6RPOlxt7fzx7Q4jQvBrMPkm6OTg0u6d0ZrcH9XkSvINQ==
 
-"@fluent/react@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@fluent/react/-/react-0.14.0.tgz#a2c8724833fd9c462f334b61f0e06830ac98ae40"
-  integrity sha512-XYiEajY4GM9GJGlldrjCJvLLAj+5T/otRDNRgGX+23UKYdzVrjyp1kcO5akG+12Wk5yxspmZdOmqwbru6xxZmw==
+"@fluent/react@^0.14.1":
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/@fluent/react/-/react-0.14.1.tgz#2ec4cda086f4c4d49add4d1637e0dc7078019f59"
+  integrity sha512-DGeGUFwR7L1tbBoeZaErVLhSGGHCKp2jPh8iz+DV+ekWu4h2D4Ah4d6yeHYySGVAH9m17kHBB2jYhAZzrFcl4Q==
   dependencies:
     "@fluent/sequence" "^0.7.0"
     cached-iterable "^0.3.0"
-    prop-types "^15.7.2"
 
 "@fluent/sequence@^0.7.0":
   version "0.7.0"
