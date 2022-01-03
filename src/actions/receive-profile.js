@@ -348,7 +348,7 @@ export function finalizeFullProfileView(
     if (
       !hasUrlInfo &&
       profile.meta.sampleUnits &&
-      profile.threads[0].samples.threadCPUDelta
+      profile.threads.some((thread) => thread.samples.threadCPUDelta)
     ) {
       const hasCPUDeltaValues = getIsCPUUtilizationProvided(getState());
       if (hasCPUDeltaValues) {
