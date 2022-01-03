@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@firefox-devtools/react-contextmenu": "^4.0.0",
-    "@fluent/bundle": "^0.17.0",
+    "@fluent/bundle": "^0.17.1",
     "@fluent/langneg": "^0.6.0",
     "@fluent/react": "^0.14.0",
     "array-move": "^3.0.1",
