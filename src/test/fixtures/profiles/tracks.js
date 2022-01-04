@@ -172,6 +172,36 @@ export function getProfileWithNiceTracks(): Profile {
   return profile;
 }
 
+/*
+ * This produces a profile where no global track will be found. This is simulating
+ * profiles coming from various importers.
+ */
+export function getProfileWithFakeGlobalTrack(): Profile {
+  const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
+
+  const [thread1, thread2, thread3, thread4] = profile.threads;
+
+  // First group of threads
+  thread1.name = 'Thread <0>';
+  thread1.processType = 'default';
+  thread1.pid = 111;
+
+  thread2.name = 'Thread <1>';
+  thread2.processType = 'default';
+  thread2.pid = 111;
+
+  // Second group of threads
+  thread3.name = 'Thread <2>';
+  thread3.processType = 'default';
+  thread3.pid = 222;
+
+  thread4.name = 'Thread <3>';
+  thread4.processType = 'default';
+  thread4.pid = 222;
+
+  return profile;
+}
+
 export function getStoreWithMemoryTrack(pid: number = 222) {
   const { profile } = getProfileFromTextSamples(
     // Create a trivial profile with 10 samples, all of the function "A".
