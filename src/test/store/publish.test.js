@@ -35,6 +35,7 @@ import {
   getHash,
   getTransformStack,
 } from '../../selectors/url-state';
+import { getHasPreferenceMarkers } from '../../selectors/profile';
 import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -139,6 +140,24 @@ describe('getCheckedSharingOptions', function () {
         includeHiddenThreads: false,
       });
     });
+  });
+});
+
+describe('getRemoveProfileInformation', function () {
+  it('should bail out early when there is no preference marker in the profile', function () {
+    const { getState, dispatch } = storeWithProfile();
+    // Checking to see that we don't have Preference markers.
+    expect(getHasPreferenceMarkers(getState())).toEqual(false);
+
+    // Setting includePreferenceValues option to false
+    dispatch(toggleCheckedSharingOptions('includePreferenceValues'));
+    expect(
+      getCheckedSharingOptions(getState()).includePreferenceValues
+    ).toEqual(false);
+
+    const removeProfileInformation = getRemoveProfileInformation(getState());
+    // It should return early with null value.
+    expect(removeProfileInformation).toEqual(null);
   });
 });
 
