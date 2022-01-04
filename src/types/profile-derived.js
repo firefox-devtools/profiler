@@ -285,6 +285,8 @@ export type AccumulatedCounterSamples = {|
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
+  // mainThreadIndex is null when this is a fake global process added to contain
+  // real threads.
   | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
   | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |}
   | {| +type: 'visual-progress' |}
