@@ -6,14 +6,24 @@
 
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
+import { TextDecoder } from 'util';
 
 describe('fetchSource', function () {
+  beforeEach(function () {
+    window.TextDecoder = TextDecoder;
+  });
+
+  afterEach(function () {
+    delete window.TextDecoder;
+  });
+
   it('fetches single files', async function () {
     expect(
       await fetchSource(
         'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
         'https://symbolication.services.mozilla.com',
         null,
+        new Map(),
         {
           fetchUrlResponse: async (url: string, _postData?: MixedObject) => {
             const r = new Response(`Fake response from ${url}`, {
@@ -30,12 +40,98 @@ describe('fetchSource', function () {
     });
   });
 
+  it('fetches archives', async function () {
+    const fetchUrlResponse = jest.fn(
+      async (_url: string, _postData?: MixedObject) => {
+        // Return an array buffer with .tar.gz bytes for an archive with the following contents:
+        // - addr2line-0.17.0 (directory)
+        //   - src (directory)
+        //     - lib.rs containing "Fake addr2line-0.17.0 src/lib.rs contents"
+        //     - function.rs containing "Fake addr2line-0.17.0 src/function.rs contents"
+        const tgzHexString =
+          '1F8B0800F3C9CD610003ED945B0E82301045594A3720CEC04CBB03F7813C0C11' +
+          '4BC263FF36824A10D08F4A7CF4FCDC0F1A9872EF9D2849AAA0C875BA011F950F' +
+          '5BCF3E00A098C54565A71050A73D02096518864C0C029002064FF01B6679A0AD' +
+          '9BA832A39C8CEA433A7BCE3CCEB285F7F4F7B8E997108DFDAFABD876065EF79F' +
+          '48211AFF1942E5FC5F8349FF8B7CEF57B5B56F98FF218916FC67BCF69FD81C00' +
+          '94C8EC09B036C1027FEEFF2E3AA6621C02710F81884BDDA4BAB19706C72731D9' +
+          'FFACD5719397DAD21278DE7F39D8FFCAF45F0584AEFF6B30DFFF4108DC127038' +
+          '1C8E9FE30C4A53C44300100000';
+        const byteLen = tgzHexString.length / 2;
+        const arr = new Uint8Array(byteLen);
+        for (let i = 0; i < arr.length; i++) {
+          arr[i] = parseInt(tgzHexString.slice(i * 2, i * 2 + 2), 16);
+        }
+        const r = new Response(arr.buffer, { status: 200 });
+        return (r: any);
+      }
+    );
+
+    const archiveCache = new Map();
+
+    expect(
+      await fetchSource(
+        'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/lib.rs',
+        'https://symbolication.services.mozilla.com',
+        null,
+        archiveCache,
+        { fetchUrlResponse }
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source: 'Fake addr2line-0.17.0 src/lib.rs contents',
+    });
+    expect(fetchUrlResponse).toHaveBeenCalledTimes(1);
+    expect(fetchUrlResponse).toHaveBeenCalledWith(
+      'https://crates.io/api/v1/crates/addr2line/0.17.0/download'
+    );
+
+    // Fetch another file from the same archive, and make sure the cached archive is used.
+    expect(
+      await fetchSource(
+        'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/function.rs',
+        'https://symbolication.services.mozilla.com',
+        null,
+        archiveCache,
+        { fetchUrlResponse }
+      )
+    ).toEqual({
+      type: 'SUCCESS',
+      source: 'Fake addr2line-0.17.0 src/function.rs contents',
+    });
+    // No additional call should have been made.
+    expect(fetchUrlResponse).toHaveBeenCalledTimes(1);
+
+    // Fetch a file which is not present in the archive.
+    expect(
+      await fetchSource(
+        'cargo:github.com-1ecc6299db9ec823:addr2line-0.17.0:src/nonexist.rs',
+        'https://symbolication.services.mozilla.com',
+        null,
+        archiveCache,
+        { fetchUrlResponse }
+      )
+    ).toEqual({
+      type: 'ERROR',
+      errors: [
+        {
+          type: 'NOT_PRESENT_IN_ARCHIVE',
+          url: 'https://crates.io/api/v1/crates/addr2line/0.17.0/download',
+          pathInArchive: 'addr2line-0.17.0/src/nonexist.rs',
+        },
+      ],
+    });
+    // No additional call should have been made.
+    expect(fetchUrlResponse).toHaveBeenCalledTimes(1);
+  });
+
   it('propagates network errors', async function () {
     expect(
       await fetchSource(
         'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28',
         'https://symbolication.services.mozilla.com',
         null,
+        new Map(),
         {
           fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
             throw new Error('Some network error');
@@ -64,6 +160,7 @@ describe('fetchSource', function () {
           breakpadId: 'FAKE_DEBUGID',
           address: 0x1234,
         },
+        new Map(),
         {
           fetchUrlResponse: async (url: string, postData?: MixedObject) => {
             if (url === 'http://127.0.0.1:3000/source/v1') {
@@ -107,6 +204,7 @@ describe('fetchSource', function () {
           breakpadId: 'FAKE_DEBUGID',
           address: 0x1234,
         },
+        new Map(),
         {
           fetchUrlResponse: async (url: string, postData?: MixedObject) => {
             if (url === 'http://127.0.0.1:3001/source/v1') {
@@ -150,6 +248,7 @@ describe('fetchSource', function () {
           breakpadId: 'FAKE_DEBUGID',
           address: 0x1234,
         },
+        new Map(),
         {
           fetchUrlResponse: async (url: string, postData?: MixedObject) => {
             if (url === 'http://127.0.0.1:3002/source/v1') {
@@ -191,6 +290,7 @@ describe('fetchSource', function () {
           breakpadId: 'FAKE_DEBUGID',
           address: 0x1234,
         },
+        new Map(),
         {
           fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
             throw new Error('Some network error');
@@ -220,6 +320,7 @@ describe('fetchSource', function () {
         'git:git.iximeow.net/yaxpeax-arm:src/armv8/a64.rs:0663147eacdef847cc1bdc07cf89eed14b1aeaca',
         'https://symbolication.services.mozilla.com',
         null,
+        new Map(),
         {
           fetchUrlResponse: async (_url: string) => {
             throw new Error('Some network error');

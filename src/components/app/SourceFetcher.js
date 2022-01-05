@@ -40,6 +40,8 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class SourceFetcherImpl extends React.PureComponent<Props> {
+  _archiveCache: Map<string, Promise<Uint8Array>> = new Map();
+
   componentDidMount() {
     this._triggerSourceLoadingIfNeeded();
   }
@@ -71,6 +73,7 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
       file,
       symbolServerUrl,
       addressProof,
+      this._archiveCache,
       {
         fetchUrlResponse: async (url: string, postData?: MixedObject) => {
           beginLoadingSourceFromUrl(file, url);

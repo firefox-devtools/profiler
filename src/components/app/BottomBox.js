@@ -130,6 +130,28 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
                       </Localized>
                     );
                   }
+                  case 'NOT_PRESENT_IN_ARCHIVE': {
+                    const { url, pathInArchive } = error;
+                    return (
+                      <Localized
+                        id="SourceView--not-in-archive-error-when-obtaining-source"
+                        vars={{ url, pathInArchive }}
+                      >
+                        <li>{`The file ${pathInArchive} was not found in the archive from ${url}.`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'ARCHIVE_PARSING_ERROR': {
+                    const { url, parsingErrorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--archive-parsing-error-when-obtaining-source"
+                        vars={{ url, parsingErrorMessage }}
+                      >
+                        <li>{`The archive at ${url} could not be parsed: ${parsingErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
                   default:
                     throw assertExhaustiveCheck(error.type);
                 }

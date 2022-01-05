@@ -72,3 +72,13 @@ export function decompress(data: Uint8Array): Promise<Uint8Array> {
     });
   });
 }
+
+export function isGzip(data: Uint8Array): boolean {
+  // Detect the gzip magic bytes 1f 8b 08.
+  return (
+    data.byteLength >= 3 &&
+    data[0] === 0x1f &&
+    data[1] === 0x8b &&
+    data[2] === 0x08
+  );
+}
