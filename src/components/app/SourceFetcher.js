@@ -12,18 +12,12 @@ import {
   finishLoadingSource,
   failLoadingSource,
 } from 'firefox-profiler/actions/sources';
-import {
-  getDownloadRecipeForSourceFile,
-  parseFileNameFromSymbolication,
-} from 'firefox-profiler/utils/special-paths';
+import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type {
-  FileSourceStatus,
-  SourceLoadingError,
-} from 'firefox-profiler/types';
+import type { FileSourceStatus } from 'firefox-profiler/types';
 
 type StateProps = {|
   +sourceViewFile: string | null,
@@ -61,50 +55,29 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
       failLoadingSource,
     } = this.props;
 
-    const errors: SourceLoadingError[] = [];
-    const parsedName = parseFileNameFromSymbolication(file);
-    const downloadRecipe = getDownloadRecipeForSourceFile(parsedName);
-
-    // First, try to fetch just the single file from the web.
-    switch (downloadRecipe.type) {
-      case 'CORS_ENABLED_SINGLE_FILE': {
-        const { url } = downloadRecipe;
+    const fetchSourceResult = await fetchSource(file, {
+      fetchUrlResponse: async (url: string) => {
         beginLoadingSourceFromUrl(file, url);
-
-        try {
-          const response = await fetch(url, { credentials: 'omit' });
-
-          if (response.status !== 200) {
-            throw new Error(
-              `The request to ${url} returned HTTP status ${response.status}`
-            );
-          }
-
-          const source = await response.text();
-          finishLoadingSource(file, source);
-          return;
-        } catch (e) {
-          errors.push({
-            type: 'NETWORK_ERROR',
-            url,
-            networkErrorMessage: e.toString(),
-          });
+        const response = await fetch(url, { credentials: 'omit' });
+        if (response.status !== 200) {
+          throw new Error(
+            `The request to ${url} returned HTTP status ${response.status}`
+          );
         }
+        return response;
+      },
+    });
+
+    switch (fetchSourceResult.type) {
+      case 'SUCCESS':
+        finishLoadingSource(file, fetchSourceResult.source);
         break;
-      }
-      case 'CORS_ENABLED_ARCHIVE': {
-        // Not handled yet.
-        errors.push({ type: 'NO_KNOWN_CORS_URL' });
+      case 'ERROR':
+        failLoadingSource(file, fetchSourceResult.errors);
         break;
-      }
-      case 'NO_KNOWN_CORS_URL': {
-        errors.push({ type: 'NO_KNOWN_CORS_URL' });
-        break;
-      }
       default:
-        throw assertExhaustiveCheck(downloadRecipe.type);
+        throw assertExhaustiveCheck(fetchSourceResult.type);
     }
-    failLoadingSource(file, errors);
   }
 
   render() {
