@@ -111,5 +111,13 @@
   display: flex;
   height: 20px;
   flex-direction: row;
+
+  /* Timeline header content should end before the scrollbar but also border
+   * bottom should extend to the whole timeline header. Because of that, we are
+   * creating a padding and a minus margin with the scrollbar width to make
+   * this work. */
+  padding-right: var(--vertical-scrollbar-reserved-width);
+  border-bottom: 1px solid var(--grey-30);
+  margin-right: calc(var(--vertical-scrollbar-reserved-width) * -1);
   margin-left: calc(var(--thread-label-column-width) * -1);
 }
