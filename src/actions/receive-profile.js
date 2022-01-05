@@ -36,7 +36,6 @@ import {
   getIsCPUUtilizationProvided,
   getSymbolServerUrl,
   getActiveTabID,
-  getIdleThreadsByCPU,
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
@@ -327,11 +326,7 @@ export function finalizeFullProfileView(
       // This is the case for the initial profile load.
       // We also get here if the URL info was ignored, for example if
       // respecting it would have caused all threads to become hidden.
-      hiddenTracks = computeDefaultHiddenTracks(
-        tracksWithOrder,
-        profile,
-        getIdleThreadsByCPU(getState())
-      );
+      hiddenTracks = computeDefaultHiddenTracks(tracksWithOrder, profile);
     }
 
     const selectedThreadIndexes = initializeSelectedThreadIndex(
