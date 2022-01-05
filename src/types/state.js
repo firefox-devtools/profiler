@@ -243,6 +243,10 @@ export type SourceLoadingError =
       type: 'NETWORK_ERROR',
       url: string,
       networkErrorMessage: string,
+    |}
+  | {|
+      type: 'SYMBOL_SERVER_API_ERROR',
+      apiErrorMessage: string,
     |};
 
 /**
