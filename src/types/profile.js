@@ -481,7 +481,10 @@ export type Page = {|
   // no embedder, which means that it's the top-most frame. That way all pages
   // can create a tree of pages that can be navigated.
   embedderInnerWindowID: number,
-  // If present and true, this page has been opened in a private browsing window.
+  // If true, this page has been opened in a private browsing window.
+  // It's optional because it appeared in Firefox 98, and is absent before when
+  // capturing was disabled when a private browsing window was open.
+  // The property is always present in Firefox 98+.
   isPrivateBrowsing?: boolean,
 |};
 
@@ -656,10 +659,15 @@ export type Thread = {|
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
   jsTracer?: JsTracerTable,
-  // If present and true, this thread was launched for a private browsing
-  // session only.
+  // If present and true, this thread was launched for a private browsing session only.
+  // When false, it can still contain private browsing data if the profile was
+  // captured in a non-fission browser.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
   isPrivateBrowsing?: boolean,
-  // If present, the number represents the container this thread was loaded in.
+  // If present and non-0, the number represents the container this thread was loaded in.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
   userContextId?: number,
 |};
 

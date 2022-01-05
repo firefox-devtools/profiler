@@ -416,7 +416,7 @@ export function getNetworkMarkerDetails(
   if (payload.isPrivateBrowsing) {
     details.push(
       <TooltipDetail label="Private Browsing" key="Network-Private Browsing">
-        yes
+        Yes
       </TooltipDetail>
     );
   }

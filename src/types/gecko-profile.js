@@ -237,8 +237,12 @@ export type GeckoThread = {|
   'eTLD+1'?: string,
   // If present and true, this thread was launched for a private browsing
   // session only.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
   isPrivateBrowsing?: boolean,
   // If present, the number represents the container this thread was loaded in.
+  // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
+  // had no extra attribute at all.
   userContextId?: number,
   registerTime: number,
   processType: string,

@@ -73,7 +73,7 @@ export function sanitizePII(
         const page = pages[i];
         if (page.isPrivateBrowsing) {
           windowIdToBeSanitized.add(page.innerWindowID);
-          page.url = removeURLs(page.url, `<Page #${i}>`);
+          pages.splice(i, 1);
         }
       }
     }
@@ -409,14 +409,14 @@ function sanitizeThreadPII(
         }
         sanitizedFrameIndexes.push(frameIndex);
       } else {
-        // The function pointed by this frame whould be kept.
+        // The function pointed by this frame should be kept.
         funcIndexesToBeKept.add(funcIndex);
       }
     }
 
-    const resourcesToBeSanitized = new Set();
-
     if (sanitizedFuncIndexesToFrameIndex.size) {
+      const resourcesToBeSanitized = new Set();
+
       const newFuncTable = (newThread.funcTable =
         shallowCloneFuncTable(funcTable));
       const newFrameTable = (newThread.frameTable = {
