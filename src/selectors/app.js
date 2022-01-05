@@ -47,6 +47,10 @@ import type {
   UploadedProfileInformation,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import type {
+  BrowserConnectionStatus,
+  BrowserConnection,
+} from 'firefox-profiler/app-logic/browser-connection';
 
 /**
  * Simple selectors into the app state.
@@ -71,6 +75,13 @@ export const getIsNewlyPublished: Selector<boolean> = (state) =>
   getApp(state).isNewlyPublished;
 export const getExperimental: Selector<ExperimentalFlags> = (state) =>
   getApp(state).experimental;
+export const getBrowserConnectionStatus: Selector<BrowserConnectionStatus> = (
+  state
+) => getApp(state).browserConnectionStatus;
+export const getBrowserConnection: Selector<BrowserConnection | null> =
+  createSelector(getBrowserConnectionStatus, (status) =>
+    status.status === 'ESTABLISHED' ? status.browserConnection : null
+  );
 export const getIsEventDelayTracksEnabled: Selector<boolean> = (state) =>
   getExperimental(state).eventDelayTracks;
 export const getIsExperimentalCPUGraphsEnabled: Selector<boolean> = (state) =>

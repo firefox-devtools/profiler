@@ -81,7 +81,6 @@ import type {
   SymbolicationStepInfo,
 } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
-import { createBrowserConnection } from '../app-logic/browser-connection';
 import type {
   BrowserConnection,
   BrowserConnectionStatus,
@@ -117,7 +116,7 @@ export function loadProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    browserConnection: BrowserConnection,
+    browserConnection: BrowserConnection | null,
     skipSymbolication: boolean, // Please use this in tests only.
   |}> = {},
   initialLoad: boolean = false
@@ -156,7 +155,7 @@ export function loadProfile(
     if (initialLoad === false) {
       await dispatch(
         finalizeProfileView(
-          config.browserConnection,
+          config.browserConnection ?? null,
           config.timelineTrackOrganization,
           config.skipSymbolication
         )
@@ -697,7 +696,7 @@ export function viewProfile(
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
     skipSymbolication: boolean,
-    browserConnection: BrowserConnection,
+    browserConnection: BrowserConnection | null,
   |}> = {}
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
@@ -997,6 +996,10 @@ export function retrieveProfileFromBrowser(
         // The other cases are error cases.
         case 'NOT_FIREFOX':
           throw new Error('/from-browser only works in Firefox browsers');
+        case 'NO_ATTEMPT':
+          throw new Error(
+            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is NO_ATTEMPT'
+          );
         case 'WAITING':
           throw new Error(
             'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
@@ -1411,6 +1414,7 @@ function _fileReader(input: File) {
  */
 export function retrieveProfileFromFile(
   file: File,
+  browserConnection: BrowserConnection | null,
   // Allow tests to inject a custom file reader to bypass the DOM APIs.
   fileReader: typeof _fileReader = _fileReader
 ): ThunkAction<Promise<void>> {
@@ -1443,19 +1447,6 @@ export function retrieveProfileFromFile(
         if (profile === undefined) {
           throw new Error('Unable to parse the profile.');
         }
-
-        // Attempt to establish a connection to the browser, for symbolication.
-        // Disable the userAgent check by supplying a fake userAgent that
-        // pretends we're Firefox. This will make us attempt to establish
-        // a connection to the WebChannel even if we're running in the test
-        // suite.
-        const browserConnectionStatus = await createBrowserConnection(
-          'Firefox/123.0'
-        );
-        const browserConnection =
-          browserConnectionStatus.status === 'ESTABLISHED'
-            ? browserConnectionStatus.browserConnection
-            : undefined;
 
         await withHistoryReplaceStateAsync(async () => {
           await dispatch(viewProfile(profile, { browserConnection }));

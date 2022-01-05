@@ -13,6 +13,7 @@ import {
   urlSetupDone,
   show404,
   setupInitialUrlState,
+  updateBrowserConnectionStatus,
 } from 'firefox-profiler/actions/app';
 import {
   urlFromState,
@@ -45,6 +46,7 @@ type DispatchProps = {|
   +urlSetupDone: typeof urlSetupDone,
   +show404: typeof show404,
   +retrieveProfileForRawUrl: typeof retrieveProfileForRawUrl,
+  +updateBrowserConnectionStatus: typeof updateBrowserConnectionStatus,
   +setupInitialUrlState: typeof setupInitialUrlState,
 |};
 
@@ -85,8 +87,12 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  */
 class UrlManagerImpl extends React.PureComponent<Props> {
   async _processInitialUrls() {
-    const { startFetchingProfiles, setupInitialUrlState, urlSetupDone } =
-      this.props;
+    const {
+      startFetchingProfiles,
+      setupInitialUrlState,
+      urlSetupDone,
+      updateBrowserConnectionStatus,
+    } = this.props;
     // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
     const retrieveProfileForRawUrl: WrapFunctionInDispatch<RetrieveProfileForRawUrl> =
       (this.props.retrieveProfileForRawUrl: any);
@@ -101,7 +107,9 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     let browserConnectionStatus;
     const route = window.location.pathname.split('/').filter((s) => s)[0];
     if (['from-browser', 'from-addon', 'from-file'].includes(route)) {
+      updateBrowserConnectionStatus({ status: 'WAITING' });
       browserConnectionStatus = await createBrowserConnection('Firefox/123.0');
+      updateBrowserConnectionStatus(browserConnectionStatus);
     }
 
     try {
@@ -261,6 +269,7 @@ export const UrlManager = explicitConnect<OwnProps, StateProps, DispatchProps>({
     show404,
     setupInitialUrlState,
     retrieveProfileForRawUrl,
+    updateBrowserConnectionStatus,
   },
   component: UrlManagerImpl,
 });

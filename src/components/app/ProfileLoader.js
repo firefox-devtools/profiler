@@ -13,23 +13,25 @@ import {
   retrieveProfileOrZipFromUrl,
   retrieveProfilesToCompare,
 } from 'firefox-profiler/actions/receive-profile';
-import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import {
   getDataSource,
   getHash,
   getProfileUrl,
   getProfilesToCompare,
 } from 'firefox-profiler/selectors/url-state';
+import { getBrowserConnectionStatus } from 'firefox-profiler/selectors/app';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { DataSource } from 'firefox-profiler/types';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 type StateProps = {|
   +dataSource: DataSource,
   +hash: string,
   +profileUrl: string,
   +profilesToCompare: string[] | null,
+  +browserConnectionStatus: BrowserConnectionStatus,
 |};
 
 type DispatchProps = {|
@@ -45,6 +47,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
   _retrieveProfileFromDataSource = async () => {
     const {
       dataSource,
+      browserConnectionStatus,
       hash,
       profileUrl,
       profilesToCompare,
@@ -55,9 +58,6 @@ class ProfileLoaderImpl extends PureComponent<Props> {
     } = this.props;
     switch (dataSource) {
       case 'from-browser': {
-        const browserConnectionStatus = await createBrowserConnection(
-          'Firefox/123.0'
-        );
         retrieveProfileFromBrowser(browserConnectionStatus);
         break;
       }
@@ -110,6 +110,7 @@ export const ProfileLoader = explicitConnect<{||}, StateProps, DispatchProps>({
     hash: getHash(state),
     profileUrl: getProfileUrl(state),
     profilesToCompare: getProfilesToCompare(state),
+    browserConnectionStatus: getBrowserConnectionStatus(state),
   }),
   mapDispatchToProps: {
     retrieveProfileFromStore,
