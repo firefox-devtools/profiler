@@ -1060,8 +1060,6 @@ function _processThread(
   const newThread: Thread = {
     name: thread.name,
     'eTLD+1': thread['eTLD+1'],
-    isPrivateBrowsing: thread.isPrivateBrowsing,
-    userContextId: thread.userContextId,
     processType: thread.processType,
     processName:
       typeof thread.processName === 'string' ? thread.processName : '',
@@ -1082,6 +1080,17 @@ function _processThread(
     stringTable,
     samples,
   };
+
+  // isPrivateBrowsing and userContextId are missing in firefox 97 and
+  // earlier. Also they're missing when this thread had no extra attribute at all.
+  // Let's add them to the new thread only when present in the gecko thread.
+  if (thread.isPrivateBrowsing !== undefined) {
+    newThread.isPrivateBrowsing = thread.isPrivateBrowsing;
+  }
+
+  if (thread.userContextId !== undefined) {
+    newThread.userContextId = thread.userContextId;
+  }
 
   if (jsAllocations) {
     // Only add the JS allocations if they exist.
