@@ -22,7 +22,7 @@ exports[`Timeline renders the header 1`] = `
         Categories
       </label>
       <label
-        class="photon-label-micro timelineSettingsToggleLabel"
+        class="photon-label photon-label-micro timelineSettingsToggleLabel"
       >
         <input
           class="photon-radio photon-radio-micro timelineSettingsToggleInput"

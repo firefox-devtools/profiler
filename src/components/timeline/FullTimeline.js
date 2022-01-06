@@ -131,7 +131,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
             />
             <Localized id="FullTimeline--categories">Categories</Localized>
           </label>
-          <label className="photon-label-micro timelineSettingsToggleLabel">
+          <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
             <input
               type="radio"
               name="timelineSettingsToggle"
