@@ -606,6 +606,9 @@ TransformNavigator--collapse-function-subtree = Comprimi sottoalbero: { $item }
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = In attesa di { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = In attesa di { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Sorgente non disponibile
@@ -623,6 +626,35 @@ SourceView--no-known-cors-url = Per questo file non è disponibile alcun URL cro
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = Si è verificato un errore di rete durante il recupero dell’URL { $url }: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Impossibile interrogare l’API di simbolizzazione del browser: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = L’API di simbolizzazione del browser ha restituito un errore: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = L’API di simbolizzazione del server locale per i simboli ha restituito un errore: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Il file { $pathInArchive } non è stato trovato nell’archivio da { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Impossibile analizzare l’archivio in { $url }: { $parsingErrorMessage }
 SourceView--close-button =
     .title = Chiudi la vista sorgente
 
