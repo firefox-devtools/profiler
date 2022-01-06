@@ -37,7 +37,7 @@ AppViewRouter--error-from-url = Could not download the profile.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
 AppViewRouter--error-from-localhost-url-safari =
     Due to a <a>specific limitation in Safari</a>, { -profiler-brand-name } is unable
-    to import profiles from the local machine in this browser. Please open 
+    to import profiles from the local machine in this browser. Please open
     this page in { -firefox-brand-name } or Chrome instead.
     .title = Safari cannot import local profiles
 
@@ -728,6 +728,10 @@ TransformNavigator--collapse-function-subtree = Collapse subtree: { $item }
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Waiting for { $host }…
 
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Waiting for { -firefox-brand-name }…
+
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Source not available
@@ -752,12 +756,44 @@ SourceView--no-known-cors-url =
 SourceView--network-error-when-obtaining-source =
     There was a network error when fetching the URL { $url }: { $networkErrorMessage }
 
-# Displayed below SourceView--cannot-obtain-source, if querying the API for
-# source code returned in an error.
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source =
+    Could not query the browser’s symbolication API: { $browserConnectionErrorMessage }
+
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
-SourceView--api-error-when-obtaining-source =
-    The symbolication API returned an error: { $apiErrorMessage }
+SourceView--browser-api-error-when-obtaining-source =
+    The browser’s symbolication API returned an error: { $apiErrorMessage }
+
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source =
+    The local symbol server’s symbolication API returned an error: { $apiErrorMessage }
+
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source =
+    The file { $pathInArchive } was not found in the archive from { $url }.
+
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source =
+    The archive at { $url } could not be parsed: { $parsingErrorMessage }
 
 SourceView--close-button =
     .title = Close the source view

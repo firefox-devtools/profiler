@@ -51,20 +51,36 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
     case 'AVAILABLE':
       return null; // No overlay if we have source code.
     case 'LOADING': {
-      const { url } = status;
-      let host;
-      try {
-        host = new URL(url).host;
-      } catch (e) {
-        host = url;
+      const { source } = status;
+      switch (source.type) {
+        case 'URL': {
+          const { url } = source;
+          let host;
+          try {
+            host = new URL(url).host;
+          } catch (e) {
+            host = url;
+          }
+          return (
+            <Localized id="SourceView--loading-url" vars={{ host }}>
+              <div className="sourceStatusOverlay loading">
+                {`Waiting for ${host}…`}
+              </div>
+            </Localized>
+          );
+        }
+        case 'BROWSER_CONNECTION': {
+          return (
+            <Localized id="SourceView--loading-browser-connection">
+              <div className="sourceStatusOverlay loading">
+                Waiting for browser…
+              </div>
+            </Localized>
+          );
+        }
+        default:
+          throw assertExhaustiveCheck(source.type);
       }
-      return (
-        <Localized id="SourceView--loading-url" vars={{ host }}>
-          <div className="sourceStatusOverlay loading">
-            {`Waiting for ${host}…`}
-          </div>
-        </Localized>
-      );
     }
     case 'ERROR': {
       return (
@@ -119,14 +135,59 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
                       </Localized>
                     );
                   }
+                  case 'BROWSER_CONNECTION_ERROR': {
+                    const { browserConnectionErrorMessage } = error;
+                    return (
+                      <Localized
+                        key={key}
+                        id="SourceView--browser-connection-error-when-obtaining-source"
+                        vars={{ browserConnectionErrorMessage }}
+                      >
+                        <li>{`Could not query the browser’s symbolication API: ${browserConnectionErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'BROWSER_API_ERROR': {
+                    const { apiErrorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--browser-api-error-when-obtaining-source"
+                        vars={{ apiErrorMessage }}
+                      >
+                        <li>{`The browser’s symbolication API returned an error: ${apiErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
                   case 'SYMBOL_SERVER_API_ERROR': {
                     const { apiErrorMessage } = error;
                     return (
                       <Localized
-                        id="SourceView--api-error-when-obtaining-source"
+                        id="SourceView--local-symbol-server-api-error-when-obtaining-source"
                         vars={{ apiErrorMessage }}
                       >
-                        <li>{`The symbolication API returned an error: ${apiErrorMessage}`}</li>
+                        <li>{`The local symbol server’s symbolication API returned an error: ${apiErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'NOT_PRESENT_IN_ARCHIVE': {
+                    const { url, pathInArchive } = error;
+                    return (
+                      <Localized
+                        id="SourceView--not-in-archive-error-when-obtaining-source"
+                        vars={{ url, pathInArchive }}
+                      >
+                        <li>{`The file ${pathInArchive} was not found in the archive from ${url}.`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'ARCHIVE_PARSING_ERROR': {
+                    const { url, parsingErrorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--archive-parsing-error-when-obtaining-source"
+                        vars={{ url, parsingErrorMessage }}
+                      >
+                        <li>{`The archive at ${url} could not be parsed: ${parsingErrorMessage}`}</li>
                       </Localized>
                     );
                   }

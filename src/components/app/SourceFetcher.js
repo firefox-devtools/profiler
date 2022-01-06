@@ -10,14 +10,17 @@ import {
   getSymbolServerUrl,
 } from 'firefox-profiler/selectors/url-state';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
+import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { getProfileOrNull } from 'firefox-profiler/selectors';
 import {
   beginLoadingSourceFromUrl,
+  beginLoadingSourceFromBrowserConnection,
   finishLoadingSource,
   failLoadingSource,
 } from 'firefox-profiler/actions/sources';
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import { findAddressProofForFile } from 'firefox-profiler/profile-logic/profile-data';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
@@ -29,10 +32,12 @@ type StateProps = {|
   +sourceViewSource: FileSourceStatus | void,
   +symbolServerUrl: string,
   +profile: Profile | null,
+  +browserConnection: BrowserConnection | null,
 |};
 
 type DispatchProps = {|
   +beginLoadingSourceFromUrl: typeof beginLoadingSourceFromUrl,
+  +beginLoadingSourceFromBrowserConnection: typeof beginLoadingSourceFromBrowserConnection,
   +finishLoadingSource: typeof finishLoadingSource,
   +failLoadingSource: typeof failLoadingSource,
 |};
@@ -40,6 +45,8 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class SourceFetcherImpl extends React.PureComponent<Props> {
+  _archiveCache: Map<string, Promise<Uint8Array>> = new Map();
+
   componentDidMount() {
     this._triggerSourceLoadingIfNeeded();
   }
@@ -58,10 +65,12 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
   async _fetchSourceForFile(file: string) {
     const {
       beginLoadingSourceFromUrl,
+      beginLoadingSourceFromBrowserConnection,
       finishLoadingSource,
       failLoadingSource,
       symbolServerUrl,
       profile,
+      browserConnection,
     } = this.props;
 
     const addressProof =
@@ -71,6 +80,7 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
       file,
       symbolServerUrl,
       addressProof,
+      this._archiveCache,
       {
         fetchUrlResponse: async (url: string, postData?: MixedObject) => {
           beginLoadingSourceFromUrl(file, url);
@@ -91,6 +101,16 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
             );
           }
           return response;
+        },
+        queryBrowserSymbolicationApi: async (
+          path: string,
+          requestJson: string
+        ) => {
+          if (browserConnection === null) {
+            throw new Error('No connection to the browser.');
+          }
+          beginLoadingSourceFromBrowserConnection(file);
+          return browserConnection.querySymbolicationApi(path, requestJson);
         },
       }
     );
@@ -118,9 +138,11 @@ export const SourceFetcher = explicitConnect<{||}, StateProps, DispatchProps>({
     sourceViewSource: getSourceViewSource(state),
     symbolServerUrl: getSymbolServerUrl(state),
     profile: getProfileOrNull(state),
+    browserConnection: getBrowserConnection(state),
   }),
   mapDispatchToProps: {
     beginLoadingSourceFromUrl,
+    beginLoadingSourceFromBrowserConnection,
     finishLoadingSource,
     failLoadingSource,
   },
