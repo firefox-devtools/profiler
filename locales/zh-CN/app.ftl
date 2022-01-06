@@ -601,6 +601,9 @@ TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = 等待 { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = 正在等待 { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = 源代码不可用
@@ -618,6 +621,11 @@ SourceView--no-known-cors-url = 此文件没有已知的 cross-origin-accessible
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = 获取网址 { $url } 时发生网络错误：{ $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = 无法查询浏览器的符号化 API：{ $browserConnectionErrorMessage }
 SourceView--close-button =
     .title = 关闭源代码视图
 
