@@ -13,6 +13,12 @@
   box-shadow: 0 1px var(--grey-30);
 }
 
+.timelineThreadList > .timelineTrack:first-child {
+  /* Remove the top border of the first timeline track because we already have
+   * a border bottom in the timeline header. */
+  border: none;
+}
+
 .timelineTrackLocal {
   margin-left: 15px;
 }
