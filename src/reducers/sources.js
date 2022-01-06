@@ -10,10 +10,19 @@ const sources: Reducer<Map<string, FileSourceStatus>> = (
   action
 ) => {
   switch (action.type) {
-    case 'SOURCE_LOADING_BEGIN': {
+    case 'SOURCE_LOADING_BEGIN_URL': {
       const { file, url } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'LOADING', url });
+      newState.set(file, { type: 'LOADING', source: { type: 'URL', url } });
+      return newState;
+    }
+    case 'SOURCE_LOADING_BEGIN_BROWSER_CONNECTION': {
+      const { file } = action;
+      const newState = new Map(state);
+      newState.set(file, {
+        type: 'LOADING',
+        source: { type: 'BROWSER_CONNECTION' },
+      });
       return newState;
     }
     case 'SOURCE_LOADING_SUCCESS': {

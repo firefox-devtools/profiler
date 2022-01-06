@@ -31,6 +31,7 @@ import type {
   SourceLoadingError,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
+import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
 
 export type DataSource =
   | 'none'
@@ -547,13 +548,19 @@ type L10nAction =
     |};
 
 type SourcesAction =
-  | {| +type: 'SOURCE_LOADING_BEGIN', file: string, url: string |}
+  | {| +type: 'SOURCE_LOADING_BEGIN_URL', file: string, url: string |}
+  | {| +type: 'SOURCE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
   | {| +type: 'SOURCE_LOADING_SUCCESS', file: string, source: string |}
   | {|
       +type: 'SOURCE_LOADING_ERROR',
       file: string,
       errors: SourceLoadingError[],
     |};
+
+type AppAction = {|
+  +type: 'UPDATE_BROWSER_CONNECTION_STATUS',
+  +browserConnectionStatus: BrowserConnectionStatus,
+|};
 
 export type Action =
   | ProfileAction
@@ -566,4 +573,5 @@ export type Action =
   | DragAndDropAction
   | CurrentProfileUploadedInformationAction
   | L10nAction
-  | SourcesAction;
+  | SourcesAction
+  | AppAction;

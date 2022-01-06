@@ -6,21 +6,6 @@
   height: var(--timeline-ruler-height);
 }
 
-/**
- * Create a border underneath the ruler that spans both the timeline track names on the
- * left, and the scrollbar area on the right.
- */
-.timelineRuler::after {
-  position: absolute;
-  z-index: 3;
-  top: 20px;
-  right: calc(var(--vertical-scrollbar-reserved-width) * -1);
-  left: -150px;
-  height: 1px;
-  background: var(--grey-30);
-  content: '';
-}
-
 .timelineRulerContainer {
   position: absolute;
   top: 0;

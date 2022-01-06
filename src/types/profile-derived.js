@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Milliseconds, StartEndRange } from './units';
+import type { Milliseconds, StartEndRange, Address } from './units';
 import type { MarkerPayload } from './markers';
 import type {
   IndexIntoFuncTable,
@@ -95,6 +95,40 @@ export type StackLineInfo = {|
 export type LineTimings = {|
   totalLineHits: Map<LineNumber, number>,
   selfLineHits: Map<LineNumber, number>,
+|};
+
+// Stores the information that's needed to prove to the symbolication API that
+// we are authorized to request the source code for a specific file.
+// This "address proof" makes it easy for the browser (or local symbol server)
+// to limit file access to only the set of files which are referenced by trusted
+// symbol information, without forcing the browser (or local symbol server) to
+// build a full list of such files upfront. Building a full list would take a
+// long time - up to a minute. Checking individual addresses is much faster.
+//
+// By allowing access to only the files referenced by symbol information, we
+// avoid giving malicious actors the ability to read arbitrary files.
+// Specifically, this restriction protects against the following threats:
+//  - If source code is requested from the browser via the WebChannel, the check
+//    avoids exposing arbitrary files to a compromised profiler.firefox.com web
+//    page or to a compromised profiler.firefox.com content process. So the
+//    check only makes a difference in cases where the browser can no longer
+//    trust the profiler WebChannel.
+//  - If source code is requested from a local symbol server via an HTTP
+//    request, the check avoids exposing arbitrary files to a compromised
+//    profiler.firefox.com page, or to other web pages or outside actors who
+//    have guessed the correct URL to request source code from. Symbol servers
+//    will usually put a randomized token into the URL in order to make it even
+//    harder to guess the right URL. The address proof check is an extra layer
+//    of protection on top of that, in case the secret URL somehow leaks.
+export type AddressProof = {|
+  // The debugName of a library whose symbol information refers to the requested
+  // file.
+  debugName: string,
+  // The breakpadId of that library.
+  breakpadId: string,
+  // The address in that library for which the symbolicated frames refer to the
+  // requested file.
+  address: Address,
 |};
 
 /**
@@ -251,6 +285,8 @@ export type AccumulatedCounterSamples = {|
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
+  // mainThreadIndex is null when this is a fake global process added to contain
+  // real threads.
   | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
   | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |}
   | {| +type: 'visual-progress' |}
@@ -265,6 +301,11 @@ export type LocalTrack =
   | {| +type: 'event-delay', +threadIndex: ThreadIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
+
+// A track index doesn't always represent uniquely a track: it's merely an index inside
+// a specific structure:
+// - for global tracks, this is the index in the global tracks array
+// - for local tracks, this is the index in the local tracks array for a specific pid.
 export type TrackIndex = number;
 
 /**

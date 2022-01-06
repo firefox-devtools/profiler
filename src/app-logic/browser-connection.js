@@ -16,6 +16,8 @@ import {
  */
 
 export type BrowserConnectionStatus =
+  // The initial state.
+  | {| status: 'NO_ATTEMPT' |}
   // In non-Firefox browsers we don't attempt to establish a connection.
   // This is determined via the userAgent.
   | {| status: 'NOT_FIREFOX' |}

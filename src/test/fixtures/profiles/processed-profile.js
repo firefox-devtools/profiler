@@ -41,6 +41,7 @@ import type {
   MarkerPhase,
   ThreadCPUDeltaUnit,
   LineNumber,
+  Address,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -487,7 +488,63 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
  * ```
  * Now the variables named A B Cjs D directly refer to the func indices and can
  * be used in tests.
- */
+ *
+ * The following func and frame attributes are supported:
+ *  - [jit:*] - The JIT used for a JS frame, affects frameTable.implementation.
+ *  - [cat:*] - The category name, affects frameTable.category
+ *  - [lib:*] - The library name, affects funcTable.resource + resourceTable + libs
+ *  - [file:*] - The filename, affects funcTable.file
+ *  - [line:*] - The line, affects frameTable.line
+ *  - [address:*] - The frame address, affects frameTable.address
+ *  - [inl:*] - The inline depth, affects frameTable.inlineDepth
+
+```js
+// Execute the code below in the web console in the profiler to get a stack that's
+// ready to be pasted into getProfileFromTextSamples.
+
+function getFrame(
+  { stackTable, frameTable, funcTable, stringTable, resourceTable, libs },
+  frameIndex
+) {
+  const funcIndex = frameTable.func[frameIndex];
+  let s = stringTable.getString(funcTable.name[funcIndex]);
+  const libIndex = resourceTable.lib[funcTable.resource[funcIndex]];
+  if (libIndex !== null) {
+    const libName = libs[libIndex].name;
+    s += `[lib:${libName}]`;
+  }
+  const fileStringIndex = funcTable.fileName[funcIndex];
+  if (fileStringIndex !== null) {
+    s += `[file:${stringTable.getString(fileStringIndex)}]`;
+  }
+  const line = frameTable.line[frameIndex];
+  if (line !== null) {
+    s += `[line:${line}]`;
+  }
+  const address = frameTable.address[frameIndex];
+  if (address !== -1) {
+    s += `[address:0x${address.toString(16)}]`;
+  }
+  const inlineDepth = frameTable.inlineDepth[frameIndex];
+  if (inlineDepth !== 0) {
+    s += `[inl:${inlineDepth}]`;
+  }
+  return s;
+}
+
+function getStack(thread, stackIndex) {
+  const { stackTable } = thread;
+  const stack = [];
+  while (stackIndex !== null) {
+    stack.unshift(getFrame(thread, stackTable.frame[stackIndex]));
+    stackIndex = stackTable.prefix[stackIndex];
+  }
+  return stack;
+}
+
+getStack(filteredThread, filteredThread.samples.stack[0])
+```
+*/
 export function getProfileFromTextSamples(...allTextSamples: string[]): {
   profile: Profile,
   funcNamesPerThread: Array<string[]>,
@@ -711,6 +768,30 @@ function _findLineNumberFromFuncName(
   return null;
 }
 
+function _findAddressFromFuncName(
+  funcNameWithModifier: string
+): Address | null {
+  const findAddressResult = /\[address:0x([0-9a-f]+)\]/.exec(
+    funcNameWithModifier
+  );
+  if (findAddressResult) {
+    return parseInt(findAddressResult[1], 16);
+  }
+
+  return null;
+}
+
+function _findInlineDepthFromFuncName(
+  funcNameWithModifier: string
+): Address | null {
+  const findInlineDepthResult = /\[inl:([0-9]+)\]/.exec(funcNameWithModifier);
+  if (findInlineDepthResult) {
+    return +findInlineDepthResult[1];
+  }
+
+  return null;
+}
+
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
@@ -802,6 +883,11 @@ function _buildThreadFromTextOnlyStacks(
         categories
       );
       const lineNumber = _findLineNumberFromFuncName(funcNameWithModifier);
+      const address =
+        _findAddressFromFuncName(funcNameWithModifier) ??
+        (funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1);
+      const inlineDepth =
+        _findInlineDepthFromFuncName(funcNameWithModifier) ?? 0;
 
       // Attempt to find a frame that satisfies the given funcIndex, jit type,
       // category, and line number.
@@ -811,7 +897,9 @@ function _buildThreadFromTextOnlyStacks(
           funcIndex === frameTable.func[i] &&
           jitTypeIndex === frameTable.implementation[i] &&
           category === frameTable.category[i] &&
-          lineNumber === frameTable.line[i]
+          lineNumber === frameTable.line[i] &&
+          address === frameTable.address[i] &&
+          inlineDepth === frameTable.inlineDepth[i]
         ) {
           frameIndex = i;
           break;
@@ -820,10 +908,8 @@ function _buildThreadFromTextOnlyStacks(
 
       if (frameIndex === undefined) {
         frameTable.func.push(funcIndex);
-        frameTable.address.push(
-          funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1
-        );
-        frameTable.inlineDepth.push(0);
+        frameTable.address.push(address);
+        frameTable.inlineDepth.push(inlineDepth);
         frameTable.category.push(category);
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);

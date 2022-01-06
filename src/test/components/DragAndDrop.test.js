@@ -11,6 +11,7 @@ import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import createStore from '../../app-logic/create-store';
+import { createBrowserConnection } from '../../app-logic/browser-connection';
 import {
   DragAndDrop,
   DragAndDropOverlay,
@@ -18,6 +19,7 @@ import {
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import { getView } from 'firefox-profiler/selectors';
+import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
 
 describe('app/DragAndDrop', () => {
@@ -96,6 +98,12 @@ describe('app/DragAndDrop', () => {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     const store = createStore();
+
+    const browserConnectionStatus = await createBrowserConnection(
+      'Firefox/123.0'
+    );
+    store.dispatch(updateBrowserConnectionStatus(browserConnectionStatus));
+
     const { container } = render(
       <Provider store={store}>
         <DragAndDrop>Target area here</DragAndDrop>

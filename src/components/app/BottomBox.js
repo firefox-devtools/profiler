@@ -18,7 +18,6 @@ import {
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
-import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
 import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -41,7 +40,6 @@ type StateProps = {|
 
 type DispatchProps = {|
   +closeBottomBox: typeof closeBottomBox,
-  +fetchSourceForFile: typeof fetchSourceForFile,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -53,20 +51,36 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
     case 'AVAILABLE':
       return null; // No overlay if we have source code.
     case 'LOADING': {
-      const { url } = status;
-      let host;
-      try {
-        host = new URL(url).host;
-      } catch (e) {
-        host = url;
+      const { source } = status;
+      switch (source.type) {
+        case 'URL': {
+          const { url } = source;
+          let host;
+          try {
+            host = new URL(url).host;
+          } catch (e) {
+            host = url;
+          }
+          return (
+            <Localized id="SourceView--loading-url" vars={{ host }}>
+              <div className="sourceStatusOverlay loading">
+                {`Waiting for ${host}…`}
+              </div>
+            </Localized>
+          );
+        }
+        case 'BROWSER_CONNECTION': {
+          return (
+            <Localized id="SourceView--loading-browser-connection">
+              <div className="sourceStatusOverlay loading">
+                Waiting for browser…
+              </div>
+            </Localized>
+          );
+        }
+        default:
+          throw assertExhaustiveCheck(source.type);
       }
-      return (
-        <Localized id="SourceView--loading-url" vars={{ host }}>
-          <div className="sourceStatusOverlay loading">
-            {`Waiting for ${host}…`}
-          </div>
-        </Localized>
-      );
     }
     case 'ERROR': {
       return (
@@ -121,6 +135,62 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
                       </Localized>
                     );
                   }
+                  case 'BROWSER_CONNECTION_ERROR': {
+                    const { browserConnectionErrorMessage } = error;
+                    return (
+                      <Localized
+                        key={key}
+                        id="SourceView--browser-connection-error-when-obtaining-source"
+                        vars={{ browserConnectionErrorMessage }}
+                      >
+                        <li>{`Could not query the browser’s symbolication API: ${browserConnectionErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'BROWSER_API_ERROR': {
+                    const { apiErrorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--browser-api-error-when-obtaining-source"
+                        vars={{ apiErrorMessage }}
+                      >
+                        <li>{`The browser’s symbolication API returned an error: ${apiErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'SYMBOL_SERVER_API_ERROR': {
+                    const { apiErrorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--local-symbol-server-api-error-when-obtaining-source"
+                        vars={{ apiErrorMessage }}
+                      >
+                        <li>{`The local symbol server’s symbolication API returned an error: ${apiErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'NOT_PRESENT_IN_ARCHIVE': {
+                    const { url, pathInArchive } = error;
+                    return (
+                      <Localized
+                        id="SourceView--not-in-archive-error-when-obtaining-source"
+                        vars={{ url, pathInArchive }}
+                      >
+                        <li>{`The file ${pathInArchive} was not found in the archive from ${url}.`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'ARCHIVE_PARSING_ERROR': {
+                    const { url, parsingErrorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--archive-parsing-error-when-obtaining-source"
+                        vars={{ url, parsingErrorMessage }}
+                      >
+                        <li>{`The archive at ${url} could not be parsed: ${parsingErrorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
                   default:
                     throw assertExhaustiveCheck(error.type);
                 }
@@ -139,8 +209,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView = React.createRef<SourceView>();
 
   componentDidMount() {
-    this._triggerSourceLoadingIfNeeded();
-
     if (this._sourceView.current) {
       this._sourceView.current.scrollToHotSpot(
         this.props.selectedCallNodeLineTimings
@@ -149,8 +217,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    this._triggerSourceLoadingIfNeeded();
-
     if (
       this._sourceView.current &&
       prevProps.sourceViewActivationGeneration <
@@ -159,13 +225,6 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       this._sourceView.current.scrollToHotSpot(
         this.props.selectedCallNodeLineTimings
       );
-    }
-  }
-
-  _triggerSourceLoadingIfNeeded() {
-    const { sourceViewFile, sourceViewSource, fetchSourceForFile } = this.props;
-    if (sourceViewFile && !sourceViewSource) {
-      fetchSourceForFile(sourceViewFile);
     }
   }
 
@@ -238,7 +297,6 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     closeBottomBox,
-    fetchSourceForFile,
   },
   component: BottomBoxImpl,
 });

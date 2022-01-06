@@ -7,6 +7,7 @@ import { combineReducers } from 'redux';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
+import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
 import type {
   AppState,
   AppViewState,
@@ -297,6 +298,18 @@ const experimental: Reducer<ExperimentalFlags> = combineReducers({
   cpuGraphs,
 });
 
+const browserConnectionStatus: Reducer<BrowserConnectionStatus> = (
+  state = { status: 'NO_ATTEMPT' },
+  action
+) => {
+  switch (action.type) {
+    case 'UPDATE_BROWSER_CONNECTION_STATUS':
+      return action.browserConnectionStatus;
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   urlSetupPhase,
@@ -310,6 +323,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   isDragAndDropOverlayRegistered,
   experimental,
   currentProfileUploadedInformation,
+  browserConnectionStatus,
 });
 
 export default appStateReducer;
