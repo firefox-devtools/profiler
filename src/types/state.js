@@ -36,6 +36,7 @@ import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path.js';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
 
 export type Reducer<T> = (T | void, Action) => T;
 
@@ -191,6 +192,7 @@ export type AppState = {|
   +isDragAndDropOverlayRegistered: boolean,
   +experimental: ExperimentalFlags,
   +currentProfileUploadedInformation: UploadedProfileInformation | null,
+  +browserConnectionStatus: BrowserConnectionStatus,
 |};
 
 export type UploadPhase =
@@ -231,9 +233,13 @@ export type SourceViewState = {|
 |};
 
 export type FileSourceStatus =
-  | {| type: 'LOADING', url: string |}
+  | {| type: 'LOADING', source: FileSourceLoadingSource |}
   | {| type: 'ERROR', errors: SourceLoadingError[] |}
   | {| type: 'AVAILABLE', source: string |};
+
+export type FileSourceLoadingSource =
+  | {| type: 'URL', url: string |}
+  | {| type: 'BROWSER_CONNECTION' |};
 
 export type SourceLoadingError =
   | {| type: 'NO_KNOWN_CORS_URL' |}
@@ -241,6 +247,28 @@ export type SourceLoadingError =
       type: 'NETWORK_ERROR',
       url: string,
       networkErrorMessage: string,
+    |}
+  | {|
+      type: 'NOT_PRESENT_IN_ARCHIVE',
+      url: string,
+      pathInArchive: string,
+    |}
+  | {|
+      type: 'ARCHIVE_PARSING_ERROR',
+      url: string,
+      parsingErrorMessage: string,
+    |}
+  | {|
+      type: 'SYMBOL_SERVER_API_ERROR',
+      apiErrorMessage: string,
+    |}
+  | {|
+      type: 'BROWSER_CONNECTION_ERROR',
+      browserConnectionErrorMessage: string,
+    |}
+  | {|
+      type: 'BROWSER_API_ERROR',
+      apiErrorMessage: string,
     |};
 
 /**

@@ -73,6 +73,7 @@ import type {
   resourceTypeEnum,
   MarkerPayload,
   Address,
+  AddressProof,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -3322,35 +3323,43 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
 }
 
 /**
- * Returns true if the thread doesn't include any RefreshDriverTick. This
- * indicates they were not painted to, and most likely idle. This is just
- * a heuristic to help users.
+ * Find the address and library (debugName, breakpadId) for any frame which
+ * was symbolicated to the given filename.
  */
-export function isThreadWithNoPaint({ markers, stringTable }: Thread): boolean {
-  let paintMarkerFound = false;
-  if (stringTable.hasString('RefreshDriverTick')) {
-    const paintStringIndex = stringTable.indexForString('RefreshDriverTick');
-
-    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-      if (paintStringIndex === markers.name[markerIndex]) {
-        paintMarkerFound = true;
-        break;
-      }
+export function findAddressProofForFile(
+  profile: Profile,
+  file: string
+): AddressProof | null {
+  for (const thread of profile.threads) {
+    const { frameTable, funcTable, resourceTable, libs, stringTable } = thread;
+    const fileStringIndex = stringTable.indexForString(file);
+    const func = funcTable.fileName.indexOf(fileStringIndex);
+    if (func === -1) {
+      continue;
     }
+    const frame = frameTable.func.indexOf(func);
+    if (frame === -1) {
+      continue;
+    }
+    const address = frameTable.address[frame];
+    if (address === null) {
+      continue;
+    }
+    const resource = funcTable.resource[func];
+    if (resourceTable.type[resource] !== resourceTypes.library) {
+      continue;
+    }
+    const libIndex = resourceTable.lib[resource];
+    if (libIndex === undefined || libIndex === null || libIndex === -1) {
+      continue;
+    }
+    const lib = libs[libIndex];
+    const { debugName, breakpadId } = lib;
+    return {
+      debugName,
+      breakpadId,
+      address,
+    };
   }
-  if (!paintMarkerFound) {
-    return true;
-  }
-  return false;
-}
-
-/**
- * Returns true if a thread is a content process main thread with no paint markers.
- */
-export function isContentThreadWithNoPaint(thread: Thread): boolean {
-  if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
-    return isThreadWithNoPaint(thread);
-  }
-
-  return false;
+  return null;
 }

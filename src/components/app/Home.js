@@ -17,17 +17,16 @@ import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
 } from 'firefox-profiler/actions/receive-profile';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
   enableMenuButton,
 } from 'firefox-profiler/app-logic/web-channel';
+import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type {
-  ConnectedProps,
-  WrapFunctionInDispatch,
-} from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { Localized } from '@fluent/react';
 import './Home.css';
@@ -35,19 +34,17 @@ import './Home.css';
 import { DragAndDropOverlay } from './DragAndDrop';
 
 type ActionButtonsProps = {|
-  +retrieveProfileFromFile: WrapFunctionInDispatch<
-    typeof retrieveProfileFromFile
-  >,
-  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  +onLoadProfileFromFileRequested: (file: File) => void,
+  +onLoadProfileFromUrlRequested: (url: string) => void,
 |};
 
 type ActionButtonsState = {
   isLoadFromUrlPressed: boolean,
 };
 
-type LoadFromUrlProps = {
-  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
-};
+type LoadFromUrlProps = {|
+  +onLoadProfileFromUrlRequested: (url: string) => void,
+|};
 
 type LoadFromUrlState = {
   value: string,
@@ -67,9 +64,9 @@ class ActionButtons extends React.PureComponent<
     this._fileInput = input;
   };
 
-  _uploadProfileFromFile = () => {
+  _uploadProfileFromFile = async () => {
     if (this._fileInput) {
-      this.props.retrieveProfileFromFile(this._fileInput.files[0]);
+      this.props.onLoadProfileFromFileRequested(this._fileInput.files[0]);
     }
   };
 
@@ -119,7 +116,11 @@ class ActionButtons extends React.PureComponent<
           </Localized>
         </div>
         {this.state.isLoadFromUrlPressed ? (
-          <LoadFromUrl {...this.props} />
+          <LoadFromUrl
+            onLoadProfileFromUrlRequested={
+              this.props.onLoadProfileFromUrlRequested
+            }
+          />
         ) : null}
       </div>
     );
@@ -144,7 +145,7 @@ class LoadFromUrl extends React.PureComponent<
   _upload = (event: SyntheticEvent<>) => {
     event.preventDefault();
     if (this.state.value) {
-      this.props.triggerLoadingFromUrl(this.state.value);
+      this.props.onLoadProfileFromUrlRequested(this.state.value);
     }
   };
 
@@ -198,12 +199,20 @@ type OwnHomeProps = {|
   +specialMessage?: string,
 |};
 
+type StateHomeProps = {|
+  +browserConnection: BrowserConnection | null,
+|};
+
 type DispatchHomeProps = {|
   +retrieveProfileFromFile: typeof retrieveProfileFromFile,
   +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 |};
 
-type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
+type HomeProps = ConnectedProps<
+  OwnHomeProps,
+  StateHomeProps,
+  DispatchHomeProps
+>;
 
 type HomeState = {
   popupInstallPhase: PopupInstallPhase,
@@ -450,6 +459,14 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     );
   }
 
+  _onLoadProfileFromFileRequested = (file: File) => {
+    this.props.retrieveProfileFromFile(file, this.props.browserConnection);
+  };
+
+  _onLoadProfileFromUrlRequested = (url: string) => {
+    this.props.triggerLoadingFromUrl(url);
+  };
+
   render() {
     const { specialMessage } = this.props;
 
@@ -489,9 +506,12 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 </p>
               </Localized>
               <ActionButtons
-                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-                retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-                triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+                onLoadProfileFromFileRequested={
+                  this._onLoadProfileFromFileRequested
+                }
+                onLoadProfileFromUrlRequested={
+                  this._onLoadProfileFromUrlRequested
+                }
               />
 
               <Localized
@@ -533,7 +553,14 @@ function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
 }
 
-export const Home = explicitConnect<OwnHomeProps, {||}, DispatchHomeProps>({
+export const Home = explicitConnect<
+  OwnHomeProps,
+  StateHomeProps,
+  DispatchHomeProps
+>({
+  mapStateToProps: (state) => ({
+    browserConnection: getBrowserConnection(state),
+  }),
   mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromUrl },
   component: HomeImpl,
 });

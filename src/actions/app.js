@@ -45,7 +45,10 @@ import type {
   UploadedProfileInformation,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
-import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
+import type {
+  BrowserConnection,
+  BrowserConnectionStatus,
+} from 'firefox-profiler/app-logic/browser-connection';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -350,4 +353,10 @@ export function profileRemotelyDeleted(): Action {
   // Ideally we should store the current profile data in a local indexeddb, and
   // set the URL to /local/<indexeddb-key>.
   return { type: 'PROFILE_REMOTELY_DELETED' };
+}
+
+export function updateBrowserConnectionStatus(
+  browserConnectionStatus: BrowserConnectionStatus
+): Action {
+  return { type: 'UPDATE_BROWSER_CONNECTION_STATUS', browserConnectionStatus };
 }

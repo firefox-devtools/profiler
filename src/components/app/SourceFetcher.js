@@ -5,33 +5,39 @@
 
 import React from 'react';
 
-import { getSourceViewFile } from 'firefox-profiler/selectors/url-state';
+import {
+  getSourceViewFile,
+  getSymbolServerUrl,
+} from 'firefox-profiler/selectors/url-state';
 import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
+import { getBrowserConnection } from 'firefox-profiler/selectors/app';
+import { getProfileOrNull } from 'firefox-profiler/selectors';
 import {
   beginLoadingSourceFromUrl,
+  beginLoadingSourceFromBrowserConnection,
   finishLoadingSource,
   failLoadingSource,
 } from 'firefox-profiler/actions/sources';
-import {
-  getDownloadRecipeForSourceFile,
-  parseFileNameFromSymbolication,
-} from 'firefox-profiler/utils/special-paths';
+import { fetchSource } from 'firefox-profiler/utils/fetch-source';
+import { findAddressProofForFile } from 'firefox-profiler/profile-logic/profile-data';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type {
-  FileSourceStatus,
-  SourceLoadingError,
-} from 'firefox-profiler/types';
+import type { FileSourceStatus, Profile } from 'firefox-profiler/types';
 
 type StateProps = {|
   +sourceViewFile: string | null,
   +sourceViewSource: FileSourceStatus | void,
+  +symbolServerUrl: string,
+  +profile: Profile | null,
+  +browserConnection: BrowserConnection | null,
 |};
 
 type DispatchProps = {|
   +beginLoadingSourceFromUrl: typeof beginLoadingSourceFromUrl,
+  +beginLoadingSourceFromBrowserConnection: typeof beginLoadingSourceFromBrowserConnection,
   +finishLoadingSource: typeof finishLoadingSource,
   +failLoadingSource: typeof failLoadingSource,
 |};
@@ -39,6 +45,8 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class SourceFetcherImpl extends React.PureComponent<Props> {
+  _archiveCache: Map<string, Promise<Uint8Array>> = new Map();
+
   componentDidMount() {
     this._triggerSourceLoadingIfNeeded();
   }
@@ -57,54 +65,66 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
   async _fetchSourceForFile(file: string) {
     const {
       beginLoadingSourceFromUrl,
+      beginLoadingSourceFromBrowserConnection,
       finishLoadingSource,
       failLoadingSource,
+      symbolServerUrl,
+      profile,
+      browserConnection,
     } = this.props;
 
-    const errors: SourceLoadingError[] = [];
-    const parsedName = parseFileNameFromSymbolication(file);
-    const downloadRecipe = getDownloadRecipeForSourceFile(parsedName);
+    const addressProof =
+      profile !== null ? findAddressProofForFile(profile, file) : null;
 
-    // First, try to fetch just the single file from the web.
-    switch (downloadRecipe.type) {
-      case 'CORS_ENABLED_SINGLE_FILE': {
-        const { url } = downloadRecipe;
-        beginLoadingSourceFromUrl(file, url);
+    const fetchSourceResult = await fetchSource(
+      file,
+      symbolServerUrl,
+      addressProof,
+      this._archiveCache,
+      {
+        fetchUrlResponse: async (url: string, postData?: MixedObject) => {
+          beginLoadingSourceFromUrl(file, url);
 
-        try {
-          const response = await fetch(url, { credentials: 'omit' });
-
+          const requestInit =
+            postData !== undefined
+              ? {
+                  body: postData,
+                  method: 'POST',
+                  mode: 'cors',
+                  credentials: 'omit',
+                }
+              : { credentials: 'omit' };
+          const response = await fetch(url, requestInit);
           if (response.status !== 200) {
             throw new Error(
               `The request to ${url} returned HTTP status ${response.status}`
             );
           }
+          return response;
+        },
+        queryBrowserSymbolicationApi: async (
+          path: string,
+          requestJson: string
+        ) => {
+          if (browserConnection === null) {
+            throw new Error('No connection to the browser.');
+          }
+          beginLoadingSourceFromBrowserConnection(file);
+          return browserConnection.querySymbolicationApi(path, requestJson);
+        },
+      }
+    );
 
-          const source = await response.text();
-          finishLoadingSource(file, source);
-          return;
-        } catch (e) {
-          errors.push({
-            type: 'NETWORK_ERROR',
-            url,
-            networkErrorMessage: e.toString(),
-          });
-        }
+    switch (fetchSourceResult.type) {
+      case 'SUCCESS':
+        finishLoadingSource(file, fetchSourceResult.source);
         break;
-      }
-      case 'CORS_ENABLED_ARCHIVE': {
-        // Not handled yet.
-        errors.push({ type: 'NO_KNOWN_CORS_URL' });
+      case 'ERROR':
+        failLoadingSource(file, fetchSourceResult.errors);
         break;
-      }
-      case 'NO_KNOWN_CORS_URL': {
-        errors.push({ type: 'NO_KNOWN_CORS_URL' });
-        break;
-      }
       default:
-        throw assertExhaustiveCheck(downloadRecipe.type);
+        throw assertExhaustiveCheck(fetchSourceResult.type);
     }
-    failLoadingSource(file, errors);
   }
 
   render() {
@@ -116,9 +136,13 @@ export const SourceFetcher = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
     sourceViewSource: getSourceViewSource(state),
+    symbolServerUrl: getSymbolServerUrl(state),
+    profile: getProfileOrNull(state),
+    browserConnection: getBrowserConnection(state),
   }),
   mapDispatchToProps: {
     beginLoadingSourceFromUrl,
+    beginLoadingSourceFromBrowserConnection,
     finishLoadingSource,
     failLoadingSource,
   },
