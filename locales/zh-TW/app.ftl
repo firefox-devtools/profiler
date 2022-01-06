@@ -643,6 +643,13 @@ SourceView--local-symbol-server-api-error-when-obtaining-source = 本機符號�
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
 SourceView--not-in-archive-error-when-obtaining-source = 下載自 { $url } 的封存檔缺少下列檔案 { $pathInArchive }。
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = 無法剖析下載自 { $url } 的封存檔: { $parsingErrorMessage }
 SourceView--close-button =
     .title = 關閉原始碼畫面
 
