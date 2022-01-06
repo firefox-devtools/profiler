@@ -669,6 +669,9 @@ TransformNavigator--collapse-function-subtree = Згорнути піддере�
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Очікування відповіді з { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Очікування { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Джерельний код недоступний
@@ -686,6 +689,19 @@ SourceView--no-known-cors-url = Для цього файлу немає відо
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = Під час отримання URL-адреси { $url } сталася помилка мережі: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Файл { $pathInArchive } не знайдено в архіві з { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Не вдалося проаналізувати архів за адресою { $url }: { $parsingErrorMessage }
 SourceView--close-button =
     .title = Закрити вікно з кодом
 
