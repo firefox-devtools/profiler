@@ -601,6 +601,9 @@ TransformNavigator--collapse-function-subtree = 摺疊子樹: { $item }
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = 等待 { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = 正在等待 { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = 無法取得原始碼
@@ -618,6 +621,28 @@ SourceView--no-known-cors-url = 這個檔案沒有已知的 cross-origin-accessi
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = 取得網址 { $url } 時發生網路錯誤: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = 無法查詢瀏覽器的符號化 API: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = 瀏覽器的符號化 API 回傳錯誤: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = 本機符號伺服器的符號化 API 回傳錯誤: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = 下載自 { $url } 的封存檔缺少下列檔案 { $pathInArchive }。
 SourceView--close-button =
     .title = 關閉原始碼畫面
 
