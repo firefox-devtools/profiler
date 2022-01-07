@@ -10071,17 +10071,6 @@ Array [
     1,
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    32.89473684210527,
-    0,
-    10,
-    10,
-  ],
-  Array [
     "set globalCompositeOperation",
     "lighter",
   ],
@@ -10796,6 +10785,17 @@ Array [
   Array [
     "set fillStyle",
     Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    32.89473684210527,
+    0,
+    10,
+    10,
   ],
 ]
 `;

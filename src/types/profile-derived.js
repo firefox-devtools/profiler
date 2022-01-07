@@ -285,6 +285,8 @@ export type AccumulatedCounterSamples = {|
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
+  // mainThreadIndex is null when this is a fake global process added to contain
+  // real threads.
   | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
   | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |}
   | {| +type: 'visual-progress' |}
@@ -299,6 +301,11 @@ export type LocalTrack =
   | {| +type: 'event-delay', +threadIndex: ThreadIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
+
+// A track index doesn't always represent uniquely a track: it's merely an index inside
+// a specific structure:
+// - for global tracks, this is the index in the global tracks array
+// - for local tracks, this is the index in the local tracks array for a specific pid.
 export type TrackIndex = number;
 
 /**
