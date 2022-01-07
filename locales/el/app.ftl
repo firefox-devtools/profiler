@@ -625,6 +625,9 @@ TransformNavigator--collapse-function-subtree = Σύμπτυξη υπόδεντ�
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Αναμονή για { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Αναμονή για { -firefox-brand-name }…
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
