@@ -424,6 +424,7 @@ export type NetworkStatus =
 export type NetworkRedirectType = 'Permanent' | 'Temporary' | 'Internal';
 export type NetworkPayload = {|
   type: 'Network',
+  innerWindowID?: number,
   URI: string,
   RedirectURI?: string,
   id: number,
