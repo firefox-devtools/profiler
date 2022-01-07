@@ -50,7 +50,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
-  _resizeListener = () => this.forceUpdate();
 
   _renderCanvas() {
     const canvas = this._canvas;
@@ -62,12 +61,11 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resizeListener);
-    this.forceUpdate(); // for initial size
+    this._renderCanvas();
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._resizeListener);
+  componentDidUpdate() {
+    this._renderCanvas();
   }
 
   drawCanvas(canvas: HTMLCanvasElement) {
@@ -223,7 +221,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
   };
 
   render() {
-    this._renderCanvas();
     const { className, trackName } = this.props;
     return (
       <div className={className}>

@@ -109,18 +109,17 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       if (!checkedSharingOptions.includeHiddenThreads) {
         for (const globalTrackIndex of hiddenGlobalTracks) {
           const globalTrack = globalTracks[globalTrackIndex];
-          if (
-            globalTrack.type === 'process' &&
-            globalTrack.mainThreadIndex !== null
-          ) {
-            // This is a process thread that has been hidden.
-            shouldRemoveThreads.add(globalTrack.mainThreadIndex);
+          if (globalTrack.type === 'process') {
+            if (globalTrack.mainThreadIndex !== null) {
+              // This is a process thread that has been hidden.
+              shouldRemoveThreads.add(globalTrack.mainThreadIndex);
+            }
+
+            // Also add all of the children threads, as they are hidden as well.
             const localTracks = ensureExists(
               localTracksByPid.get(globalTrack.pid),
               'Expected to be able to get a local track by PID.'
             );
-
-            // Also add all of the children threads, as they are hidden as well.
             for (const localTrack of localTracks) {
               if (localTrack.type === 'thread') {
                 shouldRemoveThreads.add(localTrack.threadIndex);
