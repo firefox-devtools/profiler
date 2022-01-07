@@ -118,9 +118,12 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
     return (
       <div data-testid="MenuButtonsPublish-container">
-        <form className="menuButtonsPublishContent" onSubmit={attemptToPublish}>
+        <form
+          className="menuButtonsPublishContent photon-body-10"
+          onSubmit={attemptToPublish}
+        >
           <div className="menuButtonsPublishIcon" />
-          <h1 className="menuButtonsPublishTitle">
+          <h1 className="menuButtonsPublishTitle photon-title-40">
             {isRepublish ? (
               <Localized id="MenuButtons--publish--reupload-performance-profile">
                 Re-upload Performance Profile
@@ -147,7 +150,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
               </Localized>
             )}
           </p>
-          <h3>
+          <h3 className="photon-title-10">
             <Localized id="MenuButtons--publish--include-additional-data">
               Include additional data that may be identifiable
             </Localized>
@@ -213,11 +216,11 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
     return (
       <div
-        className="menuButtonsPublishUpload"
+        className="menuButtonsPublishUpload photon-body-10"
         data-testid="MenuButtonsPublish-container"
       >
         <div className="menuButtonsPublishUploadTop">
-          <div className="menuButtonsPublishUploadTitle">
+          <div className="menuButtonsPublishUploadTitle photon-title-20">
             <Localized id="MenuButtons--publish--upload-title">
               Uploading profile…
             </Localized>
@@ -270,7 +273,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
     return (
       <div
-        className="menuButtonsPublishUpload"
+        className="menuButtonsPublishUpload photon-body-10"
         data-testid="MenuButtonsPublish-container"
       >
         <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">

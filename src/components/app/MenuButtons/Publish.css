@@ -61,7 +61,6 @@
 .menuButtonsPublishInfoDescription {
   flex: 1;
   margin-bottom: 1em;
-  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -88,7 +87,6 @@
   justify-content: center;
   margin: 0 8px;
   cursor: default;
-  font-size: 13px;
   text-align: center;
   text-decoration: none;
 }
@@ -139,15 +137,9 @@
   margin: 10px;
 }
 
-.menuButtonsPublishUploadTitle {
-  font-size: 17px;
-  font-weight: bold;
-}
-
 .menuButtonsPublishUploadPercentage {
   margin: 10px 0;
   color: var(--blue-60);
-  font-size: 13px;
 }
 
 .menuButtonsPublishUploadBar {
@@ -186,5 +178,4 @@
 
 .menuButtonsPublishError {
   margin: 10px 0;
-  font-size: 13px;
 }
