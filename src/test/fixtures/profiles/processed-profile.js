@@ -1634,7 +1634,7 @@ export function addActiveTabInformationToProfile(
   activeTabID = activeTabID === undefined ? firstTabTabID : activeTabID;
 
   // Add the pages array
-  profile.pages = [
+  const pages = [
     // A top most page in the first tab
     {
       tabID: firstTabTabID,
@@ -1680,6 +1680,8 @@ export function addActiveTabInformationToProfile(
     },
   ];
 
+  profile.pages = pages;
+
   // Set the active Tab ID.
   profile.meta.configuration = {
     activeTabID,
@@ -1698,6 +1700,37 @@ export function addActiveTabInformationToProfile(
     firstTabInnerWindowIDs,
     secondTabInnerWindowIDs,
   };
+}
+
+/**
+ * Use this function to create a profile that has private browsing data.
+ * This profile should first be run through addActiveTabInformationToProfile to
+ * add pages information.
+ * To add markers with private browsing information, please use
+ * addMarkersToThreadWithCorrespondingSamples directly.
+ *
+ * Then:
+ * @param profile The profile to change
+ * @param privateBrowsingPages The array of page IDs to switch to private
+ * @param threads Optional, this specifies the threads to set to private. This
+ *                happens in Firefox in Fission mode, but not otherwise.
+ */
+export function markTabIdsAsPrivateBrowsing(
+  profile: Profile,
+  privateBrowsingPages: TabID[]
+) {
+  const pages = profile.pages;
+  if (!pages) {
+    throw new Error(
+      `Can't add private browsing data to a profile without pages. Please run addActiveTabInformationToProfile on this profile first.`
+    );
+  }
+
+  for (const page of pages) {
+    if (privateBrowsingPages.includes(page.tabID)) {
+      page.isPrivateBrowsing = true;
+    }
+  }
 }
 
 /**

@@ -36,6 +36,7 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
   addActiveTabInformationToProfile,
+  markTabIdsAsPrivateBrowsing,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { fireFullClick } from '../fixtures/utils';
@@ -197,6 +198,14 @@ describe('app/MenuButtons', function () {
         );
       const queryPreferenceCheckbox = () =>
         screen.queryByText('Include preference values');
+      const queryPrivateBrowsingCheckbox = () =>
+        screen.queryByRole('checkbox', {
+          name: /Include the data from private browsing windows/,
+        });
+      const getPrivateBrowsingCheckbox = () =>
+        screen.getByRole('checkbox', {
+          name: /Include the data from private browsing windows/,
+        });
       const getPanel = () => screen.getByTestId('MenuButtonsPublish-container');
       const openPublishPanel = async () => {
         fireFullClick(getPublishButton());
@@ -211,6 +220,8 @@ describe('app/MenuButtons', function () {
         getCancelButton,
         getPanelForm,
         queryPreferenceCheckbox,
+        queryPrivateBrowsingCheckbox,
+        getPrivateBrowsingCheckbox,
         openPublishPanel,
         resolveUpload,
         rejectUpload,
@@ -289,6 +300,42 @@ describe('app/MenuButtons', function () {
         setupForPublish(profile);
       await openPublishPanel();
       expect(queryPreferenceCheckbox()).toBeFalsy();
+    });
+
+    it('Unchecks the Include Browsing Data checkbox in nightly when some private browsing data is in the profile', async () => {
+      const { profile } = createSimpleProfile();
+      const { firstTabTabID } = addActiveTabInformationToProfile(profile);
+      markTabIdsAsPrivateBrowsing(profile, [firstTabTabID]);
+
+      const { getPrivateBrowsingCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+
+      const privateBrowsingCheckbox = getPrivateBrowsingCheckbox();
+      expect(privateBrowsingCheckbox).toBeInTheDocument();
+      expect(privateBrowsingCheckbox).not.toBeChecked();
+    });
+
+    it('Unchecks the Include Browsing Data checkbox in release when some private browsing data is in the profile', async () => {
+      const { profile } = createSimpleProfile('release');
+      const { firstTabTabID } = addActiveTabInformationToProfile(profile);
+      markTabIdsAsPrivateBrowsing(profile, [firstTabTabID]);
+
+      const { getPrivateBrowsingCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+
+      const privateBrowsingCheckbox = getPrivateBrowsingCheckbox();
+      expect(privateBrowsingCheckbox).toBeInTheDocument();
+      expect(privateBrowsingCheckbox).not.toBeChecked();
+    });
+
+    it('does not show the Include Browsing Data checkbox when no private browsing data is in the profile', async () => {
+      const { profile } = createSimpleProfile();
+      const { queryPrivateBrowsingCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+      expect(queryPrivateBrowsingCheckbox()).not.toBeInTheDocument();
     });
 
     it('can publish and revert', async () => {
