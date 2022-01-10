@@ -48,6 +48,17 @@
 .photon-message-bar-inner-text {
   display: flex;
   align-items: center;
+
+  /* This padding is carefully computed so that multi-line message bars have the
+   * same top padding than single-line message bars. Having this property
+   * shouldn't change anything for single-line message bars.
+   * It's computed like this:
+   * height of single-line message bars is 32px
+   * padding of the message-bar div is 4px
+   * height of the inner text is line-height * font-size = 1.4 * 13px = 18.2px
+   * => (32 - 4 - 18.2) / 2 = 2.9px
+   */
+  padding: 2.9px 0;
 }
 
 .photon-message-bar-error {
