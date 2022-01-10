@@ -121,13 +121,15 @@
   border-bottom: 1px solid var(--grey-30);
   margin-right: calc(var(--vertical-scrollbar-reserved-width) * -1);
   margin-left: calc(var(--thread-label-column-width) * -1);
+  background: white;
 }
 
 .tracksContainer {
   /* This should be below the timeline header. */
   z-index: 0;
 
-  /* Moving the timeline 1 pixel below the timeline header. This way, the first 
+  /* Moving the timeline 1 pixel below the timeline header. This way, the first
    * visible track's top border will be hidden as expected. */
   margin-top: -1px;
+  margin-bottom: -1px;
 }
