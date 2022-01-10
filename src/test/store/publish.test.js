@@ -119,6 +119,10 @@ describe('getCheckedSharingOptions', function () {
     it('does filter with release', function () {
       expect(getDefaultsWith('release')).toEqual(isFiltering);
     });
+
+    it('does filter with esr', function () {
+      expect(getDefaultsWith('esr')).toEqual(isFiltering);
+    });
   });
 
   describe('toggleCheckedSharingOptions', function () {

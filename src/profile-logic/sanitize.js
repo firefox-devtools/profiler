@@ -163,6 +163,7 @@ export function sanitizePII(
  */
 export function getShouldSanitizeByDefault(profile: Profile): boolean {
   switch (profile.meta.updateChannel) {
+    case 'esr':
     case 'release':
     case 'beta':
       return true;
