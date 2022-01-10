@@ -12,13 +12,6 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 import type { RemoveProfileInformation } from 'firefox-profiler/types';
-import { storeWithProfile } from '../fixtures/stores';
-import { getHasPreferenceMarkers } from '../../selectors/profile';
-import {
-  getCheckedSharingOptions,
-  getRemoveProfileInformation,
-} from '../../selectors/publish';
-import { toggleCheckedSharingOptions } from '../../actions/publish';
 import {
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,
@@ -569,23 +562,5 @@ describe('sanitizePII', function () {
     );
 
     expect(sanitizedProfile.threads[0]['eTLD+1']).toBe(eTLDPlus1);
-  });
-});
-
-describe('getRemoveProfileInformation', function () {
-  it('should bail out early when there is no preference marker in the profile', function () {
-    const { getState, dispatch } = storeWithProfile();
-    // Checking to see that we don't have Preference markers.
-    expect(getHasPreferenceMarkers(getState())).toEqual(false);
-
-    // Setting includePreferenceValues option to false
-    dispatch(toggleCheckedSharingOptions('includePreferenceValues'));
-    expect(
-      getCheckedSharingOptions(getState()).includePreferenceValues
-    ).toEqual(false);
-
-    const removeProfileInformation = getRemoveProfileInformation(getState());
-    // It should return early with null value.
-    expect(removeProfileInformation).toEqual(null);
   });
 });

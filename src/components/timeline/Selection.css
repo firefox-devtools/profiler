@@ -15,8 +15,7 @@
   width: var(--content-width);
   flex: 1;
   flex-direction: column;
-  border-left: 1px solid var(--grey-30);
-  margin-left: calc(var(--thread-label-column-width) - 1px);
+  margin-left: var(--thread-label-column-width);
   -moz-user-focus: ignore;
 }
 
