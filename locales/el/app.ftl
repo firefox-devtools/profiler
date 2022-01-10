@@ -29,6 +29,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-from-file = Δεν ήταν δυνατή η ανάγνωση του αρχείου ή η ανάλυση του προφίλ σε αυτό.
 AppViewRouter--error-local = Δεν έχει υλοποιηθεί ακόμα.
 AppViewRouter--error-public = Δεν ήταν δυνατή η λήψη του προφίλ.
 AppViewRouter--error-from-url = Δεν ήταν δυνατή η λήψη του προφίλ.
@@ -174,6 +175,13 @@ FullTimeline--graph-type = Τύπος γραφήματος:
 FullTimeline--categories-with-cpu = Κατηγορίες με CPU
 FullTimeline--categories = Κατηγορίες
 FullTimeline--stack-height = Ύψος στοίβας
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> κομμάτια
 
 ## Home page
 
@@ -468,6 +476,7 @@ ProfileFilterNavigator--full-range = Πλήρες εύρος
 ## Profile Loader Animation
 
 ProfileLoaderAnimation--loading-unpublished = Εισαγωγή προφίλ απευθείας από το { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Ανάγνωση αρχείου και επεξεργασία προφίλ…
 ProfileLoaderAnimation--loading-local = Δεν έχει υλοποιηθεί ακόμα.
 ProfileLoaderAnimation--loading-public = Λήψη και επεξεργασία προφίλ…
 ProfileLoaderAnimation--loading-from-url = Λήψη και επεξεργασία προφίλ…
@@ -628,6 +637,14 @@ SourceView--loading-url = Αναμονή για { $host }…
 # Displayed while the source view is waiting for the browser to deliver
 # the source code.
 SourceView--loading-browser-connection = Αναμονή για { -firefox-brand-name }…
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Το αρχείο «{ $pathInArchive }» δεν βρέθηκε στο αρχείο από το { $url }.
+SourceView--close-button =
+    .title = Κλείσιμο προβολής πηγής
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
