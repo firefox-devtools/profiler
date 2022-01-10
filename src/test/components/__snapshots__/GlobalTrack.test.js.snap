@@ -77,19 +77,21 @@ Process: \\"tab\\" (222)"
         <div
           class="threadActivityGraph"
         >
-          <canvas
-            class="threadActivityGraphCanvas threadActivityGraphCanvas"
-            height="400"
-            width="400"
-          >
-            <h2>
-              Activity Graph for 
-              Content Process
-            </h2>
-            <p>
-              This graph shows a visual chart of thread activity.
-            </p>
-          </canvas>
+          <div>
+            <canvas
+              class="threadActivityGraphCanvas threadActivityGraphCanvas"
+              height="400"
+              width="400"
+            >
+              <h2>
+                Activity Graph for 
+                Content Process
+              </h2>
+              <p>
+                This graph shows a visual chart of thread activity.
+              </p>
+            </canvas>
+          </div>
         </div>
         <div
           class="threadSampleGraph"
@@ -159,19 +161,21 @@ Process: \\"tab\\" (222)"
             <div
               class="threadActivityGraph"
             >
-              <canvas
-                class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                height="400"
-                width="400"
-              >
-                <h2>
-                  Activity Graph for 
-                  DOM Worker
-                </h2>
-                <p>
-                  This graph shows a visual chart of thread activity.
-                </p>
-              </canvas>
+              <div>
+                <canvas
+                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Activity Graph for 
+                    DOM Worker
+                  </h2>
+                  <p>
+                    This graph shows a visual chart of thread activity.
+                  </p>
+                </canvas>
+              </div>
             </div>
             <div
               class="threadSampleGraph"
@@ -239,19 +243,21 @@ Process: \\"tab\\" (222)"
             <div
               class="threadActivityGraph"
             >
-              <canvas
-                class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                height="400"
-                width="400"
-              >
-                <h2>
-                  Activity Graph for 
-                  Style
-                </h2>
-                <p>
-                  This graph shows a visual chart of thread activity.
-                </p>
-              </canvas>
+              <div>
+                <canvas
+                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Activity Graph for 
+                    Style
+                  </h2>
+                  <p>
+                    This graph shows a visual chart of thread activity.
+                  </p>
+                </canvas>
+              </div>
             </div>
             <div
               class="threadSampleGraph"
@@ -352,19 +358,21 @@ Process: \\"default\\" (5555)"
             <div
               class="threadActivityGraph"
             >
-              <canvas
-                class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                height="400"
-                width="400"
-              >
-                <h2>
-                  Activity Graph for 
-                  NoMain
-                </h2>
-                <p>
-                  This graph shows a visual chart of thread activity.
-                </p>
-              </canvas>
+              <div>
+                <canvas
+                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Activity Graph for 
+                    NoMain
+                  </h2>
+                  <p>
+                    This graph shows a visual chart of thread activity.
+                  </p>
+                </canvas>
+              </div>
             </div>
             <div
               class="threadSampleGraph"

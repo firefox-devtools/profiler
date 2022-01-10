@@ -40,6 +40,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
@@ -49,6 +50,7 @@ const PID = 222;
 describe('timeline/LocalTrack', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 400, height: 400 });
+  autoMockIntersectionObserver();
 
   describe('with a thread track', function () {
     it('matches the snapshot of a local track', () => {

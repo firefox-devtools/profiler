@@ -23,10 +23,12 @@ import {
   autoMockElementSize,
   getElementWithFixedSize,
 } from '../fixtures/mocks/element-size';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 describe('ProfileViewer', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
+  autoMockIntersectionObserver();
 
   beforeEach(() => {
     jest

@@ -20,6 +20,7 @@ import {
   autoMockFullNavigation,
   resetHistoryWithUrl,
 } from '../fixtures/mocks/window-navigation';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 import { coerceMatchingShape } from '../../utils/flow';
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
@@ -47,6 +48,7 @@ describe('Root with history', function () {
 
   autoMockFullNavigation();
   autoMockCanvasContext();
+  autoMockIntersectionObserver();
 
   function setup(config: TestConfig) {
     const { profileHash } = config;

@@ -32,10 +32,12 @@ import {
   getElementWithFixedSize,
 } from '../fixtures/mocks/element-size';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 describe('ActiveTabTimeline', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
+  autoMockIntersectionObserver();
   beforeEach(() => {
     jest
       .spyOn(ReactDOM, 'findDOMNode')
