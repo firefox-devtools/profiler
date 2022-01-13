@@ -32,7 +32,10 @@ import {
   autoMockElementSize,
   setMockedElementSize,
 } from '../fixtures/mocks/element-size';
-import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
+import {
+  autoMockIntersectionObserver,
+  triggerIntersectionObservers,
+} from '../fixtures/mocks/intersection-observer';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -327,5 +330,57 @@ describe('ThreadActivityGraph', function () {
           isNaN(y)
       )
     ).toEqual([]);
+  });
+
+  describe('with intersection observer', function () {
+    // Do not automatically trigger the intersection observers.
+    autoMockIntersectionObserver(false);
+
+    it('will not draw before the intersection observer', () => {
+      const { getContextDrawCalls } = setup();
+      const drawCalls = getContextDrawCalls();
+      // There are other canvases inside the TrackThread too. We want to make sure
+      // that activity graph is not drawn yet.
+      expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+        false
+      );
+    });
+
+    it('will not draw after the intersection observer if it is not intersecting', () => {
+      const { getContextDrawCalls } = setup();
+      let drawCalls = getContextDrawCalls();
+
+      // There are other canvases inside the TrackThread too. We want to make sure
+      // that activity graph is not drawn yet.
+      expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+        false
+      );
+
+      // Now let's trigger the intersection observer and make sure that it still
+      // doesn't draw it.
+      triggerIntersectionObservers({ isIntersecting: false });
+      drawCalls = getContextDrawCalls();
+      expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+        false
+      );
+    });
+
+    it('will draw after the intersection observer if it is intersecting', () => {
+      const { getContextDrawCalls } = setup();
+      let drawCalls = getContextDrawCalls();
+
+      // There are other canvases inside the TrackThread too. We want to make sure
+      // that activity graph is not drawn yet.
+      expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+        false
+      );
+
+      // Now let's trigger the intersection observer and make sure that it draws it.
+      triggerIntersectionObservers({ isIntersecting: true });
+      drawCalls = getContextDrawCalls();
+      expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+        true
+      );
+    });
   });
 });
