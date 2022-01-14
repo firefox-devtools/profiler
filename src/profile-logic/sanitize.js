@@ -421,6 +421,7 @@ function sanitizeThreadPII(
         shallowCloneFuncTable(funcTable));
       const newFrameTable = (newThread.frameTable = {
         ...frameTable,
+        innerWindowID: frameTable.innerWindowID.slice(),
         func: frameTable.func.slice(),
         line: frameTable.line.slice(),
         column: frameTable.column.slice(),
@@ -467,6 +468,7 @@ function sanitizeThreadPII(
         frameIndexes.forEach((frameIndex) => {
           newFrameTable.line[frameIndex] = null;
           newFrameTable.column[frameIndex] = null;
+          newFrameTable.innerWindowID[frameIndex] = null;
         });
       }
 
