@@ -132,6 +132,7 @@
     "husky": "^4.3.8",
     "jest": "^27.4.5",
     "jest-environment-jsdom": "^27.4.3",
+    "jest-extended": "^1.2.0",
     "json-loader": "^0.5.7",
     "local-web-server": "^4.2.1",
     "lockfile-lint": "^4.6.2",
@@ -170,6 +171,7 @@
       "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.js"
     },
     "setupFilesAfterEnv": [
+      "jest-extended/all",
       "./src/test/setup.js"
     ],
     "globals": {
