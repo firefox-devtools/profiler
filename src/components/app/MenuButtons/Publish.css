@@ -39,23 +39,15 @@
 
   /* This aligns all content, except the big icon. */
   padding-left: 70px;
-
-  /* This is the same value as the "top" property for menuButtonsPublishIcon,
-   * so that the visible space at the top is the same as at the bottom. */
-  margin-top: 6px;
-}
-
-.menuButtonsPublishIcon {
-  position: absolute;
-  top: -6px;
-  left: 10px;
-  width: 44px;
-  height: 44px;
-  background: url(firefox-profiler-res/img/svg/info.svg) center center no-repeat;
 }
 
 .menuButtonsPublishTitle {
-  margin: 0;
+  /* "60px" This is the value to put the background image at the right location.
+   * This background image is 44x44, so this puts it 16px left of the text. */
+  padding-left: 60px;
+  margin: 0 0 0 -60px;
+  background: url(firefox-profiler-res/img/svg/info.svg) left center no-repeat;
+  line-height: 44px; /* This is the height of the background image */
 }
 
 .menuButtonsPublishInfoDescription {

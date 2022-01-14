@@ -122,7 +122,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           className="menuButtonsPublishContent photon-body-10"
           onSubmit={attemptToPublish}
         >
-          <div className="menuButtonsPublishIcon" />
           <h1 className="menuButtonsPublishTitle photon-title-40">
             {isRepublish ? (
               <Localized id="MenuButtons--publish--reupload-performance-profile">

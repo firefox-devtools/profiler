@@ -1598,9 +1598,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
   <form
     class="menuButtonsPublishContent photon-body-10"
   >
-    <div
-      class="menuButtonsPublishIcon"
-    />
     <h1
       class="menuButtonsPublishTitle photon-title-40"
     >
@@ -1714,9 +1711,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
   <form
     class="menuButtonsPublishContent photon-body-10"
   >
-    <div
-      class="menuButtonsPublishIcon"
-    />
     <h1
       class="menuButtonsPublishTitle photon-title-40"
     >
@@ -1835,9 +1829,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
   <form
     class="menuButtonsPublishContent photon-body-10"
   >
-    <div
-      class="menuButtonsPublishIcon"
-    />
     <h1
       class="menuButtonsPublishTitle photon-title-40"
     >
