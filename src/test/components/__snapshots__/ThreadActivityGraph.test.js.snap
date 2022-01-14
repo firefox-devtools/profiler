@@ -10840,19 +10840,21 @@ exports[`ThreadActivityGraph matches the component snapshot 1`] = `
   <div
     class="threadSampleGraph"
   >
-    <canvas
-      class="threadSampleGraphCanvas threadSampleGraphCanvas"
-      height="10"
-      width="80"
-    >
-      <h2>
-        Stack Graph for 
-        Test Track
-      </h2>
-      <p>
-        This graph charts the stack height of each sample.
-      </p>
-    </canvas>
+    <div>
+      <canvas
+        class="threadSampleGraphCanvas threadSampleGraphCanvas"
+        height="10"
+        width="80"
+      >
+        <h2>
+          Stack Graph for 
+          Test Track
+        </h2>
+        <p>
+          This graph charts the stack height of each sample.
+        </p>
+      </canvas>
+    </div>
   </div>
   <div
     class="timelineEmptyThreadIndicator"

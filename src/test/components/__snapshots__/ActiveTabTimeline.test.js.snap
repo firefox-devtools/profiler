@@ -35,19 +35,21 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
         <div
           class="threadSampleGraph"
         >
-          <canvas
-            class="threadSampleGraphCanvas threadSampleGraphCanvas"
-            height="300"
-            width="200"
-          >
-            <h2>
-              Stack Graph for 
-              Active Tab
-            </h2>
-            <p>
-              This graph charts the stack height of each sample.
-            </p>
-          </canvas>
+          <div>
+            <canvas
+              class="threadSampleGraphCanvas threadSampleGraphCanvas"
+              height="300"
+              width="200"
+            >
+              <h2>
+                Stack Graph for 
+                Active Tab
+              </h2>
+              <p>
+                This graph charts the stack height of each sample.
+              </p>
+            </canvas>
+          </div>
         </div>
         <div
           class="timelineTrackThreadMarkers"
@@ -134,19 +136,21 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
         <div
           class="threadSampleGraph"
         >
-          <canvas
-            class="threadSampleGraphCanvas threadSampleGraphCanvas"
-            height="300"
-            width="200"
-          >
-            <h2>
-              Stack Graph for 
-              Page #3
-            </h2>
-            <p>
-              This graph charts the stack height of each sample.
-            </p>
-          </canvas>
+          <div>
+            <canvas
+              class="threadSampleGraphCanvas threadSampleGraphCanvas"
+              height="300"
+              width="200"
+            >
+              <h2>
+                Stack Graph for 
+                Page #3
+              </h2>
+              <p>
+                This graph charts the stack height of each sample.
+              </p>
+            </canvas>
+          </div>
         </div>
         <div
           class="timelineTrackThreadMarkers"
@@ -211,19 +215,21 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
       <div
         class="threadSampleGraph"
       >
-        <canvas
-          class="threadSampleGraphCanvas threadSampleGraphCanvas"
-          height="300"
-          width="200"
-        >
-          <h2>
-            Stack Graph for 
-            Merged resource tracks
-          </h2>
-          <p>
-            This graph charts the stack height of each sample.
-          </p>
-        </canvas>
+        <div>
+          <canvas
+            class="threadSampleGraphCanvas threadSampleGraphCanvas"
+            height="300"
+            width="200"
+          >
+            <h2>
+              Stack Graph for 
+              Merged resource tracks
+            </h2>
+            <p>
+              This graph charts the stack height of each sample.
+            </p>
+          </canvas>
+        </div>
       </div>
       <div
         class="timelineTrackThreadMarkers"
@@ -287,19 +293,21 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
       <div
         class="threadSampleGraph"
       >
-        <canvas
-          class="threadSampleGraphCanvas threadSampleGraphCanvas"
-          height="300"
-          width="200"
-        >
-          <h2>
-            Stack Graph for 
-            Merged resource tracks
-          </h2>
-          <p>
-            This graph charts the stack height of each sample.
-          </p>
-        </canvas>
+        <div>
+          <canvas
+            class="threadSampleGraphCanvas threadSampleGraphCanvas"
+            height="300"
+            width="200"
+          >
+            <h2>
+              Stack Graph for 
+              Merged resource tracks
+            </h2>
+            <p>
+              This graph charts the stack height of each sample.
+            </p>
+          </canvas>
+        </div>
       </div>
       <div
         class="timelineTrackThreadMarkers"
@@ -370,19 +378,21 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
             <div
               class="threadSampleGraph"
             >
-              <canvas
-                class="threadSampleGraphCanvas threadSampleGraphCanvas"
-                height="300"
-                width="200"
-              >
-                <h2>
-                  Stack Graph for 
-                  Page #2
-                </h2>
-                <p>
-                  This graph charts the stack height of each sample.
-                </p>
-              </canvas>
+              <div>
+                <canvas
+                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                  height="300"
+                  width="200"
+                >
+                  <h2>
+                    Stack Graph for 
+                    Page #2
+                  </h2>
+                  <p>
+                    This graph charts the stack height of each sample.
+                  </p>
+                </canvas>
+              </div>
             </div>
             <div
               class="timelineTrackThreadMarkers"
@@ -514,19 +524,21 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                   <div
                     class="threadSampleGraph"
                   >
-                    <canvas
-                      class="threadSampleGraphCanvas threadSampleGraphCanvas"
-                      height="300"
-                      width="200"
-                    >
-                      <h2>
-                        Stack Graph for 
-                        Active Tab
-                      </h2>
-                      <p>
-                        This graph charts the stack height of each sample.
-                      </p>
-                    </canvas>
+                    <div>
+                      <canvas
+                        class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                        height="300"
+                        width="200"
+                      >
+                        <h2>
+                          Stack Graph for 
+                          Active Tab
+                        </h2>
+                        <p>
+                          This graph charts the stack height of each sample.
+                        </p>
+                      </canvas>
+                    </div>
                   </div>
                   <div
                     class="timelineTrackThreadMarkers"
