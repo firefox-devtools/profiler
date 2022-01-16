@@ -9,6 +9,10 @@ import '@testing-library/jest-dom';
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
 
+// Utilize fetchMock from jest-fetch-mock
+import fetchMock from 'jest-fetch-mock';
+fetchMock.enableMocks();
+
 afterEach(function () {
   // This `__shutdownWorkers` function only exists in the mocked test environment,
   // do not use flow typing on it.
