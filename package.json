@@ -63,6 +63,7 @@
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.3.3",
     "idb": "^7.0.0",
+    "jest-fetch-mock": "^3.0.3",
     "jszip": "^3.7.1",
     "memoize-immutable": "^3.0.0",
     "memoize-one": "^6.0.0",
