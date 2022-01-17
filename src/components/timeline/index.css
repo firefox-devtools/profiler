@@ -121,6 +121,9 @@
   border-bottom: 1px solid var(--grey-30);
   margin-right: calc(var(--vertical-scrollbar-reserved-width) * -1);
   margin-left: calc(var(--thread-label-column-width) * -1);
+
+  /* This div needs to be apaque so that it can properly hide the hidden tracks
+   * container border below */
   background: white;
 }
 
