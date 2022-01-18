@@ -2,14 +2,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { CallTree } from '../../profile-logic/call-tree';
+import {
+  getCallTree,
+  computeCallTreeCountsAndSummary,
+  type CallTree,
+} from 'firefox-profiler/profile-logic/call-tree';
+import { getCallNodeInfo } from 'firefox-profiler/profile-logic/profile-data';
+
 import type {
   IndexIntoCallNodeTable,
+  Profile,
   Store,
   State,
 } from 'firefox-profiler/types';
 
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import { fireEvent, screen } from '@testing-library/react';
 
 /**
@@ -89,6 +96,44 @@ export function getMouseEvent(
     ...values,
   };
   return new FakeMouseEvent(type, values);
+}
+
+/**
+ * This function retrieves a CallTree object from a profile.
+ * It's convenient to use it with formatTree below.
+ */
+export function callTreeFromProfile(
+  profile: Profile,
+  threadIndex: number = 0
+): CallTree {
+  const thread = profile.threads[threadIndex];
+  const { interval } = profile.meta;
+  const categories = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  );
+  const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    thread.funcTable,
+    defaultCategory
+  );
+  const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
+    thread.samples,
+    callNodeInfo,
+    interval,
+    false
+  );
+  return getCallTree(
+    thread,
+    interval,
+    callNodeInfo,
+    categories,
+    'combined',
+    callTreeCountsAndSummary,
+    'samples'
+  );
 }
 
 /**
