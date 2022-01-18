@@ -6,7 +6,11 @@
 import type { Action, SourceLoadingError } from 'firefox-profiler/types';
 
 export function beginLoadingSourceFromUrl(file: string, url: string): Action {
-  return { type: 'SOURCE_LOADING_BEGIN', file, url };
+  return { type: 'SOURCE_LOADING_BEGIN_URL', file, url };
+}
+
+export function beginLoadingSourceFromBrowserConnection(file: string): Action {
+  return { type: 'SOURCE_LOADING_BEGIN_BROWSER_CONNECTION', file };
 }
 
 export function finishLoadingSource(file: string, source: string): Action {

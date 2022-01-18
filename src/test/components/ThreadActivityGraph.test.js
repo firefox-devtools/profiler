@@ -32,6 +32,10 @@ import {
   autoMockElementSize,
   setMockedElementSize,
 } from '../fixtures/mocks/element-size';
+import {
+  autoMockIntersectionObserver,
+  triggerIntersectionObservers,
+} from '../fixtures/mocks/intersection-observer';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -45,19 +49,20 @@ function getSamplesPixelPosition(
   return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
 }
 
+function getSamplesProfile() {
+  return getProfileFromTextSamples(`
+    A[cat:DOM]   A[cat:DOM]       A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]
+    B            B                B              B              B              B              B              B
+    C            C                H[cat:Layout]  H[cat:Layout]  H[cat:Layout]  H[cat:Layout]  H[cat:Layout]  C
+    D            F[cat:Graphics]  I              I              I              I              I              F[cat:Graphics]
+    E[cat:Idle]  G                                                                                           G
+  `).profile;
+}
+
 describe('ThreadActivityGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
-
-  function getSamplesProfile() {
-    return getProfileFromTextSamples(`
-      A[cat:DOM]   A[cat:DOM]       A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]
-      B            B                B              B              B              B              B              B
-      C            C                H[cat:Layout]  H[cat:Layout]  H[cat:Layout]  H[cat:Layout]  H[cat:Layout]  C
-      D            F[cat:Graphics]  I              I              I              I              I              F[cat:Graphics]
-      E[cat:Idle]  G                                                                                           G
-    `).profile;
-  }
+  autoMockIntersectionObserver();
 
   function setup(profile: Profile = getSamplesProfile()) {
     const store = storeWithProfile(profile);
@@ -325,5 +330,142 @@ describe('ThreadActivityGraph', function () {
           isNaN(y)
       )
     ).toEqual([]);
+  });
+});
+
+describe('ThreadActivityGraph with intersection observer', function () {
+  // Do not automatically trigger the intersection observers.
+  autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
+  autoMockIntersectionObserver(false);
+
+  function setup(profile: Profile = getSamplesProfile()) {
+    const store = storeWithProfile(profile);
+    const { getState, dispatch } = store;
+    const flushRafCalls = mockRaf();
+
+    /**
+     * The ThreadActivityGraph is not a connected component. It's easiest to
+     * test it as once it's connected to the Redux store in TimelineTrackThread.
+     */
+    const renderResult = render(
+      <Provider store={store}>
+        <TimelineTrackThread
+          threadsKey={0}
+          trackType="expanded"
+          trackName="Test Track"
+        />
+      </Provider>
+    );
+
+    // WithSize uses requestAnimationFrame
+    flushRafCalls();
+
+    /**
+     * Coordinate the flushing of the requestAnimationFrame and the draw calls.
+     */
+    function getContextDrawCalls() {
+      flushRafCalls();
+      return (window: any).__flushDrawLog();
+    }
+
+    return {
+      ...renderResult,
+      dispatch,
+      getState,
+      profile,
+      store,
+      getContextDrawCalls,
+    };
+  }
+
+  it('will not draw before the intersection observer', () => {
+    const { getContextDrawCalls } = setup();
+    const drawCalls = getContextDrawCalls();
+    // There are other canvases inside the TrackThread too. We want to make sure
+    // that activity graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+  });
+
+  it('will not draw after the intersection observer if it is not intersecting', () => {
+    const { getContextDrawCalls } = setup();
+    let drawCalls = getContextDrawCalls();
+
+    // There are other canvases inside the TrackThread too. We want to make sure
+    // that activity graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer and make sure that it still
+    // doesn't draw it.
+    triggerIntersectionObservers({ isIntersecting: false });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+  });
+
+  it('will draw after the intersection observer if it is intersecting', () => {
+    const { getContextDrawCalls } = setup();
+    let drawCalls = getContextDrawCalls();
+
+    // There are other canvases inside the TrackThread too. We want to make sure
+    // that activity graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer and make sure that it draws it.
+    triggerIntersectionObservers({ isIntersecting: true });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
+  });
+
+  it('will redraw after it becomes visible again', () => {
+    const { getContextDrawCalls } = setup();
+    let drawCalls = getContextDrawCalls();
+
+    // There are other canvases inside the TrackThread too. We want to make sure
+    // that activity graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer and make sure that it draws it.
+    triggerIntersectionObservers({ isIntersecting: true });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
+
+    // Now it goes out of view again. Make sure that we don't redraw.
+    triggerIntersectionObservers({ isIntersecting: false });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Send out the resize with a width change.
+    // By changing the "fake" result of getBoundingClientRect, we ensure that
+    // the pure components rerender because their `width` props change.
+    setMockedElementSize({ width: GRAPH_WIDTH * 2, height: GRAPH_HEIGHT });
+    window.dispatchEvent(new Event('resize'));
+    drawCalls = getContextDrawCalls();
+    // It should still be not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer again and make sure that it redraws.
+    triggerIntersectionObservers({ isIntersecting: true });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
   });
 });

@@ -131,7 +131,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
             />
             <Localized id="FullTimeline--categories">Categories</Localized>
           </label>
-          <label className="photon-label-micro timelineSettingsToggleLabel">
+          <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
             <input
               type="radio"
               name="timelineSettingsToggle"
@@ -315,7 +315,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
             />
           </div>
           <OverflowEdgeIndicator
-            className="timelineOverflowEdgeIndicator"
+            className="tracksContainer timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}
             initialSelected={this.state.initialSelected}
           >

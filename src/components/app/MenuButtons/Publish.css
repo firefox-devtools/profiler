@@ -39,29 +39,20 @@
 
   /* This aligns all content, except the big icon. */
   padding-left: 70px;
-
-  /* This is the same value as the "top" property for menuButtonsPublishIcon,
-   * so that the visible space at the top is the same as at the bottom. */
-  margin-top: 6px;
-}
-
-.menuButtonsPublishIcon {
-  position: absolute;
-  top: -6px;
-  left: 10px;
-  width: 44px;
-  height: 44px;
-  background: url(firefox-profiler-res/img/svg/info.svg) center center no-repeat;
 }
 
 .menuButtonsPublishTitle {
-  margin: 0;
+  /* "60px" This is the value to put the background image at the right location.
+   * This background image is 44x44, so this puts it 16px left of the text. */
+  padding-left: 60px;
+  margin: 0 0 0 -60px;
+  background: url(firefox-profiler-res/img/svg/info.svg) left center no-repeat;
+  line-height: 44px; /* This is the height of the background image */
 }
 
 .menuButtonsPublishInfoDescription {
   flex: 1;
   margin-bottom: 1em;
-  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -88,7 +79,6 @@
   justify-content: center;
   margin: 0 8px;
   cursor: default;
-  font-size: 13px;
   text-align: center;
   text-decoration: none;
 }
@@ -139,15 +129,9 @@
   margin: 10px;
 }
 
-.menuButtonsPublishUploadTitle {
-  font-size: 17px;
-  font-weight: bold;
-}
-
 .menuButtonsPublishUploadPercentage {
   margin: 10px 0;
   color: var(--blue-60);
-  font-size: 13px;
 }
 
 .menuButtonsPublishUploadBar {
@@ -186,5 +170,4 @@
 
 .menuButtonsPublishError {
   margin: 10px 0;
-  font-size: 13px;
 }

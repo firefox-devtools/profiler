@@ -35,9 +35,14 @@ import {
   getHash,
   getTransformStack,
 } from '../../selectors/url-state';
+import { getHasPreferenceMarkers } from '../../selectors/profile';
 import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithFakeGlobalTrack,
+  getHumanReadableTracks,
+} from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { ensureExists } from '../../utils/flow';
@@ -114,6 +119,10 @@ describe('getCheckedSharingOptions', function () {
     it('does filter with release', function () {
       expect(getDefaultsWith('release')).toEqual(isFiltering);
     });
+
+    it('does filter with esr', function () {
+      expect(getDefaultsWith('esr')).toEqual(isFiltering);
+    });
   });
 
   describe('toggleCheckedSharingOptions', function () {
@@ -138,6 +147,63 @@ describe('getCheckedSharingOptions', function () {
       expect(getCheckedSharingOptions(getState())).toMatchObject({
         includeHiddenThreads: false,
       });
+    });
+  });
+});
+
+describe('getRemoveProfileInformation', function () {
+  it('should bail out early when there is no preference marker in the profile', function () {
+    const { getState, dispatch } = storeWithProfile();
+    // Checking to see that we don't have Preference markers.
+    expect(getHasPreferenceMarkers(getState())).toEqual(false);
+
+    // Setting includePreferenceValues option to false
+    dispatch(toggleCheckedSharingOptions('includePreferenceValues'));
+    expect(
+      getCheckedSharingOptions(getState()).includePreferenceValues
+    ).toEqual(false);
+
+    const removeProfileInformation = getRemoveProfileInformation(getState());
+    // It should return early with null value.
+    expect(removeProfileInformation).toEqual(null);
+  });
+
+  it('should remove child threads of fake main threads', function () {
+    const profile = getProfileWithFakeGlobalTrack();
+    const { getState, dispatch } = storeWithProfile(profile);
+
+    // Check the initial state
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [process]',
+      '  - show [thread Thread <0>] SELECTED',
+      '  - show [thread Thread <1>]',
+      'show [process]',
+      '  - show [thread Thread <2>]',
+      '  - show [thread Thread <3>]',
+    ]);
+
+    expect(getRemoveProfileInformation(getState())).toBe(null);
+
+    // Hide the second process
+    dispatch(hideGlobalTrack(1));
+
+    // Is it the right state?
+    // The second global track is hidden but not its children -- note that
+    // they're still hidden in the UI but not in the state: they still need to
+    // be sanitized out!
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [process]',
+      '  - show [thread Thread <0>] SELECTED',
+      '  - show [thread Thread <1>]',
+      'hide [process]',
+      '  - show [thread Thread <2>]',
+      '  - show [thread Thread <3>]',
+    ]);
+
+    // Toggle the preference to remove hidden tracks
+    dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
+    expect(getRemoveProfileInformation(getState())).toMatchObject({
+      shouldRemoveThreads: new Set([2, 3]),
     });
   });
 });

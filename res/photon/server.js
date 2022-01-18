@@ -8,20 +8,17 @@ const host = process.env.FX_PROFILER_PHOTON_HOST || 'localhost';
 
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],
-  contentBase: config.output.path,
-  publicPath: config.output.publicPath,
-  stats: {
-    colors: true,
-  },
+  host,
+  port,
+  static: false,
 };
 
-new WebpackDevServer(webpack(config), serverConfig).listen(port, host, function(
-  err
-) {
-  if (err) {
-    console.log(err);
-  }
-  console.log(
-    `> Photon styling is listening at: http://${host}:${port}/photon/\n`
-  );
-});
+const server = new WebpackDevServer(serverConfig, webpack(config));
+server
+  .start()
+  .then(function () {
+    console.log(
+      `> Photon styling is listening at: http://${host}:${port}/photon/\n`
+    );
+  })
+  .catch((err) => console.log(err));

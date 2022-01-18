@@ -23,11 +23,13 @@ import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 describe('timeline/GlobalTrack', function () {
   autoMockCanvasContext();
   // Some child components render to canvas.
   autoMockElementSize({ width: 400, height: 400 });
+  autoMockIntersectionObserver();
 
   /**
    *  getProfileWithNiceTracks() looks like: [
