@@ -1622,7 +1622,7 @@ export function addActiveTabInformationToProfile(
   const secondTabTabID = 4;
   const parentInnerWindowIDsWithChildren = 11111111111;
   const iframeInnerWindowIDsWithChild = 11111111112;
-  const fistTabInnerWindowIDs = [
+  const firstTabInnerWindowIDs = [
     parentInnerWindowIDsWithChildren,
     iframeInnerWindowIDsWithChild,
     11111111113,
@@ -1652,7 +1652,7 @@ export function addActiveTabInformationToProfile(
     // Another iframe page inside the previous iframe
     {
       tabID: 3,
-      innerWindowID: fistTabInnerWindowIDs[2],
+      innerWindowID: firstTabInnerWindowIDs[2],
       url: 'Page #3',
       embedderInnerWindowID: iframeInnerWindowIDsWithChild,
     },
@@ -1667,7 +1667,7 @@ export function addActiveTabInformationToProfile(
     // Their tabIDs are the same because of that.
     {
       tabID: firstTabTabID,
-      innerWindowID: fistTabInnerWindowIDs[3],
+      innerWindowID: firstTabInnerWindowIDs[3],
       url: 'Page #5',
       embedderInnerWindowID: 0,
     },
@@ -1695,7 +1695,7 @@ export function addActiveTabInformationToProfile(
     parentInnerWindowIDsWithChildren,
     iframeInnerWindowIDsWithChild,
     activeTabID,
-    fistTabInnerWindowIDs,
+    firstTabInnerWindowIDs,
     secondTabInnerWindowIDs,
   };
 }
