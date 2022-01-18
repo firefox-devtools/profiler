@@ -425,4 +425,47 @@ describe('ThreadActivityGraph with intersection observer', function () {
       true
     );
   });
+
+  it('will redraw after it becomes visible again', () => {
+    const { getContextDrawCalls } = setup();
+    let drawCalls = getContextDrawCalls();
+
+    // There are other canvases inside the TrackThread too. We want to make sure
+    // that activity graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer and make sure that it draws it.
+    triggerIntersectionObservers({ isIntersecting: true });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
+
+    // Now it goes out of view again. Make sure that we don't redraw.
+    triggerIntersectionObservers({ isIntersecting: false });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Send out the resize with a width change.
+    // By changing the "fake" result of getBoundingClientRect, we ensure that
+    // the pure components rerender because their `width` props change.
+    setMockedElementSize({ width: GRAPH_WIDTH * 2, height: GRAPH_HEIGHT });
+    window.dispatchEvent(new Event('resize'));
+    drawCalls = getContextDrawCalls();
+    // It should still be not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer again and make sure that it redraws.
+    triggerIntersectionObservers({ isIntersecting: true });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
+  });
 });
