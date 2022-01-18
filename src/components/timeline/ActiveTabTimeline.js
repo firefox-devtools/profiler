@@ -97,7 +97,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
             width={width}
           />
           <OverflowEdgeIndicator
-            className="timelineOverflowEdgeIndicator"
+            className="tracksContainer timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}
             initialSelected={this.state.initialSelected}
             forceLayoutGeneration={this.state.forceLayoutGeneration}
