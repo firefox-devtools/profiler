@@ -792,13 +792,10 @@ describe('sanitizePII', function () {
         '    - Cjs (total: 1, self: 1)',
       ]);
       expect(formatTree(callTreeFromProfile(sanitizedProfile))).toEqual([
-        '- A (total: 5, self: —)',
-        '  - B (total: 5, self: —)',
-        '    - <Func #3> (total: 2, self: 1)',
-        '      - F (total: 1, self: 1)',
+        '- A (total: 2, self: —)',
+        '  - B (total: 2, self: —)',
         '    - Cjs (total: 1, self: 1)',
         '    - Ejs (total: 1, self: 1)',
-        '    - <Func #6> (total: 1, self: 1)',
       ]);
     });
   });

@@ -378,7 +378,7 @@ function sanitizeThreadPII(
     windowIdToBeSanitized.size > 0
   ) {
     // In this block, we'll remove everything related to frame table entries
-    // that have the isPrivateBrowsing flag.
+    // that have a innerWindowID with a isPrivateBrowsing flag.
 
     // This map holds the information about the frame indexes that should be
     // sanitized, with their functions as a key, so that we can easily change
@@ -392,7 +392,8 @@ function sanitizeThreadPII(
     // be split in 2.
     const funcIndexesToBeKept = new Set();
 
-    const { frameTable, funcTable, resourceTable } = newThread;
+    const { frameTable, funcTable, resourceTable, stackTable, samples } =
+      newThread;
     for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
       const innerWindowId = frameTable.innerWindowID[frameIndex];
       const funcIndex = frameTable.func[frameIndex];
@@ -425,6 +426,10 @@ function sanitizeThreadPII(
         func: frameTable.func.slice(),
         line: frameTable.line.slice(),
         column: frameTable.column.slice(),
+      });
+      const newSamples = (newThread.samples = {
+        ...samples,
+        stack: samples.stack.slice(),
       });
 
       for (const [
@@ -489,6 +494,42 @@ function sanitizeThreadPII(
             newResourceTable.lib[resourceIndex] = undefined;
             newResourceTable.host[resourceIndex] = undefined;
           }
+        }
+      }
+
+      // Now we'll remove samples related to the frames
+      // First we'll loop the stack table and populate a typed array with a flag
+      // indicating "this stack index has an ancestor with the private browsing
+      // flag". This means children inherits the private browsing flag. This is
+      // possible because when iterating we visit parents before their children.
+      const isStackPrivateBrowsing = new Uint8Array(stackTable.length);
+      for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+        const prefix = stackTable.prefix[stackIndex];
+        if (prefix !== null && isStackPrivateBrowsing[prefix]) {
+          isStackPrivateBrowsing[stackIndex] = 1;
+          continue;
+        }
+
+        const frameIndex = stackTable.frame[stackIndex];
+        const innerWindowID = frameTable.innerWindowID[frameIndex];
+        if (!innerWindowID) {
+          continue;
+        }
+
+        const isPrivateBrowsing = windowIdToBeSanitized.has(innerWindowID);
+        if (isPrivateBrowsing) {
+          isStackPrivateBrowsing[stackIndex] = 1;
+        }
+      }
+
+      for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+        const stackIndex = samples.stack[sampleIndex];
+        if (stackIndex === null) {
+          continue;
+        }
+
+        if (isStackPrivateBrowsing[stackIndex]) {
+          newSamples.stack[sampleIndex] = null;
         }
       }
     }
