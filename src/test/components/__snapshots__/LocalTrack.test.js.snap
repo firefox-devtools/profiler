@@ -169,36 +169,40 @@ Process: \\"tab\\" (222)"
         <div
           class="threadActivityGraph"
         >
-          <canvas
-            class="threadActivityGraphCanvas threadActivityGraphCanvas"
-            height="400"
-            width="400"
-          >
-            <h2>
-              Activity Graph for 
-              DOM Worker
-            </h2>
-            <p>
-              This graph shows a visual chart of thread activity.
-            </p>
-          </canvas>
+          <div>
+            <canvas
+              class="threadActivityGraphCanvas threadActivityGraphCanvas"
+              height="400"
+              width="400"
+            >
+              <h2>
+                Activity Graph for 
+                DOM Worker
+              </h2>
+              <p>
+                This graph shows a visual chart of thread activity.
+              </p>
+            </canvas>
+          </div>
         </div>
         <div
           class="threadSampleGraph"
         >
-          <canvas
-            class="threadSampleGraphCanvas threadSampleGraphCanvas"
-            height="400"
-            width="400"
-          >
-            <h2>
-              Stack Graph for 
-              DOM Worker
-            </h2>
-            <p>
-              This graph charts the stack height of each sample.
-            </p>
-          </canvas>
+          <div>
+            <canvas
+              class="threadSampleGraphCanvas threadSampleGraphCanvas"
+              height="400"
+              width="400"
+            >
+              <h2>
+                Stack Graph for 
+                DOM Worker
+              </h2>
+              <p>
+                This graph charts the stack height of each sample.
+              </p>
+            </canvas>
+          </div>
         </div>
         <div
           class="timelineEmptyThreadIndicator"
