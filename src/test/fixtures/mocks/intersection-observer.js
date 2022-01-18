@@ -35,6 +35,15 @@ const observers: Map<MockIntersectionObserver, Item> = new Map();
 /**
  * Call this function inside a `describe` block to automatically define the
  * intersection observer.
+ *
+ * If the autoTrigger parameter is true, it will automatically trigger the
+ * intersection callback with `isIntersecting` = true. This means that it will
+ * work like the component is already visible in the viewport. This is useful
+ * when you don't want to test the behavior of intersection observer. If
+ * autoTrigger is false, it will not call the callback automatically, so you can
+ * do it manually with `triggerIntersectionObservers` when you need to. This will
+ * give you a better control over the intersection observer and is used mostly
+ * when you want to test the intersection observer behavior.
  */
 export function autoMockIntersectionObserver(autoTrigger?: boolean = true) {
   beforeEach(() => {
@@ -74,6 +83,7 @@ export function autoMockIntersectionObserver(autoTrigger?: boolean = true) {
 
   afterEach(() => {
     delete (window: any).IntersectionObserver;
+    observers.clear();
   });
 }
 
@@ -109,7 +119,7 @@ function triggerSingleObserver(
 
 /**
  * Trigger intersection observer callbacks.
- * `isIntersecting` can be true for hidden elements and true for visible ones.
+ * `isIntersecting` can be false for hidden elements and true for visible ones.
  */
 export function triggerIntersectionObservers({
   isIntersecting = true,
