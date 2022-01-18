@@ -557,7 +557,7 @@ TransformNavigator--complete = 完成「{ $item }」
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
-TransformNavigator--collapse-resource = 折疊: { $item }
+TransformNavigator--collapse-resource = 摺疊: { $item }
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
