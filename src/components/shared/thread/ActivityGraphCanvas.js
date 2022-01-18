@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import { InView } from 'react-intersection-observer';
 import {
   ActivityFillGraphQuerier,
   computeActivityGraphFills,
@@ -48,8 +49,22 @@ type CanvasProps = {|
 export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
   _canvas: {| current: null | HTMLCanvasElement |} = React.createRef();
   _categoryDrawStyles: null | CategoryDrawStyles = null;
+  _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
+    renderScheduled: false,
+    inView: false,
+  };
 
   _renderCanvas() {
+    if (!this._canvasState.inView) {
+      // Canvas is not in the view. Schedule the render for a later intersection
+      // observer callback.
+      this._canvasState.renderScheduled = true;
+      return;
+    }
+
+    // Canvas is in the view. Render the canvas and reset the schedule state.
+    this._canvasState.renderScheduled = false;
+
     const canvas = this._canvas.current;
     if (canvas !== null) {
       timeCode('ThreadActivityGraph render', () => {
@@ -82,6 +97,16 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
 
     return this._categoryDrawStyles;
   }
+
+  _observerCallback = (inView: boolean, _entry: IntersectionObserverEntry) => {
+    this._canvasState.inView = inView;
+    if (!this._canvasState.renderScheduled) {
+      // Skip if render is not scheduled.
+      return;
+    }
+
+    this._renderCanvas();
+  };
 
   componentDidMount() {
     this._renderCanvas();
@@ -196,10 +221,12 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
   render() {
     const { className, trackName, onClick } = this.props;
     return (
-      <canvas className={className} ref={this._canvas} onClick={onClick}>
-        <h2>Activity Graph for {trackName}</h2>
-        <p>This graph shows a visual chart of thread activity.</p>
-      </canvas>
+      <InView onChange={this._observerCallback}>
+        <canvas className={className} ref={this._canvas} onClick={onClick}>
+          <h2>Activity Graph for {trackName}</h2>
+          <p>This graph shows a visual chart of thread activity.</p>
+        </canvas>
+      </InView>
     );
   }
 }

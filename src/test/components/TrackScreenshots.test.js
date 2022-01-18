@@ -37,6 +37,7 @@ import {
   autoMockElementSize,
   setMockedElementSize,
 } from '../fixtures/mocks/element-size';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 // Mock out the element size to have a 400 pixel width and some left/top
 // positioning.
@@ -54,6 +55,7 @@ describe('timeline/TrackScreenshots', function () {
   autoMockDomRect();
   autoMockCanvasContext();
   autoMockElementSize(INITIAL_ELEMENT_SIZE);
+  autoMockIntersectionObserver();
 
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
