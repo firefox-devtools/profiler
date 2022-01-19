@@ -607,6 +607,9 @@ TransformNavigator--collapse-function-subtree = Réduction de la sous-arborescen
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = En attente de { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = En attente de { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Source non disponible
@@ -624,6 +627,12 @@ SourceView--no-known-cors-url = Aucune URL multiorigine accessible n’est connu
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = Une erreur réseau s’est produite lors de la récupération de l’URL { $url } : { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Le fichier { $pathInArchive } est introuvable dans l’archive provenant de { $url }.
 SourceView--close-button =
     .title = Fermer la vue du code source
 
