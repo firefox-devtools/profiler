@@ -33,12 +33,16 @@
 
 .photon-title-20 {
   font-size: 17px;
-  font-weight: 500;
+
+  /* This should be 500 instead of bold, but 500 isn't available on all fonts */
+  font-weight: bold;
 }
 
 .photon-title-10 {
   font-size: 13px;
-  font-weight: 500;
+
+  /* This should be 500 instead of bold, but 500 isn't available on all fonts */
+  font-weight: bold;
 }
 
 .photon-body-30 {

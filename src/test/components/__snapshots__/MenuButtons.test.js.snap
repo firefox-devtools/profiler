@@ -1478,7 +1478,7 @@ exports[`app/MenuButtons <Publish> can publish and revert 1`] = `
 
 exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
 <div
-  class="menuButtonsPublishUpload"
+  class="menuButtonsPublishUpload photon-body-10"
   data-testid="MenuButtonsPublish-container"
 >
   <div
@@ -1596,13 +1596,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
   data-testid="MenuButtonsPublish-container"
 >
   <form
-    class="menuButtonsPublishContent"
+    class="menuButtonsPublishContent photon-body-10"
   >
-    <div
-      class="menuButtonsPublishIcon"
-    />
     <h1
-      class="menuButtonsPublishTitle"
+      class="menuButtonsPublishTitle photon-title-40"
     >
       Re-upload Performance Profile
     </h1>
@@ -1613,7 +1610,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
        
       By default, your personal data is removed.
     </p>
-    <h3>
+    <h3
+      class="photon-title-10"
+    >
       Include additional data that may be identifiable
     </h3>
     <div
@@ -1710,13 +1709,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
   data-testid="MenuButtonsPublish-container"
 >
   <form
-    class="menuButtonsPublishContent"
+    class="menuButtonsPublishContent photon-body-10"
   >
-    <div
-      class="menuButtonsPublishIcon"
-    />
     <h1
-      class="menuButtonsPublishTitle"
+      class="menuButtonsPublishTitle photon-title-40"
     >
       Share Performance Profile
     </h1>
@@ -1727,7 +1723,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
        
       This profile is from ⁨Firefox Nightly⁩, so by default all information is included.
     </p>
-    <h3>
+    <h3
+      class="photon-title-10"
+    >
       Include additional data that may be identifiable
     </h3>
     <div
@@ -1829,13 +1827,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
   data-testid="MenuButtonsPublish-container"
 >
   <form
-    class="menuButtonsPublishContent"
+    class="menuButtonsPublishContent photon-body-10"
   >
-    <div
-      class="menuButtonsPublishIcon"
-    />
     <h1
-      class="menuButtonsPublishTitle"
+      class="menuButtonsPublishTitle photon-title-40"
     >
       Share Performance Profile
     </h1>
@@ -1846,7 +1841,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
        
       By default, your personal data is removed.
     </p>
-    <h3>
+    <h3
+      class="photon-title-10"
+    >
       Include additional data that may be identifiable
     </h3>
     <div

@@ -5,6 +5,7 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+import { InView } from 'react-intersection-observer';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import {
@@ -50,8 +51,22 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
+  _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
+    renderScheduled: false,
+    inView: false,
+  };
 
   _renderCanvas() {
+    if (!this._canvasState.inView) {
+      // Canvas is not in the view. Schedule the render for a later intersection
+      // observer callback.
+      this._canvasState.renderScheduled = true;
+      return;
+    }
+
+    // Canvas is in the view. Render the canvas and reset the schedule state.
+    this._canvasState.renderScheduled = false;
+
     const canvas = this._canvas;
     if (canvas !== null) {
       timeCode('ThreadSampleGraph render', () => {
@@ -59,6 +74,16 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
       });
     }
   }
+
+  _observerCallback = (inView: boolean, _entry: IntersectionObserverEntry) => {
+    this._canvasState.inView = inView;
+    if (!this._canvasState.renderScheduled) {
+      // Skip if render is not scheduled.
+      return;
+    }
+
+    this._renderCanvas();
+  };
 
   componentDidMount() {
     this._renderCanvas();
@@ -224,17 +249,19 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     const { className, trackName } = this.props;
     return (
       <div className={className}>
-        <canvas
-          className={classNames(
-            `${this.props.className}Canvas`,
-            'threadSampleGraphCanvas'
-          )}
-          ref={this._takeCanvasRef}
-          onClick={this._onClick}
-        >
-          <h2>Stack Graph for {trackName}</h2>
-          <p>This graph charts the stack height of each sample.</p>
-        </canvas>
+        <InView onChange={this._observerCallback}>
+          <canvas
+            className={classNames(
+              `${this.props.className}Canvas`,
+              'threadSampleGraphCanvas'
+            )}
+            ref={this._takeCanvasRef}
+            onClick={this._onClick}
+          >
+            <h2>Stack Graph for {trackName}</h2>
+            <p>This graph charts the stack height of each sample.</p>
+          </canvas>
+        </InView>
       </div>
     );
   }

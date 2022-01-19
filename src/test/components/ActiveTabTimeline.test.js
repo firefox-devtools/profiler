@@ -32,10 +32,12 @@ import {
   getElementWithFixedSize,
 } from '../fixtures/mocks/element-size';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 describe('ActiveTabTimeline', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
+  autoMockIntersectionObserver();
   beforeEach(() => {
     jest
       .spyOn(ReactDOM, 'findDOMNode')
@@ -287,7 +289,7 @@ describe('ActiveTabTimeline', function () {
       profile.threads[1].frameTable.innerWindowID[0] =
         pageInfo.iframeInnerWindowIDsWithChild;
       profile.threads[threadIndex].frameTable.innerWindowID[0] =
-        pageInfo.fistTabInnerWindowIDs[2];
+        pageInfo.firstTabInnerWindowIDs[2];
       profile.threads[threadIndex].name = 'GeckoMain';
       const store = storeWithProfile(profile);
       store.dispatch(
