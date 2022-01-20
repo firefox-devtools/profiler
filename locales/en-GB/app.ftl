@@ -502,6 +502,20 @@ NetworkSettings--panel-search =
     .label = Filter Networks:
     .title = Only display network requests that match a certain name
 
+## Timestamp formatting primitive
+
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
+
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
