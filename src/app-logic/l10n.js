@@ -9,7 +9,7 @@ import {
   PSEUDO_STRATEGIES,
   PSEUDO_STRATEGIES_DIRECTION,
 } from 'firefox-profiler/utils/l10n-pseudo';
-import { SHORTDATE } from 'firefox-profiler/utils/l10n-ftl-functions';
+import { HBYTES, SHORTDATE } from 'firefox-profiler/utils/l10n-ftl-functions';
 
 // This contains the locales we support in the production. Don't forget to update
 // the array RTL_LOCALES when adding a RTL locale, if necessary.
@@ -66,7 +66,7 @@ export function* lazilyParsedBundles(
     const resource = new FluentResource(messages);
     const bundle = new FluentBundle(locale, {
       transform,
-      functions: { SHORTDATE },
+      functions: { HBYTES, SHORTDATE },
     });
     bundle.addResource(resource);
     yield bundle;

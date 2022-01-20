@@ -434,6 +434,7 @@ MenuButtons--metaInfo--recording-started = Recording started:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--profile-version = Profile Version:
 MenuButtons--metaInfo--buffer-capacity = Buffer Capacity:
+MenuButtons--metaInfo--buffer-capacity-bytes = { HBYTES($capacity, significantDigits: 0) }
 MenuButtons--metaInfo--buffer-duration = Buffer Duration:
 
 # Buffer Duration in Seconds in Meta Info Panel
@@ -543,6 +544,13 @@ NetworkSettings--panel-search =
 # Variables:
 #   $date (Date) - The date to display in a shorter way
 NumberFormat--short-date = { SHORTDATE($date) }
+
+## Bytes number formatting primitives
+## They're used internally by the HBYTES function that we use in other ids.
+NumberFormat--bytes = { $value } B
+NumberFormat--kibibytes = { $value } KiB
+NumberFormat--mebibytes = { $value } MiB
+NumberFormat--gibibytes = { $value } GiB
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
