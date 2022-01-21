@@ -171,6 +171,11 @@ CallTree--inlining-badge = (inlined)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Select a node to display information about it.
+CallTreeSidebar--percentage =
+  { $percent ->
+      [0] {"\u2014"}
+     *[other] { PERCENT($percent) }
+  }
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
