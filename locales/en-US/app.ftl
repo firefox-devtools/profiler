@@ -515,6 +515,7 @@ MenuButtons--metaOverheadStatistics-statkeys-lockings = Lockings
     .title = Time to acquire the lock before sampling.
 MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
+MenuButtons--metaOverheadStatistics-overhead-percentage-value = { PERCENT($percent) }
 MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
 
 ## Publish panel
