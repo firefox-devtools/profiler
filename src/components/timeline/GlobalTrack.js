@@ -179,7 +179,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
         return (
           <TrackVisualProgress
             progressGraphData={progressGraphData}
-            graphDotTooltipText=" visual completeness at this time"
+            graphDotTooltipTextId="TrackVisualProgressGraph--visual-progress--tooltip"
           />
         );
       }
@@ -190,7 +190,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
         return (
           <TrackVisualProgress
             progressGraphData={progressGraphData}
-            graphDotTooltipText=" perceptual visual completeness at this time"
+            graphDotTooltipTextId="TrackVisualProgressGraph--perceptual-visual-progress--tooltip"
           />
         );
       }
@@ -201,7 +201,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
         return (
           <TrackVisualProgress
             progressGraphData={progressGraphData}
-            graphDotTooltipText=" contentful visual completeness at this time"
+            graphDotTooltipTextId="TrackVisualProgressGraph--contentful-visual-progress--tooltip"
           />
         );
       }

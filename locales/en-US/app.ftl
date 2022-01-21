@@ -734,6 +734,16 @@ TrackSearchField--search-input =
     .placeholder = Enter filter terms
     .title = Only display tracks that match a certain text
 
+## TrackVisualProgressGraph
+## This component is responsible to show the progression of a page's rendering
+
+TrackVisualProgressGraph--visual-progress--tooltip =
+  <span>{ PERCENT($percentage) }</span> visual completeness at this time
+TrackVisualProgressGraph--perceptual-visual-progress--tooltip =
+  <span>{ PERCENT($percentage) }</span> perceptual visual completeness at this time
+TrackVisualProgressGraph--contentful-visual-progress--tooltip =
+  <span>{ PERCENT($percentage) }</span> contentful visual completeness at this time
+
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
 ## Chart components.

@@ -64,7 +64,7 @@ describe('TrackVisualProgress', function () {
       <Provider store={store}>
         <TrackVisualProgress
           progressGraphData={VisualProgress}
-          graphDotTooltipText=" visual completeness at this time"
+          graphDotTooltipTextId="TrackVisualProgressGraph--visual-progress--tooltip"
         />
       </Provider>
     );
