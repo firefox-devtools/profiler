@@ -217,3 +217,30 @@ export const HBYTES: FluentFunction = (args, named) => {
 
   return new FluentIdWithValue(value, l10nId);
 };
+
+export const HSI: FluentFunction = (args, _named) => {
+  const arg = args[0];
+  if (!(arg instanceof FluentNumber)) {
+    return new FluentNone(`NUMBER(${String(arg)})`);
+  }
+
+  const num = arg.valueOf();
+
+  let l10nId, value;
+  if (num < 10000) {
+    // Use singles up to 10,000.  I think 9,360 looks nicer than 9.36K.
+    l10nId = 'NumberFormat--SI--no-modifier';
+    value = getNumberForFluent(num);
+  } else if (num < 1000 ** 2) {
+    l10nId = 'NumberFormat--SI--kilo';
+    value = getNumberForFluent(num / 1000, 3, 2);
+  } else if (num < 1000 ** 3) {
+    l10nId = 'NumberFormat--SI--mega';
+    value = getNumberForFluent(num / 1000 ** 2, 3, 2);
+  } else {
+    l10nId = 'NumberFormat--SI--giga';
+    value = getNumberForFluent(num / 1000 ** 3, 3, 2) + 'G';
+  }
+
+  return new FluentIdWithValue(value, l10nId);
+};

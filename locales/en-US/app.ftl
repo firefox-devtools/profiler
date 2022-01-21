@@ -552,6 +552,14 @@ NumberFormat--kibibytes = { $value } KiB
 NumberFormat--mebibytes = { $value } MiB
 NumberFormat--gibibytes = { $value } GiB
 
+## SI number formatting primitives.
+## They're useful to add a multiplier for numbers without units.
+## They're used internally by the HSI function that we use in other ids.
+NumberFormat--SI--no-modifier = { $value }
+NumberFormat--SI--kilo = { $value }K
+NumberFormat--SI--mega = { $value }M
+NumberFormat--SI--giga = { $value }G
+
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
