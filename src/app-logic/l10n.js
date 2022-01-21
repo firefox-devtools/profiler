@@ -12,6 +12,7 @@ import {
 import {
   HBYTES,
   HSI,
+  PERCENT,
   SHORTDATE,
 } from 'firefox-profiler/utils/l10n-ftl-functions';
 
@@ -70,7 +71,7 @@ export function* lazilyParsedBundles(
     const resource = new FluentResource(messages);
     const bundle = new FluentBundle(locale, {
       transform,
-      functions: { HBYTES, HSI, SHORTDATE },
+      functions: { HBYTES, HSI, PERCENT, SHORTDATE },
     });
     bundle.addResource(resource);
     yield bundle;

@@ -244,3 +244,19 @@ export const HSI: FluentFunction = (args, _named) => {
 
   return new FluentIdWithValue(value, l10nId);
 };
+
+export const PERCENT: FluentFunction = (args, _named) => {
+  const arg = args[0];
+  if (!(arg instanceof FluentNumber)) {
+    return new FluentNone(`NUMBER(${String(arg)})`);
+  }
+
+  const percent = arg.valueOf();
+  return getNumberForFluent(
+    percent,
+
+    /* significantDigits */ 2,
+    /* maxFractionalDigits */ 1,
+    'percent'
+  );
+};
