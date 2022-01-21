@@ -524,6 +524,13 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 
+## Network marker tooltips
+
+# Requested bytes for a network request
+# Variables:
+#   - $bytes (number) - The count of bytes received for this request.
+NetworkMarker--tooltip--transfered-bytes = { HBYTES($bytes) }
+
 ## NetworkSettings
 ## This is used in the network chart.
 
