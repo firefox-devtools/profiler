@@ -679,6 +679,25 @@ TrackContextMenu--show-all-tracks-below = Show all tracks below
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = No results found for “<span>{ $searchFilter }</span>”
 
+## TrackMemoryGraph
+## The component used to display memory information in the timeline.
+
+# In tooltips, this shows the memory relative to the minimum in the range at this time.
+# Note that HBYTES is a function specific to the profiler code, that will
+# automatically chose the correct multiplier. Look at the NumberFormat l10n ids
+# to change the localization for these multipliers.
+# Variables:
+#   $memory (number) - The amount of used memory
+TrackMemoryGraph--relative-memory = <span>{ HBYTES($memory) }</span> relative memory at this time
+
+# In tooltips, this shows the memory range for the full profile.
+# Note that HBYTES is a function specific to the profiler code, that will
+# automatically chose the correct multiplier. Look at the NumberFormat l10n ids
+# to change the localization for these multipliers.
+# Variables:
+#   $range (number) - The range of memory we've seen in this graph.
+TrackMemoryGraph--memory-range = <span>{ HBYTES($range) }</span> memory range in graph
+
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
