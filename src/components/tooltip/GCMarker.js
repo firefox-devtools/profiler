@@ -5,14 +5,12 @@
 // @flow
 
 import * as React from 'react';
+import { Localized } from '@fluent/react';
 import {
   formatNumber,
   formatPercent,
-  formatBytes,
-  formatSI,
   formatMicroseconds,
   formatMilliseconds,
-  formatValueTotal,
 } from 'firefox-profiler/utils/format-numbers';
 
 import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
@@ -54,109 +52,160 @@ export function getGCMinorDetails(
           <TooltipDetail label="Reason" key="GCMinor-Reason">
             {nursery.reason}
           </TooltipDetail>,
-          <TooltipDetail label="Bytes tenured" key="GCMinor-Bytes tenured">
-            {formatValueTotal(
-              nursery.bytes_tenured,
-              nursery.bytes_used,
-              formatBytes
-            )}
-          </TooltipDetail>
+          <Localized
+            id="GCMarker--tooltip--bytes-tenured"
+            key="GCMinor-Bytes tenured"
+            vars={{
+              tenured: nursery.bytes_tenured,
+              used: nursery.bytes_used,
+              percent: nursery.bytes_tenured / nursery.bytes_used,
+            }}
+          >
+            <TooltipDetail label="Bytes tenured">
+              {nursery.bytes_tenured} / {nursery.bytes_used} (XXX%)
+            </TooltipDetail>
+          </Localized>
         );
         if (nursery.cells_tenured && nursery.cells_allocated_nursery) {
           details.push(
-            <TooltipDetail label="Cells tenured" key="GCMinor-Cells tenured">
-              {formatValueTotal(
-                nursery.cells_tenured,
-                nursery.cells_allocated_nursery,
-                formatSI
-              )}
-            </TooltipDetail>
+            <Localized
+              id="GCMarker--tooltip--cells-tenured"
+              key="GCMinor-Cells tenured"
+              vars={{
+                tenured: nursery.cells_tenured,
+                allocated: nursery.cells_allocated_nursery,
+                percent:
+                  nursery.cells_tenured / nursery.cells_allocated_nursery,
+              }}
+            >
+              <TooltipDetail label="Cells tenured">
+                {nursery.cells_tenured} ∕ {nursery.cells_allocated_nursery}{' '}
+                (XXX%)
+              </TooltipDetail>
+            </Localized>
           );
         }
         if (nursery.cur_capacity) {
           details.push(
-            <TooltipDetail label="Bytes used" key="GCMinor-Bytes used">
-              {formatValueTotal(
-                nursery.bytes_used,
-                nursery.cur_capacity,
-                formatBytes
-              )}
-            </TooltipDetail>
+            <Localized
+              id="GCMarker--tooltip--bytes-used"
+              key="GCMinor-Bytes used"
+              vars={{
+                used: nursery.bytes_used,
+                capacity: nursery.cur_capacity,
+                percent: nursery.bytes_used / nursery.cur_capacity,
+              }}
+            >
+              <TooltipDetail label="Bytes used">
+                {nursery.bytes_used} / {nursery.cur_capacity} (XXX%)
+              </TooltipDetail>
+            </Localized>
           );
         }
         if (nursery.new_capacity) {
           details.push(
-            <TooltipDetail
-              label="New nursery size"
+            <Localized
+              id="GCMarker--tooltip--new-nursery-size"
               key="GCMinor-New nursery size"
+              vars={{
+                capacity: nursery.new_capacity,
+              }}
             >
-              {formatBytes(nursery.new_capacity)}
-            </TooltipDetail>
+              <TooltipDetail label="New nursery size">
+                {nursery.new_capacity}
+              </TooltipDetail>
+            </Localized>
           );
         }
         if (nursery.lazy_capacity) {
           details.push(
-            <TooltipDetail
-              label="Lazy-allocated size"
+            <Localized
+              id="GCMarker--tooltip--lazy-allocated-size"
               key="GCMinor-Lazy-allocated size"
+              vars={{
+                capacity: nursery.lazy_capacity,
+              }}
             >
-              {formatBytes(nursery.lazy_capacity)}
-            </TooltipDetail>
+              <TooltipDetail label="Lazy-allocated size">
+                {nursery.lazy_capacity}
+              </TooltipDetail>
+            </Localized>
           );
         }
         if (
           nursery.cells_allocated_nursery &&
           nursery.cells_allocated_tenured
         ) {
+          const allocatedCellsInNursery = nursery.cells_allocated_nursery;
+          const total =
+            nursery.cells_allocated_nursery + nursery.cells_allocated_tenured;
           details.push(
-            <TooltipDetail
-              label="Nursery allocations since last minor GC"
+            <Localized
+              id="GCMarker--tooltip--nursery-allocations"
               key="GCMinor-Nursery allocations since last minor GC"
+              vars={{
+                nursery: allocatedCellsInNursery,
+                total,
+                percent: allocatedCellsInNursery / total,
+              }}
             >
-              {formatValueTotal(
-                nursery.cells_allocated_nursery,
-                nursery.cells_allocated_nursery +
-                  nursery.cells_allocated_tenured,
-                formatSI
-              )}
-            </TooltipDetail>
+              <TooltipDetail label="Nursery allocations since last minor GC">
+                {allocatedCellsInNursery} / {total} (XXX%)
+              </TooltipDetail>
+            </Localized>
           );
         }
         if (evictTimeMS) {
           details.push(
-            <TooltipDetail
-              label="Tenuring allocation rate"
+            <Localized
+              id="GCMarker--tooltip--tenuring-allocation-rate-bytes"
               key="GCMinor-bytes_tenured"
-            >
-              {formatBytes(
+              vars={{
                 // evictTimeMS is in milliseconds.
-                nursery.bytes_tenured / (evictTimeMS / 1000000)
-              ) + '/s'}
-            </TooltipDetail>
+                rate: nursery.bytes_tenured / (evictTimeMS / 1000000),
+              }}
+            >
+              <TooltipDetail label="Tenuring allocation rate">
+                {nursery.bytes_tenured / (evictTimeMS / 1000000)}/s
+              </TooltipDetail>
+            </Localized>
           );
           if (nursery.cells_tenured) {
             details.push(
-              <TooltipDetail
-                label="Tenuring allocation rate"
+              <Localized
+                id="GCMarker--tooltip--tenuring-allocation-rate-cells"
                 key="GCMinor-cells_tenured"
+                vars={{
+                  rate: nursery.cells_tenured / (evictTimeMS / 10000000),
+                }}
               >
-                {formatSI(nursery.cells_tenured / (evictTimeMS / 10000000)) +
-                  '/s'}
-              </TooltipDetail>
+                <TooltipDetail label="Tenuring allocation rate">
+                  {nursery.cells_tenured / (evictTimeMS / 10000000)}/s
+                </TooltipDetail>
+              </Localized>
             );
           }
           if (nursery.strings_tenured && nursery.strings_deduplicated) {
+            const deduplicated = nursery.strings_deduplicated;
+            const total =
+              nursery.strings_deduplicated + nursery.strings_tenured;
             details.push(
-              <TooltipDetail
-                label="Strings deduplicated when tenuring"
+              <Localized
+                id="GCMarker--tooltip--strings-deduplicated"
                 key="GCMinor-strings_deduped"
+                vars={{
+                  deduplicated,
+                  total,
+                  percent: deduplicated / total,
+                }}
               >
-                {formatValueTotal(
-                  nursery.strings_deduplicated,
-                  nursery.strings_deduplicated + nursery.strings_tenured,
-                  formatSI
-                )}
-              </TooltipDetail>
+                <TooltipDetail
+                  label="Strings deduplicated when tenuring"
+                  key="GCMinor-strings_deduped"
+                >
+                  {deduplicated} / {total} (XXX%)
+                </TooltipDetail>
+              </Localized>
             );
           }
         }
@@ -248,20 +297,32 @@ export function getGCMajorDetails(
       const post_heap_size = timings.post_heap_size;
       if (post_heap_size !== undefined) {
         gcsize = (
-          <TooltipDetail
-            label="Heap size (pre - post)"
+          <Localized
+            id="GCMarker--tooltip--heap-size-with-post"
+            vars={{
+              pre: timings.allocated_bytes,
+              post: post_heap_size,
+            }}
             key="GMajor-Heap size (pre - post)"
           >
-            {formatBytes(timings.allocated_bytes) +
-              ' - ' +
-              formatBytes(post_heap_size)}
-          </TooltipDetail>
+            <TooltipDetail label="Heap size (pre - post)">
+              {timings.allocated_bytes}-{post_heap_size}
+            </TooltipDetail>
+          </Localized>
         );
       } else {
         gcsize = (
-          <TooltipDetail label="Heap size (pre)" key="GMajor-Heap size (pre)">
-            {formatBytes(timings.allocated_bytes)}
-          </TooltipDetail>
+          <Localized
+            id="GCMarker--tooltip--heap-size"
+            key="GMajor-Heap size (pre)"
+            vars={{
+              pre: timings.allocated_bytes,
+            }}
+          >
+            <TooltipDetail label="Heap size (pre)" key="GMajor-Heap size (pre)">
+              {timings.allocated_bytes}
+            </TooltipDetail>
+          </Localized>
         );
       }
       details.push(
@@ -296,13 +357,19 @@ export function getGCMajorDetails(
         <TooltipDetail label="Slices" key="GMajor-Slices">
           {timings.slices}
         </TooltipDetail>,
-        <TooltipDetail label="Zones" key="GMajor-Zones">
-          {formatValueTotal(
-            timings.zones_collected,
-            timings.total_zones,
-            String
-          )}
-        </TooltipDetail>,
+        <Localized
+          id="GCMarker--tooltip--zones"
+          key="GMajor-Zones"
+          vars={{
+            collected: timings.zones_collected,
+            total: timings.total_zones,
+            percent: timings.zones_collected / timings.total_zones,
+          }}
+        >
+          <TooltipDetail label="Zones">
+            {timings.zones_collected} / {timings.total_zones} (XXX%)
+          </TooltipDetail>
+        </Localized>,
         <TooltipDetail label="Compartments" key="GMajor-Compartments">
           {timings.total_compartments}
         </TooltipDetail>,
@@ -324,14 +391,18 @@ export function getGCSliceDetails(
   let triggers = null;
   if (timings.trigger_amount && timings.trigger_threshold) {
     triggers = (
-      <TooltipDetail label="Trigger (amt/trig)" key="GSlice-Trigger (amt/trig)">
-        {formatValueTotal(
-          timings.trigger_amount,
-          timings.trigger_threshold,
-          formatBytes,
-          false /* includePercent */
-        )}
-      </TooltipDetail>
+      <Localized
+        id="GCMarker--tooltip--trigger"
+        key="GSlice-Trigger (amt/trig)"
+        vars={{
+          amount: timings.trigger_amount,
+          threshold: timings.trigger_threshold,
+        }}
+      >
+        <TooltipDetail label="Trigger (amt/trig)">
+          {timings.trigger_amount} / {timings.trigger_threshold}
+        </TooltipDetail>
+      </Localized>
     );
   }
   const phase_times = _filterInterestingPhaseTimes(timings.phase_times, 6);

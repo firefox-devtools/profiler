@@ -27,8 +27,7 @@ import * as React from 'react';
 
 type DetailProps = {|
   +label: string,
-  // Only one child is accepted.
-  +children?: void | null | boolean | string | number | React.Element<any>,
+  +children?: React.Node,
 |};
 
 export function TooltipDetail({ label, children }: DetailProps) {
@@ -39,7 +38,7 @@ export function TooltipDetail({ label, children }: DetailProps) {
   return (
     <React.Fragment>
       <div className="tooltipLabel">{label}:</div>
-      {children}
+      <div className="tooltipDetailValue">{children}</div>
     </React.Fragment>
   );
 }

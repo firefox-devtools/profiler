@@ -231,6 +231,22 @@ FullTimeline--stack-height = Stack height
 FullTimeline--tracks-button =
     <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks
 
+## GCMarker tooltips
+
+GCMarker--tooltip--bytes-tenured = { HBYTES($tenured) } / { HBYTES($used) } ({ PERCENT($percent) })
+GCMarker--tooltip--bytes-used = { HBYTES($used) } / { HBYTES($capacity) } ({ PERCENT($percent) })
+GCMarker--tooltip--cells-tenured = { HSI($tenured) } / { HSI($allocated) } ({ PERCENT($percent) })
+GCMarker--tooltip--heap-size = { HBYTES($pre) }
+GCMarker--tooltip--heap-size-with-post = { HBYTES($pre) } - { HBYTES($post) }
+GCMarker--tooltip--lazy-allocated-size = { HBYTES($capacity) }
+GCMarker--tooltip--new-nursery-size = { HBYTES($capacity) }
+GCMarker--tooltip--nursery-allocations = { HSI($nursery) } / { HSI($total) } ({ PERCENT($percent) })
+GCMarker--tooltip--strings-deduplicated = { HSI($deduplicated) } / { HSI($total) } ({ PERCENT($percent) })
+GCMarker--tooltip--tenuring-allocation-rate-bytes = { HBYTES($rate) }/s
+GCMarker--tooltip--tenuring-allocation-rate-cells = { HSI($rate) }/s
+GCMarker--tooltip--trigger = { HBYTES($amount) } / { HBYTES($threshold) }
+GCMarker--tooltip--zones = { $collected } / { $total } ({ PERCENT($percent) })
+
 ## Home page
 
 Home--upload-from-file-input-button = Load a profile from file

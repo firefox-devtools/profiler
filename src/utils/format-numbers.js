@@ -281,24 +281,3 @@ export function formatTimestamp(
     Number.isInteger(time * 1000 * 1000) ? 0 : maxFractionalDigits
   );
 }
-
-/*
- * Format a value and a total to the form "v/t (p%)".  For example this can
- * be used to print "7MB/10MB (70%)"  fornatNum is a function to format the
- * individual numbers and includePercent may be set to false if you do not
- * wish to print the percentage.
- */
-export function formatValueTotal(
-  a: number,
-  b: number,
-  formatNum: (number) => string = String,
-  includePercent: boolean = true
-) {
-  const value_total = formatNum(a) + ' / ' + formatNum(b);
-  let percent = '';
-  if (includePercent) {
-    percent = ' (' + formatPercent(a / b) + ')';
-  }
-
-  return value_total + percent;
-}
