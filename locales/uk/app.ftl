@@ -359,6 +359,12 @@ MenuButtons--index--profile-info-uploaded-label = Вивантажено:
 MenuButtons--index--profile-info-uploaded-actions = Видалити
 MenuButtons--index--metaInfo-subtitle = Інформація про профіль
 MenuButtons--metaInfo--symbols = Символи:
+MenuButtons--metaInfo--profile-symbolicated = Профіль символізований
+MenuButtons--metaInfo--profile-not-symbolicated = Профіль не символізований
+MenuButtons--metaInfo--resymbolicate-profile = Повторно символізувати профіль
+MenuButtons--metaInfo--symbolicate-profile = Символізувати профіль
+MenuButtons--metaInfo--attempting-resymbolicate = Спроба повторно символізувати профіль
+MenuButtons--metaInfo--currently-symbolicating = Наразі профіль символізується
 MenuButtons--metaInfo--cpu = ЦП:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
@@ -690,6 +696,22 @@ SourceView--no-known-cors-url = Для цього файлу немає відо
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = Під час отримання URL-адреси { $url } сталася помилка мережі: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Не вдалося запитати API символізації браузера: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = API символізації браузера повернув помилку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = API символізації локального сервера символів повернув помилку: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
