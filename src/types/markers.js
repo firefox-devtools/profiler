@@ -424,6 +424,7 @@ export type NetworkStatus =
 export type NetworkRedirectType = 'Permanent' | 'Temporary' | 'Internal';
 export type NetworkPayload = {|
   type: 'Network',
+  innerWindowID?: number,
   URI: string,
   RedirectURI?: string,
   id: number,
@@ -450,6 +451,16 @@ export type NetworkPayload = {|
   // this property is absent then it means this profiler came from an
   // older version of the Gecko profiler without content type support.
   contentType?: string | null,
+
+  // If present and true, this network marker originated from a request in a
+  // private browsing session.
+  // Most markers tied to a window also have a innerWindowID property, but
+  // that's not always the case, especially for the requests for the top level
+  // navigation. That's why this property is needed in addition to the
+  // innerWindowID property that we also have.
+  // It's always absent in Firefox < 98 because we couldn't capture private
+  // browsing data back then.
+  isPrivateBrowsing?: boolean,
 
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look

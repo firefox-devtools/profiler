@@ -124,12 +124,13 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         const protocol = page.url.slice(0, hostIndex);
         const rest = page.url.slice(hostIndex + host.length);
         return (
-          <TooltipDetail label="URL">
+          <TooltipDetail label="Page">
             <div className="tooltipDetailsUrl">
               <span className="tooltipDetailsDim">{protocol}</span>
               {host}
               <span className="tooltipDetailsDim">{rest}</span>
               {innerWindowIDSuffix}
+              {page.isPrivateBrowsing ? ' (private)' : null}
             </div>
           </TooltipDetail>
         );
@@ -139,7 +140,10 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         if (innerWindowIDSuffix) {
           url += innerWindowIDSuffix;
         }
-        return <TooltipDetail label="URL">{url}</TooltipDetail>;
+        if (page.isPrivateBrowsing) {
+          url += ' (private)';
+        }
+        return <TooltipDetail label="Page">{url}</TooltipDetail>;
       }
     }
     return null;

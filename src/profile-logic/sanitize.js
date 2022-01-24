@@ -8,6 +8,7 @@ import { UniqueStringArray } from '../utils/unique-string-array';
 import {
   getEmptyExtensions,
   shallowCloneRawMarkerTable,
+  shallowCloneFuncTable,
 } from './data-structures';
 import { removeURLs } from '../utils/string';
 import {
@@ -26,6 +27,8 @@ import type {
   RemoveProfileInformation,
   StartEndRange,
   DerivedMarkerInfo,
+  IndexIntoFrameTable,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
@@ -59,19 +62,28 @@ export function sanitizePII(
   const PIIToBeRemoved = maybePIIToBeRemoved;
   const oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> = new Map();
 
-  let pages;
-  if (profile.pages) {
-    if (PIIToBeRemoved.shouldRemoveUrls) {
-      pages = profile.pages.map((page, pageIndex) =>
-        Object.assign({}, page, {
-          url: removeURLs(page.url, `<Page #${pageIndex}>`),
-        })
-      );
-    } else {
-      pages = profile.pages;
+  const windowIdToBeSanitized = new Set();
+  let pages = profile.pages;
+  if (pages) {
+    if (PIIToBeRemoved.shouldRemovePrivateBrowsingData) {
+      // slicing here so that we can mutate it later.
+      pages = pages.slice();
+
+      for (let i = pages.length - 1; i >= 0; i--) {
+        const page = pages[i];
+        if (page.isPrivateBrowsing) {
+          windowIdToBeSanitized.add(page.innerWindowID);
+          pages.splice(i, 1);
+        }
+      }
     }
-  } else {
-    pages = undefined;
+
+    if (PIIToBeRemoved.shouldRemoveUrls) {
+      pages = pages.map((page, pageIndex) => ({
+        ...page,
+        url: removeURLs(page.url, `<Page #${pageIndex}>`),
+      }));
+    }
   }
 
   const newProfile = {
@@ -88,7 +100,8 @@ export function sanitizePII(
         thread,
         derivedMarkerInfoForAllThreads[threadIndex],
         threadIndex,
-        PIIToBeRemoved
+        PIIToBeRemoved,
+        windowIdToBeSanitized
       );
 
       // Filtering out the current thread if it's null.
@@ -180,7 +193,8 @@ function sanitizeThreadPII(
   thread: Thread,
   derivedMarkerInfo: DerivedMarkerInfo,
   threadIndex: number,
-  PIIToBeRemoved: RemoveProfileInformation
+  PIIToBeRemoved: RemoveProfileInformation,
+  windowIdToBeSanitized: Set<number>
 ): Thread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
     // If this is a hidden thread, remove the thread immediately.
@@ -189,8 +203,16 @@ function sanitizeThreadPII(
     // inside `serializeProfile` function.
     return null;
   }
-  // Deep copying the thread since we are gonna mutate it and we don't want to alter
-  // current thread.
+
+  if (
+    PIIToBeRemoved.shouldRemovePrivateBrowsingData &&
+    thread.isPrivateBrowsing
+  ) {
+    // This thread contains only private browsing data and the user wants that
+    // we remove it.
+    return null;
+  }
+
   // We need to update the stringTable. It's not possible with UniqueStringArray.
   const stringArray = thread.stringTable.serializeToArray();
   let markerTable = shallowCloneRawMarkerTable(thread.markers);
@@ -202,7 +224,8 @@ function sanitizeThreadPII(
     PIIToBeRemoved.shouldRemoveUrls ||
     PIIToBeRemoved.shouldRemovePreferenceValues ||
     PIIToBeRemoved.shouldRemoveExtensions ||
-    PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0
+    PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0 ||
+    PIIToBeRemoved.shouldRemovePrivateBrowsingData
   ) {
     for (let i = 0; i < markerTable.length; i++) {
       let currentMarker = markerTable.data[i];
@@ -211,7 +234,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemovePreferenceValues &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'PreferenceRead'
       ) {
         // Remove the preference value field from the marker payload.
@@ -222,7 +244,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveUrls &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'Network'
       ) {
         // Remove the URI fields from marker payload.
@@ -237,7 +258,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveUrls &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'FileIO'
       ) {
         // Remove the filename path from marker payload.
@@ -247,7 +267,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveUrls &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'Text'
       ) {
         // Sanitize all the name fields of text markers in case they contain URLs.
@@ -260,7 +279,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveExtensions &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'Text'
       ) {
         const markerName = stringArray[markerTable.name[i]];
@@ -276,7 +294,6 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.has(threadIndex) &&
         currentMarker &&
-        currentMarker.type &&
         currentMarker.type === 'CompositorScreenshot'
       ) {
         const urlIndex = currentMarker.url;
@@ -285,6 +302,26 @@ function sanitizeThreadPII(
         // to string array.
         stringArray[urlIndex] = '';
         markersToDelete.add(i);
+      }
+
+      if (PIIToBeRemoved.shouldRemovePrivateBrowsingData) {
+        if (
+          currentMarker &&
+          currentMarker.type === 'Network' &&
+          currentMarker.isPrivateBrowsing
+        ) {
+          // Remove network requests coming from private browsing sessions
+          markersToDelete.add(i);
+        }
+
+        if (
+          currentMarker &&
+          currentMarker.innerWindowID &&
+          windowIdToBeSanitized.has(currentMarker.innerWindowID)
+        ) {
+          // Remove any marker that we know they come from private browsing sessions
+          markersToDelete.add(i);
+        }
       }
     }
   }
@@ -334,6 +371,168 @@ function sanitizeThreadPII(
     // Remove the domain name of the isolated content process if it's provided
     // from the back-end.
     delete newThread['eTLD+1'];
+  }
+
+  if (
+    PIIToBeRemoved.shouldRemovePrivateBrowsingData &&
+    windowIdToBeSanitized.size > 0
+  ) {
+    // In this block, we'll remove everything related to frame table entries
+    // that have a innerWindowID with a isPrivateBrowsing flag.
+
+    // This map holds the information about the frame indexes that should be
+    // sanitized, with their functions as a key, so that we can easily change
+    // all frames if we need to.
+    const sanitizedFuncIndexesToFrameIndex: Map<
+      IndexIntoFuncTable,
+      IndexIntoFrameTable[]
+    > = new Map();
+    // This set holds all func indexes that shouldn't be sanitized. This will be
+    // intersected with the previous map's keys to know which functions need to
+    // be split in 2.
+    const funcIndexesToBeKept = new Set();
+
+    const { frameTable, funcTable, resourceTable, stackTable, samples } =
+      newThread;
+    for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+      const innerWindowId = frameTable.innerWindowID[frameIndex];
+      const funcIndex = frameTable.func[frameIndex];
+      if (innerWindowId !== null && windowIdToBeSanitized.has(innerWindowId)) {
+        // The function pointed by this frame should be sanitized.
+        let sanitizedFrameIndexes =
+          sanitizedFuncIndexesToFrameIndex.get(funcIndex);
+        if (!sanitizedFrameIndexes) {
+          sanitizedFrameIndexes = [];
+          sanitizedFuncIndexesToFrameIndex.set(
+            funcIndex,
+            sanitizedFrameIndexes
+          );
+        }
+        sanitizedFrameIndexes.push(frameIndex);
+      } else {
+        // The function pointed by this frame should be kept.
+        funcIndexesToBeKept.add(funcIndex);
+      }
+    }
+
+    if (sanitizedFuncIndexesToFrameIndex.size) {
+      const resourcesToBeSanitized = new Set();
+
+      const newFuncTable = (newThread.funcTable =
+        shallowCloneFuncTable(funcTable));
+      const newFrameTable = (newThread.frameTable = {
+        ...frameTable,
+        innerWindowID: frameTable.innerWindowID.slice(),
+        func: frameTable.func.slice(),
+        line: frameTable.line.slice(),
+        column: frameTable.column.slice(),
+      });
+      const newSamples = (newThread.samples = {
+        ...samples,
+        stack: samples.stack.slice(),
+      });
+
+      for (const [
+        funcIndex,
+        frameIndexes,
+      ] of sanitizedFuncIndexesToFrameIndex.entries()) {
+        if (funcIndexesToBeKept.has(funcIndex)) {
+          // This function is used by both private and non-private data, therefore
+          // we split this function into 2 sanitized and unsanitized functions.
+          const sanitizedFuncIndex = newFuncTable.length;
+          newFuncTable.name.push(stringArray.length);
+          stringArray.push(`<Func #${sanitizedFuncIndex}>`);
+          newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
+          newFuncTable.relevantForJS.push(funcTable.isJS[funcIndex]);
+          newFuncTable.resource.push(-1);
+          newFuncTable.fileName.push(null);
+          newFuncTable.lineNumber.push(null);
+          newFuncTable.columnNumber.push(null);
+          newFuncTable.length++;
+
+          frameIndexes.forEach(
+            (frameIndex) =>
+              (newFrameTable.func[frameIndex] = sanitizedFuncIndex)
+          );
+        } else {
+          // This function is used only by private data, so we can change it
+          // directly.
+          newFuncTable.name[funcIndex] = stringArray.length;
+          stringArray.push(`<Func #${funcIndex}>`);
+
+          newFuncTable.fileName[funcIndex] = null;
+          if (newFuncTable.resource[funcIndex] >= 0) {
+            resourcesToBeSanitized.add(newFuncTable.resource[funcIndex]);
+          }
+          newFuncTable.resource[funcIndex] = -1;
+          newFuncTable.lineNumber[funcIndex] = null;
+          newFuncTable.columnNumber[funcIndex] = null;
+        }
+
+        // In both cases, nullify some information in all frames.
+        frameIndexes.forEach((frameIndex) => {
+          newFrameTable.line[frameIndex] = null;
+          newFrameTable.column[frameIndex] = null;
+          newFrameTable.innerWindowID[frameIndex] = null;
+        });
+      }
+
+      if (resourcesToBeSanitized.size) {
+        const newResourceTable = (newThread.resourceTable = {
+          ...resourceTable,
+          lib: resourceTable.lib.slice(),
+          name: resourceTable.name.slice(),
+          host: resourceTable.host.slice(),
+        });
+        const remainingResources = new Set(newFuncTable.resource);
+        for (const resourceIndex of resourcesToBeSanitized) {
+          if (!remainingResources.has(resourceIndex)) {
+            // This resource was used only by sanitized functions. Sanitize it
+            // as well.
+            newResourceTable.name[resourceIndex] = stringArray.length;
+            stringArray.push(`<Resource #${resourceIndex}>`);
+            newResourceTable.lib[resourceIndex] = undefined;
+            newResourceTable.host[resourceIndex] = undefined;
+          }
+        }
+      }
+
+      // Now we'll remove samples related to the frames
+      // First we'll loop the stack table and populate a typed array with a flag
+      // indicating "this stack index has an ancestor with the private browsing
+      // flag". This means children inherits the private browsing flag. This is
+      // possible because when iterating we visit parents before their children.
+      const isStackPrivateBrowsing = new Uint8Array(stackTable.length);
+      for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+        const prefix = stackTable.prefix[stackIndex];
+        if (prefix !== null && isStackPrivateBrowsing[prefix]) {
+          isStackPrivateBrowsing[stackIndex] = 1;
+          continue;
+        }
+
+        const frameIndex = stackTable.frame[stackIndex];
+        const innerWindowID = frameTable.innerWindowID[frameIndex];
+        if (!innerWindowID) {
+          continue;
+        }
+
+        const isPrivateBrowsing = windowIdToBeSanitized.has(innerWindowID);
+        if (isPrivateBrowsing) {
+          isStackPrivateBrowsing[stackIndex] = 1;
+        }
+      }
+
+      for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+        const stackIndex = samples.stack[sampleIndex];
+        if (stackIndex === null) {
+          continue;
+        }
+
+        if (isStackPrivateBrowsing[stackIndex]) {
+          newSamples.stack[sampleIndex] = null;
+        }
+      }
+    }
   }
 
   // Remove the old stringTable and markerTable and replace it
