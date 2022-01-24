@@ -238,11 +238,13 @@ export type GeckoThread = {|
   // If present and true, this thread was launched for a private browsing
   // session only.
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
-  // had no extra attribute at all.
+  // doesn't have any non-origin attribute (this happens in non-Fission
+  // especially but also in Fission for normal threads).
   isPrivateBrowsing?: boolean,
   // If present, the number represents the container this thread was loaded in.
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
-  // had no extra attribute at all.
+  // doesn't have any non-origin attribute (this happens in non-Fission
+  // especially but also in Fission for normal threads).
   userContextId?: number,
   registerTime: number,
   processType: string,

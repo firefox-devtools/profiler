@@ -1082,7 +1082,8 @@ function _processThread(
   };
 
   // isPrivateBrowsing and userContextId are missing in firefox 97 and
-  // earlier. Also they're missing when this thread had no extra attribute at all.
+  // earlier. Also they're missing when this thread had no origin attribute at
+  // all (non-Fission or a normal thread in Fission).
   // Let's add them to the new thread only when present in the gecko thread.
   if (thread.isPrivateBrowsing !== undefined) {
     newThread.isPrivateBrowsing = thread.isPrivateBrowsing;

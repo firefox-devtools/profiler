@@ -2165,7 +2165,7 @@ export function getThreadProcessDetails(
   }
 
   if (thread.isPrivateBrowsing) {
-    label += '\nPrivate browsing: yes';
+    label += '\nPrivate Browsing: Yes';
   }
 
   if (thread.userContextId) {

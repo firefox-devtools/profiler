@@ -162,7 +162,7 @@ describe('timeline/GlobalTrack', function () {
       Private
       Thread: "Private" (6666)
       Process: "default" (6666)
-      Private browsing: yes
+      Private Browsing: Yes
     `);
   });
 
