@@ -37,6 +37,7 @@ import {
 } from '../fixtures/utils';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
@@ -143,6 +144,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
 describe('TimelineMarkers', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
+  autoMockIntersectionObserver();
   // We will be hovering over element with a tooltip. It requires root overlay
   // element to be present in DOM.
   beforeEach(addRootOverlayElement);

@@ -10811,11 +10811,13 @@ exports[`ThreadActivityGraph matches the component snapshot 1`] = `
     <div
       class="react-contextmenu-wrapper"
     >
-      <canvas
-        class="timelineMarkersCanvas"
-        height="10"
-        width="80"
-      />
+      <div>
+        <canvas
+          class="timelineMarkersCanvas"
+          height="10"
+          width="80"
+        />
+      </div>
     </div>
   </div>
   <div
