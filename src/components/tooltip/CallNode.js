@@ -273,7 +273,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
               <div className="tooltipLabel" key="page">
                 Page URL:
               </div>,
-              <div key="pageVal">{parentPage.url}</div>
+              <div key="pageVal">
+                {parentPage.url}
+                {parentPage.isPrivateBrowsing ? ' (private)' : null}
+              </div>
             );
           }
         } else {
@@ -284,6 +287,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             </div>,
             <div className="tooltipDetailsUrl" key="pageVal">
               {page.url}
+              {page.isPrivateBrowsing ? ' (private)' : null}
             </div>,
           ];
         }
