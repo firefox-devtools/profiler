@@ -2009,7 +2009,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
     <div
       class="tooltipLabel"
     >
-      URL
+      Page
       :
     </div>
     <div
@@ -2066,7 +2066,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.6 1`] =
     <div
       class="tooltipLabel"
     >
-      URL
+      Page
       :
     </div>
     <div
@@ -2122,7 +2122,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] =
     <div
       class="tooltipLabel"
     >
-      URL
+      Page
       :
     </div>
     <div
@@ -2138,6 +2138,62 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] =
         about:blank
       </span>
        (id: 3)
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.8 1`] = `
+<div
+  class="tooltipMarker propClass"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        500μs
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        load — DOMEvent
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
+    <div
+      class="tooltipLabel"
+    >
+      Page
+      :
+    </div>
+    <div
+      class="tooltipDetailsUrl"
+    >
+      <span
+        class="tooltipDetailsDim"
+      >
+        https://
+      </span>
+      example.org
+      <span
+        class="tooltipDetailsDim"
+      />
+       (private)
     </div>
   </div>
 </div>

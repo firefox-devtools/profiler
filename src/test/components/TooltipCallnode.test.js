@@ -54,12 +54,12 @@ describe('TooltipCallNode', function () {
   }
 
   it('handles native allocations', () => {
-    const { profile, funcNamesDict } =
-      getProfileWithUnbalancedNativeAllocations();
+    const {
+      profile,
+      funcNamesDict: { A, B, Fjs, Gjs },
+    } = getProfileWithUnbalancedNativeAllocations();
     const threadIndex = 0;
-    const callNodePath = ['A', 'B', 'Fjs', 'Gjs'].map(
-      (name) => funcNamesDict[name]
-    );
+    const callNodePath = [A, B, Fjs, Gjs];
 
     const { dispatch, renderTooltip } = setup(profile);
     dispatch(changeSelectedCallNode(threadIndex, callNodePath));
@@ -70,10 +70,18 @@ describe('TooltipCallNode', function () {
   });
 
   describe('with page information', function () {
-    function setupWithPageInformation(pageUrl: string, iframeUrl?: string) {
+    function setupWithPageInformation({
+      pageUrl,
+      iframeUrl,
+      isPrivateBrowsing,
+    }: {|
+      pageUrl: string,
+      iframeUrl?: string,
+      isPrivateBrowsing?: boolean,
+    |}) {
       const {
         profile,
-        funcNamesDictPerThread: [funcNamesDict],
+        funcNamesDictPerThread: [{ A, Bjs, Cjs }],
       } = getProfileFromTextSamples(`
         A
         Bjs
@@ -87,6 +95,7 @@ describe('TooltipCallNode', function () {
           innerWindowID: 111111,
           url: pageUrl,
           embedderInnerWindowID: 0,
+          isPrivateBrowsing,
         },
       ];
 
@@ -96,6 +105,7 @@ describe('TooltipCallNode', function () {
           innerWindowID: 123123,
           url: iframeUrl,
           embedderInnerWindowID: 111111,
+          isPrivateBrowsing,
         });
       }
 
@@ -106,9 +116,7 @@ describe('TooltipCallNode', function () {
           profile.pages[profile.pages.length - 1].innerWindowID;
       }
 
-      const callNodePath = ['A', 'Bjs', 'Cjs'].map(
-        (name) => funcNamesDict[name]
-      );
+      const callNodePath = [A, Bjs, Cjs];
       const { dispatch, renderTooltip } = setup(profile);
       dispatch(changeSelectedCallNode(threadIndex, callNodePath));
       const renderResults = renderTooltip();
@@ -121,7 +129,7 @@ describe('TooltipCallNode', function () {
 
     it('displays Page URL for non-iframe pages', () => {
       const pageUrl = 'https://developer.mozilla.org/en-US/';
-      const { getByText, container } = setupWithPageInformation(pageUrl);
+      const { getByText, container } = setupWithPageInformation({ pageUrl });
 
       expect(getByText(pageUrl)).toBeInTheDocument();
       expect(container.firstChild).toMatchSnapshot();
@@ -130,14 +138,25 @@ describe('TooltipCallNode', function () {
     it('displays Page URL for iframe pages', () => {
       const pageUrl = 'https://developer.mozilla.org/en-US/';
       const iframeUrl = 'https://iframe.example.com/';
-      const { getByText, container } = setupWithPageInformation(
+      const { getByText, container } = setupWithPageInformation({
         pageUrl,
-        iframeUrl
-      );
+        iframeUrl,
+      });
 
       expect(getByText(iframeUrl)).toBeInTheDocument();
       expect(getByText(pageUrl)).toBeInTheDocument();
       expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('displays the private browsing information', () => {
+      const pageUrl = 'https://developer.mozilla.org/en-US/';
+      const { getByText } = setupWithPageInformation({
+        pageUrl,
+        isPrivateBrowsing: true,
+      });
+
+      const displayedUrl = getByText(pageUrl, { exact: false });
+      expect(displayedUrl).toHaveTextContent(`${pageUrl} (private)`);
     });
   });
 });
