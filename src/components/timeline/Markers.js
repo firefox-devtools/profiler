@@ -216,9 +216,15 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
     }
   }
 
-  render() {
+  componentDidMount() {
     this._scheduleDraw();
+  }
 
+  componentDidUpdate() {
+    this._scheduleDraw();
+  }
+
+  render() {
     return (
       <canvas
         className="timelineMarkersCanvas"
