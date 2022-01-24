@@ -91,10 +91,10 @@
     "@babel/eslint-plugin": "^7.16.5",
     "@babel/plugin-proposal-class-properties": "^7.16.7",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.7",
-    "@babel/preset-env": "^7.16.5",
+    "@babel/preset-env": "^7.16.8",
     "@babel/preset-flow": "^7.16.7",
     "@babel/preset-react": "^7.16.7",
-    "@testing-library/dom": "^8.11.1",
+    "@testing-library/dom": "^8.11.2",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "alex": "^10.0.0",
@@ -118,7 +118,7 @@
     "eslint-plugin-flowtype": "^8.0.3",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jest": "^25.3.4",
-    "eslint-plugin-jest-dom": "^3.9.4",
+    "eslint-plugin-jest-dom": "^4.0.1",
     "eslint-plugin-jest-formatting": "^3.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
@@ -127,7 +127,7 @@
     "file-loader": "^6.2.0",
     "flow-bin": "^0.96.0",
     "flow-coverage-report": "^0.8.0",
-    "flow-typed": "^3.6.0",
+    "flow-typed": "^3.6.1",
     "glob": "^7.2.0",
     "html-webpack-plugin": "^4.5.1",
     "husky": "^4.3.8",
@@ -152,7 +152,7 @@
     "stylelint-prettier": "^2.0.0",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^4.7.1"
+    "webpack-dev-server": "^4.7.3"
   },
   "jest": {
     "collectCoverageFrom": [
