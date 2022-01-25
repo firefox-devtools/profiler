@@ -36,9 +36,19 @@ import {
   fireFullContextMenu,
 } from '../fixtures/utils';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
-import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import {
+  autoMockElementSize,
+  setMockedElementSize,
+} from '../fixtures/mocks/element-size';
+import {
+  autoMockIntersectionObserver,
+  triggerIntersectionObservers,
+} from '../fixtures/mocks/intersection-observer';
 
 import type { CssPixels } from 'firefox-profiler/types';
+
+const GRAPH_WIDTH = 200;
+const GRAPH_HEIGHT = 300;
 
 function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   const flushRafCalls = mockRaf();
@@ -136,13 +146,15 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
     getContextMenu,
     tryToGetMarkerTooltip,
     clickOnMenuItem,
+    flushRafCalls,
     ...renderResult,
   };
 }
 
 describe('TimelineMarkers', function () {
   autoMockCanvasContext();
-  autoMockElementSize({ width: 200, height: 300 });
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
+  autoMockIntersectionObserver();
   // We will be hovering over element with a tooltip. It requires root overlay
   // element to be present in DOM.
   beforeEach(addRootOverlayElement);
@@ -297,5 +309,114 @@ describe('TimelineMarkers', function () {
       );
       expect(callsWithHoveredColor).toHaveLength(1);
     });
+  });
+});
+
+describe('TimelineMarkers with intersection observer', function () {
+  autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
+  autoMockIntersectionObserver(false);
+
+  function setup() {
+    const setupResults = setupWithMarkers({ rangeStart: 0, rangeEnd: 15 }, [
+      ['DOMEvent', 0, 10],
+      ['DOMEvent', 0, 10],
+    ]);
+
+    /**
+     * Coordinate the flushing of the requestAnimationFrame and the draw calls.
+     */
+    function getContextDrawCalls() {
+      setupResults.flushRafCalls();
+      return flushDrawLog();
+    }
+
+    return { ...setupResults, getContextDrawCalls };
+  }
+
+  it('will not draw before the intersection observer', () => {
+    const { getContextDrawCalls } = setup();
+    const drawCalls = getContextDrawCalls();
+    // Make sure that marker graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      false
+    );
+  });
+
+  it('will not draw after the intersection observer if it is not intersecting', () => {
+    const { getContextDrawCalls } = setup();
+    let drawCalls = getContextDrawCalls();
+
+    // Make sure that marker graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer and make sure that it still
+    // doesn't draw it.
+    triggerIntersectionObservers({ isIntersecting: false });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      false
+    );
+  });
+
+  it('will draw after the intersection observer if it is intersecting', () => {
+    const { getContextDrawCalls } = setup();
+    let drawCalls = getContextDrawCalls();
+
+    // Make sure that marker graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer and make sure that it draws it.
+    triggerIntersectionObservers({ isIntersecting: true });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      true
+    );
+  });
+
+  it('will redraw after it becomes visible again', () => {
+    const { getContextDrawCalls } = setup();
+    let drawCalls = getContextDrawCalls();
+
+    // Make sure that marker graph is not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer and make sure that it draws it.
+    triggerIntersectionObservers({ isIntersecting: true });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      true
+    );
+
+    // Now it goes out of view again. Make sure that we don't redraw.
+    triggerIntersectionObservers({ isIntersecting: false });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      false
+    );
+
+    // Send out the resize with a width change.
+    // By changing the "fake" result of getBoundingClientRect, we ensure that
+    // the pure components rerender because their `width` props change.
+    setMockedElementSize({ width: GRAPH_WIDTH * 2, height: GRAPH_HEIGHT });
+    window.dispatchEvent(new Event('resize'));
+    drawCalls = getContextDrawCalls();
+    // It should still be not drawn yet.
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      false
+    );
+
+    // Now let's trigger the intersection observer again and make sure that it redraws.
+    triggerIntersectionObservers({ isIntersecting: true });
+    drawCalls = getContextDrawCalls();
+    expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(
+      true
+    );
   });
 });
