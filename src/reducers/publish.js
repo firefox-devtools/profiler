@@ -15,7 +15,7 @@ import type {
   State,
 } from 'firefox-profiler/types';
 
-function _getDefaultSharingOptions(): CheckedSharingOptions {
+function _getSanitizingSharingOptions(): CheckedSharingOptions {
   return {
     includeHiddenThreads: false,
     includeFullTimeRange: false,
@@ -23,22 +23,32 @@ function _getDefaultSharingOptions(): CheckedSharingOptions {
     includeUrls: false,
     includeExtension: false,
     includePreferenceValues: false,
+    includePrivateBrowsingData: false,
+  };
+}
+
+function _getMostlyNonSanitizingSharingOptions(): CheckedSharingOptions {
+  return {
+    includeHiddenThreads: true,
+    includeFullTimeRange: true,
+    includeScreenshots: true,
+    includeUrls: true,
+    includeExtension: true,
+    includePreferenceValues: true,
+    // We always want to sanitize the private browsing data by default
+    includePrivateBrowsingData: false,
   };
 }
 
 const checkedSharingOptions: Reducer<CheckedSharingOptions> = (
-  state = _getDefaultSharingOptions(),
+  state = _getSanitizingSharingOptions(),
   action
 ) => {
   switch (action.type) {
     case 'PROFILE_LOADED': {
-      const newState = _getDefaultSharingOptions();
-      if (!getShouldSanitizeByDefault(action.profile)) {
-        // Flip the sharing options.
-        for (const key of Object.keys(newState)) {
-          newState[key] = true;
-        }
-      }
+      const newState = getShouldSanitizeByDefault(action.profile)
+        ? _getSanitizingSharingOptions()
+        : _getMostlyNonSanitizingSharingOptions();
       return newState;
     }
     case 'TOGGLE_CHECKED_SHARING_OPTION':

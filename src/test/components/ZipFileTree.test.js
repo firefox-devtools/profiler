@@ -15,9 +15,11 @@ import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { waitUntilState, fireFullClick } from '../fixtures/utils';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 describe('calltree/ZipFileTree', function () {
   autoMockCanvasContext();
+  autoMockIntersectionObserver();
 
   // This makes the bounding box large enough so that we don't trigger
   // VirtualList's virtualization.

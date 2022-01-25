@@ -794,3 +794,26 @@ export const getThreadIdToNameMap: Selector<Map<number, string>> =
     }
     return threadIdToNameMap;
   });
+
+// Gets whether this profile contains private information.
+export const getContainsPrivateBrowsingInformation: Selector<boolean> =
+  createSelector(getProfile, (profile) => {
+    const { threads, pages } = profile;
+
+    if (pages) {
+      const hasPrivatePages = pages.some((page) => page.isPrivateBrowsing);
+      if (hasPrivatePages) {
+        return true;
+      }
+    }
+
+    // The previous "if" block should be good enough, but including also the
+    // next block (that's appropriate for Fission only) might be more future
+    // proof.
+
+    const hasPrivateThreads = threads.some(
+      (thread) => thread.isPrivateBrowsing
+    );
+
+    return hasPrivateThreads;
+  });

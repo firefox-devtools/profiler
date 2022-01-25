@@ -3365,10 +3365,10 @@ describe('pages and active tab selectors', function () {
   }
 
   it('getInnerWindowIDSetByTabID will construct the whole map correctly', function () {
-    const { getState, fistTabInnerWindowIDs, secondTabInnerWindowIDs } =
+    const { getState, firstTabInnerWindowIDs, secondTabInnerWindowIDs } =
       setup(firstTabTabID); // the given argument is not important for this test
     const objectResult = [
-      [firstTabTabID, new Set(fistTabInnerWindowIDs)],
+      [firstTabTabID, new Set(firstTabInnerWindowIDs)],
       [secondTabTabID, new Set(secondTabInnerWindowIDs)],
     ];
     const result = new Map(objectResult);
@@ -3378,10 +3378,10 @@ describe('pages and active tab selectors', function () {
   });
 
   it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the first tab', function () {
-    const { getState, fistTabInnerWindowIDs } = setup(firstTabTabID);
+    const { getState, firstTabInnerWindowIDs } = setup(firstTabTabID);
     expect(
       ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
-    ).toEqual(new Set(fistTabInnerWindowIDs));
+    ).toEqual(new Set(firstTabInnerWindowIDs));
   });
 
   it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the second tab', function () {

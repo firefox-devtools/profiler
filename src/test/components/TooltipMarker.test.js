@@ -15,10 +15,13 @@ import {
   getNetworkMarkers,
   getProfileWithMarkers,
   getProfileWithEventDelays,
+  addActiveTabInformationToProfile,
+  markTabIdsAsPrivateBrowsing,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { getEmptyThread } from '../../profile-logic/data-structures';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import type { NetworkPayload } from 'firefox-profiler/types';
 
 describe('TooltipMarker', function () {
@@ -82,6 +85,13 @@ describe('TooltipMarker', function () {
         url: 'about:blank',
         embedderInnerWindowID: 0,
       },
+      {
+        tabID: tabID + 3,
+        innerWindowID: innerWindowID + 3,
+        url: 'https://example.org',
+        embedderInnerWindowID: 0,
+        isPrivateBrowsing: true,
+      },
     ];
     profile.threads[0].name = 'Main Thread';
 
@@ -116,6 +126,16 @@ describe('TooltipMarker', function () {
           type: 'DOMEvent',
           eventType: 'load',
           innerWindowID: innerWindowID + 2,
+        },
+      ],
+      [
+        'DOMEvent',
+        10.8,
+        11.3,
+        {
+          type: 'DOMEvent',
+          eventType: 'load',
+          innerWindowID: innerWindowID + 3,
         },
       ],
       [
@@ -518,6 +538,8 @@ describe('TooltipMarker', function () {
   // processing pipeline.
   function setupWithPayload(markers) {
     const profile = getProfileWithMarkers(markers);
+    const { secondTabTabID } = addActiveTabInformationToProfile(profile);
+    markTabIdsAsPrivateBrowsing(profile, [secondTabTabID]);
 
     const store = storeWithProfile(profile);
     const state = store.getState();
@@ -540,6 +562,12 @@ describe('TooltipMarker', function () {
         />
       </Provider>
     );
+  }
+
+  function getValueForProperty(propertyName: string): string {
+    const labelElement = screen.getByText(propertyName + ':');
+    const valueElement = ensureExists(labelElement.nextSibling);
+    return valueElement.textContent;
   }
 
   describe('renders properly redirect network markers', () => {
@@ -624,6 +652,52 @@ describe('TooltipMarker', function () {
     );
 
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders the page information for network markers', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          innerWindowID: 11111111111,
+        },
+      })
+    );
+
+    expect(getValueForProperty('Page')).toBe('Page #1');
+  });
+
+  it('renders page information for private pages in network markers', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri: 'https://example.org/index.html',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          contentType: 'text/html',
+          innerWindowID: 11111111114,
+          isPrivateBrowsing: true,
+        },
+      })
+    );
+
+    expect(getValueForProperty('Page')).toBe(
+      'Page #4 (id: 11111111114) (private)'
+    );
+    expect(getValueForProperty('Private Browsing')).toBe('Yes');
   });
 
   it('renders properly network markers with a preconnect part', () => {

@@ -15,6 +15,7 @@ import {
   getProfile,
   getProfileRootRange,
   getHasPreferenceMarkers,
+  getContainsPrivateBrowsingInformation,
 } from 'firefox-profiler/selectors/profile';
 import {
   getAbortFunction,
@@ -35,6 +36,8 @@ import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 
+import WarningImage from 'firefox-profiler-res/img/svg/warning.svg';
+
 import type {
   Profile,
   CheckedSharingOptions,
@@ -53,6 +56,7 @@ type StateProps = {|
   +profile: Profile,
   +rootRange: StartEndRange,
   +shouldShowPreferenceOption: boolean,
+  +profileContainsPrivateBrowsingInformation: boolean,
   +checkedSharingOptions: CheckedSharingOptions,
   +downloadSizePromise: Promise<string>,
   +compressedProfileBlobPromise: Promise<Blob>,
@@ -86,9 +90,15 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       this.props.toggleCheckedSharingOptions('includeExtension'),
     includePreferenceValues: () =>
       this.props.toggleCheckedSharingOptions('includePreferenceValues'),
+    includePrivateBrowsingData: () =>
+      this.props.toggleCheckedSharingOptions('includePrivateBrowsingData'),
   };
 
-  _renderCheckbox(slug: $Keys<CheckedSharingOptions>, labelL10nId: string) {
+  _renderCheckbox(
+    slug: $Keys<CheckedSharingOptions>,
+    labelL10nId: string,
+    additionalContent?: React.Node
+  ) {
     const { checkedSharingOptions } = this.props;
     const toggle = this._toggles[slug];
     return (
@@ -101,6 +111,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           checked={checkedSharingOptions[slug]}
         />
         <Localized id={labelL10nId} />
+        {additionalContent}
       </label>
     );
   }
@@ -108,6 +119,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   _renderPublishPanel() {
     const {
       shouldShowPreferenceOption,
+      profileContainsPrivateBrowsingInformation,
       downloadSizePromise,
       attemptToPublish,
       downloadFileName,
@@ -118,9 +130,11 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
     return (
       <div data-testid="MenuButtonsPublish-container">
-        <form className="menuButtonsPublishContent" onSubmit={attemptToPublish}>
-          <div className="menuButtonsPublishIcon" />
-          <h1 className="menuButtonsPublishTitle">
+        <form
+          className="menuButtonsPublishContent photon-body-10"
+          onSubmit={attemptToPublish}
+        >
+          <h1 className="menuButtonsPublishTitle photon-title-40">
             {isRepublish ? (
               <Localized id="MenuButtons--publish--reupload-performance-profile">
                 Re-upload Performance Profile
@@ -141,13 +155,13 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
                 By default, your personal data is removed.
               </Localized>
             ) : (
-              <Localized id="MenuButtons--publish--info-description-firefox-nightly">
-                This profile is from Firefox Nightly, so by default all
+              <Localized id="MenuButtons--publish--info-description-firefox-nightly2">
+                This profile is from Firefox Nightly, so by default most
                 information is included.
               </Localized>
             )}
           </p>
-          <h3>
+          <h3 className="photon-title-10">
             <Localized id="MenuButtons--publish--include-additional-data">
               Include additional data that may be identifiable
             </Localized>
@@ -177,6 +191,22 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
               ? this._renderCheckbox(
                   'includePreferenceValues',
                   'MenuButtons--publish--renderCheckbox-label-preference'
+                )
+              : null}
+            {profileContainsPrivateBrowsingInformation
+              ? this._renderCheckbox(
+                  'includePrivateBrowsingData',
+                  'MenuButtons--publish--renderCheckbox-label-private-browsing',
+                  <Localized
+                    id="MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image"
+                    attrs={{ title: true }}
+                  >
+                    <img
+                      className="menuButtonsPublishDataChoicesIndicator"
+                      src={WarningImage}
+                      title="This profile contains private browsing data"
+                    />
+                  </Localized>
                 )
               : null}
           </div>
@@ -213,11 +243,11 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
     return (
       <div
-        className="menuButtonsPublishUpload"
+        className="menuButtonsPublishUpload photon-body-10"
         data-testid="MenuButtonsPublish-container"
       >
         <div className="menuButtonsPublishUploadTop">
-          <div className="menuButtonsPublishUploadTitle">
+          <div className="menuButtonsPublishUploadTitle photon-title-20">
             <Localized id="MenuButtons--publish--upload-title">
               Uploading profile…
             </Localized>
@@ -270,7 +300,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
     return (
       <div
-        className="menuButtonsPublishUpload"
+        className="menuButtonsPublishUpload photon-body-10"
         data-testid="MenuButtonsPublish-container"
       >
         <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
@@ -320,6 +350,8 @@ export const MenuButtonsPublish = explicitConnect<
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     shouldShowPreferenceOption: getHasPreferenceMarkers(state),
+    profileContainsPrivateBrowsingInformation:
+      getContainsPrivateBrowsingInformation(state),
     checkedSharingOptions: getCheckedSharingOptions(state),
     downloadSizePromise: getDownloadSize(state),
     downloadFileName: getFilenameString(state),

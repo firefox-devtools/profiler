@@ -30,6 +30,7 @@ import {
   getCounterForThread,
 } from '../fixtures/profiles/processed-profile';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -104,6 +105,7 @@ describe('TrackMemory', function () {
 
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
+  autoMockIntersectionObserver();
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 

@@ -13,6 +13,7 @@ import {
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
+  getContainsPrivateBrowsingInformation,
   getThreads,
 } from './profile';
 import { compress } from '../utils/gz';
@@ -78,6 +79,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     getGlobalTracks,
     getLocalTracksByPid,
     getHasPreferenceMarkers,
+    getContainsPrivateBrowsingInformation,
     (
       checkedSharingOptions,
       profile,
@@ -86,14 +88,22 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       hiddenLocalTracksByPid,
       globalTracks,
       localTracksByPid,
-      hasPreferenceMarkers
+      hasPreferenceMarkers,
+      containsPrivateBrowsingInformation
     ) => {
       let isIncludingEverything = true;
       for (const prop in checkedSharingOptions) {
-        // Do not include preference values checkbox if it's hidden.
-        // Even though `includePreferenceValues` is not taken into account, it's
-        // is false, if the profile updateChannel is not nightly or custom build.
+        // Do not include preference values or private browsing checkboxes if
+        // they're hidden. Even though `includePreferenceValues` is not taken
+        // into account, it is false, if the profile updateChannel is not
+        // nightly or custom build.
         if (prop === 'includePreferenceValues' && !hasPreferenceMarkers) {
+          continue;
+        }
+        if (
+          prop === 'includePrivateBrowsingData' &&
+          !containsPrivateBrowsingInformation
+        ) {
           continue;
         }
         isIncludingEverything =
@@ -157,6 +167,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
         shouldRemoveExtensions: !checkedSharingOptions.includeExtension,
         shouldRemovePreferenceValues:
           !checkedSharingOptions.includePreferenceValues,
+        shouldRemovePrivateBrowsingData:
+          !checkedSharingOptions.includePrivateBrowsingData,
       };
     }
   );

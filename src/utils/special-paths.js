@@ -182,6 +182,10 @@ export function getDownloadRecipeForSourceFile(
           0,
           server.length - '.googlesource.com'.length
         );
+        // Use a proxy which makes sources from googlesource.com available with
+        // permissive CORS headers and as plain text. The source code for this
+        // proxy (a Cloudflare worker) is available at
+        // https://gist.github.com/mstange/ed6f7e494b763abc755f3d6e753924ee .
         return {
           type: 'CORS_ENABLED_SINGLE_FILE',
           url: `https://googlesource-proxy.mstange.workers.dev/${subdomain}/${repoPath}.git/+/${rev}/${path}`,

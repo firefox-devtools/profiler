@@ -1183,11 +1183,13 @@ declare var expect: {
   /** Matches any received string that contains the exact expected string. */
   stringContaining(value: string): string,
   stringMatching(value: string | RegExp): string,
+  toBeOneOf(value: Array<mixed>): Array<mixed>,
   not: {
     arrayContaining: (value: $ReadOnlyArray<mixed>) => Array<mixed>,
     objectContaining: (value: { ... }) => Object,
     stringContaining: (value: string) => string,
     stringMatching: (value: string | RegExp) => string,
+    toBeOneOf(value: Array<mixed>): Array<mixed>,
     ...
   },
   ...

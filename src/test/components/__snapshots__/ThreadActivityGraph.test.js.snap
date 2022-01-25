@@ -10071,17 +10071,6 @@ Array [
     1,
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    32.89473684210527,
-    0,
-    10,
-    10,
-  ],
-  Array [
     "set globalCompositeOperation",
     "lighter",
   ],
@@ -10797,6 +10786,17 @@ Array [
     "set fillStyle",
     Object {},
   ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    32.89473684210527,
+    0,
+    10,
+    10,
+  ],
 ]
 `;
 
@@ -10811,46 +10811,52 @@ exports[`ThreadActivityGraph matches the component snapshot 1`] = `
     <div
       class="react-contextmenu-wrapper"
     >
-      <canvas
-        class="timelineMarkersCanvas"
-        height="10"
-        width="80"
-      />
+      <div>
+        <canvas
+          class="timelineMarkersCanvas"
+          height="10"
+          width="80"
+        />
+      </div>
     </div>
   </div>
   <div
     class="threadActivityGraph"
   >
-    <canvas
-      class="threadActivityGraphCanvas threadActivityGraphCanvas"
-      height="10"
-      width="80"
-    >
-      <h2>
-        Activity Graph for 
-        Test Track
-      </h2>
-      <p>
-        This graph shows a visual chart of thread activity.
-      </p>
-    </canvas>
+    <div>
+      <canvas
+        class="threadActivityGraphCanvas threadActivityGraphCanvas"
+        height="10"
+        width="80"
+      >
+        <h2>
+          Activity Graph for 
+          Test Track
+        </h2>
+        <p>
+          This graph shows a visual chart of thread activity.
+        </p>
+      </canvas>
+    </div>
   </div>
   <div
     class="threadSampleGraph"
   >
-    <canvas
-      class="threadSampleGraphCanvas threadSampleGraphCanvas"
-      height="10"
-      width="80"
-    >
-      <h2>
-        Stack Graph for 
-        Test Track
-      </h2>
-      <p>
-        This graph charts the stack height of each sample.
-      </p>
-    </canvas>
+    <div>
+      <canvas
+        class="threadSampleGraphCanvas threadSampleGraphCanvas"
+        height="10"
+        width="80"
+      >
+        <h2>
+          Stack Graph for 
+          Test Track
+        </h2>
+        <p>
+          This graph charts the stack height of each sample.
+        </p>
+      </canvas>
+    </div>
   </div>
   <div
     class="timelineEmptyThreadIndicator"

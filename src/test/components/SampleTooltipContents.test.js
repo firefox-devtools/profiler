@@ -21,6 +21,7 @@ import {
 } from '../fixtures/utils';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 import type {
@@ -58,6 +59,7 @@ function getSamplesPixelPosition(
 describe('SampleTooltipContents', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
+  autoMockIntersectionObserver();
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 

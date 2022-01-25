@@ -9,7 +9,6 @@ import {
 import {
   getCallTree,
   computeCallTreeCountsAndSummary,
-  CallTree,
 } from '../../profile-logic/call-tree';
 import { getRootsAndChildren } from '../../profile-logic/flame-graph';
 import {
@@ -20,44 +19,12 @@ import {
   filterThreadSamplesToRange,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
-import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
+import {
+  callTreeFromProfile,
+  formatTree,
+  formatTreeIncludeCategories,
+} from '../fixtures/utils';
 import { ensureExists } from 'firefox-profiler/utils/flow';
-
-import type { Profile } from 'firefox-profiler/types';
-
-function callTreeFromProfile(
-  profile: Profile,
-  threadIndex: number = 0
-): CallTree {
-  const thread = profile.threads[threadIndex];
-  const { interval } = profile.meta;
-  const categories = ensureExists(
-    profile.meta.categories,
-    'Expected to find categories'
-  );
-  const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-  const callNodeInfo = getCallNodeInfo(
-    thread.stackTable,
-    thread.frameTable,
-    thread.funcTable,
-    defaultCategory
-  );
-  const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
-    thread.samples,
-    callNodeInfo,
-    interval,
-    false
-  );
-  return getCallTree(
-    thread,
-    interval,
-    callNodeInfo,
-    categories,
-    'combined',
-    callTreeCountsAndSummary,
-    'samples'
-  );
-}
 
 describe('unfiltered call tree', function () {
   // These values are hoisted at the top for the ease of access. In the profile fixture

@@ -6,6 +6,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import memoize from 'memoize-immutable';
+import { InView } from 'react-intersection-observer';
 import {
   overlayFills,
   getMarkerStyle,
@@ -89,6 +90,10 @@ function _drawRoundedRect(
 class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
   _canvas: {| current: HTMLCanvasElement | null |} = React.createRef();
   _requestedAnimationFrame: boolean = false;
+  _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
+    renderScheduled: false,
+    inView: false,
+  };
 
   _getMarkerState(marker: Marker): MarkerState {
     const { hoveredMarker, mouseDownMarker, rightClickedMarker } = this.props;
@@ -202,6 +207,16 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
   }
 
   _scheduleDraw() {
+    if (!this._canvasState.inView) {
+      // Canvas is not in the view. Schedule the render for a later intersection
+      // observer callback.
+      this._canvasState.renderScheduled = true;
+      return;
+    }
+
+    // Canvas is in the view. Render the canvas and reset the schedule state.
+    this._canvasState.renderScheduled = false;
+
     if (!this._requestedAnimationFrame) {
       this._requestedAnimationFrame = true;
       window.requestAnimationFrame(() => {
@@ -216,18 +231,36 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
     }
   }
 
-  render() {
-    this._scheduleDraw();
+  _observerCallback = (inView: boolean, _entry: IntersectionObserverEntry) => {
+    this._canvasState.inView = inView;
+    if (!this._canvasState.renderScheduled) {
+      // Skip if render is not scheduled.
+      return;
+    }
 
+    this._scheduleDraw();
+  };
+
+  componentDidMount() {
+    this._scheduleDraw();
+  }
+
+  componentDidUpdate() {
+    this._scheduleDraw();
+  }
+
+  render() {
     return (
-      <canvas
-        className="timelineMarkersCanvas"
-        ref={this._canvas}
-        onMouseDown={this.props.onMouseDown}
-        onMouseMove={this.props.onMouseMove}
-        onMouseUp={this.props.onMouseUp}
-        onMouseOut={this.props.onMouseOut}
-      />
+      <InView onChange={this._observerCallback}>
+        <canvas
+          className="timelineMarkersCanvas"
+          ref={this._canvas}
+          onMouseDown={this.props.onMouseDown}
+          onMouseMove={this.props.onMouseMove}
+          onMouseUp={this.props.onMouseUp}
+          onMouseOut={this.props.onMouseOut}
+        />
+      </InView>
     );
   }
 }

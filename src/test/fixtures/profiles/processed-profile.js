@@ -28,6 +28,7 @@ import type {
   Thread,
   ThreadIndex,
   IndexIntoCategoryList,
+  IndexIntoStackTable,
   CategoryList,
   JsTracerTable,
   Counter,
@@ -42,6 +43,7 @@ import type {
   ThreadCPUDeltaUnit,
   LineNumber,
   Address,
+  CallNodePath,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -1034,6 +1036,14 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
     URI: uri,
   };
 
+  if (payload.innerWindowID !== undefined) {
+    startPayload.innerWindowID = payload.innerWindowID;
+  }
+
+  if (payload.isPrivateBrowsing !== undefined) {
+    startPayload.isPrivateBrowsing = payload.isPrivateBrowsing;
+  }
+
   const stopPayload: NetworkPayload = {
     ...startPayload,
     status: 'STATUS_STOP',
@@ -1622,7 +1632,7 @@ export function addActiveTabInformationToProfile(
   const secondTabTabID = 4;
   const parentInnerWindowIDsWithChildren = 11111111111;
   const iframeInnerWindowIDsWithChild = 11111111112;
-  const fistTabInnerWindowIDs = [
+  const firstTabInnerWindowIDs = [
     parentInnerWindowIDsWithChildren,
     iframeInnerWindowIDsWithChild,
     11111111113,
@@ -1634,7 +1644,7 @@ export function addActiveTabInformationToProfile(
   activeTabID = activeTabID === undefined ? firstTabTabID : activeTabID;
 
   // Add the pages array
-  profile.pages = [
+  const pages = [
     // A top most page in the first tab
     {
       tabID: firstTabTabID,
@@ -1652,7 +1662,7 @@ export function addActiveTabInformationToProfile(
     // Another iframe page inside the previous iframe
     {
       tabID: 3,
-      innerWindowID: fistTabInnerWindowIDs[2],
+      innerWindowID: firstTabInnerWindowIDs[2],
       url: 'Page #3',
       embedderInnerWindowID: iframeInnerWindowIDsWithChild,
     },
@@ -1667,7 +1677,7 @@ export function addActiveTabInformationToProfile(
     // Their tabIDs are the same because of that.
     {
       tabID: firstTabTabID,
-      innerWindowID: fistTabInnerWindowIDs[3],
+      innerWindowID: firstTabInnerWindowIDs[3],
       url: 'Page #5',
       embedderInnerWindowID: 0,
     },
@@ -1679,6 +1689,8 @@ export function addActiveTabInformationToProfile(
       embedderInnerWindowID: 0,
     },
   ];
+
+  profile.pages = pages;
 
   // Set the active Tab ID.
   profile.meta.configuration = {
@@ -1695,9 +1707,195 @@ export function addActiveTabInformationToProfile(
     parentInnerWindowIDsWithChildren,
     iframeInnerWindowIDsWithChild,
     activeTabID,
-    fistTabInnerWindowIDs,
+    firstTabInnerWindowIDs,
     secondTabInnerWindowIDs,
   };
+}
+
+/**
+ * Use this function to create a profile that has private browsing data.
+ * This profile should first be run through addActiveTabInformationToProfile to
+ * add pages information.
+ * To add markers with private browsing information, please use
+ * addMarkersToThreadWithCorrespondingSamples directly.
+ *
+ * Then:
+ * @param profile The profile to change
+ * @param privateBrowsingPages The array of page IDs to switch to private
+ * @param threads Optional, this specifies the threads to set to private. This
+ *                happens in Firefox in Fission mode, but not otherwise.
+ */
+export function markTabIdsAsPrivateBrowsing(
+  profile: Profile,
+  privateBrowsingPages: TabID[]
+) {
+  const pages = profile.pages;
+  if (!pages) {
+    throw new Error(
+      `Can't add private browsing data to a profile without pages. Please run addActiveTabInformationToProfile on this profile first.`
+    );
+  }
+
+  for (const page of pages) {
+    if (privateBrowsingPages.includes(page.tabID)) {
+      page.isPrivateBrowsing = true;
+    }
+  }
+}
+
+// /!\ This algorithm is good enough for tests, but it's not correct for
+// general cases.
+function getStackIndexForCallNodePath(
+  { stackTable, frameTable }: Thread,
+  callNodePath: CallNodePath
+): IndexIntoStackTable {
+  let currentFuncInCallNodePath = 0;
+  let currentFuncIndexToFind = callNodePath[0];
+  let foundStackIndex = null;
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+
+    if (currentFuncIndexToFind === funcIndex) {
+      currentFuncInCallNodePath++;
+      if (currentFuncInCallNodePath === callNodePath.length) {
+        foundStackIndex = stackIndex;
+        break;
+      }
+
+      currentFuncIndexToFind = callNodePath[currentFuncInCallNodePath];
+    }
+  }
+
+  if (foundStackIndex === null) {
+    throw new Error(
+      `The call node path [${String(
+        callNodePath
+      )}] wasn't found in the stack table.`
+    );
+  }
+
+  return foundStackIndex;
+}
+
+/**
+ * Use this function to add window id information to frames, using call node
+ * paths to point to frames using stacks.
+ *
+ * @param thread The thread to mutate.
+ * @param privateInnerWindowID The innerWindowID representing a private browser window.
+ * @param nonPrivateInnerWindowID The innerWindowID representing a non private browser window.
+ * @param privateCallNodes These call nodes point to frames that will get privateInnerWindowID.
+ * @param nonPrivateCallNodes These call nodes point to frames that will get nonPrivateInnerWindowID.
+ * @param callNodesToDupe These call nodes point to frames that will be duped to get both privateInnerWindowID and nonPrivateInnerWindowID.
+ */
+export function addInnerWindowIdToStacks(
+  thread: Thread,
+  {
+    privateInnerWindowID,
+    nonPrivateInnerWindowID,
+    privateCallNodes,
+    nonPrivateCallNodes,
+    callNodesToDupe,
+  }: {|
+    privateInnerWindowID: number,
+    nonPrivateInnerWindowID: number,
+    privateCallNodes?: CallNodePath[],
+    nonPrivateCallNodes?: CallNodePath[],
+    callNodesToDupe?: CallNodePath[],
+  |}
+) {
+  const { stackTable, frameTable, samples } = thread;
+
+  if (privateCallNodes) {
+    // privateCallNodes contains the call nodes we want to directly change to
+    // "coming from private browsing".
+    for (const callNode of privateCallNodes) {
+      const stackIndex = getStackIndexForCallNodePath(thread, callNode);
+      const foundFrameIndex = stackTable.frame[stackIndex];
+      frameTable.innerWindowID[foundFrameIndex] = privateInnerWindowID;
+    }
+  }
+
+  if (nonPrivateCallNodes) {
+    // nonPrivateCallNodes contains the call nodes we want to directly change to
+    // "coming from non private browsing".
+    for (const callNode of nonPrivateCallNodes) {
+      const stackIndex = getStackIndexForCallNodePath(thread, callNode);
+      const foundFrameIndex = stackTable.frame[stackIndex];
+      frameTable.innerWindowID[foundFrameIndex] = nonPrivateInnerWindowID;
+    }
+  }
+
+  if (callNodesToDupe) {
+    // callNodesToChange contains the call nodes we want to dupe so that the
+    // original comes from a non-private browsing window, while the dupe comes
+    // from a private browsing window.
+
+    const mapStackIndexToDupe = new Map();
+
+    for (const callNode of callNodesToDupe) {
+      const stackIndex = getStackIndexForCallNodePath(thread, callNode);
+      const foundFrameIndex = stackTable.frame[stackIndex];
+      // The found one comes from a non private window
+      frameTable.innerWindowID[foundFrameIndex] = nonPrivateInnerWindowID;
+
+      // Clone this frame
+      const newFrameIndex = frameTable.length++;
+      frameTable.address.push(frameTable.address[foundFrameIndex]);
+      frameTable.inlineDepth.push(frameTable.inlineDepth[foundFrameIndex]);
+      frameTable.category.push(frameTable.category[foundFrameIndex]);
+      frameTable.subcategory.push(frameTable.subcategory[foundFrameIndex]);
+      frameTable.func.push(frameTable.func[foundFrameIndex]);
+      frameTable.nativeSymbol.push(frameTable.nativeSymbol[foundFrameIndex]);
+      frameTable.implementation.push(
+        frameTable.implementation[foundFrameIndex]
+      );
+      frameTable.line.push(frameTable.line[foundFrameIndex]);
+      frameTable.column.push(frameTable.column[foundFrameIndex]);
+      frameTable.optimizations.push(frameTable.optimizations[foundFrameIndex]);
+
+      // And use the passed privateInnerWindowID
+      frameTable.innerWindowID.push(privateInnerWindowID);
+
+      // Clone the stack
+      const newStackIndex = stackTable.length++;
+      stackTable.prefix.push(stackTable.prefix[stackIndex]);
+      stackTable.category.push(stackTable.category[stackIndex]);
+      stackTable.subcategory.push(stackTable.subcategory[stackIndex]);
+      // Using the cloned frame index.
+      stackTable.frame.push(newFrameIndex);
+
+      mapStackIndexToDupe.set(stackIndex, newStackIndex);
+    }
+
+    for (let sampleIndex = samples.length; sampleIndex >= 0; sampleIndex--) {
+      // We're looping from the end because we'll push some samples to the end
+      // and don't want to look at them.
+      const stackIndex = samples.stack[sampleIndex];
+      const newStackIndex = mapStackIndexToDupe.get(stackIndex);
+      if (newStackIndex === undefined) {
+        continue;
+      }
+
+      // Dupe the sample
+      samples.time.push(samples.time[samples.length - 1] + 1);
+      samples.stack.push(newStackIndex);
+      if (samples.eventDelay) {
+        samples.eventDelay.push(samples.eventDelay[sampleIndex]);
+      }
+      if (samples.responsiveness) {
+        samples.responsiveness.push(samples.responsiveness[sampleIndex]);
+      }
+      if (samples.threadCPUDelta) {
+        samples.threadCPUDelta.push(samples.threadCPUDelta[sampleIndex]);
+      }
+      if (samples.weight) {
+        samples.weight.push(samples.weight[sampleIndex]);
+      }
+      samples.length++;
+    }
+  }
 }
 
 /**
