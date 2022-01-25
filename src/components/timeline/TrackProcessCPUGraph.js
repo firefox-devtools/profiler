@@ -15,7 +15,7 @@ import {
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { ORANGE_50 } from 'photon-colors';
+import { GREY_40 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
@@ -116,8 +116,8 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
       // process CPU graph.
 
       ctx.lineWidth = deviceLineWidth;
-      ctx.strokeStyle = ORANGE_50;
-      ctx.fillStyle = '#ff940088'; // Orange 50 with transparency.
+      ctx.strokeStyle = GREY_40;
+      ctx.fillStyle = '#b1b1b388'; // Grey 40 with transparency.
       ctx.beginPath();
 
       // The x and y are used after the loop.

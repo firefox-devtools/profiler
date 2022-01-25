@@ -20,7 +20,7 @@
   height: 6px;
   margin-top: -3px;
   margin-left: -3px;
-  background-color: var(--orange-60);
+  background-color: var(--grey-50);
   border-radius: 3px;
   pointer-events: none;
 }
