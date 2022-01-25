@@ -1357,5 +1357,13 @@ const _upgraders = {
     // No upgrade is needed though, because previous versions of firefox weren't
     // generating anything in this case.
   },
+  [25]: (_) => {
+    // This version bumps happened when private browsing data could be captured
+    // by the profiler. We want to ensure that the frontend will be able to
+    // sanitize it if needed.
+    // No upgrade is needed though, because previous versions of firefox weren't
+    // capturing this data and no new mandatory values are present in this
+    // version.
+  },
 };
 /* eslint-enable no-useless-computed-key */
