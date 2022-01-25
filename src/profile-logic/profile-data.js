@@ -2164,6 +2164,15 @@ export function getThreadProcessDetails(
     }
   }
 
+  if (thread.isPrivateBrowsing) {
+    label += '\nPrivate Browsing: Yes';
+  }
+
+  if (thread.userContextId) {
+    // If present and non-zero, this page was loaded inside a container.
+    label += `\nContainer Id: ${thread.userContextId}`;
+  }
+
   return label;
 }
 

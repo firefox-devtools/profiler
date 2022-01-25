@@ -80,6 +80,7 @@ describe('getCheckedSharingOptions', function () {
       includeScreenshots: false,
       includeUrls: false,
       includePreferenceValues: false,
+      includePrivateBrowsingData: false,
     };
     const isNotFiltering = {
       includeExtension: true,
@@ -88,6 +89,7 @@ describe('getCheckedSharingOptions', function () {
       includeScreenshots: true,
       includeUrls: true,
       includePreferenceValues: true,
+      includePrivateBrowsingData: false,
     };
     function getDefaultsWith(updateChannel: string) {
       const { profile } = getProfileFromTextSamples('A');

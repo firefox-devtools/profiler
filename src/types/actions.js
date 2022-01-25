@@ -147,6 +147,7 @@ export type CheckedSharingOptions = {|
   includeUrls: boolean,
   includeExtension: boolean,
   includePreferenceValues: boolean,
+  includePrivateBrowsingData: boolean,
 |};
 
 export type Localization = ReactLocalization;

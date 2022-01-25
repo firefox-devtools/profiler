@@ -1123,7 +1123,7 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
       <div
         class="tooltipLabel"
       >
-        URL
+        Page
         :
       </div>
       Page #1

@@ -6,8 +6,9 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
+import { stripIndent } from 'common-tags';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeSelectedThreads,
   hideGlobalTrack,
@@ -43,6 +44,8 @@ describe('timeline/GlobalTrack', function () {
    */
   const GECKOMAIN_TAB_TRACK_INDEX = 1;
   const NO_THREAD_TRACK_INDEX = 2;
+  const PRIVATE_TRACK_INDEX = 3;
+  const CONTAINER_TRACK_INDEX = 4;
   function setup(trackIndex = GECKOMAIN_TAB_TRACK_INDEX) {
     const profile = getProfileWithNiceTracks();
     {
@@ -54,6 +57,36 @@ describe('timeline/GlobalTrack', function () {
       } = getProfileFromTextSamples('A');
       thread.name = 'NoMain';
       thread.pid = 5555;
+      profile.threads.push(thread);
+    }
+    {
+      // Add another thread launched in a fission browser to handle a private
+      // browsing window.
+      const {
+        profile: {
+          threads: [thread],
+        },
+      } = getProfileFromTextSamples('A');
+      thread.name = 'Private';
+      thread['eTLD+1'] = 'https://example.org';
+      thread.pid = 6666;
+      thread.tid = 6666;
+      thread.isPrivateBrowsing = true;
+      profile.threads.push(thread);
+    }
+    {
+      // Add another thread launched in a fission browser to handle a tab in a
+      // non-default container.
+      const {
+        profile: {
+          threads: [thread],
+        },
+      } = getProfileFromTextSamples('A');
+      thread.name = 'InContainer';
+      thread['eTLD+1'] = 'https://example.org';
+      thread.pid = 7777;
+      thread.tid = 7777;
+      thread.userContextId = 3;
       profile.threads.push(thread);
     }
     const store = storeWithProfile(profile);
@@ -119,6 +152,30 @@ describe('timeline/GlobalTrack', function () {
   it('matches the snapshot of a global process track without a thread', () => {
     const { container } = setup(NO_THREAD_TRACK_INDEX);
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('displays the private browsing status of a fission thread', () => {
+    setup(PRIVATE_TRACK_INDEX);
+    const track = screen.getByText('Private');
+    // $FlowExpectError The parent element is an HTML Element but Flow doesn't know that.
+    expect(ensureExists(track.parentElement).title).toBe(stripIndent`
+      Private
+      Thread: "Private" (6666)
+      Process: "default" (6666)
+      Private Browsing: Yes
+    `);
+  });
+
+  it('displays the container status of a fission thread', () => {
+    setup(CONTAINER_TRACK_INDEX);
+    const track = screen.getByText('InContainer');
+    // $FlowExpectError The parent element is an HTML Element but Flow doesn't know that.
+    expect(ensureExists(track.parentElement).title).toBe(stripIndent`
+      InContainer
+      Thread: "InContainer" (7777)
+      Process: "default" (7777)
+      Container Id: 3
+    `);
   });
 
   it('has the correct selectors into useful parts of the component', function () {
