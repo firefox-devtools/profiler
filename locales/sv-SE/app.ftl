@@ -473,6 +473,7 @@ MenuButtons--publish--reupload-performance-profile = Ladda upp prestandaprofilen
 MenuButtons--publish--share-performance-profile = Dela prestandaprofil
 MenuButtons--publish--info-description = Ladda upp din profil och gör den tillgänglig för alla med länken.
 MenuButtons--publish--info-description-default = Som standard tas dina personuppgifter bort.
+MenuButtons--publish--info-description-firefox-nightly2 = Den här profilen är från { -firefox-nightly-brand-name }, så den mesta information ingår som standard.
 MenuButtons--publish--include-additional-data = Inkludera ytterligare data som kan identifieras
 MenuButtons--publish--button-upload = Ladda upp
 MenuButtons--publish--upload-title = Laddar upp profil...
