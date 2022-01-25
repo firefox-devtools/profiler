@@ -29,6 +29,7 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-unpublished = Δεν ήταν δυνατή η ανάκτηση του προφίλ από το { -firefox-brand-name }.
 AppViewRouter--error-from-file = Δεν ήταν δυνατή η ανάγνωση του αρχείου ή η ανάλυση του προφίλ σε αυτό.
 AppViewRouter--error-local = Δεν έχει υλοποιηθεί ακόμα.
 AppViewRouter--error-public = Δεν ήταν δυνατή η λήψη του προφίλ.
@@ -437,7 +438,7 @@ MenuButtons--publish--reupload-performance-profile = Νέα μεταφόρτωσ
 MenuButtons--publish--share-performance-profile = Κοινή χρήση προφίλ επιδόσεων
 MenuButtons--publish--info-description = Ανεβάστε το προφίλ σας και κάντε το προσβάσιμο σε οποιονδήποτε έχει τον σύνδεσμο.
 MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
-MenuButtons--publish--info-description-firefox-nightly = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται όλες οι πληροφορίες από προεπιλογή.
+MenuButtons--publish--info-description-firefox-nightly2 = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται οι περισσότερες πληροφορίες από προεπιλογή.
 MenuButtons--publish--include-additional-data = Συμπερίληψη επιπλέον δεδομένων που ίσως να είναι αναγνωρίσιμα
 MenuButtons--publish--button-upload = Μεταφόρτωση
 MenuButtons--publish--upload-title = Μεταφόρτωση προφίλ…
@@ -637,6 +638,9 @@ SourceView--loading-url = Αναμονή για { $host }…
 # Displayed while the source view is waiting for the browser to deliver
 # the source code.
 SourceView--loading-browser-connection = Αναμονή για { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Μη διαθέσιμη πηγή
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
