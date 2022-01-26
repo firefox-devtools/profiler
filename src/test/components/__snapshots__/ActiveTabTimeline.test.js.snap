@@ -61,11 +61,13 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
             <div
               class="react-contextmenu-wrapper"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-                height="300"
-                width="200"
-              />
+              <div>
+                <canvas
+                  class="timelineMarkersCanvas"
+                  height="300"
+                  width="200"
+                />
+              </div>
             </div>
           </div>
           <div
@@ -75,11 +77,13 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
             <div
               class="react-contextmenu-wrapper"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-                height="300"
-                width="200"
-              />
+              <div>
+                <canvas
+                  class="timelineMarkersCanvas"
+                  height="300"
+                  width="200"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -162,11 +166,13 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
             <div
               class="react-contextmenu-wrapper"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-                height="300"
-                width="200"
-              />
+              <div>
+                <canvas
+                  class="timelineMarkersCanvas"
+                  height="300"
+                  width="200"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -241,11 +247,13 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
           <div
             class="react-contextmenu-wrapper"
           >
-            <canvas
-              class="timelineMarkersCanvas"
-              height="300"
-              width="200"
-            />
+            <div>
+              <canvas
+                class="timelineMarkersCanvas"
+                height="300"
+                width="200"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -319,11 +327,13 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
           <div
             class="react-contextmenu-wrapper"
           >
-            <canvas
-              class="timelineMarkersCanvas"
-              height="300"
-              width="200"
-            />
+            <div>
+              <canvas
+                class="timelineMarkersCanvas"
+                height="300"
+                width="200"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -404,11 +414,13 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
                 <div
                   class="react-contextmenu-wrapper"
                 >
-                  <canvas
-                    class="timelineMarkersCanvas"
-                    height="300"
-                    width="200"
-                  />
+                  <div>
+                    <canvas
+                      class="timelineMarkersCanvas"
+                      height="300"
+                      width="200"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -550,11 +562,13 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                       <div
                         class="react-contextmenu-wrapper"
                       >
-                        <canvas
-                          class="timelineMarkersCanvas"
-                          height="300"
-                          width="200"
-                        />
+                        <div>
+                          <canvas
+                            class="timelineMarkersCanvas"
+                            height="300"
+                            width="200"
+                          />
+                        </div>
                       </div>
                     </div>
                     <div
@@ -564,11 +578,13 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                       <div
                         class="react-contextmenu-wrapper"
                       >
-                        <canvas
-                          class="timelineMarkersCanvas"
-                          height="300"
-                          width="200"
-                        />
+                        <div>
+                          <canvas
+                            class="timelineMarkersCanvas"
+                            height="300"
+                            width="200"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

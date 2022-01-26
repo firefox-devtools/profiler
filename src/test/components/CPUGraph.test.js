@@ -22,6 +22,7 @@ import {
   getProfileFromTextSamples,
   addCpuUsageValues,
 } from '../fixtures/profiles/processed-profile';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 // Mocking the ActivityGraph and SampleGraph because we don't want to see the
 // content/draw log of it in these tests. It has its own tests.
@@ -41,6 +42,7 @@ const GRAPH_HEIGHT = 10;
 describe('CPUGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
+  autoMockIntersectionObserver();
 
   function getSamplesProfile() {
     const profile = getProfileFromTextSamples(`

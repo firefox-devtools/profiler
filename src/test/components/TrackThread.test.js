@@ -37,6 +37,7 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 // The graph is 400 pixels wide based on the element size mock. Each stack is
 // 100 pixels wide. Use the value 50 to click in the middle of this stack, and
@@ -54,6 +55,7 @@ describe('timeline/TrackThread', function () {
   afterEach(removeRootOverlayElement);
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
+  autoMockIntersectionObserver();
 
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
