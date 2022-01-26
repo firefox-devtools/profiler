@@ -408,11 +408,14 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Inclure des cap
 MenuButtons--publish--renderCheckbox-label-resource = Inclure les URL et les chemins des ressources
 MenuButtons--publish--renderCheckbox-label-extension = Inclure les informations des extensions
 MenuButtons--publish--renderCheckbox-label-preference = Inclure les valeurs des paramètres
+MenuButtons--publish--renderCheckbox-label-private-browsing = Inclure les données des fenêtres de navigation privée
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Ce profil contient des données de navigation privée
 MenuButtons--publish--reupload-performance-profile = Envoyer à nouveau le profil de performances
 MenuButtons--publish--share-performance-profile = Partager le profil de performance
 MenuButtons--publish--info-description = Envoyez votre profil et rendez-le accessible à toute personne disposant du lien.
 MenuButtons--publish--info-description-default = Par défaut, vos données personnelles sont supprimées.
-MenuButtons--publish--info-description-firefox-nightly = Ce profil provient de { -firefox-nightly-brand-name }, donc par défaut toutes les informations sont incluses.
+MenuButtons--publish--info-description-firefox-nightly2 = Ce profil provient de { -firefox-nightly-brand-name }, donc par défaut la plupart les informations sont incluses.
 MenuButtons--publish--include-additional-data = Inclure des données supplémentaires qui peuvent être identifiables
 MenuButtons--publish--button-upload = Envoyer
 MenuButtons--publish--upload-title = Envoi du profil…
@@ -627,12 +630,35 @@ SourceView--no-known-cors-url = Aucune URL multiorigine accessible n’est connu
 #   $url (String) - The URL which we tried to get the source code from
 #   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
 SourceView--network-error-when-obtaining-source = Une erreur réseau s’est produite lors de la récupération de l’URL { $url } : { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Impossible d’interroger l’API de symbolisation du navigateur : { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = L’API de symbolisation du navigateur a renvoyé une erreur : { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = L’API de symbolisation du serveur de symboles local a renvoyé une erreur : { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
 SourceView--not-in-archive-error-when-obtaining-source = Le fichier { $pathInArchive } est introuvable dans l’archive provenant de { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = L’archive à l’adresse { $url } n’a pas pu être analysée : { $parsingErrorMessage }
 SourceView--close-button =
     .title = Fermer la vue du code source
 
