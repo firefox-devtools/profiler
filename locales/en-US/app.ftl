@@ -171,6 +171,11 @@ CallTree--inlining-badge = (inlined)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Select a node to display information about it.
+CallTreeSidebar--percentage =
+  { $percent ->
+      [0] {"\u2014"}
+     *[other] { PERCENT($percent) }
+  }
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -230,6 +235,22 @@ FullTimeline--stack-height = Stack height
 #   $totalTrackCount (Number) - Total track count in the timeline
 FullTimeline--tracks-button =
     <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks
+
+## GCMarker tooltips
+
+GCMarker--tooltip--bytes-tenured = { HBYTES($tenured) } / { HBYTES($used) } ({ PERCENT($percent) })
+GCMarker--tooltip--bytes-used = { HBYTES($used) } / { HBYTES($capacity) } ({ PERCENT($percent) })
+GCMarker--tooltip--cells-tenured = { HSI($tenured) } / { HSI($allocated) } ({ PERCENT($percent) })
+GCMarker--tooltip--heap-size = { HBYTES($pre) }
+GCMarker--tooltip--heap-size-with-post = { HBYTES($pre) } - { HBYTES($post) }
+GCMarker--tooltip--lazy-allocated-size = { HBYTES($capacity) }
+GCMarker--tooltip--new-nursery-size = { HBYTES($capacity) }
+GCMarker--tooltip--nursery-allocations = { HSI($nursery) } / { HSI($total) } ({ PERCENT($percent) })
+GCMarker--tooltip--strings-deduplicated = { HSI($deduplicated) } / { HSI($total) } ({ PERCENT($percent) })
+GCMarker--tooltip--tenuring-allocation-rate-bytes = { HBYTES($rate) }/s
+GCMarker--tooltip--tenuring-allocation-rate-cells = { HSI($rate) }/s
+GCMarker--tooltip--trigger = { HBYTES($amount) } / { HBYTES($threshold) }
+GCMarker--tooltip--zones = { $collected } / { $total } ({ PERCENT($percent) })
 
 ## Home page
 
@@ -434,6 +455,7 @@ MenuButtons--metaInfo--recording-started = Recording started:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--profile-version = Profile Version:
 MenuButtons--metaInfo--buffer-capacity = Buffer Capacity:
+MenuButtons--metaInfo--buffer-capacity-bytes = { HBYTES($capacity, significantDigits: 0) }
 MenuButtons--metaInfo--buffer-duration = Buffer Duration:
 
 # Buffer Duration in Seconds in Meta Info Panel
@@ -498,6 +520,7 @@ MenuButtons--metaOverheadStatistics-statkeys-lockings = Lockings
     .title = Time to acquire the lock before sampling.
 MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
+MenuButtons--metaOverheadStatistics-overhead-percentage-value = { PERCENT($percent) }
 MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
 
 ## Publish panel
@@ -526,12 +549,48 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 
+## Network marker tooltips
+
+# Requested bytes for a network request
+# Variables:
+#   - $bytes (number) - The count of bytes received for this request.
+NetworkMarker--tooltip--transfered-bytes = { HBYTES($bytes) }
+
 ## NetworkSettings
 ## This is used in the network chart.
 
 NetworkSettings--panel-search =
     .label = Filter Networks:
     .title = Only display network requests that match a certain name
+
+## Timestamp formatting primitive
+
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
+
+## Bytes number formatting primitives
+## They're used internally by the HBYTES function that we use in other ids.
+NumberFormat--bytes = { $value } B
+NumberFormat--kibibytes = { $value } KiB
+NumberFormat--mebibytes = { $value } MiB
+NumberFormat--gibibytes = { $value } GiB
+
+## SI number formatting primitives.
+## They're useful to add a multiplier for numbers without units.
+## They're used internally by the HSI function that we use in other ids.
+NumberFormat--SI--no-modifier = { $value }
+NumberFormat--SI--kilo = { $value }K
+NumberFormat--SI--mega = { $value }M
+NumberFormat--SI--giga = { $value }G
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
@@ -652,12 +711,41 @@ TrackContextMenu--show-all-tracks-below = Show all tracks below
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = No results found for “<span>{ $searchFilter }</span>”
 
+## TrackMemoryGraph
+## The component used to display memory information in the timeline.
+
+# In tooltips, this shows the memory relative to the minimum in the range at this time.
+# Note that HBYTES is a function specific to the profiler code, that will
+# automatically chose the correct multiplier. Look at the NumberFormat l10n ids
+# to change the localization for these multipliers.
+# Variables:
+#   $memory (number) - The amount of used memory
+TrackMemoryGraph--relative-memory = <span>{ HBYTES($memory) }</span> relative memory at this time
+
+# In tooltips, this shows the memory range for the full profile.
+# Note that HBYTES is a function specific to the profiler code, that will
+# automatically chose the correct multiplier. Look at the NumberFormat l10n ids
+# to change the localization for these multipliers.
+# Variables:
+#   $range (number) - The range of memory we've seen in this graph.
+TrackMemoryGraph--memory-range = <span>{ HBYTES($range) }</span> memory range in graph
+
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
 TrackSearchField--search-input =
     .placeholder = Enter filter terms
     .title = Only display tracks that match a certain text
+
+## TrackVisualProgressGraph
+## This component is responsible to show the progression of a page's rendering
+
+TrackVisualProgressGraph--visual-progress--tooltip =
+  <span>{ PERCENT($percentage) }</span> visual completeness at this time
+TrackVisualProgressGraph--perceptual-visual-progress--tooltip =
+  <span>{ PERCENT($percentage) }</span> perceptual visual completeness at this time
+TrackVisualProgressGraph--contentful-visual-progress--tooltip =
+  <span>{ PERCENT($percentage) }</span> contentful visual completeness at this time
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack

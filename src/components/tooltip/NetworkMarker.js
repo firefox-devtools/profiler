@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
+import { Localized } from '@fluent/react';
 
 import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
 import {
@@ -13,7 +14,6 @@ import {
   guessMimeTypeFromNetworkMarker,
 } from 'firefox-profiler/profile-logic/marker-data';
 import {
-  formatBytes,
   formatNumber,
   formatMilliseconds,
 } from 'firefox-profiler/utils/format-numbers';
@@ -423,9 +423,14 @@ export function getNetworkMarkerDetails(
 
   if (typeof payload.count === 'number') {
     details.push(
-      <TooltipDetail label="Requested bytes" key="Network-Requested Bytes">
-        {formatBytes(payload.count)}
-      </TooltipDetail>
+      <Localized
+        id="Networkmarker--tooltip--transfered-bytes"
+        vars={{ bytes: payload.count }}
+      >
+        <TooltipDetail label="Transfered bytes" key="Network-Requested Bytes">
+          {payload.count}
+        </TooltipDetail>
+      </Localized>
     );
   }
 

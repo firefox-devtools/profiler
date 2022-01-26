@@ -5,9 +5,9 @@
 // @flow
 
 import * as React from 'react';
+import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { formatPercent } from 'firefox-profiler/utils/format-numbers';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
@@ -175,7 +175,7 @@ type OwnProps = {|
   +progressGraphData: ProgressGraphData[],
   +lineWidth: CssPixels,
   +graphHeight: CssPixels,
-  +graphDotTooltipText: string,
+  +graphDotTooltipTextId: string,
 |};
 
 type StateProps = {|
@@ -248,16 +248,23 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(graphDataIndex: number): React.Node {
-    const { progressGraphData, graphDotTooltipText } = this.props;
+    const { progressGraphData, graphDotTooltipTextId } = this.props;
     const percentage = progressGraphData[graphDataIndex].percent / 100;
     return (
       <div className="timelineTrackVisualProgressTooltip">
-        <div className="timelineTrackVisualProgressTooltipLine">
-          <span className="timelineTrackVisualProgressTooltipNumber">
-            {formatPercent(percentage)}
-          </span>
-          {graphDotTooltipText}
-        </div>
+        <Localized
+          id={graphDotTooltipTextId}
+          vars={{ percentage }}
+          elems={{
+            span: <span className="timelineTrackVisualProgressTooltipNumber" />,
+          }}
+        >
+          <div className="timelineTrackVisualProgressTooltipLine">
+            <span className="timelineTrackVisualProgressTooltipNumber">
+              {percentage}%
+            </span>
+          </div>
+        </Localized>
       </div>
     );
   }

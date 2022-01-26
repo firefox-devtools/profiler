@@ -13,10 +13,7 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
 
-import {
-  formatBytes,
-  formatTimestamp,
-} from 'firefox-profiler/utils/format-numbers';
+import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
 import {
   formatProductAndVersion,
   formatPlatform,
@@ -188,10 +185,11 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
                     Buffer Capacity:
                   </Localized>
                 </span>
-                {
-                  /* The capacity is expressed in "entries", where 1 entry == 8 bytes. */
-                  formatBytes(configuration.capacity * 8, 0)
-                }
+                {/* The capacity is expressed in "entries", where 1 entry == 8 bytes. */}
+                <Localized
+                  id="MenuButtons--metaInfo--buffer-capacity-bytes"
+                  vars={{ capacity: configuration.capacity * 8 }}
+                />
               </div>
               <div className="metaInfoRow">
                 <span className="metaInfoLabel">

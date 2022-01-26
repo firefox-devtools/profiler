@@ -6,10 +6,7 @@
 import * as React from 'react';
 import { Localized } from '@fluent/react';
 
-import {
-  formatMicroseconds,
-  formatPercent,
-} from 'firefox-profiler/utils/format-numbers';
+import { formatMicroseconds } from 'firefox-profiler/utils/format-numbers';
 
 import type { ProfilerOverhead } from 'firefox-profiler/types';
 
@@ -149,7 +146,12 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
                 </Localized>
               </span>
               <span className="metaInfoValueRight">
-                {formatPercent(overheadPercentage / totalSamplingCount)}
+                <Localized
+                  id="MenuButtons--metaOverheadStatistics-overhead-percentage-value"
+                  vars={{ percent: overheadPercentage / totalSamplingCount }}
+                >
+                  {overheadPercentage} / {totalSamplingCount}
+                </Localized>
               </span>
             </div>
           ) : null}

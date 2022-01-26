@@ -5,9 +5,10 @@
 // @flow
 
 import * as React from 'react';
+import { Localized } from '@fluent/react';
+
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { formatBytes } from 'firefox-profiler/utils/format-numbers';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
@@ -312,18 +313,28 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     const bytes = accumulatedCounts[counterIndex] - minCount;
     return (
       <div className="timelineTrackMemoryTooltip">
-        <div className="timelineTrackMemoryTooltipLine">
-          <span className="timelineTrackMemoryTooltipNumber">
-            {formatBytes(bytes)}
-          </span>
-          {' relative memory at this time'}
-        </div>
-        <div className="timelineTrackMemoryTooltipLine">
-          <span className="timelineTrackMemoryTooltipNumber">
-            {formatBytes(countRange)}
-          </span>
-          {' memory range in graph'}
-        </div>
+        <Localized
+          id="TrackMemoryGraph--relative-memory"
+          vars={{ memory: bytes }}
+          elems={{
+            span: <span className="timelineTrackMemoryTooltipNumber" />,
+          }}
+        >
+          <div className="timelineTrackMemoryTooltipLine">
+            <span>XXX</span> relative memory at this time
+          </div>
+        </Localized>
+        <Localized
+          id="TrackMemoryGraph--memory-range"
+          vars={{ range: countRange }}
+          elems={{
+            span: <span className="timelineTrackMemoryTooltipNumber" />,
+          }}
+        >
+          <div className="timelineTrackMemoryTooltipLine">
+            <span>XXX</span> memory range in graph
+          </div>
+        </Localized>
       </div>
     );
   }

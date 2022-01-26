@@ -42,7 +42,6 @@ import type {
 } from 'firefox-profiler/profile-logic/profile-data';
 import {
   formatMilliseconds,
-  formatPercent,
   formatBytes,
   formatNumber,
   ratioToCssPercent,
@@ -54,7 +53,7 @@ type SidebarDetailProps = {|
   +color?: string,
   +indent?: boolean,
   +value: React.Node,
-  +percentage?: string | number,
+  +percentage?: number,
 |};
 
 function SidebarDetail({
@@ -73,7 +72,14 @@ function SidebarDetail({
       >
         {label}
       </div>
-      <div className="sidebar-percentage">{percentage}</div>
+      <div className="sidebar-percentage">
+        {percentage !== undefined && percentage !== null ? (
+          <Localized
+            id="CallTreeSidebar--percentage"
+            vars={{ percent: percentage }}
+          />
+        ) : null}
+      </div>
       <div className="sidebar-value">{value}</div>
     </React.Fragment>
   );
@@ -126,7 +132,7 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
             <SidebarDetail
               label={group}
               value={number(value)}
-              percentage={formatPercent(value / totalTime)}
+              percentage={value / totalTime}
             />
             {/* Draw a histogram bar. */}
             <div className="sidebar-histogram-bar">
@@ -239,7 +245,7 @@ class CategoryBreakdown extends React.PureComponent<
                   )
                 }
                 value={number(value)}
-                percentage={formatPercent(value / totalTime)}
+                percentage={value / totalTime}
               />
 
               {/* Draw a histogram bar, colored by the category. */}
@@ -256,7 +262,7 @@ class CategoryBreakdown extends React.PureComponent<
                       key={name}
                       label={name}
                       value={number(value)}
-                      percentage={formatPercent(value / totalTime)}
+                      percentage={value / totalTime}
                       indent={true}
                     />
                   ))
@@ -360,8 +366,6 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
 
     const { number, running, self } = this._getWeightTypeDetails(weightType);
 
-    const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
-    const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
     const totalTimeBreakdownByCategory = totalTime.breakdownByCategory;
     const totalTimeBreakdownByImplementation =
       totalTime.breakdownByImplementation;
@@ -415,12 +419,12 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           <SidebarDetail
             label={running}
             value={totalTime.value ? `${number(totalTime.value)}` : '—'}
-            percentage={totalTimePercent ? totalTimePercent + '%' : '—'}
+            percentage={totalTime.value / rootTime}
           />
           <SidebarDetail
             label={self}
             value={selfTime.value ? `${number(selfTime.value)}` : '—'}
-            percentage={selfTimePercent ? selfTimePercent + '%' : '—'}
+            percentage={selfTime.value / rootTime}
           />
           {totalTimeBreakdownByCategory ? (
             <>
