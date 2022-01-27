@@ -27,6 +27,7 @@ import {
   autoMockIntersectionObserver,
   triggerIntersectionObservers,
 } from '../fixtures/mocks/intersection-observer';
+import { triggerResizeObservers } from '../fixtures/mocks/resize-observer';
 
 import type {
   Profile,
@@ -278,7 +279,7 @@ describe('SampleGraph with intersection observer', function () {
     // By changing the "fake" result of getBoundingClientRect, we ensure that
     // the pure components rerender because their `width` props change.
     setMockedElementSize({ width: GRAPH_WIDTH * 2, height: GRAPH_HEIGHT });
-    window.dispatchEvent(new Event('resize'));
+    triggerResizeObservers();
     drawCalls = getContextDrawCalls();
     // It should still be not drawn yet.
     expect(drawCalls.some(([operation]) => operation === 'fillRect')).toBe(

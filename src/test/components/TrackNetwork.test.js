@@ -26,6 +26,7 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { changeSelectedNetworkMarker } from 'firefox-profiler/actions/profile-view';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
+import { triggerResizeObservers } from '../fixtures/mocks/resize-observer';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -71,14 +72,14 @@ describe('timeline/TrackNetwork', function () {
     // Flush out any existing draw calls.
     getContextDrawCalls();
     // Ensure we start out with 0.
-    expect(getContextDrawCalls().length).toEqual(0);
+    expect(getContextDrawCalls()).toHaveLength(0);
 
     // Send out the resize with a width change.
     // By changing the "fake" result of getBoundingClientRect, we ensure that
     // the pure components rerender because their `width` props change.
     setMockedElementSize({ width: GRAPH_WIDTH - 100, height: GRAPH_HEIGHT });
-    window.dispatchEvent(new Event('resize'));
-    expect(getContextDrawCalls().length > 0).toBe(true);
+    triggerResizeObservers();
+    expect(getContextDrawCalls()).not.toHaveLength(0);
   });
 
   it('draws differently a request and displays a tooltip when hovered', () => {
