@@ -25,7 +25,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackMemory.css';
+import './TrackProcessCPU.css';
 
 type OwnProps = {|
   +counterIndex: CounterIndex,
@@ -50,7 +50,7 @@ export class TracProcessCPUImpl extends React.PureComponent<Props, State> {
     const { counterIndex } = this.props;
     return (
       <div
-        className="timelineTrackMemory"
+        className="timelineTrackProcessCPU"
         style={{
           height: TRACK_PROCESS_CPU_HEIGHT,
           '--graph-height': `${TRACK_PROCESS_CPU_HEIGHT}px`,

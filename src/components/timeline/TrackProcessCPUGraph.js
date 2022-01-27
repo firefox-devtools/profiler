@@ -32,7 +32,7 @@ import type {
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackMemory.css';
+import './TrackProcessCPU.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.
@@ -188,7 +188,10 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
     this._scheduleDraw();
 
     return (
-      <canvas className="timelineTrackMemoryCanvas" ref={this._takeCanvasRef} />
+      <canvas
+        className="timelineTrackProcessCPUCanvas"
+        ref={this._takeCanvasRef}
+      />
     );
   }
 }
@@ -304,10 +307,10 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
     const cpuUsage = samples.count[counterIndex];
     const cpuRatio = cpuUsage / maxCPU;
     return (
-      <div className="timelineTrackMemoryTooltip">
-        <div className="timelineTrackMemoryTooltipLine">
+      <div className="timelineTrackProcessCPUTooltip">
+        <div className="timelineTrackProcessCPUTooltipLine">
           CPU:{' '}
-          <span className="timelineTrackMemoryTooltipNumber">
+          <span className="timelineTrackProcessCPUTooltipNumber">
             {formatPercent(cpuRatio)}
           </span>
         </div>
@@ -352,7 +355,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
 
     return (
-      <div style={{ left, top }} className="timelineTrackMemoryGraphDot" />
+      <div style={{ left, top }} className="timelineTrackProcessCPUGraphDot" />
     );
   }
 
@@ -373,7 +376,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <div
-        className="timelineTrackMemoryGraph"
+        className="timelineTrackProcessCPUGraph"
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
       >
