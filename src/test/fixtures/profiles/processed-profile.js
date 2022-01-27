@@ -1344,6 +1344,48 @@ export function getCounterForThread(
 }
 
 /**
+ * Creates a Counter fixture for a given thread with the given samples.
+ */
+export function getCounterForThreadWithSamples(
+  thread: Thread,
+  mainThreadIndex: ThreadIndex,
+  samples: {
+    time?: number[],
+    number?: number[],
+    count?: number[],
+    length: number,
+  },
+  name?: string,
+  category?: string
+): Counter {
+  const newSamples = {
+    time: samples.time
+      ? samples.time
+      : Array.from({ length: samples.length }, (_, i) => i),
+    number: samples.number ? samples.number : Array(samples.length).fill(0),
+    count: samples.count
+      ? samples.count
+      : Array(samples.length).map((_, i) => Math.sin(i)),
+    length: samples.length,
+  };
+
+  const counter: Counter = {
+    name: name ? name : 'My Counter',
+    category: category ? category : 'My Category',
+    description: 'My Description',
+    pid: thread.pid,
+    mainThreadIndex,
+    sampleGroups: [
+      {
+        id: 0,
+        samples: newSamples,
+      },
+    ],
+  };
+  return counter;
+}
+
+/**
  * Creates a profile that includes a thread with eventDelay values.
  */
 export function getProfileWithEventDelays(
