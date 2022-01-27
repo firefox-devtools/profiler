@@ -193,9 +193,15 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     this._canvas = canvas;
   };
 
-  render() {
+  componentDidMount() {
     this._scheduleDraw();
+  }
 
+  componentDidUpdate() {
+    this._scheduleDraw();
+  }
+
+  render() {
     return (
       <canvas className="timelineTrackMemoryCanvas" ref={this._takeCanvasRef} />
     );
