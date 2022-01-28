@@ -4,13 +4,11 @@
 // @flow
 
 import * as React from 'react';
-import classNames from 'classnames';
-import memoize from 'memoize-one';
-import range from 'array-range';
 
-import { VirtualList } from './VirtualList';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import type { LineTimings } from 'firefox-profiler/types';
 
-import type { CssPixels, LineTimings } from 'firefox-profiler/types';
+import type { SourceViewEditor } from './SourceView-codemirror';
 
 import './SourceView.css';
 
@@ -35,7 +33,6 @@ for understanding where time was actually spent in a program."
       >
         Self
       </span>
-      <span className="sourceViewHeaderColumn sourceViewFixedColumn lineNumber"></span>
       <span className="sourceViewHeaderColumn sourceViewMainColumn source"></span>
     </div>
   );
@@ -44,11 +41,11 @@ for understanding where time was actually spent in a program."
 type SourceViewProps = {|
   +timings: LineTimings,
   +source: string,
-  +rowHeight: CssPixels,
   +disableOverscan: boolean,
+  +filePath: string | null,
+  +scrollToHotSpotGeneration: number,
+  +hotSpotTimings: LineTimings,
 |};
-
-type LineNumber = number;
 
 function _mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | void {
   let maxValue = -Infinity;
@@ -62,92 +59,11 @@ function _mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | void {
   return keyForMaxValue;
 }
 
+let editorModulePromise: Promise<any> | null = null;
+
 export class SourceView extends React.PureComponent<SourceViewProps> {
-  _specialItems: [] = [];
-  _list: VirtualList<LineNumber> | null = null;
-  _takeListRef = (list: VirtualList<LineNumber> | null) => (this._list = list);
-
-  _computeSourceLinesMemoized = memoize((source: string) => source.split('\n'));
-
-  _computeAllLineNumbersMemoized = memoize(
-    (sourceLines: string[], timings: LineTimings): number[] => {
-      let maxLineNumber = sourceLines.length;
-      if (maxLineNumber <= 1) {
-        // We probably don't have the true source code yet, and don't really know
-        // the true number of lines in this file.
-        // Derive a maximum line number from the timings.
-        // Add a bit of space at the bottom (10 rows) so that the scroll position
-        // isn't too constrained - if the last known line is chosen as the "hot spot",
-        // this extra space allows us to display it in the top half of the viewport,
-        // if the viewport is small enough.
-        maxLineNumber = Math.max(1, ...timings.totalLineHits.keys()) + 10;
-      }
-      return range(1, maxLineNumber + 1);
-    }
-  );
-
-  _computeMaxLineLengthMemoized = memoize((sourceLines: string[]): number =>
-    sourceLines.reduce(
-      (prevMaxLen, line) => Math.max(prevMaxLen, line.length),
-      0
-    )
-  );
-
-  _renderRow = (lineNumber: LineNumber, index: number, columnIndex: number) => {
-    const { rowHeight, timings } = this.props;
-    // React converts height into 'px' values, while lineHeight is valid in
-    // non-'px' units.
-    const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
-
-    const total = timings.totalLineHits.get(lineNumber);
-    const self = timings.selfLineHits.get(lineNumber);
-    const isNonZero = !!total || !!self;
-
-    if (columnIndex === 0) {
-      return (
-        <div
-          className={classNames('sourceViewRow', 'sourceViewRowFixedColumns', {
-            sourceViewRowNonZero: isNonZero,
-          })}
-          style={rowHeightStyle}
-        >
-          <span className="sourceViewRowColumn sourceViewFixedColumn total">
-            {total}
-          </span>
-          <span className="sourceViewRowColumn sourceViewFixedColumn self">
-            {self}
-          </span>
-          <span className="sourceViewRowColumn sourceViewFixedColumn lineNumber">
-            {lineNumber}
-          </span>
-        </div>
-      );
-    }
-
-    const sourceLines = this._getSourceLines();
-    const line = index < sourceLines.length ? sourceLines[index] : '';
-
-    return (
-      <div
-        className={classNames('sourceViewRow', 'sourceViewRowScrolledColumns', {
-          sourceViewRowNonZero: isNonZero,
-        })}
-        style={rowHeightStyle}
-        key={index}
-      >
-        <code>{line}</code>
-      </div>
-    );
-  };
-
-  _getSourceLines(): string[] {
-    return this._computeSourceLinesMemoized(this.props.source);
-  }
-
-  _getItems(): LineNumber[] {
-    const { timings } = this.props;
-    return this._computeAllLineNumbersMemoized(this._getSourceLines(), timings);
-  }
+  _ref = React.createRef<HTMLDivElement>();
+  _editor: SourceViewEditor | null = null;
 
   /**
    * Scroll to the line with the most hits, based on the timings in
@@ -170,9 +86,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
    * from a URL and ended up with an arbitrary selected call node.
    * In that case, pick the hotspot from the global line timings.
    */
-  /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
-  scrollToHotSpot(timingsForScrolling: LineTimings) {
+  _scrollToHotSpot(timingsForScrolling: LineTimings) {
     const heaviestLine =
       _mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
       _mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
@@ -182,33 +96,99 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   }
 
   _scrollToLine(lineNumber: number) {
-    if (this._list) {
-      this._list.scrollToItem(lineNumber - 1, 0);
+    if (this._editor) {
+      this._editor.scrollToLine(lineNumber);
     }
   }
 
-  render() {
-    const { rowHeight, disableOverscan } = this.props;
-    const sourceLines = this._getSourceLines();
-    const maxLength = this._computeMaxLineLengthMemoized(sourceLines);
-    const CHAR_WIDTH_ESTIMATE = 8; // css pixels
+  _getMaxLineNumber() {
+    const { source, timings } = this.props;
+    const sourceLines = source.split('\n');
+    let maxLineNumber = sourceLines.length;
+    if (maxLineNumber <= 1) {
+      // We probably don't have the true source code yet, and don't really know
+      // the true number of lines in this file.
+      // Derive a maximum line number from the timings.
+      // Add a bit of space at the bottom (10 rows) so that the scroll position
+      // isn't too constrained - if the last known line is chosen as the "hot spot",
+      // this extra space allows us to display it in the top half of the viewport,
+      // if the viewport is small enough.
+      maxLineNumber = Math.max(1, ...timings.totalLineHits.keys()) + 10;
+    }
+    return maxLineNumber;
+  }
 
+  _getSourceOrFallback() {
+    const { source } = this.props;
+    if (source !== '') {
+      return source;
+    }
+    return '\n'.repeat(this._getMaxLineNumber());
+  }
+
+  render() {
     return (
       <div className="sourceView">
         <SourceViewHeader />
-        <VirtualList
-          className="sourceViewBody"
-          items={this._getItems()}
-          renderItem={this._renderRow}
-          itemHeight={rowHeight}
-          columnCount={2}
-          focusable={true}
-          specialItems={this._specialItems}
-          disableOverscan={disableOverscan}
-          containerWidth={maxLength * CHAR_WIDTH_ESTIMATE}
-          ref={this._takeListRef}
-        />
+        <div className="codeMirrorContainer" ref={this._ref}></div>
       </div>
     );
+  }
+
+  componentDidMount() {
+    // Load the module with all the @codemirror imports asynchronously, so that
+    // it can be split into a separate bundle chunk.
+    if (editorModulePromise === null) {
+      editorModulePromise = import('./SourceView-codemirror');
+    }
+    (async () => {
+      const codeMirrorModulePromise = ensureExists(editorModulePromise);
+      const codeMirrorModule = await codeMirrorModulePromise;
+      const domParent = this._ref.current;
+      if (!domParent) {
+        return;
+      }
+      const { SourceViewEditor } = codeMirrorModule;
+      const editor = new SourceViewEditor(
+        this._getSourceOrFallback(),
+        this.props.filePath,
+        this.props.timings,
+        domParent
+      );
+      this._editor = editor;
+      this._scrollToHotSpot(this.props.hotSpotTimings);
+    })();
+  }
+
+  // CodeMirror's API is not based on React. When our props change, we need to
+  // translate those changes into CodeMirror API calls manually.
+  componentDidUpdate(prevProps: SourceViewProps) {
+    if (!this._editor) {
+      return;
+    }
+
+    if (this.props.filePath !== prevProps.filePath) {
+      this._editor.updateLanguageForFilePath(this.props.filePath);
+    }
+
+    if (
+      this.props.source !== prevProps.source ||
+      (this.props.source === '' &&
+        prevProps.source === '' &&
+        this.props.timings !== prevProps.timings)
+    ) {
+      this._editor.setContents(this._getSourceOrFallback());
+    }
+
+    if (
+      this.props.scrollToHotSpotGeneration !==
+      prevProps.scrollToHotSpotGeneration
+    ) {
+      this._scrollToHotSpot(this.props.hotSpotTimings);
+    }
+
+    if (this.props.timings !== prevProps.timings) {
+      this._editor.setTimings(this.props.timings);
+    }
   }
 }
