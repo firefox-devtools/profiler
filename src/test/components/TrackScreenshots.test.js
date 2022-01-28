@@ -115,13 +115,13 @@ describe('timeline/TrackScreenshots', function () {
     // And we should see a small screenshot hover while preview selecting.
     expect(screenShotSize).toEqual({ width: 100, height: 50 });
 
-    // Mouseup should keep this existing selection
+    // click should keep this existing selection
     const previouslySelectedPreviewSelection = getPreviewSelection(getState());
     fireEvent(
       track,
       getMouseEvent('mouseup', { pageX: LEFT + 200, pageY: TOP })
     );
-    fireEvent(track, getMouseEvent('click', { pageX: LEFT + 210, pageY: TOP }));
+    fireEvent(track, getMouseEvent('click', { pageX: LEFT + 200, pageY: TOP }));
 
     expect(getPreviewSelection(getState())).toEqual({
       ...previouslySelectedPreviewSelection,
