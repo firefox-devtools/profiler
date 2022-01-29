@@ -59,7 +59,7 @@ type State = {|
 class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   _handlers: ?{
     mouseMoveHandler: MouseHandler,
-    mouseUpHandler: MouseHandler,
+    mouseClickHandler: MouseHandler,
   };
 
   _container: ?HTMLElement;
@@ -132,7 +132,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       }
     };
 
-    const mouseUpHandler = (event) => {
+    const clickHandler = (event) => {
       if (isRangeSelecting) {
         const mouseMoveTime =
           ((event.pageX - rect.left) / rect.width) *
@@ -154,23 +154,23 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
           selectionEnd,
           isModifying: false,
         });
-        // Stop propagation so that no thread is selected when creating a preview
-        // selection.
+        // Stop propagation so that no thread and no call node is selected when
+        // creating a preview selection.
         event.stopPropagation();
-        this._uninstallMoveAndUpHandlers();
+        this._uninstallMoveAndClickHandlers();
         return;
       }
 
       const { previewSelection } = this.props;
       if (previewSelection.hasSelection) {
-        const mouseUpTime =
+        const clickTime =
           ((event.pageX - rect.left) / rect.width) *
             (committedRange.end - committedRange.start) +
           committedRange.start;
         const { selectionStart, selectionEnd } = previewSelection;
-        if (mouseUpTime < selectionStart || mouseUpTime >= selectionEnd) {
-          // Stop propagation so that no thread is selected when removing the preview
-          // selections.
+        if (clickTime < selectionStart || clickTime >= selectionEnd) {
+          // Stop propagation so that no thread and no call node is selected
+          // when removing the preview selections.
           event.stopPropagation();
 
           // Unset preview selection.
@@ -181,31 +181,31 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         }
       }
 
-      // Do not stopPropagation(), so that graph gets mouseup event.
-      this._uninstallMoveAndUpHandlers();
+      // Do not stopPropagation(), so that graph gets click event.
+      this._uninstallMoveAndClickHandlers();
     };
 
-    this._installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler);
+    this._installMoveAndClickHandlers(mouseMoveHandler, clickHandler);
   };
 
-  _installMoveAndUpHandlers(
+  _installMoveAndClickHandlers(
     mouseMoveHandler: MouseHandler,
-    mouseUpHandler: MouseHandler
+    mouseClickHandler: MouseHandler
   ) {
-    // Unregister any leftover old handlers, in case we didn't get a mouseup for the previous
+    // Unregister any leftover old handlers, in case we didn't get a click for the previous
     // drag (e.g. when tab switching during a drag, or when ctrl+clicking on macOS).
-    this._uninstallMoveAndUpHandlers();
+    this._uninstallMoveAndClickHandlers();
 
-    this._handlers = { mouseMoveHandler, mouseUpHandler };
+    this._handlers = { mouseMoveHandler, mouseClickHandler };
     window.addEventListener('mousemove', mouseMoveHandler, true);
-    window.addEventListener('mouseup', mouseUpHandler, true);
+    window.addEventListener('click', mouseClickHandler, true);
   }
 
-  _uninstallMoveAndUpHandlers() {
+  _uninstallMoveAndClickHandlers() {
     if (this._handlers) {
-      const { mouseMoveHandler, mouseUpHandler } = this._handlers;
+      const { mouseMoveHandler, mouseClickHandler } = this._handlers;
       window.removeEventListener('mousemove', mouseMoveHandler, true);
-      window.removeEventListener('mouseup', mouseUpHandler, true);
+      window.removeEventListener('click', mouseClickHandler, true);
       this._handlers = null;
     }
   }
