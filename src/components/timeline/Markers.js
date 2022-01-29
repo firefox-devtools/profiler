@@ -408,7 +408,6 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
           // browser window.
           canvas.setCapture();
         }
-        e.stopPropagation();
       }
     }
   };

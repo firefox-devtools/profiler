@@ -163,11 +163,13 @@ exports[`TrackMemory matches the component snapshot 1`] = `
   <div
     class="timelineTrackMemoryGraph"
   >
-    <canvas
-      class="timelineTrackMemoryCanvas"
-      height="25"
-      width="80"
-    />
+    <div>
+      <canvas
+        class="timelineTrackMemoryCanvas"
+        height="25"
+        width="80"
+      />
+    </div>
     <div
       class="timelineEmptyThreadIndicator"
     />

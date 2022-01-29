@@ -208,26 +208,6 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
 class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView = React.createRef<SourceView>();
 
-  componentDidMount() {
-    if (this._sourceView.current) {
-      this._sourceView.current.scrollToHotSpot(
-        this.props.selectedCallNodeLineTimings
-      );
-    }
-  }
-
-  componentDidUpdate(prevProps: Props) {
-    if (
-      this._sourceView.current &&
-      prevProps.sourceViewActivationGeneration <
-        this.props.sourceViewActivationGeneration
-    ) {
-      this._sourceView.current.scrollToHotSpot(
-        this.props.selectedCallNodeLineTimings
-      );
-    }
-  }
-
   _onClickCloseButton = () => {
     this.props.closeBottomBox();
   };
@@ -238,19 +218,21 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewSource,
       globalLineTimings,
       disableOverscan,
+      sourceViewActivationGeneration,
+      selectedCallNodeLineTimings,
     } = this.props;
     const source =
       sourceViewSource && sourceViewSource.type === 'AVAILABLE'
         ? sourceViewSource.source
         : '';
+    const path =
+      sourceViewFile !== null
+        ? parseFileNameFromSymbolication(sourceViewFile).path
+        : null;
     return (
       <div className="bottom-box">
         <div className="bottom-box-bar">
-          <h3 className="bottom-box-title">
-            {sourceViewFile === null
-              ? '(no file selected)'
-              : parseFileNameFromSymbolication(sourceViewFile).path}
-          </h3>
+          <h3 className="bottom-box-title">{path ?? '(no file selected)'}</h3>
           <Localized id="SourceView--close-button" attrs={{ title: true }}>
             <button
               className={classNames(
@@ -267,11 +249,12 @@ class BottomBoxImpl extends React.PureComponent<Props> {
         <div className="bottom-main" id="bottom-main">
           {sourceViewFile !== null ? (
             <SourceView
-              key={sourceViewFile}
               disableOverscan={disableOverscan}
               timings={globalLineTimings}
               source={source}
-              rowHeight={16}
+              filePath={path}
+              scrollToHotSpotGeneration={sourceViewActivationGeneration}
+              hotSpotTimings={selectedCallNodeLineTimings}
               ref={this._sourceView}
             />
           ) : null}
