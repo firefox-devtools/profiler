@@ -7,10 +7,7 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { selectActiveTabTrack } from 'firefox-profiler/actions/profile-view';
-import {
-  getSelectedThreadIndexes,
-  getSelectedTab,
-} from 'firefox-profiler/selectors/url-state';
+import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getActiveTabGlobalTracks,
@@ -23,7 +20,6 @@ import { TimelineActiveTabResourcesPanel } from './ActiveTabResourcesPanel';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 
-import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
   GlobalTrackReference,
   TrackIndex,
@@ -46,7 +42,6 @@ type OwnProps = {|
 type StateProps = {|
   +globalTrack: ActiveTabGlobalTrack,
   +isSelected: boolean,
-  +selectedTab: TabSlug,
   +resourceTracks: ActiveTabResourceTrack[],
 |};
 
@@ -161,7 +156,6 @@ export const TimelineActiveTabGlobalTrack = explicitConnect<
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getActiveTabGlobalTracks(state);
     const globalTrack = globalTracks[trackIndex];
-    const selectedTab = getSelectedTab(state);
 
     // These get assigned based on the track type.
     let isSelected = false;
@@ -170,11 +164,10 @@ export const TimelineActiveTabGlobalTrack = explicitConnect<
     // Run different selectors based on the track type.
     switch (globalTrack.type) {
       case 'tab': {
-        isSelected =
-          hasThreadKeys(
-            getSelectedThreadIndexes(state),
-            globalTrack.threadsKey
-          ) && selectedTab !== 'network-chart';
+        isSelected = hasThreadKeys(
+          getSelectedThreadIndexes(state),
+          globalTrack.threadsKey
+        );
         resourceTracks = getActiveTabResourceTracks(state);
         break;
       }
@@ -190,7 +183,6 @@ export const TimelineActiveTabGlobalTrack = explicitConnect<
     return {
       globalTrack,
       isSelected,
-      selectedTab,
       resourceTracks,
     };
   },

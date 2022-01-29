@@ -7,10 +7,7 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { selectActiveTabTrack } from 'firefox-profiler/actions/profile-view';
-import {
-  getSelectedThreadIndexes,
-  getSelectedTab,
-} from 'firefox-profiler/selectors/url-state';
+import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TimelineTrackThread } from './TrackThread';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
@@ -199,9 +196,7 @@ export const TimelineActiveTabResourceTrack = explicitConnect<
   mapStateToProps: (state, { resourceTrack }) => {
     const threadIndex = resourceTrack.threadIndex;
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
-    const selectedTab = getSelectedTab(state);
-    const isSelected =
-      selectedThreadIndexes.has(threadIndex) && selectedTab !== 'network-chart';
+    const isSelected = selectedThreadIndexes.has(threadIndex);
 
     return {
       isSelected,
