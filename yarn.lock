@@ -1118,14 +1118,7 @@
     "@codemirror/state" "^0.19.0"
     "@codemirror/view" "^0.19.0"
 
-"@codemirror/rangeset@^0.19.0", "@codemirror/rangeset@^0.19.5":
-  version "0.19.5"
-  resolved "https://registry.yarnpkg.com/@codemirror/rangeset/-/rangeset-0.19.5.tgz#82dd2583324f5d5ffacf58922170bc5f3010e076"
-  integrity sha512-L3b+RIwIRKOJ3pJLOtpkxCUjGnxZKFyPb0CjYWKnVLuzEIaEExWWK7sp6rsejxOy8RjYzfCHlFhYB4UdQN7brw==
-  dependencies:
-    "@codemirror/state" "^0.19.0"
-
-"@codemirror/rangeset@^0.19.1", "@codemirror/rangeset@^0.19.6":
+"@codemirror/rangeset@^0.19.0", "@codemirror/rangeset@^0.19.1", "@codemirror/rangeset@^0.19.5", "@codemirror/rangeset@^0.19.6":
   version "0.19.6"
   resolved "https://registry.yarnpkg.com/@codemirror/rangeset/-/rangeset-0.19.6.tgz#2562850cb4ce7dd30088f4d13a13860b67e7d384"
   integrity sha512-wYtgGnW2Jtrh2nj7vpcBoEZib+jfyilrLN6w7YMTzzSRN8xXhYRorOUg4VQIa1JwFcMQrjSCkIdqXsDqOX1cYg==
@@ -1139,12 +1132,7 @@
   dependencies:
     "@codemirror/text" "^0.19.0"
 
-"@codemirror/text@^0.19.0":
-  version "0.19.5"
-  resolved "https://registry.yarnpkg.com/@codemirror/text/-/text-0.19.5.tgz#75033af2476214e79eae22b81ada618815441c18"
-  integrity sha512-Syu5Xc7tZzeUAM/y4fETkT0zgGr48rDG+w4U38bPwSIUr+L9S/7w2wDE1WGNzjaZPz12F6gb1gxWiSTg9ocLow==
-
-"@codemirror/text@^0.19.2":
+"@codemirror/text@^0.19.0", "@codemirror/text@^0.19.2":
   version "0.19.6"
   resolved "https://registry.yarnpkg.com/@codemirror/text/-/text-0.19.6.tgz#9adcbd8137f69b75518eacd30ddb16fd67bbac45"
   integrity sha512-T9jnREMIygx+TPC1bOuepz18maGq/92q2a+n4qTqObKwvNMg+8cMTslb8yxeEDEq7S3kpgGWxgO1UWbQRij0dA==
@@ -4060,10 +4048,10 @@ core-js@^2.5.3:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.11.tgz#38831469f9922bded8ee21c9dc46985e0399308c"
   integrity sha512-5wjnpaT/3dV+XB4borEsnAYQchn00XSgTAWKDkEqv+K8KevjbzmofK6hfJ9TZIlpj2N0xQpazy7PiRQiWHqzWg==
 
-core-js@^3.20.2:
-  version "3.20.2"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.20.2.tgz#46468d8601eafc8b266bd2dd6bf9dee622779581"
-  integrity sha512-nuqhq11DcOAbFBV4zCbKeGbKQsUDRqTX0oqx7AttUBuqe3h20ixsE039QHelbL6P4h+9kytVqyEtyZ6gsiwEYw==
+core-js@^3.20.3:
+  version "3.20.3"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.20.3.tgz#c710d0a676e684522f3db4ee84e5e18a9d11d69a"
+  integrity sha512-vVl8j8ph6tRS3B8qir40H7yw7voy17xL0piAjlbBUsH7WIfzoedL/ZOr1OV9FyZQLWXsayOJyV4tnRyXR85/ag==
 
 core-util-is@~1.0.0:
   version "1.0.2"
