@@ -106,6 +106,10 @@ export function getHumanReadableTracks(state: State): string[] {
           trackName = profileViewSelectors
             .getCounterSelectors(track.counterIndex)
             .getPid(state);
+        } else if (track.type === 'process-cpu') {
+          trackName = profileViewSelectors
+            .getCounterSelectors(track.counterIndex)
+            .getPid(state);
         } else {
           trackName = threads[track.threadIndex].name;
         }
