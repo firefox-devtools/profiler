@@ -816,7 +816,7 @@ function _buildThreadFromTextOnlyStacks(
   funcNames.forEach((funcName) => {
     funcTable.name.push(stringTable.indexForString(funcName));
     funcTable.fileName.push(null);
-    funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
+    funcTable.relevantForJS.push(funcName.endsWith('-relevantForJS'));
     funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
