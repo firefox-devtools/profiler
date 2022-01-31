@@ -1370,8 +1370,8 @@ export function getCounterForThreadWithSamples(
   };
 
   const counter: Counter = {
-    name: name ? name : 'My Counter',
-    category: category ? category : 'My Category',
+    name: name ?? 'My Counter',
+    category: category ?? 'My Category',
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,

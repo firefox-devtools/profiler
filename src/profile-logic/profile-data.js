@@ -1475,10 +1475,7 @@ export function accumulateCounterSamples(
 }
 
 /**
- * The memory counter contains relative offsets of memory. In order to draw an interesting
- * graph, take the memory counts, and find the minimum and maximum values, by
- * accumulating them over the entire profile range. Then, map those values to the
- * accumulatedCounts array.
+ * Compute the max counter sample counts to determine the range of a counter.
  */
 export function computeMaxCounterSampleCounts(
   samplesArray: Array<CounterSamplesTable>

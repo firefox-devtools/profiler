@@ -298,11 +298,7 @@ export function addProcessCPUTracksForProcess(
     }
 
     const { pid } = counter;
-    let localTracks = newLocalTracksByPid.get(pid);
-    if (localTracks === undefined) {
-      // It can't be undefined, but let's make sure.
-      localTracks = [];
-    }
+    let localTracks = newLocalTracksByPid.get(pid) ?? [];
 
     // Do not mutate the current state.
     localTracks = [...localTracks, { type: 'process-cpu', counterIndex }];

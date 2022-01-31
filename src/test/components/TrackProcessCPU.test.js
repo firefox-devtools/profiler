@@ -57,12 +57,18 @@ describe('TrackProcessCPU', function () {
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
     profile.counters = [
-      getCounterForThreadWithSamples(thread, threadIndex, {
-        time: thread.samples.time.slice(),
-        // CPU usage numbers for the per-process CPU.
-        count: [100, 400, 500, 1000, 200, 500, 300, 100],
-        length: SAMPLE_COUNT,
-      }),
+      getCounterForThreadWithSamples(
+        thread,
+        threadIndex,
+        {
+          time: thread.samples.time.slice(),
+          // CPU usage numbers for the per-process CPU.
+          count: [100, 400, 500, 1000, 200, 500, 300, 100],
+          length: SAMPLE_COUNT,
+        },
+        'processCPU',
+        'CPU'
+      ),
     ];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
