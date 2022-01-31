@@ -301,6 +301,11 @@ type ProfileAction =
       +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
     |}
   | {|
+      +type: 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS',
+      +localTracksByPid: Map<Pid, LocalTrack[]>,
+      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+    |}
+  | {|
       +type: 'OPEN_SOURCE_VIEW',
       +file: string,
       +currentTab: TabSlug,

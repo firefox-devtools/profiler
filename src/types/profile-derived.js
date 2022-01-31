@@ -298,7 +298,8 @@ export type LocalTrack =
   | {| +type: 'network', +threadIndex: ThreadIndex |}
   | {| +type: 'memory', +counterIndex: CounterIndex |}
   | {| +type: 'ipc', +threadIndex: ThreadIndex |}
-  | {| +type: 'event-delay', +threadIndex: ThreadIndex |};
+  | {| +type: 'event-delay', +threadIndex: ThreadIndex |}
+  | {| +type: 'process-cpu', +counterIndex: CounterIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
 
