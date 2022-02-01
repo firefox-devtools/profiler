@@ -849,11 +849,10 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
 );
 
 /**
- * Extracts the data of the first page on the tab filtered profile.
- * Currently we assume that we don't change the origin of webpages while
- * profiling in web developer preset. That's why we are simply getting the
- * first page we find that belongs to the active tab. Returns null if profiler
- * is not in the single tab view at the moment.
+ * Extract the hostname and favicon from the last page if we are in single tab
+ * view. We assume that the user wants to know about the last loaded page in
+ * this tab.
+ * Returns null if profiler is not in the single tab view at the moment.
  */
 export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> =
   createSelector(

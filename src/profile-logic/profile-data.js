@@ -2858,11 +2858,10 @@ export function filterToRetainedAllocations(
 }
 
 /**
- * Extract the hostname and favicon from the first page if we are in single tab
- * view. Currently we assume that we don't change the origin of webpages while
- * profiling in web developer preset. That's why we are simply getting the first
- * page we find that belongs to the active tab. Returns null if profiler is not
- * in the single tab view at the moment.
+ * Extract the hostname and favicon from the last page if we are in single tab
+ * view. We assume that the user wants to know about the last loaded page in
+ * this tab.
+ * Returns null if profiler is not in the single tab view at the moment.
  */
 export function extractProfileFilterPageData(
   pages: PageList | null,
@@ -2895,7 +2894,7 @@ export function extractProfileFilterPageData(
     return null;
   }
 
-  const pageUrl = filteredPages[0].url;
+  const pageUrl = filteredPages[filteredPages.length - 1].url;
 
   if (pageUrl.startsWith('about:')) {
     // If we only have an `about:*` page, we should return early with a friendly
