@@ -12,6 +12,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   TrackIndex,
+  Counter,
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
@@ -53,6 +54,7 @@ const LOCAL_TRACK_INDEX_ORDER = {
   memory: 2,
   ipc: 3,
   'event-delay': 4,
+  'process-cpu': 5,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
@@ -60,6 +62,7 @@ const LOCAL_TRACK_DISPLAY_ORDER = {
   thread: 2,
   ipc: 3,
   'event-delay': 4,
+  'process-cpu': 5,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -268,6 +271,38 @@ export function addEventDelayTracksForThreads(
 
     tracks.push({ type: 'event-delay', threadIndex });
     newLocalTracksByPid.set(pid, tracks);
+  }
+
+  return newLocalTracksByPid;
+}
+
+/**
+ * Take global tracks and add the experimental process CPU tracks. Return the new
+ * localTracksByPid map.
+ */
+export function addProcessCPUTracksForProcess(
+  counters: Counter[] | null,
+  localTracksByPid: Map<Pid, LocalTrack[]>
+): Map<Pid, LocalTrack[]> {
+  if (counters === null) {
+    // We don't have any counters to add.
+    return localTracksByPid;
+  }
+
+  const newLocalTracksByPid = new Map(localTracksByPid);
+
+  for (const [counterIndex, counter] of counters.entries()) {
+    if (counter.category !== 'CPU' || counter.name !== 'processCPU') {
+      // We only care about the process CPU counter types.
+      continue;
+    }
+
+    const { pid } = counter;
+    let localTracks = newLocalTracksByPid.get(pid) ?? [];
+
+    // Do not mutate the current state.
+    localTracks = [...localTracks, { type: 'process-cpu', counterIndex }];
+    newLocalTracksByPid.set(pid, localTracks);
   }
 
   return newLocalTracksByPid;
@@ -718,6 +753,8 @@ export function getLocalTrackName(
         getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
         ' Event Delay'
       );
+    case 'process-cpu':
+      return 'Process CPU';
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -1100,7 +1137,8 @@ export function getSearchFilteredLocalTracksByPid(
         case 'network':
         case 'memory':
         case 'ipc':
-        case 'event-delay': {
+        case 'event-delay':
+        case 'process-cpu': {
           const { type } = localTrack;
           if (searchRegExp.test(type)) {
             searchFilteredLocalTracks.add(trackIndex);

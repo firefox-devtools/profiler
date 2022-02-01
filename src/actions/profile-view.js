@@ -353,6 +353,15 @@ export function selectTrack(
             selectedThreadIndex = localTrack.threadIndex;
             break;
           }
+          case 'process-cpu': {
+            const { counterIndex } = localTrack;
+            const counterSelectors = getCounterSelectors(counterIndex);
+            const counter = counterSelectors.getCommittedRangeFilteredCounter(
+              getState()
+            );
+            selectedThreadIndex = counter.mainThreadIndex;
+            break;
+          }
           default:
             throw assertExhaustiveCheck(
               localTrack,
