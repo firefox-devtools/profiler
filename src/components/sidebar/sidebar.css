@@ -169,7 +169,7 @@
   height: 0;
   border-width: 5px 4px 5px 8px;
   border-style: solid;
-  border-color: transparent transparent transparent currentColor;
+  border-color: transparent transparent transparent currentcolor;
   margin-top: 1px;
   background: none;
   content: '';
@@ -183,7 +183,7 @@
 .sidebar-toggle.expanded::before {
   border-width: 8px 5px 4px;
   border-style: solid;
-  border-color: currentColor transparent transparent;
+  border-color: currentcolor transparent transparent;
   margin-top: 3px;
   margin-inline-start: -12px;
 }

@@ -1475,6 +1475,24 @@ export function accumulateCounterSamples(
 }
 
 /**
+ * Compute the max counter sample counts to determine the range of a counter.
+ */
+export function computeMaxCounterSampleCounts(
+  samplesArray: Array<CounterSamplesTable>
+): Array<number> {
+  const maxSampleCounts = samplesArray.map((samples) => {
+    let maxCount = 0;
+    for (let i = 0; i < samples.length; i++) {
+      maxCount = Math.max(samples.count[i], maxCount);
+    }
+
+    return maxCount;
+  });
+
+  return maxSampleCounts;
+}
+
+/**
  * Pre-processing of raw eventDelay values.
  *
  * We don't do 16ms event injection for responsiveness values anymore. Instead,

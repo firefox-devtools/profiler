@@ -28,6 +28,7 @@ import { TrackEventDelay } from './TrackEventDelay';
 import { TrackNetwork } from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
+import { TrackProcessCPU } from './TrackProcessCPU';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import type {
   TrackReference,
@@ -140,6 +141,8 @@ class LocalTrackComponent extends PureComponent<Props> {
         return <TrackIPC threadIndex={localTrack.threadIndex} />;
       case 'event-delay':
         return <TrackEventDelay threadIndex={localTrack.threadIndex} />;
+      case 'process-cpu':
+        return <TrackProcessCPU counterIndex={localTrack.counterIndex} />;
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
@@ -254,6 +257,12 @@ export const TimelineLocalTrack = explicitConnect<
           selectedTab !== 'event-delay';
         titleText =
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
+        break;
+      }
+      case 'process-cpu': {
+        titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
+          state
+        );
         break;
       }
       default:

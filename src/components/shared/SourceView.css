@@ -4,9 +4,24 @@
 
 .sourceView {
   display: flex;
+  min-height: 0;
   flex: 1;
   flex-flow: column;
   background: white;
+
+  /* Extra intermediate colors which Photon doesn't have, from
+     https://searchfox.org/mozilla-central/rev/8012bca692dddb307c2787bac1d4dd48cb0d8243/devtools/client/themes/variables.css#34-100 */
+  --blue-55: #0074e8;
+  --magenta-65: #dd00a9;
+
+  /* Theme colors. Loosely based on the Firefox devtools light theme as of Jan 2022. */
+  --theme-highlight-keyword: var(--magenta-65);
+  --theme-highlight-type: var(--purple-60);
+  --theme-highlight-variable: var(--blue-55);
+  --theme-highlight-method: var(--green-70);
+  --theme-highlight-literal: var(--blue-70);
+  --theme-highlight-comment: var(--grey-50);
+  --theme-highlight-punctuation: var(--grey-70);
 }
 
 .sourceViewHeader {
@@ -16,6 +31,28 @@
   padding: 1px 0;
   border-bottom: 1px solid var(--grey-30);
   background: white;
+}
+
+.codeMirrorContainer {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-flow: column;
+}
+
+.cm-editor {
+  min-height: 0;
+}
+
+.cm-scroller {
+  overflow: auto;
+  font: inherit !important;
+  line-height: 16px !important;
+}
+
+.cm-gutters {
+  border-right: 0 !important;
+  background-color: white !important;
 }
 
 .sourceViewHeaderMainColumn {
@@ -42,36 +79,35 @@
 }
 
 .sourceViewHeaderColumn.total,
-.sourceViewHeaderColumn.self {
-  text-align: right;
-}
-
-.sourceViewFixedColumn {
-  padding-right: 5px;
-  text-align: right;
-}
-
-.sourceViewRowColumn.sourceViewFixedColumn {
-  overflow: hidden;
-  box-sizing: border-box;
-  border-right: 1px solid var(--grey-30);
-  text-overflow: ellipsis;
-}
-
-.sourceViewFixedColumn.total,
-.sourceViewFixedColumn.self {
+.sourceViewHeaderColumn.self,
+.cm-total-timings-gutter,
+.cm-self-timings-gutter {
   width: 50px;
+  text-align: right;
 }
 
-.sourceViewFixedColumn.lineNumber {
-  width: 45px;
-  border-right: 0;
+.cm-total-timings-gutter,
+.cm-self-timings-gutter {
+  border-right: 1px solid var(--grey-30);
+  color: black;
+}
+
+.cm-lineNumbers {
   color: #aaa;
   font-variant-numeric: tabular-nums;
 }
 
-.sourceViewHeaderColumn.sourceViewFixedColumn.lineNumber::after {
-  display: none;
+.cm-lineNumbers .cm-gutterElement {
+  min-width: 45px !important;
+}
+
+.cm-total-timings-gutter .cm-gutterElement,
+.cm-self-timings-gutter .cm-gutterElement {
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 5px;
+  text-overflow: ellipsis;
 }
 
 .sourceViewBody {
@@ -123,15 +159,93 @@
   white-space: pre;
 }
 
+.cm-nonZeroLine,
 .sourceViewRowNonZero {
   background-color: #edf6ff;
 }
 
-.sourceViewRow > code {
+.cm-content {
   font-family: ui-monospace, 'Roboto Mono', monospace;
   hyphens: none;
-  tab-size: 4;
   word-break: normal;
   word-spacing: normal;
   word-wrap: normal;
+}
+
+/**
+ * Syntax highlighting uses the CodeMirror 6 classHighlightStyle. From its documentation:
+ *
+ * These tags are mapped to their name prefixed with "cmt-" (for example "cmt-comment"):
+ *
+ *  - link
+ *  - heading
+ *  - emphasis
+ *  - strong
+ *  - keyword
+ *  - atom
+ *  - bool
+ *  - url
+ *  - labelName
+ *  - inserted
+ *  - deleted
+ *  - literal
+ *  - string
+ *  - number
+ *  - variableName
+ *  - typeName
+ *  - namespace
+ *  - className
+ *  - macroName
+ *  - propertyName
+ *  - operator
+ *  - comment
+ *  - meta
+ *  - punctuation
+ *  - invalid
+ * 
+ * In addition, these mappings are provided:
+ * 
+ *  - regexp, escape, and special(string) are mapped to "cmt-string2"
+ *  - special(variableName) to "cmt-variableName2"
+ *  - local(variableName) to "cmt-variableName cmt-local"
+ *  - definition(variableName) to "cmt-variableName cmt-definition"
+ *  - definition(propertyName) to "cmt-propertyName cmt-definition"
+ */
+
+.cmt-namespace,
+.cmt-variableName,
+.cmt-variableName2,
+.cmt-macroName {
+  color: var(--theme-highlight-variable);
+}
+
+.cmt-typeName {
+  color: var(--theme-highlight-type);
+}
+
+.cmt-propertyName {
+  color: var(--theme-highlight-method);
+}
+
+.cmt-number,
+.cmt-string,
+.cmt-string2 {
+  color: var(--theme-highlight-literal);
+}
+
+.cmt-bool,
+.cmt-atom,
+.cmt-error,
+.cmt-keyword {
+  color: var(--theme-highlight-keyword);
+}
+
+.cmt-comment,
+.cmt-meta {
+  color: var(--theme-highlight-comment);
+}
+
+.cmt-operator,
+.cmt-punctuation {
+  color: var(--theme-highlight-punctuation);
 }
