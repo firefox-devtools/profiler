@@ -251,6 +251,18 @@ export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
 
 export const getActiveTabID: Selector<TabID | null> = (state) => {
   const configuration = getProfilerConfiguration(state);
+  const pagesMap = getPagesMap(state);
+  const timelineTrackOrganization =
+    UrlState.getTimelineTrackOrganization(state);
+  if (
+    pagesMap &&
+    timelineTrackOrganization.type === 'active-tab' &&
+    timelineTrackOrganization.tabID &&
+    pagesMap.has(timelineTrackOrganization.tabID)
+  ) {
+    return timelineTrackOrganization.tabID;
+  }
+
   if (
     configuration &&
     configuration.activeTabID &&
