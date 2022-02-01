@@ -770,13 +770,22 @@ describe('sanitizePII', function () {
         secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
       } = addActiveTabInformationToProfile(originalProfile);
       markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
-      addInnerWindowIdToStacks(originalProfile.threads[0], {
-        privateInnerWindowID: privateTabInnerWindowIDs[0],
-        nonPrivateInnerWindowID: nonPrivateTabInnerWindowIDs[0],
-        privateCallNodes: [[A, B, Djs]],
-        nonPrivateCallNodes: [[A, B, Cjs]],
-        callNodesToDupe: [[A, B, Ejs]],
-      });
+      addInnerWindowIdToStacks(
+        originalProfile.threads[0],
+        /* listOfOperations */
+        [
+          {
+            innerWindowID: nonPrivateTabInnerWindowIDs[0],
+            callNodes: [[A, B, Cjs]],
+          },
+          {
+            innerWindowID: privateTabInnerWindowIDs[0],
+            callNodes: [[A, B, Djs]],
+          },
+        ],
+        /* callNodesToDupe */
+        [[A, B, Ejs]]
+      );
 
       const { sanitizedProfile } = setup(
         { shouldRemovePrivateBrowsingData: true },
