@@ -581,6 +581,8 @@ export function finalizeActiveTabProfileView(
   tabID: TabID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
+    // First, dispatch the new tab ids so that the states can be computed.
+    dispatch({ type: 'CHANGE_ACTIVE_TAB', tabID });
     const hasUrlInfo = selectedThreadIndexes !== null;
     const relevantPages = getRelevantPagesForActiveTab(getState());
 

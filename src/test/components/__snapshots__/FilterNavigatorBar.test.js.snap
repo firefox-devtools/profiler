@@ -92,14 +92,18 @@ exports[`app/ProfileFilterNavigator renders the site hostname as its first eleme
       <div
         class="nodeIcon "
       />
-      <span
-        title="https://developer.mozilla.org"
+      <select
+        class="profileFilterNavigator--tabID-select"
       >
-        developer.mozilla.org
-         (
-        51ms
-        )
-      </span>
+        <option
+          value="123123"
+        >
+          developer.mozilla.org
+        </option>
+      </select>
+      (
+      51ms
+      )
     </span>
   </li>
 </ol>

@@ -4,15 +4,19 @@
 
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 import memoize from 'memoize-immutable';
 import { Localized } from '@fluent/react';
 
-import explicitConnect from 'firefox-profiler/utils/connect';
+import explicitConnect, {
+  type ConnectedProps,
+} from 'firefox-profiler/utils/connect';
 import { popCommittedRanges } from 'firefox-profiler/actions/profile-view';
+import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 import {
   getPreviewSelection,
-  getProfileFilterPageData,
+  getProfileFilterPageDataByTabID,
+  getActiveTabID,
   getProfileRootRange,
 } from 'firefox-profiler/selectors/profile';
 import { getCommittedRangeLabels } from 'firefox-profiler/selectors/url-state';
@@ -20,21 +24,30 @@ import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed
 import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNavigatorBar';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
 
-import type { ElementProps } from 'react';
 import type {
   ProfileFilterPageData,
   StartEndRange,
+  TabID,
 } from 'firefox-profiler/types';
 
-type Props = {|
-  +filterPageData: ProfileFilterPageData | null,
-  +rootRange: StartEndRange,
-  ...ElementProps<typeof FilterNavigatorBar>,
-|};
+import './ProfileFilterNavigator.css';
+
 type DispatchProps = {|
-  +onPop: $PropertyType<Props, 'onPop'>,
+  +onPop: (number) => mixed,
+  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
 |};
-type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
+
+type StateProps = {|
+  +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
+  +activeTabID: TabID | null,
+  +rootRange: StartEndRange,
+  +className: string,
+  +items: $ReadOnlyArray<React.Node | string>,
+  +selectedItem: number,
+  +uncommittedItem?: string,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
   _getItemsWithFirstElement = memoize(
@@ -44,6 +57,29 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
     }
   );
 
+  _handleTabIdChange = (event: SyntheticInputEvent<>) => {
+    const newTabID = +event.target.value;
+
+    if (newTabID) {
+      this.props.changeTimelineTrackOrganization({
+        type: 'active-tab',
+        tabID: newTabID,
+      });
+    }
+  };
+
+  _renderTabIdsAsOptions() {
+    if (!this.props.pageDataByTabID) {
+      return null;
+    }
+
+    return [...this.props.pageDataByTabID].map(([tabID, pageData]) => (
+      <option value={tabID} key={tabID}>
+        {pageData.hostname}
+      </option>
+    ));
+  }
+
   render() {
     const {
       className,
@@ -51,21 +87,28 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
       selectedItem,
       uncommittedItem,
       onPop,
-      filterPageData,
+      pageDataByTabID,
+      activeTabID,
       rootRange,
     } = this.props;
 
     let firstItem;
-    if (filterPageData) {
+    const pageData =
+      pageDataByTabID && activeTabID !== null
+        ? pageDataByTabID.get(activeTabID)
+        : null;
+    if (pageData) {
       firstItem = (
         <>
-          {filterPageData.favicon ? (
-            <Icon iconUrl={filterPageData.favicon} />
-          ) : null}
-          <span title={filterPageData.origin}>
-            {filterPageData.hostname} (
-            {getFormattedTimeLength(rootRange.end - rootRange.start)})
-          </span>
+          {pageData.favicon ? <Icon iconUrl={pageData.favicon} /> : null}
+          <select
+            className="profileFilterNavigator--tabID-select"
+            onChange={this._handleTabIdChange}
+            value={activeTabID}
+          >
+            {this._renderTabIdsAsOptions()}
+          </select>
+          ({getFormattedTimeLength(rootRange.end - rootRange.start)})
         </>
       );
     } else {
@@ -112,7 +155,8 @@ export const ProfileFilterNavigator = explicitConnect<
           previewSelection.selectionEnd - previewSelection.selectionStart
         )
       : undefined;
-    const filterPageData = getProfileFilterPageData(state);
+    const pageDataByTabID = getProfileFilterPageDataByTabID(state);
+    const activeTabID = getActiveTabID(state);
     const rootRange = getProfileRootRange(state);
     return {
       className: 'profileFilterNavigator',
@@ -121,12 +165,14 @@ export const ProfileFilterNavigator = explicitConnect<
       // array's length by adding the first element.
       selectedItem: items.length,
       uncommittedItem,
-      filterPageData,
+      pageDataByTabID,
+      activeTabID,
       rootRange,
     };
   },
   mapDispatchToProps: {
     onPop: popCommittedRanges,
+    changeTimelineTrackOrganization,
   },
   component: ProfileFilterNavigatorBarImpl,
 });
