@@ -15,6 +15,7 @@ import {
   getHasPreferenceMarkers,
   getContainsPrivateBrowsingInformation,
   getThreads,
+  getActiveTabID,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -80,6 +81,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     getLocalTracksByPid,
     getHasPreferenceMarkers,
     getContainsPrivateBrowsingInformation,
+    getActiveTabID,
     (
       checkedSharingOptions,
       profile,
@@ -89,7 +91,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       globalTracks,
       localTracksByPid,
       hasPreferenceMarkers,
-      containsPrivateBrowsingInformation
+      containsPrivateBrowsingInformation,
+      activeTabID
     ) => {
       let isIncludingEverything = true;
       for (const prop in checkedSharingOptions) {
@@ -153,6 +156,10 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
         }
       }
 
+      const shouldKeepTabID = checkedSharingOptions.includeAllTabs
+        ? null
+        : activeTabID;
+
       return {
         shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
           ? null
@@ -169,6 +176,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           !checkedSharingOptions.includePreferenceValues,
         shouldRemovePrivateBrowsingData:
           !checkedSharingOptions.includePrivateBrowsingData,
+        shouldKeepTabID,
       };
     }
   );

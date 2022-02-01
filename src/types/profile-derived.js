@@ -16,6 +16,7 @@ import type {
   InnerWindowID,
   Page,
   IndexIntoRawMarkerTable,
+  TabID,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { StackTiming } from '../profile-logic/stack-timing';
@@ -429,6 +430,8 @@ export type RemoveProfileInformation = {|
   +shouldRemovePreferenceValues: boolean,
   // Remove the private browsing data if it's true.
   +shouldRemovePrivateBrowsingData: boolean,
+  // Remove all tab ids except this one.
+  +shouldKeepTabID: TabID | null,
 |};
 
 /**
