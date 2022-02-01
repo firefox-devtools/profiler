@@ -524,8 +524,8 @@ describe('profileName', function () {
   });
 });
 
-describe('ctxId', function () {
-  it('serializes the ctxId in the URL', function () {
+describe('tabID', function () {
+  it('serializes the tabID in the URL', function () {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
@@ -534,7 +534,7 @@ describe('ctxId', function () {
 
     dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
     const queryString = getQueryStringFromState(getState());
-    expect(queryString).toContain(`ctxId=${tabID}`);
+    expect(queryString).toContain(`tabID=${tabID}`);
   });
 
   it('reflects in the state from URL', function () {
@@ -543,7 +543,7 @@ describe('ctxId', function () {
     );
     const { getState } = _getStoreWithURL(
       {
-        search: '?ctxId=123&view=active-tab',
+        search: '?tabID=123&view=active-tab',
       },
       profile
     );
@@ -553,7 +553,7 @@ describe('ctxId', function () {
     });
   });
 
-  it('returns the full view when ctxId is not specified', function () {
+  it('returns the full view when tabID is not specified', function () {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
@@ -575,7 +575,7 @@ describe('ctxId', function () {
       iframeInnerWindowIDsWithChild;
     const { getState } = _getStoreWithURL(
       {
-        search: '?view=active-tab&ctxId=123',
+        search: '?view=active-tab&tabID=123',
       },
       profile
     );
@@ -606,7 +606,7 @@ describe('ctxId', function () {
     const { getState } = _getStoreWithURL(
       {
         search:
-          '?ctxId=123&view=active-tab&globalTrackOrder=3w0&hiddenGlobalTracks=45&hiddenLocalTracksByPid=111-1&thread=0',
+          '?tabID=123&view=active-tab&globalTrackOrder=3w0&hiddenGlobalTracks=45&hiddenLocalTracksByPid=111-1&thread=0',
       },
       profile
     );
@@ -617,7 +617,7 @@ describe('ctxId', function () {
     );
     // The url states that are relevant to full view should be stripped out.
     expect(newUrl.search).toEqual(
-      `?ctxId=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
+      `?tabID=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
     );
   });
 

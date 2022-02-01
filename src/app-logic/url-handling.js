@@ -163,7 +163,7 @@ type FullProfileSpecificBaseQuery = {|
 // Base query that only applies to active tab profile view.
 type ActiveTabProfileSpecificBaseQuery = {|
   resources: null | void,
-  ctxId: TabID | void,
+  tabID: TabID | void,
 |};
 
 // Base query that only applies to origins profile view.
@@ -288,7 +288,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const selectedThreadsKey =
     selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
-  let ctxId;
+  let tabID;
   let view;
   const { timelineTrackOrganization } = urlState;
   switch (timelineTrackOrganization.type) {
@@ -297,7 +297,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       break;
     case 'active-tab':
       view = timelineTrackOrganization.type;
-      ctxId = timelineTrackOrganization.tabID;
+      tabID = timelineTrackOrganization.tabID;
       break;
     case 'origins':
       view = timelineTrackOrganization.type;
@@ -338,7 +338,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         .isResourcesPanelOpen
         ? null
         : undefined;
-      baseQuery.ctxId = ctxId || undefined;
+      baseQuery.tabID = tabID || undefined;
       break;
     }
     case 'origins':
@@ -582,8 +582,8 @@ export function stateFromLocation(
   }
 
   let tabID = null;
-  if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
-    tabID = Number(query.ctxId);
+  if (query.tabID && Number.isInteger(Number(query.tabID))) {
+    tabID = Number(query.tabID);
   }
 
   const selectedTab =

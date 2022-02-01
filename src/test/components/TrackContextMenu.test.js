@@ -744,7 +744,7 @@ describe('timeline/TrackContextMenu', function () {
     // TODO - We should wait until we have some real tracks without a thread index.
     it.todo('can present a disabled isolate item on non-process tracks');
 
-    it('network track will be displayed when a number is not set for ctxId', () => {
+    it('network track will be displayed when a number is not set for tabID', () => {
       const { container } = setupGlobalTrack(getNetworkTrackProfile(), 0);
       // We can't use getHumanReadableTracks here because that function doesn't
       // use the functions used by context menu directly and gives us wrong results.
