@@ -7,7 +7,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { changeImplementationFilter as actionChangeImplementationFilter } from 'firefox-profiler/actions/profile-view';
+import { render, screen, fireEvent } from '../fixtures/testing-library';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -29,6 +30,7 @@ import type {
   IndexIntoSamplesTable,
   CssPixels,
   ThreadCPUDeltaUnit,
+  ImplementationFilter,
 } from 'firefox-profiler/types';
 
 // The following constants determine the size of the drawn graph.
@@ -124,7 +126,16 @@ describe('SampleTooltipContents', function () {
         `Couldn't find the tooltip element, with selector .tooltip`
       );
 
-    return { getTooltip };
+    const changeImplementationFilter = (
+      implementationFilter: ImplementationFilter
+    ) => store.dispatch(actionChangeImplementationFilter(implementationFilter));
+
+    const getBacktrace = () =>
+      Array.from(document.querySelectorAll('.backtraceStackFrame')).map(
+        (element) => element.textContent
+      );
+
+    return { getTooltip, changeImplementationFilter, getBacktrace };
   }
 
   it('renders the sample tooltip properly', () => {
@@ -159,6 +170,42 @@ describe('SampleTooltipContents', function () {
 
     const { getTooltip } = setup(profile, hoveredSampleIndex, 'after');
     expect(getTooltip()).toMatchSnapshot();
+  });
+
+  it(`filters the tooltip's backtrace when using the javascript implementation`, () => {
+    const { profile } = getProfileFromTextSamples(`
+      A
+      B
+      C-relevantForJS
+      D
+      E.js
+    `);
+    // There is only one sample in the profile
+    const hoveredSampleIndex = 0;
+
+    const { changeImplementationFilter, getBacktrace } = setup(
+      profile,
+      hoveredSampleIndex,
+      'after'
+    );
+
+    expect(getBacktrace()).toEqual([
+      // Keep this array in vertical form
+      'E.js',
+      'D',
+      'C-relevantForJS',
+      'B',
+      'A',
+    ]);
+
+    // With the implementation filter "javascript", we should see only the
+    // javascript and "relevant for JS" lines;
+    changeImplementationFilter('js');
+    expect(getBacktrace()).toEqual([
+      // Keep this array in vertical form
+      'E.js',
+      'C-relevantForJS',
+    ]);
   });
 
   it('renders the sample with µs CPU usage information properly', () => {

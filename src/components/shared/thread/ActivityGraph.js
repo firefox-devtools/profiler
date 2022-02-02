@@ -21,6 +21,7 @@ import './ActivityGraph.css';
 import type {
   Thread,
   CategoryList,
+  ImplementationFilter,
   IndexIntoSamplesTable,
   SelectedState,
   Milliseconds,
@@ -52,6 +53,7 @@ export type Props = {|
   ) => number,
   +enableCPUUsage: boolean,
   +maxThreadCPUDelta: number,
+  +implementationFilter: ImplementationFilter,
   ...SizeProps,
 |};
 
@@ -164,6 +166,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       treeOrderSampleComparator,
       maxThreadCPUDelta,
       enableCPUUsage,
+      implementationFilter,
       width,
       height,
     } = this.props;
@@ -204,6 +207,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
               cpuRatioInTimeRange={hoveredPixelState.cpuRatioInTimeRange}
               rangeFilteredThread={rangeFilteredThread}
               categories={categories}
+              implementationFilter={implementationFilter}
             />
           </Tooltip>
         )}

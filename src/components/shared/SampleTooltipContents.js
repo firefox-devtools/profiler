@@ -14,6 +14,7 @@ import {
 } from 'firefox-profiler/utils/format-numbers';
 
 import type {
+  ImplementationFilter,
   IndexIntoSamplesTable,
   CategoryList,
   Thread,
@@ -26,6 +27,7 @@ type RestProps = {|
   +sampleIndex: IndexIntoSamplesTable,
   +categories: CategoryList,
   +rangeFilteredThread: Thread,
+  +implementationFilter: ImplementationFilter,
 |};
 
 type Props = {|
@@ -61,7 +63,12 @@ class SampleTooltipCPUContents extends React.PureComponent<CPUProps> {
  */
 class SampleTooltipRestContents extends React.PureComponent<RestProps> {
   render() {
-    const { sampleIndex, rangeFilteredThread, categories } = this.props;
+    const {
+      sampleIndex,
+      rangeFilteredThread,
+      categories,
+      implementationFilter,
+    } = this.props;
     const { samples, stackTable } = rangeFilteredThread;
     const stackIndex = samples.stack[sampleIndex];
     if (stackIndex === null) {
@@ -89,7 +96,7 @@ class SampleTooltipRestContents extends React.PureComponent<RestProps> {
           maxStacks={20}
           stackIndex={stackIndex}
           thread={rangeFilteredThread}
-          implementationFilter="combined"
+          implementationFilter={implementationFilter}
           categories={categories}
         />
       </>
@@ -108,6 +115,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       sampleIndex,
       rangeFilteredThread,
       categories,
+      implementationFilter,
     } = this.props;
     return (
       <>
@@ -121,6 +129,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
           sampleIndex={sampleIndex}
           rangeFilteredThread={rangeFilteredThread}
           categories={categories}
+          implementationFilter={implementationFilter}
         />
       </>
     );
