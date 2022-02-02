@@ -1696,14 +1696,14 @@ export function addActiveTabInformationToProfile(
     },
     // An iframe page inside the previous page
     {
-      tabID: 2,
+      tabID: firstTabTabID,
       innerWindowID: iframeInnerWindowIDsWithChild,
       url: 'Page #2',
       embedderInnerWindowID: parentInnerWindowIDsWithChildren,
     },
     // Another iframe page inside the previous iframe
     {
-      tabID: 3,
+      tabID: firstTabTabID,
       innerWindowID: firstTabInnerWindowIDs[2],
       url: 'Page #3',
       embedderInnerWindowID: iframeInnerWindowIDsWithChild,
@@ -1834,7 +1834,7 @@ function getStackIndexForCallNodePath(
 export function addInnerWindowIdToStacks(
   thread: Thread,
   listOfOperations: Array<{ innerWindowID: number, callNodes: CallNodePath[] }>,
-  callNodesToDupe: CallNodePath[]
+  callNodesToDupe?: CallNodePath[]
 ) {
   const { stackTable, frameTable, samples } = thread;
 

@@ -16,6 +16,8 @@ import {
   addActiveTabInformationToProfile,
   addMarkersToThreadWithCorrespondingSamples,
   getProfileWithThreadCPUDelta,
+  getProfileFromTextSamples,
+  addInnerWindowIdToStacks,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { getView } from '../../selectors/app';
@@ -99,6 +101,67 @@ describe('ActiveTab', function () {
       const { getState } = setup(profile, false);
 
       expect(getHumanReadableActiveTabTracks(getState()).length).toBe(0);
+    });
+
+    it('can compute global tracks even when there are several tab ids in one thread', () => {
+      const {
+        profile,
+        funcNamesDictPerThread: [firstThread, { A, B, Cjs, Djs }],
+      } = getProfileFromTextSamples(
+        // First thread is the main thread of the first tab (which is the
+        // active tab)
+        `
+          A
+        `,
+        // In this second thread, the first sample is from tab 2, the second sample is
+        // from an iframe of the tab 1 which is the active tab.
+        `
+          A    A
+          B    B
+          Cjs  Djs
+        `
+      );
+
+      profile.threads[0].name = 'GeckoMain';
+      profile.threads[1].name = 'GeckoMain';
+
+      const {
+        firstTabInnerWindowIDs,
+        iframeInnerWindowIDsWithChild,
+        secondTabInnerWindowIDs,
+      } = addActiveTabInformationToProfile(profile);
+      addInnerWindowIdToStacks(
+        profile.threads[0],
+        /* listOfOperations */
+        [
+          // first tab is the active tab.
+          {
+            innerWindowID: firstTabInnerWindowIDs[0],
+            callNodes: [[firstThread.A]],
+          },
+        ]
+      );
+      addInnerWindowIdToStacks(
+        profile.threads[1],
+        /* listOfOperations */
+        [
+          // Second tab points to the first sample.
+          {
+            innerWindowID: secondTabInnerWindowIDs[0],
+            callNodes: [[A, B, Cjs]],
+          },
+          // First tab is the active tab, we're using the iframe's innerWindowID.
+          {
+            innerWindowID: iframeInnerWindowIDsWithChild,
+            callNodes: [[A, B, Djs]],
+          },
+        ]
+      );
+
+      const { getState } = setup(profile, false);
+      expect(getHumanReadableActiveTabTracks(getState())).toEqual([
+        'main track [tab] SELECTED',
+      ]);
     });
   });
 });
