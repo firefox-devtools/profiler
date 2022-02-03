@@ -15,11 +15,13 @@ import {
   getTrackThreadHeights,
   getIsEventDelayTracksEnabled,
   getIsExperimentalCPUGraphsEnabled,
+  getIsExperimentalProcessCPUTracksEnabled,
 } from 'firefox-profiler/selectors/app';
 import {
   getActiveTabMainTrack,
   getLocalTracksByPid,
   getThreads,
+  getCounter,
 } from 'firefox-profiler/selectors/profile';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import {
@@ -31,9 +33,13 @@ import { fatalError } from './errors';
 import {
   addEventDelayTracksForThreads,
   initializeLocalTrackOrderByPid,
+  addProcessCPUTracksForProcess,
 } from 'firefox-profiler/profile-logic/tracks';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { getIsCPUUtilizationProvided } from 'firefox-profiler/selectors/cpu';
+import {
+  getIsCPUUtilizationProvided,
+  getAreThereAnyProcessCPUCounters,
+} from 'firefox-profiler/selectors/cpu';
 
 import type {
   Profile,
@@ -331,6 +337,56 @@ export function enableExperimentalCPUGraphs(): ThunkAction<boolean> {
 
     dispatch({
       type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
+    });
+
+    return true;
+  };
+}
+
+/*
+ * This action enables the process CPU tracks. They are hidden by default because
+ * the front-end work is not done for this data yet.
+ * There is no UI that triggers this action in the profiler interface. Instead,
+ * users have to enable this from the developer console by writing this line:
+ * `experimental.enableExperimentalProcessCPUTracks()`
+ */
+export function enableExperimentalProcessCPUTracks(): ThunkAction<boolean> {
+  return (dispatch, getState) => {
+    if (getIsExperimentalProcessCPUTracksEnabled(getState())) {
+      console.error(
+        'Tried to enable the process CPU tracks, but they are already enabled.'
+      );
+      return false;
+    }
+
+    if (
+      !getIsCPUUtilizationProvided(getState()) &&
+      getAreThereAnyProcessCPUCounters(getState())
+    ) {
+      // Return early if the profile doesn't have threadCPUDelta values or
+      // doesn't have any experimental process CPU counters.
+      console.error(oneLine`
+        Tried to enable the process CPU tracks, but this profile does
+        not have threadCPUDelta values or process CPU threads.
+      `);
+      return false;
+    }
+
+    const oldLocalTracks = getLocalTracksByPid(getState());
+    const localTracksByPid = addProcessCPUTracksForProcess(
+      getCounter(getState()),
+      oldLocalTracks
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      getLocalTrackOrderByPid(getState()),
+      localTracksByPid,
+      null
+    );
+
+    dispatch({
+      type: 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS',
+      localTracksByPid,
+      localTrackOrderByPid,
     });
 
     return true;

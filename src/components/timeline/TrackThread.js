@@ -28,6 +28,7 @@ import {
   getThreadSelectorsFromThreadsKey,
   getMaxThreadCPUDelta,
   getIsExperimentalCPUGraphsEnabled,
+  getImplementationFilter,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -59,6 +60,7 @@ import type {
   Milliseconds,
   StartEndRange,
   CallNodeInfo,
+  ImplementationFilter,
   IndexIntoCallNodeTable,
   SelectedState,
   State,
@@ -101,6 +103,7 @@ type StateProps = {|
   +enableCPUUsage: boolean,
   +isExperimentalCPUGraphsEnabled: boolean,
   +maxThreadCPUDelta: number,
+  +implementationFilter: ImplementationFilter,
 |};
 
 type DispatchProps = {|
@@ -212,6 +215,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       enableCPUUsage,
       maxThreadCPUDelta,
       isExperimentalCPUGraphsEnabled,
+      implementationFilter,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -281,6 +285,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               treeOrderSampleComparator={treeOrderSampleComparator}
               enableCPUUsage={enableCPUUsage}
               maxThreadCPUDelta={maxThreadCPUDelta}
+              implementationFilter={implementationFilter}
             />
             <ThreadSampleGraph
               className="threadSampleGraph"
@@ -433,6 +438,7 @@ export const TimelineTrackThread = explicitConnect<
       enableCPUUsage,
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
       maxThreadCPUDelta: getMaxThreadCPUDelta(state),
+      implementationFilter: getImplementationFilter(state),
     };
   },
   mapDispatchToProps: {

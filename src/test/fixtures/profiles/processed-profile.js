@@ -816,7 +816,7 @@ function _buildThreadFromTextOnlyStacks(
   funcNames.forEach((funcName) => {
     funcTable.name.push(stringTable.indexForString(funcName));
     funcTable.fileName.push(null);
-    funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
+    funcTable.relevantForJS.push(funcName.endsWith('-relevantForJS'));
     funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
@@ -1337,6 +1337,48 @@ export function getCounterForThread(
           count: thread.samples.time.map((_, i) => Math.sin(i)),
           length: thread.samples.length,
         },
+      },
+    ],
+  };
+  return counter;
+}
+
+/**
+ * Creates a Counter fixture for a given thread with the given samples.
+ */
+export function getCounterForThreadWithSamples(
+  thread: Thread,
+  mainThreadIndex: ThreadIndex,
+  samples: {
+    time?: number[],
+    number?: number[],
+    count?: number[],
+    length: number,
+  },
+  name?: string,
+  category?: string
+): Counter {
+  const newSamples = {
+    time: samples.time
+      ? samples.time
+      : Array.from({ length: samples.length }, (_, i) => i),
+    number: samples.number ? samples.number : Array(samples.length).fill(0),
+    count: samples.count
+      ? samples.count
+      : Array(samples.length).map((_, i) => Math.sin(i)),
+    length: samples.length,
+  };
+
+  const counter: Counter = {
+    name: name ?? 'My Counter',
+    category: category ?? 'My Category',
+    description: 'My Description',
+    pid: thread.pid,
+    mainThreadIndex,
+    sampleGroups: [
+      {
+        id: 0,
+        samples: newSamples,
       },
     ],
   };

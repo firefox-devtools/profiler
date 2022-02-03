@@ -10,6 +10,7 @@ import {
   getProfileInterval,
   getSampleUnits,
   getMeta,
+  getCounter,
 } from './profile';
 import { getThreadSelectors } from './per-thread';
 import { computeMaxThreadCPUDelta } from 'firefox-profiler/profile-logic/cpu';
@@ -32,6 +33,17 @@ export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
     );
   }
 );
+
+/**
+ * It will return true if there are experimental process CPU threads in the profile.
+ */
+export const getAreThereAnyProcessCPUCounters: Selector<boolean> =
+  createSelector(
+    getCounter,
+    (counters) =>
+      counters !== null &&
+      counters.some((counter) => counter.category === 'CPU')
+  );
 
 /**
  * This function returns the list of all threads after the CPU values have been
