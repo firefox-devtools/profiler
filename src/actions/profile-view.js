@@ -664,12 +664,25 @@ export function showProvidedTracks(
   globalTracksToShow: Set<TrackIndex>,
   localTracksByPidToShow: Map<Pid, Set<TrackIndex>>
 ): ThunkAction<void> {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'timeline',
       eventAction: 'show provided tracks',
     });
+
+    // We got the global and local tracks, but if a local track's global track
+    // is not visible, we should still make it visible so the local one can be
+    // visible too. Let's iterate over the global tracks and include them if
+    // their children are going to be made visible.
+    const globalTracks = getGlobalTracks(getState());
+    for (const [globalTrackIndex, globalTrack] of globalTracks.entries()) {
+      const pidsToShow = new Set(localTracksByPidToShow.keys());
+
+      if (globalTrack.pid && pidsToShow.has(globalTrack.pid)) {
+        globalTracksToShow.add(globalTrackIndex);
+      }
+    }
 
     dispatch({
       type: 'SHOW_PROVIDED_TRACKS',
