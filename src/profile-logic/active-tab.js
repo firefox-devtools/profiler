@@ -197,9 +197,12 @@ function _getActiveTabResourceName(
 ): string {
   if (isMainThread(thread)) {
     // This is a sub-frame.
-    // Get the first innerWindowID inside the thread.
+    // Get the first innerWindowID inside the thread that's also present of innerWindowIDToPageMap.
     let firstInnerWindowID = ensureExists(thread.frameTable.innerWindowID).find(
-      (innerWindowID) => innerWindowID && innerWindowID !== 0
+      (innerWindowID) =>
+        innerWindowID &&
+        innerWindowID !== 0 &&
+        innerWindowIDToPageMap.has(innerWindowID)
     );
     if (firstInnerWindowID === undefined || firstInnerWindowID === null) {
       const markerData = thread.markers.data.find((data) => {
