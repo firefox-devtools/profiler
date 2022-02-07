@@ -432,7 +432,6 @@ MenuButtons--metaInfo--logical-cpu =
 
 MenuButtons--metaInfo--recording-started = Recording started:
 MenuButtons--metaInfo--interval = Interval:
-MenuButtons--metaInfo--profile-version = Profile Version:
 MenuButtons--metaInfo--buffer-capacity = Buffer Capacity:
 MenuButtons--metaInfo--buffer-duration = Buffer Duration:
 
