@@ -10,6 +10,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 import {
   getHasZoomedViaMousewheel,
   getPanelLayoutGeneration,
@@ -762,14 +763,15 @@ export const withChartViewport: WithChartViewport<*, *> =
       };
 
       componentDidMount() {
-        window.addEventListener('resize', this._setSizeNextFrame, false);
         // The first _setSize ensures that the screen does not blip when mounting
         // the component, while the second ensures that it lays out correctly if the DOM
         // is not fully layed out correctly yet.
         this._setSize();
         this._setSizeNextFrame();
         if (this._container) {
-          this._container.addEventListener('wheel', this._mouseWheelListener, {
+          const container = this._container;
+          getResizeObserverWrapper().subscribe(container, this._setSize);
+          container.addEventListener('wheel', this._mouseWheelListener, {
             passive: false,
           });
         }
@@ -779,12 +781,12 @@ export const withChartViewport: WithChartViewport<*, *> =
         window.removeEventListener('resize', this._setSizeNextFrame, false);
         window.removeEventListener('mousemove', this._mouseMoveListener, true);
         window.removeEventListener('mouseup', this._mouseUpListener, true);
-        if (this._container) {
-          this._container.removeEventListener(
-            'wheel',
-            this._mouseWheelListener,
-            { passive: false }
-          );
+        const container = this._container;
+        if (container) {
+          getResizeObserverWrapper().unsubscribe(container, this._setSize);
+          container.removeEventListener('wheel', this._mouseWheelListener, {
+            passive: false,
+          });
         }
       }
 
