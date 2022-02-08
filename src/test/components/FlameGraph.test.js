@@ -152,6 +152,13 @@ describe('FlameGraph', function () {
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('A');
 
+    // The right click gesture triggered 2 redraws (one mousemove, one
+    // mousedown), but the tool findFillTextPosition ensures there's only one
+    // result and will throw otherwise.
+    // So let's flush the draw calls now. After running the timers
+    // afterwards the flame graph will redraw again (as a result of closing the
+    // menu and resetting the rightClickedCallNodeIndex).
+    flushDrawLog();
     jest.runAllTimers();
 
     // Try another node to make sure the menu can handle other nodes than the first.
