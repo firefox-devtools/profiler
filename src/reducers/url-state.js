@@ -401,11 +401,7 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
         pid,
         localTracksToMakeVisible,
       ] of action.localTracksByPidToShow.entries()) {
-        const hiddenLocalTracks = state.get(pid);
-        if (!hiddenLocalTracks) {
-          throw new Error('Failed to find the local tracks');
-        }
-
+        const hiddenLocalTracks = state.get(pid) ?? new Set();
         const newHiddenLocalTracks = new Set(hiddenLocalTracks);
         localTracksToMakeVisible.forEach(
           Set.prototype.delete,
