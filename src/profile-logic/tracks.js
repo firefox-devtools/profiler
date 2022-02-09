@@ -1151,7 +1151,10 @@ export function getSearchFilteredLocalTracksByPid(
       }
     }
 
-    searchFilteredLocalTracksByPid.set(pid, searchFilteredLocalTracks);
+    if (searchFilteredLocalTracks.size > 0) {
+      // Only add the global track when the are some search filtered local tracks.
+      searchFilteredLocalTracksByPid.set(pid, searchFilteredLocalTracks);
+    }
   }
 
   return searchFilteredLocalTracksByPid;
