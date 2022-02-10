@@ -8,6 +8,9 @@ import '@testing-library/jest-dom';
 
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
+import { autoMockResizeObserver } from './fixtures/mocks/resize-observer';
+
+autoMockResizeObserver();
 
 afterEach(function () {
   // This `__shutdownWorkers` function only exists in the mocked test environment,

@@ -17,6 +17,7 @@ import { FlameGraph } from '../../components/flame-graph';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
 import { ensureExists, objectEntries } from '../../utils/flow';
 import { fireFullKeyPress } from '../fixtures/utils';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { StackChart } from 'firefox-profiler/components/stack-chart';
 import type {
@@ -209,6 +210,8 @@ const actions = {
     ).not.toBeNull();
   },
 };
+
+autoMockCanvasContext();
 
 describe('flame graph transform shortcuts', () => {
   for (const [name, action] of objectEntries(actions)) {

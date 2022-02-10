@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
+import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
 type State = {|
   width: CssPixels,
@@ -53,7 +54,7 @@ export function withSize<
         throw new Error('Unable to find the DOMNode');
       }
       this._container = container;
-      window.addEventListener('resize', this._resizeListener);
+      getResizeObserverWrapper().subscribe(container, this._resizeListener);
       window.addEventListener(
         'visibilitychange',
         this._visibilityChangeListener
@@ -97,12 +98,16 @@ export function withSize<
     };
 
     componentWillUnmount() {
-      this._container = null;
-      window.removeEventListener('resize', this._resizeListener);
+      const container = this._container;
+      if (container) {
+        getResizeObserverWrapper().unsubscribe(container, this._resizeListener);
+      }
+
       window.removeEventListener(
         'visibilitychange',
         this._visibilityChangeListener
       );
+      this._container = null;
     }
 
     _updateSize(container: HTMLElement) {
