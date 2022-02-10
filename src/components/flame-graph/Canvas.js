@@ -424,6 +424,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}
         onRightClick={this._onRightClick}
+        drawCanvasAfterRaf={false}
       />
     );
   }

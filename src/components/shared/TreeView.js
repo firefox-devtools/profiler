@@ -748,6 +748,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
         <TreeViewHeader fixedColumns={fixedColumns} mainColumn={mainColumn} />
         <ContextMenuTrigger
           id={contextMenuId}
+          disable={!contextMenuId}
           attributes={{ className: 'treeViewContextMenu' }}
         >
           <VirtualList

@@ -395,20 +395,21 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
       return hiddenLocalTracksByPid;
     }
     case 'SHOW_PROVIDED_TRACKS': {
-      const hiddenLocalTracksByPid = new Map();
-      // Go through the local tracks and make the provided ones visible.
-      for (const [pid, hiddenLocalTracks] of state.entries()) {
+      const hiddenLocalTracksByPid = new Map(state);
+      // Go through the filtered local tracks to make them visible.
+      for (const [
+        pid,
+        localTracksToMakeVisible,
+      ] of action.localTracksByPidToShow.entries()) {
+        const hiddenLocalTracks = state.get(pid) ?? new Set();
         const newHiddenLocalTracks = new Set(hiddenLocalTracks);
-        // Remove all provided local tracks.
-        const localTracks = action.localTracksByPidToShow.get(pid);
-
-        if (!localTracks) {
-          throw new Error('Failed to find the local tracks');
-        }
-
-        localTracks.forEach(Set.prototype.delete, newHiddenLocalTracks);
+        localTracksToMakeVisible.forEach(
+          Set.prototype.delete,
+          newHiddenLocalTracks
+        );
         hiddenLocalTracksByPid.set(pid, newHiddenLocalTracks);
       }
+
       return hiddenLocalTracksByPid;
     }
     case 'SHOW_LOCAL_TRACK': {
