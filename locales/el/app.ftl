@@ -362,7 +362,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Έναρξη καταγραφής:
 MenuButtons--metaInfo--interval = Διάστημα:
-MenuButtons--metaInfo--profile-version = Έκδοση προφίλ:
 MenuButtons--metaInfo--buffer-capacity = Χωρητικότητα buffer:
 MenuButtons--metaInfo--buffer-duration = Διάρκεια buffer:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -434,6 +433,9 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Συμπερί�
 MenuButtons--publish--renderCheckbox-label-resource = Συμπερίληψη URL και διαδρομών πόρων
 MenuButtons--publish--renderCheckbox-label-extension = Συμπερίληψη πληροφοριών επέκτασης
 MenuButtons--publish--renderCheckbox-label-preference = Συμπερίληψη τιμών προτιμήσεων
+MenuButtons--publish--renderCheckbox-label-private-browsing = Συμπερίληψη δεδομένων από τα παράθυρα ιδιωτικής περιήγησης
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Αυτό το προφίλ περιέχει δεδομένα ιδιωτικής περιήγησης
 MenuButtons--publish--reupload-performance-profile = Νέα μεταφόρτωση προφίλ επιδόσεων
 MenuButtons--publish--share-performance-profile = Κοινή χρήση προφίλ επιδόσεων
 MenuButtons--publish--info-description = Ανεβάστε το προφίλ σας και κάντε το προσβάσιμο σε οποιονδήποτε έχει τον σύνδεσμο.
@@ -641,12 +643,30 @@ SourceView--loading-browser-connection = Αναμονή για { -firefox-brand-
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Μη διαθέσιμη πηγή
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Προέκυψε σφάλμα δικτύου κατά τη λήψη του URL { $url }: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Δεν ήταν δυνατή η διερεύνηση του API συμβολισμού του προγράμματος περιήγησης: { $browserConnectionErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
 SourceView--not-in-archive-error-when-obtaining-source = Το αρχείο «{ $pathInArchive }» δεν βρέθηκε στο αρχείο από το { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Δεν ήταν δυνατή η ανάλυση του αρχείου στο { $url }: { $parsingErrorMessage }
 SourceView--close-button =
     .title = Κλείσιμο προβολής πηγής
 
