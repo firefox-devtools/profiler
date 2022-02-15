@@ -11,7 +11,6 @@ import { render, screen } from '@testing-library/react';
 import { lazilyParsedBundles } from 'firefox-profiler/app-logic/l10n';
 import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 import {
-  getL10nFetchingPhase,
   getLocalization,
   getPrimaryLocale,
   getDirection,
@@ -79,10 +78,8 @@ describe('AppLocalizationProvider', () => {
 
   it('changes the state accordingly when the actions are dispatched', () => {
     const { dispatch, getState } = setup();
-    expect(getL10nFetchingPhase(getState())).toBe('not-fetching');
     expect(getLocalization(getState())).toEqual(new ReactLocalization([]));
     dispatch(requestL10n());
-    expect(getL10nFetchingPhase(getState())).toBe('fetching-ftl');
     const resource = [
       'locale',
       'data-testid = content-test-ApplocalizationProvider',
@@ -90,7 +87,6 @@ describe('AppLocalizationProvider', () => {
     const bundles = lazilyParsedBundles([resource]);
     const testLocalization = new ReactLocalization(bundles);
     dispatch(receiveL10n(testLocalization, 'en-US', 'ltr'));
-    expect(getL10nFetchingPhase(getState())).toBe('done-fetching');
     expect(getLocalization(getState())).toEqual(testLocalization);
     expect(getPrimaryLocale(getState())).toEqual('en-US');
     expect(getDirection(getState())).toEqual('ltr');

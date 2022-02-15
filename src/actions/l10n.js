@@ -44,7 +44,7 @@ export function receiveL10n(
  * This function is called when the AppLocalizationProvider is mounted.
  * It takes the locales available and generates l10n bundles for those locales.
  * Initially it dispatches the info that translations are now fetching and
- * later it dispacthes the translations and updates the state
+ * later it dispatches the translations and updates the state
  */
 export function setupLocalization(
   locales: Array<string>,

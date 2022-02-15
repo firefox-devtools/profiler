@@ -339,13 +339,7 @@ export type UrlState = {|
 /**
  * Localization State
  */
-export type L10nFetchingPhase =
-  | 'not-fetching'
-  | 'fetching-ftl'
-  | 'done-fetching';
-
 export type L10nState = {|
-  +l10nFetchingPhase: L10nFetchingPhase,
   +localization: Localization,
   +primaryLocale: string | null,
   +direction: 'ltr' | 'rtl',
