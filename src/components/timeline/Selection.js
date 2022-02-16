@@ -73,11 +73,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   };
 
   _onMouseDown = (event: SyntheticMouseEvent<>) => {
-    if (!this._container || event.button !== 0) {
+    const container = this._container;
+    if (!container || event.button !== 0) {
       return;
     }
 
-    const rect = getContentRect(this._container);
+    const rect = getContentRect(container);
     if (
       event.pageX < rect.left ||
       event.pageX >= rect.right ||
@@ -91,6 +92,19 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     // this more reliably in Gecko, so this preventDefault is mostly for other
     // browsers.
     event.preventDefault();
+
+    // Redirect all mouse and pointer events related to this pointer down to
+    // this DOM element. This fixes bug 1755746 and bug 1755498 in our case.
+    // Only Firefox supports this, but that's fine because only Firefox has
+    // these bugs.
+    // Also Flow doesn't know about setCapture, that's why we're opting out of
+    // Flow checking here.
+    // $FlowExpectError
+    if (container.setCapture) {
+      // Using `true` is necessary to fix the issue when releasing on buttons
+      // inside the container, eg the track selection buttons.
+      container.setCapture(true);
+    }
 
     const { committedRange } = this.props;
     const minSelectionStartWidth: CssPixels = 3;
