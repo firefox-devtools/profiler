@@ -339,7 +339,10 @@ export type UrlState = {|
 /**
  * Localization State
  */
+export type PseudoStrategy = null | 'bidi' | 'accented';
 export type L10nState = {|
+  +requestedLocales: string[] | null,
+  +pseudoStrategy: PseudoStrategy,
   +localization: Localization,
   +primaryLocale: string | null,
   +direction: 'ltr' | 'rtl',

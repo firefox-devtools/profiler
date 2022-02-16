@@ -4,7 +4,12 @@
 
 // @flow
 
-import type { Selector, L10nState, Localization } from 'firefox-profiler/types';
+import type {
+  Selector,
+  L10nState,
+  Localization,
+  PseudoStrategy,
+} from 'firefox-profiler/types';
 
 export const getL10nState: Selector<L10nState> = (state) => state.l10n;
 export const getLocalization: Selector<Localization> = (state) =>
@@ -13,3 +18,7 @@ export const getPrimaryLocale: Selector<string | null> = (state) =>
   getL10nState(state).primaryLocale;
 export const getDirection: Selector<'ltr' | 'rtl'> = (state) =>
   getL10nState(state).direction;
+export const getRequestedLocales: Selector<string[] | null> = (state) =>
+  getL10nState(state).requestedLocales;
+export const getPseudoStrategy: Selector<PseudoStrategy> = (state) =>
+  getL10nState(state).pseudoStrategy;

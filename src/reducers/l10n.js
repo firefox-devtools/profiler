@@ -3,9 +3,31 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Reducer, L10nState } from 'firefox-profiler/types';
+import type {
+  Reducer,
+  L10nState,
+  PseudoStrategy,
+} from 'firefox-profiler/types';
 import { ReactLocalization } from '@fluent/react';
 import { combineReducers } from 'redux';
+
+const requestedLocales: Reducer<string[] | null> = (state = null, action) => {
+  switch (action.type) {
+    case 'REQUEST_L10N':
+      return action.locales;
+    default:
+      return state;
+  }
+};
+
+const pseudoStrategy: Reducer<PseudoStrategy> = (state = null, action) => {
+  switch (action.type) {
+    case 'TOGGLE_PSEUDO_STRATEGY':
+      return action.pseudoStrategy;
+    default:
+      return state;
+  }
+};
 
 const localization: Reducer<ReactLocalization> = (
   state = new ReactLocalization([]),
@@ -41,6 +63,8 @@ const l10nReducer: Reducer<L10nState> = combineReducers({
   localization,
   primaryLocale,
   direction,
+  requestedLocales,
+  pseudoStrategy,
 });
 
 export default l10nReducer;
