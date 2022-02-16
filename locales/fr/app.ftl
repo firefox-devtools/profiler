@@ -336,7 +336,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Enregistrement commencé :
 MenuButtons--metaInfo--interval = Intervalle :
-MenuButtons--metaInfo--profile-version = Version du profil :
 MenuButtons--metaInfo--buffer-capacity = Capacité de la mémoire tampon :
 MenuButtons--metaInfo--buffer-duration = Durée de la mémoire tampon :
 # Buffer Duration in Seconds in Meta Info Panel
@@ -415,7 +414,7 @@ MenuButtons--publish--reupload-performance-profile = Envoyer à nouveau le profi
 MenuButtons--publish--share-performance-profile = Partager le profil de performance
 MenuButtons--publish--info-description = Envoyez votre profil et rendez-le accessible à toute personne disposant du lien.
 MenuButtons--publish--info-description-default = Par défaut, vos données personnelles sont supprimées.
-MenuButtons--publish--info-description-firefox-nightly2 = Ce profil provient de { -firefox-nightly-brand-name }, donc par défaut la plupart les informations sont incluses.
+MenuButtons--publish--info-description-firefox-nightly2 = Ce profil provient de { -firefox-nightly-brand-name }, donc par défaut la plupart des informations sont incluses.
 MenuButtons--publish--include-additional-data = Inclure des données supplémentaires qui peuvent être identifiables
 MenuButtons--publish--button-upload = Envoyer
 MenuButtons--publish--upload-title = Envoi du profil…
