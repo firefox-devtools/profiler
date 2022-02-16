@@ -29,16 +29,19 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = Det gick inte att hämta profilen från { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = Det gick inte att läsa filen eller analysera profilen i den.
-AppViewRouter--error-message-local =
-    .message = Inte implementerat än.
-AppViewRouter--error-message-public =
-    .message = Det gick inte att ladda ner profilen.
-AppViewRouter--error-message-from-url =
-    .message = Det gick inte att ladda ner profilen.
+AppViewRouter--error-unpublished = Det gick inte att hämta profilen från { -firefox-brand-name }.
+AppViewRouter--error-from-file = Det gick inte att läsa filen eller analysera profilen i den.
+AppViewRouter--error-local = Inte implementerat ännu.
+AppViewRouter--error-public = Det gick inte att ladda ner profilen.
+AppViewRouter--error-from-url = Det gick inte att ladda ner profilen.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    På grund av en <a>specifik begränsning i Safari</a> kan inte
+    { -profiler-brand-name } importera profiler från den lokala datorn i den här webbläsaren. Öppna
+    den här sidan i { -firefox-brand-name } eller Chrome istället.
+    .title = Safari kan inte importera lokala profiler
 AppViewRouter--route-not-found--home =
     .specialMessage = Webbadressen du försökte nå kändes inte igen.
 
@@ -57,6 +60,13 @@ CallNodeContextMenu--transform-merge-call-node = Sammanfoga endast nod
         funktionens nod som anropade den. Den tar bara bort funktionen från
         den specifika delen av trädet. Alla andra platser där funktionen
         anropades kommer att förbli i profilen.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Att fokusera på en funktion tar bort alla exempel som inte inkluderar
+    den funktionen. Dessutom rotar den om anropsträdet så att funktionen
+    är trädets enda rot. Detta kan kombinera flera funktionsanropsplatser
+    över en profil till en anropsnod.
 CallNodeContextMenu--transform-focus-function = Fokusera på funktion
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fokus på funktion (inverterad)
@@ -79,6 +89,10 @@ CallNodeContextMenu--transform-collapse-resource = Fäll ihop <strong> { $nameFo
     .title =
         Att fälla ihop en resurs plattar ut alla anrop till den
         resursen till en enda ihopfälld anropsnod.
+CallNodeContextMenu--transform-collapse-direct-recursion = Dölj direkt rekursion
+    .title = Dölj direkt rekursion tar bort anrop som upprepade gånger anropar samma funktion.
+CallNodeContextMenu--transform-drop-function = Ta bort prover med denna funktion
+    .title = Genom att ta bort proverna kommer de tillhörande körtiderna att tas bort från profilen. Detta är användbart för att eliminera tidsinformation som inte är relevant för analysen.
 CallNodeContextMenu--expand-all = Expandera alla
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -95,6 +109,51 @@ CallTree--tracing-ms-total = Körningstid (ms)
         Den "totala" körtiden innehåller en sammanfattning av hela tiden där denna
         funktion observerades vara på stacken. Detta inkluderar den tid då funktionen
         faktiskt kördes och den tid som tillbringades i anropen från den här funktionen.
+CallTree--tracing-ms-self = Själv (ms)
+    .title =
+        "Självtiden" inkluderar tiden då funktionen var i slutet av stacken.
+        Om denna funktion har anropat andra funktioner, ingår inte den
+        "övriga" tiden för dessa funktioner. "Självtiden" är användbar för
+        att förstå var tiden verkligen spenderas inom ett program.
+CallTree--samples-total = Totalt (prov)
+    .title =
+        Det "totala" urvalet inkluderar en sammanfattning av alla prover där
+        denna funktion observerades på stacken. Detta inkluderar den tid
+        som funktionen faktiskt kördes, men också den tid som spenderas
+        i de funktioner som anropas av denna funktion.
+CallTree--samples-self = Själv
+    .title =
+        Antalet "själv"-prov inkluderar bara de prov där funktionen var i slutet
+        av stacken. Om den här funktionen anropas till andra funktioner, ingår
+        inte antalet "andra" funktioner. "Själv"-räkningen är användbar för att
+        förstå var tiden faktiskt spenderades i ett program.
+CallTree--bytes-total = Total storlek (byte)
+    .title =
+        Den "totala storleken" inkluderar en sammanfattning av alla byte
+        som tilldelats eller avallokerats medan denna funktion observerades
+        vara i stacken. Detta inkluderar både byten där funktionen faktiskt
+        kördes och byten för anropen från denna funktion.
+CallTree--bytes-self = Själv (bytes)
+    .title =
+        "Själv"-byten inkluderar de byte som allokerats eller avallokerats medan
+        denna funktion var i slutet av stacken. Om den här funktionen anropas till andra funktioner, så ingår inte de "andra" funktionernas bytes.
+        "Själv"-byten är användbara för att förstå var minnet faktiskt fanns.
+
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Vissa anrop till { $calledFunction } infogades av kompilatorn.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (infogad)
+    .title = Anrop till { $calledFunction } infogades i { $outerFunction } av kompilatorn.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -119,6 +178,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Den här profilen spelades in i ett bygge utan releaseoptimeringar.
+        Prestandaobservationer kanske inte gäller för releasepopulationen.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -151,7 +214,7 @@ FullTimeline--stack-height = Stackens höjd
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> synliga spår
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> spår
 
 ## Home page
 
@@ -164,6 +227,19 @@ Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
 Home--menu-button-instructions =
     Aktivera profil-menyknappen för att börja spela in en prestandaprofil
     i { -firefox-brand-name }, analysera den och dela den med profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Den här profileringsinstansen kunde inte ansluta till WebChannel, så den kan inte aktivera menyknappen för profilering.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Den här profileringsinstansen kunde inte ansluta till WebChannel. Detta betyder
+    vanligtvis att den körs på en annan värd än den som anges i inställningen
+    <code>devtools.performance.recording.ui-base-url</code>. Om du vill fånga nya
+    profiler med den här instansen och ge den programmatisk kontroll av
+    profileringsmenyknappen, kan du gå till <code>about:config</code> och ändra inställningen.
 Home--record-instructions =
     För att starta profilering, klicka på profileringsknappen eller använd
     kortkommandona. Ikonen är blå när en profil spelas in. Tryck på
@@ -189,6 +265,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Visa endast självtid
+    .title = Visa endast tiden som spenderats i en anropsnod, ignorera dess underordnade.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -388,11 +466,14 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Inkludera skär
 MenuButtons--publish--renderCheckbox-label-resource = Inkludera resursURLs och sökvägar
 MenuButtons--publish--renderCheckbox-label-extension = Inkludera tilläggsinformation
 MenuButtons--publish--renderCheckbox-label-preference = Inkludera preferensvärden
+MenuButtons--publish--renderCheckbox-label-private-browsing = Inkludera data från privata surffönster
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Den här profilen innehåller privata webbläsardata
 MenuButtons--publish--reupload-performance-profile = Ladda upp prestandaprofilen igen
 MenuButtons--publish--share-performance-profile = Dela prestandaprofil
 MenuButtons--publish--info-description = Ladda upp din profil och gör den tillgänglig för alla med länken.
 MenuButtons--publish--info-description-default = Som standard tas dina personuppgifter bort.
-MenuButtons--publish--info-description-firefox-nightly = Den här profilen är från { -firefox-nightly-brand-name }, så all information ingår som standard.
+MenuButtons--publish--info-description-firefox-nightly2 = Den här profilen är från { -firefox-nightly-brand-name }, så den mesta information ingår som standard.
 MenuButtons--publish--include-additional-data = Inkludera ytterligare data som kan identifieras
 MenuButtons--publish--button-upload = Ladda upp
 MenuButtons--publish--upload-title = Laddar upp profil...
@@ -426,23 +507,17 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = Hela intervallet
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Importerar profilen direkt från { -firefox-brand-name }...
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Läser fil och bearbetar profil...
-ProfileLoaderAnimation--loading-message-local =
-    .message = Inte implementerat än.
-ProfileLoaderAnimation--loading-message-public =
-    .message = Laddar ner och bearbetar profil...
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Laddar ner och bearbetar profil...
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Läser och bearbetar profil...
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Vy hittades inte
+ProfileLoaderAnimation--loading-unpublished = Importerar profilen direkt från { -firefox-brand-name }...
+ProfileLoaderAnimation--loading-from-file = Läser fil och bearbetar profil...
+ProfileLoaderAnimation--loading-local = Inte implementerat ännu.
+ProfileLoaderAnimation--loading-public = Laddar ner och bearbetar profil...
+ProfileLoaderAnimation--loading-from-url = Laddar ner och bearbetar profil...
+ProfileLoaderAnimation--loading-compare = Läser och bearbetar profil...
+ProfileLoaderAnimation--loading-view-not-found = Vy hittades inte
 
 ## ProfileRootMessage
 
@@ -456,6 +531,9 @@ ProfileRootMessage--additional = Tillbaka till hem
 ServiceWorkerManager--installing-button = Installerar…
 ServiceWorkerManager--pending-button = Applicera och ladda om
 ServiceWorkerManager--installed-button = Ladda om applikationen
+ServiceWorkerManager--updated-while-not-ready =
+    En ny version av applikationen tillämpades innan den här sidan
+    var helt laddad. Du kan se fel.
 ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har laddats ner och är redo att användas.
 ServiceWorkerManager--hide-notice-button =
     .title = Dölj omladdningsmeddelandet
@@ -469,11 +547,24 @@ StackSettings--implementation-all-stacks = Alla stackar
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Ursprunglig
 StackSettings--use-data-source-label = Datakälla:
+StackSettings--call-tree-strategy-timing = Tidpunkter
+    .title = Sammanfatta med hjälp av samplade stackar av exekverad kod över tid
+StackSettings--call-tree-strategy-js-allocations = JavaScript-allokeringar
+    .title = Sammanfatta med hjälp av byte av JavaScript allokerat (inga avallokeringar)
 StackSettings--call-tree-strategy-native-retained-allocations = Lagrat minne
     .title = Sammanfatta med hjälp av byte av minne som tilldelades och som aldrig frigjordes i det aktuella förhandsgranskningsvalet
 StackSettings--call-tree-native-allocations = Tilldelat minne
     .title = Sammanfatta med byte av tilldelat minne
+StackSettings--call-tree-strategy-native-deallocations-memory = Tilldelat minne
+    .title = Sammanfatta med hjälp av byte av minne som delas ut på platsen där minnet tilldelades
+StackSettings--call-tree-strategy-native-deallocations-sites = Tilldelningswebbplatser
+    .title = Sammanfatta med hjälp av byte av minne som delas ut efter webbplatsen där minnet tilldelades
+StackSettings--invert-call-stack = Invertera anropsstack
+    .title = Sortera efter tiden i en anropsnod, utan att ignorera dess barn.
 StackSettings--show-user-timing = Visa användartiming
+StackSettings--panel-search =
+    .label = Filtrera stackar:
+    .title = Visa endast stackar som innehåller en funktion vars namn matchar denna delsträng
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -494,11 +585,27 @@ TrackContextMenu--only-show-this-process-group = Visa endast denna processgrupp
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Visa endast "{ $trackName }"
+TrackContextMenu--hide-other-screenshots-tracks = Dölj andra Skärmdump-spår
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Dölj "{ $trackName }"
 TrackContextMenu--show-all-tracks = Visa alla spår
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Visa alla spår nedan
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Inga resultat hittades för “<span>{ $searchFilter }</span>”
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Ange filtertermer
+    .title = Visa endast spår som matchar en viss text
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -555,6 +662,65 @@ TransformNavigator--collapse-direct-recursion = Dölj rekursion: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Dölj underträd: { $item }
+
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Väntar på { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Väntar på { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Källa inte tillgänglig
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Se <a>problem #3741</a> för scenarier som stöds och planerade förbättringar.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Det finns ingen tillgänglig webbadress för den här filen.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Det uppstod ett nätverksfel när webbadressen { $url } skulle hämtas: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Kunde inte fråga webbläsarens symboliserings-API: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = Webbläsarens symboliserings-API returnerade ett fel: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = Den lokala symbolserverns symboliserings-API returnerade ett fel: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Filen { $pathInArchive } hittades inte i arkivet från { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Arkivet på { $url } kunde inte analyseras: { $parsingErrorMessage }
+SourceView--close-button =
+    .title = Stäng källvyn
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

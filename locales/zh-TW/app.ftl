@@ -29,16 +29,16 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = 無法從 { -firefox-brand-name } 取得效能檢測檔。
-AppViewRouter--error-message-from-file =
-    .message = 無法讀取檔案或剖析檔案當中的效能檢測資訊。
-AppViewRouter--error-message-local =
-    .message = 尚未實作。
-AppViewRouter--error-message-public =
-    .message = 無法下載效能檢測檔。
-AppViewRouter--error-message-from-url =
-    .message = 無法下載效能檢測檔。
+AppViewRouter--error-unpublished = 無法從 { -firefox-brand-name } 取得效能檢測檔。
+AppViewRouter--error-from-file = 無法讀取檔案或剖析檔案當中的效能檢測資訊。
+AppViewRouter--error-local = 尚未實作。
+AppViewRouter--error-public = 無法下載效能檢測檔。
+AppViewRouter--error-from-url = 無法下載效能檢測檔。
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari = 由於 <a>Safari 的特殊限制</a>，{ -profiler-brand-name } 無法從這套瀏覽器自本機匯入效能檢測檔。請改用 { -firefox-brand-name } 或 Chrome 開啟此頁面。
+    .title = 無法使用 Safari 匯入本機效能檢測檔
 AppViewRouter--route-not-found--home =
     .specialMessage = 無法處理您嘗試開啟的網址。
 
@@ -94,6 +94,22 @@ CallTree--bytes-total = 總大小（位元組數）
 CallTree--bytes-self = Self（位元組）
     .title = 「Self」位元組數只包含函數在堆疊底部分配到或取消分配到的記憶體用量。若此函數是透過其他函數呼叫的，則不會包含「該函數」的用量。「self」位元組數適合用來了解程式當中實際花費了多少記憶體在哪些函數上。
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = 編譯器內聯了一些對 { $calledFunction } 函數的呼叫。
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = （內聯）
+    .title = 編譯器已將一些對 { $calledFunction } 函數的呼叫內聯到 { $outerFunction } 函數。
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
@@ -148,7 +164,7 @@ FullTimeline--stack-height = 堆疊高度
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = 可見 <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> 軌
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> 軌
 
 ## Home page
 
@@ -383,11 +399,14 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含畫面擷
 MenuButtons--publish--renderCheckbox-label-resource = 包含資源網址與路徑
 MenuButtons--publish--renderCheckbox-label-extension = 包含擴充套件資訊
 MenuButtons--publish--renderCheckbox-label-preference = 包含偏好設定值
+MenuButtons--publish--renderCheckbox-label-private-browsing = 包含來自隱私瀏覽視窗的資料
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = 此效能檢測檔包含隱私瀏覽資料
 MenuButtons--publish--reupload-performance-profile = 重新上傳效能檢測檔
 MenuButtons--publish--share-performance-profile = 分享效能檢測檔
 MenuButtons--publish--info-description = 上傳您的檢測檔並透過鏈結分享，讓任何取得該鏈結的人都能存取。
 MenuButtons--publish--info-description-default = 預設情況下，將會移除您的個人資料。
-MenuButtons--publish--info-description-firefox-nightly = 此檢測檔來自 { -firefox-nightly-brand-name }，預設情況下將包含所有資訊。
+MenuButtons--publish--info-description-firefox-nightly2 = 此檢測檔來自 { -firefox-nightly-brand-name }，預設情況下將包含大部分資訊。
 MenuButtons--publish--include-additional-data = 包含其他資料後，可能造成檢測檔可被識別。
 MenuButtons--publish--button-upload = 上傳
 MenuButtons--publish--upload-title = 正在上傳檢測檔…
@@ -425,20 +444,13 @@ ProfileFilterNavigator--full-range = 完整範圍
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = 正在直接從 { -firefox-brand-name } 匯入檢測檔…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = 正在讀取檔案並處理檢測檔…
-ProfileLoaderAnimation--loading-message-local =
-    .message = 尚未實作。
-ProfileLoaderAnimation--loading-message-public =
-    .message = 正在下載處理檢測檔…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = 正在下載處理檢測檔…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = 正在讀取與處理檢測檔…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = 找不到畫面
+ProfileLoaderAnimation--loading-unpublished = 直接從 { -firefox-brand-name } 匯入檢測檔…
+ProfileLoaderAnimation--loading-from-file = 正在讀取檔案並處理檢測檔…
+ProfileLoaderAnimation--loading-local = 尚未實作。
+ProfileLoaderAnimation--loading-public = 正在下載處理檢測檔…
+ProfileLoaderAnimation--loading-from-url = 正在下載處理檢測檔…
+ProfileLoaderAnimation--loading-compare = 正在讀取與處理檢測檔…
+ProfileLoaderAnimation--loading-view-not-found = 找不到畫面
 
 ## ProfileRootMessage
 
@@ -513,6 +525,21 @@ TrackContextMenu--hide-other-screenshots-tracks = 隱藏其他畫面擷圖軌
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = 隱藏「{ $trackName }」
 TrackContextMenu--show-all-tracks = 顯示所有軌道
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = 在下方顯示所有軌道
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = 找不到「<span>{ $searchFilter }</span>」的結果
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = 輸入過濾條件
+    .title = 只顯示符合特定文字的軌道
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -533,7 +560,7 @@ TransformNavigator--complete = 完成「{ $item }」
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
-TransformNavigator--collapse-resource = 折疊: { $item }
+TransformNavigator--collapse-resource = 摺疊: { $item }
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
@@ -569,6 +596,65 @@ TransformNavigator--collapse-direct-recursion = 摺疊遞迴: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = 摺疊子樹: { $item }
+
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = 等待 { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = 正在等待 { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = 無法取得原始碼
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = 關於支援的使用情境與規劃中的改進，請參考<a>issue #3741</a>。
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = 這個檔案沒有已知的 cross-origin-accessible 網址。
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = 取得網址 { $url } 時發生網路錯誤: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = 無法查詢瀏覽器的符號化 API: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = 瀏覽器的符號化 API 回傳錯誤: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = 本機符號伺服器的符號化 API 回傳錯誤: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = 下載自 { $url } 的封存檔缺少下列檔案 { $pathInArchive }。
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = 無法剖析下載自 { $url } 的封存檔: { $parsingErrorMessage }
+SourceView--close-button =
+    .title = 關閉原始碼畫面
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

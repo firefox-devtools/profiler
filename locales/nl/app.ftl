@@ -29,16 +29,19 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = Kan het profiel niet ophalen van { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = Kan het bestand niet lezen of het profiel erin ontleden.
-AppViewRouter--error-message-local =
-    .message = Nog niet geïmplementeerd.
-AppViewRouter--error-message-public =
-    .message = Kan het profiel niet downloaden.
-AppViewRouter--error-message-from-url =
-    .message = Kan het profiel niet downloaden.
+AppViewRouter--error-unpublished = Kan het profiel niet ophalen van { -firefox-brand-name }.
+AppViewRouter--error-from-file = Kan het bestand niet lezen of het profiel erin ontleden.
+AppViewRouter--error-local = Nog niet geïmplementeerd.
+AppViewRouter--error-public = Kan het profiel niet downloaden.
+AppViewRouter--error-from-url = Kan het profiel niet downloaden.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Vanwege een <a>specifieke beperking in Safari</a> kan { -profiler-brand-name } geen
+    profielen van de lokale computer in deze browser importeren. Open in plaats daarvan
+    deze pagina in { -firefox-brand-name } of Chrome.
+    .title = Safari kan geen lokale profielen importeren
 AppViewRouter--route-not-found--home =
     .specialMessage = De URL die u probeerde te bereiken, werd niet herkend.
 
@@ -143,6 +146,22 @@ CallTree--bytes-self = Zelf (bytes)
         De ‘zelf’-bytes zijn nuttig om te begrijpen waar geheugenruimte daadwerkelijk
         in het programma was gealloceerd of gedealloceerd.
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Sommige aanroepen naar { $callFunction } zijn inline door de compiler geplaatst.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (inline geplaatst)
+    .title = Aanroepen naar { $calledFunction } zijn inline in { $outerFunction } geplaatst door de compiler.
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
@@ -202,7 +221,7 @@ FullTimeline--stack-height = Stackhoogte
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks zichtbaar
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks
 
 ## Home page
 
@@ -454,11 +473,14 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Schermafdrukken
 MenuButtons--publish--renderCheckbox-label-resource = Hulpbron-URL’s en -paden opnemen
 MenuButtons--publish--renderCheckbox-label-extension = Extensie-informatie opnemen
 MenuButtons--publish--renderCheckbox-label-preference = Voorkeurswaarden opnemen
+MenuButtons--publish--renderCheckbox-label-private-browsing = De gegevens van privénavigatievensters opnemen
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Dit profiel bevat privénavigatiegegevens
 MenuButtons--publish--reupload-performance-profile = Prestatieprofiel opnieuw uploaden
 MenuButtons--publish--share-performance-profile = Prestatieprofiel delen
 MenuButtons--publish--info-description = Upload uw profiel en maak het met de koppeling toegankelijk voor iedereen.
 MenuButtons--publish--info-description-default = Standaard worden uw persoonlijke gegevens verwijderd.
-MenuButtons--publish--info-description-firefox-nightly = Dit profiel is van { -firefox-nightly-brand-name }, dus standaard worden alle gegevens opgenomen.
+MenuButtons--publish--info-description-firefox-nightly2 = Dit profiel is van { -firefox-nightly-brand-name }, dus standaard worden de meeste gegevens opgenomen.
 MenuButtons--publish--include-additional-data = Aanvullende gegevens die identificeerbaar kunnen zijn toevoegen
 MenuButtons--publish--button-upload = Uploaden
 MenuButtons--publish--upload-title = Profiel uploaden…
@@ -496,20 +518,13 @@ ProfileFilterNavigator--full-range = Volledig bereik
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Profiel rechtstreeks vanuit { -firefox-brand-name } importeren…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Het bestand lezen en het profiel verwerken…
-ProfileLoaderAnimation--loading-message-local =
-    .message = Nog niet geïmplementeerd.
-ProfileLoaderAnimation--loading-message-public =
-    .message = Het profiel downloaden en verwerken…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Het profiel downloaden en verwerken…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Profielen lezen en verwerken…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Weergave niet gevonden
+ProfileLoaderAnimation--loading-unpublished = Profiel rechtstreeks vanuit { -firefox-brand-name } importeren…
+ProfileLoaderAnimation--loading-from-file = Het bestand lezen en het profiel verwerken…
+ProfileLoaderAnimation--loading-local = Nog niet geïmplementeerd.
+ProfileLoaderAnimation--loading-public = Het profiel downloaden en verwerken…
+ProfileLoaderAnimation--loading-from-url = Het profiel downloaden en verwerken…
+ProfileLoaderAnimation--loading-compare = Profielen lezen en verwerken…
+ProfileLoaderAnimation--loading-view-not-found = Weergave niet gevonden
 
 ## ProfileRootMessage
 
@@ -583,6 +598,21 @@ TrackContextMenu--hide-other-screenshots-tracks = Andere schermafdruktracks verb
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = ‘{ $trackName }’ verbergen
 TrackContextMenu--show-all-tracks = Alle tracks tonen
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Alle tracks hieronder tonen
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Geen resultaten gevonden voor ‘<span>{ $searchFilter }</span>’
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Voer filtertermen in
+    .title = Alleen tracks tonen die overeenkomen met een bepaalde tekst
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -639,6 +669,65 @@ TransformNavigator--collapse-direct-recursion = Recursie samenvouwen: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Subtree samenvouwen: { $item }
+
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Wachten op { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Wachten op { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Bron niet beschikbaar
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Zie <a>issue #3741</a> voor ondersteunde scenario’s en geplande verbeteringen.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Er is geen bekende cross-origin-toegankelijke URL voor dit bestand.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Er is een netwerkfout opgetreden bij het ophalen van de URL { $url }: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Kan de symboliserings-API van de browser niet opvragen: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = De symboliserings-API van de browser heeft een fout teruggestuurd: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = De symboliserings-API van de lokale symboolserver heeft een fout teruggestuurd: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Het bestand { $pathInArchive } is niet gevonden in het archief van { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Het archief op { $url } kan niet worden ontleed: { $parsingErrorMessage }
+SourceView--close-button =
+    .title = Bronweergave sluiten
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
