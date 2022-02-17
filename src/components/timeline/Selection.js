@@ -102,6 +102,25 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     let isRangeSelecting = false;
 
+    const getSelectionFromEvent = (event: MouseEvent) => {
+      const mouseMoveX = event.pageX;
+      const mouseMoveTime =
+        ((mouseMoveX - rect.left) / rect.width) *
+          (committedRange.end - committedRange.start) +
+        committedRange.start;
+      const selectionStart = clamp(
+        Math.min(mouseDownTime, mouseMoveTime),
+        committedRange.start,
+        committedRange.end
+      );
+      const selectionEnd = clamp(
+        Math.max(mouseDownTime, mouseMoveTime),
+        committedRange.start,
+        committedRange.end
+      );
+      return { selectionStart, selectionEnd };
+    };
+
     const mouseMoveHandler = (event) => {
       const isLeftButtonUsed = (event.buttons & 1) > 0;
       if (!isLeftButtonUsed) {
@@ -126,26 +145,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         return;
       }
 
-      const mouseMoveX = event.pageX;
-      const mouseMoveTime =
-        ((mouseMoveX - rect.left) / rect.width) *
-          (committedRange.end - committedRange.start) +
-        committedRange.start;
-      const selectionStart = clamp(
-        Math.min(mouseDownTime, mouseMoveTime),
-        committedRange.start,
-        committedRange.end
-      );
-      const selectionEnd = clamp(
-        Math.max(mouseDownTime, mouseMoveTime),
-        committedRange.start,
-        committedRange.end
-      );
       if (
         isRangeSelecting ||
-        Math.abs(mouseMoveX - mouseDownX) >= minSelectionStartWidth
+        Math.abs(event.pageX - mouseDownX) >= minSelectionStartWidth
       ) {
         isRangeSelecting = true;
+        const { selectionStart, selectionEnd } = getSelectionFromEvent(event);
         this.props.updatePreviewSelection({
           hasSelection: true,
           selectionStart,
@@ -157,20 +162,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     const clickHandler = (event) => {
       if (isRangeSelecting) {
-        const mouseMoveTime =
-          ((event.pageX - rect.left) / rect.width) *
-            (committedRange.end - committedRange.start) +
-          committedRange.start;
-        const selectionStart = clamp(
-          Math.min(mouseDownTime, mouseMoveTime),
-          committedRange.start,
-          committedRange.end
-        );
-        const selectionEnd = clamp(
-          Math.max(mouseDownTime, mouseMoveTime),
-          committedRange.start,
-          committedRange.end
-        );
+        // This click ends the current selection gesture.
+        const { selectionStart, selectionEnd } = getSelectionFromEvent(event);
         this.props.updatePreviewSelection({
           hasSelection: true,
           selectionStart,
@@ -184,8 +177,13 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         return;
       }
 
+      // This is a normal click where no selection is currently occurring (but
+      // there may be one from a previous selection operation).
+
       const { previewSelection } = this.props;
       if (previewSelection.hasSelection) {
+        // There's a selection.
+        // Dismiss it but only if the click is outside the current selection.
         const clickTime =
           ((event.pageX - rect.left) / rect.width) *
             (committedRange.end - committedRange.start) +
@@ -204,7 +202,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         }
       }
 
-      // Do not stopPropagation(), so that graph gets click event.
+      // Do not stopPropagation(), so that underlying graphs get the click event.
+      // In all cases, remove the event handlers.
       this._uninstallMoveAndClickHandlers();
     };
 
