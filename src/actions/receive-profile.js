@@ -16,7 +16,7 @@ import {
 } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
 import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
-import { decompress } from 'firefox-profiler/utils/gz';
+import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { expandUrl } from 'firefox-profiler/utils/shorten-url';
 import { TemporaryError } from 'firefox-profiler/utils/errors';
 import JSZip from 'jszip';
@@ -1266,7 +1266,7 @@ async function _extractJsonFromArrayBuffer(
 ): Promise<MixedObject> {
   let profileBytes = new Uint8Array(arrayBuffer);
   // Check for the gzip magic number in the header.
-  if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+  if (isGzip(profileBytes)) {
     profileBytes = await decompress(profileBytes);
   }
 
@@ -1438,7 +1438,7 @@ export function retrieveProfileFromFile(
         // Check for the gzip magic number in the header. If we find it, decompress
         // the data first.
         const profileBytes = new Uint8Array(arrayBuffer);
-        if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+        if (isGzip(profileBytes)) {
           const decompressedProfile = await decompress(profileBytes);
           arrayBuffer = decompressedProfile.buffer;
         }
