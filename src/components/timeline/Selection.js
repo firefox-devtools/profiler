@@ -57,10 +57,10 @@ type State = {|
 |};
 
 class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
-  _handlers: ?{
+  _handlers: ?{|
     mouseMoveHandler: MouseHandler,
     mouseClickHandler: MouseHandler,
-  };
+  |};
 
   _container: ?HTMLElement;
 
@@ -103,6 +103,29 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     let isRangeSelecting = false;
 
     const mouseMoveHandler = (event) => {
+      const isLeftButtonUsed = (event.buttons & 1) > 0;
+      if (!isLeftButtonUsed) {
+        // Oops, the mouseMove handler is still registered but the left button
+        // isn't pressed, this means we missed the "click" event for some reason.
+        // Maybe the user moved the cursor in some place where we didn't get the
+        // click event because of Firefox issues such as bug 1755746 and bug 1755498.
+        // Let's uninstall the event handlers and stop the selection.
+        const { previewSelection } = this.props;
+        isRangeSelecting = false;
+        this._uninstallMoveAndClickHandlers();
+
+        if (previewSelection.hasSelection) {
+          const { selectionStart, selectionEnd } = previewSelection;
+          this.props.updatePreviewSelection({
+            hasSelection: true,
+            selectionStart,
+            selectionEnd,
+            isModifying: false,
+          });
+        }
+        return;
+      }
+
       const mouseMoveX = event.pageX;
       const mouseMoveTime =
         ((mouseMoveX - rect.left) / rect.width) *
