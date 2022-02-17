@@ -11,7 +11,6 @@ import { render, screen } from '@testing-library/react';
 import { lazilyParsedBundles } from 'firefox-profiler/app-logic/l10n';
 import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 import {
-  getL10nFetchingPhase,
   getLocalization,
   getPrimaryLocale,
   getDirection,
@@ -19,7 +18,7 @@ import {
 import {
   requestL10n,
   receiveL10n,
-  setupLocalization,
+  togglePseudoStrategy,
 } from 'firefox-profiler/actions/l10n';
 
 import { blankStore } from '../fixtures/stores';
@@ -79,10 +78,8 @@ describe('AppLocalizationProvider', () => {
 
   it('changes the state accordingly when the actions are dispatched', () => {
     const { dispatch, getState } = setup();
-    expect(getL10nFetchingPhase(getState())).toBe('not-fetching');
     expect(getLocalization(getState())).toEqual(new ReactLocalization([]));
-    dispatch(requestL10n());
-    expect(getL10nFetchingPhase(getState())).toBe('fetching-ftl');
+    dispatch(requestL10n(['en-US']));
     const resource = [
       'locale',
       'data-testid = content-test-ApplocalizationProvider',
@@ -90,7 +87,6 @@ describe('AppLocalizationProvider', () => {
     const bundles = lazilyParsedBundles([resource]);
     const testLocalization = new ReactLocalization(bundles);
     dispatch(receiveL10n(testLocalization, 'en-US', 'ltr'));
-    expect(getL10nFetchingPhase(getState())).toBe('done-fetching');
     expect(getLocalization(getState())).toEqual(testLocalization);
     expect(getPrimaryLocale(getState())).toEqual('en-US');
     expect(getDirection(getState())).toEqual('ltr');
@@ -135,18 +131,55 @@ describe('AppLocalizationProvider', () => {
     expect(document.dir).toBe('ltr');
 
     // Now we're testing the LTR pseudo-localization.
-    dispatch(setupLocalization(navigator.languages, 'accented'));
+    dispatch(togglePseudoStrategy('accented'));
     expect(await screen.findByText('Ŧħīş īş ḗḗƞ-ŬŞ Ŧḗḗẋŧ')).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
 
     // And now the RTL pseudo-localization.
-    dispatch(setupLocalization(navigator.languages, 'bidi'));
+    dispatch(togglePseudoStrategy('bidi'));
     expect(await screen.findByText(/⊥ɥıs ıs ǝu-∩S ⊥ǝxʇ/)).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('rtl');
+
+    // Back to no pseudo-localization
+    dispatch(togglePseudoStrategy(null));
+    expect(
+      await screen.findByText(translatedText('en-US'))
+    ).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute('lang', 'en-US');
+    // $FlowExpectError Our version of flow doesn't know about document.dir
+    expect(document.dir).toBe('ltr');
+  });
+
+  it('can switch the language', async () => {
+    const { store, dispatch, translatedText } = setup();
+    render(
+      <Provider store={store}>
+        <AppLocalizationProvider>
+          <Localized id="test-id">
+            <span>Fallback String</span>
+          </Localized>
+        </AppLocalizationProvider>
+      </Provider>
+    );
+
+    // Start with american english
+    expect(
+      await screen.findByText(translatedText('en-US'))
+    ).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute('lang', 'en-US');
+    // $FlowExpectError Our version of flow doesn't know about document.dir
+    expect(document.dir).toBe('ltr');
+
+    // Switch to german
+    dispatch(requestL10n(['de']));
+    expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute('lang', 'de');
+    // $FlowExpectError Our version of flow doesn't know about document.dir
+    expect(document.dir).toBe('ltr');
   });
 
   it('fetches FTL strings for all available locales, but not others', async () => {
