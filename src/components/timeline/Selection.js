@@ -73,7 +73,17 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   };
 
   _onMouseDown = (event: SyntheticMouseEvent<>) => {
-    if (!this._container || event.button !== 0) {
+    if (
+      !this._container ||
+      event.button !== 0 ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey
+    ) {
+      // Do not start a selection if the user doesn't press with the left button
+      // or if they uses a keyboard modifier. Especially on MacOS ctrl+click can
+      // be used to display the context menu.
       return;
     }
 
