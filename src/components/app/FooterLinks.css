@@ -16,7 +16,7 @@
 .appFooterLinksLink,
 .appFooterLinksClose {
   display: inline-block;
-  padding: 3px 5px;
+  margin: 2px 4px;
   color: var(--blue-60);
   text-decoration: none;
 }
@@ -32,6 +32,12 @@
 .appFooterLinksLink:hover,
 .appFooterLinksClose:hover {
   text-decoration: underline;
+}
+
+.appFooterLinksLanguageSwitcher {
+  margin: 2px 5px;
+  color: inherit;
+  font: inherit;
 }
 
 @media (max-width: 767px) {

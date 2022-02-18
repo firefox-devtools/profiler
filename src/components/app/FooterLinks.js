@@ -5,6 +5,8 @@
 
 import { Localized } from '@fluent/react';
 import React, { PureComponent } from 'react';
+import { LanguageSwitcher } from './LanguageSwitcher';
+
 import './FooterLinks.css';
 
 type State = {| hide: boolean |};
@@ -57,6 +59,7 @@ export class FooterLinks extends PureComponent<{||}, State> {
         >
           <Localized id="FooterLinks--Cookies">Cookies</Localized>
         </a>
+        <LanguageSwitcher />
       </div>
     );
   }

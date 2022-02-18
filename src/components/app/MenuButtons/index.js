@@ -27,9 +27,9 @@ import {
 /* Note: the order of import is important, from most general to most specific,
  * so that the CSS rules are in the correct order. */
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
-import { MetaInfoPanel } from 'firefox-profiler/components/app/MenuButtons/MetaInfo';
-import { MenuButtonsPublish } from 'firefox-profiler/components/app/MenuButtons/Publish';
-import { MenuButtonsPermalink } from 'firefox-profiler/components/app/MenuButtons/Permalink';
+import { MetaInfoPanel } from './MetaInfo';
+import { MenuButtonsPublish } from './Publish';
+import { MenuButtonsPermalink } from './Permalink';
 import {
   ProfileDeletePanel,
   ProfileDeleteSuccess,
