@@ -431,7 +431,7 @@ export type RemoveProfileInformation = {|
   // Remove the private browsing data if it's true.
   +shouldRemovePrivateBrowsingData: boolean,
   // Remove all tab ids except this one.
-  +shouldKeepTabID: TabID | null,
+  +shouldRemoveTabsExceptTabID: TabID | null,
 |};
 
 /**

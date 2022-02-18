@@ -29,6 +29,7 @@ import type {
   DerivedMarkerInfo,
   IndexIntoFrameTable,
   IndexIntoFuncTable,
+  InnerWindowID,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
@@ -74,7 +75,7 @@ export function sanitizePII(
   if (pages) {
     if (
       PIIToBeRemoved.shouldRemovePrivateBrowsingData ||
-      PIIToBeRemoved.shouldKeepTabID !== null
+      PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null
     ) {
       // slicing here so that we can mutate it later.
       pages = pages.slice();
@@ -93,8 +94,8 @@ export function sanitizePII(
           removePageEntry = true;
         }
 
-        if (PIIToBeRemoved.shouldKeepTabID !== null) {
-          if (page.tabID === PIIToBeRemoved.shouldKeepTabID) {
+        if (PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null) {
+          if (page.tabID === PIIToBeRemoved.shouldRemoveTabsExceptTabID) {
             // This page is part of the active tab.
             windowIdFromActiveTab.add(page.innerWindowID);
           } else {
@@ -225,8 +226,8 @@ function sanitizeThreadPII(
   derivedMarkerInfo: DerivedMarkerInfo,
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation,
-  windowIdFromPrivateBrowsing: Set<number>,
-  windowIdFromActiveTab: Set<number>
+  windowIdFromPrivateBrowsing: Set<InnerWindowID>,
+  windowIdFromActiveTab: Set<InnerWindowID>
 ): Thread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
     // If this is a hidden thread, remove the thread immediately.
@@ -258,7 +259,7 @@ function sanitizeThreadPII(
     PIIToBeRemoved.shouldRemoveExtensions ||
     PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0 ||
     PIIToBeRemoved.shouldRemovePrivateBrowsingData ||
-    PIIToBeRemoved.shouldKeepTabID !== null
+    PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null
   ) {
     for (let i = 0; i < markerTable.length; i++) {
       let currentMarker = markerTable.data[i];
@@ -357,7 +358,7 @@ function sanitizeThreadPII(
         }
       }
 
-      if (PIIToBeRemoved.shouldKeepTabID !== null) {
+      if (PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null) {
         if (!currentMarker) {
           // No payload, so no innerWindowID!
           markersToDelete.add(i);
@@ -425,7 +426,7 @@ function sanitizeThreadPII(
 
   if (
     windowIdFromPrivateBrowsing.size > 0 ||
-    PIIToBeRemoved.shouldKeepTabID !== null
+    PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null
   ) {
     // In this block, we'll remove everything related to frame table entries
     // that have a innerWindowID with a isPrivateBrowsing flag, or that come
@@ -453,7 +454,7 @@ function sanitizeThreadPII(
         innerWindowID && windowIdFromPrivateBrowsing.has(innerWindowID);
       const isRemoveTabId =
         innerWindowID &&
-        PIIToBeRemoved.shouldKeepTabID !== null &&
+        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
         !windowIdFromActiveTab.has(innerWindowID);
       if (isPrivateBrowsing || isRemoveTabId) {
         // The function pointed by this frame should be sanitized.
@@ -599,7 +600,7 @@ function sanitizeThreadPII(
 
       const isPrivateBrowsing = windowIdFromPrivateBrowsing.has(innerWindowID);
       const isKeepTabId =
-        PIIToBeRemoved.shouldKeepTabID !== null &&
+        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
         windowIdFromActiveTab.has(innerWindowID);
       if (isPrivateBrowsing) {
         stackFlags[stackIndex] = PRIVATE_BROWSING_STACK;
@@ -621,7 +622,7 @@ function sanitizeThreadPII(
       }
 
       if (
-        PIIToBeRemoved.shouldKeepTabID !== null &&
+        PIIToBeRemoved.shouldRemoveTabsExceptTabID !== null &&
         stackFlag !== KEEP_TAB_ID_STACK
       ) {
         newSamples.stack[sampleIndex] = null;
@@ -644,7 +645,7 @@ function sanitizeThreadPII(
   return null;
 }
 
-// This returns true if the thread has at leastt a samples or a marker.
+// This returns true if the thread has at least a samples or a marker.
 function isThreadNonEmpty(thread: Thread): boolean {
   const hasMarkers = thread.markers.length > 0;
   if (hasMarkers) {

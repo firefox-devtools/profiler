@@ -40,7 +40,7 @@ describe('sanitizePII', function () {
       shouldRemoveExtensions: false,
       shouldRemovePreferenceValues: false,
       shouldRemovePrivateBrowsingData: false,
-      shouldKeepTabID: null,
+      shouldRemoveTabsExceptTabID: null,
     };
 
     const PIIToRemove = {
@@ -880,7 +880,7 @@ describe('sanitizePII', function () {
       );
 
       const { sanitizedProfile } = setup(
-        { shouldKeepTabID: secondTabTabID },
+        { shouldRemoveTabsExceptTabID: secondTabTabID },
         originalProfile
       );
 
@@ -997,7 +997,7 @@ describe('sanitizePII', function () {
         originalProfile
       );
       const { sanitizedProfile } = setup(
-        { shouldKeepTabID: secondTabTabID },
+        { shouldRemoveTabsExceptTabID: secondTabTabID },
         originalProfile
       );
 
@@ -1152,7 +1152,7 @@ describe('sanitizePII', function () {
         originalProfile
       );
       const { sanitizedProfile } = setup(
-        { shouldKeepTabID: secondTabTabID },
+        { shouldRemoveTabsExceptTabID: secondTabTabID },
         originalProfile
       );
 
@@ -1200,7 +1200,7 @@ describe('sanitizePII', function () {
       const { sanitizedProfile } = setup(
         {
           shouldRemovePrivateBrowsingData: true,
-          shouldKeepTabID: privateTabTabID,
+          shouldRemoveTabsExceptTabID: privateTabTabID,
         },
         originalProfile
       );
@@ -1234,7 +1234,7 @@ describe('sanitizePII', function () {
       const { sanitizedProfile: sanitizedProfile2 } = setup(
         {
           shouldRemovePrivateBrowsingData: true,
-          shouldKeepTabID: nonPrivateTabTabID,
+          shouldRemoveTabsExceptTabID: nonPrivateTabTabID,
         },
         originalProfile
       );
@@ -1318,7 +1318,7 @@ describe('sanitizePII', function () {
       const { sanitizedProfile } = setup(
         {
           shouldRemovePrivateBrowsingData: true,
-          shouldKeepTabID: privateTabTabID,
+          shouldRemoveTabsExceptTabID: privateTabTabID,
         },
         originalProfile
       );
@@ -1349,7 +1349,7 @@ describe('sanitizePII', function () {
       const { sanitizedProfile: sanitizedProfile2 } = setup(
         {
           shouldRemovePrivateBrowsingData: true,
-          shouldKeepTabID: nonPrivateTabTabID,
+          shouldRemoveTabsExceptTabID: nonPrivateTabTabID,
         },
         originalProfile
       );
@@ -1424,7 +1424,7 @@ describe('sanitizePII', function () {
       const { sanitizedProfile } = setup(
         {
           shouldRemovePrivateBrowsingData: true,
-          shouldKeepTabID: privateTabTabID,
+          shouldRemoveTabsExceptTabID: privateTabTabID,
         },
         originalProfile
       );
@@ -1447,7 +1447,7 @@ describe('sanitizePII', function () {
       const { sanitizedProfile: sanitizedProfile2 } = setup(
         {
           shouldRemovePrivateBrowsingData: true,
-          shouldKeepTabID: nonPrivateTabTabID,
+          shouldRemoveTabsExceptTabID: nonPrivateTabTabID,
         },
         originalProfile
       );

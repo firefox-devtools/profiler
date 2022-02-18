@@ -27,7 +27,11 @@ import {
 import prettyBytes from '../utils/pretty-bytes';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
-import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
+import {
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
+  getTimelineTrackOrganization,
+} from './url-state';
 
 import type {
   PublishState,
@@ -81,6 +85,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     getLocalTracksByPid,
     getHasPreferenceMarkers,
     getContainsPrivateBrowsingInformation,
+    getTimelineTrackOrganization,
     getActiveTabID,
     (
       checkedSharingOptions,
@@ -92,6 +97,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       localTracksByPid,
       hasPreferenceMarkers,
       containsPrivateBrowsingInformation,
+      timelineTrackOrganization,
       activeTabID
     ) => {
       let isIncludingEverything = true;
@@ -119,7 +125,10 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
 
       // Find all of the thread indexes that are hidden.
       const shouldRemoveThreads = new Set();
-      if (!checkedSharingOptions.includeHiddenThreads) {
+      if (
+        timelineTrackOrganization.type === 'full' &&
+        !checkedSharingOptions.includeHiddenThreads
+      ) {
         for (const globalTrackIndex of hiddenGlobalTracks) {
           const globalTrack = globalTracks[globalTrackIndex];
           if (globalTrack.type === 'process') {
@@ -156,9 +165,11 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
         }
       }
 
-      const shouldKeepTabID = checkedSharingOptions.includeAllTabs
-        ? null
-        : activeTabID;
+      const shouldRemoveTabsExceptTabID =
+        timelineTrackOrganization.type === 'active-tab' &&
+        !checkedSharingOptions.includeAllTabs
+          ? activeTabID
+          : null;
 
       return {
         shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
@@ -176,7 +187,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           !checkedSharingOptions.includePreferenceValues,
         shouldRemovePrivateBrowsingData:
           !checkedSharingOptions.includePrivateBrowsingData,
-        shouldKeepTabID,
+        shouldRemoveTabsExceptTabID,
       };
     }
   );
