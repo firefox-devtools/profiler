@@ -28,12 +28,12 @@
 /* stylelint-enable order/properties-order */
 
 .menuButtonsButton:hover {
-  background-color: rgb(0 0 0 / 0.1);
+  background-color: #e0e0e1;
 }
 
 .buttonWithPanel.open > .menuButtonsButton,
 .menuButtonsButton:hover:active {
-  background-color: rgb(0 0 0 / 0.2);
+  background-color: #c7c7c8;
 }
 
 /* Use this class if a button has an icon */
