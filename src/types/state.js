@@ -339,13 +339,10 @@ export type UrlState = {|
 /**
  * Localization State
  */
-export type L10nFetchingPhase =
-  | 'not-fetching'
-  | 'fetching-ftl'
-  | 'done-fetching';
-
+export type PseudoStrategy = null | 'bidi' | 'accented';
 export type L10nState = {|
-  +l10nFetchingPhase: L10nFetchingPhase,
+  +requestedLocales: string[] | null,
+  +pseudoStrategy: PseudoStrategy,
   +localization: Localization,
   +primaryLocale: string | null,
   +direction: 'ltr' | 'rtl',

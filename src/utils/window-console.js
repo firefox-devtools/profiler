@@ -114,7 +114,7 @@ export function addDataToWindowObject(
       return;
     }
 
-    dispatch(actions.setupLocalization(navigator.languages, pseudoStrategy));
+    dispatch(actions.togglePseudoStrategy(pseudoStrategy ?? null));
     if (pseudoStrategy) {
       console.log(stripIndent`
         ✅ The pseudo strategy "${pseudoStrategy}" is now enabled for the localization.

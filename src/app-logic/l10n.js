@@ -22,6 +22,7 @@ export const AVAILABLE_LOCALES: Array<string> = AVAILABLE_STAGING_LOCALES || [
   'en-GB',
   'en-US',
   'es-CL',
+  'fr',
   'ia',
   'it',
   'nl',
@@ -56,7 +57,7 @@ export async function fetchMessages(locale: string): Promise<[string, string]> {
  */
 export function* lazilyParsedBundles(
   fetchedMessages: Array<[string, string]>,
-  pseudoStrategy?: 'accented' | 'bidi'
+  pseudoStrategy?: 'accented' | 'bidi' | null
 ): Generator<FluentBundle, void, void> {
   const transform = pseudoStrategy
     ? PSEUDO_STRATEGIES[pseudoStrategy]
@@ -77,7 +78,7 @@ export function* lazilyParsedBundles(
  */
 export function getLocaleDirection(
   language: string,
-  pseudoStrategy?: 'accented' | 'bidi'
+  pseudoStrategy?: 'accented' | 'bidi' | null
 ): 'ltr' | 'rtl' {
   if (pseudoStrategy && pseudoStrategy in PSEUDO_STRATEGIES_DIRECTION) {
     return PSEUDO_STRATEGIES_DIRECTION[pseudoStrategy];
