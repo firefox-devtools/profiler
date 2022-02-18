@@ -1,0 +1,25 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.menuButtonsLanguageSwitcherContainer {
+  position: relative;
+  overflow: hidden;
+}
+
+.menuButtonsLanguageSwitcherSelect {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.menuButtonsLanguageSwitcherContainer::before {
+  padding: 0;
+  background-image: url(firefox-profiler-res/img/svg/globe-dark.svg);
+}
+
+.menuButtonsLanguageSwitcherContainer:focus-within {
+  box-shadow: 0 0 0 1px var(--blue-50) inset, 0 0 0 1px var(--blue-50),
+    0 0 0 4px var(--blue-50-a30);
+  outline: 0;
+}

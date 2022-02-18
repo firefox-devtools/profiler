@@ -52,6 +52,13 @@
   content: '';
 }
 
+/* position: relative so that we can use position: absolute for the generated
+ * element below. */
+.menuButtonsButton-hasRightBorder,
+.menuButtonsButton-hasLeftBorder {
+  position: relative;
+}
+
 /* These classes define respectively a right or a left border. We use ::after for
  * both of them, so one element won't be able to have both a right and a left
  * borders with this technique.

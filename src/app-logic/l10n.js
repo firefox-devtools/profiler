@@ -10,28 +10,39 @@ import {
   PSEUDO_STRATEGIES_DIRECTION,
 } from 'firefox-profiler/utils/l10n-pseudo';
 
-// This contains the locales we support in the production. Don't forget to update
-// the array RTL_LOCALES when adding a RTL locale, if necessary.
-// AVAILABLE_STAGING_LOCALES is replaced, using webpack's DefinePlugin, by all
-// available locales, when running with L10N=1, using the "l10n" versions of the
-// yarn scripts. Especially this is done when building and deploying the l10n
-// branch in netlify.
-export const AVAILABLE_LOCALES: Array<string> = AVAILABLE_STAGING_LOCALES || [
-  'de',
-  'el',
-  'en-GB',
-  'en-US',
-  'es-CL',
-  'fr',
-  'ia',
-  'it',
-  'nl',
-  'pt-BR',
-  'sv-SE',
-  'uk',
-  'zh-CN',
-  'zh-TW',
-];
+// This object contains the locales that are at least 90% complete and
+// that we enable by default. Don't forget to update the array RTL_LOCALES when
+// adding a RTL locale, if necessary.
+// The localized names are copied from the select box at the bottom of
+// https://mozilla-l10n.github.io/firefox-languages/.mozilla.org/.
+// We use the language names in their own language.
+export const AVAILABLE_LOCALES_TO_LOCALIZED_NAMES = {
+  de: 'Deutsch',
+  el: 'Ελληνικά',
+  'en-GB': 'English (GB)',
+  'en-US': 'English (US)',
+  'es-CL': 'Español', // Use "Español (CL)" once we have more spanish versions
+  fr: 'Français',
+  ia: 'Interlingua',
+  it: 'Italiano',
+  nl: 'Nederlands',
+  'pt-BR': 'Português (BR)',
+  'sv-SE': 'Svenska',
+  uk: 'Українська',
+  'zh-CN': '简体中文',
+  'zh-TW': '正體中文',
+};
+
+// This constant contains all locales available to our application. The default
+// is to use the keys of the previous object.
+// However when running the yarn scripts with the environment variable L10N=1,
+// webpack replaces AVAILABLE_STAGING_LOCALES with all locales that have an FTL
+// file in the repository, and this becomes the value for this constant. This
+// is used in our l10n branch when deployed on netlify.
+export const AVAILABLE_LOCALES: Array<string> =
+  AVAILABLE_STAGING_LOCALES ||
+  Object.keys(AVAILABLE_LOCALES_TO_LOCALIZED_NAMES);
+
 export const DEFAULT_LOCALE = 'en-US';
 
 // This array contains only the locales that are RTL (Right-To-Left).

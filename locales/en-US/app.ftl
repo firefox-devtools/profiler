@@ -381,6 +381,9 @@ MenuButtons--index--docs = Docs
 MenuButtons--permalink--button =
     .label = Permalink
 
+MenuButtons--languageSwitcher--select =
+    .title = Change language
+
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
