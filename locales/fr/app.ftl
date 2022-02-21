@@ -68,8 +68,8 @@ CallNodeContextMenu--transform-collapse-resource = Réduire <strong>{ $nameForRe
     .title = Réduire une ressource aplatit tous les appels à cette ressource en un seul nœud d’appel réduit.
 CallNodeContextMenu--transform-collapse-direct-recursion = Réduire la récursivité directe
     .title = La réduction de la récursivité directe supprime les appels qui reviennent à plusieurs reprises dans la même fonction.
-CallNodeContextMenu--transform-drop-function = Supprimer les échantillons avec cette fonction
-    .title = La suppression des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
+CallNodeContextMenu--transform-drop-function = Ignorer les échantillons avec cette fonction
+    .title = Ignorer des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
