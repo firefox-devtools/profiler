@@ -5,7 +5,7 @@ The [Firefox Profiler] visualizes performance data recorded from web browsers. I
 
 [Mozilla] develops this tool to help make [Firefox] silky smooth and fast for millions of its users, and to help make sites and apps faster across the web.
 
-![Screenshot of the Firefox Profiler](./docs-user/images/screenshot-2019-02-05.jpg?raw=true)
+![Screenshot of the Firefox Profiler](./docs-user/images/screenshot-2021-10-21.png?raw=true)
 
 ### Usage
 
