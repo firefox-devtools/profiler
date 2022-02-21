@@ -6,12 +6,58 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  fireEvent,
+  screen,
+} from 'firefox-profiler/test/fixtures/testing-library';
+import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNavigatorBar';
 import { ProfileFilterNavigator } from '../../components/app/ProfileFilterNavigator';
 import * as ProfileView from '../../actions/profile-view';
 import * as ReceiveProfile from '../../actions/receive-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+
+describe('shared/FilterNavigatorBar', () => {
+  it(`pops the item unless the last one is clicked`, () => {
+    const onPop = jest.fn();
+    render(
+      <FilterNavigatorBar
+        className=""
+        items={['foo', 'bar']}
+        selectedItem={2}
+        onPop={onPop}
+      />
+    );
+
+    // We don't use getByRole because this isn't a button.
+    const lastElement = screen.getByText('bar');
+    fireEvent.click(lastElement);
+    expect(onPop).not.toHaveBeenCalled();
+
+    const firstElement = screen.getByRole('button', { name: 'foo' });
+    fireEvent.click(firstElement);
+    expect(onPop).toHaveBeenCalledWith(0);
+  });
+
+  it(`pops the last item if there's an uncommited item`, () => {
+    const onPop = jest.fn();
+    render(
+      <FilterNavigatorBar
+        className=""
+        items={['foo', 'bar']}
+        selectedItem={2}
+        uncommittedItem="baz"
+        onPop={onPop}
+      />
+    );
+
+    // We don't use getByRole because this isn't a button.
+    const lastElement = screen.getByText('bar');
+    fireEvent.click(lastElement);
+    expect(onPop).toHaveBeenCalledWith(1);
+  });
+});
 
 describe('app/ProfileFilterNavigator', () => {
   const tabID = 123123;
