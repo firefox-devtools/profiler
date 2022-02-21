@@ -16,6 +16,7 @@ import {
 } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   TimelineMarkersOverview,
+  TimelineMarkersMemory,
   MIN_MARKER_WIDTH,
 } from '../../components/timeline/Markers';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
@@ -51,15 +52,27 @@ import type { CssPixels } from 'firefox-profiler/types';
 const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
 
-function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
+function setupWithMarkers(
+  {
+    rangeStart,
+    rangeEnd,
+    component,
+  }: {
+    rangeStart: number,
+    rangeEnd: number,
+    component?: typeof TimelineMarkersOverview,
+  },
+  ...markersPerThread
+) {
   const flushRafCalls = mockRaf();
 
   const profile = getProfileWithMarkers(...markersPerThread);
+  const TimelineMarkersComponent = component ?? TimelineMarkersOverview;
 
   const renderResult = render(
     <Provider store={storeWithProfile(profile)}>
       <>
-        <TimelineMarkersOverview
+        <TimelineMarkersComponent
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           threadsKey={0}
@@ -161,7 +174,7 @@ describe('TimelineMarkers', function () {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
-  it('renders correctly', () => {
+  it('renders correctly overview markers', () => {
     window.devicePixelRatio = 1;
 
     const { container } = setupWithMarkers({ rangeStart: 0, rangeEnd: 15 }, [
@@ -171,7 +184,31 @@ describe('TimelineMarkers', function () {
       ['Paint', 2, 13],
       ['Navigation', 2, 6],
       ['Layout', 6, 8],
+      // These 2 will be ignored.
+      ['CC', 0, 5],
+      ['GCMajor', 5, 10],
     ]);
+
+    const drawCalls = flushDrawLog();
+
+    expect(container.firstChild).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
+
+    delete window.devicePixelRatio;
+  });
+
+  it('renders correctly memory markers', () => {
+    window.devicePixelRatio = 1;
+
+    const { container } = setupWithMarkers(
+      { rangeStart: 0, rangeEnd: 15, component: TimelineMarkersMemory },
+      [
+        // The first one will be ignored.
+        ['DOMEvent', 0, 10],
+        ['CC', 0, 5],
+        ['GCMajor', 5, 10],
+      ]
+    );
 
     const drawCalls = flushDrawLog();
 
