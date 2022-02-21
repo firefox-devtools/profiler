@@ -44,8 +44,10 @@ import type {
   StackTable,
   RawMarkerTable,
   Lib,
+  LibMapping,
   FuncTable,
   ResourceTable,
+  IndexIntoLibs,
   IndexIntoStackTable,
   IndexIntoFuncTable,
   IndexIntoStringTable,
@@ -154,18 +156,61 @@ function _cleanFunctionName(functionName: string): string {
   return functionName;
 }
 
+/**
+ * GlobalDataCollector collects data which is global in the processed profile
+ * format but per-process or per-thread in the Gecko profile format. It
+ * de-duplicates elements and builds one shared list of each type.
+ * For now it only de-duplicates libraries, but in the future we may move more
+ * tables to be global.
+ * You could also call this class an "interner".
+ */
+export class GlobalDataCollector {
+  _libs: Lib[] = [];
+  _libKeyToLibIndex: Map<string, IndexIntoLibs> = new Map();
+
+  // Return the global index for this library, adding it to the global list if
+  // necessary.
+  indexForLib(libMapping: LibMapping | Lib): IndexIntoLibs {
+    const { debugName, breakpadId } = libMapping;
+    const libKey = `${debugName}/${breakpadId}`;
+    let index = this._libKeyToLibIndex.get(libKey);
+    if (index === undefined) {
+      index = this._libs.length;
+      const { arch, name, path, debugPath, codeId } = libMapping;
+      this._libs.push({
+        arch,
+        name,
+        path,
+        debugName,
+        debugPath,
+        breakpadId,
+        codeId: codeId ?? null,
+      });
+      this._libKeyToLibIndex.set(libKey, index);
+    }
+    return index;
+  }
+
+  // Package up all de-duplicated global tables so that they can be embedded in
+  // the profile.
+  finish(): {| libs: Lib[] |} {
+    return { libs: this._libs };
+  }
+}
+
 type ExtractionInfo = {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   stringTable: UniqueStringArray,
   addressLocator: AddressLocator,
-  libToResourceIndex: Map<Lib, IndexIntoResourceTable>,
+  libToResourceIndex: Map<IndexIntoLibs, IndexIntoResourceTable>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
   libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable>,
   stringToNewFuncIndexAndFrameAddress: Map<
     string,
     { funcIndex: IndexIntoFuncTable, frameAddress: Address | null }
   >,
+  globalDataCollector: GlobalDataCollector,
 };
 
 /**
@@ -180,8 +225,9 @@ export function extractFuncsAndResourcesFromFrameLocations(
   frameLocations: IndexIntoStringTable[],
   relevantForJSPerFrame: boolean[],
   stringTable: UniqueStringArray,
-  libs: Lib[],
-  extensions: ExtensionTable = getEmptyExtensions()
+  libs: LibMapping[],
+  extensions: ExtensionTable = getEmptyExtensions(),
+  globalDataCollector: GlobalDataCollector
 ): {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
@@ -206,6 +252,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
     originToResourceIndex: new Map(),
     libNameToResourceIndex: new Map(),
     stringToNewFuncIndexAndFrameAddress: new Map(),
+    globalDataCollector,
   };
 
   for (let i = 0; i < extensions.length; i++) {
@@ -317,13 +364,14 @@ function _extractUnsymbolicatedFunction(
     // Look up to see if it falls into one of the libraries that were mapped into
     // the profiled process, according to the libs list.
     // This call will throw if addressHex is not a valid hex number.
-    const { lib, libIndex, relativeAddress } =
-      addressLocator.locateAddress(addressHex);
-    if (lib !== null && libIndex !== null) {
+    const { lib, relativeAddress } = addressLocator.locateAddress(addressHex);
+    if (lib !== null) {
       // Yes, we found the library whose mapping covers this address!
       addressRelativeToLib = relativeAddress;
 
-      resourceIndex = libToResourceIndex.get(lib);
+      const libIndex = extractionInfo.globalDataCollector.indexForLib(lib);
+
+      resourceIndex = libToResourceIndex.get(libIndex);
       if (resourceIndex === undefined) {
         // This library doesn't exist in the libs array, insert it. This resou
         // A lib resource is a systems-level compiled library, for example "XUL",
@@ -333,9 +381,9 @@ function _extractUnsymbolicatedFunction(
         resourceTable.name[resourceIndex] = stringTable.indexForString(
           lib.name
         );
-        resourceTable.host[resourceIndex] = undefined;
+        resourceTable.host[resourceIndex] = null;
         resourceTable.type[resourceIndex] = resourceTypes.library;
-        libToResourceIndex.set(lib, resourceIndex);
+        libToResourceIndex.set(libIndex, resourceIndex);
       }
     }
   } catch (e) {
@@ -399,9 +447,9 @@ function _extractCppFunction(
   if (resourceIndex === undefined) {
     resourceIndex = resourceTable.length++;
     libNameToResourceIndex.set(libraryNameStringIndex, resourceIndex);
-    resourceTable.lib[resourceIndex] = -1;
+    resourceTable.lib[resourceIndex] = null;
     resourceTable.name[resourceIndex] = libraryNameStringIndex;
-    resourceTable.host[resourceIndex] = undefined;
+    resourceTable.host[resourceIndex] = null;
     resourceTable.type[resourceIndex] = resourceTypes.library;
   }
 
@@ -437,7 +485,7 @@ function _addExtensionOrigin(
 
     const idIndex = stringTable.indexForString(extensions.id[index]);
 
-    resourceTable.lib[resourceIndex] = undefined;
+    resourceTable.lib[resourceIndex] = null;
     resourceTable.name[resourceIndex] = stringTable.indexForString(name);
     resourceTable.host[resourceIndex] = idIndex;
     resourceTable.type[resourceIndex] = resourceTypes.addon;
@@ -1017,7 +1065,8 @@ function _processProfilerOverhead(
 function _processThread(
   thread: GeckoThread,
   processProfile: GeckoProfile | GeckoSubprocessProfile,
-  extensions: ExtensionTable
+  extensions: ExtensionTable,
+  globalDataCollector: GlobalDataCollector
 ): Thread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
@@ -1040,7 +1089,8 @@ function _processThread(
       geckoFrameStruct.relevantForJS,
       stringTable,
       libs,
-      extensions
+      extensions,
+      globalDataCollector
     );
   const nativeSymbols = getEmptyNativeSymbolTable();
   const frameTable: FrameTable = _processFrameTable(
@@ -1069,7 +1119,6 @@ function _processThread(
     unregisterTime: thread.unregisterTime,
     tid: thread.tid,
     pid: thread.pid,
-    libs,
     pausedRanges: pausedRanges || [],
     frameTable,
     funcTable,
@@ -1333,8 +1382,12 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     ? _toStructOfArrays(geckoProfile.meta.extensions)
     : getEmptyExtensions();
 
+  const globalDataCollector = new GlobalDataCollector();
+
   for (const thread of geckoProfile.threads) {
-    threads.push(_processThread(thread, geckoProfile, extensions));
+    threads.push(
+      _processThread(thread, geckoProfile, extensions, globalDataCollector)
+    );
   }
   const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
   const nullableProfilerOverhead: Array<ProfilerOverhead | null> = [
@@ -1349,7 +1402,8 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
         const newThread: Thread = _processThread(
           thread,
           subprocessProfile,
-          extensions
+          extensions,
+          globalDataCollector
         );
         newThread.samples = adjustTableTimestamps(
           newThread.samples,
@@ -1469,8 +1523,11 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     }
   }
 
+  const { libs } = globalDataCollector.finish();
+
   const result = {
     meta,
+    libs,
     pages,
     counters,
     profilerOverhead,

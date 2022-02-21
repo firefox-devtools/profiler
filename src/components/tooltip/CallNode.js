@@ -234,17 +234,15 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
     if (resourceIndex !== -1) {
       const resourceNameIndex = thread.resourceTable.name[resourceIndex];
-      if (resourceNameIndex !== -1) {
-        // Because of our use of Grid Layout, all our elements need to be direct
-        // children of the grid parent. That's why we use arrays here, to add
-        // the elements as direct children.
-        resource = [
-          <div className="tooltipLabel" key="resource">
-            Resource:
-          </div>,
-          thread.stringTable.getString(resourceNameIndex),
-        ];
-      }
+      // Because of our use of Grid Layout, all our elements need to be direct
+      // children of the grid parent. That's why we use arrays here, to add
+      // the elements as direct children.
+      resource = [
+        <div className="tooltipLabel" key="resource">
+          Resource:
+        </div>,
+        thread.stringTable.getString(resourceNameIndex),
+      ];
     }
 
     // Finding current frame and parent frame URL(if there is).

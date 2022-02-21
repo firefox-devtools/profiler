@@ -8,6 +8,7 @@ import {
   processGeckoProfile,
   serializeProfile,
   unserializeProfileOfArbitraryFormat,
+  GlobalDataCollector,
 } from '../../profile-logic/process-profile';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
@@ -89,6 +90,7 @@ describe('extract functions and resource from location strings', function () {
     name: ['Gecko Profiler', 'Firefox Screenshots'],
     length: 2,
   };
+  const globalDataCollector = new GlobalDataCollector();
 
   it('extracts the information for all different types of locations', function () {
     const { funcTable, resourceTable, frameFuncs } =
@@ -97,7 +99,8 @@ describe('extract functions and resource from location strings', function () {
         locationIndexes.map(() => false),
         stringTable,
         libs,
-        extensions
+        extensions,
+        globalDataCollector
       );
 
     expect(

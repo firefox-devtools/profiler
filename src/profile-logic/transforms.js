@@ -300,21 +300,12 @@ export function getTransformLabelL10nIds(
   threadName: string,
   transforms: Transform[]
 ): Array<TransformLabeL10nIds> {
-  const { funcTable, libs, stringTable, resourceTable } = thread;
+  const { funcTable, stringTable, resourceTable } = thread;
   const labels: TransformLabeL10nIds[] = transforms.map((transform) => {
     // Lookup library information.
     if (transform.type === 'collapse-resource') {
-      const libIndex = resourceTable.lib[transform.resourceIndex];
-      let resourceName;
-      if (libIndex === undefined || libIndex === null || libIndex === -1) {
-        const nameIndex = resourceTable.name[transform.resourceIndex];
-        if (nameIndex === -1) {
-          throw new Error('Attempting to collapse a resource without a name');
-        }
-        resourceName = stringTable.getString(nameIndex);
-      } else {
-        resourceName = libs[libIndex].name;
-      }
+      const nameIndex = resourceTable.name[transform.resourceIndex];
+      const resourceName = stringTable.getString(nameIndex);
       return {
         l10nId: 'TransformNavigator--collapse-resource',
         item: resourceName,

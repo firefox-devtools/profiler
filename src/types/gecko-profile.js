@@ -4,7 +4,6 @@
 // @flow
 
 import type {
-  Lib,
   IndexIntoStringTable,
   IndexIntoCategoryList,
   PausedRange,
@@ -17,7 +16,7 @@ import type {
   SampleUnits,
 } from './profile';
 import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
-import type { Milliseconds, Nanoseconds } from './units';
+import type { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
 import type { MixedObject } from './utils';
 
 export type IndexIntoGeckoFrameTable = number;
@@ -391,13 +390,49 @@ export type GeckoProfileFullMeta = {|
   device?: string,
 |};
 
+/**
+ * Information about libraries, for instance the Firefox executables, and its memory
+ * offsets. This information is used for symbolicating C++ memory addresses into
+ * actual function names. For instance turning 0x23459234 into "void myFuncName()".
+ *
+ * Libraries are mapped into the (virtual memory) address space of the profiled
+ * process. Libraries exist as files on disk, and not the entire file needs to be
+ * mapped. When the beginning of the file is not mapped, the library's "offset"
+ * field will be non-zero.
+ *
+ * These LibMapping objects are present in the Gecko profile format, stored in
+ * one list per process. In the processed profile format, they are are converted
+ * to Lib objects which don't have mapping address information and which are
+ * shared between all processes in the profile.
+ */
+export type LibMapping = {|
+  // The range in the address space of the profiled process that the mappings for
+  // this shared library occupied.
+  start: MemoryOffset,
+  end: MemoryOffset,
+
+  // The offset relative to the library's base address where the first mapping starts.
+  // libBaseAddress + lib.offset = lib.start
+  // When instruction addresses are given as library-relative offsets, they are
+  // relative to the library's baseAddress.
+  offset: Bytes,
+
+  arch: string, // e.g. "x86_64"
+  name: string, // e.g. "firefox"
+  path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  debugName: string, // e.g. "firefox", or "firefox.pdb" on Windows
+  debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
+  codeId?: string, // e.g. "6132B96B70fd000"
+|};
+
 export type GeckoProfileWithMeta<Meta> = {|
   counters?: GeckoCounter[],
   // Optional because older Firefox versions may not have that data and
   // no upgrader was necessary.
   profilerOverhead?: GeckoProfilerOverhead,
   meta: Meta,
-  libs: Lib[],
+  libs: LibMapping[],
   pages?: PageList,
   threads: GeckoThread[],
   pausedRanges: PausedRange[],
