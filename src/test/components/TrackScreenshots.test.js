@@ -318,7 +318,7 @@ function setup(
   function moveMouse(pageX: number) {
     fireEvent(
       screenshotTrack(),
-      getMouseEvent('mousemove', { pageX, pageY: TOP })
+      getMouseEvent('mousemove', { pageX, pageY: TOP, buttons: 1 })
     );
   }
 

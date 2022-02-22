@@ -57,10 +57,10 @@ type State = {|
 |};
 
 class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
-  _handlers: ?{
+  _handlers: ?{|
     mouseMoveHandler: MouseHandler,
     mouseClickHandler: MouseHandler,
-  };
+  |};
 
   _container: ?HTMLElement;
 
@@ -73,7 +73,17 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   };
 
   _onMouseDown = (event: SyntheticMouseEvent<>) => {
-    if (!this._container || event.button !== 0) {
+    if (
+      !this._container ||
+      event.button !== 0 ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey
+    ) {
+      // Do not start a selection if the user doesn't press with the left button
+      // or if they uses a keyboard modifier. Especially on MacOS ctrl+click can
+      // be used to display the context menu.
       return;
     }
 
@@ -102,7 +112,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     let isRangeSelecting = false;
 
-    const mouseMoveHandler = (event) => {
+    const getSelectionFromEvent = (event: MouseEvent) => {
       const mouseMoveX = event.pageX;
       const mouseMoveTime =
         ((mouseMoveX - rect.left) / rect.width) *
@@ -118,11 +128,39 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         committedRange.start,
         committedRange.end
       );
+      return { selectionStart, selectionEnd };
+    };
+
+    const mouseMoveHandler = (event) => {
+      const isLeftButtonUsed = (event.buttons & 1) > 0;
+      if (!isLeftButtonUsed) {
+        // Oops, the mouseMove handler is still registered but the left button
+        // isn't pressed, this means we missed the "click" event for some reason.
+        // Maybe the user moved the cursor in some place where we didn't get the
+        // click event because of Firefox issues such as bug 1755746 and bug 1755498.
+        // Let's uninstall the event handlers and stop the selection.
+        const { previewSelection } = this.props;
+        isRangeSelecting = false;
+        this._uninstallMoveAndClickHandlers();
+
+        if (previewSelection.hasSelection) {
+          const { selectionStart, selectionEnd } = previewSelection;
+          this.props.updatePreviewSelection({
+            hasSelection: true,
+            selectionStart,
+            selectionEnd,
+            isModifying: false,
+          });
+        }
+        return;
+      }
+
       if (
         isRangeSelecting ||
-        Math.abs(mouseMoveX - mouseDownX) >= minSelectionStartWidth
+        Math.abs(event.pageX - mouseDownX) >= minSelectionStartWidth
       ) {
         isRangeSelecting = true;
+        const { selectionStart, selectionEnd } = getSelectionFromEvent(event);
         this.props.updatePreviewSelection({
           hasSelection: true,
           selectionStart,
@@ -134,20 +172,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     const clickHandler = (event) => {
       if (isRangeSelecting) {
-        const mouseMoveTime =
-          ((event.pageX - rect.left) / rect.width) *
-            (committedRange.end - committedRange.start) +
-          committedRange.start;
-        const selectionStart = clamp(
-          Math.min(mouseDownTime, mouseMoveTime),
-          committedRange.start,
-          committedRange.end
-        );
-        const selectionEnd = clamp(
-          Math.max(mouseDownTime, mouseMoveTime),
-          committedRange.start,
-          committedRange.end
-        );
+        // This click ends the current selection gesture.
+        const { selectionStart, selectionEnd } = getSelectionFromEvent(event);
         this.props.updatePreviewSelection({
           hasSelection: true,
           selectionStart,
@@ -161,8 +187,13 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         return;
       }
 
+      // This is a normal click where no selection is currently occurring (but
+      // there may be one from a previous selection operation).
+
       const { previewSelection } = this.props;
       if (previewSelection.hasSelection) {
+        // There's a selection.
+        // Dismiss it but only if the click is outside the current selection.
         const clickTime =
           ((event.pageX - rect.left) / rect.width) *
             (committedRange.end - committedRange.start) +
@@ -181,7 +212,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         }
       }
 
-      // Do not stopPropagation(), so that graph gets click event.
+      // Do not stopPropagation(), so that underlying graphs get the click event.
+      // In all cases, remove the event handlers.
       this._uninstallMoveAndClickHandlers();
     };
 
