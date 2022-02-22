@@ -26,6 +26,7 @@ import type {
   SelectedState,
   Milliseconds,
   CssPixels,
+  Resource,
 } from 'firefox-profiler/types';
 import type {
   ActivityFillGraphQuerier,
@@ -46,6 +47,7 @@ export type Props = {|
     sampleIndex: IndexIntoSamplesTable
   ) => void,
   +categories: CategoryList,
+  +resources: Resource[],
   +samplesSelectedStates: null | SelectedState[],
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
@@ -157,6 +159,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       fullThread,
       rangeFilteredThread,
       categories,
+      resources,
       trackName,
       interval,
       rangeStart,
@@ -208,6 +211,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
               rangeFilteredThread={rangeFilteredThread}
               categories={categories}
               implementationFilter={implementationFilter}
+              resources={resources}
             />
           </Tooltip>
         )}

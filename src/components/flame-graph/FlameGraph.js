@@ -10,6 +10,7 @@ import { FlameGraphCanvas } from './Canvas';
 
 import {
   getCategories,
+  getResources,
   getCommittedRange,
   getPreviewSelection,
   getScrollToSelectionGeneration,
@@ -33,6 +34,7 @@ import {
 import type {
   Thread,
   CategoryList,
+  Resource,
   PageList,
   Milliseconds,
   StartEndRange,
@@ -80,6 +82,7 @@ type StateProps = {|
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
+  +resources: Resource[],
   +interval: Milliseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
@@ -313,6 +316,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       scrollToSelectionGeneration,
       callTreeSummaryStrategy,
       categories,
+      resources,
       interval,
       isInverted,
       pages,
@@ -359,6 +363,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               callTree,
               callNodeInfo,
               categories,
+              resources,
               selectedCallNodeIndex,
               rightClickedCallNodeIndex,
               scrollToSelectionGeneration,
@@ -405,6 +410,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     previewSelection: getPreviewSelection(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
     categories: getCategories(state),
+    resources: getResources(state),
     threadsKey: getSelectedThreadsKey(state),
     selectedCallNodeIndex:
       selectedThreadSelectors.getSelectedCallNodeIndex(state),

@@ -4,7 +4,6 @@
 // @flow
 
 import {
-  resourceTypes,
   getEmptyStackTable,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
@@ -18,7 +17,7 @@ import type {
   ThreadIndex,
   IndexIntoFuncTable,
   IndexIntoFrameTable,
-  IndexIntoResourceTable,
+  IndexIntoResources,
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   IndexIntoStackTable,
@@ -26,6 +25,7 @@ import type {
   CallNodePath,
   StackTable,
   Lib,
+  Resource,
 } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
@@ -204,7 +204,7 @@ export type SymbolicationStepCallback = (
 
 type ThreadLibSymbolicationInfo = {|
   // The resourceIndex for this lib in this thread.
-  resourceIndex: IndexIntoResourceTable,
+  resourceIndex: IndexIntoResources,
   // The libIndex for this lib in this thread.
   libIndex: IndexIntoLibs,
   // The set of funcs for this lib in this thread.
@@ -268,26 +268,23 @@ function makeConsensusMap<K, V>(
  */
 function getThreadSymbolicationInfo(
   thread: Thread,
-  libs: Lib[]
+  libs: Lib[],
+  resources: Resource[]
 ): ThreadSymbolicationInfo {
-  const { frameTable, funcTable, nativeSymbols, resourceTable } = thread;
+  const { frameTable, funcTable, nativeSymbols } = thread;
 
   const map = new Map();
   for (
     let resourceIndex = 0;
-    resourceIndex < resourceTable.length;
+    resourceIndex < resources.length;
     resourceIndex++
   ) {
-    const resourceType = resourceTable.type[resourceIndex];
-    if (resourceType !== resourceTypes.library) {
+    const resource = resources[resourceIndex];
+    if (resource.type !== 'LIBRARY') {
       continue;
     }
-    const libIndex = resourceTable.lib[resourceIndex];
-    if (libIndex === null) {
-      // We can get here if we have pre-symbolicated "funcName (in LibraryName)"
-      // frames. Those get resourceTypes.library but no libIndex.
-      continue;
-    }
+
+    const { libIndex } = resource;
     const lib = libs[libIndex];
     if (lib === undefined) {
       throw new Error('Did not find a lib.');
@@ -889,7 +886,7 @@ export async function symbolicateProfile(
   symbolicationStepCallback: SymbolicationStepCallback
 ): Promise<void> {
   const symbolicationInfo = profile.threads.map((thread) =>
-    getThreadSymbolicationInfo(thread, profile.libs)
+    getThreadSymbolicationInfo(thread, profile.libs, profile.resources)
   );
   const libSymbolicationRequests =
     buildLibSymbolicationRequestsForAllThreads(symbolicationInfo);

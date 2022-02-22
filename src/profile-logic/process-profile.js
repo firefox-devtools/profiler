@@ -8,10 +8,8 @@ import { attemptToConvertDhat } from './import/dhat';
 import { AddressLocator } from './address-locator';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import {
-  resourceTypes,
   getEmptyExtensions,
   getEmptyFuncTable,
-  getEmptyResourceTable,
   getEmptyRawMarkerTable,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
@@ -28,7 +26,6 @@ import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
-  getOrCreateURIResource,
   nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
@@ -46,12 +43,12 @@ import type {
   Lib,
   LibMapping,
   FuncTable,
-  ResourceTable,
+  Resource,
   IndexIntoLibs,
   IndexIntoStackTable,
   IndexIntoFuncTable,
   IndexIntoStringTable,
-  IndexIntoResourceTable,
+  IndexIntoResources,
   JsTracerTable,
   JsAllocationsTable,
   ProfilerOverhead,
@@ -160,13 +157,29 @@ function _cleanFunctionName(functionName: string): string {
  * GlobalDataCollector collects data which is global in the processed profile
  * format but per-process or per-thread in the Gecko profile format. It
  * de-duplicates elements and builds one shared list of each type.
- * For now it only de-duplicates libraries, but in the future we may move more
- * tables to be global.
  * You could also call this class an "interner".
  */
 export class GlobalDataCollector {
   _libs: Lib[] = [];
   _libKeyToLibIndex: Map<string, IndexIntoLibs> = new Map();
+
+  _resources: Resource[] = [];
+  _originToResourceIndex: Map<string, IndexIntoResources> = new Map();
+  _libIndexToResourceIndex: Map<IndexIntoLibs, IndexIntoResources> = new Map();
+
+  addResourcesForExtensions(extensions: ExtensionTable) {
+    // Initialize the resource list with one "ADDON" resource per extension.
+    for (let i = 0; i < extensions.length; i++) {
+      const origin = new URL(extensions.baseURL[i]).origin;
+
+      const quotedName = JSON.stringify(extensions.name[i]);
+      const name = `Extension ${quotedName} (ID: ${extensions.id[i]})`;
+      const addonId = extensions.id[i];
+
+      this._originToResourceIndex.set(origin, this._resources.length);
+      this._resources.push({ type: 'ADDON', name, addonId });
+    }
+  }
 
   // Return the global index for this library, adding it to the global list if
   // necessary.
@@ -191,21 +204,76 @@ export class GlobalDataCollector {
     return index;
   }
 
+  indexForLibResource(libIndex: IndexIntoLibs): IndexIntoResources {
+    let index = this._libIndexToResourceIndex.get(libIndex);
+    if (index === undefined) {
+      index = this._resources.length;
+      const { name } = ensureExists(this._libs[libIndex]);
+      this._resources.push({ type: 'LIBRARY', name, libIndex });
+    }
+    return index;
+  }
+
+  indexForURIResource(scriptURI: string): IndexIntoResources {
+    // Figure out the origin and host.
+    let origin;
+    let host;
+    try {
+      const url = new URL(scriptURI);
+      if (
+        !(
+          url.protocol === 'http:' ||
+          url.protocol === 'https:' ||
+          url.protocol === 'moz-extension:'
+        )
+      ) {
+        throw new Error('not a webhost or extension protocol');
+      }
+      origin = url.origin;
+      host = url.host;
+    } catch (e) {
+      origin = scriptURI;
+      host = null;
+    }
+
+    let resourceIndex = this._originToResourceIndex.get(origin);
+    if (resourceIndex !== undefined) {
+      return resourceIndex;
+    }
+
+    resourceIndex = this._resources.length;
+    this._originToResourceIndex.set(origin, resourceIndex);
+    if (host) {
+      // This is a webhost URL.
+      this._resources.push({
+        type: 'WEBHOST',
+        name: origin,
+        host,
+      });
+    } else {
+      // This is a URL, but it doesn't point to something on the web, e.g. a
+      // chrome url.
+      this._resources.push({
+        type: 'URL',
+        name: scriptURI,
+      });
+    }
+    return resourceIndex;
+  }
+
   // Package up all de-duplicated global tables so that they can be embedded in
   // the profile.
-  finish(): {| libs: Lib[] |} {
-    return { libs: this._libs };
+  finish(): {| libs: Lib[], resources: Resource[] |} {
+    return { libs: this._libs, resources: this._resources };
   }
 }
 
 type ExtractionInfo = {
   funcTable: FuncTable,
-  resourceTable: ResourceTable,
   stringTable: UniqueStringArray,
   addressLocator: AddressLocator,
-  libToResourceIndex: Map<IndexIntoLibs, IndexIntoResourceTable>,
-  originToResourceIndex: Map<string, IndexIntoResourceTable>,
-  libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable>,
+  originToResourceIndex: Map<string, IndexIntoResources>,
+  libNameToLibIndex: Map<string, IndexIntoLibs>,
   stringToNewFuncIndexAndFrameAddress: Map<
     string,
     { funcIndex: IndexIntoFuncTable, frameAddress: Address | null }
@@ -226,11 +294,9 @@ export function extractFuncsAndResourcesFromFrameLocations(
   relevantForJSPerFrame: boolean[],
   stringTable: UniqueStringArray,
   libs: LibMapping[],
-  extensions: ExtensionTable = getEmptyExtensions(),
   globalDataCollector: GlobalDataCollector
 ): {
   funcTable: FuncTable,
-  resourceTable: ResourceTable,
   frameFuncs: IndexIntoFuncTable[],
   frameAddresses: (Address | null)[],
 } {
@@ -238,26 +304,17 @@ export function extractFuncsAndResourcesFromFrameLocations(
   // in this file that start with the word "extract".
   const funcTable = getEmptyFuncTable();
 
-  // Important! If the flow type for the ResourceTable was changed, update all the functions
-  // in this file that start with the word "extract".
-  const resourceTable = getEmptyResourceTable();
-
   // Bundle all of the variables up into an object to pass them around to functions.
   const extractionInfo: ExtractionInfo = {
     funcTable,
-    resourceTable,
     stringTable,
     addressLocator: new AddressLocator(libs),
     libToResourceIndex: new Map(),
     originToResourceIndex: new Map(),
-    libNameToResourceIndex: new Map(),
+    libNameToLibIndex: new Map(),
     stringToNewFuncIndexAndFrameAddress: new Map(),
     globalDataCollector,
   };
-
-  for (let i = 0; i < extensions.length; i++) {
-    _addExtensionOrigin(extractionInfo, extensions, i);
-  }
 
   // Go through every frame location string, and deduce the function and resource
   // information by applying various string matching heuristics.
@@ -315,7 +372,6 @@ export function extractFuncsAndResourcesFromFrameLocations(
 
   return {
     funcTable: extractionInfo.funcTable,
-    resourceTable: extractionInfo.resourceTable,
     frameFuncs,
     frameAddresses,
   };
@@ -342,13 +398,7 @@ function _extractUnsymbolicatedFunction(
   if (!locationString.startsWith('0x')) {
     return null;
   }
-  const {
-    addressLocator,
-    libToResourceIndex,
-    resourceTable,
-    funcTable,
-    stringTable,
-  } = extractionInfo;
+  const { addressLocator, funcTable, globalDataCollector } = extractionInfo;
 
   let resourceIndex = -1;
   let addressRelativeToLib: Address = -1;
@@ -369,22 +419,8 @@ function _extractUnsymbolicatedFunction(
       // Yes, we found the library whose mapping covers this address!
       addressRelativeToLib = relativeAddress;
 
-      const libIndex = extractionInfo.globalDataCollector.indexForLib(lib);
-
-      resourceIndex = libToResourceIndex.get(libIndex);
-      if (resourceIndex === undefined) {
-        // This library doesn't exist in the libs array, insert it. This resou
-        // A lib resource is a systems-level compiled library, for example "XUL",
-        // "AppKit", or "CoreFoundation".
-        resourceIndex = resourceTable.length++;
-        resourceTable.lib[resourceIndex] = libIndex;
-        resourceTable.name[resourceIndex] = stringTable.indexForString(
-          lib.name
-        );
-        resourceTable.host[resourceIndex] = null;
-        resourceTable.type[resourceIndex] = resourceTypes.library;
-        libToResourceIndex.set(libIndex, resourceIndex);
-      }
+      const libIndex = globalDataCollector.indexForLib(lib);
+      resourceIndex = globalDataCollector.indexForLibResource(libIndex);
     }
   } catch (e) {
     // Probably a hex parse error. Ignore.
@@ -430,28 +466,33 @@ function _extractCppFunction(
     funcTable,
     stringTable,
     stringToNewFuncIndexAndFrameAddress,
-    libNameToResourceIndex,
-    resourceTable,
+    libNameToLibIndex,
+    globalDataCollector,
   } = extractionInfo;
 
-  const [, funcNameRaw, libraryNameString] = cppMatch;
+  const [, funcNameRaw, libraryName] = cppMatch;
   const funcName = _cleanFunctionName(funcNameRaw);
   const funcNameIndex = stringTable.indexForString(funcName);
-  const libraryNameStringIndex = stringTable.indexForString(libraryNameString);
   const frameInfo = stringToNewFuncIndexAndFrameAddress.get(funcName);
   if (frameInfo !== undefined) {
     // Do not insert a new function.
     return frameInfo.funcIndex;
   }
-  let resourceIndex = libNameToResourceIndex.get(libraryNameStringIndex);
-  if (resourceIndex === undefined) {
-    resourceIndex = resourceTable.length++;
-    libNameToResourceIndex.set(libraryNameStringIndex, resourceIndex);
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = libraryNameStringIndex;
-    resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.library;
+  let libIndex = libNameToLibIndex.get(libraryName);
+  if (libIndex === undefined) {
+    libIndex = globalDataCollector.indexForLib({
+      arch: '',
+      name: libraryName,
+      path: libraryName,
+      debugName: libraryName,
+      debugPath: libraryName,
+      breakpadId: '',
+      codeId: null,
+    });
+    libNameToLibIndex.set(libraryName, libIndex);
   }
+
+  const resourceIndex = globalDataCollector.indexForLibResource(libIndex);
 
   const newFuncIndex = funcTable.length++;
   funcTable.name[newFuncIndex] = funcNameIndex;
@@ -463,33 +504,6 @@ function _extractCppFunction(
   funcTable.columnNumber[newFuncIndex] = null;
 
   return newFuncIndex;
-}
-
-// Adds a resource table entry for an extension's base URL origin
-// string, mapping it to the extension's name and internal ID.
-function _addExtensionOrigin(
-  extractionInfo: ExtractionInfo,
-  extensions: ExtensionTable,
-  index: number
-): void {
-  const { originToResourceIndex, resourceTable, stringTable } = extractionInfo;
-  const origin = new URL(extensions.baseURL[index]).origin;
-
-  let resourceIndex = originToResourceIndex.get(origin);
-  if (resourceIndex === undefined) {
-    resourceIndex = resourceTable.length++;
-    originToResourceIndex.set(origin, resourceIndex);
-
-    const quotedName = JSON.stringify(extensions.name[index]);
-    const name = `Extension ${quotedName} (ID: ${extensions.id[index]})`;
-
-    const idIndex = stringTable.indexForString(extensions.id[index]);
-
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = stringTable.indexForString(name);
-    resourceTable.host[resourceIndex] = idIndex;
-    resourceTable.type[resourceIndex] = resourceTypes.addon;
-  }
 }
 
 /**
@@ -514,20 +528,14 @@ function _extractJsFunction(
     return null;
   }
 
-  const { funcTable, stringTable, resourceTable, originToResourceIndex } =
-    extractionInfo;
+  const { funcTable, stringTable, globalDataCollector } = extractionInfo;
 
   // Case 4: JS function - A match was found in the location string in the format
   // of a JS function.
   const [, funcName, rawScriptURI] = jsMatch;
   const scriptURI = _getRealScriptURI(rawScriptURI);
 
-  const resourceIndex = getOrCreateURIResource(
-    scriptURI,
-    resourceTable,
-    stringTable,
-    originToResourceIndex
-  );
+  const resourceIndex = globalDataCollector.indexForURIResource(scriptURI);
 
   let funcNameIndex;
   if (funcName) {
@@ -1065,7 +1073,6 @@ function _processProfilerOverhead(
 function _processThread(
   thread: GeckoThread,
   processProfile: GeckoProfile | GeckoSubprocessProfile,
-  extensions: ExtensionTable,
   globalDataCollector: GlobalDataCollector
 ): Thread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
@@ -1083,13 +1090,12 @@ function _processThread(
   const { categories, shutdownTime } = meta;
 
   const stringTable = new UniqueStringArray(thread.stringTable);
-  const { funcTable, resourceTable, frameFuncs, frameAddresses } =
+  const { funcTable, frameFuncs, frameAddresses } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
       geckoFrameStruct.relevantForJS,
       stringTable,
       libs,
-      extensions,
       globalDataCollector
     );
   const nativeSymbols = getEmptyNativeSymbolTable();
@@ -1123,7 +1129,6 @@ function _processThread(
     frameTable,
     funcTable,
     nativeSymbols,
-    resourceTable,
     stackTable,
     markers,
     stringTable,
@@ -1383,11 +1388,10 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     : getEmptyExtensions();
 
   const globalDataCollector = new GlobalDataCollector();
+  globalDataCollector.addResourcesForExtensions(extensions);
 
   for (const thread of geckoProfile.threads) {
-    threads.push(
-      _processThread(thread, geckoProfile, extensions, globalDataCollector)
-    );
+    threads.push(_processThread(thread, geckoProfile, globalDataCollector));
   }
   const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
   const nullableProfilerOverhead: Array<ProfilerOverhead | null> = [
@@ -1402,7 +1406,6 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
         const newThread: Thread = _processThread(
           thread,
           subprocessProfile,
-          extensions,
           globalDataCollector
         );
         newThread.samples = adjustTableTimestamps(
@@ -1523,11 +1526,12 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     }
   }
 
-  const { libs } = globalDataCollector.finish();
+  const { libs, resources } = globalDataCollector.finish();
 
   const result = {
     meta,
     libs,
+    resources,
     pages,
     counters,
     profilerOverhead,

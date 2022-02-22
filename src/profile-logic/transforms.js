@@ -29,7 +29,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoStackTable,
-  IndexIntoResourceTable,
+  IndexIntoResources,
   CallNodePath,
   CallNodeAndCategoryPath,
   CallNodeTable,
@@ -38,6 +38,7 @@ import type {
   Transform,
   TransformType,
   TransformStack,
+  Resource,
 } from 'firefox-profiler/types';
 
 /**
@@ -298,14 +299,14 @@ export type TransformLabeL10nIds = {|
 export function getTransformLabelL10nIds(
   thread: Thread,
   threadName: string,
+  resources: Resource[],
   transforms: Transform[]
 ): Array<TransformLabeL10nIds> {
-  const { funcTable, stringTable, resourceTable } = thread;
+  const { funcTable, stringTable } = thread;
   const labels: TransformLabeL10nIds[] = transforms.map((transform) => {
     // Lookup library information.
     if (transform.type === 'collapse-resource') {
-      const nameIndex = resourceTable.name[transform.resourceIndex];
-      const resourceName = stringTable.getString(nameIndex);
+      const resourceName = resources[transform.resourceIndex].name;
       return {
         l10nId: 'TransformNavigator--collapse-resource',
         item: resourceName,
@@ -450,7 +451,7 @@ function _dropFunctionInCallNodePath(
 }
 
 function _collapseResourceInCallNodePath(
-  resourceIndex: IndexIntoResourceTable,
+  resourceIndex: IndexIntoResources,
   collapsedFuncIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
   callNodePath: CallNodePath
@@ -735,12 +736,13 @@ export function dropFunction(
 
 export function collapseResource(
   thread: Thread,
-  resourceIndexToCollapse: IndexIntoResourceTable,
+  resourceIndexToCollapse: IndexIntoResources,
+  resourceName: string,
   implementation: ImplementationFilter,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const { stackTable, funcTable, frameTable, resourceTable } = thread;
-  const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
+  const { stackTable, funcTable, frameTable, stringTable } = thread;
+  const resourceNameIndex = stringTable.indexForString(resourceName);
   const newFrameTable = shallowCloneFrameTable(frameTable);
   const newFuncTable = shallowCloneFuncTable(funcTable);
   const newStackTable = getEmptyStackTable();
@@ -1391,6 +1393,7 @@ export function funcHasRecursiveCall(
 
 export function applyTransform(
   thread: Thread,
+  resources: Resource[],
   transform: Transform,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
@@ -1423,6 +1426,7 @@ export function applyTransform(
       return collapseResource(
         thread,
         transform.resourceIndex,
+        resources[transform.resourceIndex].name,
         transform.implementation,
         defaultCategory
       );

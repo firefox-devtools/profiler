@@ -18,12 +18,12 @@ import {
   getOriginAnnotationForFunc,
   filterThreadSamplesToRange,
 } from '../../profile-logic/profile-data';
-import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   callTreeFromProfile,
   formatTree,
   formatTreeIncludeCategories,
 } from '../fixtures/utils';
+import type { Resource } from 'firefox-profiler/types/profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 describe('unfiltered call tree', function () {
@@ -336,14 +336,11 @@ describe('unfiltered call tree', function () {
           A[lib:examplecom.js]
         `);
         const callTree = callTreeFromProfile(profile);
-        const [thread] = profile.threads;
-        const hostStringIndex =
-          thread.stringTable.indexForString('examplecom.js');
-
-        thread.resourceTable.type[0] = resourceTypes.webhost;
-        thread.resourceTable.host[0] = hostStringIndex;
-        // Hijack the string table to provide the proper host name
-        thread.stringTable._array[hostStringIndex] = 'http://example.com';
+        profile.resources[0] = {
+          type: 'WEBHOST',
+          name: 'examplecom.js',
+          host: 'http://example.com',
+        };
 
         expect(callTree.getDisplayData(A).icon).toEqual(
           'https://example.com/favicon.ico'
@@ -438,6 +435,7 @@ describe('inverted call tree', function () {
       interval,
       callNodeInfo,
       categories,
+      profile.resources,
       'combined',
       callTreeCountsAndSummary,
       'samples'
@@ -478,6 +476,7 @@ describe('inverted call tree', function () {
       interval,
       invertedCallNodeInfo,
       categories,
+      profile.resources,
       'combined',
       invertedCallTreeCountsAndSummary,
       'samples'
@@ -616,9 +615,7 @@ describe('diffing trees', function () {
 
 describe('origin annotation', function () {
   const {
-    profile: {
-      threads: [thread],
-    },
+    profile,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
     A
@@ -626,50 +623,51 @@ describe('origin annotation', function () {
     C
     D
   `);
+  const [thread] = profile.threads;
 
   function addResource(
     funcName: string,
-    name: string,
-    host: string | null,
-    location: string | null
+    location: string | null,
+    resource: Resource
   ) {
-    const resourceIndex = thread.resourceTable.length;
+    const resourceIndex = profile.resources.length;
     const funcIndex = funcNames.indexOf(funcName);
     thread.funcTable.resource[funcIndex] = resourceIndex;
     thread.funcTable.fileName[funcIndex] = location
       ? thread.stringTable.indexForString(location)
       : null;
-    thread.resourceTable.lib.push(-1);
-    thread.resourceTable.name.push(thread.stringTable.indexForString(name));
-    thread.resourceTable.host.push(
-      host ? thread.stringTable.indexForString(host) : null
-    );
-    thread.resourceTable.length++;
+    profile.resources.push(resource);
   }
 
-  addResource(
-    'A',
-    'http://foobar.com',
-    'http://foobar.com',
-    'http://foobar.com/script.js'
-  );
+  addResource('A', 'http://foobar.com/script.js', {
+    type: 'WEBHOST',
+    name: 'http://foobar.com',
+    host: 'http://foobar.com',
+  });
 
   addResource(
     'B',
-    'Extension "Gecko Profiler"',
-    'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85',
-    'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/script.js'
+    'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/script.js',
+    {
+      type: 'ADDON',
+      name: 'Extension "Gecko Profiler"',
+      addonId: 'bf3bb73c-919c-4fef-95c4-070a19fdaf85',
+    }
   );
 
-  addResource('C', 'libxul.so', null, '/home/user/mozilla-central/xul.cpp');
+  addResource('C', '/home/user/mozilla-central/xul.cpp', {
+    type: 'LIBRARY',
+    name: 'libxul.so',
+    libIndex: 0,
+  });
 
-  addResource('D', 'libxul.so', null, null);
+  addResource('D', null, { type: 'LIBRARY', name: 'libxul.so', libIndex: 0 });
 
   function getOrigin(funcName: string): string {
     return getOriginAnnotationForFunc(
       funcNames.indexOf(funcName),
       thread.funcTable,
-      thread.resourceTable,
+      profile.resources,
       thread.stringTable
     );
   }

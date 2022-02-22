@@ -17,6 +17,7 @@ import type {
   Thread,
   IndexIntoStackTable,
   ImplementationFilter,
+  Resource,
 } from 'firefox-profiler/types';
 
 import './Backtrace.css';
@@ -29,11 +30,18 @@ type Props = {|
   +stackIndex: IndexIntoStackTable,
   +implementationFilter: ImplementationFilter,
   +categories: CategoryList,
+  +resources: Resource[],
 |};
 
 export function Backtrace(props: Props) {
-  const { stackIndex, thread, implementationFilter, maxStacks, categories } =
-    props;
+  const {
+    stackIndex,
+    thread,
+    implementationFilter,
+    maxStacks,
+    categories,
+    resources,
+  } = props;
   const callNodePath = filterCallNodeAndCategoryPathByImplementation(
     thread,
     implementationFilter,
@@ -41,7 +49,8 @@ export function Backtrace(props: Props) {
   );
   const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(
     callNodePath,
-    thread
+    thread,
+    resources
   ).reverse();
 
   if (funcNamesAndOrigins.length) {

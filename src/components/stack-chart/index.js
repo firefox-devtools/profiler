@@ -17,6 +17,7 @@ import {
   getScrollToSelectionGeneration,
   getCategories,
   getPageList,
+  getResources,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
@@ -53,6 +54,7 @@ import type {
   WeightType,
   ThreadsKey,
   CssPixels,
+  Resource,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -73,6 +75,7 @@ type StateProps = {|
   +threadsKey: ThreadsKey,
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
+  +resources: Resource[],
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
@@ -171,6 +174,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       updatePreviewSelection,
       callNodeInfo,
       categories,
+      resources,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
       pages,
@@ -228,6 +232,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   stackFrameHeight: STACK_FRAME_HEIGHT,
                   callNodeInfo,
                   categories,
+                  resources,
                   selectedCallNodeIndex,
                   onSelectionChange: this._onSelectedCallNodeChange,
                   // TODO: support right clicking user timing markers #2354.
@@ -264,6 +269,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       threadsKey: getSelectedThreadsKey(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       categories: getCategories(state),
+      resources: getResources(state),
       selectedCallNodeIndex:
         selectedThreadSelectors.getSelectedCallNodeIndex(state),
       rightClickedCallNodeIndex:

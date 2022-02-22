@@ -69,6 +69,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   SampleUnits,
+  Resource,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
@@ -151,6 +152,8 @@ export const getProfileInterval: Selector<Milliseconds> = (state) =>
   getProfile(state).meta.interval;
 export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
+export const getResources: Selector<Resource[]> = (state) =>
+  getProfile(state).resources;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = (state) =>
   getCategories(state).findIndex((c) => c.color === 'grey');
 export const getThreads: Selector<Thread[]> = (state) =>

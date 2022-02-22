@@ -648,9 +648,8 @@ describe('"collapse-resource" transform', function () {
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const firefoxNameIndex = thread.stringTable.indexForString('firefox');
-    const firefoxResourceIndex = thread.resourceTable.name.findIndex(
-      (stringIndex) => stringIndex === firefoxNameIndex
+    const firefoxResourceIndex = profile.resources.findIndex(
+      (res) => res.name === 'firefox'
     );
     if (firefoxResourceIndex === -1) {
       throw new Error('Unable to find the firefox resource');
@@ -750,9 +749,8 @@ describe('"collapse-resource" transform', function () {
     const collapsedFuncNames = [...funcNames, 'firefox'];
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const firefoxNameIndex = thread.stringTable.indexForString('firefox');
-    const firefoxResourceIndex = thread.resourceTable.name.findIndex(
-      (stringIndex) => stringIndex === firefoxNameIndex
+    const firefoxResourceIndex = profile.resources.findIndex(
+      (res) => res.name === 'firefox'
     );
     if (firefoxResourceIndex === -1) {
       throw new Error('Unable to find the firefox resource');

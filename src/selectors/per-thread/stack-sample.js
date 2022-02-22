@@ -236,6 +236,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileSelectors.getProfileInterval,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
+    ProfileSelectors.getResources,
     UrlState.getImplementationFilter,
     getCallTreeCountsAndSummary,
     getWeightTypeForCallTree,

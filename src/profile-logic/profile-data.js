@@ -8,7 +8,6 @@ import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 import { oneLine } from 'common-tags';
 import {
-  resourceTypes,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
   getEmptyStackTable,
@@ -37,14 +36,12 @@ import type {
   StackTable,
   FrameTable,
   FuncTable,
-  ResourceTable,
   CategoryList,
   IndexIntoCategoryList,
   IndexIntoSubcategoryListForCategory,
   IndexIntoFuncTable,
   IndexIntoSamplesTable,
   IndexIntoStackTable,
-  IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   ThreadIndex,
   Category,
@@ -55,6 +52,7 @@ import type {
   BalancedNativeAllocationsTable,
   IndexIntoFrameTable,
   PageList,
+  Resource,
   CallNodeInfo,
   CallNodeTable,
   CallNodePath,
@@ -70,7 +68,6 @@ import type {
   CallTreeSummaryStrategy,
   EventDelayInfo,
   ThreadsKey,
-  resourceTypeEnum,
   MarkerPayload,
   Address,
   AddressProof,
@@ -1106,6 +1103,7 @@ function _filterThreadByFunc(
 
 export function filterThreadToSearchStrings(
   thread: Thread,
+  resources: Resource[],
   searchStrings: string[] | null
 ): Thread {
   return timeCode('filterThreadToSearchStrings', () => {
@@ -1113,20 +1111,24 @@ export function filterThreadToSearchStrings(
       return thread;
     }
 
-    return searchStrings.reduce(filterThreadToSearchString, thread);
+    return searchStrings.reduce(
+      (filteredThread, searchString) =>
+        filterThreadToSearchString(filteredThread, resources, searchString),
+      thread
+    );
   });
 }
 
 export function filterThreadToSearchString(
   thread: Thread,
+  resources: Resource[],
   searchString: string
 ): Thread {
   if (!searchString) {
     return thread;
   }
   const lowercaseSearchString = searchString.toLowerCase();
-  const { funcTable, frameTable, stackTable, stringTable, resourceTable } =
-    thread;
+  const { funcTable, frameTable, stackTable, stringTable } = thread;
 
   function computeFuncMatchesFilter(func) {
     const nameIndex = funcTable.name[func];
@@ -1145,8 +1147,7 @@ export function filterThreadToSearchString(
 
     const resourceIndex = funcTable.resource[func];
     if (resourceIndex !== -1) {
-      const resourceNameIndex = resourceTable.name[resourceIndex];
-      const resourceNameString = stringTable.getString(resourceNameIndex);
+      const resourceNameString = resources[resourceIndex].name;
       if (resourceNameString.toLowerCase().includes(lowercaseSearchString)) {
         return true;
       }
@@ -2200,7 +2201,7 @@ export function getThreadProcessDetails(
 function _shouldShowBothOriginAndFileName(
   fileName: string,
   origin: string,
-  resourceType: resourceTypeEnum | null
+  resource: Resource | null
 ): boolean {
   // If the origin string is just a URL prefix that's part of the
   // filename, it doesn't add any useful information, so only show
@@ -2211,7 +2212,7 @@ function _shouldShowBothOriginAndFileName(
 
   // For native code (resource type "library"), if we have the filename of the
   // source code, only show the filename and not the library name.
-  if (resourceType === resourceTypes.library) {
+  if (resource !== null && resource.type === 'LIBRARY') {
     return false;
   }
 
@@ -2227,16 +2228,15 @@ function _shouldShowBothOriginAndFileName(
 export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
-  resourceTable: ResourceTable,
+  resources: Resource[],
   stringTable: UniqueStringArray
 ): string {
-  let resourceType = null;
+  let resource = null;
   let origin = null;
   const resourceIndex = funcTable.resource[funcIndex];
   if (resourceIndex !== -1) {
-    resourceType = resourceTable.type[resourceIndex];
-    const resourceNameIndex = resourceTable.name[resourceIndex];
-    origin = stringTable.getString(resourceNameIndex);
+    resource = resources[resourceIndex];
+    origin = resource.name;
   }
 
   const fileNameIndex = funcTable.fileName[funcIndex];
@@ -2260,7 +2260,7 @@ export function getOriginAnnotationForFunc(
   if (fileName) {
     if (
       origin &&
-      _shouldShowBothOriginAndFileName(fileName, origin, resourceType)
+      _shouldShowBothOriginAndFileName(fileName, origin, resource)
     ) {
       return `${origin}: ${fileName}`;
     }
@@ -2280,14 +2280,15 @@ export function getOriginAnnotationForFunc(
  */
 export function getFuncNamesAndOriginsForPath(
   path: CallNodeAndCategoryPath,
-  thread: Thread
+  thread: Thread,
+  resources: Resource[]
 ): Array<{
   funcName: string,
   category: IndexIntoCategoryList,
   isFrameLabel: boolean,
   origin: string,
 }> {
-  const { funcTable, stringTable, resourceTable } = thread;
+  const { funcTable, stringTable } = thread;
 
   return path.map((frame) => {
     const { category, func } = frame;
@@ -2298,7 +2299,7 @@ export function getFuncNamesAndOriginsForPath(
       origin: getOriginAnnotationForFunc(
         func,
         funcTable,
-        resourceTable,
+        resources,
         stringTable
       ),
     };
@@ -2823,59 +2824,6 @@ export function extractProfileFilterPageData(
   }
 }
 
-// Returns the resource index for a "url" or "webhost" resource which is created
-// on demand based on the script URI.
-export function getOrCreateURIResource(
-  scriptURI: string,
-  resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
-  originToResourceIndex: Map<string, IndexIntoResourceTable>
-): IndexIntoResourceTable {
-  // Figure out the origin and host.
-  let origin;
-  let host;
-  try {
-    const url = new URL(scriptURI);
-    if (
-      !(
-        url.protocol === 'http:' ||
-        url.protocol === 'https:' ||
-        url.protocol === 'moz-extension:'
-      )
-    ) {
-      throw new Error('not a webhost or extension protocol');
-    }
-    origin = url.origin;
-    host = url.host;
-  } catch (e) {
-    origin = scriptURI;
-    host = null;
-  }
-
-  let resourceIndex = originToResourceIndex.get(origin);
-  if (resourceIndex !== undefined) {
-    return resourceIndex;
-  }
-
-  resourceIndex = resourceTable.length++;
-  originToResourceIndex.set(origin, resourceIndex);
-  if (host) {
-    // This is a webhost URL.
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = stringTable.indexForString(origin);
-    resourceTable.host[resourceIndex] = stringTable.indexForString(host);
-    resourceTable.type[resourceIndex] = resourceTypes.webhost;
-  } else {
-    // This is a URL, but it doesn't point to something on the web, e.g. a
-    // chrome url.
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
-    resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.url;
-  }
-  return resourceIndex;
-}
-
 /**
  * See the ThreadsKey type for an explanation.
  */
@@ -3356,9 +3304,9 @@ export function findAddressProofForFile(
   profile: Profile,
   file: string
 ): AddressProof | null {
-  const { libs } = profile;
+  const { libs, resources } = profile;
   for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable, stringTable } = thread;
+    const { frameTable, funcTable, stringTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
     const func = funcTable.fileName.indexOf(fileStringIndex);
     if (func === -1) {
@@ -3372,15 +3320,15 @@ export function findAddressProofForFile(
     if (address === null) {
       continue;
     }
-    const resource = funcTable.resource[func];
-    if (resourceTable.type[resource] !== resourceTypes.library) {
+    const resourceIndex = funcTable.resource[func];
+    if (resourceIndex === -1) {
       continue;
     }
-    const libIndex = resourceTable.lib[resource];
-    if (libIndex === null) {
+    const resource = resources[resourceIndex];
+    if (resource.type !== 'LIBRARY') {
       continue;
     }
-    const lib = libs[libIndex];
+    const lib = libs[resource.libIndex];
     const { debugName, breakpadId } = lib;
     return {
       debugName,

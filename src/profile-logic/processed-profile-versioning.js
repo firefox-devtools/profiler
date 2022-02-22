@@ -13,7 +13,6 @@
  */
 
 import { sortDataTable } from '../utils/data-table-utils';
-import { resourceTypes } from './data-structures';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
@@ -320,6 +319,14 @@ const _upgraders = {
         icon: [],
         addonId: [],
         host: [],
+      };
+      const resourceTypes = {
+        unknown: 0,
+        library: 1,
+        addon: 2,
+        webhost: 3,
+        otherhost: 4,
+        url: 5,
       };
       function addLibResource(name, lib) {
         const index = newResourceTable.length++;
@@ -1754,6 +1761,7 @@ const _upgraders = {
     // The frame table has a new field: nativeSymbol.
     // The function table loses one field: address. (This field moves to the nativeSymbols table.)
     // The NativeSymbolsTable has the fields libIndex, address, and name.
+    const RESOURCE_TYPE_LIBRARY = 1;
     for (const thread of profile.threads) {
       const nativeSymbols = {
         libIndex: [],
@@ -1772,7 +1780,7 @@ const _upgraders = {
           continue;
         }
         const resourceType = resourceTable.type[resourceIndex];
-        if (resourceType !== resourceTypes.library) {
+        if (resourceType !== RESOURCE_TYPE_LIBRARY) {
           continue;
         }
         const libIndex = resourceTable.lib[resourceIndex];
@@ -2107,5 +2115,6 @@ const _upgraders = {
     }
     profile.libs = libs;
   },
+  // TODO: Upgrader for shared resources
 };
 /* eslint-enable no-useless-computed-key */

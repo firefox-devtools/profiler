@@ -36,6 +36,7 @@ import type {
   UnitIntervalOfProfileRange,
   MarkerIndex,
   Marker,
+  Resource,
 } from 'firefox-profiler/types';
 
 import type {
@@ -60,6 +61,7 @@ type OwnProps = {|
   >,
   +getMarker: (MarkerIndex) => Marker,
   +categories: CategoryList,
+  +resources: Resource[],
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
@@ -414,6 +416,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       threadsKey,
       combinedTimingRows,
       categories,
+      resources,
       callNodeInfo,
       getMarker,
       shouldDisplayTooltips,
@@ -453,6 +456,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}
         categories={categories}
+        resources={resources}
         // The stack chart doesn't support other call tree summary types.
         callTreeSummaryStrategy="timing"
         durationText={formatMilliseconds(duration)}

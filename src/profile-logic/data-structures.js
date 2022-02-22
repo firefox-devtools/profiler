@@ -19,7 +19,6 @@ import type {
   JsAllocationsTable,
   UnbalancedNativeAllocationsTable,
   BalancedNativeAllocationsTable,
-  ResourceTable,
   NativeSymbolTable,
   Profile,
   ExtensionTable,
@@ -176,20 +175,6 @@ export function shallowCloneNativeSymbolTable(
   };
 }
 
-export function getEmptyResourceTable(): ResourceTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    lib: [],
-    name: [],
-    host: [],
-    type: [],
-    length: 0,
-  };
-}
-
 export function getEmptyNativeSymbolTable(): NativeSymbolTable {
   return {
     // Important!
@@ -293,24 +278,6 @@ export function shallowCloneRawMarkerTable(
   };
 }
 
-export function getResourceTypes() {
-  return {
-    unknown: 0,
-    library: 1,
-    addon: 2,
-    webhost: 3,
-    otherhost: 4,
-    url: 5,
-  };
-}
-
-/**
- * Export a read-only copy of the resource types.
- */
-export const resourceTypes = (getResourceTypes(): $Exact<
-  $ReadOnly<$Call<typeof getResourceTypes>>
->);
-
 export function getEmptyExtensions(): ExtensionTable {
   return {
     // Important!
@@ -372,7 +339,6 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     frameTable: getEmptyFrameTable(),
     stringTable: new UniqueStringArray(),
     funcTable: getEmptyFuncTable(),
-    resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),
   };
 
@@ -407,6 +373,7 @@ export function getEmptyProfile(): Profile {
       markerSchema: [],
     },
     libs: [],
+    resources: [],
     pages: [],
     threads: [],
   };

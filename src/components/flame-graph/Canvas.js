@@ -32,6 +32,7 @@ import type {
   WeightType,
   SamplesLikeTable,
   TracedTiming,
+  Resource,
 } from 'firefox-profiler/types';
 
 import type {
@@ -62,6 +63,7 @@ export type OwnProps = {|
   +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
+  +resources: Resource[],
   +interval: Milliseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
@@ -278,6 +280,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       callNodeInfo,
       shouldDisplayTooltips,
       categories,
+      resources,
       interval,
       isInverted,
       callTreeSummaryStrategy,
@@ -323,6 +326,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         thread={thread}
         weightType={weightType}
         pages={pages}
+        resources={resources}
         interval={interval}
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}

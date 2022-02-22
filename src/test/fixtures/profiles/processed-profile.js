@@ -7,7 +7,6 @@ import {
   getEmptyProfile,
   getEmptyThread,
   getEmptyJsTracerTable,
-  resourceTypes,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
@@ -809,14 +808,7 @@ function _buildThreadFromTextOnlyStacks(
 ): Thread {
   const thread = getEmptyThread();
 
-  const {
-    funcTable,
-    stringTable,
-    frameTable,
-    stackTable,
-    samples,
-    resourceTable,
-  } = thread;
+  const { funcTable, stringTable, frameTable, stackTable, samples } = thread;
 
   // Create the FuncTable.
   funcNames.forEach((funcName) => {
@@ -861,13 +853,7 @@ function _buildThreadFromTextOnlyStacks(
             breakpadId: 'SOMETHING_FAKE',
             codeId: null,
           });
-
-          resourceTable.lib.push(libIndex);
-          resourceTable.name.push(stringTable.indexForString(libraryName));
-          resourceTable.type.push(resourceTypes.library);
-          resourceTable.host.push(null);
-          resourceIndex = resourceTable.length++;
-
+          resourceIndex = globalDataCollector.indexForLibResource(libIndex);
           resourceIndexCache[libraryName] = resourceIndex;
         }
       }

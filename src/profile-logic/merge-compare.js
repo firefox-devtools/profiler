@@ -16,7 +16,6 @@ import {
 } from './process-profile';
 import {
   getEmptyProfile,
-  getEmptyResourceTable,
   getEmptyNativeSymbolTable,
   getEmptyFrameTable,
   getEmptyFuncTable,
@@ -44,7 +43,7 @@ import type {
   CategoryList,
   IndexIntoFrameTable,
   IndexIntoFuncTable,
-  IndexIntoResourceTable,
+  IndexIntoResources,
   IndexIntoLibs,
   IndexIntoNativeSymbolTable,
   IndexIntoStackTable,
@@ -53,7 +52,6 @@ import type {
   FrameTable,
   Lib,
   NativeSymbolTable,
-  ResourceTable,
   StackTable,
   SamplesTable,
   UrlState,
@@ -294,8 +292,8 @@ type TranslationMapForCategories = Map<
 >;
 type TranslationMapForFuncs = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
 type TranslationMapForResources = Map<
-  IndexIntoResourceTable,
-  IndexIntoResourceTable
+  IndexIntoResources,
+  IndexIntoResources
 >;
 type TranslationMapForNativeSymbols = Map<
   IndexIntoNativeSymbolTable,
@@ -491,7 +489,7 @@ function combineResourceTables(
   resourceTable: ResourceTable,
   translationMaps: TranslationMapForResources[],
 } {
-  const mapOfInsertedResources: Map<string, IndexIntoResourceTable> = new Map();
+  const mapOfInsertedResources: Map<string, IndexIntoResources> = new Map();
   const translationMaps = [];
   const newResourceTable = getEmptyResourceTable();
 

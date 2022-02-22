@@ -30,10 +30,12 @@ import type {
   IndexIntoStackTable,
   Thread,
   MarkerReference,
+  Resource,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getImplementationFilter } from 'firefox-profiler/selectors/url-state';
+import { getResources } from 'firefox-profiler/selectors';
 
 import { filterCallNodeAndCategoryPathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
@@ -55,6 +57,7 @@ type StateProps = {|
   +committedRange: StartEndRange,
   +thread: Thread | null,
   +implementationFilter: ImplementationFilter,
+  +resources: Resource[],
   +getMarkerLabelToCopy: (MarkerIndex) => string,
 |};
 
@@ -145,7 +148,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   }
 
   _convertStackToString(stack: IndexIntoStackTable): string {
-    const { thread, implementationFilter } = this.props;
+    const { thread, implementationFilter, resources } = this.props;
 
     if (thread === null) {
       return '';
@@ -157,7 +160,11 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       convertStackToCallNodeAndCategoryPath(thread, stack)
     );
 
-    const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(path, thread);
+    const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(
+      path,
+      thread,
+      resources
+    );
     return funcNamesAndOrigins
       .map(({ funcName, origin }) => `${funcName} [${origin}]`)
       .join('\n');
@@ -382,6 +389,7 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
       previewSelection: getPreviewSelection(state),
       committedRange: getCommittedRange(state),
       implementationFilter: getImplementationFilter(state),
+      resources: getResources(state),
       thread: selectors.getThread(state),
       getMarkerLabelToCopy: selectors.getMarkerLabelToCopyGetter(state),
     };
