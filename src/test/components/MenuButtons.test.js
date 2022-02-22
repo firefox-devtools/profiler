@@ -206,6 +206,10 @@ describe('app/MenuButtons', function () {
         screen.getByRole('checkbox', {
           name: /Include the data from private browsing windows/,
         });
+      const getRemoveOtherTabsCheckbox = () =>
+        screen.getByRole('checkbox', {
+          name: /Include the data from other tabs/,
+        });
       const getPanel = () => screen.getByTestId('MenuButtonsPublish-container');
       const openPublishPanel = async () => {
         fireFullClick(getPublishButton());
@@ -222,6 +226,7 @@ describe('app/MenuButtons', function () {
         queryPreferenceCheckbox,
         queryPrivateBrowsingCheckbox,
         getPrivateBrowsingCheckbox,
+        getRemoveOtherTabsCheckbox,
         openPublishPanel,
         resolveUpload,
         rejectUpload,
@@ -336,6 +341,22 @@ describe('app/MenuButtons', function () {
         setupForPublish(profile);
       await openPublishPanel();
       expect(queryPrivateBrowsingCheckbox()).not.toBeInTheDocument();
+    });
+
+    it('shows the active tab data checkbox when the current track organization is active-tab', async () => {
+      const { profile } = addActiveTabInformationToProfile(
+        getProfileWithNiceTracks()
+      );
+      const { getRemoveOtherTabsCheckbox, openPublishPanel, dispatch } =
+        setupForPublish(profile);
+      dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          tabID: null,
+        })
+      );
+      await openPublishPanel();
+      expect(getRemoveOtherTabsCheckbox()).toBeInTheDocument();
     });
 
     it('can publish and revert', async () => {
