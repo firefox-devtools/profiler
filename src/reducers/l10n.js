@@ -6,20 +6,24 @@
 import type {
   Reducer,
   L10nState,
-  L10nFetchingPhase,
+  PseudoStrategy,
 } from 'firefox-profiler/types';
 import { ReactLocalization } from '@fluent/react';
 import { combineReducers } from 'redux';
 
-const l10nFetchingPhase: Reducer<L10nFetchingPhase> = (
-  state = 'not-fetching',
-  action
-) => {
+const requestedLocales: Reducer<string[] | null> = (state = null, action) => {
   switch (action.type) {
     case 'REQUEST_L10N':
-      return 'fetching-ftl';
-    case 'RECEIVE_L10N':
-      return 'done-fetching';
+      return action.locales;
+    default:
+      return state;
+  }
+};
+
+const pseudoStrategy: Reducer<PseudoStrategy> = (state = null, action) => {
+  switch (action.type) {
+    case 'TOGGLE_PSEUDO_STRATEGY':
+      return action.pseudoStrategy;
     default:
       return state;
   }
@@ -56,10 +60,11 @@ const direction: Reducer<'ltr' | 'rtl'> = (state = 'ltr', action) => {
 };
 
 const l10nReducer: Reducer<L10nState> = combineReducers({
-  l10nFetchingPhase,
   localization,
   primaryLocale,
   direction,
+  requestedLocales,
+  pseudoStrategy,
 });
 
 export default l10nReducer;

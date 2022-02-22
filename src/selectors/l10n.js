@@ -8,15 +8,17 @@ import type {
   Selector,
   L10nState,
   Localization,
-  L10nFetchingPhase,
+  PseudoStrategy,
 } from 'firefox-profiler/types';
 
 export const getL10nState: Selector<L10nState> = (state) => state.l10n;
-export const getL10nFetchingPhase: Selector<L10nFetchingPhase> = (state) =>
-  getL10nState(state).l10nFetchingPhase;
 export const getLocalization: Selector<Localization> = (state) =>
   getL10nState(state).localization;
 export const getPrimaryLocale: Selector<string | null> = (state) =>
   getL10nState(state).primaryLocale;
 export const getDirection: Selector<'ltr' | 'rtl'> = (state) =>
   getL10nState(state).direction;
+export const getRequestedLocales: Selector<string[] | null> = (state) =>
+  getL10nState(state).requestedLocales;
+export const getPseudoStrategy: Selector<PseudoStrategy> = (state) =>
+  getL10nState(state).pseudoStrategy;

@@ -120,16 +120,6 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         <span
           class="metaInfoLabel"
         >
-          Profile Version:
-        </span>
-        40
-      </div>
-      <div
-        class="metaInfoRow"
-      >
-        <span
-          class="metaInfoLabel"
-        >
           Symbols:
         </span>
         Profile is symbolicated
@@ -249,16 +239,6 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         <span
           class="metaInfoLabel"
         >
-          Profile Version:
-        </span>
-        40
-      </div>
-      <div
-        class="metaInfoRow"
-      >
-        <span
-          class="metaInfoLabel"
-        >
           Symbols:
         </span>
         Profile is symbolicated
@@ -345,16 +325,6 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile does not display the
           Interval:
         </span>
         1ms
-      </div>
-      <div
-        class="metaInfoRow"
-      >
-        <span
-          class="metaInfoLabel"
-        >
-          Profile Version:
-        </span>
-        40
       </div>
       <div
         class="metaInfoRow"
@@ -458,16 +428,6 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           Interval:
         </span>
         1ms
-      </div>
-      <div
-        class="metaInfoRow"
-      >
-        <span
-          class="metaInfoLabel"
-        >
-          Profile Version:
-        </span>
-        40
       </div>
       <div
         class="metaInfoRow"
@@ -864,16 +824,6 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         <span
           class="metaInfoLabel"
         >
-          Profile Version:
-        </span>
-        40
-      </div>
-      <div
-        class="metaInfoRow"
-      >
-        <span
-          class="metaInfoLabel"
-        >
           Buffer Capacity:
         </span>
         8MB
@@ -1219,16 +1169,6 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
           Interval:
         </span>
         1ms
-      </div>
-      <div
-        class="metaInfoRow"
-      >
-        <span
-          class="metaInfoLabel"
-        >
-          Profile Version:
-        </span>
-        40
       </div>
       <div
         class="metaInfoRow"

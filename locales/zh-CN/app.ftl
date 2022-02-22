@@ -29,16 +29,16 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = 无法从 { -firefox-brand-name } 检索到分析记录。
-AppViewRouter--error-message-from-file =
-    .message = 无法读取或解析其中的分析记录。
-AppViewRouter--error-message-local =
-    .message = 尚未实现。
-AppViewRouter--error-message-public =
-    .message = 无法下载分析记录。
-AppViewRouter--error-message-from-url =
-    .message = 无法下载分析记录。
+AppViewRouter--error-unpublished = 无法从 { -firefox-brand-name } 检索到分析记录。
+AppViewRouter--error-from-file = 无法读取或解析其中的分析记录。
+AppViewRouter--error-local = 尚未实现。
+AppViewRouter--error-public = 无法下载分析记录。
+AppViewRouter--error-from-url = 无法下载分析记录。
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari = 由于 <a>Safari 的特殊限制</a>，{ -profiler-brand-name } 无法使用此浏览器从本地导入分析记录。请在 { -firefox-brand-name } 或 Chrome 中打开此页面。
+    .title = Safari 无法导入本地性能分析记录
 AppViewRouter--route-not-found--home =
     .specialMessage = 无法识别您尝试访问的 URL。
 
@@ -94,6 +94,22 @@ CallTree--bytes-total = 总大小（字节）
 CallTree--bytes-self = Self（字节）
     .title = “Self”字节数只包含函数在栈底分配或释放的内存用量。若此函数是通过其他函数调用的，则不包含“该函数”的用量。“Self”字节数适合用于了解程序中实际用了多少内存在哪些函数上。
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = 编译器内联了一些对 { $calledFunction } 函数的调用。
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = （内联）
+    .title = 编译器已将一些对 { $calledFunction } 函数的调用内联到 { $outerFunction } 函数。
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
@@ -148,7 +164,7 @@ FullTimeline--stack-height = 栈深度
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = 可见 <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> 轨
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> 轨
 
 ## Home page
 
@@ -383,11 +399,14 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含快照
 MenuButtons--publish--renderCheckbox-label-resource = 包括资源 URL 和路径
 MenuButtons--publish--renderCheckbox-label-extension = 包含扩展信息
 MenuButtons--publish--renderCheckbox-label-preference = 包含首选项值
+MenuButtons--publish--renderCheckbox-label-private-browsing = 包含来自隐私浏览窗口的数据
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = 此分析记录包含隐私浏览数据
 MenuButtons--publish--reupload-performance-profile = 重新上传性能分析记录
 MenuButtons--publish--share-performance-profile = 分享性能分析记录
 MenuButtons--publish--info-description = 上传您的分析记录，并通过链接分享给任何人。
 MenuButtons--publish--info-description-default = 默认情况下，将会移除您的个人数据。
-MenuButtons--publish--info-description-firefox-nightly = 此分析记录来自 { -firefox-nightly-brand-name }，默认情况下将包含所有信息。
+MenuButtons--publish--info-description-firefox-nightly2 = 此分析记录来自 { -firefox-nightly-brand-name }，默认情况下将包含大部分信息。
 MenuButtons--publish--include-additional-data = 包括其他数据后，可能造成分析记录可被识别
 MenuButtons--publish--button-upload = 上传
 MenuButtons--publish--upload-title = 正在上传分析记录…
@@ -425,20 +444,13 @@ ProfileFilterNavigator--full-range = 完整范围
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = 正在直接从 { -firefox-brand-name } 导入分析记录…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = 正在读取文件并处理分析记录…
-ProfileLoaderAnimation--loading-message-local =
-    .message = 尚未实现。
-ProfileLoaderAnimation--loading-message-public =
-    .message = 正在下载处理分析记录…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = 正在下载处理分析记录…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = 正在读取和处理分析记录…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = 找不到视图
+ProfileLoaderAnimation--loading-unpublished = 正在直接从 { -firefox-brand-name } 导入分析记录…
+ProfileLoaderAnimation--loading-from-file = 正在读取文件并处理分析记录…
+ProfileLoaderAnimation--loading-local = 尚未实现。
+ProfileLoaderAnimation--loading-public = 正在下载处理分析记录…
+ProfileLoaderAnimation--loading-from-url = 正在下载处理分析记录…
+ProfileLoaderAnimation--loading-compare = 正在读取和处理分析记录…
+ProfileLoaderAnimation--loading-view-not-found = 找不到视图
 
 ## ProfileRootMessage
 
@@ -513,6 +525,21 @@ TrackContextMenu--hide-other-screenshots-tracks = 隐藏其他快照轨
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = 隐藏“{ $trackName }”
 TrackContextMenu--show-all-tracks = 显示所有轨道
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = 显示下方所有轨道
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = 找不到“<span>{ $searchFilter }</span>”的结果
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = 输入过滤条件
+    .title = 只显示匹配特定文本的轨道
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -569,6 +596,65 @@ TransformNavigator--collapse-direct-recursion = 折叠递归：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
+
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = 等待 { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = 正在等待 { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = 源代码不可用
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #3741</a>。
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = 此文件没有已知的 cross-origin-accessible 网址。
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = 获取网址 { $url } 时发生网络错误：{ $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = 无法查询浏览器的符号化 API：{ $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = 浏览器的符号化 API 返回错误：{ $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = 本地符号服务器的符号化 API 返回错误：{ $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = { $url } 处的存档中未找到文件 { $pathInArchive }。
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = 无法解析 { $url } 处的存档：{ $parsingErrorMessage }
+SourceView--close-button =
+    .title = 关闭源代码视图
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

@@ -24,6 +24,7 @@ import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
+  PseudoStrategy,
   UrlState,
   UploadState,
   State,
@@ -142,6 +143,7 @@ export type CallTreeSummaryStrategy =
 export type CheckedSharingOptions = {|
   // The following values are for including more information in a sanitized profile.
   includeHiddenThreads: boolean,
+  includeAllTabs: boolean,
   includeFullTimeRange: boolean,
   includeScreenshots: boolean,
   includeUrls: boolean,
@@ -545,12 +547,19 @@ type CurrentProfileUploadedInformationAction = {|
 |};
 
 type L10nAction =
-  | {| +type: 'REQUEST_L10N' |}
+  | {|
+      +type: 'REQUEST_L10N',
+      +locales: string[],
+    |}
   | {|
       +type: 'RECEIVE_L10N',
       +localization: Localization,
       +primaryLocale: string,
       +direction: 'ltr' | 'rtl',
+    |}
+  | {|
+      +type: 'TOGGLE_PSEUDO_STRATEGY',
+      +pseudoStrategy: PseudoStrategy,
     |};
 
 type SourcesAction =

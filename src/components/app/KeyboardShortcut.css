@@ -118,3 +118,11 @@
     background: #000a;
   }
 }
+
+/* Do not animate the panel or the background if user prefers reduced motion */
+@media (prefers-reduced-motion) {
+  .appKeyboardShortcuts,
+  .appKeyboardShortcutsBox {
+    animation: none;
+  }
+}
