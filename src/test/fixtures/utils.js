@@ -7,6 +7,7 @@ import {
   computeCallTreeCountsAndSummary,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
+import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 import { getCallNodeInfo } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
@@ -106,7 +107,7 @@ export function callTreeFromProfile(
   profile: Profile,
   threadIndex: number = 0
 ): CallTree {
-  const thread = profile.threads[threadIndex];
+  const thread = profile.threads[threadIndex] ?? getEmptyThread();
   const { interval } = profile.meta;
   const categories = ensureExists(
     profile.meta.categories,

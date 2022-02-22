@@ -156,10 +156,17 @@ describe('timeline/TrackContextMenu', function () {
         fireFullClick(screen.getByText('Style'));
       };
 
+      const hideAllTracksExceptMain = () => {
+        fireFullClick(screen.getByText('DOM Worker'));
+        fireFullClick(screen.getByText('Style'));
+        fireFullClick(screen.getByText('Content Process'));
+      };
+
       return {
         ...results,
         selectAllTracksBelowItem,
         hideAllTracks,
+        hideAllTracksExceptMain,
       };
     }
 
@@ -287,6 +294,37 @@ describe('timeline/TrackContextMenu', function () {
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
         '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    it("shows local track's global track even if it wasn't visible before", () => {
+      const {
+        getState,
+        selectAllTracksBelowItem,
+        hideAllTracksExceptMain,
+        changeSearchFilter,
+      } = setupAllTracks();
+      // Hide the local tracks and tehe global track with children for this behavior.
+      hideAllTracksExceptMain();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        // These tracks must be hidden at the start.
+        'hide [thread GeckoMain tab]',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+
+      // Search a local track.
+      changeSearchFilter('DOM Worker');
+      // Click the button.
+      fireFullClick(selectAllTracksBelowItem());
+
+      // DOM Worker and its global process should be visible now.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
         '  - hide [thread Style]',
       ]);
     });

@@ -170,16 +170,6 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
               {formatTimestamp(meta.interval, 4, 1)}
             </div>
           ) : null}
-          {meta.preprocessedProfileVersion ? (
-            <div className="metaInfoRow">
-              <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--profile-version">
-                  Profile Version:
-                </Localized>
-              </span>
-              {meta.preprocessedProfileVersion}
-            </div>
-          ) : null}
           {configuration ? (
             <>
               <div className="metaInfoRow">

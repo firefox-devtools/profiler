@@ -36,6 +36,7 @@ import {
   autoMockIntersectionObserver,
   triggerIntersectionObservers,
 } from '../fixtures/mocks/intersection-observer';
+import { triggerResizeObservers } from '../fixtures/mocks/resize-observer';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -159,7 +160,7 @@ describe('ThreadActivityGraph', function () {
     // By changing the "fake" result of getBoundingClientRect, we ensure that
     // the pure components rerender because their `width` props change.
     setMockedElementSize({ width: GRAPH_WIDTH * 2, height: GRAPH_HEIGHT });
-    window.dispatchEvent(new Event('resize'));
+    triggerResizeObservers();
     const drawCalls = getContextDrawCalls();
     // We want to ensure that we redraw the activity graph and not something
     // else like the sample graph.
@@ -454,7 +455,7 @@ describe('ThreadActivityGraph with intersection observer', function () {
     // By changing the "fake" result of getBoundingClientRect, we ensure that
     // the pure components rerender because their `width` props change.
     setMockedElementSize({ width: GRAPH_WIDTH * 2, height: GRAPH_HEIGHT });
-    window.dispatchEvent(new Event('resize'));
+    triggerResizeObservers();
     drawCalls = getContextDrawCalls();
     // It should still be not drawn yet.
     expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(

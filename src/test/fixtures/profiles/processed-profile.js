@@ -816,7 +816,7 @@ function _buildThreadFromTextOnlyStacks(
   funcNames.forEach((funcName) => {
     funcTable.name.push(stringTable.indexForString(funcName));
     funcTable.fileName.push(null);
-    funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
+    funcTable.relevantForJS.push(funcName.endsWith('-relevantForJS'));
     funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
@@ -1696,14 +1696,14 @@ export function addActiveTabInformationToProfile(
     },
     // An iframe page inside the previous page
     {
-      tabID: 2,
+      tabID: firstTabTabID,
       innerWindowID: iframeInnerWindowIDsWithChild,
       url: 'Page #2',
       embedderInnerWindowID: parentInnerWindowIDsWithChildren,
     },
     // Another iframe page inside the previous iframe
     {
-      tabID: 3,
+      tabID: firstTabTabID,
       innerWindowID: firstTabInnerWindowIDs[2],
       url: 'Page #3',
       embedderInnerWindowID: iframeInnerWindowIDsWithChild,
@@ -1825,51 +1825,34 @@ function getStackIndexForCallNodePath(
  * paths to point to frames using stacks.
  *
  * @param thread The thread to mutate.
- * @param privateInnerWindowID The innerWindowID representing a private browser window.
- * @param nonPrivateInnerWindowID The innerWindowID representing a non private browser window.
- * @param privateCallNodes These call nodes point to frames that will get privateInnerWindowID.
- * @param nonPrivateCallNodes These call nodes point to frames that will get nonPrivateInnerWindowID.
- * @param callNodesToDupe These call nodes point to frames that will be duped to get both privateInnerWindowID and nonPrivateInnerWindowID.
+ * @param listOfOperations A list of pairs { innerWindowID, callNodes }
+ *                         indicating which call nodes this innerWindowID will
+ *                         be assigned to.
+ * @param callNodesToDupe These call nodes point to frames that will be duped to
+ *                        get all passed innerWindowIDs
  */
 export function addInnerWindowIdToStacks(
   thread: Thread,
-  {
-    privateInnerWindowID,
-    nonPrivateInnerWindowID,
-    privateCallNodes,
-    nonPrivateCallNodes,
-    callNodesToDupe,
-  }: {|
-    privateInnerWindowID: number,
-    nonPrivateInnerWindowID: number,
-    privateCallNodes?: CallNodePath[],
-    nonPrivateCallNodes?: CallNodePath[],
-    callNodesToDupe?: CallNodePath[],
-  |}
+  listOfOperations: Array<{ innerWindowID: number, callNodes: CallNodePath[] }>,
+  callNodesToDupe?: CallNodePath[]
 ) {
   const { stackTable, frameTable, samples } = thread;
 
-  if (privateCallNodes) {
-    // privateCallNodes contains the call nodes we want to directly change to
-    // "coming from private browsing".
-    for (const callNode of privateCallNodes) {
+  for (const { innerWindowID, callNodes } of listOfOperations) {
+    for (const callNode of callNodes) {
       const stackIndex = getStackIndexForCallNodePath(thread, callNode);
       const foundFrameIndex = stackTable.frame[stackIndex];
-      frameTable.innerWindowID[foundFrameIndex] = privateInnerWindowID;
-    }
-  }
-
-  if (nonPrivateCallNodes) {
-    // nonPrivateCallNodes contains the call nodes we want to directly change to
-    // "coming from non private browsing".
-    for (const callNode of nonPrivateCallNodes) {
-      const stackIndex = getStackIndexForCallNodePath(thread, callNode);
-      const foundFrameIndex = stackTable.frame[stackIndex];
-      frameTable.innerWindowID[foundFrameIndex] = nonPrivateInnerWindowID;
+      frameTable.innerWindowID[foundFrameIndex] = innerWindowID;
     }
   }
 
   if (callNodesToDupe) {
+    if (listOfOperations.length !== 2) {
+      throw new Error(
+        `This tool doesn't support more than 2 innerWindowIDs for duping.`
+      );
+    }
+
     // callNodesToChange contains the call nodes we want to dupe so that the
     // original comes from a non-private browsing window, while the dupe comes
     // from a private browsing window.
@@ -1879,8 +1862,9 @@ export function addInnerWindowIdToStacks(
     for (const callNode of callNodesToDupe) {
       const stackIndex = getStackIndexForCallNodePath(thread, callNode);
       const foundFrameIndex = stackTable.frame[stackIndex];
-      // The found one comes from a non private window
-      frameTable.innerWindowID[foundFrameIndex] = nonPrivateInnerWindowID;
+      // The found one comes from the first tab.
+      frameTable.innerWindowID[foundFrameIndex] =
+        listOfOperations[0].innerWindowID;
 
       // Clone this frame
       const newFrameIndex = frameTable.length++;
@@ -1897,8 +1881,8 @@ export function addInnerWindowIdToStacks(
       frameTable.column.push(frameTable.column[foundFrameIndex]);
       frameTable.optimizations.push(frameTable.optimizations[foundFrameIndex]);
 
-      // And use the passed privateInnerWindowID
-      frameTable.innerWindowID.push(privateInnerWindowID);
+      // And that one comes from the second tab.
+      frameTable.innerWindowID.push(listOfOperations[1].innerWindowID);
 
       // Clone the stack
       const newStackIndex = stackTable.length++;

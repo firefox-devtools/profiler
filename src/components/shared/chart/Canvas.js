@@ -28,6 +28,9 @@ type Props<HoveredItem> = {|
   // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
   +scaleCtxToCssPixels: boolean,
   +hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
+  // Default to true. Set to false if the chart should be redrawn right away after
+  // rerender.
+  +drawCanvasAfterRaf?: boolean,
 |};
 
 // The naming of the X and Y coordinates here correspond to the ones
@@ -84,24 +87,20 @@ export class ChartCanvas<HoveredItem> extends React.Component<
     isHoveredOnlyDifferent: boolean = false,
     prevHoveredItem: HoveredItem | null = null
   ) {
-    const { className, drawCanvas } = this.props;
+    const { drawCanvasAfterRaf } = this.props;
+    if (drawCanvasAfterRaf === false) {
+      // The behavior of waiting for a rAF has been explicitely  disabled.
+      this._doDrawCanvas(isHoveredOnlyDifferent, prevHoveredItem);
+      return;
+    }
+
     if (this._isDrawScheduled) {
       return;
     }
     this._isDrawScheduled = true;
     window.requestAnimationFrame(() => {
       this._isDrawScheduled = false;
-      if (this._canvas) {
-        timeCode(`${className} render`, () => {
-          this._prepCanvas();
-          drawCanvas(
-            this._ctx,
-            this.state.hoveredItem,
-            prevHoveredItem,
-            isHoveredOnlyDifferent
-          );
-        });
-      }
+      this._doDrawCanvas(isHoveredOnlyDifferent, prevHoveredItem);
     });
   }
 
@@ -156,6 +155,24 @@ export class ChartCanvas<HoveredItem> extends React.Component<
         ctx.scale(scale, scale);
       }
       this._devicePixelRatio = devicePixelRatio;
+    }
+  }
+
+  _doDrawCanvas(
+    isHoveredOnlyDifferent: boolean = false,
+    prevHoveredItem: HoveredItem | null = null
+  ) {
+    const { className, drawCanvas } = this.props;
+    if (this._canvas) {
+      timeCode(`${className} render`, () => {
+        this._prepCanvas();
+        drawCanvas(
+          this._ctx,
+          this.state.hoveredItem,
+          prevHoveredItem,
+          isHoveredOnlyDifferent
+        );
+      });
     }
   }
 

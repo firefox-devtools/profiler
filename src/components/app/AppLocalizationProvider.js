@@ -2,38 +2,132 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
+
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { LocalizationProvider } from '@fluent/react';
+import { LocalizationProvider, ReactLocalization } from '@fluent/react';
+import { negotiateLanguages } from '@fluent/langneg';
+
 import * as React from 'react';
 import {
   getLocalization,
   getPrimaryLocale,
   getDirection,
+  getRequestedLocales,
+  getPseudoStrategy,
 } from 'firefox-profiler/selectors/l10n';
-import { setupLocalization } from 'firefox-profiler/actions/l10n';
+import { requestL10n, receiveL10n } from 'firefox-profiler/actions/l10n';
+import {
+  AVAILABLE_LOCALES,
+  DEFAULT_LOCALE,
+  fetchMessages,
+  lazilyParsedBundles,
+  getLocaleDirection,
+} from 'firefox-profiler/app-logic/l10n';
+
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import type { Localization } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type StateProps = {|
+type FetchProps = {|
+  +requestedLocales: null | string[],
+  +pseudoStrategy: null | 'accented' | 'bidi',
+  +receiveL10n: typeof receiveL10n,
+|};
+
+/**
+ * This class is responsible for handling the changes of the requested locales
+ * and the pseudo strategy, including fetching the FTL files and generating the
+ * Fluent bundles. Afterwards it will change the state with the negotiated
+ * information and the bundles so that AppLocalizationProvider can supply them
+ * to the rest of the app.
+ */
+class AppLocalizationFetcher extends React.PureComponent<FetchProps> {
+  /**
+   * This function is called when this component is rendered, that is at mount
+   * time and when either requestedLocales or pseudoStrategy changes.
+   * It takes the locales available and generates l10n bundles for those locales.
+   * Finally it dispatches the translations and updates the state.
+   */
+  async _setupLocalization() {
+    const { requestedLocales, pseudoStrategy, receiveL10n } = this.props;
+
+    if (!requestedLocales) {
+      return;
+    }
+
+    // Setting defaultLocale to `en-US` means that it will always be the
+    // last fallback locale, thus making sure the UI is always working.
+    const languages = negotiateLanguages(requestedLocales, AVAILABLE_LOCALES, {
+      defaultLocale: DEFAULT_LOCALE,
+    });
+
+    // It's important to note that `languages` is the result of the negotiation,
+    // and can be different than `locales`.
+    // languages may contain the requested locale as well as some fallback
+    // locales. Also `negotiateLanguages` always adds the default locale if it's
+    // not present.
+    // Some examples:
+    // * navigator.locales == ['fr', 'en-US', 'en'] => languages == ['fr-FR', 'en-US', 'en-GB']
+    // * navigator.locales == ['fr'] => languages == ['fr-FR', 'en-US']
+    // Because our primary locale is en-US it's not useful to go past it and
+    // fetch more locales than necessary, so let's slice to that entry.
+    const indexOfDefaultLocale = languages.indexOf(DEFAULT_LOCALE); // Guaranteed to be positive
+    const localesToFetch = languages.slice(0, indexOfDefaultLocale + 1);
+    const fetchedMessages = await Promise.all(
+      localesToFetch.map(fetchMessages)
+    );
+    const bundles = lazilyParsedBundles(fetchedMessages, pseudoStrategy);
+    const localization = new ReactLocalization(bundles);
+
+    const primaryLocale = languages[0];
+    const direction = getLocaleDirection(primaryLocale, pseudoStrategy);
+    receiveL10n(localization, primaryLocale, direction);
+  }
+
+  componentDidMount() {
+    this._setupLocalization();
+  }
+
+  componentDidUpdate() {
+    this._setupLocalization();
+  }
+
+  render() {
+    return null;
+  }
+}
+
+type ProviderStateProps = {|
+  +requestedLocales: null | string[],
+  +pseudoStrategy: null | 'accented' | 'bidi',
   +localization: Localization,
   +primaryLocale: string | null,
   +direction: 'ltr' | 'rtl',
 |};
-type OwnProps = {|
+type ProviderOwnProps = {|
   children: React.Node,
 |};
-type DispatchProps = {|
-  +setupLocalization: typeof setupLocalization,
+type ProviderDispatchProps = {|
+  +requestL10n: typeof requestL10n,
+  +receiveL10n: typeof receiveL10n,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type ProviderProps = ConnectedProps<
+  ProviderOwnProps,
+  ProviderStateProps,
+  ProviderDispatchProps
+>;
 
-class AppLocalizationProviderImpl extends React.PureComponent<Props> {
+/**
+ * This component is responsible for initializing the locales and providing the
+ * fluent localization data to the components. It also updates the locale
+ * attributes on the document.
+ */
+class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
   componentDidMount() {
-    const { setupLocalization } = this.props;
+    const { requestL10n } = this.props;
     const locales = navigator.languages;
-    setupLocalization(locales);
+    requestL10n(locales);
   }
 
   componentDidUpdate() {
@@ -48,31 +142,46 @@ class AppLocalizationProviderImpl extends React.PureComponent<Props> {
   }
 
   render() {
-    const { primaryLocale, children, localization } = this.props;
-    if (!primaryLocale) {
-      // The localization isn't ready.
-      return null;
-    }
-
+    const {
+      primaryLocale,
+      children,
+      localization,
+      requestedLocales,
+      receiveL10n,
+      pseudoStrategy,
+    } = this.props;
     return (
-      <LocalizationProvider l10n={localization}>
-        {children}
-      </LocalizationProvider>
+      <>
+        <AppLocalizationFetcher
+          requestedLocales={requestedLocales}
+          pseudoStrategy={pseudoStrategy}
+          receiveL10n={receiveL10n}
+        />
+        {/* if primaryLocale is null, the localization isn't ready */}
+        {primaryLocale ? (
+          <LocalizationProvider l10n={localization}>
+            {children}
+          </LocalizationProvider>
+        ) : null}
+      </>
     );
   }
 }
 export const AppLocalizationProvider = explicitConnect<
-  OwnProps,
-  StateProps,
-  DispatchProps
+  ProviderOwnProps,
+  ProviderStateProps,
+  ProviderDispatchProps
 >({
   mapStateToProps: (state) => ({
     localization: getLocalization(state),
     primaryLocale: getPrimaryLocale(state),
     direction: getDirection(state),
+    requestedLocales: getRequestedLocales(state),
+    pseudoStrategy: getPseudoStrategy(state),
   }),
   mapDispatchToProps: {
-    setupLocalization,
+    requestL10n,
+    receiveL10n,
   },
   component: AppLocalizationProviderImpl,
 });

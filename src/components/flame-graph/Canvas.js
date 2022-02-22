@@ -55,6 +55,7 @@ export type OwnProps = {|
   +callTree: CallTree,
   +stackFrameHeight: CssPixels,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +onRightClick: (IndexIntoCallNodeTable | null) => void,
   +onDoubleClick: (IndexIntoCallNodeTable | null) => void,
@@ -162,6 +163,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       callNodeInfo: { callNodeTable },
       stackFrameHeight,
       maxStackDepth,
+      rightClickedCallNodeIndex,
       selectedCallNodeIndex,
       categories,
       viewport: {
@@ -218,21 +220,23 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         );
 
         const isSelected = selectedCallNodeIndex === callNodeIndex;
+        const isRightClicked = rightClickedCallNodeIndex === callNodeIndex;
         const isHovered =
           hoveredItem &&
           depth === hoveredItem.depth &&
           i === hoveredItem.flameGraphTimingIndex;
+        const isHighlighted = isSelected || isRightClicked || isHovered;
 
         const categoryIndex = callNodeTable.category[callNodeIndex];
         const category = categories[categoryIndex];
         const colorStyles = this._mapCategoryColorNameToStyles(category.color);
 
-        const background =
-          isHovered || isSelected
-            ? colorStyles.selectedFillStyle
-            : colorStyles.unselectedFillStyle;
-        const foreground =
-          isHovered || isSelected ? colorStyles.selectedTextColor : '#000';
+        const background = isHighlighted
+          ? colorStyles.selectedFillStyle
+          : colorStyles.unselectedFillStyle;
+        const foreground = isHighlighted
+          ? colorStyles.selectedTextColor
+          : '#000';
 
         ctx.fillStyle = background;
         ctx.fillRect(x, y, w, h);
@@ -420,6 +424,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}
         onRightClick={this._onRightClick}
+        drawCanvasAfterRaf={false}
       />
     );
   }

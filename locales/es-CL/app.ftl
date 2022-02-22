@@ -29,16 +29,16 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = No se pudo recuperar el perfil de { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = No se pudo leer el archivo ni analizar el perfil que contiene.
-AppViewRouter--error-message-local =
-    .message = Aún no se ha implementado.
-AppViewRouter--error-message-public =
-    .message = No se pudo descargar el perfil.
-AppViewRouter--error-message-from-url =
-    .message = No se pudo descargar el perfil.
+AppViewRouter--error-unpublished = No se pudo recuperar el perfil de { -firefox-brand-name }.
+AppViewRouter--error-from-file = No se pudo leer el archivo ni analizar el perfil que contiene.
+AppViewRouter--error-local = Aún no se ha implementado.
+AppViewRouter--error-public = No se pudo descargar el perfil.
+AppViewRouter--error-from-url = No se pudo descargar el perfil.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari = Debido a una <a>limitación específica en Safari</a>, { -profiler-brand-name } no puede importar perfiles de la máquina local en este navegador. Por favor, abre esta página en { -firefox-brand-name } o Chrome en su lugar.
+    .title = Safari no puede importar perfiles locales
 AppViewRouter--route-not-found--home =
     .specialMessage = La URL a la que intentaste acceder no fue reconocida.
 
@@ -98,6 +98,22 @@ CallTree--bytes-total = Tamaño total (bytes)
 CallTree--bytes-self = Propio (bytes)
     .title = Los bytes "propios" incluyen los bytes asignados o desasignados donde la función estuvo como finalización de la pila. Si esta función es llamada en otras funciones, entonces los bytes de las "otras" funciones no son incluidos. Los bytes "propios" son útiles para entender dónde fue realmente asignada o desasignada la memoria dentro del programa.
 
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Algunas llamadas a { $callFunction } fueron incorporadas por el compilador.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (incorporada)
+    .title = Las llamadas a { $calledFunction } fueron incorporadas a { $outerFunction } por el compilador.
+
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
@@ -154,7 +170,7 @@ FullTimeline--stack-height = Altura de pila
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> pistas visibles
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> pistas
 
 ## Home page
 
@@ -396,11 +412,14 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Incluir captura
 MenuButtons--publish--renderCheckbox-label-resource = Incluir URL y rutas de recursos
 MenuButtons--publish--renderCheckbox-label-extension = Incluir información de extensión
 MenuButtons--publish--renderCheckbox-label-preference = Incluir valores de preferencias
+MenuButtons--publish--renderCheckbox-label-private-browsing = Incluir los datos de las ventanas de navegación privadas
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Este perfil contiene datos privados de navegación.
 MenuButtons--publish--reupload-performance-profile = Volver a subir perfil de rendimiento
 MenuButtons--publish--share-performance-profile = Compartir perfil de rendimiento
 MenuButtons--publish--info-description = Sube tu perfil y hazlo accesible a cualquiera que tenga el enlace.
 MenuButtons--publish--info-description-default = Por defecto, se eliminan tus datos personales.
-MenuButtons--publish--info-description-firefox-nightly = Este perfil es de { -firefox-nightly-brand-name }, por lo que de forma predeterminada se incluye toda la información.
+MenuButtons--publish--info-description-firefox-nightly2 = Este perfil es de { -firefox-nightly-brand-name }, por lo que de forma predeterminada se incluye casi toda la información.
 MenuButtons--publish--include-additional-data = Incluir datos adicionales que pueden ser identificables
 MenuButtons--publish--button-upload = Subir
 MenuButtons--publish--upload-title = Subiendo perfil…
@@ -438,20 +457,13 @@ ProfileFilterNavigator--full-range = Rango completo
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-unpublished =
-    .message = Importando el perfil directamente desde { -firefox-brand-name }…
-ProfileLoaderAnimation--loading-message-from-file =
-    .message = Leyendo el archivo y procesando el perfil…
-ProfileLoaderAnimation--loading-message-local =
-    .message = Aún no se ha implementado.
-ProfileLoaderAnimation--loading-message-public =
-    .message = Bajando y procesando el perfil…
-ProfileLoaderAnimation--loading-message-from-url =
-    .message = Bajando y procesando el perfil…
-ProfileLoaderAnimation--loading-message-compare =
-    .message = Leyendo y procesando perfiles…
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Vista no encontrada
+ProfileLoaderAnimation--loading-unpublished = Importando el perfil directamente desde { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Leyendo el archivo y procesando el perfil…
+ProfileLoaderAnimation--loading-local = Aún no se ha implementado.
+ProfileLoaderAnimation--loading-public = Bajando y procesando el perfil…
+ProfileLoaderAnimation--loading-from-url = Bajando y procesando el perfil…
+ProfileLoaderAnimation--loading-compare = Leyendo y procesando perfiles…
+ProfileLoaderAnimation--loading-view-not-found = Vista no encontrada
 
 ## ProfileRootMessage
 
@@ -523,6 +535,21 @@ TrackContextMenu--hide-other-screenshots-tracks = Ocultar otras pistas de captur
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Ocultar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Mostrar todas las pistas
+# This is used in the tracks context menu as a button to show all the tracks
+# below it.
+TrackContextMenu--show-all-tracks-below = Mostrar todas las pistas a continuación
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = No se encontraron resultados para "<span>{ $searchFilter }</span>"
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Ingrese términos de filtro
+    .title = Mostrar solo las pistas que coinciden con cierto texto
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -579,6 +606,65 @@ TransformNavigator--collapse-direct-recursion = Contraer recursión: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Colapsar subárbol: { $item }
+
+## Source code view in a box at the bottom of the UI.
+
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Esperando a { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Esperando por { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Fuente no disponible
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Consulta el <a>problema #3741</a> para conocer los escenarios compatibles y las mejoras planificadas.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = No se conoce una URL accesible por origen cruzado para este archivo.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Hubo un error de red al obtener la URL { $url }: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = No se pudo consultar la API de simbolización del navegador: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = La API de simbolización del navegador devolvió un error: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = La API de simbolización del servidor de símbolos local devolvió un error: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = El documento { $pathInArchive } no se encontró en el archivo de { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = El archivo de { $url } no pudo ser analizado: { $parsingErrorMessage }
+SourceView--close-button =
+    .title = Cerrar la vista de fuente
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
