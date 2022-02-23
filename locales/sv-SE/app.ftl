@@ -394,7 +394,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Inspelningen startade:
 MenuButtons--metaInfo--interval = Intervall:
-MenuButtons--metaInfo--profile-version = Profilversion:
 MenuButtons--metaInfo--buffer-capacity = Buffertkapacitet:
 MenuButtons--metaInfo--buffer-duration = Buffertlängd:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -461,6 +460,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Profilerad varaktighet:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Inkludera dolda trådar
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Inkludera data från andra flikar
 MenuButtons--publish--renderCheckbox-label-hidden-time = Inkludera dolt tidsintervall
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Inkludera skärmdumpar
 MenuButtons--publish--renderCheckbox-label-resource = Inkludera resursURLs och sökvägar
