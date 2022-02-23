@@ -338,7 +338,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Gravação iniciada:
 MenuButtons--metaInfo--interval = Intervalo:
-MenuButtons--metaInfo--profile-version = Versão do profile:
 MenuButtons--metaInfo--buffer-capacity = Capacidade do buffer:
 MenuButtons--metaInfo--buffer-duration = Duração do buffer:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -405,6 +404,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Duração da gravação 
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Incluir threads ocultos
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Incluir os dados de outras abas
 MenuButtons--publish--renderCheckbox-label-hidden-time = Incluir intervalo de tempo oculto
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Incluir capturas de tela
 MenuButtons--publish--renderCheckbox-label-resource = Incluir URLs e caminhos de recursos
