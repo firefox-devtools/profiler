@@ -401,7 +401,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Opname gestart:
 MenuButtons--metaInfo--interval = Interval:
-MenuButtons--metaInfo--profile-version = Profielversie:
 MenuButtons--metaInfo--buffer-capacity = Buffercapaciteit:
 MenuButtons--metaInfo--buffer-duration = Bufferduur:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -468,6 +467,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Geprofileerde duur:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Verborgen threads opnemen
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = De gegevens van andere tabbladen opnemen
 MenuButtons--publish--renderCheckbox-label-hidden-time = Verborgen tijdsbereik opnemen
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Schermafdrukken opnemen
 MenuButtons--publish--renderCheckbox-label-resource = Hulpbron-URL’s en -paden opnemen
