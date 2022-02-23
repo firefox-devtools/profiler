@@ -29,6 +29,7 @@ import {
   getUploadError,
   getShouldSanitizeByDefault,
 } from 'firefox-profiler/selectors/publish';
+import { getTimelineTrackOrganization } from 'firefox-profiler/selectors/url-state';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -67,6 +68,7 @@ type StateProps = {|
   +shouldSanitizeByDefault: boolean,
   +error: mixed,
   +abortFunction: () => mixed,
+  +timelineTrackOrganizationType: 'full' | 'active-tab' | 'origins',
 |};
 
 type DispatchProps = {|
@@ -81,6 +83,8 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   _toggles: { [$Keys<CheckedSharingOptions>]: () => mixed } = {
     includeHiddenThreads: () =>
       this.props.toggleCheckedSharingOptions('includeHiddenThreads'),
+    includeAllTabs: () =>
+      this.props.toggleCheckedSharingOptions('includeAllTabs'),
     includeFullTimeRange: () =>
       this.props.toggleCheckedSharingOptions('includeFullTimeRange'),
     includeScreenshots: () =>
@@ -126,7 +130,10 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       compressedProfileBlobPromise,
       shouldSanitizeByDefault,
       isRepublish,
+      timelineTrackOrganizationType,
     } = this.props;
+
+    const isActiveTabTimeline = timelineTrackOrganizationType === 'active-tab';
 
     return (
       <div data-testid="MenuButtonsPublish-container">
@@ -167,10 +174,15 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
             </Localized>
           </h3>
           <div className="menuButtonsPublishDataChoices">
-            {this._renderCheckbox(
-              'includeHiddenThreads',
-              'MenuButtons--publish--renderCheckbox-label-hidden-threads'
-            )}
+            {isActiveTabTimeline
+              ? this._renderCheckbox(
+                  'includeAllTabs',
+                  'MenuButtons--publish--renderCheckbox-label-include-other-tabs'
+                )
+              : this._renderCheckbox(
+                  'includeHiddenThreads',
+                  'MenuButtons--publish--renderCheckbox-label-hidden-threads'
+                )}
             {this._renderCheckbox(
               'includeFullTimeRange',
               'MenuButtons--publish--renderCheckbox-label-hidden-time'
@@ -362,6 +374,7 @@ export const MenuButtonsPublish = explicitConnect<
     error: getUploadError(state),
     shouldSanitizeByDefault: getShouldSanitizeByDefault(state),
     abortFunction: getAbortFunction(state),
+    timelineTrackOrganizationType: getTimelineTrackOrganization(state).type,
   }),
   mapDispatchToProps: {
     toggleCheckedSharingOptions,
