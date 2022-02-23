@@ -402,7 +402,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Запис розпочато:
 MenuButtons--metaInfo--interval = Інтервал:
-MenuButtons--metaInfo--profile-version = Версія профілю:
 MenuButtons--metaInfo--buffer-capacity = Обсяг буфера:
 MenuButtons--metaInfo--buffer-duration = Тривалість буфера:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -470,6 +469,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Тривалість з�
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Включити приховані потоки
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Включити дані з інших вкладок
 MenuButtons--publish--renderCheckbox-label-hidden-time = Включити прихований діапазон часу
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Включити знімки екрана
 MenuButtons--publish--renderCheckbox-label-resource = Включити URL-адреси ресурсів та шляхи
