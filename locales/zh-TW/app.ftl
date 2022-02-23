@@ -328,7 +328,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = 紀錄開始於:
 MenuButtons--metaInfo--interval = 間隔:
-MenuButtons--metaInfo--profile-version = 檢測檔版本:
 MenuButtons--metaInfo--buffer-capacity = 緩衝容量:
 MenuButtons--metaInfo--buffer-duration = 緩衝間隔:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -394,6 +393,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = 檢測的持續時間:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = 包含隱藏的執行緒
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = 包含來自其他分頁的資料
 MenuButtons--publish--renderCheckbox-label-hidden-time = 包含隱藏的時間範圍
 MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含畫面擷圖
 MenuButtons--publish--renderCheckbox-label-resource = 包含資源網址與路徑
