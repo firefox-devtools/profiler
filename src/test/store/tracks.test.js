@@ -671,10 +671,10 @@ describe('ordering and hiding', function () {
         'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         // Belongs to the global tab track.
-        '  - show [ipc GeckoMain] SELECTED',
+        '  - hide [ipc GeckoMain] SELECTED',
         '  - show [thread DOM Worker]',
         // Belongs to the DOM Worker local track.
-        '  - show [ipc DOM Worker]',
+        '  - hide [ipc DOM Worker]',
         '  - show [thread Style]',
       ]);
     });

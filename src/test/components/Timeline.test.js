@@ -16,9 +16,11 @@ import {
   selectedThreadSelectors,
   getRightClickedTrack,
   getMouseTimePosition,
+  getLocalTracksByPid,
 } from 'firefox-profiler/selectors';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from 'firefox-profiler/app-logic/constants';
 import { ensureExists } from 'firefox-profiler/utils/flow';
+import { showLocalTrack } from 'firefox-profiler/actions/profile-view';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -79,7 +81,23 @@ describe('Timeline multiple thread selection', function () {
     );
     flushRafCalls();
 
-    return { ...renderResult, ...store };
+    const showAllIPCTracks = () => {
+      const localTracksByPid = getLocalTracksByPid(store.getState());
+      for (const [pid, localTracks] of localTracksByPid) {
+        for (
+          let trackIndex = 0;
+          trackIndex < localTracks.length;
+          trackIndex++
+        ) {
+          const localTrack = localTracks[trackIndex];
+          if (localTrack.type === 'ipc') {
+            store.dispatch(showLocalTrack(pid, trackIndex));
+          }
+        }
+      }
+    };
+
+    return { ...renderResult, ...store, showAllIPCTracks };
   }
 
   it('can toggle select multiple threads', function () {
@@ -994,7 +1012,8 @@ describe('Timeline multiple thread selection', function () {
       profile.threads[7] // DOM Worker
     );
 
-    const { getState } = setup(profile);
+    const { getState, showAllIPCTracks } = setup(profile);
+    showAllIPCTracks();
     expect(getHumanReadableTracks(getState())).toEqual([
       'show [thread GeckoMain default]',
       '  - show [ipc GeckoMain]',
@@ -1092,7 +1111,8 @@ describe('Timeline multiple thread selection', function () {
       profile.threads[7] // DOM Worker
     );
 
-    const { getState } = setup(profile);
+    const { getState, showAllIPCTracks } = setup(profile);
+    showAllIPCTracks();
     expect(getHumanReadableTracks(getState())).toEqual([
       'show [thread GeckoMain default]',
       '  - show [ipc GeckoMain]',
