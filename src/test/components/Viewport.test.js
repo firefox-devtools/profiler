@@ -569,6 +569,17 @@ describe('Viewport', function () {
       expect(getChartViewport().viewportLeft).toBeGreaterThan(viewportLeft);
       expect(getChartViewport().viewportRight).toBeGreaterThan(viewportRight);
     });
+
+    // eslint-disable-next-line jest/expect-expect
+    it('stops redrawing when losing focus', () => {
+      const { viewportContainer, flushRafCalls } = setup();
+      fireEvent.keyDown(viewportContainer(), { code: 'KeyQ' });
+      fireEvent.blur(viewportContainer());
+      fireEvent.keyUp(ensureExists(document.body), { code: 'KeyQ' });
+
+      // This will throw if we have an infinite loop.
+      flushRafCalls();
+    });
   });
 
   it('reacts to changes to the panel layout generation', function () {
@@ -663,6 +674,9 @@ function setup(profileOverrides: MixedObject = {}) {
   // WithSize uses requestAnimationFrame.
   flushRafCalls();
 
+  // We rely on performance.now() for keyboard navigation.
+  jest.spyOn(performance, 'now').mockReturnValue(0);
+
   // The following functions are helpers for the tests, to provide a nicer functional
   // interface to drive changes to the components.
 
@@ -695,7 +709,6 @@ function setup(profileOverrides: MixedObject = {}) {
    * requestAnimationFrame `_keyboardNavigation` callback.
    */
   function depressKey(code: string, duration: Milliseconds) {
-    jest.spyOn(performance, 'now').mockReturnValue(0);
     fireEvent.keyDown(viewportContainer(), { code });
     // we run requestAnimationFrame callbacks only once here: indeed Viewport
     // will schedule callbacks as long as the keyup event isn't sent, and we'd
@@ -726,6 +739,7 @@ function setup(profileOverrides: MixedObject = {}) {
     ...renderResult,
     flushRafCalls,
     getChartViewport,
+    viewportContainer,
     scrollAndGetViewport,
     scroll,
     depressKey,
