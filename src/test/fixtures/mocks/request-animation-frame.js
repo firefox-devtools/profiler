@@ -13,12 +13,31 @@
 
 import { stripIndent } from 'common-tags';
 
-function stripThisFileFromErrorStack(stack: string) {
-  const stacks = stack.split('\n');
+function stripThisFileFromErrorStack(error: Error): string[] {
+  const stacks = error.stack.split('\n');
   const filteredStacks = stacks.filter(
     (stack) => !stack.includes('/request-animation-frame.js')
   );
-  return filteredStacks.join('\n');
+  filteredStacks.shift();
+  return filteredStacks;
+}
+
+/**
+ * Node logging mechanism only log error.stack, not error.message. Therefore we
+ * need to replace it in error.stack to see it logged as well.
+ * This function will build an error out of a message and the stacks filtered
+ * using stripThisFileFromErrorStack.
+ */
+function buildErrorWithMessageAndStacks(
+  message: string,
+  stacks: $ReadOnlyArray<string>
+): Error {
+  const error = new Error();
+  stacks = stacks.slice();
+  stacks.unshift(`Error: ${message}`);
+  error.message = message;
+  error.stack = stacks.join('\n');
+  return error;
 }
 
 /**
@@ -55,7 +74,7 @@ export function mockRaf() {
   jest.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
     requests.push({
       func: fn,
-      stack: stripThisFileFromErrorStack(new Error().stack),
+      stacks: stripThisFileFromErrorStack(new Error()),
     });
   });
 
@@ -79,40 +98,41 @@ export function mockRaf() {
 
     if (maxLoops <= 0 && !once) {
       if (requests.length === 1) {
-        const error = new Error(stripIndent`
-          We found a possible infinite loop using requestAnimationFrame.
-          If this is expected, you can pass "{once: true}" to "flushRafCalls" to avoid this throw.
-          This error's stack is where the last AnimationFrame was requested.
-        `);
-        error.stack = requests[0].stack;
-        throw error;
+        throw buildErrorWithMessageAndStacks(
+          stripIndent`
+            We found a possible infinite loop using requestAnimationFrame.
+            If this is expected, you can pass "{once: true}" to "flushRafCalls" to avoid this throw.
+            This error's stack is where the last AnimationFrame was requested.
+          `,
+          requests[0].stacks
+        );
       }
 
       // More than 1 request.
 
       const lastRequest = requests.pop();
-      const remainingRequestFirstStacks = requests.map((request, i) => {
-        const stackLines = request.stack.split('\n');
-        const firstLineFromProject = stackLines.find((line) =>
+      const remainingRequestFirstStacks = requests.map(({ stacks }, i) => {
+        const firstLineFromProject = stacks.find((line) =>
           line.includes('/src/')
         );
-        const reportedFirstLine = firstLineFromProject || stackLines[0];
+        const reportedFirstLine = firstLineFromProject || stacks[0];
 
         // Remove the first characteres so that jest's stack handling doesn't
         // merge this in the other stack.
         return reportedFirstLine.replace(/^\s*at/, `${i + 1} `);
       });
 
-      const error = new Error(stripIndent`
-        We found a possible infinite loop using requestAnimationFrame.
-        If this is expected, you can pass "{once: true}" to "flushRafCalls".
-        This error's stack is where the last AnimationFrame was requested, but there ${
-          requests.length > 1 ? 'are' : 'is'
-        } ${requests.length} more:
-        ${remainingRequestFirstStacks.join('\n')}
-      `);
-      error.stack = lastRequest.stack;
-      throw error;
+      throw buildErrorWithMessageAndStacks(
+        stripIndent`
+          We found a possible infinite loop using requestAnimationFrame.
+          If this is expected, you can pass "{once: true}" to "flushRafCalls".
+          This error's stack is where the last AnimationFrame was requested, but there ${
+            requests.length > 1 ? 'are' : 'is'
+          } ${requests.length} more:
+          ${remainingRequestFirstStacks.join('\n')}
+        `,
+        lastRequest.stacks
+      );
     }
   };
 }
