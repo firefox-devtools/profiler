@@ -15,6 +15,7 @@ import {
   getHasPreferenceMarkers,
   getContainsPrivateBrowsingInformation,
   getThreads,
+  getActiveTabID,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -26,7 +27,11 @@ import {
 import prettyBytes from '../utils/pretty-bytes';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
-import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
+import {
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
+  getTimelineTrackOrganization,
+} from './url-state';
 
 import type {
   PublishState,
@@ -80,6 +85,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     getLocalTracksByPid,
     getHasPreferenceMarkers,
     getContainsPrivateBrowsingInformation,
+    getTimelineTrackOrganization,
+    getActiveTabID,
     (
       checkedSharingOptions,
       profile,
@@ -89,7 +96,9 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       globalTracks,
       localTracksByPid,
       hasPreferenceMarkers,
-      containsPrivateBrowsingInformation
+      containsPrivateBrowsingInformation,
+      timelineTrackOrganization,
+      activeTabID
     ) => {
       let isIncludingEverything = true;
       for (const prop in checkedSharingOptions) {
@@ -116,7 +125,10 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
 
       // Find all of the thread indexes that are hidden.
       const shouldRemoveThreads = new Set();
-      if (!checkedSharingOptions.includeHiddenThreads) {
+      if (
+        timelineTrackOrganization.type === 'full' &&
+        !checkedSharingOptions.includeHiddenThreads
+      ) {
         for (const globalTrackIndex of hiddenGlobalTracks) {
           const globalTrack = globalTracks[globalTrackIndex];
           if (globalTrack.type === 'process') {
@@ -153,6 +165,12 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
         }
       }
 
+      const shouldRemoveTabsExceptTabID =
+        timelineTrackOrganization.type === 'active-tab' &&
+        !checkedSharingOptions.includeAllTabs
+          ? activeTabID
+          : null;
+
       return {
         shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
           ? null
@@ -169,6 +187,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           !checkedSharingOptions.includePreferenceValues,
         shouldRemovePrivateBrowsingData:
           !checkedSharingOptions.includePrivateBrowsingData,
+        shouldRemoveTabsExceptTabID,
       };
     }
   );

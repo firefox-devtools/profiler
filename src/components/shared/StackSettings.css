@@ -46,5 +46,6 @@
    * the focus ring around the select breaks out of its surrounding container. */
   position: relative;
   height: 24px;
+  color: inherit; /* important so that the text is still legible when the OS is configured in dark mode. */
   font-size: inherit;
 }

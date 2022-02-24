@@ -143,6 +143,7 @@ export type CallTreeSummaryStrategy =
 export type CheckedSharingOptions = {|
   // The following values are for including more information in a sanitized profile.
   includeHiddenThreads: boolean,
+  includeAllTabs: boolean,
   includeFullTimeRange: boolean,
   includeScreenshots: boolean,
   includeUrls: boolean,

@@ -18,6 +18,7 @@ import type {
 function _getSanitizingSharingOptions(): CheckedSharingOptions {
   return {
     includeHiddenThreads: false,
+    includeAllTabs: false,
     includeFullTimeRange: false,
     includeScreenshots: false,
     includeUrls: false,
@@ -30,6 +31,7 @@ function _getSanitizingSharingOptions(): CheckedSharingOptions {
 function _getMostlyNonSanitizingSharingOptions(): CheckedSharingOptions {
   return {
     includeHiddenThreads: true,
+    includeAllTabs: true,
     includeFullTimeRange: true,
     includeScreenshots: true,
     includeUrls: true,
