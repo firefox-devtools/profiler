@@ -625,6 +625,10 @@ export const withChartViewport: WithChartViewport<*, *> =
         this._keysDown.delete(BARE_KEYMAP[event.nativeEvent.code]);
       };
 
+      _onBlur = () => {
+        this._keysDown.clear();
+      };
+
       _keyboardNavigation = (timestamp) => {
         if (this._keysDown.size === 0) {
           // No keys are down, nothing to do.  Don't request a new
@@ -839,6 +843,7 @@ export const withChartViewport: WithChartViewport<*, *> =
             onMouseDown={this._mouseDownListener}
             onKeyDown={this._keyDownListener}
             onKeyUp={this._keyUpListener}
+            onBlur={this._onBlur}
             ref={this._takeContainerRef}
             tabIndex={0}
           >
