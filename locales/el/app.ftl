@@ -654,6 +654,12 @@ SourceView--network-error-when-obtaining-source = Προέκυψε σφάλμα 
 # Variables:
 #   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
 SourceView--browser-connection-error-when-obtaining-source = Δεν ήταν δυνατή η διερεύνηση του API συμβολισμού του προγράμματος περιήγησης: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = Το API συμβολισμού του διακομιστή τοπικών συμβόλων επέστρεψε σφάλμα: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
