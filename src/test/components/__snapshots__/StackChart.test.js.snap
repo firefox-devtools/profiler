@@ -123,7 +123,6 @@ exports[`CombinedChart renders combined stack chart 1`] = `
   >
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-      data-index="0"
     >
       <span
         class="filterNavigatorBarItemContent"
@@ -641,7 +640,6 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
   >
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-      data-index="0"
     >
       <span
         class="filterNavigatorBarItemContent"
@@ -1106,7 +1104,6 @@ exports[`StackChart matches the snapshot 1`] = `
   >
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-      data-index="0"
     >
       <span
         class="filterNavigatorBarItemContent"
