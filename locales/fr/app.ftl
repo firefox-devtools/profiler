@@ -402,6 +402,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Durée profilée :
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Inclure les threads cachés
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Inclure les données des autres onglets
 MenuButtons--publish--renderCheckbox-label-hidden-time = Inclure la plage de temps masquée
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Inclure des captures d’écran
 MenuButtons--publish--renderCheckbox-label-resource = Inclure les URL et les chemins des ressources
