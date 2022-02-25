@@ -97,6 +97,25 @@ class AppLocalizationFetcher extends React.PureComponent<FetchProps> {
   }
 }
 
+type InitProps = {|
+  +requestL10n: typeof requestL10n,
+|};
+
+/**
+ * This component is responsible for initializing the locales.
+ */
+class AppLocalizationInit extends React.PureComponent<InitProps> {
+  componentDidMount() {
+    const { requestL10n } = this.props;
+    const locales = navigator.languages;
+    requestL10n(locales);
+  }
+
+  render() {
+    return null;
+  }
+}
+
 type ProviderStateProps = {|
   +requestedLocales: null | string[],
   +pseudoStrategy: null | 'accented' | 'bidi',
@@ -119,18 +138,21 @@ type ProviderProps = ConnectedProps<
 >;
 
 /**
- * This component is responsible for initializing the locales and providing the
- * fluent localization data to the components. It also updates the locale
- * attributes on the document.
+ * This component is responsible for providing the fluent localization data to
+ * the components. It also updates the locale attributes on the document.
+ * Moreover it delegates to AppLocalizationInit and AppLocalizationFetcher the
+ * handling of initialization and fetching the locales information.
  */
 class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
   componentDidMount() {
-    const { requestL10n } = this.props;
-    const locales = navigator.languages;
-    requestL10n(locales);
+    this._updateLocalizationDocumentAttribute();
   }
 
   componentDidUpdate() {
+    this._updateLocalizationDocumentAttribute();
+  }
+
+  _updateLocalizationDocumentAttribute() {
     const { primaryLocale, direction } = this.props;
     if (!primaryLocale) {
       // The localization isn't ready.
@@ -147,11 +169,13 @@ class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
       children,
       localization,
       requestedLocales,
-      receiveL10n,
       pseudoStrategy,
+      receiveL10n,
+      requestL10n,
     } = this.props;
     return (
       <>
+        <AppLocalizationInit requestL10n={requestL10n} />
         <AppLocalizationFetcher
           requestedLocales={requestedLocales}
           pseudoStrategy={pseudoStrategy}
