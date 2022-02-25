@@ -47,9 +47,10 @@ beforeEach(() => {
 
 afterEach(function () {
   delete window.fetch;
+  localStorage.clear();
 });
 
-async function setup() {
+function setup() {
   const store = blankStore();
   render(
     <Provider store={store}>
@@ -58,17 +59,17 @@ async function setup() {
       </AppLocalizationProvider>
     </Provider>
   );
-  await screen.findByText(/Legal/);
 }
 
 it('correctly renders the FooterLinks component', async () => {
-  await setup();
+  setup();
+  await screen.findByText(/Legal/);
   expect(document.body).toMatchSnapshot();
 });
 
 it('can hide the footer links', async () => {
-  await setup();
-  expect(screen.getByText(/Privacy/)).toBeInTheDocument();
+  setup();
+  expect(await screen.findByText(/Privacy/)).toBeInTheDocument();
   const closeButton = screen.getByRole('button', {
     name: 'Hide footer links',
   });
@@ -76,15 +77,27 @@ it('can hide the footer links', async () => {
   expect(screen.queryByText(/Privacy/)).not.toBeInTheDocument();
 });
 
-it('makes it possible to switch the language', async () => {
-  await setup();
+it('makes it possible to switch the language and persists it', async () => {
+  setup();
 
   // Select the german language
-  const select = screen.getByRole('combobox', { name: 'Change language' });
+  const select = await screen.findByRole('combobox', {
+    name: 'Change language',
+  });
   const option: HTMLOptionElement = (screen.getByRole('option', {
     name: 'Deutsch',
   }): any);
   option.selected = true;
   fireEvent.change(select);
   expect(await screen.findByText('Rechtliches')).toBeInTheDocument();
+  expect(localStorage.getItem('requestedLocales')).toBe(JSON.stringify(['de']));
+});
+
+it('uses the previously requested locale at startup', async () => {
+  localStorage.setItem('requestedLocales', JSON.stringify(['fr']));
+  setup();
+  const option: HTMLOptionElement = (await screen.findByRole('option', {
+    name: 'Français',
+  }): any);
+  expect(option.selected).toBeTrue();
 });
