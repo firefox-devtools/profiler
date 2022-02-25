@@ -5,6 +5,8 @@
 
 import { Localized } from '@fluent/react';
 import React, { PureComponent } from 'react';
+import { LanguageSwitcher } from './LanguageSwitcher';
+
 import './FooterLinks.css';
 
 type State = {| hide: boolean |};
@@ -24,15 +26,18 @@ export class FooterLinks extends PureComponent<{||}, State> {
     }
     return (
       <div className="appFooterLinks">
-        <button
-          aria-label="Hide links to legal information"
-          title="Hide links to legal information"
-          className="appFooterLinksClose"
-          type="button"
-          onClick={this._onClick}
+        <Localized
+          id="FooterLinks--hide-button"
+          attrs={{ title: true, 'aria-label': true }}
         >
-          ✕
-        </button>
+          <button
+            className="appFooterLinksClose"
+            type="button"
+            onClick={this._onClick}
+          >
+            ✕
+          </button>
+        </Localized>
         <a
           className="appFooterLinksLink"
           href="https://www.mozilla.org/about/legal/terms/mozilla"
@@ -57,6 +62,7 @@ export class FooterLinks extends PureComponent<{||}, State> {
         >
           <Localized id="FooterLinks--Cookies">Cookies</Localized>
         </a>
+        <LanguageSwitcher />
       </div>
     );
   }
