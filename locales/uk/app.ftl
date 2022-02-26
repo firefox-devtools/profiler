@@ -202,6 +202,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Правові положення
 FooterLinks--Privacy = Приватність
 FooterLinks--Cookies = Куки
+FooterLinks--languageSwitcher--select =
+    .title = Змінити мову
+FooterLinks--hide-button =
+    .title = Сховати посилання нижнього колонтитула
+    .aria-label = Сховати посилання нижнього колонтитула
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
