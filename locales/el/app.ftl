@@ -167,6 +167,8 @@ Details--error-boundary-message =
 FooterLinks--legal = Νομικά
 FooterLinks--Privacy = Απόρρητο
 FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Αλλαγή γλώσσας
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -428,6 +430,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Διάρκεια κατ�
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Συμπερίληψη κρυφών νημάτων
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Συμπερίληψη δεδομένων από άλλες καρτέλες
 MenuButtons--publish--renderCheckbox-label-hidden-time = Συμπερίληψη κρυφού χρονικού διαστήματος
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Συμπερίληψη στιγμιότυπων οθόνης
 MenuButtons--publish--renderCheckbox-label-resource = Συμπερίληψη URL και διαδρομών πόρων
