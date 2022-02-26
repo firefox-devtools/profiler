@@ -199,6 +199,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Juridisk information
 FooterLinks--Privacy = Sekretesspolicy
 FooterLinks--Cookies = Kakor
+FooterLinks--languageSwitcher--select =
+    .title = Ändra språk
+FooterLinks--hide-button =
+    .title = Dölj sidfotslänkar
+    .aria-label = Dölj sidfotslänkar
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
