@@ -149,6 +149,11 @@ Details--error-boundary-message =
 FooterLinks--legal = 法律資訊
 FooterLinks--Privacy = 隱私權
 FooterLinks--Cookies = Cookie
+FooterLinks--languageSwitcher--select =
+    .title = 變更語言
+FooterLinks--hide-button =
+    .title = 隱藏頁尾鏈結
+    .aria-label = 隱藏頁尾鏈結
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
