@@ -149,6 +149,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Note legali
 FooterLinks--Privacy = Informativa sulla privacy
 FooterLinks--Cookies = Cookie
+FooterLinks--languageSwitcher--select =
+    .title = Cambia lingua
+FooterLinks--hide-button =
+    .title = Nascondi collegamenti a piè di pagina
+    .aria-label = Nascondi collegamenti a piè di pagina
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
