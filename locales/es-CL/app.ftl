@@ -155,6 +155,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacidad
 FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Cambiar idioma
+FooterLinks--hide-button =
+    .title = Ocultar enlaces de pie de página
+    .aria-label = Ocultar enlaces de pie de página
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -340,7 +345,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Inicio del registro:
 MenuButtons--metaInfo--interval = Intervalo:
-MenuButtons--metaInfo--profile-version = Versión del perfil:
 MenuButtons--metaInfo--buffer-capacity = Capacidad del búfer:
 MenuButtons--metaInfo--buffer-duration = Duración del búfer:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -407,6 +411,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Duración del perfilado:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Incluir hilos ocultos
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Incluir los datos de otras pestañas
 MenuButtons--publish--renderCheckbox-label-hidden-time = Incluir rango de tiempo oculto
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Incluir capturas de pantalla
 MenuButtons--publish--renderCheckbox-label-resource = Incluir URL y rutas de recursos
