@@ -1118,10 +1118,10 @@
     "@codemirror/state" "^0.19.0"
     "@codemirror/view" "^0.19.0"
 
-"@codemirror/rangeset@^0.19.0", "@codemirror/rangeset@^0.19.1", "@codemirror/rangeset@^0.19.5", "@codemirror/rangeset@^0.19.6":
-  version "0.19.6"
-  resolved "https://registry.yarnpkg.com/@codemirror/rangeset/-/rangeset-0.19.6.tgz#2562850cb4ce7dd30088f4d13a13860b67e7d384"
-  integrity sha512-wYtgGnW2Jtrh2nj7vpcBoEZib+jfyilrLN6w7YMTzzSRN8xXhYRorOUg4VQIa1JwFcMQrjSCkIdqXsDqOX1cYg==
+"@codemirror/rangeset@^0.19.0", "@codemirror/rangeset@^0.19.1", "@codemirror/rangeset@^0.19.5", "@codemirror/rangeset@^0.19.8":
+  version "0.19.8"
+  resolved "https://registry.yarnpkg.com/@codemirror/rangeset/-/rangeset-0.19.8.tgz#f9b572c287bcef08d150b4a539e0128db62b2091"
+  integrity sha512-1vusIkxSD0vK5KQ22JO/4Ejfww5268PgM/CpKNBSpTpWZEFlZbmOPyRiY4HXO2oEzOpypbA/walMiNInWnrT0Q==
   dependencies:
     "@codemirror/state" "^0.19.0"
 
