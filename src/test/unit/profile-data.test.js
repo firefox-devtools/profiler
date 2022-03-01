@@ -130,14 +130,14 @@ describe('process-profile', function () {
       expect(profile.threads.length).toEqual(3);
     });
 
-    it('should not have a profile-wide libs property', function () {
-      expect('libs' in profile).toBeFalsy();
+    it('should have a profile-wide libs property', function () {
+      expect('libs' in profile).toBeTruthy();
     });
 
     it('should have threads that are objects of the right shape', function () {
       for (const thread of profile.threads) {
         expect(typeof thread).toEqual('object');
-        expect('libs' in thread).toBeTruthy();
+        expect('libs' in thread).toBeFalsy();
         expect('samples' in thread).toBeTruthy();
         expect('stackTable' in thread).toBeTruthy();
         expect('frameTable' in thread).toBeTruthy();
@@ -148,44 +148,19 @@ describe('process-profile', function () {
       }
     });
 
-    it('should sort libs by start address', function () {
-      const libs = profile.threads[0].libs;
-      let lastStartAddress = -Infinity;
-      for (const lib of libs) {
-        expect(lib.start).toBeGreaterThan(lastStartAddress);
-        lastStartAddress = lib.start;
-      }
-    });
-
     it('should have reasonable debugName fields on each library', function () {
-      expect(profile.threads[0].libs[0].debugName).toEqual('firefox');
-      expect(profile.threads[0].libs[1].debugName).toEqual('examplebinary');
-      expect(profile.threads[0].libs[2].debugName).toEqual(
-        'examplebinary2.pdb'
-      );
-      expect(profile.threads[1].libs[0].debugName).toEqual('firefox');
-      expect(profile.threads[1].libs[1].debugName).toEqual('examplebinary');
-      expect(profile.threads[1].libs[2].debugName).toEqual(
-        'examplebinary2.pdb'
-      );
-
-      // Thread 2 is the content process main thread
-      expect(profile.threads[2].libs[0].debugName).toEqual(
-        'firefox-webcontent'
-      );
-      expect(profile.threads[2].libs[1].debugName).toEqual('examplebinary');
-      expect(profile.threads[2].libs[2].debugName).toEqual(
-        'examplebinary2.pdb'
-      );
+      expect(profile.libs.length).toBe(2);
+      expect(profile.libs[0].debugName).toEqual('firefox');
+      expect(profile.libs[1].debugName).toEqual('firefox-webcontent');
+      // The other libraries aren't used, so they should be culled from the
+      // processed profile.
     });
 
     it('should have reasonable breakpadId fields on each library', function () {
-      for (const thread of profile.threads) {
-        for (const lib of thread.libs) {
-          expect('breakpadId' in lib).toBeTruthy();
-          expect(lib.breakpadId.length).toEqual(33);
-          expect(lib.breakpadId).toEqual(lib.breakpadId.toUpperCase());
-        }
+      for (const lib of profile.libs) {
+        expect('breakpadId' in lib).toBeTruthy();
+        expect(lib.breakpadId.length).toEqual(33);
+        expect(lib.breakpadId).toEqual(lib.breakpadId.toUpperCase());
       }
     });
 

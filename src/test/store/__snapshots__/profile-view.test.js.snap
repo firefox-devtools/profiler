@@ -2,6 +2,7 @@
 
 exports[`snapshots of selectors/profile matches the last stored run of getProfile 1`] = `
 Object {
+  "libs": Array [],
   "meta": Object {
     "abi": "",
     "appBuildID": "",
@@ -401,7 +402,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 40,
+    "preprocessedProfileVersion": 41,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -625,7 +626,6 @@ Object {
           -1,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -936,7 +936,6 @@ Object {
         "relevantForJS": Array [],
         "resource": Array [],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [
           0,
@@ -1317,7 +1316,6 @@ Array [
         -1,
       ],
     },
-    "libs": Array [],
     "markers": Object {
       "category": Array [],
       "data": Array [],
@@ -1628,7 +1626,6 @@ Array [
       "relevantForJS": Array [],
       "resource": Array [],
     },
-    "libs": Array [],
     "markers": Object {
       "category": Array [
         0,
@@ -2807,7 +2804,6 @@ Object {
       -1,
     ],
   },
-  "libs": Array [],
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -3217,7 +3213,6 @@ Object {
       -1,
     ],
   },
-  "libs": Array [],
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -3542,7 +3537,6 @@ Object {
       -1,
     ],
   },
-  "libs": Array [],
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -3873,7 +3867,6 @@ Object {
       -1,
     ],
   },
-  "libs": Array [],
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -4208,7 +4201,6 @@ Object {
       -1,
     ],
   },
-  "libs": Array [],
   "markers": Object {
     "category": Array [],
     "data": Array [],

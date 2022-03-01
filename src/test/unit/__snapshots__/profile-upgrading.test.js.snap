@@ -3,6 +3,7 @@
 exports[`importing perf profile should import a perf profile 1`] = `
 Object {
   "counters": Array [],
+  "libs": Array [],
   "meta": Object {
     "abi": undefined,
     "appBuildID": undefined,
@@ -38,7 +39,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 40,
+    "preprocessedProfileVersion": 41,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -242,7 +243,6 @@ Object {
           0,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -268,19 +268,19 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 5,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           9,
@@ -532,7 +532,6 @@ Object {
           2,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -558,15 +557,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
         ],
         "length": 3,
         "lib": Array [
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           4,
@@ -750,7 +749,6 @@ Object {
           2,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -776,15 +774,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
         ],
         "length": 3,
         "lib": Array [
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           4,
@@ -1166,7 +1164,6 @@ Object {
           6,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -1192,23 +1189,23 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 7,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           15,
@@ -1515,7 +1512,6 @@ Object {
           3,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -1541,17 +1537,17 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 4,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           4,
@@ -1821,7 +1817,6 @@ Object {
           4,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -1847,19 +1842,19 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 5,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           7,
@@ -2084,7 +2079,6 @@ Object {
           1,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2110,13 +2104,13 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
+          null,
+          null,
         ],
         "length": 2,
         "lib": Array [
-          -1,
-          -1,
+          null,
+          null,
         ],
         "name": Array [
           3,
@@ -2288,7 +2282,6 @@ Object {
           2,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2314,15 +2307,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
         ],
         "length": 3,
         "lib": Array [
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           3,
@@ -2504,7 +2497,6 @@ Object {
           2,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2530,15 +2522,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
         ],
         "length": 3,
         "lib": Array [
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           3,
@@ -2724,7 +2716,6 @@ Object {
           2,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2750,15 +2741,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
         ],
         "length": 3,
         "lib": Array [
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           3,
@@ -2958,7 +2949,6 @@ Object {
           3,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2984,17 +2974,17 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 4,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           4,
@@ -3738,7 +3728,6 @@ Object {
           4,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -3764,19 +3753,19 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 5,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           32,
@@ -4728,7 +4717,6 @@ Object {
           4,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -4754,19 +4742,19 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 5,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           32,
@@ -5718,7 +5706,6 @@ Object {
           4,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -5744,19 +5731,19 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 5,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           32,
@@ -6712,7 +6699,6 @@ Object {
           4,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -6738,19 +6724,19 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "length": 5,
         "lib": Array [
-          -1,
-          -1,
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           32,
@@ -7490,7 +7476,6 @@ Object {
           2,
         ],
       },
-      "libs": Array [],
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -7516,15 +7501,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
-          undefined,
-          undefined,
-          undefined,
+          null,
+          null,
+          null,
         ],
         "length": 3,
         "lib": Array [
-          -1,
-          -1,
-          -1,
+          null,
+          null,
+          null,
         ],
         "name": Array [
           20,
@@ -10728,6 +10713,26 @@ Object {
 
 exports[`upgrading processed profiles should upgrade processed-1.json all the way to the current version 1`] = `
 Object {
+  "libs": Array [
+    Object {
+      "arch": "x86_64",
+      "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
+      "codeId": null,
+      "debugName": "firefox",
+      "debugPath": "",
+      "name": "firefox",
+      "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+    },
+    Object {
+      "arch": "x86_64",
+      "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
+      "codeId": null,
+      "debugName": "firefox-webcontent",
+      "debugPath": "",
+      "name": "firefox-webcontent",
+      "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
+    },
+  ],
   "meta": Object {
     "abi": "x86_64-gcc3",
     "categories": Array [
@@ -11119,7 +11124,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 40,
+    "preprocessedProfileVersion": 41,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -11283,38 +11288,6 @@ Object {
           1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
-          "debugName": "firefox",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -11437,11 +11410,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "addonId": Array [],
-        "host": Array [],
+        "host": Array [
+          null,
+          null,
+        ],
         "icon": Array [],
         "length": 2,
         "lib": Array [
           0,
+          null,
         ],
         "name": Array [
           11,
@@ -11718,38 +11695,6 @@ Object {
           1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
-          "debugName": "firefox",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -11872,11 +11817,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "addonId": Array [],
-        "host": Array [],
+        "host": Array [
+          null,
+          null,
+        ],
         "icon": Array [],
         "length": 2,
         "lib": Array [
           0,
+          null,
         ],
         "name": Array [
           11,
@@ -12153,38 +12102,6 @@ Object {
           1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
-          "debugName": "firefox-webcontent",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox-webcontent",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -12307,11 +12224,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "addonId": Array [],
-        "host": Array [],
+        "host": Array [
+          null,
+          null,
+        ],
         "icon": Array [],
         "length": 2,
         "lib": Array [
-          0,
+          1,
+          null,
         ],
         "name": Array [
           11,
@@ -12439,6 +12360,26 @@ Object {
 
 exports[`upgrading processed profiles should upgrade processed-2.json all the way to the current version 1`] = `
 Object {
+  "libs": Array [
+    Object {
+      "arch": "x86_64",
+      "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
+      "codeId": null,
+      "debugName": "firefox",
+      "debugPath": "",
+      "name": "firefox",
+      "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+    },
+    Object {
+      "arch": "x86_64",
+      "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
+      "codeId": null,
+      "debugName": "firefox-webcontent",
+      "debugPath": "",
+      "name": "firefox-webcontent",
+      "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
+    },
+  ],
   "meta": Object {
     "abi": "x86_64-gcc3",
     "categories": Array [
@@ -12830,7 +12771,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 40,
+    "preprocessedProfileVersion": 41,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -12994,38 +12935,6 @@ Object {
           1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
-          "debugName": "firefox",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -13172,11 +13081,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "addonId": Array [],
-        "host": Array [],
+        "host": Array [
+          null,
+          null,
+        ],
         "icon": Array [],
         "length": 2,
         "lib": Array [
           0,
+          null,
         ],
         "name": Array [
           11,
@@ -13456,38 +13369,6 @@ Object {
           1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
-          "debugName": "firefox",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -13610,11 +13491,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "addonId": Array [],
-        "host": Array [],
+        "host": Array [
+          null,
+          null,
+        ],
         "icon": Array [],
         "length": 2,
         "lib": Array [
           0,
+          null,
         ],
         "name": Array [
           11,
@@ -13927,38 +13812,6 @@ Object {
           -1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
-          "debugName": "firefox-webcontent",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox-webcontent",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -14119,7 +13972,7 @@ Object {
         ],
         "length": 2,
         "lib": Array [
-          0,
+          1,
           null,
         ],
         "name": Array [
@@ -14302,6 +14155,26 @@ Object {
           },
         },
       ],
+    },
+  ],
+  "libs": Array [
+    Object {
+      "arch": "x86_64",
+      "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
+      "codeId": null,
+      "debugName": "firefox",
+      "debugPath": "",
+      "name": "firefox",
+      "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+    },
+    Object {
+      "arch": "x86_64",
+      "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
+      "codeId": null,
+      "debugName": "firefox-webcontent",
+      "debugPath": "",
+      "name": "firefox-webcontent",
+      "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
     },
   ],
   "meta": Object {
@@ -14695,7 +14568,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 40,
+    "preprocessedProfileVersion": 41,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -14885,38 +14758,6 @@ Object {
           1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
-          "debugName": "firefox",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -15075,11 +14916,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "addonId": Array [],
-        "host": Array [],
+        "host": Array [
+          null,
+          null,
+        ],
         "icon": Array [],
         "length": 2,
         "lib": Array [
           0,
+          null,
         ],
         "name": Array [
           11,
@@ -15360,38 +15205,6 @@ Object {
           1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
-          "debugName": "firefox",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -15516,11 +15329,15 @@ Object {
       "registerTime": 0,
       "resourceTable": Object {
         "addonId": Array [],
-        "host": Array [],
+        "host": Array [
+          null,
+          null,
+        ],
         "icon": Array [],
         "length": 2,
         "lib": Array [
           0,
+          null,
         ],
         "name": Array [
           11,
@@ -15833,38 +15650,6 @@ Object {
           -1,
         ],
       },
-      "libs": Array [
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
-          "debugName": "firefox-webcontent",
-          "debugPath": "",
-          "end": 4294977296,
-          "name": "firefox-webcontent",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
-          "start": 4294967296,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "1000000000000000000000000000000A1",
-          "debugName": "examplebinary",
-          "debugPath": "",
-          "end": 8589934612,
-          "name": "examplebinary",
-          "path": "/tmp/examplebinary",
-          "start": 8589934592,
-        },
-        Object {
-          "arch": "x86_64",
-          "breakpadId": "100000000000000000000000000000A27",
-          "debugName": "examplebinary2.pdb",
-          "debugPath": "",
-          "end": 8589934632,
-          "name": "examplebinary2",
-          "path": "C:\\\\examplebinary2",
-          "start": 8589934612,
-        },
-      ],
       "markers": Object {
         "category": Array [
           4,
@@ -16027,7 +15812,7 @@ Object {
         ],
         "length": 2,
         "lib": Array [
-          0,
+          1,
           null,
         ],
         "name": Array [

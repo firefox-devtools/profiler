@@ -4,7 +4,7 @@
 // @flow
 
 import type {
-  Lib,
+  LibMapping,
   ProfilerOverheadStats,
   GeckoProfile,
   GeckoSubprocessProfile,
@@ -94,7 +94,7 @@ export function createGeckoSubprocessProfile(
     markerSchema: [...parentProfile.meta.markerSchema],
   };
 
-  const contentProcessBinary: Lib = {
+  const contentProcessBinary: LibMapping = {
     breakpadId: '9F950E2CE3CD3E1ABD06D80788B606E60',
     debugName: 'firefox-webcontent',
     name: 'firefox-webcontent',
@@ -143,7 +143,7 @@ export function createGeckoSubprocessProfile(
  * i.e. the format that nsIProfiler.getProfileDataAsync outputs.
  */
 export function createGeckoProfile(): GeckoProfile {
-  const parentProcessBinary: Lib = {
+  const parentProcessBinary: LibMapping = {
     breakpadId: 'F1D957D30B413D55A539BBA06F90DD8F0',
     debugName: 'firefox',
     name: 'firefox',
@@ -155,7 +155,7 @@ export function createGeckoProfile(): GeckoProfile {
     arch: 'x86_64',
   };
 
-  const extraBinaries: Lib[] = [
+  const extraBinaries: LibMapping[] = [
     {
       breakpadId: '1000000000000000000000000000000A1',
       debugName: 'examplebinary',
