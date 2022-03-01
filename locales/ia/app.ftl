@@ -204,6 +204,8 @@ Details--error-boundary-message =
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Confidentialitate
 FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Cambiar lingua
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -394,7 +396,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Registration comenciate:
 MenuButtons--metaInfo--interval = Intervallo:
-MenuButtons--metaInfo--profile-version = Version de profilo:
 MenuButtons--metaInfo--buffer-capacity = Capacitate de buffer:
 MenuButtons--metaInfo--buffer-duration = Capacitate de buffer:
 # Buffer Duration in Seconds in Meta Info Panel
