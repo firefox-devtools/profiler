@@ -633,7 +633,7 @@ TabBar--js-tracer-tab = JS Tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Only show this process group
+TrackContextMenu--only-show-this-process = Only show this process
 
 # This is used as the context menu item to show only the given track.
 # Variables:
