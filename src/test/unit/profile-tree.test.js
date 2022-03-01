@@ -642,7 +642,7 @@ describe('origin annotation', function () {
     thread.resourceTable.lib.push(-1);
     thread.resourceTable.name.push(thread.stringTable.indexForString(name));
     thread.resourceTable.host.push(
-      host ? thread.stringTable.indexForString(host) : undefined
+      host ? thread.stringTable.indexForString(host) : null
     );
     thread.resourceTable.length++;
   }

@@ -2029,5 +2029,83 @@ const _upgraders = {
       thread.frameTable.inlineDepth = Array(thread.frameTable.length).fill(0);
     }
   },
+  [41]: (profile) => {
+    // The libs list has moved from Thread to Profile - it is now shared between
+    // all threads in the profile. And it only contains libs which are used by
+    // at least one resource.
+    //
+    // The Lib fields have changed, too:
+    //  - The start/end/offset fields are gone: They are not needed after
+    //    profile processing, when all frame addresses have been made
+    //    library-relative; and these values usually differ in the different
+    //    processes, so the fields could not have a meaningful value in the
+    //    shared list.
+    //  - There is a codeId field which defaults to null. This will be used in
+    //    the future to store another ID which lets the symbol server look up
+    //    correct binary. On Windows this is the dll / exe CodeId, and on Linux
+    //    and Android this is the full ELF build ID.
+    //
+    // We've also cleaned up the ResourceTable format:
+    //  - All resources now have names.
+    //  - Resources without a "host" or "lib" field have these fields set to
+    //    null consistently.
+
+    const libs = [];
+    const libKeyToLibIndex = new Map();
+    for (const thread of profile.threads) {
+      const { libs: threadLibs, resourceTable, stringTable } = thread;
+      const threadLibIndexToGlobalLibIndex = new Map();
+      delete thread.libs;
+      for (
+        let resourceIndex = 0;
+        resourceIndex < resourceTable.length;
+        resourceIndex++
+      ) {
+        const nameStringIndex = resourceTable.name[resourceIndex];
+        if (
+          nameStringIndex === -1 ||
+          nameStringIndex === undefined ||
+          nameStringIndex === null
+        ) {
+          resourceTable.name[resourceIndex] =
+            stringTable.indexForString('<unnamed resource>');
+        }
+        const hostStringIndex = resourceTable.host[resourceIndex];
+        if (hostStringIndex === -1 || hostStringIndex === undefined) {
+          resourceTable.host[resourceIndex] = null;
+        }
+        const libIndex = resourceTable.lib[resourceIndex];
+        if (libIndex === undefined || libIndex === null || libIndex === -1) {
+          resourceTable.lib[resourceIndex] = null;
+          continue;
+        }
+
+        let newLibIndex = threadLibIndexToGlobalLibIndex.get(libIndex);
+        if (newLibIndex === undefined) {
+          const lib = threadLibs[libIndex];
+          const { debugName, breakpadId } = lib;
+          const libKey = `${debugName}/${breakpadId}`;
+
+          newLibIndex = libKeyToLibIndex.get(libKey);
+          if (newLibIndex === undefined) {
+            newLibIndex = libs.length;
+            const { arch, name, path, debugPath, codeId } = lib;
+            libs.push({
+              arch,
+              name,
+              path,
+              debugName,
+              debugPath,
+              breakpadId,
+              codeId: codeId ?? null,
+            });
+            libKeyToLibIndex.set(libKey, newLibIndex);
+          }
+        }
+        resourceTable.lib[resourceIndex] = newLibIndex;
+      }
+    }
+    profile.libs = libs;
+  },
 };
 /* eslint-enable no-useless-computed-key */

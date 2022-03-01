@@ -523,16 +523,14 @@ function _createUnsymbolicatedProfile() {
 
   // Add a mock lib.
   const libIndex = 0;
-  thread.libs[libIndex] = {
-    start: 0,
-    end: 0x4000,
-    offset: 0,
+  profile.libs[libIndex] = {
     arch: '',
     name: 'firefox.exe',
     path: '',
     debugName: 'firefox.pdb',
     debugPath: '',
     breakpadId: '000000000000000000000000000000000',
+    codeId: null,
   };
 
   thread.resourceTable = {

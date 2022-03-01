@@ -36,7 +36,7 @@ describe('mergeProfilesForDiffing function', function () {
     expect(mergedProfile.threads).toHaveLength(3);
 
     const mergedThread = mergedProfile.threads[2];
-    const mergedLibs = mergedThread.libs;
+    const mergedLibs = mergedProfile.libs;
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
     const stringTable = mergedThread.stringTable;
@@ -169,30 +169,73 @@ describe('mergeProfilesForDiffing function', function () {
       )
     ).toBe(false);
   });
+
+  it('merges the nativeSymbols tables correctly', function () {
+    const sampleProfileA = getProfileFromTextSamples(
+      'X[lib:libA]  Y[lib:libA]'
+    );
+    const sampleProfileB = getProfileFromTextSamples(
+      'Z[lib:libB]  W[lib:libB]'
+    );
+
+    const threadA = sampleProfileA.profile.threads[0];
+    const threadB = sampleProfileB.profile.threads[0];
+
+    threadA.nativeSymbols = {
+      length: 2,
+      name: [
+        threadA.stringTable.indexForString('X'),
+        threadA.stringTable.indexForString('Y'),
+      ],
+      address: [0x20, 0x50],
+      libIndex: [0, 0],
+    };
+
+    threadB.nativeSymbols = {
+      length: 2,
+      name: [
+        threadB.stringTable.indexForString('Z'),
+        threadB.stringTable.indexForString('W'),
+      ],
+      address: [0x25, 0x45],
+      libIndex: [0, 0],
+    };
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [sampleProfileA.profile, sampleProfileB.profile],
+      [profileState, profileState]
+    );
+
+    // The merged profile has a single merged libs list, so the two threads
+    // should now be referring to different libIndexes.
+    const mergedProfileThreadA = mergedProfile.threads[0];
+    const mergedProfileThreadB = mergedProfile.threads[1];
+    const mergedThread = mergedProfile.threads[2];
+    expect(mergedProfileThreadA.nativeSymbols.libIndex).toEqual([0, 0]);
+    expect(mergedProfileThreadB.nativeSymbols.libIndex).toEqual([1, 1]);
+    expect(mergedThread.nativeSymbols.libIndex).toEqual([0, 0, 1, 1]);
+  });
 });
 
 describe('mergeThreads function', function () {
   function getFriendlyFuncLibResources(thread: Thread): string[] {
-    const { funcTable, resourceTable, stringTable, libs } = thread;
+    const { funcTable, resourceTable, stringTable } = thread;
     const strings = [];
     for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
       const funcName = stringTable.getString(funcTable.name[funcIndex]);
       const resourceIndex = funcTable.resource[funcIndex];
 
       let resourceName = '';
-      let libName = '';
       if (resourceIndex >= 0) {
         const nameIndex = resourceTable.name[resourceIndex];
-        if (nameIndex >= 0) {
-          resourceName = stringTable.getString(nameIndex);
-        }
-
-        const libIndex = resourceTable.lib[resourceIndex];
-        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
-          libName = libs[libIndex].name;
-        }
+        resourceName = stringTable.getString(nameIndex);
       }
-      strings.push(`${funcName} [${resourceName}:${libName}]`);
+      strings.push(`${funcName} [${resourceName}]`);
     }
     return strings;
   }
@@ -205,11 +248,10 @@ describe('mergeThreads function', function () {
 
     const mergedThread = mergeThreads(profile.threads);
 
-    const mergedLibs = mergedThread.libs;
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
 
-    expect(mergedLibs).toHaveLength(3);
+    expect(profile.libs).toHaveLength(3);
     expect(mergedResources).toHaveLength(3);
     expect(mergedFunctions).toHaveLength(4);
 
@@ -217,10 +259,10 @@ describe('mergeThreads function', function () {
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, and 1 C function.
     expect(getFriendlyFuncLibResources(mergedThread)).toEqual([
-      'A [libA:libA]',
-      'B [libA:libA]',
-      'A [libB:libB]',
-      'C [libC:libC]',
+      'A [libA]',
+      'B [libA]',
+      'A [libB]',
+      'C [libC]',
     ]);
   });
 
@@ -233,11 +275,10 @@ describe('mergeThreads function', function () {
 
     const mergedThread = mergeThreads(profile.threads);
 
-    const mergedLibs = mergedThread.libs;
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
 
-    expect(mergedLibs).toHaveLength(4);
+    expect(profile.libs).toHaveLength(4);
     expect(mergedResources).toHaveLength(4);
     expect(mergedFunctions).toHaveLength(5);
 
@@ -245,11 +286,11 @@ describe('mergeThreads function', function () {
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, 1 C function and 1 D function.
     expect(getFriendlyFuncLibResources(mergedThread)).toEqual([
-      'A [libA:libA]',
-      'B [libA:libA]',
-      'A [libB:libB]',
-      'C [libC:libC]',
-      'D [libD:libD]',
+      'A [libA]',
+      'B [libA]',
+      'A [libB]',
+      'C [libC]',
+      'D [libD]',
     ]);
   });
 

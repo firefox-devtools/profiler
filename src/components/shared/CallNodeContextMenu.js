@@ -331,7 +331,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodePath,
-      thread: { funcTable, stringTable, resourceTable, libs },
+      thread: { funcTable, stringTable, resourceTable },
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodePath[callNodePath.length - 1];
@@ -350,11 +350,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     if (resourceIndex === -1) {
       return null;
     }
-    const libIndex = resourceTable.lib[resourceIndex];
-    if (libIndex === undefined || libIndex === null || libIndex === -1) {
-      return null;
-    }
-    return libs[libIndex].name;
+    const resNameStringIndex = resourceTable.name[resourceIndex];
+    return stringTable.getString(resNameStringIndex);
   }
 
   /**

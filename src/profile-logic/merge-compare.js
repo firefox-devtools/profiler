@@ -115,6 +115,12 @@ export function mergeProfilesForDiffing(
   } = mergeCategories(profiles.map((profile) => profile.meta.categories));
   resultProfile.meta.categories = newCategories;
 
+  // Then merge libs.
+  const { libs: newLibs, translationMaps: translationMapsForLibs } = mergeLibs(
+    profiles.map((profile) => profile.libs)
+  );
+  resultProfile.libs = newLibs;
+
   // Then we loop over all profiles and do the necessary changes according
   // to the states we computed earlier.
   const transformStacks = {};
@@ -153,6 +159,20 @@ export function mergeProfilesForDiffing(
       category: adjustNullableCategories(
         thread.frameTable.category,
         translationMapsForCategories[i]
+      ),
+    };
+    thread.resourceTable = {
+      ...thread.resourceTable,
+      lib: adjustResourceTableLibs(
+        thread.resourceTable.lib,
+        translationMapsForLibs[i]
+      ),
+    };
+    thread.nativeSymbols = {
+      ...thread.nativeSymbols,
+      libIndex: adjustNativeSymbolLibs(
+        thread.nativeSymbols.libIndex,
+        translationMapsForLibs[i]
       ),
     };
 
@@ -354,6 +374,49 @@ function adjustCategories(
 
 /**
  * Adjusts the category indices in a category list using a translation map.
+ */
+function adjustResourceTableLibs(
+  libs: Array<IndexIntoLibs | null>, // type of ResourceTable.libs
+  translationMap: TranslationMapForLibs
+): Array<IndexIntoLibs | null> {
+  return libs.map((lib) => {
+    if (lib === null) {
+      return lib;
+    }
+    const result = translationMap.get(lib);
+    if (result === undefined) {
+      throw new Error(
+        stripIndent`
+          Lib with index ${lib} hasn't been found in the translation map.
+          This shouldn't happen and indicates a bug in the profiler's code.
+        `
+      );
+    }
+    return result;
+  });
+}
+
+// Same as above, but without the " | null" in the type, to make flow happy.
+function adjustNativeSymbolLibs(
+  libs: Array<IndexIntoLibs>, // type of ResourceTable.libs
+  translationMap: TranslationMapForLibs
+): Array<IndexIntoLibs> {
+  return libs.map((lib) => {
+    const result = translationMap.get(lib);
+    if (result === undefined) {
+      throw new Error(
+        stripIndent`
+          Lib with index ${lib} hasn't been found in the translation map.
+          This shouldn't happen and indicates a bug in the profiler's code.
+        `
+      );
+    }
+    return result;
+  });
+}
+
+/**
+ * Adjusts the category indices in a category list using a translation map.
  * This is just like the previous function, except the input and output arrays
  * can have null values. There are 2 different functions to keep our type
  * safety.
@@ -380,12 +443,11 @@ function adjustNullableCategories(
 }
 
 /**
- * This combines the library tables for a list of threads. It returns a merged
+ * This combines the library lists from multiple profiles. It returns a merged
  * Lib array, along with a translation maps that can be used in other functions
  * when merging lib references in other tables.
- * The address ranges in the combined lib table are meaningless.
  */
-function combineLibTables(threads: $ReadOnlyArray<Thread>): {
+function mergeLibs(libsPerProfile: Lib[][]): {
   libs: Lib[],
   translationMaps: TranslationMapForLibs[],
 } {
@@ -394,9 +456,8 @@ function combineLibTables(threads: $ReadOnlyArray<Thread>): {
   const translationMaps = [];
   const newLibTable = [];
 
-  threads.forEach((thread) => {
+  for (const libs of libsPerProfile) {
     const translationMap = new Map();
-    const { libs } = thread;
 
     libs.forEach((lib, i) => {
       const insertedLibKey = [lib.name, lib.debugName].join('#');
@@ -413,7 +474,7 @@ function combineLibTables(threads: $ReadOnlyArray<Thread>): {
     });
 
     translationMaps.push(translationMap);
-  });
+  }
 
   return { libs: newLibTable, translationMaps };
 }
@@ -424,7 +485,6 @@ function combineLibTables(threads: $ReadOnlyArray<Thread>): {
  * functions.
  */
 function combineResourceTables(
-  translationMapsForLibs: TranslationMapForLibs[],
   newStringTable: UniqueStringArray,
   threads: $ReadOnlyArray<Thread>
 ): {
@@ -435,37 +495,23 @@ function combineResourceTables(
   const translationMaps = [];
   const newResourceTable = getEmptyResourceTable();
 
-  threads.forEach((thread, threadIndex) => {
+  threads.forEach((thread) => {
     const translationMap = new Map();
     const { resourceTable, stringTable } = thread;
-    const libTranslationMap = translationMapsForLibs[threadIndex];
 
     for (let i = 0; i < resourceTable.length; i++) {
       const libIndex = resourceTable.lib[i];
-      const newLibIndex =
-        typeof libIndex === 'number' && libIndex >= 0
-          ? libTranslationMap.get(libIndex)
-          : null;
-      if (newLibIndex === undefined) {
-        throw new Error(stripIndent`
-          We couldn't find the lib of resource ${i} in the translation map.
-          This is a programming error.
-        `);
-      }
-
       const nameIndex = resourceTable.name[i];
-      const newName = nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
+      const newName = stringTable.getString(nameIndex) ?? '';
 
       const hostIndex = resourceTable.host[i];
       const newHost =
-        typeof hostIndex === 'number' && hostIndex >= 0
-          ? stringTable.getString(hostIndex)
-          : undefined;
+        hostIndex !== null ? stringTable.getString(hostIndex) : null;
 
       const type = resourceTable.type[i];
 
       // Duplicate search.
-      const resourceKey = [newLibIndex, newName || '', type].join('#');
+      const resourceKey = [newName, type].join('#');
       const insertedResourceIndex = mapOfInsertedResources.get(resourceKey);
       if (insertedResourceIndex !== undefined) {
         translationMap.set(i, insertedResourceIndex);
@@ -475,17 +521,12 @@ function combineResourceTables(
       translationMap.set(i, newResourceTable.length);
       mapOfInsertedResources.set(resourceKey, newResourceTable.length);
 
-      newResourceTable.lib.push(newLibIndex);
-      newResourceTable.name.push(
-        newName === null ? -1 : newStringTable.indexForString(newName)
-      );
+      newResourceTable.lib.push(libIndex);
+      newResourceTable.name.push(newStringTable.indexForString(newName));
       newResourceTable.host.push(
-        newHost === undefined
-          ? undefined
-          : newStringTable.indexForString(newHost)
+        newHost === null ? null : newStringTable.indexForString(newHost)
       );
       newResourceTable.type.push(type);
-
       newResourceTable.length++;
     }
 
@@ -499,7 +540,6 @@ function combineResourceTables(
  * This combines the nativeSymbols tables for the threads.
  */
 function combineNativeSymbolTables(
-  translationMapsForLibs: TranslationMapForLibs[],
   newStringTable: UniqueStringArray,
   threads: $ReadOnlyArray<Thread>
 ): {
@@ -511,27 +551,18 @@ function combineNativeSymbolTables(
   const translationMaps = [];
   const newNativeSymbols = getEmptyNativeSymbolTable();
 
-  threads.forEach((thread, threadIndex) => {
+  threads.forEach((thread) => {
     const translationMap = new Map();
     const { nativeSymbols, stringTable } = thread;
-    const libTranslationMap = translationMapsForLibs[threadIndex];
 
     for (let i = 0; i < nativeSymbols.length; i++) {
       const libIndex = nativeSymbols.libIndex[i];
-      const newLibIndex = libTranslationMap.get(libIndex);
-      if (newLibIndex === undefined) {
-        throw new Error(stripIndent`
-        We couldn't find the lib of nativeSymbol ${i} in the translation map.
-        This is a programming error.
-        `);
-      }
-
       const nameIndex = nativeSymbols.name[i];
       const newName = stringTable.getString(nameIndex);
       const address = nativeSymbols.address[i];
 
       // Duplicate search.
-      const nativeSymbolKey = [newLibIndex, newName, address].join('#');
+      const nativeSymbolKey = [newName, address].join('#');
       const insertedNativeSymbolIndex =
         mapOfInsertedNativeSymbols.get(nativeSymbolKey);
       if (insertedNativeSymbolIndex !== undefined) {
@@ -542,7 +573,7 @@ function combineNativeSymbolTables(
       translationMap.set(i, newNativeSymbols.length);
       mapOfInsertedNativeSymbols.set(nativeSymbolKey, newNativeSymbols.length);
 
-      newNativeSymbols.libIndex.push(newLibIndex);
+      newNativeSymbols.libIndex.push(libIndex);
       newNativeSymbols.name.push(newStringTable.indexForString(newName));
       newNativeSymbols.address.push(address);
 
@@ -916,20 +947,14 @@ function getComparisonThread(
 
   const threads = threadsAndIntervals.map((item) => item.thread);
 
-  const { libs: newLibTable, translationMaps: translationMapsForLibs } =
-    combineLibTables(threads);
   const {
     resourceTable: newResourceTable,
     translationMaps: translationMapsForResources,
-  } = combineResourceTables(translationMapsForLibs, newStringTable, threads);
+  } = combineResourceTables(newStringTable, threads);
   const {
     nativeSymbols: newNativeSymbols,
     translationMaps: translationMapsForNativeSymbols,
-  } = combineNativeSymbolTables(
-    translationMapsForLibs,
-    newStringTable,
-    threads
-  );
+  } = combineNativeSymbolTables(newStringTable, threads);
   const { funcTable: newFuncTable, translationMaps: translationMapsForFuncs } =
     combineFuncTables(translationMapsForResources, newStringTable, threads);
   const {
@@ -981,7 +1006,6 @@ function getComparisonThread(
     stackTable: newStackTable,
     frameTable: newFrameTable,
     stringTable: newStringTable,
-    libs: newLibTable,
     funcTable: newFuncTable,
     resourceTable: newResourceTable,
     nativeSymbols: newNativeSymbols,
@@ -1000,20 +1024,14 @@ export function mergeThreads(threads: Thread[]): Thread {
   const newStringTable = new UniqueStringArray();
 
   // Combine the table we would need.
-  const { libs: newLibTable, translationMaps: translationMapsForLibs } =
-    combineLibTables(threads);
   const {
     resourceTable: newResourceTable,
     translationMaps: translationMapsForResources,
-  } = combineResourceTables(translationMapsForLibs, newStringTable, threads);
+  } = combineResourceTables(newStringTable, threads);
   const {
     nativeSymbols: newNativeSymbols,
     translationMaps: translationMapsForNativeSymbols,
-  } = combineNativeSymbolTables(
-    translationMapsForLibs,
-    newStringTable,
-    threads
-  );
+  } = combineNativeSymbolTables(newStringTable, threads);
   const { funcTable: newFuncTable, translationMaps: translationMapsForFuncs } =
     combineFuncTables(translationMapsForResources, newStringTable, threads);
   const {
@@ -1079,7 +1097,6 @@ export function mergeThreads(threads: Thread[]): Thread {
     stackTable: newStackTable,
     frameTable: newFrameTable,
     stringTable: newStringTable,
-    libs: newLibTable,
     funcTable: newFuncTable,
     nativeSymbols: newNativeSymbols,
     resourceTable: newResourceTable,

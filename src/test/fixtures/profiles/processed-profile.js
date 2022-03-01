@@ -51,6 +51,7 @@ import {
 } from '../../../profile-logic/marker-data';
 import { getTimeRangeForThread } from '../../../profile-logic/profile-data';
 import { markerSchemaForTests } from './marker-schema';
+import { GlobalDataCollector } from 'firefox-profiler/profile-logic/process-profile';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
@@ -552,7 +553,7 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
 } {
-  const profile = getEmptyProfile();
+  let profile = getEmptyProfile();
   // Provide a useful marker schema, rather than an empty one.
   profile.meta.markerSchema = markerSchemaForTests;
   const categories = ensureExists(
@@ -562,6 +563,8 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
 
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];
+
+  const globalDataCollector = new GlobalDataCollector();
 
   profile.threads = allTextSamples.map((textSamples) => {
     // Process the text.
@@ -607,9 +610,12 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
       textOnlyStacks,
       funcNames,
       categories,
+      globalDataCollector,
       sampleTimes
     );
   });
+
+  profile = { ...profile, ...globalDataCollector.finish() };
 
   return { profile, funcNamesPerThread, funcNamesDictPerThread };
 }
@@ -798,6 +804,7 @@ function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
   categories: CategoryList,
+  globalDataCollector: GlobalDataCollector,
   sampleTimes: number[] | null
 ): Thread {
   const thread = getEmptyThread();
@@ -809,7 +816,6 @@ function _buildThreadFromTextOnlyStacks(
     stackTable,
     samples,
     resourceTable,
-    libs,
   } = thread;
 
   // Create the FuncTable.
@@ -846,22 +852,20 @@ function _buildThreadFromTextOnlyStacks(
       if (libraryName) {
         resourceIndex = resourceIndexCache[libraryName];
         if (resourceIndex === undefined) {
-          libs.push({
-            start: 0,
-            end: 0,
-            offset: 0,
+          const libIndex = globalDataCollector.indexForLib({
             arch: '',
             name: libraryName,
             path: '/path/to/' + libraryName,
             debugName: libraryName,
             debugPath: '/path/to/' + libraryName,
             breakpadId: 'SOMETHING_FAKE',
+            codeId: null,
           });
 
-          resourceTable.lib.push(libs.length - 1); // The lastly inserted item.
+          resourceTable.lib.push(libIndex);
           resourceTable.name.push(stringTable.indexForString(libraryName));
           resourceTable.type.push(resourceTypes.library);
-          resourceTable.host.push(undefined);
+          resourceTable.host.push(null);
           resourceIndex = resourceTable.length++;
 
           resourceIndexCache[libraryName] = resourceIndex;

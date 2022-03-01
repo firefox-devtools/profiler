@@ -4,13 +4,7 @@
 
 // @flow
 
-import type {
-  Milliseconds,
-  MemoryOffset,
-  Address,
-  Microseconds,
-  Bytes,
-} from './units';
+import type { Milliseconds, Address, Microseconds, Bytes } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload, MarkerSchema } from './markers';
 import type { MarkerPhase } from './gecko-profile';
@@ -411,43 +405,38 @@ export type NativeSymbolTable = {|
  */
 export type ResourceTable = {|
   length: number,
-  // lib SHOULD be void in this case, but some profiles in the store have null or -1
-  // here. We should investigate and provide an upgrader.
-  // See https://github.com/firefox-devtools/profiler/issues/652
-  lib: Array<IndexIntoLibs | void | null | -1>,
-  name: Array<IndexIntoStringTable | -1>,
-  host: Array<IndexIntoStringTable | void | null>,
+  lib: Array<IndexIntoLibs | null>,
+  name: Array<IndexIntoStringTable>,
+  host: Array<IndexIntoStringTable | null>,
   type: resourceTypeEnum[],
 |};
 
 /**
- * Information about libraries, for instance the Firefox executables, and its memory
- * offsets. This information is used for symbolicating C++ memory addresses into
- * actual function names. For instance turning 0x23459234 into "void myFuncName()".
- *
- * Libraries are mapped into the (virtual memory) address space of the profiled
- * process. Libraries exist as files on disk, and not the entire file needs to be
- * mapped. When the beginning of the file is not mapped, the library's "offset"
- * field will be non-zero.
+ * Information about the shared libraries that were loaded into the processes in
+ * the profile. This information is needed during symbolication. Most importantly,
+ * the symbolication API requires a debugName + breakpadId for each set of
+ * unsymbolicated addresses, to know where to obtain symbols for those addresses.
  */
 export type Lib = {|
-  // The range in the address space of the profiled process that the mappings for
-  // this shared library occupied.
-  start: MemoryOffset,
-  end: MemoryOffset,
-
-  // The offset relative to the library's base address where the first mapping starts.
-  // libBaseAddress + lib.offset = lib.start
-  // When instruction addresses are given as library-relative offsets, they are
-  // relative to the library's baseAddress.
-  offset: Bytes,
-
   arch: string, // e.g. "x86_64"
   name: string, // e.g. "firefox"
   path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
   debugName: string, // e.g. "firefox", or "firefox.pdb" on Windows
   debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
   breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
+
+  // The codeId is currently always null.
+  // In the future, it will have the following values:
+  //  - On macOS, it will still be null.
+  //  - On Linux / Android, it will have the full GNU build id. (The breakpadId
+  //    is also based on the build id, but truncates some information.)
+  //    This lets us obtain unstripped system libraries on Linux distributions
+  //    which have a "debuginfod" server, and we can use those unstripped binaries
+  //    for symbolication.
+  //  - On Windows, it will be the codeId for the binary (.exe / .dll), as used
+  //    by Windows symbol servers. This will allow us to get assembly code for
+  //    Windows system libraries for profiles which were captured on another machine.
+  codeId: string | null, // e.g. "6132B96B70fd000"
 |};
 
 export type Category = {|
@@ -654,7 +643,6 @@ export type Thread = {|
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringTable: UniqueStringArray,
-  libs: Lib[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
@@ -866,6 +854,7 @@ export type ProfileMeta = {|
  */
 export type Profile = {|
   meta: ProfileMeta,
+  libs: Lib[],
   pages?: PageList,
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.

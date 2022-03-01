@@ -1144,8 +1144,8 @@ export function filterThreadToSearchString(
     }
 
     const resourceIndex = funcTable.resource[func];
-    const resourceNameIndex = resourceTable.name[resourceIndex];
-    if (resourceNameIndex !== undefined) {
+    if (resourceIndex !== -1) {
+      const resourceNameIndex = resourceTable.name[resourceIndex];
       const resourceNameString = stringTable.getString(resourceNameIndex);
       if (resourceNameString.toLowerCase().includes(lowercaseSearchString)) {
         return true;
@@ -2200,7 +2200,7 @@ export function getThreadProcessDetails(
 function _shouldShowBothOriginAndFileName(
   fileName: string,
   origin: string,
-  resourceType: resourceTypeEnum
+  resourceType: resourceTypeEnum | null
 ): boolean {
   // If the origin string is just a URL prefix that's part of the
   // filename, it doesn't add any useful information, so only show
@@ -2230,12 +2230,12 @@ export function getOriginAnnotationForFunc(
   resourceTable: ResourceTable,
   stringTable: UniqueStringArray
 ): string {
+  let resourceType = null;
+  let origin = null;
   const resourceIndex = funcTable.resource[funcIndex];
-  const resourceNameIndex = resourceTable.name[resourceIndex];
-  const resourceType = resourceTable.type[resourceIndex];
-
-  let origin;
-  if (resourceNameIndex !== undefined) {
+  if (resourceIndex !== -1) {
+    resourceType = resourceTable.type[resourceIndex];
+    const resourceNameIndex = resourceTable.name[resourceIndex];
     origin = stringTable.getString(resourceNameIndex);
   }
 
@@ -2858,20 +2858,19 @@ export function getOrCreateURIResource(
   }
 
   resourceIndex = resourceTable.length++;
-  const originStringIndex = stringTable.indexForString(origin);
   originToResourceIndex.set(origin, resourceIndex);
   if (host) {
     // This is a webhost URL.
-    resourceTable.lib[resourceIndex] = undefined;
-    resourceTable.name[resourceIndex] = originStringIndex;
+    resourceTable.lib[resourceIndex] = null;
+    resourceTable.name[resourceIndex] = stringTable.indexForString(origin);
     resourceTable.host[resourceIndex] = stringTable.indexForString(host);
     resourceTable.type[resourceIndex] = resourceTypes.webhost;
   } else {
     // This is a URL, but it doesn't point to something on the web, e.g. a
     // chrome url.
-    resourceTable.lib[resourceIndex] = undefined;
+    resourceTable.lib[resourceIndex] = null;
     resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
-    resourceTable.host[resourceIndex] = undefined;
+    resourceTable.host[resourceIndex] = null;
     resourceTable.type[resourceIndex] = resourceTypes.url;
   }
   return resourceIndex;
@@ -3357,8 +3356,9 @@ export function findAddressProofForFile(
   profile: Profile,
   file: string
 ): AddressProof | null {
+  const { libs } = profile;
   for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable, libs, stringTable } = thread;
+    const { frameTable, funcTable, resourceTable, stringTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
     const func = funcTable.fileName.indexOf(fileStringIndex);
     if (func === -1) {
@@ -3377,7 +3377,7 @@ export function findAddressProofForFile(
       continue;
     }
     const libIndex = resourceTable.lib[resource];
-    if (libIndex === undefined || libIndex === null || libIndex === -1) {
+    if (libIndex === null) {
       continue;
     }
     const lib = libs[libIndex];
