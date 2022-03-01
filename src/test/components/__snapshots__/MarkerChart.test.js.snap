@@ -153,7 +153,7 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     <span
       class="react-contextmenu-icon markerContextMenuIconCopyPayload"
     />
-    Copy full payload
+    Copy as JSON
   </div>
 </nav>
 `;
