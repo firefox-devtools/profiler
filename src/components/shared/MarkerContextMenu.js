@@ -360,8 +360,8 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         ) : null}
         <MenuItem onClick={this.copyMarkerJSON}>
           <span className="react-contextmenu-icon markerContextMenuIconCopyPayload" />
-          <Localized id="MarkerContextMenu--copy-full-payload">
-            Copy full payload
+          <Localized id="MarkerContextMenu--copy-as-json">
+            Copy as JSON
           </Localized>
         </MenuItem>
       </ContextMenu>
