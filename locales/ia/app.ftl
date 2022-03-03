@@ -206,6 +206,9 @@ FooterLinks--Privacy = Confidentialitate
 FooterLinks--Cookies = Cookies
 FooterLinks--languageSwitcher--select =
     .title = Cambiar lingua
+FooterLinks--hide-button =
+    .title = Celar ligamines de pede de pagina
+    .aria-label = Celar ligamines de pede de pagina
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -309,7 +312,7 @@ MarkerContextMenu--end-selection-at-marker-end = Fini le selection al <strong>fi
 MarkerContextMenu--copy-description = Copiar le description
 MarkerContextMenu--copy-call-stack = Copiar pila de appellos
 MarkerContextMenu--copy-url = Copiar URL
-MarkerContextMenu--copy-full-payload = Copiar le carga utile complete
+MarkerContextMenu--copy-as-json = Copiar como JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -581,7 +584,6 @@ TabBar--js-tracer-tab = Traciator JS
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Solo monstrar iste gruppo de processos
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
