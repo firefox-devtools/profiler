@@ -465,6 +465,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Duration profilate:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Includer argumentos celate
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Include le datos de altere schedas
 MenuButtons--publish--renderCheckbox-label-hidden-time = Includer gamma de tempore celate
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Includer instantaneos
 MenuButtons--publish--renderCheckbox-label-resource = Includer URLs e routes de accesso del ressource
@@ -584,6 +585,7 @@ TabBar--js-tracer-tab = Traciator JS
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Solo monstrar iste processo
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
