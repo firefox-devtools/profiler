@@ -341,7 +341,7 @@ MarkerContextMenu--end-selection-at-marker-end =
 MarkerContextMenu--copy-description = Copy description
 MarkerContextMenu--copy-call-stack = Copy call stack
 MarkerContextMenu--copy-url = Copy URL
-MarkerContextMenu--copy-full-payload = Copy full payload
+MarkerContextMenu--copy-as-json = Copy as JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -633,7 +633,7 @@ TabBar--js-tracer-tab = JS Tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Only show this process group
+TrackContextMenu--only-show-this-process = Only show this process
 
 # This is used as the context menu item to show only the given track.
 # Variables:
