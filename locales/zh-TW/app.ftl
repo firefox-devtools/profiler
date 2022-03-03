@@ -250,7 +250,7 @@ MarkerContextMenu--end-selection-at-marker-end = 選擇到標記的<strong>終�
 MarkerContextMenu--copy-description = 複製描述
 MarkerContextMenu--copy-call-stack = 複製呼叫堆疊
 MarkerContextMenu--copy-url = 複製網址
-MarkerContextMenu--copy-full-payload = 複製完整酬載
+MarkerContextMenu--copy-as-json = 以 JSON 格式複製
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -519,7 +519,7 @@ TabBar--js-tracer-tab = JS 追蹤器
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = 只顯示此處理程序群組
+TrackContextMenu--only-show-this-process = 只顯示此處理程序
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
