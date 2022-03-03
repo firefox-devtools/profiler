@@ -19,7 +19,7 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     >
       0.000B
     </span>
-     relative memory at this time
+    relative memory at this time
   </div>
   <div
     class="timelineTrackMemoryTooltipLine"
@@ -29,7 +29,7 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     >
       2B
     </span>
-     memory range in graph
+    memory range in graph
   </div>
   <div
     class="timelineTrackMemoryTooltipLine"
@@ -39,7 +39,7 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     >
       36
     </span>
-     operations since the previous sample
+    operations since the previous sample
   </div>
 </div>
 `;

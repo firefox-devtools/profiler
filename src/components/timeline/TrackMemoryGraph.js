@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
+import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
@@ -363,19 +364,27 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
           <span className="timelineTrackMemoryTooltipNumber">
             {formatBytes(bytes)}
           </span>
-          {' relative memory at this time'}
+          <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
+            relative memory at this time
+          </Localized>
         </div>
+
         <div className="timelineTrackMemoryTooltipLine">
           <span className="timelineTrackMemoryTooltipNumber">
             {formatBytes(countRange)}
           </span>
-          {' memory range in graph'}
+          <Localized id="TrackMemoryGraph--memory-range-in-graph">
+            memory range in graph
+          </Localized>
         </div>
+
         <div className="timelineTrackMemoryTooltipLine">
           <span className="timelineTrackMemoryTooltipNumber">
             {formatNumber(allocations, 2, 0)}
           </span>
-          {' operations since the previous sample'}
+          <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
+            operations since the previous sample
+          </Localized>
         </div>
       </div>
     );
