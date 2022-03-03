@@ -283,6 +283,12 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _onMouseLeave = () => {
+    // This persistTooltips property is part of the web console API. It helps
+    // in being able to inspect and debug tooltips.
+    if (window.persistTooltips) {
+      return;
+    }
+
     this.setState({ hoveredCounter: null });
   };
 
