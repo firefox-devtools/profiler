@@ -254,7 +254,7 @@ MarkerContextMenu--end-selection-at-marker-end = Termina selezione alla <strong>
 MarkerContextMenu--copy-description = Copia descrizione
 MarkerContextMenu--copy-call-stack = Copia stack di chiamata
 MarkerContextMenu--copy-url = Copia URL
-MarkerContextMenu--copy-full-payload = Copia payload completo
+MarkerContextMenu--copy-as-json = Copia come JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -524,7 +524,7 @@ TabBar--js-tracer-tab = Tracer JS
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Mostra solo questo gruppo di processi
+TrackContextMenu--only-show-this-process = Mostra solo questo processo
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
