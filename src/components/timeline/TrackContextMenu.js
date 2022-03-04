@@ -108,7 +108,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     showAllTracks();
   };
 
-  _showProvidedTracks = (): void => {
+  _showMatchingTracks = (): void => {
     const {
       showProvidedTracks,
       globalTracks,
@@ -749,9 +749,9 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     return (
       <React.Fragment>
-        <MenuItem onClick={this._showProvidedTracks}>
-          <Localized id="TrackContextMenu--show-all-tracks-below">
-            Show all tracks below
+        <MenuItem onClick={this._showMatchingTracks}>
+          <Localized id="TrackContextMenu--show-all-matching-tracks">
+            Show all matching tracks
           </Localized>
         </MenuItem>
         <div className="react-contextmenu-separator" />

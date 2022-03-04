@@ -143,11 +143,11 @@ describe('timeline/TrackContextMenu', function () {
     });
   });
 
-  describe('show all tracks below', function () {
+  describe('show all matching tracks', function () {
     function setupAllTracks() {
       const results = setup();
-      const selectAllTracksBelowItem = () =>
-        screen.getByText('Show all tracks below');
+      const selectShowAllMatchingTracksItem = () =>
+        screen.getByText('Show all matching tracks');
 
       const hideAllTracks = () => {
         // To hide the tracks before testing 'Show all tracks'
@@ -164,7 +164,7 @@ describe('timeline/TrackContextMenu', function () {
 
       return {
         ...results,
-        selectAllTracksBelowItem,
+        selectShowAllMatchingTracksItem,
         hideAllTracks,
         hideAllTracksExceptMain,
       };
@@ -173,7 +173,7 @@ describe('timeline/TrackContextMenu', function () {
     it('shows a single track', () => {
       const {
         getState,
-        selectAllTracksBelowItem,
+        selectShowAllMatchingTracksItem,
         hideAllTracks,
         changeSearchFilter,
       } = setupAllTracks();
@@ -191,7 +191,7 @@ describe('timeline/TrackContextMenu', function () {
       // Search something to filter the tracks.
       changeSearchFilter('GeckoMain');
       // Click the button.
-      fireFullClick(selectAllTracksBelowItem());
+      fireFullClick(selectShowAllMatchingTracksItem());
 
       // GeckoMain should be visible now.
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -205,7 +205,7 @@ describe('timeline/TrackContextMenu', function () {
     it('shows children of a global track', () => {
       const {
         getState,
-        selectAllTracksBelowItem,
+        selectShowAllMatchingTracksItem,
         hideAllTracks,
         changeSearchFilter,
       } = setupAllTracks();
@@ -223,7 +223,7 @@ describe('timeline/TrackContextMenu', function () {
       // Search something to filter the tracks.
       changeSearchFilter('Content Process');
       // Click the button.
-      fireFullClick(selectAllTracksBelowItem());
+      fireFullClick(selectShowAllMatchingTracksItem());
 
       // Children of Content Process should be visible now.
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -237,7 +237,7 @@ describe('timeline/TrackContextMenu', function () {
     it('shows a local track', () => {
       const {
         getState,
-        selectAllTracksBelowItem,
+        selectShowAllMatchingTracksItem,
         hideAllTracks,
         changeSearchFilter,
       } = setupAllTracks();
@@ -255,7 +255,7 @@ describe('timeline/TrackContextMenu', function () {
       // Search something to filter the tracks.
       changeSearchFilter('DOM Worker');
       // Click the button.
-      fireFullClick(selectAllTracksBelowItem());
+      fireFullClick(selectShowAllMatchingTracksItem());
 
       // DOM Worker track should be visible now.
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -269,7 +269,7 @@ describe('timeline/TrackContextMenu', function () {
     it('does not show anything if the list is empty', () => {
       const {
         getState,
-        selectAllTracksBelowItem,
+        selectShowAllMatchingTracksItem,
         hideAllTracks,
         changeSearchFilter,
       } = setupAllTracks();
@@ -287,7 +287,7 @@ describe('timeline/TrackContextMenu', function () {
       // Search something to filter the tracks. This time it's something random.
       changeSearchFilter('this should not be in the tracks list');
       // Click the button.
-      fireFullClick(selectAllTracksBelowItem());
+      fireFullClick(selectShowAllMatchingTracksItem());
 
       // No new track should be visible.
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -301,7 +301,7 @@ describe('timeline/TrackContextMenu', function () {
     it("shows local track's global track even if it wasn't visible before", () => {
       const {
         getState,
-        selectAllTracksBelowItem,
+        selectShowAllMatchingTracksItem,
         hideAllTracksExceptMain,
         changeSearchFilter,
       } = setupAllTracks();
@@ -318,7 +318,7 @@ describe('timeline/TrackContextMenu', function () {
       // Search a local track.
       changeSearchFilter('DOM Worker');
       // Click the button.
-      fireFullClick(selectAllTracksBelowItem());
+      fireFullClick(selectShowAllMatchingTracksItem());
 
       // DOM Worker and its global process should be visible now.
       expect(getHumanReadableTracks(getState())).toEqual([
