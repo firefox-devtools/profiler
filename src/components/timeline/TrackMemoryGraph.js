@@ -356,10 +356,19 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     }
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
     const bytes = accumulatedCounts[counterIndex] - minCount;
-    const { number } = counter.sampleGroups[0].samples;
-    const allocations = number[counterIndex];
+    const operationsCounters = counter.sampleGroups[0].samples.number;
+    const operations = operationsCounters[counterIndex];
     return (
       <div className="timelineTrackMemoryTooltip">
+        <div className="timelineTrackMemoryTooltipLine">
+          <span className="timelineTrackMemoryTooltipNumber">
+            {formatNumber(operations, 2, 0)}
+          </span>
+          <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
+            operations since the previous sample
+          </Localized>
+        </div>
+
         <div className="timelineTrackMemoryTooltipLine">
           <span className="timelineTrackMemoryTooltipNumber">
             {formatBytes(bytes)}
@@ -375,15 +384,6 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
           </span>
           <Localized id="TrackMemoryGraph--memory-range-in-graph">
             memory range in graph
-          </Localized>
-        </div>
-
-        <div className="timelineTrackMemoryTooltipLine">
-          <span className="timelineTrackMemoryTooltipNumber">
-            {formatNumber(allocations, 2, 0)}
-          </span>
-          <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
-            operations since the previous sample
           </Localized>
         </div>
       </div>
