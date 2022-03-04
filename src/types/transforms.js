@@ -16,7 +16,7 @@
  * This combination of information will provide a stable reference to a call node for a
  * given view into a call tree.
  */
-import type { IndexIntoFuncTable, IndexIntoResourceTable } from './profile';
+import type { IndexIntoFuncTable, IndexIntoResources } from './profile';
 import type { CallNodePath, ThreadsKey } from './profile-derived';
 import type { ImplementationFilter } from './actions';
 
@@ -229,7 +229,7 @@ export type TransformDefinitions = {
    */
   'collapse-resource': {|
     +type: 'collapse-resource',
-    +resourceIndex: IndexIntoResourceTable,
+    +resourceIndex: IndexIntoResources,
     // This is the index of the newly created function that represents the collapsed stack.
     +collapsedFuncIndex: IndexIntoFuncTable,
     +implementation: ImplementationFilter,

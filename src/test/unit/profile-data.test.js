@@ -24,7 +24,6 @@ import {
   extractProfileFilterPageData,
   findAddressProofForFile,
 } from '../../profile-logic/profile-data';
-import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   createGeckoProfile,
   createGeckoProfileWithJsTimings,
@@ -287,17 +286,16 @@ describe('process-profile', function () {
     });
 
     it('should create one resource per used library', function () {
-      const thread = profile.threads[0];
-      expect(thread.resourceTable.length).toEqual(3);
-      expect(thread.resourceTable.type[0]).toEqual(resourceTypes.addon);
-      expect(thread.resourceTable.type[1]).toEqual(resourceTypes.library);
-      expect(thread.resourceTable.type[2]).toEqual(resourceTypes.url);
-      const [name0, name1, name2] = thread.resourceTable.name;
-      expect(thread.stringTable.getString(name0)).toEqual(
+      const resources = profile.resources;
+      expect(resources.length).toEqual(3);
+      expect(resources[0].type).toEqual('ADDON');
+      expect(resources[1].type).toEqual('LIBRARY');
+      expect(resources[2].type).toEqual('URL');
+      expect(resources[0].name).toEqual(
         'Extension "Form Autofill" (ID: formautofill@mozilla.org)'
       );
-      expect(thread.stringTable.getString(name1)).toEqual('firefox');
-      expect(thread.stringTable.getString(name2)).toEqual('chrome://blargh');
+      expect(resources[1].name).toEqual('firefox');
+      expect(resources[2].name).toEqual('chrome://blargh');
     });
   });
 

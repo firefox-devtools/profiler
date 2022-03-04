@@ -12,7 +12,6 @@ import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
 import { SymbolStore } from '../../profile-logic/symbol-store.js';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { resourceTypes } from '../../profile-logic/data-structures';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
   changeSelectedCallNode,
@@ -533,13 +532,13 @@ function _createUnsymbolicatedProfile() {
     codeId: null,
   };
 
-  thread.resourceTable = {
-    length: 1,
-    lib: [libIndex],
-    name: [thread.stringTable.indexForString('example lib')],
-    host: [thread.stringTable.indexForString('example host')],
-    type: [resourceTypes.library],
-  };
+  profile.resources = [
+    {
+      type: 'LIBRARY',
+      name: 'example lib',
+      libIndex,
+    },
+  ];
   for (let i = 0; i < thread.funcTable.length; i++) {
     thread.funcTable.resource[i] = 0;
   }

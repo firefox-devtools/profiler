@@ -39,6 +39,7 @@ describe('TooltipCallNode', function () {
               'Unable to find a selected call node index.'
             )}
             callNodeInfo={selectedThreadSelectors.getCallNodeInfo(getState())}
+            resources={ProfileSelectors.getResources(getState())}
             categories={ProfileSelectors.getCategories(getState())}
             interval={ProfileSelectors.getProfileInterval(getState())}
             durationText="Fake Duration Text"

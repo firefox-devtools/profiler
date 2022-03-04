@@ -18,6 +18,7 @@ import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 import type {
   Thread,
   CategoryList,
+  Resource,
   PageList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
@@ -40,6 +41,7 @@ type Props = {|
   +pages: PageList | null,
   +callNodeIndex: IndexIntoCallNodeTable,
   +callNodeInfo: CallNodeInfo,
+  +resources: Resource[],
   +categories: CategoryList,
   +interval: Milliseconds,
   // Since this tooltip can be used in different context, provide some kind of duration
@@ -168,6 +170,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       callNodeIndex,
       thread,
       durationText,
+      resources,
       categories,
       callTree,
       timings,
@@ -226,7 +229,6 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const resourceIndex = thread.funcTable.resource[funcIndex];
 
     if (resourceIndex !== -1) {
-      const resourceNameIndex = thread.resourceTable.name[resourceIndex];
       // Because of our use of Grid Layout, all our elements need to be direct
       // children of the grid parent. That's why we use arrays here, to add
       // the elements as direct children.
@@ -234,7 +236,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         <div className="tooltipLabel" key="resource">
           Resource:
         </div>,
-        thread.stringTable.getString(resourceNameIndex),
+        resources[resourceIndex].name,
       ];
     }
 

@@ -17,6 +17,7 @@ import type {
   ImplementationFilter,
   IndexIntoSamplesTable,
   CategoryList,
+  Resource,
   Thread,
 } from 'firefox-profiler/types';
 import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
@@ -26,6 +27,7 @@ type CPUProps = CpuRatioInTimeRange;
 type RestProps = {|
   +sampleIndex: IndexIntoSamplesTable,
   +categories: CategoryList,
+  +resources: Resource[],
   +rangeFilteredThread: Thread,
   +implementationFilter: ImplementationFilter,
 |};
@@ -67,6 +69,7 @@ class SampleTooltipRestContents extends React.PureComponent<RestProps> {
       sampleIndex,
       rangeFilteredThread,
       categories,
+      resources,
       implementationFilter,
     } = this.props;
     const { samples, stackTable } = rangeFilteredThread;
@@ -97,6 +100,7 @@ class SampleTooltipRestContents extends React.PureComponent<RestProps> {
           stackIndex={stackIndex}
           thread={rangeFilteredThread}
           implementationFilter={implementationFilter}
+          resources={resources}
           categories={categories}
         />
       </>
@@ -116,6 +120,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       rangeFilteredThread,
       categories,
       implementationFilter,
+      resources,
     } = this.props;
     return (
       <>
@@ -130,6 +135,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
           rangeFilteredThread={rangeFilteredThread}
           categories={categories}
           implementationFilter={implementationFilter}
+          resources={resources}
         />
       </>
     );

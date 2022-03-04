@@ -24,6 +24,7 @@ import {
   getSelectedThreadIndexes,
   getTimelineType,
   getInvertCallstack,
+  getResources,
   getTimelineTrackOrganization,
   getThreadSelectorsFromThreadsKey,
   getMaxThreadCPUDelta,
@@ -66,6 +67,7 @@ import type {
   State,
   TimelineTrackOrganization,
   ThreadsKey,
+  Resource,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -90,6 +92,7 @@ type StateProps = {|
   +rangeEnd: Milliseconds,
   +sampleIndexOffset: number,
   +categories: CategoryList,
+  +resources: Resource[],
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
@@ -204,6 +207,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       selectedCallNodeIndex,
       unfilteredSamplesRange,
       categories,
+      resources,
       timelineType,
       hasFileIoMarkers,
       showMemoryMarkers,
@@ -281,6 +285,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               sampleIndexOffset={sampleIndexOffset}
               onSampleClick={this._onSampleClick}
               categories={categories}
+              resources={resources}
               samplesSelectedStates={samplesSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
               enableCPUUsage={enableCPUUsage}
@@ -426,6 +431,7 @@ export const TimelineTrackThread = explicitConnect<
       sampleIndexOffset:
         selectors.getSampleIndexOffsetFromCommittedRange(state),
       categories: getCategories(state),
+      resources: getResources(state),
       timelineType,
       hasFileIoMarkers:
         selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,

@@ -10,14 +10,12 @@ import {
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
 } from './profile-data';
-import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
   CategoryList,
   Thread,
   FuncTable,
-  ResourceTable,
   NativeSymbolTable,
   IndexIntoFuncTable,
   SamplesLikeTable,
@@ -31,6 +29,7 @@ import type {
   TracedTiming,
   SamplesTable,
   ExtraBadgeInfo,
+  Resource,
 } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
@@ -74,7 +73,7 @@ export class CallTree {
   _callNodeSummary: CallNodeSummary;
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
   _funcTable: FuncTable;
-  _resourceTable: ResourceTable;
+  _resources: Resource[];
   _nativeSymbols: NativeSymbolTable;
   _stringTable: UniqueStringArray;
   _rootTotalSummary: number;
@@ -89,8 +88,9 @@ export class CallTree {
   _weightType: WeightType;
 
   constructor(
-    { funcTable, resourceTable, nativeSymbols, stringTable }: Thread,
+    { funcTable, nativeSymbols, stringTable }: Thread,
     categories: CategoryList,
+    resources: Resource[],
     callNodeTable: CallNodeTable,
     callNodeSummary: CallNodeSummary,
     callNodeChildCount: Uint32Array,
@@ -106,7 +106,7 @@ export class CallTree {
     this._callNodeSummary = callNodeSummary;
     this._callNodeChildCount = callNodeChildCount;
     this._funcTable = funcTable;
-    this._resourceTable = resourceTable;
+    this._resources = resources;
     this._nativeSymbols = nativeSymbols;
     this._stringTable = stringTable;
     this._rootTotalSummary = rootTotalSummary;
@@ -260,7 +260,7 @@ export class CallTree {
       const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
       const badge = this._getInliningBadge(callNodeIndex, funcName);
       const resourceIndex = this._funcTable.resource[funcIndex];
-      const resourceType = this._resourceTable.type[resourceIndex];
+      const resource = this._resources[resourceIndex] ?? null;
       const isFrameLabel = resourceIndex === -1;
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
@@ -268,14 +268,14 @@ export class CallTree {
       let iconSrc = null;
       let icon = null;
 
-      if (resourceType === resourceTypes.webhost) {
-        icon = iconSrc = extractFaviconFromLibname(libName);
-      } else if (resourceType === resourceTypes.addon) {
-        iconSrc = ExtensionIcon;
-
-        const resourceNameIndex = this._resourceTable.name[resourceIndex];
-        const iconText = this._stringTable.getString(resourceNameIndex);
-        icon = iconText;
+      if (resource !== null) {
+        if (resource.type === 'WEBHOST') {
+          icon = iconSrc = extractFaviconFromLibname(libName);
+        } else if (resource.type === 'ADDON') {
+          iconSrc = ExtensionIcon;
+          const iconText = resource.name;
+          icon = iconText;
+        }
       }
 
       const formattedTotal = formatCallNodeNumber(
@@ -363,7 +363,7 @@ export class CallTree {
     return getOriginAnnotationForFunc(
       funcIndex,
       this._funcTable,
-      this._resourceTable,
+      this._resources,
       this._stringTable
     );
   }
@@ -542,6 +542,7 @@ export function getCallTree(
   interval: Milliseconds,
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
+  resources: Resource[],
   implementationFilter: string,
   callTreeCountsAndSummary: CallTreeCountsAndSummary,
   weightType: WeightType
@@ -555,6 +556,7 @@ export function getCallTree(
     return new CallTree(
       thread,
       categories,
+      resources,
       callNodeInfo.callNodeTable,
       callNodeSummary,
       callNodeChildCount,

@@ -19,6 +19,7 @@ import {
   getZeroAt,
   getThreadIdToNameMap,
   getThreadSelectorsFromThreadsKey,
+  getResources,
 } from 'firefox-profiler/selectors';
 
 import {
@@ -48,6 +49,7 @@ import type {
   PageList,
   MarkerSchemaByName,
   MarkerIndex,
+  Resource,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -87,6 +89,7 @@ type StateProps = {|
   +threadIdToNameMap: Map<number, string>,
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,
+  +resources: Resource[],
   +categories: CategoryList,
 |};
 
@@ -319,6 +322,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       thread,
       implementationFilter,
       restrictHeightWidth,
+      resources,
       categories,
     } = this.props;
     const { data, start } = marker;
@@ -349,6 +353,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               stackIndex={cause.stack}
               thread={thread}
               implementationFilter={implementationFilter}
+              resources={resources}
               categories={categories}
             />
           </div>
@@ -430,6 +435,7 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
       threadIdToNameMap: getThreadIdToNameMap(state),
       markerSchemaByName: getMarkerSchemaByName(state),
       getMarkerLabel: selectors.getMarkerTooltipLabelGetter(state),
+      resources: getResources(state),
       categories: getCategories(state),
     };
   },

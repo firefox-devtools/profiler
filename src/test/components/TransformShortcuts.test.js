@@ -24,7 +24,7 @@ import type {
   Transform,
   CallNodePath,
   IndexIntoFuncTable,
-  IndexIntoResourceTable,
+  IndexIntoResources,
 } from 'firefox-profiler/types';
 
 type KeyPressOptions = { key: string, ... };
@@ -35,7 +35,7 @@ type TestSetup = {|
   expectedCallNodePath: CallNodePath,
   // This should be expectedCallNodePath[expectedCallNodePath.length - 1], but this simplifies tests a bit.
   expectedFuncIndex: IndexIntoFuncTable,
-  expectedResourceIndex: IndexIntoResourceTable,
+  expectedResourceIndex: IndexIntoResources,
 |};
 
 function testTransformKeyboardShortcuts(setup: () => TestSetup) {

@@ -444,8 +444,7 @@ function sanitizeThreadPII(
     // be split in 2.
     const funcIndexesToBeKept = new Set();
 
-    const { frameTable, funcTable, resourceTable, stackTable, samples } =
-      newThread;
+    const { frameTable, funcTable, stackTable, samples } = newThread;
     for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
       const innerWindowID = frameTable.innerWindowID[frameIndex];
       const funcIndex = frameTable.func[frameIndex];

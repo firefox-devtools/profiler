@@ -183,12 +183,18 @@ export function getThreadSelectorsPerThread(
   const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
     getRangeFilteredThread,
     getTransformStack,
+    ProfileSelectors.getResources,
     ProfileSelectors.getDefaultCategory,
-    (startingThread, transforms, defaultCategory) =>
+    (startingThread, transforms, resources, defaultCategory) =>
       transforms.reduce(
         // Apply the reducer using an arrow function to ensure correct memoization.
         (thread, transform) =>
-          _applyTransformMemoized(thread, transform, defaultCategory),
+          _applyTransformMemoized(
+            thread,
+            resources,
+            transform,
+            defaultCategory
+          ),
         startingThread
       )
   );
@@ -203,9 +209,14 @@ export function getThreadSelectorsPerThread(
   const _getImplementationAndSearchFilteredThread: Selector<Thread> =
     createSelector(
       _getImplementationFilteredThread,
+      ProfileSelectors.getResources,
       UrlState.getSearchStrings,
-      (thread, searchStrings) => {
-        return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
+      (thread, resources, searchStrings) => {
+        return ProfileData.filterThreadToSearchStrings(
+          thread,
+          resources,
+          searchStrings
+        );
       }
     );
 
@@ -363,6 +374,7 @@ export function getThreadSelectorsPerThread(
     createSelector(
       getRangeAndTransformFilteredThread,
       getFriendlyThreadName,
+      ProfileSelectors.getResources,
       getTransformStack,
       Transforms.getTransformLabelL10nIds
     );

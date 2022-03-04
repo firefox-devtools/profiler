@@ -8,7 +8,6 @@ import type {
   Thread,
   IndexIntoFuncTable,
   IndexIntoStackTable,
-  IndexIntoResourceTable,
   MixedObject,
 } from 'firefox-profiler/types';
 
@@ -24,7 +23,7 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 
-import { getOrCreateURIResource } from '../../profile-logic/profile-data';
+import { GlobalDataCollector } from '../../profile-logic/process-profile';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -244,7 +243,6 @@ type ThreadInfo = {
   thread: Thread,
   funcKeyToFuncId: Map<string, IndexIntoFuncTable>,
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>,
-  originToResourceIndex: Map<string, IndexIntoResourceTable>,
   lastSeenTime: number,
   lastSampledTime: number,
   pid: number,
@@ -384,7 +382,6 @@ function getThreadInfo(
     thread,
     nodeIdToStackId,
     funcKeyToFuncId: new Map(),
-    originToResourceIndex: new Map(),
     lastSeenTime: chunk.ts / 1000,
     lastSampledTime: 0,
     pid: chunk.pid,
@@ -488,6 +485,7 @@ async function processTracingEvents(
     ensureExists(profile.meta.categories)
   );
 
+  const globalDataCollector = new GlobalDataCollector();
   const threadInfoByPidAndTid = new Map();
   const threadInfoByThread = new Map();
   for (const profileEvent of profileEvents) {
@@ -500,8 +498,7 @@ async function processTracingEvents(
       profile,
       profileEvent
     );
-    const { thread, funcKeyToFuncId, nodeIdToStackId, originToResourceIndex } =
-      threadInfo;
+    const { thread, funcKeyToFuncId, nodeIdToStackId } = threadInfo;
 
     let profileChunks = [];
     if (profileEvent.name === 'Profile') {
@@ -532,7 +529,6 @@ async function processTracingEvents(
         stackTable,
         stringTable,
         samples: samplesTable,
-        resourceTable,
       } = thread;
 
       if (nodes) {
@@ -584,12 +580,7 @@ async function processTracingEvents(
             funcTable.name.push(stringTable.indexForString(name));
             funcTable.resource.push(
               isJS
-                ? getOrCreateURIResource(
-                    url || '<unknown>',
-                    resourceTable,
-                    stringTable,
-                    originToResourceIndex
-                  )
+                ? globalDataCollector.indexForURIResource(url || '<unknown>')
                 : -1
             );
             funcTable.fileName.push(
@@ -704,7 +695,7 @@ async function processTracingEvents(
     return threadInfoA.tieBreakerIndex - threadInfoB.tieBreakerIndex;
   });
 
-  return profile;
+  return { ...profile, ...globalDataCollector.finish() };
 }
 
 async function extractScreenshots(

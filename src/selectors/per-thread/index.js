@@ -223,7 +223,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getLib: Selector<string> = createSelector(
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getFilteredThread,
-    (selectedPath, { stringTable, funcTable, resourceTable }) => {
+    ProfileSelectors.getResources,
+    (selectedPath, { stringTable, funcTable }, resources) => {
       if (!selectedPath.length) {
         return '';
       }
@@ -231,7 +232,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
       return ProfileData.getOriginAnnotationForFunc(
         ProfileData.getLeafFuncIndex(selectedPath),
         funcTable,
-        resourceTable,
+        resources,
         stringTable
       );
     }

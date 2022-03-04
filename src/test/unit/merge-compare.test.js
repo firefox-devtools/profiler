@@ -14,7 +14,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 
-import type { Thread } from 'firefox-profiler/types';
+import type { Thread, Resource } from 'firefox-profiler/types';
 
 describe('mergeProfilesForDiffing function', function () {
   it('merges the various tables properly in the diffing profile', function () {
@@ -37,7 +37,7 @@ describe('mergeProfilesForDiffing function', function () {
 
     const mergedThread = mergedProfile.threads[2];
     const mergedLibs = mergedProfile.libs;
-    const mergedResources = mergedThread.resourceTable;
+    const mergedResources = mergedProfile.resources;
     const mergedFunctions = mergedThread.funcTable;
     const stringTable = mergedThread.stringTable;
 
@@ -57,14 +57,11 @@ describe('mergeProfilesForDiffing function', function () {
       let resourceName = '';
       let libName = '';
       if (resourceIndex >= 0) {
-        const nameIndex = mergedResources.name[resourceIndex];
-        if (nameIndex >= 0) {
-          resourceName = stringTable.getString(nameIndex);
-        }
+        const mergedResource = mergedResources[resourceIndex];
+        resourceName = mergedResource.name;
 
-        const libIndex = mergedResources.lib[resourceIndex];
-        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
-          libName = mergedLibs[libIndex].name;
+        if (mergedResource.type === 'LIBRARY') {
+          libName = mergedLibs[mergedResource.libIndex].name;
         }
       }
 
@@ -223,8 +220,11 @@ describe('mergeProfilesForDiffing function', function () {
 });
 
 describe('mergeThreads function', function () {
-  function getFriendlyFuncLibResources(thread: Thread): string[] {
-    const { funcTable, resourceTable, stringTable } = thread;
+  function getFriendlyFuncLibResources(
+    thread: Thread,
+    resources: Resource[]
+  ): string[] {
+    const { funcTable, stringTable } = thread;
     const strings = [];
     for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
       const funcName = stringTable.getString(funcTable.name[funcIndex]);
@@ -232,8 +232,7 @@ describe('mergeThreads function', function () {
 
       let resourceName = '';
       if (resourceIndex >= 0) {
-        const nameIndex = resourceTable.name[resourceIndex];
-        resourceName = stringTable.getString(nameIndex);
+        resourceName = resources[resourceIndex].name;
       }
       strings.push(`${funcName} [${resourceName}]`);
     }
@@ -248,22 +247,18 @@ describe('mergeThreads function', function () {
 
     const mergedThread = mergeThreads(profile.threads);
 
-    const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
 
     expect(profile.libs).toHaveLength(3);
-    expect(mergedResources).toHaveLength(3);
+    expect(profile.resources).toHaveLength(3);
     expect(mergedFunctions).toHaveLength(4);
 
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, and 1 C function.
-    expect(getFriendlyFuncLibResources(mergedThread)).toEqual([
-      'A [libA]',
-      'B [libA]',
-      'A [libB]',
-      'C [libC]',
-    ]);
+    expect(
+      getFriendlyFuncLibResources(mergedThread, profile.resources)
+    ).toEqual(['A [libA]', 'B [libA]', 'A [libB]', 'C [libC]']);
   });
 
   it('merges the various tables for more than 2 threads properly', function () {
@@ -275,23 +270,18 @@ describe('mergeThreads function', function () {
 
     const mergedThread = mergeThreads(profile.threads);
 
-    const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
 
     expect(profile.libs).toHaveLength(4);
-    expect(mergedResources).toHaveLength(4);
+    expect(profile.resources).toHaveLength(4);
     expect(mergedFunctions).toHaveLength(5);
 
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, 1 C function and 1 D function.
-    expect(getFriendlyFuncLibResources(mergedThread)).toEqual([
-      'A [libA]',
-      'B [libA]',
-      'A [libB]',
-      'C [libC]',
-      'D [libD]',
-    ]);
+    expect(
+      getFriendlyFuncLibResources(mergedThread, profile.resources)
+    ).toEqual(['A [libA]', 'B [libA]', 'A [libB]', 'C [libC]', 'D [libD]']);
   });
 
   it('merges the marker tables properly', function () {

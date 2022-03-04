@@ -25,6 +25,7 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
+import { getProfile } from 'firefox-profiler/selectors';
 import { oneLine } from 'common-tags';
 
 import {
@@ -38,6 +39,7 @@ import type {
   IndexIntoCallNodeTable,
   CallNodeInfo,
   CallNodePath,
+  Profile,
   Thread,
   ThreadsKey,
 } from 'firefox-profiler/types';
@@ -46,6 +48,7 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
+  +profile: Profile | null,
   +thread: Thread | null,
   +threadsKey: ThreadsKey | null,
   +callNodeInfo: CallNodeInfo | null,
@@ -331,7 +334,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodePath,
-      thread: { funcTable, stringTable, resourceTable },
+      profile,
+      thread: { funcTable, stringTable },
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodePath[callNodePath.length - 1];
@@ -350,8 +354,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     if (resourceIndex === -1) {
       return null;
     }
-    const resNameStringIndex = resourceTable.name[resourceIndex];
-    return stringTable.getString(resNameStringIndex);
+    return profile.resources[resourceIndex].name;
   }
 
   /**
@@ -385,6 +388,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   getRightClickedCallNodeInfo(): null | {|
+    +profile: Profile,
     +thread: Thread,
     +threadsKey: ThreadsKey,
     +callNodeInfo: CallNodeInfo,
@@ -392,6 +396,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     +callNodeIndex: IndexIntoCallNodeTable,
   |} {
     const {
+      profile,
       thread,
       threadsKey,
       callNodeInfo,
@@ -400,6 +405,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     } = this.props;
 
     if (
+      profile &&
       thread &&
       threadsKey !== null &&
       callNodeInfo &&
@@ -407,6 +413,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       typeof rightClickedCallNodeIndex === 'number'
     ) {
       return {
+        profile,
         thread,
         threadsKey,
         callNodeInfo,
@@ -658,6 +665,7 @@ export const CallNodeContextMenu = explicitConnect<
   mapStateToProps: (state) => {
     const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
 
+    let profile = null;
     let thread = null;
     let threadsKey = null;
     let callNodeInfo = null;
@@ -669,6 +677,7 @@ export const CallNodeContextMenu = explicitConnect<
         rightClickedCallNodeInfo.threadsKey
       );
 
+      profile = getProfile(state);
       thread = selectors.getThread(state);
       threadsKey = rightClickedCallNodeInfo.threadsKey;
       callNodeInfo = selectors.getCallNodeInfo(state);
@@ -677,6 +686,7 @@ export const CallNodeContextMenu = explicitConnect<
     }
 
     return {
+      profile,
       thread,
       threadsKey,
       callNodeInfo,

@@ -15,7 +15,7 @@ export type IndexIntoRawMarkerTable = number;
 export type IndexIntoFrameTable = number;
 export type IndexIntoStringTable = number;
 export type IndexIntoFuncTable = number;
-export type IndexIntoResourceTable = number;
+export type IndexIntoResources = number;
 export type IndexIntoLibs = number;
 export type IndexIntoNativeSymbolTable = number;
 export type IndexIntoCategoryList = number;
@@ -361,7 +361,7 @@ export type FuncTable = {|
   // For JS functions, the resource is of type addon, webhost, otherhost, or url.
   // For native functions, the resource is of type library.
   // For labels and for other unidentified functions, we set the resource to -1.
-  resource: Array<IndexIntoResourceTable | -1>,
+  resource: Array<IndexIntoResources | -1>,
 
   // These are non-null for JS functions only. The line and column describe the
   // location of the *start* of the JS function. As for the information about which
@@ -399,17 +399,27 @@ export type NativeSymbolTable = {|
   length: number,
 |};
 
-/**
- * The ResourceTable holds additional information about functions. It tends to contain
- * sparse arrays. Multiple functions can point to the same resource.
- */
-export type ResourceTable = {|
-  length: number,
-  lib: Array<IndexIntoLibs | null>,
-  name: Array<IndexIntoStringTable>,
-  host: Array<IndexIntoStringTable | null>,
-  type: resourceTypeEnum[],
-|};
+// All resources have a type and a name.
+export type Resource =
+  | {|
+      type: 'LIBRARY',
+      name: string,
+      libIndex: IndexIntoLibs,
+    |}
+  | {|
+      type: 'ADDON',
+      name: string,
+      addonId: string,
+    |}
+  | {|
+      type: 'WEBHOST',
+      name: string,
+      host: string,
+    |}
+  | {|
+      type: 'URL',
+      name: string,
+    |};
 
 /**
  * Information about the shared libraries that were loaded into the processes in
@@ -644,7 +654,6 @@ export type Thread = {|
   // their index by other tables.
   stringTable: UniqueStringArray,
   funcTable: FuncTable,
-  resourceTable: ResourceTable,
   nativeSymbols: NativeSymbolTable,
   jsTracer?: JsTracerTable,
   // If present and true, this thread was launched for a private browsing session only.
@@ -855,6 +864,7 @@ export type ProfileMeta = {|
 export type Profile = {|
   meta: ProfileMeta,
   libs: Lib[],
+  resources: Resource[],
   pages?: PageList,
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.

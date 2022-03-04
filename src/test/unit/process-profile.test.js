@@ -91,17 +91,19 @@ describe('extract functions and resource from location strings', function () {
     length: 2,
   };
   const globalDataCollector = new GlobalDataCollector();
+  globalDataCollector.addResourcesForExtensions(extensions);
 
   it('extracts the information for all different types of locations', function () {
-    const { funcTable, resourceTable, frameFuncs } =
+    const { funcTable, frameFuncs } =
       extractFuncsAndResourcesFromFrameLocations(
         locationIndexes,
         locationIndexes.map(() => false),
         stringTable,
         libs,
-        extensions,
         globalDataCollector
       );
+
+    const { resources } = globalDataCollector.finish();
 
     expect(
       frameFuncs.map((funcIndex, locationIndex) => {
@@ -119,25 +121,18 @@ describe('extract functions and resource from location strings', function () {
 
         let libIndex, resourceName, host, resourceType;
         if (resourceIndex === -1) {
+          libIndex = null;
           resourceName = null;
           host = null;
           resourceType = null;
         } else {
-          const hostStringIndex = resourceTable.host[resourceIndex];
-          libIndex = resourceTable.lib[resourceIndex];
-          resourceName = stringTable.getString(
-            resourceTable.name[resourceIndex]
-          );
-          host =
-            hostStringIndex === undefined || hostStringIndex === null
-              ? null
-              : stringTable.getString(hostStringIndex);
-          resourceType = resourceTable.type[resourceIndex];
+          const resource = resources[resourceIndex];
+          libIndex = resource.type === 'LIBRARY' ? resource.libIndex : null;
+          resourceName = resource.name;
+          host = resource.type === 'WEBHOST' ? resource.host : null;
+          resourceType = resource.type;
         }
-        const lib =
-          libIndex === undefined || libIndex === null || libIndex === -1
-            ? undefined
-            : libs[libIndex];
+        const lib = libIndex === null ? undefined : libs[libIndex];
 
         return [
           locationName,

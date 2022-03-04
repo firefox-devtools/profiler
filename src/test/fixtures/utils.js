@@ -131,6 +131,7 @@ export function callTreeFromProfile(
     interval,
     callNodeInfo,
     categories,
+    profile.resources,
     'combined',
     callTreeCountsAndSummary,
     'samples'
