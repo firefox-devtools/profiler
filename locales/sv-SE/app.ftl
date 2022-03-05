@@ -610,6 +610,7 @@ TrackContextMenu--no-results-found = Inga resultat hittades för “<span>{ $sea
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = relativa minnet vid denna tidpunkt
 TrackMemoryGraph--memory-range-in-graph = minnesintervall i grafen
 TrackMemoryGraph--operations-since-the-previous-sample = operationer sedan föregående prov
 
