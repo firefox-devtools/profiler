@@ -544,6 +544,15 @@ TrackContextMenu--show-all-tracks-below = Mostra tutte le tracce sottostanti
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Nessun risultato trovato per “<span>{ $searchFilter }</span>”
 
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = memoria relativa al momento
+TrackMemoryGraph--memory-range-in-graph = intervallo di memoria nel grafico
+TrackMemoryGraph--operations-since-the-previous-sample = operazioni dal campione precedente
+
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
