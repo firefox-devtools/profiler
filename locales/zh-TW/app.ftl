@@ -539,6 +539,15 @@ TrackContextMenu--show-all-tracks-below = 在下方顯示所有軌道
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = 找不到「<span>{ $searchFilter }</span>」的結果
 
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
+TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
+TrackMemoryGraph--operations-since-the-previous-sample = 自前一次取樣以來的操作次數
+
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
