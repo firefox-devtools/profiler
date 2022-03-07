@@ -151,6 +151,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Mentions légales
 FooterLinks--Privacy = Confidentialité
 FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Changer de langue
+FooterLinks--hide-button =
+    .title = Masquer les liens de pied de page
+    .aria-label = Masquer les liens de pied de page
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -249,7 +254,7 @@ MarkerContextMenu--end-selection-at-marker-end = Terminer la sélection à la <s
 MarkerContextMenu--copy-description = Copier la description
 MarkerContextMenu--copy-call-stack = Copier la pile d’appels
 MarkerContextMenu--copy-url = Copier l’URL
-MarkerContextMenu--copy-full-payload = Copier la charge utile complète
+MarkerContextMenu--copy-as-json = Copier au format JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -520,7 +525,7 @@ TabBar--js-tracer-tab = Traceur JS
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Afficher uniquement ce groupe de processus
+TrackContextMenu--only-show-this-process = Afficher uniquement ce processus
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -539,6 +544,12 @@ TrackContextMenu--show-all-tracks-below = Afficher toutes les pistes ci-dessous
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Aucun résultat pour « <span>{ $searchFilter }</span> »
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
