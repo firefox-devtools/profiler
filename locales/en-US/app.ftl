@@ -212,6 +212,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacy
 FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Change language
+FooterLinks--hide-button =
+    .title = Hide footer links
+    .aria-label = Hide footer links
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -336,7 +341,7 @@ MarkerContextMenu--end-selection-at-marker-end =
 MarkerContextMenu--copy-description = Copy description
 MarkerContextMenu--copy-call-stack = Copy call stack
 MarkerContextMenu--copy-url = Copy URL
-MarkerContextMenu--copy-full-payload = Copy full payload
+MarkerContextMenu--copy-as-json = Copy as JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -628,7 +633,7 @@ TabBar--js-tracer-tab = JS Tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Only show this process group
+TrackContextMenu--only-show-this-process = Only show this process
 
 # This is used as the context menu item to show only the given track.
 # Variables:
@@ -651,6 +656,15 @@ TrackContextMenu--show-all-tracks-below = Show all tracks below
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = No results found for “<span>{ $searchFilter }</span>”
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = relative memory at this time
+TrackMemoryGraph--memory-range-in-graph = memory range in graph
+TrackMemoryGraph--operations-since-the-previous-sample = operations since the previous sample
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

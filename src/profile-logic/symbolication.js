@@ -25,6 +25,7 @@ import type {
   Address,
   CallNodePath,
   StackTable,
+  Lib,
 } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
@@ -265,8 +266,11 @@ function makeConsensusMap<K, V>(
  * allows the symbol substitation step at the end to work efficiently.
  * Returns a map with one entry for each library resource.
  */
-function getThreadSymbolicationInfo(thread: Thread): ThreadSymbolicationInfo {
-  const { libs, frameTable, funcTable, nativeSymbols, resourceTable } = thread;
+function getThreadSymbolicationInfo(
+  thread: Thread,
+  libs: Lib[]
+): ThreadSymbolicationInfo {
+  const { frameTable, funcTable, nativeSymbols, resourceTable } = thread;
 
   const map = new Map();
   for (
@@ -279,7 +283,7 @@ function getThreadSymbolicationInfo(thread: Thread): ThreadSymbolicationInfo {
       continue;
     }
     const libIndex = resourceTable.lib[resourceIndex];
-    if (libIndex === null || libIndex === undefined || libIndex === -1) {
+    if (libIndex === null) {
       // We can get here if we have pre-symbolicated "funcName (in LibraryName)"
       // frames. Those get resourceTypes.library but no libIndex.
       continue;
@@ -884,7 +888,9 @@ export async function symbolicateProfile(
   symbolStore: AbstractSymbolStore,
   symbolicationStepCallback: SymbolicationStepCallback
 ): Promise<void> {
-  const symbolicationInfo = profile.threads.map(getThreadSymbolicationInfo);
+  const symbolicationInfo = profile.threads.map((thread) =>
+    getThreadSymbolicationInfo(thread, profile.libs)
+  );
   const libSymbolicationRequests =
     buildLibSymbolicationRequestsForAllThreads(symbolicationInfo);
   await symbolStore.getSymbols(

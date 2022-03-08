@@ -546,8 +546,8 @@ function sanitizeThreadPII(
             // as well.
             newResourceTable.name[resourceIndex] = stringArray.length;
             stringArray.push(`<Resource #${resourceIndex}>`);
-            newResourceTable.lib[resourceIndex] = undefined;
-            newResourceTable.host[resourceIndex] = undefined;
+            newResourceTable.lib[resourceIndex] = null;
+            newResourceTable.host[resourceIndex] = null;
           }
         }
       }

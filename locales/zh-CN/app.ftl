@@ -149,6 +149,11 @@ Details--error-boundary-message =
 FooterLinks--legal = 法律
 FooterLinks--Privacy = 隐私
 FooterLinks--Cookies = Cookie
+FooterLinks--languageSwitcher--select =
+    .title = 更改语言
+FooterLinks--hide-button =
+    .title = 隐藏页脚链接
+    .aria-label = 隐藏页脚链接
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -328,7 +333,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = 记录开始于：
 MenuButtons--metaInfo--interval = 间隔：
-MenuButtons--metaInfo--profile-version = 分析记录版本：
 MenuButtons--metaInfo--buffer-capacity = 缓冲容量：
 MenuButtons--metaInfo--buffer-duration = 缓冲间隔：
 # Buffer Duration in Seconds in Meta Info Panel
@@ -394,6 +398,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = 分析的持续时间：
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = 包含隐藏的线程
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = 包含来自其他标签页的数据
 MenuButtons--publish--renderCheckbox-label-hidden-time = 包含隐藏的时间范围
 MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含快照
 MenuButtons--publish--renderCheckbox-label-resource = 包括资源 URL 和路径

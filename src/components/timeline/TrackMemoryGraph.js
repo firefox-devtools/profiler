@@ -6,9 +6,13 @@
 
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
+import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { formatBytes } from 'firefox-profiler/utils/format-numbers';
+import {
+  formatBytes,
+  formatNumber,
+} from 'firefox-profiler/utils/format-numbers';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
@@ -280,6 +284,12 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _onMouseLeave = () => {
+    // This persistTooltips property is part of the web console API. It helps
+    // in being able to inspect and debug tooltips.
+    if (window.persistTooltips) {
+      return;
+    }
+
     this.setState({ hoveredCounter: null });
   };
 
@@ -338,27 +348,43 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(counterIndex: number): React.Node {
-    if (this.props.accumulatedSamples.length === 0) {
+    const { accumulatedSamples, counter } = this.props;
+    if (accumulatedSamples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
       throw new Error('No accumulated sample found for memory counter');
     }
-    const { minCount, countRange, accumulatedCounts } =
-      this.props.accumulatedSamples[0];
+    const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
     const bytes = accumulatedCounts[counterIndex] - minCount;
+    const operationsCounters = counter.sampleGroups[0].samples.number;
+    const operations = operationsCounters[counterIndex];
     return (
       <div className="timelineTrackMemoryTooltip">
         <div className="timelineTrackMemoryTooltipLine">
           <span className="timelineTrackMemoryTooltipNumber">
+            {formatNumber(operations, 2, 0)}
+          </span>
+          <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
+            operations since the previous sample
+          </Localized>
+        </div>
+
+        <div className="timelineTrackMemoryTooltipLine">
+          <span className="timelineTrackMemoryTooltipNumber">
             {formatBytes(bytes)}
           </span>
-          {' relative memory at this time'}
+          <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
+            relative memory at this time
+          </Localized>
         </div>
+
         <div className="timelineTrackMemoryTooltipLine">
           <span className="timelineTrackMemoryTooltipNumber">
             {formatBytes(countRange)}
           </span>
-          {' memory range in graph'}
+          <Localized id="TrackMemoryGraph--memory-range-in-graph">
+            memory range in graph
+          </Localized>
         </div>
       </div>
     );

@@ -212,22 +212,6 @@ describe('actions/receive-profile', function () {
       ]);
     });
 
-    it('will not hide the Renderer thread', function () {
-      const store = blankStore();
-      const { profile, idleThread, workThread } =
-        getProfileWithIdleAndWorkThread();
-      idleThread.name = 'Renderer';
-      idleThread.processType = 'default';
-      workThread.name = 'GeckoMain';
-      workThread.processType = 'default';
-
-      store.dispatch(viewProfile(profile));
-      expect(getHumanReadableTracks(store.getState())).toEqual([
-        'show [thread GeckoMain default] SELECTED',
-        '  - show [thread Renderer]',
-      ]);
-    });
-
     it('will not hide a main thread', function () {
       const store = blankStore();
       const { profile, idleThread, workThread } =
@@ -580,8 +564,6 @@ describe('actions/receive-profile', function () {
       it('will keep certain threads visible even if they have low CPU usage', function () {
         const store = blankStore();
         // A profile with 18 threads, with varying thread scores.
-        // The "Renderer" thread only has a CPU delta sum of 20, but should be
-        // visible anyway, because of its thread name.
 
         const profile = getProfileWithThreadCPUDelta([
           [100, 10, 20, 30, 20, 10, 0, 0, 0, 0, 0, 0, 0],
@@ -622,8 +604,8 @@ describe('actions/receive-profile', function () {
         expect(getHumanReadableTracks(store.getState())).toEqual([
           'show [process]',
           '  - show [thread Thread with 190 CPU] SELECTED',
-          '  - show [thread Renderer]',
-          '  - hide [thread DOM Worker]', // <-- hidden
+          '  - hide [thread Renderer]', // <-- hidden
+          '  - show [thread DOM Worker]',
           '  - show [thread Thread with 270 CPU]',
           '  - show [thread Thread with 330 CPU]',
           '  - show [thread Thread with 180 CPU]',

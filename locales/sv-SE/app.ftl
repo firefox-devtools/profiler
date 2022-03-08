@@ -199,6 +199,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Juridisk information
 FooterLinks--Privacy = Sekretesspolicy
 FooterLinks--Cookies = Kakor
+FooterLinks--languageSwitcher--select =
+    .title = Ändra språk
+FooterLinks--hide-button =
+    .title = Dölj sidfotslänkar
+    .aria-label = Dölj sidfotslänkar
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -307,7 +312,7 @@ MarkerContextMenu--end-selection-at-marker-end = Avsluta markering vid markören
 MarkerContextMenu--copy-description = Kopiera beskrivning
 MarkerContextMenu--copy-call-stack = Kopiera anropsstack
 MarkerContextMenu--copy-url = Kopiera URL
-MarkerContextMenu--copy-full-payload = Kopiera full nyttolast
+MarkerContextMenu--copy-as-json = Kopiera som JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -394,7 +399,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Inspelningen startade:
 MenuButtons--metaInfo--interval = Intervall:
-MenuButtons--metaInfo--profile-version = Profilversion:
 MenuButtons--metaInfo--buffer-capacity = Buffertkapacitet:
 MenuButtons--metaInfo--buffer-duration = Buffertlängd:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -461,6 +465,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Profilerad varaktighet:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Inkludera dolda trådar
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Inkludera data från andra flikar
 MenuButtons--publish--renderCheckbox-label-hidden-time = Inkludera dolt tidsintervall
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Inkludera skärmdumpar
 MenuButtons--publish--renderCheckbox-label-resource = Inkludera resursURLs och sökvägar
@@ -580,7 +585,7 @@ TabBar--js-tracer-tab = JS Tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Visa endast denna processgrupp
+TrackContextMenu--only-show-this-process = Visa endast denna process
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -599,6 +604,15 @@ TrackContextMenu--show-all-tracks-below = Visa alla spår nedan
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Inga resultat hittades för “<span>{ $searchFilter }</span>”
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = relativa minnet vid denna tidpunkt
+TrackMemoryGraph--memory-range-in-graph = minnesintervall i grafen
+TrackMemoryGraph--operations-since-the-previous-sample = operationer sedan föregående prov
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

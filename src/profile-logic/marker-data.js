@@ -6,7 +6,7 @@
 import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs } from '../utils/string';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   INSTANT,
   INTERVAL,
@@ -304,23 +304,36 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
   // To store all the markers for a given message, we convert the direction and
   // phase to an index into an array.
   function phaseToIndex(data: IPCMarkerPayload): number {
+    const { phase } = data;
     if (data.direction === 'sending') {
-      switch (data.phase) {
+      switch (phase) {
+        case 'endpoint':
+        // We don't have a 'phase' field in the older profiles, in that case
+        // their phase is 'endpoint'. (fallthrough)
+        case undefined:
+          return 0;
         case 'transferStart':
           return 1;
         case 'transferEnd':
           return 2;
         default:
-          // 'endpoint'
-          return 0;
+          throw assertExhaustiveCheck(phase, `Unhandled IPC phase type.`);
       }
     } else {
-      switch (data.phase) {
+      switch (phase) {
         case 'transferEnd':
           return 3;
-        default:
-          // 'endpoint'
+        case 'endpoint':
+        // We don't have a 'phase' field in the older profiles, in that case
+        // their phase is 'endpoint'. (fallthrough)
+        case undefined:
           return 4;
+        case 'transferStart':
+          throw new Error(
+            'Unexpected "transferStart" phase found on receiving side.'
+          );
+        default:
+          throw assertExhaustiveCheck(phase, `Unhandled IPC phase type.`);
       }
     }
   }

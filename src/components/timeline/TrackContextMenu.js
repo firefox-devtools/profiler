@@ -522,8 +522,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     return (
       <MenuItem onClick={this._isolateProcess} disabled={isDisabled}>
-        <Localized id="TrackContextMenu--only-show-this-process-group">
-          Only show this process group
+        <Localized id="TrackContextMenu--only-show-this-process">
+          Only show this process
         </Localized>
       </MenuItem>
     );

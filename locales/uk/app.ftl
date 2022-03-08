@@ -202,6 +202,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Правові положення
 FooterLinks--Privacy = Приватність
 FooterLinks--Cookies = Куки
+FooterLinks--languageSwitcher--select =
+    .title = Змінити мову
+FooterLinks--hide-button =
+    .title = Сховати посилання нижнього колонтитула
+    .aria-label = Сховати посилання нижнього колонтитула
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -311,7 +316,7 @@ MarkerContextMenu--end-selection-at-marker-end = Завершити вибір �
 MarkerContextMenu--copy-description = Скопіювати опис
 MarkerContextMenu--copy-call-stack = Скопіювати стек викликів
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
-MarkerContextMenu--copy-full-payload = Копіювати повне корисне навантаження
+MarkerContextMenu--copy-as-json = Скопіювати як JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -402,7 +407,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Запис розпочато:
 MenuButtons--metaInfo--interval = Інтервал:
-MenuButtons--metaInfo--profile-version = Версія профілю:
 MenuButtons--metaInfo--buffer-capacity = Обсяг буфера:
 MenuButtons--metaInfo--buffer-duration = Тривалість буфера:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -470,6 +474,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Тривалість з�
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Включити приховані потоки
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Включити дані з інших вкладок
 MenuButtons--publish--renderCheckbox-label-hidden-time = Включити прихований діапазон часу
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Включити знімки екрана
 MenuButtons--publish--renderCheckbox-label-resource = Включити URL-адреси ресурсів та шляхи
@@ -589,7 +594,7 @@ TabBar--js-tracer-tab = JS Tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Показати лише цю групу процесів
+TrackContextMenu--only-show-this-process = Показувати лише ці процеси
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.

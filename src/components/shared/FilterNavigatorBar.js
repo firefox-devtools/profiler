@@ -9,23 +9,43 @@ import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
+type FilterNavigatorBarButtonProps = {|
+  onClick: (number) => mixed,
+  index: number,
+  children: React.Node,
+|};
+
+class FilterNavigatorBarButton extends React.PureComponent<FilterNavigatorBarButtonProps> {
+  _onClick = () => {
+    const { index, onClick } = this.props;
+    onClick(index);
+  };
+
+  render() {
+    return (
+      <button
+        type="button"
+        className="filterNavigatorBarItemContent"
+        onClick={this._onClick}
+      >
+        {this.props.children}
+      </button>
+    );
+  }
+}
+
 type Props = {|
   +className: string,
-  +items: $ReadOnlyArray<React.Node | string>,
+  +items: $ReadOnlyArray<React.Node>,
   +onPop: (number) => mixed,
   +selectedItem: number,
   +uncommittedItem?: string,
 |};
 
 export class FilterNavigatorBar extends React.PureComponent<Props> {
-  _onLiClick = (e: SyntheticMouseEvent<HTMLLIElement>) => {
-    const element = e.currentTarget;
-    const index = parseInt(element.dataset.index, 10) || 0;
-    this.props.onPop(index);
-  };
-
   render() {
-    const { className, items, selectedItem, uncommittedItem } = this.props;
+    const { className, items, selectedItem, uncommittedItem, onPop } =
+      this.props;
     return (
       <TransitionGroup
         component="ol"
@@ -38,21 +58,19 @@ export class FilterNavigatorBar extends React.PureComponent<Props> {
             timeout={250}
           >
             <li
-              data-index={i}
               className={classNames('filterNavigatorBarItem', {
                 filterNavigatorBarRootItem: i === 0,
                 filterNavigatorBarBeforeSelectedItem: i === selectedItem - 1,
                 filterNavigatorBarSelectedItem: i === selectedItem,
                 filterNavigatorBarLeafItem: i === items.length - 1,
               })}
-              onClick={this._onLiClick}
             >
-              {i === items.length - 1 ? (
+              {i === items.length - 1 && !uncommittedItem ? (
                 <span className="filterNavigatorBarItemContent">{item}</span>
               ) : (
-                <button type="button" className="filterNavigatorBarItemContent">
+                <FilterNavigatorBarButton index={i} onClick={onPop}>
                   {item}
-                </button>
+                </FilterNavigatorBarButton>
               )}
             </li>
           </CSSTransition>

@@ -24,7 +24,7 @@
 // small enough.
 
 export class AddressLocator {
-  _libs /* : Lib[] */;
+  _libs /* : LibMapping[] */;
   _libRanges /* : Array<{| baseAddress: BigInt, start: BigInt, end: BigInt |}> */;
 
   /**
@@ -80,18 +80,16 @@ export class AddressLocator {
         right = mid - 1;
       } else {
         // Found a match!
-        const libIndex = mid;
-        const relativeAddress = address - libRanges[libIndex].baseAddress;
+        const index = mid;
+        const relativeAddress = address - libRanges[index].baseAddress;
         return {
-          lib: this._libs[libIndex],
-          libIndex,
+          lib: this._libs[index],
           relativeAddress: Number(relativeAddress),
         };
       }
     }
     return {
       lib: null,
-      libIndex: null,
       relativeAddress: parseInt(addressHexString, 16),
     };
   }

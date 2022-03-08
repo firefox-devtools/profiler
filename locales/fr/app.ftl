@@ -68,8 +68,8 @@ CallNodeContextMenu--transform-collapse-resource = Réduire <strong>{ $nameForRe
     .title = Réduire une ressource aplatit tous les appels à cette ressource en un seul nœud d’appel réduit.
 CallNodeContextMenu--transform-collapse-direct-recursion = Réduire la récursivité directe
     .title = La réduction de la récursivité directe supprime les appels qui reviennent à plusieurs reprises dans la même fonction.
-CallNodeContextMenu--transform-drop-function = Supprimer les échantillons avec cette fonction
-    .title = La suppression des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
+CallNodeContextMenu--transform-drop-function = Ignorer les échantillons avec cette fonction
+    .title = Ignorer des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -151,6 +151,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Mentions légales
 FooterLinks--Privacy = Confidentialité
 FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Changer de langue
+FooterLinks--hide-button =
+    .title = Masquer les liens de pied de page
+    .aria-label = Masquer les liens de pied de page
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -249,7 +254,7 @@ MarkerContextMenu--end-selection-at-marker-end = Terminer la sélection à la <s
 MarkerContextMenu--copy-description = Copier la description
 MarkerContextMenu--copy-call-stack = Copier la pile d’appels
 MarkerContextMenu--copy-url = Copier l’URL
-MarkerContextMenu--copy-full-payload = Copier la charge utile complète
+MarkerContextMenu--copy-as-json = Copier au format JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -336,7 +341,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Enregistrement commencé :
 MenuButtons--metaInfo--interval = Intervalle :
-MenuButtons--metaInfo--profile-version = Version du profil :
 MenuButtons--metaInfo--buffer-capacity = Capacité de la mémoire tampon :
 MenuButtons--metaInfo--buffer-duration = Durée de la mémoire tampon :
 # Buffer Duration in Seconds in Meta Info Panel
@@ -403,6 +407,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Durée profilée :
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Inclure les threads cachés
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Inclure les données des autres onglets
 MenuButtons--publish--renderCheckbox-label-hidden-time = Inclure la plage de temps masquée
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Inclure des captures d’écran
 MenuButtons--publish--renderCheckbox-label-resource = Inclure les URL et les chemins des ressources
@@ -415,7 +420,7 @@ MenuButtons--publish--reupload-performance-profile = Envoyer à nouveau le profi
 MenuButtons--publish--share-performance-profile = Partager le profil de performance
 MenuButtons--publish--info-description = Envoyez votre profil et rendez-le accessible à toute personne disposant du lien.
 MenuButtons--publish--info-description-default = Par défaut, vos données personnelles sont supprimées.
-MenuButtons--publish--info-description-firefox-nightly2 = Ce profil provient de { -firefox-nightly-brand-name }, donc par défaut la plupart les informations sont incluses.
+MenuButtons--publish--info-description-firefox-nightly2 = Ce profil provient de { -firefox-nightly-brand-name }, donc par défaut la plupart des informations sont incluses.
 MenuButtons--publish--include-additional-data = Inclure des données supplémentaires qui peuvent être identifiables
 MenuButtons--publish--button-upload = Envoyer
 MenuButtons--publish--upload-title = Envoi du profil…
@@ -520,7 +525,7 @@ TabBar--js-tracer-tab = Traceur JS
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Afficher uniquement ce groupe de processus
+TrackContextMenu--only-show-this-process = Afficher uniquement ce processus
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -539,6 +544,12 @@ TrackContextMenu--show-all-tracks-below = Afficher toutes les pistes ci-dessous
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Aucun résultat pour « <span>{ $searchFilter }</span> »
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -591,7 +602,7 @@ TransformNavigator--merge-function = Fusion : { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--drop-function = Abandon : { $item }
+TransformNavigator--drop-function = Ignorer : { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
