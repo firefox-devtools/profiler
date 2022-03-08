@@ -155,6 +155,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacidad
 FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Cambiar idioma
+FooterLinks--hide-button =
+    .title = Ocultar enlaces de pie de página
+    .aria-label = Ocultar enlaces de pie de página
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -253,7 +258,7 @@ MarkerContextMenu--end-selection-at-marker-end = Terminar la selección en el <s
 MarkerContextMenu--copy-description = Copiar descripción
 MarkerContextMenu--copy-call-stack = Copiar pila de llamadas
 MarkerContextMenu--copy-url = Copiar URL
-MarkerContextMenu--copy-full-payload = Copiar payload completo
+MarkerContextMenu--copy-as-json = Copiar como JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -340,7 +345,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Inicio del registro:
 MenuButtons--metaInfo--interval = Intervalo:
-MenuButtons--metaInfo--profile-version = Versión del perfil:
 MenuButtons--metaInfo--buffer-capacity = Capacidad del búfer:
 MenuButtons--metaInfo--buffer-duration = Duración del búfer:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -407,6 +411,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Duración del perfilado:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Incluir hilos ocultos
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Incluir los datos de otras pestañas
 MenuButtons--publish--renderCheckbox-label-hidden-time = Incluir rango de tiempo oculto
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Incluir capturas de pantalla
 MenuButtons--publish--renderCheckbox-label-resource = Incluir URL y rutas de recursos
@@ -524,7 +529,7 @@ TabBar--js-tracer-tab = Trazador JS
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Mostrar solo este grupo de procesos
+TrackContextMenu--only-show-this-process = Mostrar solo este proceso
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -543,6 +548,15 @@ TrackContextMenu--show-all-tracks-below = Mostrar todas las pistas a continuaci�
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = No se encontraron resultados para "<span>{ $searchFilter }</span>"
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = memoria relativa en este momento
+TrackMemoryGraph--memory-range-in-graph = rango de memoria en un gráfico
+TrackMemoryGraph--operations-since-the-previous-sample = operaciones desde la muestra anterior
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

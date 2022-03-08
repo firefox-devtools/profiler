@@ -149,6 +149,11 @@ Details--error-boundary-message =
 FooterLinks--legal = 法律資訊
 FooterLinks--Privacy = 隱私權
 FooterLinks--Cookies = Cookie
+FooterLinks--languageSwitcher--select =
+    .title = 變更語言
+FooterLinks--hide-button =
+    .title = 隱藏頁尾鏈結
+    .aria-label = 隱藏頁尾鏈結
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -245,7 +250,7 @@ MarkerContextMenu--end-selection-at-marker-end = 選擇到標記的<strong>終�
 MarkerContextMenu--copy-description = 複製描述
 MarkerContextMenu--copy-call-stack = 複製呼叫堆疊
 MarkerContextMenu--copy-url = 複製網址
-MarkerContextMenu--copy-full-payload = 複製完整酬載
+MarkerContextMenu--copy-as-json = 以 JSON 格式複製
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -328,7 +333,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = 紀錄開始於:
 MenuButtons--metaInfo--interval = 間隔:
-MenuButtons--metaInfo--profile-version = 檢測檔版本:
 MenuButtons--metaInfo--buffer-capacity = 緩衝容量:
 MenuButtons--metaInfo--buffer-duration = 緩衝間隔:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -394,6 +398,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = 檢測的持續時間:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = 包含隱藏的執行緒
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = 包含來自其他分頁的資料
 MenuButtons--publish--renderCheckbox-label-hidden-time = 包含隱藏的時間範圍
 MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含畫面擷圖
 MenuButtons--publish--renderCheckbox-label-resource = 包含資源網址與路徑
@@ -514,7 +519,7 @@ TabBar--js-tracer-tab = JS 追蹤器
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = 只顯示此處理程序群組
+TrackContextMenu--only-show-this-process = 只顯示此處理程序
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -533,6 +538,15 @@ TrackContextMenu--show-all-tracks-below = 在下方顯示所有軌道
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = 找不到「<span>{ $searchFilter }</span>」的結果
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
+TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
+TrackMemoryGraph--operations-since-the-previous-sample = 自前一次取樣以來的操作次數
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

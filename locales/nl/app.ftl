@@ -206,6 +206,11 @@ Details--error-boundary-message =
 FooterLinks--legal = Juridisch
 FooterLinks--Privacy = Privacy
 FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Taal wijzigen
+FooterLinks--hide-button =
+    .title = Voettekstkoppelingen verbergen
+    .aria-label = Voettekstkoppelingen verbergen
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -314,7 +319,7 @@ MarkerContextMenu--end-selection-at-marker-end = Selectie beëindigen bij <stron
 MarkerContextMenu--copy-description = Beschrijving kopiëren
 MarkerContextMenu--copy-call-stack = Aanroepstack kopiëren
 MarkerContextMenu--copy-url = URL kopiëren
-MarkerContextMenu--copy-full-payload = Volledige payload kopiëren
+MarkerContextMenu--copy-as-json = Kopiëren als JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -401,7 +406,6 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = Opname gestart:
 MenuButtons--metaInfo--interval = Interval:
-MenuButtons--metaInfo--profile-version = Profielversie:
 MenuButtons--metaInfo--buffer-capacity = Buffercapaciteit:
 MenuButtons--metaInfo--buffer-duration = Bufferduur:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -468,6 +472,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Geprofileerde duur:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Verborgen threads opnemen
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = De gegevens van andere tabbladen opnemen
 MenuButtons--publish--renderCheckbox-label-hidden-time = Verborgen tijdsbereik opnemen
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Schermafdrukken opnemen
 MenuButtons--publish--renderCheckbox-label-resource = Hulpbron-URL’s en -paden opnemen
@@ -587,7 +592,7 @@ TabBar--js-tracer-tab = JS-tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Alleen deze procesgroep tonen
+TrackContextMenu--only-show-this-process = Alleen dit proces tonen
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
