@@ -555,6 +555,8 @@ TrackContextMenu--no-results-found = Nenhum resultado encontrado de “<span>{ $
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
 TrackMemoryGraph--relative-memory-at-this-time = memória relativa neste momento
+TrackMemoryGraph--memory-range-in-graph = intervalo de memória no gráfico
+TrackMemoryGraph--operations-since-the-previous-sample = operações desde a amostra anterior
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
