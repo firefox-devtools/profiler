@@ -10,9 +10,6 @@ import type {
   MarkerTimingAndBuckets,
 } from 'firefox-profiler/types';
 
-// Arbitrarily set an upper limit for adding marker depths, avoiding an infinite loop.
-const MAX_STACKING_DEPTH = 300;
-
 /**
  * This function computes the timing information for laying out the markers in the
  * MarkerChart component. Each marker is put into a single row based on its name. In
@@ -32,7 +29,15 @@ const MAX_STACKING_DEPTH = 300;
  *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"],
  *      bucket: "DOM",
  *    },
- *    {
+ *    { // First line of B markers
+ *      name: "B",
+ *      start: [1, 28, 39, 69, 70],
+ *      end: [2, 29, 49, 70, 77],
+ *      index: [1, 3, 7, 9, 10],
+ *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
+ *      bucket: "DOM",
+ *    },
+ *    { // Second line of B markers
  *      name: "B",
  *      start: [1, 28, 39, 69, 70],
  *      end: [2, 29, 49, 70, 77],
@@ -84,6 +89,20 @@ export function getMarkerTiming(
   for (const markerIndex of markerIndexes) {
     const marker = getMarker(markerIndex);
 
+    const addCurrentMarkerToMarkerTiming = (markerTiming: MarkerTiming) => {
+      markerTiming.start.push(marker.start);
+      markerTiming.end.push(
+        // If this is an instant marker, the start time and end time will match.
+        // The chart will then be responsible for drawing this differently.
+        marker.end === null ? marker.start : marker.end
+      );
+      markerTiming.label.push(getLabel(markerIndex));
+      markerTiming.index.push(markerIndex);
+      markerTiming.length++;
+    };
+
+    const bucketName = categories ? categories[marker.category].name : 'None';
+
     // We want to group all network requests in the same line. Indeed they all
     // have different names and they'd end up with one single request in each
     // line without this special handling.
@@ -91,50 +110,46 @@ export function getMarkerTiming(
       marker.data && marker.data.type === 'Network'
         ? 'Network Requests'
         : marker.name;
-    let markerTimingsByName = markerTimingsMap.get(markerLineName);
-    if (markerTimingsByName === undefined) {
-      markerTimingsByName = [];
-      markerTimingsMap.set(markerLineName, markerTimingsByName);
+
+    const emptyTiming = (): MarkerTiming => ({
+      start: [],
+      end: [],
+      index: [],
+      label: [],
+      name: markerLineName,
+      bucket: bucketName,
+      length: 0,
+    });
+
+    // This is an interval marker.
+    let markerTimingsForName = markerTimingsMap.get(markerLineName);
+    if (markerTimingsForName === undefined) {
+      markerTimingsForName = [];
+      markerTimingsMap.set(markerLineName, markerTimingsForName);
     }
 
-    // Place the marker in the closest row that is empty.
-    for (let i = 0; i < MAX_STACKING_DEPTH; i++) {
-      const bucketName = categories ? categories[marker.category].name : 'None';
+    // Find the first row where the new marker fits.
+    // Since the markers are sorted, look at the last added marker in this row. If
+    // the new marker fits, go ahead and insert it.
+    const foundMarkerTiming = markerTimingsForName.find(
+      (markerTiming) =>
+        markerTiming.end[markerTiming.length - 1] <= marker.start
+    );
 
-      // Get or create a row for marker timings.
-      let markerTiming = markerTimingsByName[i];
-      if (!markerTiming) {
-        markerTiming = {
-          start: [],
-          end: [],
-          index: [],
-          label: [],
-          name: markerLineName,
-          bucket: bucketName,
-          length: 0,
-        };
-        markerTimingsByName.push(markerTiming);
-      }
-
-      // Since the markers are sorted, look at the last added marker in this row. If
-      // the new marker fits, go ahead and insert it.
-      const otherEnd = markerTiming.end[markerTiming.length - 1];
-      if (otherEnd === undefined || otherEnd <= marker.start) {
-        markerTiming.start.push(marker.start);
-        markerTiming.end.push(
-          // If this is an instant marker, the start time and end time will match.
-          // The chart will then be responsible for drawing this as a dot.
-          marker.end === null ? marker.start : marker.end
-        );
-        markerTiming.label.push(getLabel(markerIndex));
-        markerTiming.index.push(markerIndex);
-        markerTiming.length++;
-        break;
-      }
+    if (foundMarkerTiming) {
+      addCurrentMarkerToMarkerTiming(foundMarkerTiming);
+      continue;
     }
+
+    // Otherwise, let's add a new row!
+    const newTiming = emptyTiming();
+    addCurrentMarkerToMarkerTiming(newTiming);
+    markerTimingsForName.push(newTiming);
+    continue;
   }
 
   // Flatten out the map into a single array.
+  // One item in this array is one line in the drawn canvas.
   const allMarkerTimings = [].concat(...markerTimingsMap.values());
 
   // Sort all the marker timings in place, first by the bucket, then by their names.
@@ -199,6 +214,14 @@ export function getMarkerTiming(
  *      bucket: "DOM",
  *    },
  *    {
+ *      name: "B",
+ *      start: [1, 28, 39, 69, 70],
+ *      end: [2, 29, 49, 70, 77],
+ *      index: [1, 3, 7, 9, 10],
+ *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
+ *      bucket: "DOM",
+ *    },
+ *    { // Second line of B markers
  *      name: "B",
  *      start: [1, 28, 39, 69, 70],
  *      end: [2, 29, 49, 70, 77],
