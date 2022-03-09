@@ -69,10 +69,12 @@ import type {
   ThreadsKey,
   Milliseconds,
   Tid,
+  GlobalTrack,
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
+import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including
@@ -756,6 +758,73 @@ export function showProvidedTracks(
       type: 'SHOW_PROVIDED_TRACKS',
       globalTracksToShow,
       localTracksByPidToShow,
+    });
+  };
+}
+
+/**
+ * This action makes the tracks that are provided hidden.
+ */
+export function hideProvidedTracks(
+  globalTracksToHide: Set<TrackIndex>,
+  localTracksByPidToHide: Map<Pid, Set<TrackIndex>>
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'hide provided tracks',
+    });
+
+    const hiddenGlobalTracks = getHiddenGlobalTracks(getState());
+    const globalTracks = getGlobalTracks(getState());
+    const newHiddenGlobalTrackCount =
+      hiddenGlobalTracks.size +
+      globalTracksToHide.size -
+      intersectSets(hiddenGlobalTracks, globalTracksToHide).size;
+    const visibleGlobalTracksLeftAfterHiding =
+      newHiddenGlobalTrackCount < globalTracks.length;
+    if (!visibleGlobalTracksLeftAfterHiding) {
+      // Bail if there isn't any other visible global track left after hiding.
+      return;
+    }
+
+    // Remove the threads that are going to be hidden from the selectedThreadIndexes.
+    const newSelectedThreadIndexes: Set<ThreadIndex> = new Set(
+      getSelectedThreadIndexes(getState())
+    );
+
+    for (const trackIndex of globalTracksToHide) {
+      const globalTrack = globalTracks[trackIndex];
+      _removeSelectedThreadIndexesForGlobalTrack(
+        getState,
+        newSelectedThreadIndexes,
+        globalTrack,
+        trackIndex
+      );
+    }
+
+    for (const [pid, localTracksToHide] of localTracksByPidToHide) {
+      const localTracks = getLocalTracks(getState(), pid);
+      for (const trackIndex of localTracksToHide) {
+        const localTrack = localTracks[trackIndex];
+        if (localTrack.type === 'thread') {
+          newSelectedThreadIndexes.delete(localTrack.threadIndex);
+        }
+      }
+    }
+
+    if (newSelectedThreadIndexes.size === 0) {
+      // Hiding this process would make it so that there is no selected thread.
+      // Bail out.
+      return;
+    }
+
+    dispatch({
+      type: 'HIDE_PROVIDED_TRACKS',
+      globalTracksToHide,
+      localTracksByPidToHide,
+      selectedThreadIndexes: newSelectedThreadIndexes,
     });
   };
 }

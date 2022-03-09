@@ -238,6 +238,12 @@ type ProfileAction =
       +localTracksByPidToShow: Map<Pid, Set<TrackIndex>>,
     |}
   | {|
+      +type: 'HIDE_PROVIDED_TRACKS',
+      +globalTracksToHide: Set<TrackIndex>,
+      +localTracksByPidToHide: Map<Pid, Set<TrackIndex>>,
+      +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
+  | {|
       +type: 'SHOW_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
     |}

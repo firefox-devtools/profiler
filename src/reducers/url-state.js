@@ -130,6 +130,7 @@ const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
+    case 'HIDE_PROVIDED_TRACKS':
     case 'ISOLATE_LOCAL_TRACK':
     case 'TOGGLE_RESOURCES_PANEL':
       // Only switch to non-null selected threads.
@@ -364,6 +365,12 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
       hiddenGlobalTracks.delete(action.trackIndex);
       return hiddenGlobalTracks;
     }
+    case 'HIDE_PROVIDED_TRACKS': {
+      const hiddenGlobalTracks = new Set(state);
+      // Add all the provided global tracks to the hidden global tracks.
+      action.globalTracksToHide.forEach(Set.prototype.add, hiddenGlobalTracks);
+      return hiddenGlobalTracks;
+    }
     case 'SANITIZED_PROFILE_PUBLISHED':
       // If any threads were removed, this was because they were hidden.
       // Reset this state.
@@ -417,6 +424,24 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
       const hiddenLocalTracks = new Set(hiddenLocalTracksByPid.get(action.pid));
       hiddenLocalTracks.delete(action.trackIndex);
       hiddenLocalTracksByPid.set(action.pid, hiddenLocalTracks);
+      return hiddenLocalTracksByPid;
+    }
+    case 'HIDE_PROVIDED_TRACKS': {
+      const hiddenLocalTracksByPid = new Map(state);
+      // Go through the provided local tracks to make them hidden.
+      for (const [
+        pid,
+        localTracksToMakeHidden,
+      ] of action.localTracksByPidToHide.entries()) {
+        const hiddenLocalTracks = state.get(pid) ?? new Set();
+        const newHiddenLocalTracks = new Set(hiddenLocalTracks);
+        localTracksToMakeHidden.forEach(
+          Set.prototype.add,
+          newHiddenLocalTracks
+        );
+        hiddenLocalTracksByPid.set(pid, newHiddenLocalTracks);
+      }
+
       return hiddenLocalTracksByPid;
     }
     case 'ISOLATE_PROCESS_MAIN_THREAD':
