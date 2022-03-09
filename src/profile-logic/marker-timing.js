@@ -24,32 +24,30 @@ const MAX_STACKING_DEPTH = 300;
  *      something that looks like:
  *
  *  [
- *    "DOM", // The bucket.
  *    {
  *      name: "A",
  *      start: [0, 23, 35, 65, 75],
  *      end: [1, 25, 37, 67, 77],
  *      index: [0, 2, 5, 6, 8],
- *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"]
- *      bucket: "DOM"
- *    }
+ *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"],
+ *      bucket: "DOM",
+ *    },
  *    {
  *      name: "B",
  *      start: [1, 28, 39, 69, 70],
  *      end: [2, 29, 49, 70, 77],
  *      index: [1, 3, 7, 9, 10],
- *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"]
- *      bucket: "DOM"
- *    }
- *    "Other", // The bucket.
+ *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
+ *      bucket: "DOM",
+ *    },
  *    {
  *      name: "C",
  *      start: [10, 33, 45, 75, 85],
  *      end: [11, 35, 47, 77, 87],
  *      index: [4, 11, 12, 13, 14],
- *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"]
- *      bucket: "Other"
- *    }
+ *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"],
+ *      bucket: "Other",
+ *    },
  *  ]
  *
  * If a marker of a name has timings that overlap in a single row, then it is broken
@@ -66,15 +64,18 @@ const MAX_STACKING_DEPTH = 300;
  *   | User Timings |       *------------*        | <- MarkerTimingRow
  *   | User Timings |       *--*     *---*        | <- MarkerTimingRow
  *   |______________|_____________________________|
+ *
+ * Note that the bucket names aren't present as a result of this function,
+ * they're inserted in `getMarkerTimingAndBuckets`.
  */
-export function getMarkerTimingAndBuckets(
+export function getMarkerTiming(
   getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
   getLabel: (MarkerIndex) => string,
   categories: ?CategoryList
-): MarkerTimingAndBuckets {
+): MarkerTiming[] {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
   const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
@@ -177,6 +178,60 @@ export function getMarkerTimingAndBuckets(
     return a.name > b.name ? 1 : -1;
   });
 
+  return allMarkerTimings;
+}
+
+/**
+ * This function builds on `getMarkerTiming` above, inserting the bucket names
+ * that are plain strings as items in the result array.
+ *
+ * Reusing the previous example of an array of 15 markers named either "A", "B",
+ * or "C", this is the result we'd get:
+ *
+ *  [
+ *    "DOM", // The bucket, inserted by this function after `getMarkerTiming`.
+ *    {
+ *      name: "A",
+ *      start: [0, 23, 35, 65, 75],
+ *      end: [1, 25, 37, 67, 77],
+ *      index: [0, 2, 5, 6, 8],
+ *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"],
+ *      bucket: "DOM",
+ *    },
+ *    {
+ *      name: "B",
+ *      start: [1, 28, 39, 69, 70],
+ *      end: [2, 29, 49, 70, 77],
+ *      index: [1, 3, 7, 9, 10],
+ *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
+ *      bucket: "DOM",
+ *    },
+ *    "Other", // The bucket.
+ *    {
+ *      name: "C",
+ *      start: [10, 33, 45, 75, 85],
+ *      end: [11, 35, 47, 77, 87],
+ *      index: [4, 11, 12, 13, 14],
+ *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"],
+ *      bucket: "Other",
+ *    },
+ *  ]
+ */
+export function getMarkerTimingAndBuckets(
+  getMarker: (MarkerIndex) => Marker,
+  markerIndexes: MarkerIndex[],
+  // Categories can be null for things like Network Markers, where we don't care to
+  // break things up by category.
+  getLabel: (MarkerIndex) => string,
+  categories: ?CategoryList
+): MarkerTimingAndBuckets {
+  const allMarkerTimings = getMarkerTiming(
+    getMarker,
+    markerIndexes,
+    getLabel,
+    categories
+  );
+
   // Interleave the bucket names in between the marker timings.
   const markerTimingsAndBuckets: MarkerTimingAndBuckets = [];
   let prevBucket;
@@ -189,24 +244,4 @@ export function getMarkerTimingAndBuckets(
   }
 
   return markerTimingsAndBuckets;
-}
-
-export function getMarkerTiming(
-  getMarker: (MarkerIndex) => Marker,
-  markerIndexes: MarkerIndex[],
-  getLabel: (MarkerIndex) => string
-): MarkerTiming[] {
-  // Flow didn't understand the filter operation here, so filter out bucket names
-  // imperatively.
-  const onlyTiming = [];
-  for (const timingOrString of getMarkerTimingAndBuckets(
-    getMarker,
-    markerIndexes,
-    getLabel
-  )) {
-    if (typeof timingOrString !== 'string') {
-      onlyTiming.push(timingOrString);
-    }
-  }
-  return onlyTiming;
 }
