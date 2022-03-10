@@ -83,7 +83,9 @@ export function getMarkerTiming(
 ): MarkerTiming[] {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
-  const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
+  const intervalMarkerTimingsMap: Map<string, MarkerTiming[]> = new Map();
+  // Instant markers are on separate lines.
+  const instantMarkerTimingsMap: Map<string, MarkerTiming> = new Map();
 
   // Go through all of the markers.
   for (const markerIndex of markerIndexes) {
@@ -111,21 +113,33 @@ export function getMarkerTiming(
         ? 'Network Requests'
         : marker.name;
 
-    const emptyTiming = (): MarkerTiming => ({
+    const emptyTiming = ({ instantOnly }): MarkerTiming => ({
       start: [],
       end: [],
       index: [],
       label: [],
       name: markerLineName,
       bucket: bucketName,
+      instantOnly,
       length: 0,
     });
 
+    if (marker.end === null) {
+      // This is an instant marker.
+      let instantMarkerTiming = instantMarkerTimingsMap.get(markerLineName);
+      if (!instantMarkerTiming) {
+        instantMarkerTiming = emptyTiming({ instantOnly: true });
+        instantMarkerTimingsMap.set(markerLineName, instantMarkerTiming);
+      }
+      addCurrentMarkerToMarkerTiming(instantMarkerTiming);
+      continue;
+    }
+
     // This is an interval marker.
-    let markerTimingsForName = markerTimingsMap.get(markerLineName);
+    let markerTimingsForName = intervalMarkerTimingsMap.get(markerLineName);
     if (markerTimingsForName === undefined) {
       markerTimingsForName = [];
-      markerTimingsMap.set(markerLineName, markerTimingsForName);
+      intervalMarkerTimingsMap.set(markerLineName, markerTimingsForName);
     }
 
     // Find the first row where the new marker fits.
@@ -142,15 +156,17 @@ export function getMarkerTiming(
     }
 
     // Otherwise, let's add a new row!
-    const newTiming = emptyTiming();
+    const newTiming = emptyTiming({ instantOnly: false });
     addCurrentMarkerToMarkerTiming(newTiming);
     markerTimingsForName.push(newTiming);
     continue;
   }
 
-  // Flatten out the map into a single array.
+  // Flatten out the maps into a single array.
   // One item in this array is one line in the drawn canvas.
-  const allMarkerTimings = [].concat(...markerTimingsMap.values());
+  const allMarkerTimings = [...instantMarkerTimingsMap.values()].concat(
+    ...intervalMarkerTimingsMap.values()
+  );
 
   // Sort all the marker timings in place, first by the bucket, then by their names.
   allMarkerTimings.sort((a, b) => {
@@ -175,7 +191,17 @@ export function getMarkerTiming(
       return a.bucket > b.bucket ? 1 : -1;
     }
     if (a.name === b.name) {
-      // Keep the original ordering if the names are the same.
+      // These 2 lines are for the same marker name.
+
+      // The instant markers need to come first.
+      if (a.instantOnly) {
+        return -1;
+      }
+      if (b.instantOnly) {
+        return 1;
+      }
+
+      // Otherwise keep the original ordering.
       return 0;
     }
 

@@ -160,16 +160,17 @@ describe('MarkerChart', function () {
     const markers = [
       // RENDERED: This marker defines the start of our range.
       [rowName, 0],
-      // Now create four "dot" markers, but only one should be rendered.
-      // RENDERED: This is the first dot marker, as an instant marker.
+      // Now create four "dot" markers, but only two should be rendered.
+      // RENDERED: This is the first instant marker, so it's rendered.
       [rowName, 5000],
-      // NOT-RENDERED: This marker has a duration, but it's very small, and would get
-      // rendered as a dot. (1/2)
+      // RENDERED: This marker has a duration, but it's very small, and would get
+      // rendered as a dot. It's rendered because it's the the first.
       [rowName, 5001, 5001.1],
-      // NOT-RENDERED: The second instant marker.
+      // NOT-RENDERED: The second instant marker, so it's not rendered.
       [rowName, 5002],
       // NOT-RENDERED: This marker has a duration, but it's very small, and would get
-      // rendered as a dot. (2/2)
+      // rendered as a dot if it was rendered. But it's not because it's close to
+      // the previous one.
       [rowName, 5002, 5002.1],
       // RENDERED: This is a longer marker, it should always be drawn even if it starts
       // at the same location as a dot marker
@@ -184,16 +185,18 @@ describe('MarkerChart', function () {
 
     const drawCalls = flushDrawLog();
 
-    // Check that we have 3 arc operations (first marker, one of the 2 dot
-    // markers in the middle, and last marker)
+    // Check that we have 4 arc operations (first marker, first instant marker,
+    // first small interval marker, and last marker)
     const arcOperations = drawCalls.filter(
       ([operation]) => operation === 'arc'
     );
-    expect(arcOperations).toHaveLength(3);
+    expect(arcOperations).toHaveLength(4);
 
-    // Check that all X values are different
-    const arcOperationsX = new Set(arcOperations.map(([, x]) => Math.round(x)));
-    expect(arcOperationsX.size).toBe(3);
+    // Check that all X, Y values are different
+    const arcOperationsXY = new Set(
+      arcOperations.map(([, x, y]) => `${Math.round(x)};${Math.round(y)}`)
+    );
+    expect(arcOperationsXY.size).toBe(4);
 
     // Check that we have a fillRect operation for the longer marker.
     // We filter on the height to get only 1 relevant fillRect operation per marker
