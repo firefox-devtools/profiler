@@ -34,6 +34,14 @@ AppViewRouter--error-from-file = Δεν ήταν δυνατή η ανάγνωσ�
 AppViewRouter--error-local = Δεν έχει υλοποιηθεί ακόμα.
 AppViewRouter--error-public = Δεν ήταν δυνατή η λήψη του προφίλ.
 AppViewRouter--error-from-url = Δεν ήταν δυνατή η λήψη του προφίλ.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Λόγω ενός <a>συγκεκριμένου περιορισμού στο Safari</a>, το { -profiler-brand-name } δεν μπορεί να
+    εισαγάγει προφίλ από τη συσκευή σε αυτό το πρόγραμμα περιήγησης. Παρακαλούμε
+    ανοίξτε αυτήν τη σελίδα στο { -firefox-brand-name } ή το Chrome.
+    .title = Το Safari δεν μπορεί να εισαγάγει τοπικά προφίλ
 AppViewRouter--route-not-found--home =
     .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
 
@@ -658,6 +666,14 @@ SourceView--loading-browser-connection = Αναμονή για { -firefox-brand-
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Μη διαθέσιμη πηγή
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Δείτε το <a>ζήτημα #3741</a> για υποστηριζόμενα σενάρια και προγραμματισμένες βελτιώσεις.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Δεν υπάρχει γνωστό URL με δυνατότητα πρόσβασης από πολλαπλές προελεύσεις για αυτό το αρχείο.
 # Displayed below SourceView--cannot-obtain-source, if there was a network error
 # when fetching the source code for a file.
 # Variables:
@@ -669,6 +685,11 @@ SourceView--network-error-when-obtaining-source = Προέκυψε σφάλμα 
 # Variables:
 #   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
 SourceView--browser-connection-error-when-obtaining-source = Δεν ήταν δυνατή η διερεύνηση του API συμβολισμού του προγράμματος περιήγησης: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = Το API συμβολισμού του προγράμματος περιήγησης επέστρεψε σφάλμα: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a symbol server which is
 # running locally was queried for source code using the symbolication API, and
 # this query returned an error.
