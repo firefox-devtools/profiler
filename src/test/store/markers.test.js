@@ -265,9 +265,11 @@ describe('memory markers', function () {
 describe('selectors/getUserTimingMarkerTiming', function () {
   it('simple profile', function () {
     const profile = getProfileWithMarkers([
-      getUserTiming('renderFunction', 0, 10),
-      getUserTiming('componentA', 1, 8),
-      getUserTiming('componentB', 2, 4),
+      getUserTiming('renderFunction', 0, 10), // 0 -> 10
+      getUserTiming('componentA', 1, 8), // 1 -> 9
+      getUserTiming('componentB', 2, 3), // 2 -> 5
+      getUserTiming('pointInTime', 6), // 6 -> 6
+      getUserTiming('componentC', 7, 2), // 7 -> 9
     ]);
     const { getState } = storeWithProfile(profile);
 
@@ -293,13 +295,13 @@ describe('selectors/getUserTimingMarkerTiming', function () {
         length: 1,
       },
       {
-        start: [2],
-        end: [6],
-        index: [2],
-        label: ['componentB'],
+        start: [2, 6, 7],
+        end: [5, 6, 9],
+        index: [2, 3, 4],
+        label: ['componentB', 'pointInTime', 'componentC'],
         name: 'UserTiming',
         bucket: 'None',
-        length: 1,
+        length: 3,
       },
     ]);
   });

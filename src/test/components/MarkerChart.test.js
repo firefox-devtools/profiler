@@ -160,13 +160,17 @@ describe('MarkerChart', function () {
     const markers = [
       // RENDERED: This marker defines the start of our range.
       [rowName, 0],
-      // RENDERED: Now create three "dot" markers that should only be rendered once.
+      // Now create four "dot" markers, but only one should be rendered.
+      // RENDERED: This is the first dot marker, as an instant marker.
       [rowName, 5000],
       // NOT-RENDERED: This marker has a duration, but it's very small, and would get
-      // rendered as a dot.
+      // rendered as a dot. (1/2)
       [rowName, 5001, 5001.1],
-      // NOT-RENDERED: The final dot marker
+      // NOT-RENDERED: The second instant marker.
       [rowName, 5002],
+      // NOT-RENDERED: This marker has a duration, but it's very small, and would get
+      // rendered as a dot. (2/2)
+      [rowName, 5002, 5002.1],
       // RENDERED: This is a longer marker, it should always be drawn even if it starts
       // at the same location as a dot marker
       [rowName, 5002, 7000],
