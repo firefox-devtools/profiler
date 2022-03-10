@@ -169,6 +169,9 @@ FooterLinks--Privacy = Απόρρητο
 FooterLinks--Cookies = Cookies
 FooterLinks--languageSwitcher--select =
     .title = Αλλαγή γλώσσας
+FooterLinks--hide-button =
+    .title = Απόκρυψη συνδέσμων υποσέλιδου
+    .aria-label = Απόκρυψη συνδέσμων υποσέλιδου
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -277,7 +280,7 @@ MarkerContextMenu--end-selection-at-marker-end = Διακοπή επιλογής
 MarkerContextMenu--copy-description = Αντιγραφή περιγραφής
 MarkerContextMenu--copy-call-stack = Αντιγραφή στοίβας κλήσεων
 MarkerContextMenu--copy-url = Αντιγραφή URL
-MarkerContextMenu--copy-full-payload = Αντιγραφή πλήρους φορτίου
+MarkerContextMenu--copy-as-json = Αντιγραφή ως JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -550,7 +553,7 @@ TabBar--js-tracer-tab = JS Tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Εμφάνιση μόνο αυτής της ομάδας διεργασιών
+TrackContextMenu--only-show-this-process = Εμφάνιση μόνο αυτής της διεργασίας
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -569,6 +572,15 @@ TrackContextMenu--show-all-tracks-below = Εμφάνιση όλων των κο�
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Δεν βρέθηκαν αποτελέσματα για «<span>{ $searchFilter }</span>»
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = σχετική μνήμη αυτήν τη στιγμή
+TrackMemoryGraph--memory-range-in-graph = εύρος μνήμης στο γράφημα
+TrackMemoryGraph--operations-since-the-previous-sample = λειτουργίες από το προηγούμενο δείγμα
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
