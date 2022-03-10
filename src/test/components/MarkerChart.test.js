@@ -35,6 +35,7 @@ import {
   getProfileWithMarkers,
   addActiveTabInformationToProfile,
   addMarkersToThreadWithCorrespondingSamples,
+  getUserTiming,
   type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
 import {
@@ -48,10 +49,7 @@ import {
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
-import type {
-  UserTimingMarkerPayload,
-  CssPixels,
-} from 'firefox-profiler/types';
+import type { CssPixels } from 'firefox-profiler/types';
 
 const MARKERS: TestDefinedMarkers = [
   ['Marker A', 0, 10],
@@ -91,7 +89,7 @@ const MARKERS: TestDefinedMarkers = [
       category: 'Paint',
     },
   ],
-  getUserTiming('Marker B', 2, 8),
+  getUserTiming('Marker B', 2, 6),
 ];
 
 function setupWithProfile(profile) {
@@ -286,8 +284,8 @@ describe('MarkerChart', function () {
 
     function setupForContextMenus() {
       const profile = getProfileWithMarkers([
-        getUserTiming('UserTiming A', 0, 10),
-        getUserTiming('UserTiming B', 2, 8),
+        getUserTiming('UserTiming A', 0, 10), // 0 -> 10
+        getUserTiming('UserTiming B', 2, 6), // 2 -> 8
       ]);
       const setupResult = setupWithProfile(profile);
       const { flushRafCalls, dispatch, fireMouseEvent, container } =
@@ -724,19 +722,3 @@ describe('MarkerChart', function () {
     });
   });
 });
-
-/**
- * This is a quick helper to create UserTiming markers.
- */
-function getUserTiming(name: string, startTime: number, endTime: number) {
-  return [
-    'UserTiming',
-    startTime,
-    endTime,
-    ({
-      type: 'UserTiming',
-      name,
-      entryType: 'measure',
-    }: UserTimingMarkerPayload),
-  ];
-}

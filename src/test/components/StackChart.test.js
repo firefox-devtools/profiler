@@ -52,14 +52,11 @@ import {
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
+  getUserTiming,
 } from '../fixtures/profiles/processed-profile';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
-import type {
-  Profile,
-  UserTimingMarkerPayload,
-  CssPixels,
-} from 'firefox-profiler/types';
+import type { Profile, CssPixels } from 'firefox-profiler/types';
 
 jest.useFakeTimers();
 
@@ -262,20 +259,6 @@ describe('CombinedChart', function () {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 });
-
-function getUserTiming(name: string, startTime: number, duration: number) {
-  const endTime = startTime + duration;
-  return [
-    'UserTiming',
-    startTime,
-    endTime,
-    ({
-      type: 'UserTiming',
-      name,
-      entryType: 'measure',
-    }: UserTimingMarkerPayload),
-  ];
-}
 
 function showUserTimings({ getByLabelText, flushRafCalls }) {
   flushDrawLog();
