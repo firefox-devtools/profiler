@@ -88,10 +88,6 @@ type Props = {|
   +viewport: Viewport,
 |};
 
-type State = {|
-  hoveredItem: null | number,
-|};
-
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
@@ -99,7 +95,7 @@ const TEXT_OFFSET_START = 3;
 const DOT_WIDTH = 10;
 const LABEL_PADDING = 5;
 
-class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
+class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
   drawCanvas = (
