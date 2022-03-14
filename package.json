@@ -130,7 +130,7 @@
     "eslint-plugin-jest-formatting": "^3.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.29.3",
-    "eslint-plugin-testing-library": "^5.0.5",
+    "eslint-plugin-testing-library": "^5.0.6",
     "fake-indexeddb": "^3.1.7",
     "file-loader": "^6.2.0",
     "flow-bin": "^0.96.0",
