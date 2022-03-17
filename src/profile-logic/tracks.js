@@ -13,6 +13,8 @@ import type {
   LocalTrack,
   TrackIndex,
   Counter,
+  Tid,
+  TrackReference,
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
@@ -1154,4 +1156,53 @@ export function getSearchFilteredLocalTracksByPid(
   }
 
   return searchFilteredLocalTracksByPid;
+}
+
+/**
+ * Returns the track reference from tid.
+ * Returns null if the given tid is not found.
+ */
+export function getTrackReferenceFromTid(
+  tid: Tid,
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+  threads: Thread[]
+): TrackReference | null {
+  // First, check if it's a global track.
+  for (
+    let globalTrackIndex = 0;
+    globalTrackIndex < globalTracks.length;
+    globalTrackIndex++
+  ) {
+    const globalTrack = globalTracks[globalTrackIndex];
+
+    if (
+      globalTrack.type === 'process' &&
+      globalTrack.mainThreadIndex !== null &&
+      threads[globalTrack.mainThreadIndex].tid === tid
+    ) {
+      return { type: 'global', trackIndex: globalTrackIndex };
+    }
+  }
+
+  // Then, check if it's a local track
+  for (const [pid, localTracks] of localTracksByPid) {
+    for (
+      let localTrackIndex = 0;
+      localTrackIndex < localTracks.length;
+      localTrackIndex++
+    ) {
+      const localTrack = localTracks[localTrackIndex];
+
+      if (
+        localTrack.type === 'thread' &&
+        threads[localTrack.threadIndex].tid === tid
+      ) {
+        return { type: 'local', pid: pid, trackIndex: localTrackIndex };
+      }
+    }
+  }
+
+  // Failed to find the thread from tid.
+  return null;
 }

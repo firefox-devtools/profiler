@@ -15,6 +15,8 @@ import {
   getPreviewSelection,
   getActiveTabGlobalTrackFromReference,
   getActiveTabResourceTrackFromReference,
+  getLocalTracksByPid,
+  getThreads,
 } from 'firefox-profiler/selectors/profile';
 import {
   getThreadSelectors,
@@ -42,6 +44,7 @@ import {
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import { objectShallowEquals } from 'firefox-profiler/utils/index';
+import { getTrackReferenceFromTid } from 'firefox-profiler/profile-logic/tracks';
 
 import type {
   PreviewSelection,
@@ -65,6 +68,7 @@ import type {
   Transform,
   ThreadsKey,
   Milliseconds,
+  Tid,
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
@@ -415,6 +419,52 @@ export function selectTrack(
       selectedThreadIndexes,
       selectedTab,
     });
+  };
+}
+
+/**
+ * Selects the track from the provided tid.
+ * Since it can be either a global track or local track, we check its type first
+ * and select it depending on that. Also, we check if the track is visible or
+ * not, and make it visible if it's hidden.
+ */
+export function selectTrackFromTid(tid: Tid): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const globalTracks = getGlobalTracks(getState());
+    const localTracksByPid = getLocalTracksByPid(getState());
+    const threads = getThreads(getState());
+    const trackReference = getTrackReferenceFromTid(
+      tid,
+      globalTracks,
+      localTracksByPid,
+      threads
+    );
+
+    if (trackReference === null) {
+      // Return early if we failed to find the thread from tid.
+      return;
+    }
+
+    // Make the track visible just in case if it's hidden.
+    // It's safe to call them even if they are already visible.
+    switch (trackReference.type) {
+      case 'global':
+        dispatch(showGlobalTrack(trackReference.trackIndex));
+        break;
+      case 'local': {
+        const { globalTrackIndex } = getGlobalTrackAndIndexByPid(
+          getState(),
+          trackReference.pid
+        );
+        dispatch(showGlobalTrack(globalTrackIndex));
+        dispatch(showLocalTrack(trackReference.pid, trackReference.trackIndex));
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(trackReference.type);
+    }
+
+    dispatch(selectTrack(trackReference, 'none'));
   };
 }
 

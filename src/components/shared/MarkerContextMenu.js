@@ -13,6 +13,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   setContextMenuVisibility,
   updatePreviewSelection,
+  selectTrackFromTid,
 } from 'firefox-profiler/actions/profile-view';
 import {
   getPreviewSelection,
@@ -61,6 +62,7 @@ type StateProps = {|
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
+  +selectTrackFromTid: typeof selectTrackFromTid,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -193,6 +195,21 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     if (marker.data && marker.data.type === 'Network') {
       copy(marker.data.URI);
     }
+  };
+
+  selectOtherThreadForIPCMarkers = () => {
+    const { marker, selectTrackFromTid } = this.props;
+    if (!marker.data || marker.data.type !== 'IPC') {
+      return;
+    }
+
+    // Select the other thread of that IPC marker.
+    const { data } = marker;
+    const tid = data.direction === 'sending' ? data.recvTid : data.sendTid;
+    if (!tid) {
+      return;
+    }
+    selectTrackFromTid(tid);
   };
 
   // Using setTimeout here is a bit complex, but is necessary to make the menu
@@ -364,6 +381,20 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             Copy as JSON
           </Localized>
         </MenuItem>
+        {data && data.type === 'IPC' ? (
+          <MenuItem onClick={this.selectOtherThreadForIPCMarkers}>
+            <span className="react-contextmenu-icon markerContextMenuSelectThread" />
+            {data.direction === 'sending' ? (
+              <Localized id="MarkerContextMenu--select-the-receiver-thread">
+                Select the receiver thread
+              </Localized>
+            ) : (
+              <Localized id="MarkerContextMenu--select-the-sender-thread">
+                Select the sender thread
+              </Localized>
+            )}
+          </MenuItem>
+        ) : null}
       </ContextMenu>
     );
   }
@@ -386,7 +417,11 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
       getMarkerLabelToCopy: selectors.getMarkerLabelToCopyGetter(state),
     };
   },
-  mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
+  mapDispatchToProps: {
+    updatePreviewSelection,
+    setContextMenuVisibility,
+    selectTrackFromTid,
+  },
   component: MarkerContextMenuImpl,
 });
 

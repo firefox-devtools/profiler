@@ -342,6 +342,8 @@ MarkerContextMenu--copy-description = Copy description
 MarkerContextMenu--copy-call-stack = Copy call stack
 MarkerContextMenu--copy-url = Copy URL
 MarkerContextMenu--copy-as-json = Copy as JSON
+MarkerContextMenu--select-the-receiver-thread = Select the receiver thread
+MarkerContextMenu--select-the-sender-thread = Select the sender thread
 
 ## MarkerSettings
 ## This is used in all panels related to markers.

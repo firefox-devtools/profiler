@@ -676,8 +676,8 @@ export type IPCMarkerPayload = {|
   sendEndTime?: Milliseconds,
   recvEndTime?: Milliseconds,
   endTime?: Milliseconds,
-  sendTid?: number,
-  recvTid?: number,
+  sendTid?: Tid,
+  recvTid?: Tid,
   sendThreadName?: string,
   recvThreadName?: string,
 
