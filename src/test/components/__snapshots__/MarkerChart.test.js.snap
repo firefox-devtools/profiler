@@ -204,7 +204,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#003eaa",
+    "#0060df",
   ],
   Array [
     "set strokeStyle",
@@ -467,20 +467,16 @@ Array [
     "clip",
   ],
   Array [
-    "set fillStyle",
-    "#0A75E3",
-  ],
-  Array [
-    "set strokeStyle",
-    "#0060df",
-  ],
-  Array [
     "measureText",
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
   ],
   Array [
     "measureText",
     "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
   ],
   Array [
     "beginPath",
@@ -498,7 +494,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
+    "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
@@ -526,7 +522,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
+    "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
@@ -550,7 +546,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
+    "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
@@ -574,7 +570,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
+    "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
@@ -602,7 +598,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "black",
   ],
   Array [
     "fillText",
@@ -612,10 +608,6 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
-  ],
-  Array [
-    "set strokeStyle",
     "#0060df",
   ],
   Array [
@@ -634,7 +626,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
+    "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
@@ -658,10 +650,6 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
-  ],
-  Array [
-    "set strokeStyle",
     "#0060df",
   ],
   Array [
@@ -680,7 +668,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
+    "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
@@ -708,7 +696,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "black",
   ],
   Array [
     "fillText",
@@ -718,7 +706,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
+    "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
@@ -996,7 +984,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
+    "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
@@ -1020,7 +1008,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "black",
   ],
   Array [
     "fillText",
@@ -1080,7 +1068,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#003eaa",
+    "#0060df",
   ],
   Array [
     "set strokeStyle",
@@ -1336,20 +1324,20 @@ Array [
     "clip",
   ],
   Array [
-    "set fillStyle",
-    "#0A75E3",
-  ],
-  Array [
-    "set strokeStyle",
-    "#0060df",
-  ],
-  Array [
     "measureText",
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
   ],
   Array [
     "measureText",
     "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#8ac4ff",
+  ],
+  Array [
+    "set strokeStyle",
+    "#0060df",
   ],
   Array [
     "beginPath",
@@ -1373,7 +1361,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "black",
   ],
   Array [
     "fillText",
@@ -1383,10 +1371,6 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0A75E3",
-  ],
-  Array [
-    "set strokeStyle",
     "#0060df",
   ],
   Array [

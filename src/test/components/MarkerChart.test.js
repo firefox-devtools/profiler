@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { BLUE_70 } from 'photon-colors';
+import { BLUE_60 } from 'photon-colors';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -425,7 +425,8 @@ describe('MarkerChart', function () {
       // Expect that we have 2 markers drawn with this color.
       const drawCalls = flushDrawLog();
       const callsWithHighlightColor = drawCalls.filter(
-        ([, argument]) => argument === BLUE_70
+        ([operation, argument]) =>
+          operation === 'set fillStyle' && argument === BLUE_60
       );
       expect(callsWithHighlightColor).toHaveLength(2);
     });

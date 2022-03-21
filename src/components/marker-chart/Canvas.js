@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { GREY_20, GREY_30, BLUE_60, BLUE_70, BLUE_80 } from 'photon-colors';
+import { GREY_20, GREY_30, BLUE_60, BLUE_80 } from 'photon-colors';
 import * as React from 'react';
 import {
   withChartViewport,
@@ -268,12 +268,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     isHighlighted: boolean = false
   ) {
     const { marginLeft } = this.props;
-    ctx.fillStyle = isHighlighted ? BLUE_70 : '#0A75E3'; // This color is in-between BLUE_50 and BLUE_60, and is contrasted enough for the white text.
-    ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
-
     const textMeasurement = this._getTextMeasurement(ctx);
 
     if (uncutWidth >= h) {
+      ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
+      ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
+
       ctx.beginPath();
 
       // We want the rectangle to have a clear margin, that's why we increment y
@@ -301,11 +301,13 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       if (w2 > textMeasurement.minWidth) {
         const fittedText = textMeasurement.getFittedText(text, w2);
         if (fittedText) {
-          ctx.fillStyle = 'white';
+          ctx.fillStyle = isHighlighted ? 'white' : 'black';
           ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
         }
       }
     } else {
+      ctx.fillStyle = isHighlighted ? BLUE_80 : BLUE_60;
+
       ctx.beginPath();
       ctx.arc(
         x + uncutWidth / 2, // x
