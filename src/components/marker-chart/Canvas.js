@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { GREY_20, GREY_30 } from 'photon-colors';
+import { GREY_20, GREY_30, BLUE_60, BLUE_70, BLUE_80 } from 'photon-colors';
 import * as React from 'react';
 import {
   withChartViewport,
@@ -18,7 +18,6 @@ import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
 } from 'firefox-profiler/actions/profile-view';
-import { BLUE_40 } from 'firefox-profiler/utils/colors';
 import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
   Milliseconds,
@@ -266,28 +265,43 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     h: CssPixels,
     uncutWidth: CssPixels,
     text: string,
-    backgroundColor: string = BLUE_40,
-    foregroundColor: string = 'white'
+    isHighlighted: boolean = false
   ) {
-    ctx.fillStyle = backgroundColor;
+    const { marginLeft } = this.props;
+    ctx.fillStyle = isHighlighted ? BLUE_70 : '#0A75E3'; // This color is in-between BLUE_50 and BLUE_60, and is contrasted enough for the white text.
+    ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
 
     const textMeasurement = this._getTextMeasurement(ctx);
 
     if (uncutWidth >= h) {
+      ctx.beginPath();
+
       // We want the rectangle to have a clear margin, that's why we increment y
       // and decrement h (twice, for both margins).
-      this.drawRoundedRect(ctx, x, y + 1, w, h - 2, 1);
+      // We also add "0.5" more so that the stroke is properly on a pixel.
+      // Indeed strokes are drawn on both sides equally, so half a pixel on each
+      // side in this case.
+      ctx.rect(
+        x + 0.5, // + 0.5 for the stroke
+        y + 1 + 0.5, // + 1 for the top margin, + 0.5 for the stroke
+        w - 1, // - 1 to account for left and right strokes.
+        h - 2 - 1 // + 2 accounts for top and bottom margins, + 1 accounts for top and bottom strokes
+      );
+      ctx.fill();
+      ctx.stroke();
 
       // Draw the text label
       // TODO - L10N RTL.
       // Constrain the x coordinate to the leftmost area.
-      const x2: CssPixels = x + TEXT_OFFSET_START;
-      const w2: CssPixels = Math.max(0, w - (x2 - x));
+      const x2: CssPixels =
+        x < marginLeft ? marginLeft + TEXT_OFFSET_START : x + TEXT_OFFSET_START;
+      const visibleWidth = x < marginLeft ? w - marginLeft + x : w;
+      const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
 
       if (w2 > textMeasurement.minWidth) {
         const fittedText = textMeasurement.getFittedText(text, w2);
         if (fittedText) {
-          ctx.fillStyle = foregroundColor;
+          ctx.fillStyle = 'white';
           ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
         }
       }
@@ -429,8 +443,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         highlightedMarker.h,
         highlightedMarker.uncutWidth,
         highlightedMarker.text,
-        'Highlight', //    background color
-        'HighlightText' // foreground color
+        true /* isHighlighted */
       );
     });
 
@@ -712,22 +725,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const { changeRightClickedMarker, threadsKey } = this.props;
     changeRightClickedMarker(threadsKey, markerIndex);
   };
-
-  drawRoundedRect(
-    ctx: CanvasRenderingContext2D,
-    x: CssPixels,
-    y: CssPixels,
-    width: CssPixels,
-    height: CssPixels,
-    cornerSize: CssPixels
-  ) {
-    // Cut out c x c -sized squares in the corners.
-    const c = Math.min(width / 2, height / 2, cornerSize);
-    const bottom = y + height;
-    ctx.fillRect(x + c, y, width - 2 * c, c);
-    ctx.fillRect(x, y + c, width, height - 2 * c);
-    ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
-  }
 
   getHoveredMarkerInfo = ({
     markerIndex,
