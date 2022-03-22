@@ -66,6 +66,9 @@ function mockCanvasContext() {
   const canvasContextInstance = new Proxy(
     {
       scale: spyLog('scale'),
+      clip: spyLog('clip'),
+      save: spyLog('save'),
+      restore: spyLog('restore'),
       fill: spyLog('fill'),
       fillRect: spyLog('fillRect'),
       fillText: spyLog('fillText'),
@@ -75,6 +78,7 @@ function mockCanvasContext() {
       moveTo: spyLog('moveTo'),
       lineTo: spyLog('lineTo'),
       stroke: spyLog('stroke'),
+      rect: spyLog('rect'),
       arc: spyLog('arc'),
       measureText: spyLog('measureText', (text) => ({
         width: text.length * 5,
@@ -114,5 +118,8 @@ class MockPath2D {
   }
   arc(...args) {
     this.__operations.push(['arc', ...args]);
+  }
+  rect(...args) {
+    this.__operations.push(['rect', ...args]);
   }
 }

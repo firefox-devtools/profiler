@@ -159,6 +159,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       newRow = hoveredLabel;
     }
 
+    // Common properties that won't be changed later.
+    ctx.lineWidth = 1;
+
     if (isHoveredOnlyDifferent) {
       // Only re-draw the rows that have been updated if only the hovering information
       // is different.
@@ -315,7 +318,13 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       marginLeft,
       marginRight,
       rightClickedMarkerIndex,
-      viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
+      viewport: {
+        containerWidth,
+        containerHeight,
+        viewportLeft,
+        viewportRight,
+        viewportTop,
+      },
     } = this.props;
 
     const { devicePixelRatio } = window;
@@ -324,8 +333,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
-
-    ctx.lineWidth = 1;
 
     // Decide which samples to actually draw
     const timeAtViewportLeft: Milliseconds =
@@ -337,6 +344,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       marginRight * ((viewportLength * rangeLength) / markerContainerWidth);
 
     const highlightedMarkers: MarkerDrawingInformation[] = [];
+
+    // We'll restore the context at the end, so that the clip region will be
+    // removed.
+    ctx.save();
+    // The clip operation forbids drawing in the label zone.
+    ctx.beginPath();
+    ctx.rect(marginLeft, 0, markerContainerWidth, containerHeight);
+    ctx.clip();
 
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
@@ -372,11 +387,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
           const h: CssPixels = rowHeight - 1;
 
           let w = uncutWidth;
-          if (x < marginLeft) {
-            // Adjust markers that are before the left margin.
-            w = w - marginLeft + x;
-            x = marginLeft;
-          }
           if (uncutWidth < DOT_WIDTH) {
             // Ensure that small durations render as a dot, but markers cut by the margins
             // are rendered as squares.
@@ -423,6 +433,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         'HighlightText' // foreground color
       );
     });
+
+    ctx.restore();
   }
 
   clearRow(ctx: CanvasRenderingContext2D, rowIndex: number) {

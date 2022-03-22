@@ -161,6 +161,10 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
 exports[`MarkerChart renders the hoveredItem markers properly 1`] = `
 Array [
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#fff",
   ],
@@ -183,8 +187,20 @@ Array [
     15,
   ],
   Array [
-    "set lineWidth",
-    1,
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    150,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "clip",
   ],
   Array [
     "set fillStyle",
@@ -220,6 +236,9 @@ Array [
     "Marker B",
     178,
     139,
+  ],
+  Array [
+    "restore",
   ],
   Array [
     "set fillStyle",
@@ -418,6 +437,10 @@ Array [
     2,
   ],
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#ffffff",
   ],
@@ -429,8 +452,20 @@ Array [
     300,
   ],
   Array [
-    "set lineWidth",
-    1,
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    150,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "clip",
   ],
   Array [
     "set fillStyle",
@@ -702,6 +737,9 @@ Array [
     1,
   ],
   Array [
+    "restore",
+  ],
+  Array [
     "set fillStyle",
     "#ededf0",
   ],
@@ -911,6 +949,10 @@ Array [
 exports[`MarkerChart with active tab does not render the hovered label 1`] = `
 Array [
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#fff",
   ],
@@ -933,8 +975,20 @@ Array [
     15,
   ],
   Array [
-    "set lineWidth",
-    1,
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    0,
+    0,
+    350,
+    300,
+  ],
+  Array [
+    "clip",
   ],
   Array [
     "set fillStyle",
@@ -971,11 +1025,18 @@ Array [
     91,
     27,
   ],
+  Array [
+    "restore",
+  ],
 ]
 `;
 
 exports[`MarkerChart with active tab renders the hovered marker properly 1`] = `
 Array [
+  Array [
+    "set lineWidth",
+    1,
+  ],
   Array [
     "set fillStyle",
     "#fff",
@@ -999,8 +1060,20 @@ Array [
     15,
   ],
   Array [
-    "set lineWidth",
-    1,
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    0,
+    0,
+    350,
+    300,
+  ],
+  Array [
+    "clip",
   ],
   Array [
     "set fillStyle",
@@ -1036,6 +1109,9 @@ Array [
     "click",
     91,
     27,
+  ],
+  Array [
+    "restore",
   ],
   Array [
     "set fillStyle",
@@ -1227,6 +1303,10 @@ Array [
     2,
   ],
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#ffffff",
   ],
@@ -1238,8 +1318,20 @@ Array [
     300,
   ],
   Array [
-    "set lineWidth",
-    1,
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    0,
+    0,
+    350,
+    300,
+  ],
+  Array [
+    "clip",
   ],
   Array [
     "set fillStyle",
@@ -1305,6 +1397,9 @@ Array [
   ],
   Array [
     "fill",
+  ],
+  Array [
+    "restore",
   ],
   Array [
     "set fillStyle",
