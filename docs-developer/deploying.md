@@ -14,6 +14,11 @@ separate domain, whose link will be added automatically to the PR:
 
 ## How to deploy main to production
 
+Before the deploy, changes in the [`l10n`](https://github.com/firefox-devtools/profiler/tree/l10n)
+branch should be merged into `main` if there are any localization changes. See
+the [section related to this step](#how-to-merge-l10n-into-main) for more details.
+
+After merging the `l10n` branch, we can continue with the deployment.
 The easiest by far is to
 [create a pull request on GitHub](https://github.com/firefox-devtools/profiler/compare/production...main?expand=1).
 It would be nice to write down the main changes in the PR description.
@@ -25,6 +30,25 @@ not *squash* or *rebase*, to keep a better history.
 Once it's done the new version should be deployed automatically. You can follow the
 process on [Netlify's dashboard](https://app.netlify.com/sites/perf-html/deploys)
 if you have access.
+
+## How to merge l10n into main
+
+Our localization process happens inside [Pontoon](https://pontoon.mozilla.org/de/firefox-profiler/).
+Changes in Pontoon are being pushed into the `l10n` branch. They should be merged
+into `main` before the deployment.
+
+The easiest way is to
+[create a pull request on GitHub](https://github.com/firefox-devtools/profiler/compare/main...l10n?expand=1&title=🔃%20Sync:%20l10n%20->%20main%20(DATE)).
+It would be nice to list down the locales that are changed in the PR description.
+To be able to get the changed locales quickly, this command can be used
+(assuming that `upstream` is the remote you use for this repository):
+
+```
+git fetch upstream && git diff --name-only upstream/main..upstream/l10n | awk -F '/' '{print $2}'
+```
+
+Be careful to always use the **create a merge commit** functionality, not
+*squash* or *rebase*, to keep a better history.
 
 ## How to revert to a previous version
 

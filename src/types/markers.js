@@ -659,6 +659,10 @@ export type IPCMarkerPayload_Gecko = {|
   // Phase is not present in older profiles (in this case the phase is "endpoint").
   phase?: 'endpoint' | 'transferStart' | 'transferEnd',
   sync: boolean,
+  // `tid` of the thread that this marker is originated from. It is undefined
+  // when the IPC marker is originated from the same thread. Also, this field is
+  // added in Firefox 100. It will always be undefined for the older profiles.
+  threadId?: Tid,
 |};
 
 export type IPCMarkerPayload = {|

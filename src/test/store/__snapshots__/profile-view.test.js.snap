@@ -1954,6 +1954,7 @@ Array [
     "index": Array [
       3,
     ],
+    "instantOnly": true,
     "label": Array [
       "",
     ],
@@ -1971,6 +1972,7 @@ Array [
     "index": Array [
       4,
     ],
+    "instantOnly": true,
     "label": Array [
       "",
     ],
@@ -1988,6 +1990,7 @@ Array [
     "index": Array [
       5,
     ],
+    "instantOnly": true,
     "label": Array [
       "",
     ],
@@ -2007,6 +2010,7 @@ Array [
       6,
       7,
     ],
+    "instantOnly": false,
     "label": Array [
       "https://mozilla.org",
       "https://mozilla.org",
