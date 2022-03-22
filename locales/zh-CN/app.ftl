@@ -250,7 +250,7 @@ MarkerContextMenu--end-selection-at-marker-end = 至标记的<strong>终点</str
 MarkerContextMenu--copy-description = 复制描述
 MarkerContextMenu--copy-call-stack = 复制调用栈
 MarkerContextMenu--copy-url = 复制 URL
-MarkerContextMenu--copy-full-payload = 复制完整载荷
+MarkerContextMenu--copy-as-json = 复制为 JSON 格式
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -533,7 +533,7 @@ TabBar--js-tracer-tab = JS 追踪器
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = 只显示此进程组
+TrackContextMenu--only-show-this-process = 只显示此进程
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -552,6 +552,15 @@ TrackContextMenu--show-all-tracks-below = 显示下方所有轨道
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = 找不到“<span>{ $searchFilter }</span>”的结果
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = 此时的相对内存用量
+TrackMemoryGraph--memory-range-in-graph = 图表里的内存范围
+TrackMemoryGraph--operations-since-the-previous-sample = 自前一次采样以来的操作次数
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
