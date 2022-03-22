@@ -34,6 +34,14 @@ AppViewRouter--error-from-file = Δεν ήταν δυνατή η ανάγνωσ�
 AppViewRouter--error-local = Δεν έχει υλοποιηθεί ακόμα.
 AppViewRouter--error-public = Δεν ήταν δυνατή η λήψη του προφίλ.
 AppViewRouter--error-from-url = Δεν ήταν δυνατή η λήψη του προφίλ.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Λόγω ενός <a>συγκεκριμένου περιορισμού στο Safari</a>, το { -profiler-brand-name } δεν μπορεί να
+    εισαγάγει προφίλ από τη συσκευή σε αυτό το πρόγραμμα περιήγησης. Παρακαλούμε
+    ανοίξτε αυτήν τη σελίδα στο { -firefox-brand-name } ή το Chrome.
+    .title = Το Safari δεν μπορεί να εισαγάγει τοπικά προφίλ
 AppViewRouter--route-not-found--home =
     .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
 
@@ -106,6 +114,33 @@ CallTree--tracing-ms-total = Χρόνος εκτέλεσης (ms)
         παρατηρήθηκε αυτή η συνάρτηση σε στοίβα. Περιέχει τον χρόνο πραγματικής
         εκτέλεσης της συνάρτησης και τον χρόνο που χρησιμοποιήθηκε στους καλούντες από
         αυτή τη συνάρτηση.
+CallTree--tracing-ms-self = Ιδιοχρόνος (ms)
+    .title =
+        Ο ατομικός χρόνος περιλαμβάνει μόνο τον χρόνο που η συνάρτηση βρισκόταν
+        στο τέλος της στοίβας. Αν η συνάρτηση καλούταν σε άλλες συναρτήσεις,
+        τότε ο χρόνος των άλλων συναρτήσεων δεν περιλαμβάνεται. Ο ατομικός χρόνος είναι
+        χρήσιμος για να κατανοήσετε πώς ξοδεύτηκε ο χρόνος σε ένα πρόγραμμα.
+CallTree--samples-total = Σύνολο (δείγματα)
+    .title = Το «σύνολο» δειγμάτων περιλαμβάνει μια σύνοψη όλων των δειγμάτων στα οποία παρατηρήθηκε ότι η συνάρτηση βρίσκεται στη στοίβα. Περιλαμβάνει τον χρόνο που εκτελούταν η συνάρτηση και τον χρόνο που ξοδεύτηκε στις κλήσεις από αυτήν τη συνάρτηση.
+CallTree--samples-self = Ιδιοαριθμός
+    .title =
+        Ο ατομικός αριθμός δειγμάτων περιλαμβάνει μόνο τα δείγματα στα οποία η συνάρτηση
+        ήταν στο τέλος της στοίβας. Αν η συνάρτηση κλήθηκε σε άλλες συναρτήσεις,
+        τότε τα πλήθη των άλλων συναρτήσεων δεν συμπεριλαμβάνονται. Ο ατομικός αριθμός είναι χρήσιμος
+        για να κατανοήσετε πώς ξοδεύτηκε ο χρόνος σε ένα πρόγραμμα.
+CallTree--bytes-total = Συνολικό μέγεθος (bytes)
+    .title =
+        Το συνολικό μέγεθος περιλαμβάνει μια σύνοψη όλων των bytes που δεσμεύτηκαν ή
+        αποδεσμεύτηκαν όσο παρατηρήθηκε ότι η συνάρτηση είναι στο τέλος της στοίβας.
+        Περιλαμβάνει το μέγεθος σε bytes όπου εκτελούταν η συνάρτηση, καθώς και τα
+        bytes των καλούντων από αυτήν τη συνάρτηση.
+CallTree--bytes-self = Ιδιο-bytes (bytes)
+    .title =
+        Τα ατομικά bytes περιλαμβάνουν τα bytes που δεσμεύθηκαν ή αποδεσμεύθηκαν
+        όσο η συνάρτηση ήταν στο τέλος της στοίβας. Αν η συνάρτηση κλήθηκε σε άλλες
+        συναρτήσεις, τότε τα bytes των άλλων συναρτήσεων δεν συμπεριλαμβάνονται.
+        Τα ατομικά bytes είναι χρήσιμα για να κατανοήσετε πού δεσμεύθηκε ή
+        αποδεσμεύθηκε μνήμη στο πρόγραμμα.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -169,6 +204,9 @@ FooterLinks--Privacy = Απόρρητο
 FooterLinks--Cookies = Cookies
 FooterLinks--languageSwitcher--select =
     .title = Αλλαγή γλώσσας
+FooterLinks--hide-button =
+    .title = Απόκρυψη συνδέσμων υποσέλιδου
+    .aria-label = Απόκρυψη συνδέσμων υποσέλιδου
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -277,7 +315,7 @@ MarkerContextMenu--end-selection-at-marker-end = Διακοπή επιλογής
 MarkerContextMenu--copy-description = Αντιγραφή περιγραφής
 MarkerContextMenu--copy-call-stack = Αντιγραφή στοίβας κλήσεων
 MarkerContextMenu--copy-url = Αντιγραφή URL
-MarkerContextMenu--copy-full-payload = Αντιγραφή πλήρους φορτίου
+MarkerContextMenu--copy-as-json = Αντιγραφή ως JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -460,6 +498,20 @@ NetworkSettings--panel-search =
     .label = Φιλτράρισμα δικτύων:
     .title = Προβολή μόνο των αιτημάτων δικτύου που ταιριάζουν με συγκεκριμένο όνομα
 
+## Timestamp formatting primitive
+
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
+
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
@@ -550,7 +602,7 @@ TabBar--js-tracer-tab = JS Tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Εμφάνιση μόνο αυτής της ομάδας διεργασιών
+TrackContextMenu--only-show-this-process = Εμφάνιση μόνο αυτής της διεργασίας
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -569,6 +621,15 @@ TrackContextMenu--show-all-tracks-below = Εμφάνιση όλων των κο�
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Δεν βρέθηκαν αποτελέσματα για «<span>{ $searchFilter }</span>»
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = σχετική μνήμη αυτήν τη στιγμή
+TrackMemoryGraph--memory-range-in-graph = εύρος μνήμης στο γράφημα
+TrackMemoryGraph--operations-since-the-previous-sample = λειτουργίες από το προηγούμενο δείγμα
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -646,6 +707,14 @@ SourceView--loading-browser-connection = Αναμονή για { -firefox-brand-
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Μη διαθέσιμη πηγή
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Δείτε το <a>ζήτημα #3741</a> για υποστηριζόμενα σενάρια και προγραμματισμένες βελτιώσεις.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Δεν υπάρχει γνωστό URL με δυνατότητα πρόσβασης από πολλαπλές προελεύσεις για αυτό το αρχείο.
 # Displayed below SourceView--cannot-obtain-source, if there was a network error
 # when fetching the source code for a file.
 # Variables:
@@ -657,6 +726,11 @@ SourceView--network-error-when-obtaining-source = Προέκυψε σφάλμα 
 # Variables:
 #   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
 SourceView--browser-connection-error-when-obtaining-source = Δεν ήταν δυνατή η διερεύνηση του API συμβολισμού του προγράμματος περιήγησης: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = Το API συμβολισμού του προγράμματος περιήγησης επέστρεψε σφάλμα: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a symbol server which is
 # running locally was queried for source code using the symbolication API, and
 # this query returned an error.

@@ -437,6 +437,20 @@ NetworkSettings--panel-search =
     .label = Filtrer les réseaux :
     .title = Afficher uniquement les requêtes réseau qui correspondent à un certain nom
 
+## Timestamp formatting primitive
+
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
+
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
@@ -550,6 +564,9 @@ TrackContextMenu--no-results-found = Aucun résultat pour « <span>{ $searchFil
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = mémoire relative à ce moment
+TrackMemoryGraph--memory-range-in-graph = plage mémoire dans le graphique
+TrackMemoryGraph--operations-since-the-previous-sample = opérations depuis l’échantillon précédent
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

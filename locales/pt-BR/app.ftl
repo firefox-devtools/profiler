@@ -439,6 +439,20 @@ NetworkSettings--panel-search =
     .label = Filtrar redes:
     .title = Só exibir requisições de rede que correspondem a um determinado nome
 
+## Timestamp formatting primitive
+
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
+
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
@@ -548,6 +562,15 @@ TrackContextMenu--show-all-tracks-below = Exibir todas as faixas abaixo
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Nenhum resultado encontrado de “<span>{ $searchFilter }</span>”
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+TrackMemoryGraph--relative-memory-at-this-time = memória relativa neste momento
+TrackMemoryGraph--memory-range-in-graph = intervalo de memória no gráfico
+TrackMemoryGraph--operations-since-the-previous-sample = operações desde a amostra anterior
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

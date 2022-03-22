@@ -227,12 +227,14 @@ export type CallNodeDisplayData = $Exact<
 export type MarkerTiming = {|
   // Start time in milliseconds.
   start: number[],
-  // End time in milliseconds.
+  // End time in milliseconds. It will equals start for instant markers.
   end: number[],
   index: MarkerIndex[],
   label: string[],
   name: string,
   bucket: string,
+  // True if this marker timing contains only instant markers.
+  instantOnly: boolean,
   length: number,
 |};
 

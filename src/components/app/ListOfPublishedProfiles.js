@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import memoize from 'memoize-immutable';
 import classNames from 'classnames';
 
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
@@ -18,56 +17,13 @@ import {
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 
-import type { Milliseconds, StartEndRange } from 'firefox-profiler/types/units';
+import type { StartEndRange } from 'firefox-profiler/types/units';
 
 import './ListOfPublishedProfiles.css';
 import { Localized } from '@fluent/react';
 
 // This component displays all published profile, and makes it possible to load
 // them by clicking on them, or delete them.
-
-const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-const ONE_YEAR_IN_MS = 365 * ONE_DAY_IN_MS;
-
-// All formats are lazy-initialized at the first use by using the `memoize`
-// tool, because the DateTimeFormat constructor is slow.
-// Because there's no parameter to these functions there will only ever be
-// memoized once and should be fairly efficient. We can replace with a dedicated
-// "lazy" function in the future if performance ever becomes a problem.
-const dateFormats = {
-  thisDay: memoize(
-    () =>
-      new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: 'numeric' })
-  ),
-  thisYear: memoize(
-    () =>
-      new Intl.DateTimeFormat(undefined, {
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-      })
-  ),
-  ancient: memoize(
-    () =>
-      new Intl.DateTimeFormat(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-  ),
-};
-
-function _formatDate(date: Date, nowTimestamp: Milliseconds) {
-  const timeDifference = nowTimestamp - +date;
-  if (timeDifference < 0 || timeDifference > ONE_YEAR_IN_MS) {
-    return dateFormats.ancient().format(date);
-  }
-  if (timeDifference > ONE_DAY_IN_MS) {
-    return dateFormats.thisYear().format(date);
-  }
-  return dateFormats.thisDay().format(date);
-}
 
 function _formatRange(range: StartEndRange): string {
   return formatSeconds(range.end - range.start, 3, 1);
@@ -76,7 +32,6 @@ function _formatRange(range: StartEndRange): string {
 type PublishedProfileProps = {|
   +onProfileDelete: () => void,
   +uploadedProfileInformation: UploadedProfileInformation,
-  +nowTimestamp: Milliseconds,
   +withActionButtons: boolean,
 |};
 
@@ -108,8 +63,7 @@ class PublishedProfile extends React.PureComponent<
   };
 
   render() {
-    const { uploadedProfileInformation, nowTimestamp, withActionButtons } =
-      this.props;
+    const { uploadedProfileInformation, withActionButtons } = this.props;
     const { confirmDialogIsOpen } = this.state;
 
     let { urlPath } = uploadedProfileInformation;
@@ -144,10 +98,10 @@ class PublishedProfile extends React.PureComponent<
             title={`Click here to load profile ${smallProfileName}`}
           >
             <div className="publishedProfilesDate">
-              {_formatDate(
-                uploadedProfileInformation.publishedDate,
-                nowTimestamp
-              )}
+              <Localized
+                id="NumberFormat--short-date"
+                vars={{ date: uploadedProfileInformation.publishedDate }}
+              />
             </div>
             <div className="publishedProfilesInfo">
               <div className="publishedProfilesName">
@@ -286,8 +240,6 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
       );
     }
 
-    const nowTimestamp = Date.now();
-
     return (
       <>
         <ul className="publishedProfilesList">
@@ -297,7 +249,6 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
                 onProfileDelete={this.onProfileDelete}
                 key={uploadedProfileInformation.profileToken}
                 uploadedProfileInformation={uploadedProfileInformation}
-                nowTimestamp={nowTimestamp}
                 withActionButtons={withActionButtons}
               />
             )
