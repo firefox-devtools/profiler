@@ -9,6 +9,7 @@ import {
   PSEUDO_STRATEGIES,
   PSEUDO_STRATEGIES_DIRECTION,
 } from 'firefox-profiler/utils/l10n-pseudo';
+import { SHORTDATE } from 'firefox-profiler/utils/l10n-ftl-functions';
 
 // This object contains the locales that are at least 90% complete and
 // that we enable by default. Don't forget to update the array RTL_LOCALES when
@@ -79,6 +80,7 @@ export function* lazilyParsedBundles(
     const resource = new FluentResource(messages);
     const bundle = new FluentBundle(locale, {
       transform,
+      functions: { SHORTDATE },
     });
     bundle.addResource(resource);
     yield bundle;
