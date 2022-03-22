@@ -35,6 +35,7 @@ import {
   getProfileWithMarkers,
   addActiveTabInformationToProfile,
   addMarkersToThreadWithCorrespondingSamples,
+  getUserTiming,
   type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
 import {
@@ -48,10 +49,7 @@ import {
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
-import type {
-  UserTimingMarkerPayload,
-  CssPixels,
-} from 'firefox-profiler/types';
+import type { CssPixels } from 'firefox-profiler/types';
 
 const MARKERS: TestDefinedMarkers = [
   ['Marker A', 0, 10],
@@ -91,7 +89,7 @@ const MARKERS: TestDefinedMarkers = [
       category: 'Paint',
     },
   ],
-  getUserTiming('Marker B', 2, 8),
+  getUserTiming('Marker B', 2, 6),
 ];
 
 function setupWithProfile(profile) {
@@ -162,13 +160,18 @@ describe('MarkerChart', function () {
     const markers = [
       // RENDERED: This marker defines the start of our range.
       [rowName, 0],
-      // RENDERED: Now create three "dot" markers that should only be rendered once.
+      // Now create four "dot" markers, but only two should be rendered.
+      // RENDERED: This is the first instant marker, so it's rendered.
       [rowName, 5000],
-      // NOT-RENDERED: This marker has a duration, but it's very small, and would get
-      // rendered as a dot.
+      // RENDERED: This marker has a duration, but it's very small, and would get
+      // rendered as a dot. It's rendered because it's the the first.
       [rowName, 5001, 5001.1],
-      // NOT-RENDERED: The final dot marker
+      // NOT-RENDERED: The second instant marker, so it's not rendered.
       [rowName, 5002],
+      // NOT-RENDERED: This marker has a duration, but it's very small, and would get
+      // rendered as a dot if it was rendered. But it's not because it's close to
+      // the previous one.
+      [rowName, 5002, 5002.1],
       // RENDERED: This is a longer marker, it should always be drawn even if it starts
       // at the same location as a dot marker
       [rowName, 5002, 7000],
@@ -182,16 +185,18 @@ describe('MarkerChart', function () {
 
     const drawCalls = flushDrawLog();
 
-    // Check that we have 3 arc operations (first marker, one of the 2 dot
-    // markers in the middle, and last marker)
+    // Check that we have 4 arc operations (first marker, first instant marker,
+    // first small interval marker, and last marker)
     const arcOperations = drawCalls.filter(
       ([operation]) => operation === 'arc'
     );
-    expect(arcOperations).toHaveLength(3);
+    expect(arcOperations).toHaveLength(4);
 
-    // Check that all X values are different
-    const arcOperationsX = new Set(arcOperations.map(([, x]) => Math.round(x)));
-    expect(arcOperationsX.size).toBe(3);
+    // Check that all X, Y values are different
+    const arcOperationsXY = new Set(
+      arcOperations.map(([, x, y]) => `${Math.round(x)};${Math.round(y)}`)
+    );
+    expect(arcOperationsXY.size).toBe(4);
 
     // Check that we have a fillRect operation for the longer marker.
     // We filter on the height to get only 1 relevant fillRect operation per marker
@@ -286,8 +291,8 @@ describe('MarkerChart', function () {
 
     function setupForContextMenus() {
       const profile = getProfileWithMarkers([
-        getUserTiming('UserTiming A', 0, 10),
-        getUserTiming('UserTiming B', 2, 8),
+        getUserTiming('UserTiming A', 0, 10), // 0 -> 10
+        getUserTiming('UserTiming B', 2, 6), // 2 -> 8
       ]);
       const setupResult = setupWithProfile(profile);
       const { flushRafCalls, dispatch, fireMouseEvent, container } =
@@ -724,19 +729,3 @@ describe('MarkerChart', function () {
     });
   });
 });
-
-/**
- * This is a quick helper to create UserTiming markers.
- */
-function getUserTiming(name: string, startTime: number, endTime: number) {
-  return [
-    'UserTiming',
-    startTime,
-    endTime,
-    ({
-      type: 'UserTiming',
-      name,
-      entryType: 'measure',
-    }: UserTimingMarkerPayload),
-  ];
-}

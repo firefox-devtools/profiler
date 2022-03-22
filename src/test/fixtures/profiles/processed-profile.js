@@ -306,10 +306,11 @@ export function makeCompositorScreenshot(
 
 export function getUserTiming(
   name: string,
-  startTime: number,
-  duration: number
+  startTime: Milliseconds,
+  duration: Milliseconds | null = null
 ) {
-  const endTime = startTime + duration;
+  const endTime = duration === null ? null : startTime + duration;
+  const entryType = duration === null ? 'mark' : 'measure';
   return [
     'UserTiming',
     startTime,
@@ -317,7 +318,7 @@ export function getUserTiming(
     ({
       type: 'UserTiming',
       name,
-      entryType: 'measure',
+      entryType,
     }: UserTimingMarkerPayload),
   ];
 }

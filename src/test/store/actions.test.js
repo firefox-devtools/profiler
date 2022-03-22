@@ -518,6 +518,7 @@ describe('selectors/getCombinedTimingRows', function () {
         label: ['renderFunction'],
         name: 'A',
         bucket: 'None',
+        instantOnly: false,
         length: 1,
       },
       {
@@ -527,6 +528,7 @@ describe('selectors/getCombinedTimingRows', function () {
         label: ['componentA'],
         name: 'A',
         bucket: 'None',
+        instantOnly: false,
         length: 1,
       },
       {
@@ -536,6 +538,7 @@ describe('selectors/getCombinedTimingRows', function () {
         label: ['componentB'],
         name: 'A',
         bucket: 'None',
+        instantOnly: false,
         length: 1,
       },
       {
@@ -546,6 +549,7 @@ describe('selectors/getCombinedTimingRows', function () {
         length: 1,
         name: 'A',
         start: [3],
+        instantOnly: false,
       },
       { start: [0], end: [3], callNode: [0], length: 1 },
       { start: [0], end: [3], callNode: [1], length: 1 },

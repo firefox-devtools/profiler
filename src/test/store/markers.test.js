@@ -119,6 +119,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
           index: [0],
           label: [''],
           bucket: 'Other',
+          instantOnly: true,
           length: 1,
         },
       ]);
@@ -171,6 +172,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
             'https://www.mozilla.org/',
             'https://www.mozilla.org/image.jpg',
           ],
+          instantOnly: false,
           length: 2,
         },
       ]);
@@ -190,6 +192,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
           end: [3],
           index: [1],
           label: [''],
+          instantOnly: true,
           length: 1,
         },
         {
@@ -199,6 +202,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function () {
           end: [1],
           index: [0],
           label: ['https://mozilla.org'],
+          instantOnly: false,
           length: 1,
         },
       ]);
@@ -265,9 +269,11 @@ describe('memory markers', function () {
 describe('selectors/getUserTimingMarkerTiming', function () {
   it('simple profile', function () {
     const profile = getProfileWithMarkers([
-      getUserTiming('renderFunction', 0, 10),
-      getUserTiming('componentA', 1, 8),
-      getUserTiming('componentB', 2, 4),
+      getUserTiming('renderFunction', 0, 10), // 0 -> 10
+      getUserTiming('componentA', 1, 8), // 1 -> 9
+      getUserTiming('componentB', 2, 3), // 2 -> 5
+      getUserTiming('pointInTime', 6), // 6 -> 6
+      getUserTiming('componentC', 7, 2), // 7 -> 9
     ]);
     const { getState } = storeWithProfile(profile);
 
@@ -275,12 +281,23 @@ describe('selectors/getUserTimingMarkerTiming', function () {
       selectedThreadSelectors.getUserTimingMarkerTiming(getState())
     ).toEqual([
       {
+        start: [6],
+        end: [6],
+        index: [3],
+        label: ['pointInTime'],
+        name: 'UserTiming',
+        bucket: 'None',
+        instantOnly: true,
+        length: 1,
+      },
+      {
         start: [0],
         end: [10],
         index: [0],
         label: ['renderFunction'],
         name: 'UserTiming',
         bucket: 'None',
+        instantOnly: false,
         length: 1,
       },
       {
@@ -290,16 +307,18 @@ describe('selectors/getUserTimingMarkerTiming', function () {
         label: ['componentA'],
         name: 'UserTiming',
         bucket: 'None',
+        instantOnly: false,
         length: 1,
       },
       {
-        start: [2],
-        end: [6],
-        index: [2],
-        label: ['componentB'],
+        start: [2, 7],
+        end: [5, 9],
+        index: [2, 4],
+        label: ['componentB', 'componentC'],
         name: 'UserTiming',
         bucket: 'None',
-        length: 1,
+        instantOnly: false,
+        length: 2,
       },
     ]);
   });
