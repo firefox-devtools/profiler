@@ -89,9 +89,9 @@ type Props = {|
 |};
 
 const TEXT_OFFSET_TOP = 11;
+const TEXT_OFFSET_START = 3;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
-const TEXT_OFFSET_START = 3;
 const DOT_WIDTH = 10;
 const LABEL_PADDING = 5;
 
@@ -460,9 +460,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       markerTimingAndBuckets,
       rowHeight,
       marginLeft,
+      marginRight,
       timelineTrackOrganization,
       viewport: { viewportTop, containerWidth, containerHeight },
     } = this.props;
+
+    const usefulContainerWidth = containerWidth - marginRight;
 
     // Draw separators
     ctx.fillStyle = GREY_20;
@@ -474,7 +477,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       // `- 1` at the end, because the top separator is not drawn in the canvas,
       // it's drawn using CSS' border property. And canvas positioning is 0-based.
       const y = (rowIndex + 1) * rowHeight - viewportTop - 1;
-      ctx.fillRect(0, y, containerWidth, 1);
+      ctx.fillRect(0, y, usefulContainerWidth, 1);
     }
 
     const textMeasurement = this._getTextMeasurement(ctx);
@@ -523,12 +526,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
 
       // Draw the backgound.
       ctx.fillStyle = GREY_20;
-      ctx.fillRect(0, y, containerWidth, rowHeight);
+      ctx.fillRect(0, y - 1, usefulContainerWidth, rowHeight);
 
-      // Draw the borders.
+      // Draw the borders./*
       ctx.fillStyle = GREY_30;
-      ctx.fillRect(0, y - 1, containerWidth, 1);
-      ctx.fillRect(0, y + rowHeight, containerWidth, 1);
+      ctx.fillRect(0, y - 1, usefulContainerWidth, 1);
+      ctx.fillRect(0, y + rowHeight - 1, usefulContainerWidth, 1);
 
       // Draw the text.
       ctx.fillStyle = '#000000';
