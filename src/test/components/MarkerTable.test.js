@@ -15,6 +15,9 @@ import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMen
 import {
   updatePreviewSelection,
   changeMarkersSearchString,
+  hideGlobalTrack,
+  hideLocalTrack,
+  selectTrack,
 } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
@@ -24,9 +27,15 @@ import {
   getProfileFromTextSamples,
   getMarkerTableProfile,
   addMarkersToThreadWithCorrespondingSamples,
+  addIPCMarkerPairToThreads,
 } from '../fixtures/profiles/processed-profile';
 import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import {
+  getProfileWithNiceTracks,
+  getHumanReadableTracks,
+} from '../fixtures/profiles/tracks';
+import * as UrlStateSelectors from '../../selectors/url-state';
 
 import type { CauseBacktrace } from 'firefox-profiler/types';
 
@@ -199,6 +208,146 @@ describe('MarkerTable', function () {
       const { dispatch, container } = setup();
       dispatch(changeMarkersSearchString('MATCH_NOTHING'));
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+  });
+
+  describe('IPC marker context menu item', () => {
+    /**
+     * Using the following tracks:
+     *  [
+     *    'show [thread GeckoMain process]',
+     *    'show [thread GeckoMain tab]',
+     *    '  - show [thread DOM Worker]',
+     *    '  - show [thread Style]',
+     *  ]
+     */
+    const parentTrackReference = { type: 'global', trackIndex: 0 };
+    const tabTrackReference = { type: 'global', trackIndex: 1 };
+    const domWorkerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
+    const parentThreadIndex = 0;
+    const domWorkerThreadIndex = 2;
+    const tabPid = 222;
+    function setupWithTracksAndIPCMarker() {
+      const profile = getProfileWithNiceTracks();
+      addIPCMarkerPairToThreads(
+        {
+          startTime: 1,
+          endTime: 10,
+          messageSeqno: 1,
+        },
+        profile.threads[0], // Parent process
+        profile.threads[1] // tab process
+      );
+
+      addIPCMarkerPairToThreads(
+        {
+          startTime: 11,
+          endTime: 20,
+          messageSeqno: 2,
+        },
+        profile.threads[0], // Parent process
+        profile.threads[2] // DOM Worker
+      );
+
+      return setup(profile);
+    }
+
+    it('can switch to another global track', function () {
+      const { getByText, getState } = setupWithTracksAndIPCMarker();
+      fireFullContextMenu(getByText(/IPCIn/));
+      fireFullClick(getByText('Select the sender thread'));
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([parentThreadIndex])
+      );
+    });
+
+    it('can switch to a hidden global track', function () {
+      const { getState, dispatch, getByText } = setupWithTracksAndIPCMarker();
+      // Hide the global track first.
+      dispatch(hideGlobalTrack(parentTrackReference.trackIndex));
+      // Make sure that it's hidden.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        '  - show [ipc GeckoMain]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+        '  - show [ipc GeckoMain] SELECTED',
+        '  - show [ipc DOM Worker]',
+      ]);
+
+      // Check the actual behavior now.
+      fireFullContextMenu(getByText(/IPCIn/));
+      fireFullClick(getByText('Select the sender thread'));
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([parentThreadIndex])
+      );
+      // Make sure that it's not hidden anymore.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        '  - show [ipc GeckoMain] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+        '  - show [ipc GeckoMain]',
+        '  - show [ipc DOM Worker]',
+      ]);
+    });
+
+    it('can switch to a local track', function () {
+      const { getByText, getState, dispatch } = setupWithTracksAndIPCMarker();
+      dispatch(selectTrack(parentTrackReference, 'none'));
+      // Make sure that we are in the parent process thread.
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([parentThreadIndex])
+      );
+
+      // Check if we can switch to the DOM Worker properly.
+      fireFullContextMenu(getByText(/sent to DOM Worker/));
+      fireFullClick(getByText('Select the receiver thread'));
+
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([domWorkerThreadIndex])
+      );
+    });
+
+    it('can switch to a hidden local track', function () {
+      const { getState, dispatch, getByText } = setupWithTracksAndIPCMarker();
+      dispatch(selectTrack(parentTrackReference, 'none'));
+      // Make sure that we are in the parent process thread.
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([parentThreadIndex])
+      );
+      // Hide the global and local tracks.
+      dispatch(hideLocalTrack(tabPid, domWorkerTrackReference.trackIndex));
+      dispatch(hideGlobalTrack(tabTrackReference.trackIndex));
+      // Make sure that they are hidden.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        '  - show [ipc GeckoMain] SELECTED',
+        'hide [thread GeckoMain tab]',
+        '  - hide [thread DOM Worker]',
+        '  - show [thread Style]',
+        '  - show [ipc GeckoMain]',
+        '  - show [ipc DOM Worker]',
+      ]);
+
+      // Check the actual behavior now.
+      fireFullContextMenu(getByText(/sent to DOM Worker/));
+      fireFullClick(getByText('Select the receiver thread'));
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([domWorkerThreadIndex])
+      );
+      // Make sure that they are not hidden anymore.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        '  - show [ipc GeckoMain]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker] SELECTED',
+        '  - show [thread Style]',
+        '  - show [ipc GeckoMain]',
+        '  - show [ipc DOM Worker] SELECTED',
+      ]);
     });
   });
 });

@@ -25,10 +25,7 @@ import {
   getEmptySamplesTableWithEventDelay,
 } from '../../profile-logic/data-structures';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
-import {
-  getProfileWithNiceTracks,
-  getHumanReadableTracks,
-} from '../fixtures/profiles/tracks';
+import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
@@ -1553,135 +1550,6 @@ describe('actions/ProfileView', function () {
         throw new Error('No screenshots found.');
       }
       expect(screenshots.length).toEqual(endIndex - startIndex + 1);
-    });
-  });
-
-  describe('selectTrackFromTid', function () {
-    /**
-     * Using the following tracks:
-     *  [
-     *    'show [thread GeckoMain process]',
-     *    'show [thread GeckoMain tab]',
-     *    '  - show [thread DOM Worker]',
-     *    '  - show [thread Style]',
-     *  ]
-     */
-    const parentTrackReference = { type: 'global', trackIndex: 0 };
-    const tabTrackReference = { type: 'global', trackIndex: 1 };
-    const workerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
-    const parentTrackTid = 11;
-    const workerTrackTid = 33;
-
-    function setup() {
-      const profile = getProfileWithNiceTracks();
-      const { dispatch, getState } = storeWithProfile(profile);
-      const parentTrack = ProfileViewSelectors.getGlobalTrackFromReference(
-        getState(),
-        parentTrackReference
-      );
-      const tabTrack = ProfileViewSelectors.getGlobalTrackFromReference(
-        getState(),
-        tabTrackReference
-      );
-      const workerTrack = ProfileViewSelectors.getLocalTrackFromReference(
-        getState(),
-        workerTrackReference
-      );
-      if (tabTrack.type !== 'process' || parentTrack.type !== 'process') {
-        throw new Error('Expected to get process tracks.');
-      }
-      if (workerTrack.type !== 'thread') {
-        throw new Error('Expected to get a thread tracks.');
-      }
-      return {
-        profile,
-        getState,
-        dispatch,
-        parentTrack,
-        tabTrack,
-        workerTrack,
-      };
-    }
-
-    it('starts out with the tab thread selected', function () {
-      const { getState, tabTrack } = setup();
-      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
-        new Set([tabTrack.mainThreadIndex])
-      );
-    });
-
-    it('can switch to another global track', function () {
-      const { getState, dispatch, parentTrack } = setup();
-      dispatch(ProfileView.selectTrackFromTid(parentTrackTid));
-      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
-        new Set([parentTrack.mainThreadIndex])
-      );
-    });
-
-    it('can switch to a hidden global track', function () {
-      const { getState, dispatch, parentTrack } = setup();
-      // Hide the global track first.
-      dispatch(ProfileView.hideGlobalTrack(parentTrackReference.trackIndex));
-      // Make sure that it's hidden.
-      expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
-        'show [thread GeckoMain tab] SELECTED',
-        '  - show [thread DOM Worker]',
-        '  - show [thread Style]',
-      ]);
-
-      // Check the actual behavior now.
-      dispatch(ProfileView.selectTrackFromTid(parentTrackTid));
-      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
-        new Set([parentTrack.mainThreadIndex])
-      );
-      // Make sure that it's not hidden anymore.
-      expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
-        'show [thread GeckoMain tab]',
-        '  - show [thread DOM Worker]',
-        '  - show [thread Style]',
-      ]);
-    });
-
-    it('can switch to a local track', function () {
-      const { getState, dispatch, workerTrack } = setup();
-      dispatch(ProfileView.selectTrackFromTid(workerTrackTid));
-      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
-        new Set([workerTrack.threadIndex])
-      );
-    });
-
-    it('can switch to a hidden local track', function () {
-      const { getState, dispatch, tabTrack, workerTrack } = setup();
-      // Hide the global and local tracks first.
-      dispatch(
-        ProfileView.hideLocalTrack(
-          tabTrack.pid,
-          workerTrackReference.trackIndex
-        )
-      );
-      dispatch(ProfileView.hideGlobalTrack(tabTrackReference.trackIndex));
-      // Make sure that they are hidden.
-      expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
-        'hide [thread GeckoMain tab]',
-        '  - hide [thread DOM Worker]',
-        '  - show [thread Style]',
-      ]);
-
-      // Check the actual behavior now.
-      dispatch(ProfileView.selectTrackFromTid(workerTrackTid));
-      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
-        new Set([workerTrack.threadIndex])
-      );
-      // Make sure that they are not hidden anymore.
-      expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
-        'show [thread GeckoMain tab]',
-        '  - show [thread DOM Worker] SELECTED',
-        '  - show [thread Style]',
-      ]);
     });
   });
 });
