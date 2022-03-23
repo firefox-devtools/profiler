@@ -175,8 +175,6 @@ const prePublishedState: Reducer<null | State> = (state = null, action) => {
     case 'SANITIZED_PROFILE_PUBLISHED':
     case 'PROFILE_PUBLISHED':
       return action.prePublishedState;
-    case 'REVERT_TO_PRE_PUBLISHED_STATE':
-      return null;
     default:
       return state;
   }

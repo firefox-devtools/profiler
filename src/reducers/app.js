@@ -41,7 +41,6 @@ const view: Reducer<AppViewState> = (
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
-    case 'REVERT_TO_PRE_PUBLISHED_STATE':
     case 'SANITIZED_PROFILE_PUBLISHED':
       return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
     case 'PROFILE_LOADED':
