@@ -384,15 +384,22 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         {data && data.type === 'IPC' ? (
           <MenuItem onClick={this.selectOtherThreadForIPCMarkers}>
             <span className="react-contextmenu-icon markerContextMenuSelectThread" />
-            {data.direction === 'sending' ? (
-              <Localized id="MarkerContextMenu--select-the-receiver-thread">
-                Select the receiver thread
+            {data.direction === 'sending' && data.recvTid ? (
+              <Localized
+                id="MarkerContextMenu--select-the-receiver-thread"
+                vars={{ threadName: data.recvThreadName }}
+              >
+                <>Select the receiver “{data.recvThreadName}” thread</>
               </Localized>
-            ) : (
-              <Localized id="MarkerContextMenu--select-the-sender-thread">
-                Select the sender thread
+            ) : null}
+            {data.direction === 'receiving' && data.sendTid ? (
+              <Localized
+                id="MarkerContextMenu--select-the-sender-thread"
+                vars={{ threadName: data.sendThreadName }}
+              >
+                <>Select the sender “{data.sendThreadName}” thread</>
               </Localized>
-            )}
+            ) : null}
           </MenuItem>
         ) : null}
       </ContextMenu>

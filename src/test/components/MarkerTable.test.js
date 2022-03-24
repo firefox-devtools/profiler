@@ -255,7 +255,7 @@ describe('MarkerTable', function () {
     it('can switch to another global track', function () {
       const { getByText, getState } = setupWithTracksAndIPCMarker();
       fireFullContextMenu(getByText(/IPCIn/));
-      fireFullClick(getByText('Select the sender thread'));
+      fireFullClick(getByText(/Select the sender/));
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([parentThreadIndex])
       );
@@ -278,7 +278,7 @@ describe('MarkerTable', function () {
 
       // Check the actual behavior now.
       fireFullContextMenu(getByText(/IPCIn/));
-      fireFullClick(getByText('Select the sender thread'));
+      fireFullClick(getByText(/Select the sender/));
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([parentThreadIndex])
       );
@@ -304,7 +304,7 @@ describe('MarkerTable', function () {
 
       // Check if we can switch to the DOM Worker properly.
       fireFullContextMenu(getByText(/sent to DOM Worker/));
-      fireFullClick(getByText('Select the receiver thread'));
+      fireFullClick(getByText(/Select the receiver/));
 
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([domWorkerThreadIndex])
@@ -334,7 +334,7 @@ describe('MarkerTable', function () {
 
       // Check the actual behavior now.
       fireFullContextMenu(getByText(/sent to DOM Worker/));
-      fireFullClick(getByText('Select the receiver thread'));
+      fireFullClick(getByText(/Select the receiver/));
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([domWorkerThreadIndex])
       );

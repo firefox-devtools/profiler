@@ -442,6 +442,7 @@ export function selectTrackFromTid(tid: Tid): ThunkAction<void> {
 
     if (trackReference === null) {
       // Return early if we failed to find the thread from tid.
+      console.warn(`Failed to find a track with tid: ${tid}`);
       return;
     }
 
