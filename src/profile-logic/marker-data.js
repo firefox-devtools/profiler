@@ -279,7 +279,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
   // message seqno, and message type. Since the seqno is only unique for each
   // message channel pair, we use the PIDs and message type as a way of
   // identifying which channel pair generated this message.
-  function makeMarkerID(thread, data): string {
+  function makeIPCMessageID(thread, data): string {
     let pids;
     if (data.direction === 'sending') {
       pids = `${thread.pid},${data.otherPid}`;
@@ -363,7 +363,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
         if (!data || data.type !== 'IPC') {
           continue;
         }
-        const key = makeMarkerID(thread, data);
+        const key = makeIPCMessageID(thread, data);
         if (!markersByKey.has(key)) {
           markersByKey.set(key, new Array(5).fill(undefined));
         }
