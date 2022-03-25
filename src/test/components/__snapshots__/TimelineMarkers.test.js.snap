@@ -1,6 +1,69 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TimelineMarkers renders correctly 1`] = `
+exports[`TimelineMarkers renders correctly memory markers 1`] = `
+<div
+  class="timelineMarkers timelineMarkersMemory selected"
+  data-testid="TimelineMarkersMemory"
+>
+  <div
+    class="react-contextmenu-wrapper"
+  >
+    <div>
+      <canvas
+        class="timelineMarkersCanvas"
+        height="300"
+        width="200"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TimelineMarkers renders correctly memory markers 2`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffc600",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    66.66666666666666,
+    6,
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "fillRect",
+    67,
+    0,
+    66.66666666666666,
+    6,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+]
+`;
+
+exports[`TimelineMarkers renders correctly overview markers 1`] = `
 <div
   class="timelineMarkers selected"
   data-testid="TimelineMarkersOverview"
@@ -19,7 +82,7 @@ exports[`TimelineMarkers renders correctly 1`] = `
 </div>
 `;
 
-exports[`TimelineMarkers renders correctly 2`] = `
+exports[`TimelineMarkers renders correctly overview markers 2`] = `
 Array [
   Array [
     "clearRect",
