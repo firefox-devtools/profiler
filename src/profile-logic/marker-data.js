@@ -39,6 +39,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   MarkerDisplayLocation,
+  Tid,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -251,22 +252,27 @@ export function getTabFilteredMarkerIndexes(
  * times for the IPC message.
  */
 export class IPCMarkerCorrelations {
-  _correlations: Map<string, IPCSharedData>;
+  _correlations: Map<Tid, Map<number, IPCSharedData>>;
 
   constructor() {
     this._correlations = new Map();
   }
 
-  _makeKey(tid: number, index: number) {
-    return `${tid},${index}`;
-  }
-
-  set(tid: number, index: number, data: IPCSharedData): void {
-    this._correlations.set(this._makeKey(tid, index), data);
+  set(tid: Tid, index: number, data: IPCSharedData): void {
+    let threadData = this._correlations.get(tid);
+    if (!threadData) {
+      threadData = new Map();
+      this._correlations.set(tid, threadData);
+    }
+    threadData.set(index, data);
   }
 
   get(tid: number, index: number): ?IPCSharedData {
-    return this._correlations.get(this._makeKey(tid, index));
+    const threadData = this._correlations.get(tid);
+    if (!threadData) {
+      return null;
+    }
+    return threadData.get(index);
   }
 }
 
