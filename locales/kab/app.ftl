@@ -29,16 +29,11 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
-AppViewRouter--error-message-unpublished =
-    .message = Ur yezmir ara ad d-yerr amaɣnu seg { -firefox-brand-name }.
-AppViewRouter--error-message-from-file =
-    .message = Taɣuri n faylu neɣ tasleḍt n ufylu yellan deg-s d awezɣi.
-AppViewRouter--error-message-local =
-    .message = Ur yettwasebded ara yakan.
-AppViewRouter--error-message-public =
-    .message = Ur yezmir ara ad d-yader umaɣnu.
-AppViewRouter--error-message-from-url =
-    .message = Ur yezmir ara ad d-yader umaɣnu.
+AppViewRouter--error-unpublished = Ur yezmir ara ad d-yaf amaɣnu seg { -firefox-brand-name }.
+AppViewRouter--error-from-file = Ur izmir ara ad d-iɣer afaylu neɣ ad yesleḍ amaɣnu  yellan deg-s.
+AppViewRouter--error-local = Ur yebdid ara yakan.
+AppViewRouter--error-public = Ur yezmir ara ad d-yader amaɣnu.
+AppViewRouter--error-from-url = Ur yezmir ara ad d-yessader amaɣnu.
 AppViewRouter--route-not-found--home =
     .specialMessage = URL wuɣur tettaɛraḍeḍ ad tawḍeḍ ur tettwassen ara.
 
@@ -55,6 +50,8 @@ CallNodeContextMenu--transform-focus-function = Siḍes ef twuri
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Siḍeṣ ɣef twuri (imitti)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-collapse-function-subtree = Ṭebbeq tawuri
+    .title = Aṭebbeq n twuri ad yekkes meṛṛa ayen iwumi tessawaldaɣen ad tefk  akk akud n uselkem i twuri. Aya ad yefk tallelt i usifses n umaɣnu ara yessiwlen i tengalt ur yattwaslaḍen ara.
 CallNodeContextMenu--expand-all = Snefli akk
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -65,6 +62,13 @@ CallNodeContextMenu--copy-stack = Nqel tanebdant
 
 ## CallTree
 ## This is the component for Call Tree panel.
+
+
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
 
 
 ## CallTreeSidebar
@@ -170,7 +174,6 @@ MarkerContextMenu--end-selection-here = Taggara n ufran da
 MarkerContextMenu--copy-description = Nɣel aglam
 MarkerContextMenu--copy-call-stack = Nɣel tanebdant n usiwel
 MarkerContextMenu--copy-url = Nɣel URL
-MarkerContextMenu--copy-full-payload = Nɣel tuttra tummidt
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -217,7 +220,6 @@ MenuButtons--metaInfo--symbols = Izamulen:
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--recording-started = Asekles yebda:
 MenuButtons--metaInfo--interval = Azilal:
-MenuButtons--metaInfo--profile-version = Lqem n umaɣnu:
 MenuButtons--metaInfo--buffer-capacity = Tazmert n uḥraz:
 MenuButtons--metaInfo--buffer-duration = Tanzgat n uḥraz:
 # Buffer Duration in Seconds in Meta Info Panel
@@ -313,10 +315,6 @@ ProfileFilterNavigator--full-range = Azilal ummid
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-message-local =
-    .message = Ur yettwasebded ara yakan.
-ProfileLoaderAnimation--loading-message-view-not-found =
-    .message = Ur tettwaf ara teskant
 
 ## ProfileRootMessage
 
@@ -353,7 +351,6 @@ TabBar--network-tab = Aẓeṭṭa
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
-TrackContextMenu--only-show-this-process-group = Sken kan agraw-a n ukala
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -362,6 +359,16 @@ TrackContextMenu--only-show-track = Sken kan “{ $trackName }”
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Ffer “{ $trackName }”
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -408,6 +415,28 @@ TransformNavigator--drop-function = Sers: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-direct-recursion = Fneẓ asniles: { $item }
+
+## Source code view in a box at the bottom of the UI.
+
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Ur yezmir ara ad yessuter i API n uzamul n yiminig: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = API n uzamul n yiminig yerra-d tuccḍa: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Aḥraz deg { $url } ur yezmir ara ad yettwasleḍ: { $parsingErrorMessage }
+SourceView--close-button =
+    .title = Mdel timeẓri taneṣlit
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
