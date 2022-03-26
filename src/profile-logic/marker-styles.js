@@ -27,14 +27,13 @@ const defaultStyle = {
 const gcStyle = {
   ...defaultStyle,
   top: 6,
-  // This color is a yellower ORANGE_50 to help distinguish GC as coming from scripts.
-  // It keeps it within a similar hue as the rest of the memory markers.
-  background: '#ffc600',
+  background: colors.ORANGE_50,
 };
 
 const ccStyle = {
   ...gcStyle,
-  background: colors.ORANGE_50,
+  // This is a paler orange to distinguish CC from GC.
+  background: '#ffc600',
 };
 
 /**
@@ -171,10 +170,18 @@ const markerStyles: { +[styleName: string]: MarkerStyle } = {
   },
   GCSlice: gcStyle,
   GCMinor: gcStyle,
-  CCSlice: gcStyle,
+  'GC Interrupt': gcStyle,
+  CC: {
+    ...ccStyle,
+    squareCorners: true,
+    top: 0,
+  },
+  CCSlice: ccStyle,
+  ForgetSkippable: ccStyle,
+  // Note: these Idle* markers have been removed in Firefox 99 (Bug 1752646),
+  // but they're still here for compatibility for older profiles.
   IdleCCSlice: ccStyle,
   IdleForgetSkippable: ccStyle,
-  ForgetSkippable: ccStyle,
 
   // IO:
   FileIO: {
