@@ -730,14 +730,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       hiddenLocalTracksCount + this.props.hiddenGlobalTracks.size === 0;
 
     return (
-      <React.Fragment>
-        <MenuItem onClick={this._showAllTracks} disabled={isDisabled}>
-          <Localized id="TrackContextMenu--show-all-tracks">
-            Show all tracks
-          </Localized>
-        </MenuItem>
-        <div className="react-contextmenu-separator" />
-      </React.Fragment>
+      <MenuItem onClick={this._showAllTracks} disabled={isDisabled}>
+        <Localized id="TrackContextMenu--show-all-tracks">
+          Show all tracks
+        </Localized>
+      </MenuItem>
     );
   }
 
@@ -748,14 +745,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     }
 
     return (
-      <React.Fragment>
-        <MenuItem onClick={this._showMatchingTracks}>
-          <Localized id="TrackContextMenu--show-all-matching-tracks">
-            Show all matching tracks
-          </Localized>
-        </MenuItem>
-        <div className="react-contextmenu-separator" />
-      </React.Fragment>
+      <MenuItem onClick={this._showMatchingTracks}>
+        <Localized id="TrackContextMenu--show-all-matching-tracks">
+          Show all matching tracks
+        </Localized>
+      </MenuItem>
     );
   }
 
@@ -893,6 +887,9 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {searchFilter
           ? this.renderShowProvidedTracks()
           : this.renderShowAllTracks()}
+        {rightClickedTrack === null ? (
+          <div className="react-contextmenu-separator" />
+        ) : null}
         {isolateProcessMainThread}
         {isolateProcess}
         {isolateLocalTrack}
