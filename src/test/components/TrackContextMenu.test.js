@@ -330,6 +330,157 @@ describe('timeline/TrackContextMenu', function () {
     });
   });
 
+  describe('hide all matching tracks', function () {
+    function setupAllTracks() {
+      const setupResults = setup();
+      const selectHideAllMatchingTracksItem = () =>
+        screen.getByText('Hide all matching tracks');
+
+      const hideAllTracksExceptMain = () => {
+        fireFullClick(screen.getByText('DOM Worker'));
+        fireFullClick(screen.getByText('Style'));
+        fireFullClick(screen.getByText('Content Process'));
+      };
+
+      return {
+        ...setupResults,
+        selectHideAllMatchingTracksItem,
+        hideAllTracksExceptMain,
+      };
+    }
+
+    it('hides a global track', () => {
+      const { getState, selectHideAllMatchingTracksItem, changeSearchFilter } =
+        setupAllTracks();
+      // Make sure all the tracks are visible at first.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('GeckoMain');
+      // Click the button.
+      fireFullClick(selectHideAllMatchingTracksItem());
+
+      // GeckoMain should be hidden now.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('hides a local track', () => {
+      const { getState, selectHideAllMatchingTracksItem, changeSearchFilter } =
+        setupAllTracks();
+      // Make sure all the tracks are visible at first.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('DOM Worker');
+      // Click the button.
+      fireFullClick(selectHideAllMatchingTracksItem());
+
+      // DOM Worker track should be hidden now.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('does not hide anything if search filter does not match', () => {
+      const { getState, selectHideAllMatchingTracksItem, changeSearchFilter } =
+        setupAllTracks();
+      // Make sure all the tracks are visible at first.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // Search something to filter the tracks. This time it's something random.
+      changeSearchFilter('this should not be in the tracks list');
+      // Click the button.
+      fireFullClick(selectHideAllMatchingTracksItem());
+
+      // No new track should be hidden.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('does not hide if it is the last visible track', () => {
+      const {
+        getState,
+        selectHideAllMatchingTracksItem,
+        hideAllTracksExceptMain,
+        changeSearchFilter,
+      } = setupAllTracks();
+      // Hide all tracks except the main to test the behavior.
+      hideAllTracksExceptMain();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        // This must be the only visible track.
+        'show [thread GeckoMain process] SELECTED',
+        'hide [thread GeckoMain tab]',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('GeckoMain');
+      // Click the button.
+      fireFullClick(selectHideAllMatchingTracksItem());
+
+      // GeckoMain should still be visible.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'hide [thread GeckoMain tab]',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    it('selects another visible track when the selected one becomes hidden', () => {
+      const { getState, selectHideAllMatchingTracksItem, changeSearchFilter } =
+        setupAllTracks();
+      // Make sure all the tracks are visible at first.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('tab');
+      // Click the button.
+      fireFullClick(selectHideAllMatchingTracksItem());
+
+      // GeckoMain should be visible and selected.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'hide [thread GeckoMain tab]',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+  });
+
   describe('selected global track', function () {
     function setupGlobalTrack(profile, trackIndex = 1) {
       const results = setup(profile);
