@@ -642,34 +642,12 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
 
     // Find another selectedThreadIndex if the current selected thread is hidden
     // with this operation.
-    if (globalTrackToHide.type === 'process') {
-      // This is a process global track, this operation could potentially hide
-      // the selectedThreadIndex.
-      if (globalTrackToHide.mainThreadIndex !== null) {
-        newSelectedThreadIndexes.delete(globalTrackToHide.mainThreadIndex);
-      }
-
-      // Check in the local tracks for the selectedThreadIndex
-      if (newSelectedThreadIndexes.size !== 0) {
-        for (const localTrack of getLocalTracks(
-          getState(),
-          globalTrackToHide.pid
-        )) {
-          if (localTrack.type === 'thread') {
-            newSelectedThreadIndexes.delete(localTrack.threadIndex);
-            break;
-          }
-        }
-      }
-      if (newSelectedThreadIndexes.size === 0) {
-        const threadIndex = _findOtherVisibleThread(getState, trackIndex);
-        if (threadIndex === null) {
-          // Could not find another thread index, bail out.
-          return;
-        }
-        newSelectedThreadIndexes.add(threadIndex);
-      }
-    }
+    _removeSelectedThreadIndexesForGlobalTrack(
+      getState,
+      newSelectedThreadIndexes,
+      globalTrackToHide,
+      trackIndex
+    );
 
     if (newSelectedThreadIndexes.size === 0) {
       // Hiding this process would make it so that there is no selected thread.
@@ -689,6 +667,46 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
       selectedThreadIndexes: newSelectedThreadIndexes,
     });
   };
+}
+
+/**
+ * Find another selectedThreadIndex if the current selected thread is hidden
+ * with this operation.
+ */
+function _removeSelectedThreadIndexesForGlobalTrack(
+  getState: () => State,
+  selectedThreadIndexes: Set<ThreadIndex>,
+  globalTrackToHide: GlobalTrack,
+  trackIndex: TrackIndex
+) {
+  if (globalTrackToHide.type === 'process') {
+    // This is a process global track, this operation could potentially hide
+    // the selectedThreadIndex.
+    if (globalTrackToHide.mainThreadIndex !== null) {
+      selectedThreadIndexes.delete(globalTrackToHide.mainThreadIndex);
+    }
+
+    // Check in the local tracks for the selectedThreadIndex
+    if (selectedThreadIndexes.size !== 0) {
+      for (const localTrack of getLocalTracks(
+        getState(),
+        globalTrackToHide.pid
+      )) {
+        if (localTrack.type === 'thread') {
+          selectedThreadIndexes.delete(localTrack.threadIndex);
+          break;
+        }
+      }
+    }
+    if (selectedThreadIndexes.size === 0) {
+      const threadIndex = _findOtherVisibleThread(getState, trackIndex);
+      if (threadIndex === null) {
+        // Could not find another thread index, bail out.
+        return;
+      }
+      selectedThreadIndexes.add(threadIndex);
+    }
+  }
 }
 
 /**
