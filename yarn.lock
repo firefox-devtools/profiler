@@ -1085,12 +1085,12 @@
     "@codemirror/view" "^0.19.0"
     "@lezer/javascript" "^0.15.1"
 
-"@codemirror/lang-rust@^0.19.1":
-  version "0.19.1"
-  resolved "https://registry.yarnpkg.com/@codemirror/lang-rust/-/lang-rust-0.19.1.tgz#3ed1386bbc825ae5dbd09b28f31a9ee4ec0dae86"
-  integrity sha512-T/LzRC5bMPvkMg11kr/jnpScqsE68B+F0SYqjyQTzQ+666RhHJICDCSlk7wbIrJi/fagpBwvuAmo2LgQ8dcGsQ==
+"@codemirror/lang-rust@^0.19.2":
+  version "0.19.2"
+  resolved "https://registry.yarnpkg.com/@codemirror/lang-rust/-/lang-rust-0.19.2.tgz#39e32e1a817fafdd8eac23a8904785cf0fc9cc29"
+  integrity sha512-SEXsO7Qf2gktRvVhHMc0Mq4HzPBpFcQlrlcinafy6VFXavWs+QAIB8UAuLG/igOc3PrIHbZFlyEhVUIGstox8w==
   dependencies:
-    "@codemirror/highlight" "^0.19.0"
+    "@codemirror/highlight" "^0.19.7"
     "@codemirror/language" "^0.19.0"
     "@lezer/rust" "^0.15.0"
 
