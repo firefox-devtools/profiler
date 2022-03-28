@@ -39,6 +39,7 @@ import { objectMap } from '../utils/flow';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'PROFILE_LOADED':
       return action.profile;
     case 'BULK_SYMBOLICATION': {
@@ -81,6 +82,7 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
 const globalTracks: Reducer<GlobalTrack[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return action.globalTracks;
     default:
       return state;
@@ -97,6 +99,7 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
 ) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'ENABLE_EVENT_DELAY_TRACKS':
     case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
       return action.localTracksByPid;
@@ -637,7 +640,6 @@ const wrapReducerInResetter = (
 ): Reducer<ProfileViewState> => {
   return (state, action) => {
     switch (action.type) {
-      case 'SANITIZED_PROFILE_PUBLISHED':
       case 'RETURN_TO_ZIP_FILE_LIST':
         // Provide a mechanism to wipe the state clean when changing out profiles.
         // All of the profile view information is invalidated.

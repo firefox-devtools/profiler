@@ -463,7 +463,14 @@ type UrlStateAction =
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
       +profileName: string,
+      +profile: Profile,
       +prePublishedState: State | null,
+      +globalTracks: GlobalTrack[],
+      +localTracksByPid: Map<Pid, LocalTrack[]>,
+      +hiddenGlobalTracks: Set<TrackIndex>,
+      +globalTrackOrder: TrackIndex[],
+      +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     |}
   | {|
       +type: 'SET_DATA_SOURCE',

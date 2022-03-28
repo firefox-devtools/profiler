@@ -192,6 +192,7 @@ const isHidingStaleProfile: Reducer<boolean> = (state = false, action) => {
     case 'HIDE_STALE_PROFILE':
       return true;
     case 'VIEW_FULL_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'VIEW_ORIGINS_PROFILE':
     case 'VIEW_ACTIVE_TAB_PROFILE':
       return false;
@@ -208,6 +209,9 @@ const hasSanitizedProfile: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'HIDE_STALE_PROFILE':
       return true;
+    case 'SANITIZED_PROFILE_PUBLISHED':
+    case 'REVERT_TO_PRE_PUBLISHED_STATE':
+      return false;
     default:
       return state;
   }
