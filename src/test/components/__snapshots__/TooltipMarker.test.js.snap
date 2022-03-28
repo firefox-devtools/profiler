@@ -4680,3 +4680,67 @@ exports[`TooltipMarker shows a tooltip for Jank markers 1`] = `
   </div>
 </div>
 `;
+
+exports[`TooltipMarker shows image of CompositorScreenshot markers 1`] = `
+<div
+  class="tooltipMarker"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        2ms
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        CompositorScreenshot
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Image
+      :
+    </div>
+    <img
+      class="tooltipScreenshotImg"
+      src="Screenshot Url"
+      style="width: 350px; height: 175px;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      Window Size
+      :
+    </div>
+    600
+    px x 
+    300
+    px
+    <div
+      class="tooltipLabel"
+    >
+      Description
+      :
+    </div>
+    This marker spans the time between each composite of a window and shows the window contents during that time.
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
+  </div>
+</div>
+`;
