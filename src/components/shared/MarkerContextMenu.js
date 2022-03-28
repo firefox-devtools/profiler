@@ -19,6 +19,7 @@ import {
 import {
   getPreviewSelection,
   getCommittedRange,
+  getProfiledThreadTids,
 } from 'firefox-profiler/selectors/profile';
 import { getRightClickedMarkerInfo } from 'firefox-profiler/selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
@@ -32,6 +33,7 @@ import type {
   IndexIntoStackTable,
   Thread,
   MarkerReference,
+  Tid,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -58,6 +60,7 @@ type StateProps = {|
   +thread: Thread | null,
   +implementationFilter: ImplementationFilter,
   +getMarkerLabelToCopy: (MarkerIndex) => string,
+  +profiledThreadTids: Set<Tid>,
 |};
 
 type DispatchProps = {|
@@ -215,7 +218,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   };
 
   maybeRenderIPCMarkerMenuItem() {
-    const { marker } = this.props;
+    const { marker, profiledThreadTids } = this.props;
     const { data } = marker;
 
     if (!data || data.type !== 'IPC') {
@@ -228,6 +231,11 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       case 'sending':
         if (!data.recvTid) {
           console.warn('Unable to find the receiver tid for IPC marker');
+          return null;
+        }
+
+        if (!profiledThreadTids.has(data.recvTid)) {
+          console.warn('Unable to find the receiver thread for IPC marker');
           return null;
         }
 
@@ -247,6 +255,11 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       case 'receiving':
         if (!data.sendTid) {
           console.warn('Unable to find the sender tid for IPC marker');
+          return null;
+        }
+
+        if (!profiledThreadTids.has(data.sendTid)) {
+          console.warn('Unable to find the sender thread for IPC marker');
           return null;
         }
 
@@ -467,6 +480,7 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
       implementationFilter: getImplementationFilter(state),
       thread: selectors.getThread(state),
       getMarkerLabelToCopy: selectors.getMarkerLabelToCopyGetter(state),
+      profiledThreadTids: getProfiledThreadTids(state),
     };
   },
   mapDispatchToProps: {

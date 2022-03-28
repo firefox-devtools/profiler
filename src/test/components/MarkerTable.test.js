@@ -224,8 +224,10 @@ describe('MarkerTable', function () {
     const parentTrackReference = { type: 'global', trackIndex: 0 };
     const tabTrackReference = { type: 'global', trackIndex: 1 };
     const domWorkerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
+    const styleTrackReference = { type: 'local', trackIndex: 1, pid: 222 };
     const parentThreadIndex = 0;
     const domWorkerThreadIndex = 2;
+    const styleThreadIndex = 3;
     const tabPid = 222;
     function setupWithTracksAndIPCMarker() {
       const profile = getProfileWithNiceTracks();
@@ -248,6 +250,29 @@ describe('MarkerTable', function () {
         profile.threads[0], // Parent process
         profile.threads[2] // DOM Worker
       );
+
+      // Add an incomplete IPC marker to the Style thread.
+      // We do not add the other marker pair to another thread on purpose.
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[3], [
+        [
+          'IPC',
+          20,
+          25,
+          {
+            type: 'IPC',
+            startTime: 20,
+            endTime: 25,
+            otherPid: 444,
+            messageSeqno: 3,
+            messageType: 'PContent::Msg_PreferenceUpdate',
+            side: 'parent',
+            direction: 'sending',
+            phase: 'endpoint',
+            sync: false,
+            niceDirection: `sending to 444`,
+          },
+        ],
+      ]);
 
       return setup(profile);
     }
@@ -274,6 +299,7 @@ describe('MarkerTable', function () {
         '  - show [thread Style]',
         '  - show [ipc GeckoMain] SELECTED',
         '  - show [ipc DOM Worker]',
+        '  - show [ipc Style]',
       ]);
 
       // Check the actual behavior now.
@@ -291,6 +317,7 @@ describe('MarkerTable', function () {
         '  - show [thread Style]',
         '  - show [ipc GeckoMain]',
         '  - show [ipc DOM Worker]',
+        '  - show [ipc Style]',
       ]);
     });
 
@@ -330,6 +357,7 @@ describe('MarkerTable', function () {
         '  - show [thread Style]',
         '  - show [ipc GeckoMain]',
         '  - show [ipc DOM Worker]',
+        '  - show [ipc Style]',
       ]);
 
       // Check the actual behavior now.
@@ -347,7 +375,24 @@ describe('MarkerTable', function () {
         '  - show [thread Style]',
         '  - show [ipc GeckoMain]',
         '  - show [ipc DOM Worker] SELECTED',
+        '  - show [ipc Style]',
       ]);
+    });
+
+    it('does not render when the other thread is not profiled', function () {
+      const { getState, dispatch } = setupWithTracksAndIPCMarker();
+      dispatch(selectTrack(styleTrackReference, 'none'));
+      // Make sure that we are in the Style thread.
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([styleThreadIndex])
+      );
+
+      // Silence console logs coming from the component.
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      // Make sure that it's not in the context menu.
+      fireFullContextMenu(screen.getByText(/IPCOut/));
+      expect(screen.queryByText(/Select the/)).not.toBeInTheDocument();
     });
   });
 });
