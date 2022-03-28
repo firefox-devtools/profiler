@@ -253,16 +253,16 @@ describe('MarkerTable', function () {
     }
 
     it('can switch to another global track', function () {
-      const { getByText, getState } = setupWithTracksAndIPCMarker();
-      fireFullContextMenu(getByText(/IPCIn/));
-      fireFullClick(getByText(/Select the sender/));
+      const { getState } = setupWithTracksAndIPCMarker();
+      fireFullContextMenu(screen.getByText(/IPCIn/));
+      fireFullClick(screen.getByText(/Select the sender/));
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([parentThreadIndex])
       );
     });
 
     it('can switch to a hidden global track', function () {
-      const { getState, dispatch, getByText } = setupWithTracksAndIPCMarker();
+      const { getState, dispatch } = setupWithTracksAndIPCMarker();
       // Hide the global track first.
       dispatch(hideGlobalTrack(parentTrackReference.trackIndex));
       // Make sure that it's hidden.
@@ -277,8 +277,8 @@ describe('MarkerTable', function () {
       ]);
 
       // Check the actual behavior now.
-      fireFullContextMenu(getByText(/IPCIn/));
-      fireFullClick(getByText(/Select the sender/));
+      fireFullContextMenu(screen.getByText(/IPCIn/));
+      fireFullClick(screen.getByText(/Select the sender/));
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([parentThreadIndex])
       );
@@ -295,7 +295,7 @@ describe('MarkerTable', function () {
     });
 
     it('can switch to a local track', function () {
-      const { getByText, getState, dispatch } = setupWithTracksAndIPCMarker();
+      const { getState, dispatch } = setupWithTracksAndIPCMarker();
       dispatch(selectTrack(parentTrackReference, 'none'));
       // Make sure that we are in the parent process thread.
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
@@ -303,8 +303,8 @@ describe('MarkerTable', function () {
       );
 
       // Check if we can switch to the DOM Worker properly.
-      fireFullContextMenu(getByText(/sent to DOM Worker/));
-      fireFullClick(getByText(/Select the receiver/));
+      fireFullContextMenu(screen.getByText(/sent to DOM Worker/));
+      fireFullClick(screen.getByText(/Select the receiver/));
 
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([domWorkerThreadIndex])
@@ -312,7 +312,7 @@ describe('MarkerTable', function () {
     });
 
     it('can switch to a hidden local track', function () {
-      const { getState, dispatch, getByText } = setupWithTracksAndIPCMarker();
+      const { getState, dispatch } = setupWithTracksAndIPCMarker();
       dispatch(selectTrack(parentTrackReference, 'none'));
       // Make sure that we are in the parent process thread.
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
@@ -333,8 +333,8 @@ describe('MarkerTable', function () {
       ]);
 
       // Check the actual behavior now.
-      fireFullContextMenu(getByText(/sent to DOM Worker/));
-      fireFullClick(getByText(/Select the receiver/));
+      fireFullContextMenu(screen.getByText(/sent to DOM Worker/));
+      fireFullClick(screen.getByText(/Select the receiver/));
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([domWorkerThreadIndex])
       );
