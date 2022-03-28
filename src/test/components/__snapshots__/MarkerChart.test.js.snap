@@ -161,6 +161,10 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
 exports[`MarkerChart renders the hoveredItem markers properly 1`] = `
 Array [
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#fff",
   ],
@@ -183,43 +187,57 @@ Array [
     15,
   ],
   Array [
-    "set lineWidth",
-    1,
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    150,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "clip",
   ],
   Array [
     "set fillStyle",
-    "Highlight",
+    "#0060df",
   ],
   Array [
-    "fillRect",
-    176,
-    129,
-    73,
-    1,
+    "set strokeStyle",
+    "#002275",
   ],
   Array [
-    "fillRect",
-    175,
-    130,
-    75,
-    11,
+    "beginPath",
   ],
   Array [
-    "fillRect",
-    176,
-    141,
-    73,
-    1,
+    "rect",
+    175.5,
+    129.5,
+    74,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "set fillStyle",
-    "HighlightText",
+    "white",
   ],
   Array [
     "fillText",
     "Marker B",
     178,
     139,
+  ],
+  Array [
+    "restore",
   ],
   Array [
     "set fillStyle",
@@ -236,7 +254,7 @@ Array [
     "fillRect",
     0,
     143,
-    365,
+    350,
     1,
   ],
   Array [
@@ -418,6 +436,10 @@ Array [
     2,
   ],
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#ffffff",
   ],
@@ -429,12 +451,20 @@ Array [
     300,
   ],
   Array [
-    "set lineWidth",
-    1,
+    "save",
   ],
   Array [
-    "set fillStyle",
-    "#45a1ff",
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    150,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "clip",
   ],
   Array [
     "measureText",
@@ -443,6 +473,10 @@ Array [
   Array [
     "measureText",
     "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
   ],
   Array [
     "beginPath",
@@ -460,28 +494,27 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#8ac4ff",
   ],
   Array [
-    "fillRect",
-    151,
-    33,
-    123,
-    1,
+    "set strokeStyle",
+    "#0060df",
   ],
   Array [
-    "fillRect",
-    150,
-    34,
-    125,
-    11,
+    "beginPath",
   ],
   Array [
-    "fillRect",
-    151,
-    45,
-    123,
-    1,
+    "rect",
+    150.5,
+    33.5,
+    124,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "measureText",
@@ -489,78 +522,75 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#8ac4ff",
   ],
   Array [
-    "fillRect",
-    288.5,
-    33,
-    48,
-    1,
+    "set strokeStyle",
+    "#0060df",
   ],
   Array [
-    "fillRect",
-    287.5,
-    34,
-    50,
-    11,
+    "beginPath",
   ],
   Array [
-    "fillRect",
-    288.5,
-    45,
-    48,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "fillRect",
-    151,
+    "rect",
+    288,
+    33.5,
     49,
-    123,
-    1,
+    12,
   ],
   Array [
-    "fillRect",
-    150,
-    50,
-    125,
-    11,
+    "fill",
   ],
   Array [
-    "fillRect",
-    151,
-    61,
-    123,
-    1,
+    "stroke",
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#8ac4ff",
   ],
   Array [
-    "fillRect",
-    213.5,
-    65,
-    60.5,
-    1,
+    "set strokeStyle",
+    "#0060df",
   ],
   Array [
-    "fillRect",
-    212.5,
-    66,
-    62.5,
-    11,
+    "beginPath",
   ],
   Array [
-    "fillRect",
-    213.5,
-    77,
-    60.5,
-    1,
+    "rect",
+    150.5,
+    49.5,
+    124,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "set fillStyle",
+    "#8ac4ff",
+  ],
+  Array [
+    "set strokeStyle",
+    "#0060df",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    213,
+    65.5,
+    61.5,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "measureText",
@@ -568,7 +598,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "black",
   ],
   Array [
     "fillText",
@@ -578,7 +608,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#0060df",
   ],
   Array [
     "beginPath",
@@ -596,32 +626,31 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#8ac4ff",
   ],
   Array [
-    "fillRect",
-    151,
-    97,
-    35.5,
-    1,
+    "set strokeStyle",
+    "#0060df",
   ],
   Array [
-    "fillRect",
-    150,
-    98,
-    37.5,
-    11,
+    "beginPath",
   ],
   Array [
-    "fillRect",
-    151,
-    109,
-    35.5,
-    1,
+    "rect",
+    150.5,
+    97.5,
+    36.5,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#0060df",
   ],
   Array [
     "beginPath",
@@ -639,28 +668,27 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#8ac4ff",
   ],
   Array [
-    "fillRect",
-    176,
-    129,
-    73,
-    1,
+    "set strokeStyle",
+    "#0060df",
   ],
   Array [
-    "fillRect",
-    175,
-    130,
-    75,
-    11,
+    "beginPath",
   ],
   Array [
-    "fillRect",
-    176,
-    141,
-    73,
-    1,
+    "rect",
+    175.5,
+    129.5,
+    74,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "measureText",
@@ -668,7 +696,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "black",
   ],
   Array [
     "fillText",
@@ -678,28 +706,30 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#8ac4ff",
   ],
   Array [
-    "fillRect",
-    213.5,
-    145,
-    123,
-    1,
+    "set strokeStyle",
+    "#0060df",
   ],
   Array [
-    "fillRect",
-    212.5,
-    146,
-    125,
-    11,
+    "beginPath",
   ],
   Array [
-    "fillRect",
-    213.5,
-    157,
-    123,
-    1,
+    "rect",
+    213,
+    145.5,
+    124,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "restore",
   ],
   Array [
     "set fillStyle",
@@ -716,70 +746,70 @@ Array [
     "fillRect",
     0,
     15,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     31,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     47,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     63,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     79,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     95,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     111,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     127,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     143,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     159,
-    365,
+    350,
     1,
   ],
   Array [
@@ -873,8 +903,8 @@ Array [
   Array [
     "fillRect",
     0,
-    0,
-    365,
+    -1,
+    350,
     16,
   ],
   Array [
@@ -885,14 +915,14 @@ Array [
     "fillRect",
     0,
     -1,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
-    16,
-    365,
+    15,
+    350,
     1,
   ],
   Array [
@@ -911,6 +941,10 @@ Array [
 exports[`MarkerChart with active tab does not render the hovered label 1`] = `
 Array [
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#fff",
   ],
@@ -933,33 +967,128 @@ Array [
     15,
   ],
   Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    0,
+    0,
+    350,
+    300,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#8ac4ff",
+  ],
+  Array [
+    "set strokeStyle",
+    "#0060df",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    88.5,
+    17.5,
+    130.25,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "set fillStyle",
+    "black",
+  ],
+  Array [
+    "fillText",
+    "click",
+    91,
+    27,
+  ],
+  Array [
+    "restore",
+  ],
+]
+`;
+
+exports[`MarkerChart with active tab renders the hovered marker properly 1`] = `
+Array [
+  Array [
     "set lineWidth",
     1,
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#fff",
   ],
   Array [
     "fillRect",
-    89,
-    17,
-    129.25,
-    1,
+    0,
+    16,
+    365,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "rgba(40, 122, 169, 0.2)",
   ],
   Array [
     "fillRect",
-    88,
-    18,
-    131.25,
-    11,
+    0,
+    16,
+    365,
+    15,
   ],
   Array [
-    "fillRect",
-    89,
-    29,
-    129.25,
-    1,
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    0,
+    0,
+    350,
+    300,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set strokeStyle",
+    "#002275",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    88.5,
+    17.5,
+    130.25,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "set fillStyle",
@@ -971,71 +1100,8 @@ Array [
     91,
     27,
   ],
-]
-`;
-
-exports[`MarkerChart with active tab renders the hovered marker properly 1`] = `
-Array [
   Array [
-    "set fillStyle",
-    "#fff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    16,
-    365,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "rgba(40, 122, 169, 0.2)",
-  ],
-  Array [
-    "fillRect",
-    0,
-    16,
-    365,
-    15,
-  ],
-  Array [
-    "set lineWidth",
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "Highlight",
-  ],
-  Array [
-    "fillRect",
-    89,
-    17,
-    129.25,
-    1,
-  ],
-  Array [
-    "fillRect",
-    88,
-    18,
-    131.25,
-    11,
-  ],
-  Array [
-    "fillRect",
-    89,
-    29,
-    129.25,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "HighlightText",
-  ],
-  Array [
-    "fillText",
-    "click",
-    91,
-    27,
+    "restore",
   ],
   Array [
     "set fillStyle",
@@ -1045,7 +1111,7 @@ Array [
     "fillRect",
     0,
     31,
-    365,
+    350,
     1,
   ],
   Array [
@@ -1227,6 +1293,10 @@ Array [
     2,
   ],
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#ffffff",
   ],
@@ -1238,12 +1308,20 @@ Array [
     300,
   ],
   Array [
-    "set lineWidth",
-    1,
+    "save",
   ],
   Array [
-    "set fillStyle",
-    "#45a1ff",
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    0,
+    0,
+    350,
+    300,
+  ],
+  Array [
+    "clip",
   ],
   Array [
     "measureText",
@@ -1254,25 +1332,28 @@ Array [
     "…",
   ],
   Array [
-    "fillRect",
-    88.5,
-    17,
-    129.25,
-    1,
+    "set fillStyle",
+    "#8ac4ff",
   ],
   Array [
-    "fillRect",
-    87.5,
-    18,
-    131.25,
-    11,
+    "set strokeStyle",
+    "#0060df",
   ],
   Array [
-    "fillRect",
-    88.5,
-    29,
-    129.25,
-    1,
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    88,
+    17.5,
+    130.25,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "measureText",
@@ -1280,7 +1361,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "black",
   ],
   Array [
     "fillText",
@@ -1290,7 +1371,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#0060df",
   ],
   Array [
     "beginPath",
@@ -1307,6 +1388,9 @@ Array [
     "fill",
   ],
   Array [
+    "restore",
+  ],
+  Array [
     "set fillStyle",
     "#ededf0",
   ],
@@ -1314,21 +1398,21 @@ Array [
     "fillRect",
     0,
     15,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     31,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
     47,
-    365,
+    350,
     1,
   ],
   Array [
@@ -1392,8 +1476,8 @@ Array [
   Array [
     "fillRect",
     0,
-    0,
-    365,
+    -1,
+    350,
     16,
   ],
   Array [
@@ -1404,14 +1488,14 @@ Array [
     "fillRect",
     0,
     -1,
-    365,
+    350,
     1,
   ],
   Array [
     "fillRect",
     0,
-    16,
-    365,
+    15,
+    350,
     1,
   ],
   Array [
