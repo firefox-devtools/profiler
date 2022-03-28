@@ -267,10 +267,10 @@ export class IPCMarkerCorrelations {
     threadData.set(index, data);
   }
 
-  get(tid: number, index: number): ?IPCSharedData {
+  get(tid: Tid, index: number): ?IPCSharedData {
     const threadData = this._correlations.get(tid);
     if (!threadData) {
-      return null;
+      return undefined;
     }
     return threadData.get(index);
   }
@@ -279,6 +279,27 @@ export class IPCMarkerCorrelations {
 /**
  * This function correlates the sender and recipient sides of IPC markers so
  * that we can share data between the two during profile processing.
+ *
+ * A single IPC message consists of 5 markers:
+ *
+ *        endpoint   (sender or background thread)
+ *            |      (or main thread in sender process if they are not profiled)
+ *            |
+ *            v
+ *     transferStart (IPC I/O thread in sender process)
+ *            |      (or main thread in sender process if it's not profiled)
+ *            |
+ *            v
+ *      transferEnd  (IPC I/O thread in sender process)
+ *            |      (or main thread in sender process if it's not profiled)
+ *            |
+ *            v
+ *      transferEnd  (IPC I/O thread in receiver process)
+ *            |      (or main thread in receiver process if it's not profiled)
+ *            |
+ *            v
+ *        endpoint   (receiver or background thread)
+ *                   (or main thread in receiver process if they are not profiled)
  */
 export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
   // Create a unique ID constructed from the source PID, destination PID,
@@ -424,6 +445,10 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
       );
     }
 
+    // We added both endpoints to the correlations now (if they are present).
+    // If both of them are present at the same time, we don't need to add the
+    // middle three markers because these are the I/O related markers that
+    // happen in another thread (IPC I/O if profiled, main thread if not profiled).
     if (!startEndpointMarker || !endEndpointMarker) {
       // If both markers from sender and receiver threads are present, we can
       // only add the markers of them to the correlations. That way, the middle
@@ -432,6 +457,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
       // the marker.
       for (const m of markers.slice(1, 4)) {
         if (m !== undefined && !addedThreadIds.has(m.tid)) {
+          // Add the marker to a thread only if it's not already added.
           correlations.set(m.tid, m.index, sharedData);
           addedThreadIds.add(m.tid);
         }
