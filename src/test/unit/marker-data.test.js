@@ -413,7 +413,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
     expect(markers).toMatchSnapshot();
   });
 
-  it('creates 18 markers given the test data', function () {
+  it('creates 17 markers given the test data', function () {
     const { markers } = setup();
     const markerNames = markers.map(
       (marker) => (marker.data ? marker.data.type : 'null') + ':' + marker.name
@@ -433,7 +433,6 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       'FileIO:FileIO',
       'CompositorScreenshot:CompositorScreenshot',
       'PreferenceRead:PreferenceRead',
-      'IPC:IPCOut',
       'IPC:IPCOut',
       'IPC:IPCOut',
       'tracing:Rasterize',
@@ -460,7 +459,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
 
   it('should fold the two reflow markers into one marker', function () {
     const { markers } = setup();
-    expect(markers.length).toEqual(18);
+    expect(markers.length).toEqual(17);
     expect(markers[2]).toMatchObject({
       start: 3,
       end: 8,
@@ -485,26 +484,13 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       name: 'IPCOut',
       data: { phase: 'endpoint' },
     });
-    expect(markers[15]).toMatchObject({
-      start: 30,
-      end: 1031,
-      name: 'IPCOut',
-      data: { phase: 'transferStart' },
-    });
     expect(contentMarkers[0]).toMatchObject({
-      start: 30,
-      end: 1031,
-      name: 'IPCIn',
-      data: { phase: 'transferEnd' },
-    });
-    expect(contentMarkers[1]).toMatchObject({
       start: 30,
       end: 1031,
       name: 'IPCIn',
       data: { phase: 'endpoint' },
     });
-
-    expect(markers[16]).toMatchObject({
+    expect(markers[15]).toMatchObject({
       start: 40,
       end: 40,
       name: 'IPCOut',
@@ -550,7 +536,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
 
   it('should handle markers without an end', function () {
     const { markers } = setup();
-    expect(markers[17]).toMatchObject({
+    expect(markers[16]).toMatchObject({
       start: 100,
       end: 100,
       name: 'Rasterize',
@@ -664,7 +650,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       category: 0,
     });
 
-    expect(contentMarkers[1]).toEqual({
+    expect(contentMarkers[0]).toEqual({
       data: {
         type: 'IPC',
         startTime: 30,
@@ -691,7 +677,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       start: 30,
       category: 0,
     });
-    expect(contentMarkers[12]).toEqual({
+    expect(contentMarkers[11]).toEqual({
       data: {
         type: 'Network',
         startTime: 1022,
@@ -717,7 +703,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       start: 1022,
       category: 0,
     });
-    expect(contentMarkers[13]).toEqual({
+    expect(contentMarkers[12]).toEqual({
       data: {
         // Stack property is converted to a cause.
         cause: {
