@@ -388,16 +388,24 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
               <Localized
                 id="MarkerContextMenu--select-the-receiver-thread"
                 vars={{ threadName: data.recvThreadName }}
+                elems={{ strong: <strong /> }}
               >
-                <>Select the receiver “{data.recvThreadName}” thread</>
+                <>
+                  Select the receiver thread “
+                  <strong>{data.recvThreadName}</strong>”
+                </>
               </Localized>
             ) : null}
             {data.direction === 'receiving' && data.sendTid ? (
               <Localized
                 id="MarkerContextMenu--select-the-sender-thread"
                 vars={{ threadName: data.sendThreadName }}
+                elems={{ strong: <strong /> }}
               >
-                <>Select the sender “{data.sendThreadName}” thread</>
+                <>
+                  Select the sender thread “
+                  <strong>{data.recvThreadName}</strong>”
+                </>
               </Localized>
             ) : null}
           </MenuItem>

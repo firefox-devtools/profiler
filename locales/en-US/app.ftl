@@ -347,13 +347,15 @@ MarkerContextMenu--copy-as-json = Copy as JSON
 # IPC marker.
 # Variables:
 #   $threadName (String) - Name of the thread that will be selected.
-MarkerContextMenu--select-the-receiver-thread = Select the receiver “{ $threadName }” thread
+MarkerContextMenu--select-the-receiver-thread =
+    Select the receiver thread “<strong>{ $threadName }</strong>”
 
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
 # Variables:
 #   $threadName (String) - Name of the thread that will be selected.
-MarkerContextMenu--select-the-sender-thread = Select the sender “{ $threadName }” thread
+MarkerContextMenu--select-the-sender-thread =
+    Select the sender thread “<strong>{ $threadName }</strong>”
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
