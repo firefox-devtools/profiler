@@ -310,6 +310,21 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                   height,
                 }}
               />
+            </TooltipDetail>,
+            <TooltipDetail
+              label="Window Size"
+              key="CompositorScreenshot-window size"
+            >
+              <>
+                {data.windowWidth}px x {data.windowHeight}px
+              </>
+            </TooltipDetail>,
+            <TooltipDetail
+              label="Description"
+              key="CompositorScreenshot-description"
+            >
+              This marker spans the time between each composite of a window and
+              shows the window contents during that time.
             </TooltipDetail>
           );
           break;
