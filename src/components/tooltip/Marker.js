@@ -37,6 +37,7 @@ import {
   formatFromMarkerSchema,
   getSchemaFromMarker,
 } from 'firefox-profiler/profile-logic/marker-schema';
+import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
 
 import type {
   CategoryList,
@@ -91,6 +92,9 @@ type StateProps = {|
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
+
+// Maximum image size of a tooltip field.
+const MAXIMUM_IMAGE_SIZE = 350;
 
 /**
  * This component combines Marker Schema, and custom handling to generate tooltips
@@ -195,7 +199,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * properties that are difficult to represent with the Schema.
    */
   _renderMarkerDetails(): TooltipDetailComponent[] {
-    const { marker, markerSchemaByName } = this.props;
+    const { marker, markerSchemaByName, thread } = this.props;
     const data = marker.data;
     const details: TooltipDetailComponent[] = [];
 
@@ -287,6 +291,40 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               key="IPC-Recv Thread Latency"
             >
               {_maybeFormatDuration(data.recvEndTime, data.endTime)}
+            </TooltipDetail>
+          );
+          break;
+        }
+        case 'CompositorScreenshot': {
+          const { width, height } = computeScreenshotSize(
+            data,
+            MAXIMUM_IMAGE_SIZE
+          );
+          details.push(
+            <TooltipDetail label="Image" key="CompositorScreenshot-image">
+              <img
+                className="tooltipScreenshotImg"
+                src={thread.stringTable.getString(data.url)}
+                style={{
+                  width,
+                  height,
+                }}
+              />
+            </TooltipDetail>,
+            <TooltipDetail
+              label="Window Size"
+              key="CompositorScreenshot-window size"
+            >
+              <>
+                {data.windowWidth}px × {data.windowHeight}px
+              </>
+            </TooltipDetail>,
+            <TooltipDetail
+              label="Description"
+              key="CompositorScreenshot-description"
+            >
+              This marker spans the time between each composite of a window and
+              shows the window contents during that time.
             </TooltipDetail>
           );
           break;

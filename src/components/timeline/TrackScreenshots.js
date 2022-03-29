@@ -18,6 +18,7 @@ import {
 } from 'firefox-profiler/components/shared/WithSize';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { createPortal } from 'react-dom';
+import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
 
 import type {
   ScreenshotPayload,
@@ -253,25 +254,16 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     if (offsetX === null || pageX === null) {
       return null;
     }
-    const { url, windowWidth, windowHeight } = payload;
-    // Compute the hover image's thumbnail size.
+    const { url } = payload;
 
-    // When making a selection, we'd like that the hover is still displayed,
-    // but much smaller
     const maximumHoverSize = isMakingPreviewSelection
       ? MAXIMUM_HOVER_SIZE_WHEN_SELECTING_RANGE
       : MAXIMUM_HOVER_SIZE;
 
-    // Coefficient should be according to bigger side.
-    const coefficient =
-      windowHeight > windowWidth
-        ? maximumHoverSize / windowHeight
-        : maximumHoverSize / windowWidth;
-    let hoverHeight = windowHeight * coefficient;
-    let hoverWidth = windowWidth * coefficient;
-
-    hoverWidth = Math.round(hoverWidth);
-    hoverHeight = Math.round(hoverHeight);
+    const { width: hoverWidth, height: hoverHeight } = computeScreenshotSize(
+      payload,
+      maximumHoverSize
+    );
 
     // Set the top so it centers around the track.
     let top = containerTop + (trackHeight - hoverHeight) * 0.5;

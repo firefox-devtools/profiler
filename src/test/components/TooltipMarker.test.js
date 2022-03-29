@@ -916,4 +916,43 @@ describe('TooltipMarker', function () {
 
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('shows image of CompositorScreenshot markers', function () {
+    const { profile } = getProfileFromTextSamples(`A`);
+    const thread = profile.threads[0];
+
+    const screenshotUrl = 'Screenshot Url';
+    const screenshotUrlIndex = thread.stringTable.indexForString(screenshotUrl);
+    addMarkersToThreadWithCorrespondingSamples(thread, [
+      [
+        'CompositorScreenshot',
+        1,
+        2,
+        {
+          type: 'CompositorScreenshot',
+          url: screenshotUrlIndex,
+          windowID: 'XXX',
+          windowWidth: 600,
+          windowHeight: 300,
+        },
+      ],
+    ]);
+
+    const store = storeWithProfile(profile);
+    const { getState } = store;
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+
+    const { container } = render(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={0}
+          marker={getMarker(0)}
+          threadsKey={0}
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
 });

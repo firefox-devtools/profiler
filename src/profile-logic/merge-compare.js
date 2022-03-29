@@ -1233,6 +1233,14 @@ function mergeMarkers(
             stack: newStack,
           },
         });
+      } else if (oldData && oldData.type === 'CompositorScreenshot') {
+        const oldUrlIndex = oldData.url;
+        const urlString = stringTable.getString(oldUrlIndex);
+
+        newMarkerTable.data.push({
+          ...oldData,
+          url: newStringTable.indexForString(urlString),
+        });
       } else {
         newMarkerTable.data.push(oldData);
       }
