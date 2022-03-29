@@ -39,6 +39,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   MarkerDisplayLocation,
+  Tid,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -251,35 +252,61 @@ export function getTabFilteredMarkerIndexes(
  * times for the IPC message.
  */
 export class IPCMarkerCorrelations {
-  _correlations: Map<string, IPCSharedData>;
+  _correlations: Map<Tid, Map<number, IPCSharedData>>;
 
   constructor() {
     this._correlations = new Map();
   }
 
-  _makeKey(tid: number, index: number) {
-    return `${tid},${index}`;
+  set(tid: Tid, index: number, data: IPCSharedData): void {
+    let threadData = this._correlations.get(tid);
+    if (!threadData) {
+      threadData = new Map();
+      this._correlations.set(tid, threadData);
+    }
+    threadData.set(index, data);
   }
 
-  set(tid: number, index: number, data: IPCSharedData): void {
-    this._correlations.set(this._makeKey(tid, index), data);
-  }
-
-  get(tid: number, index: number): ?IPCSharedData {
-    return this._correlations.get(this._makeKey(tid, index));
+  get(tid: Tid, index: number): ?IPCSharedData {
+    const threadData = this._correlations.get(tid);
+    if (!threadData) {
+      return undefined;
+    }
+    return threadData.get(index);
   }
 }
 
 /**
  * This function correlates the sender and recipient sides of IPC markers so
  * that we can share data between the two during profile processing.
+ *
+ * A single IPC message consists of 5 markers:
+ *
+ *        endpoint   (sender or background thread)
+ *            |      (or main thread in sender process if they are not profiled)
+ *            |
+ *            v
+ *     transferStart (IPC I/O thread in sender process)
+ *            |      (or main thread in sender process if it's not profiled)
+ *            |
+ *            v
+ *      transferEnd  (IPC I/O thread in sender process)
+ *            |      (or main thread in sender process if it's not profiled)
+ *            |
+ *            v
+ *      transferEnd  (IPC I/O thread in receiver process)
+ *            |      (or main thread in receiver process if it's not profiled)
+ *            |
+ *            v
+ *        endpoint   (receiver or background thread)
+ *                   (or main thread in receiver process if they are not profiled)
  */
 export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
   // Create a unique ID constructed from the source PID, destination PID,
   // message seqno, and message type. Since the seqno is only unique for each
   // message channel pair, we use the PIDs and message type as a way of
   // identifying which channel pair generated this message.
-  function makeMarkerID(thread, data): string {
+  function makeIPCMessageID(thread, data): string {
     let pids;
     if (data.direction === 'sending') {
       pids = `${thread.pid},${data.otherPid}`;
@@ -363,7 +390,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
         if (!data || data.type !== 'IPC') {
           continue;
         }
-        const key = makeMarkerID(thread, data);
+        const key = makeIPCMessageID(thread, data);
         if (!markersByKey.has(key)) {
           markersByKey.set(key, new Array(5).fill(undefined));
         }
@@ -382,23 +409,58 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
 
   const correlations = new IPCMarkerCorrelations();
   for (const markers of markersByKey.values()) {
-    const sendTid = markers[0] ? markers[0].tid : undefined;
-    const recvTid = markers[4] ? markers[4].tid : undefined;
+    const startEndpointMarker = markers[0];
+    const endEndpointMarker = markers[4];
+    const sendTid = startEndpointMarker ? startEndpointMarker.tid : undefined;
+    const recvTid = endEndpointMarker ? endEndpointMarker.tid : undefined;
     const sharedData: IPCSharedData = {
-      startTime: markers[0] ? markers[0].data.startTime : undefined,
+      startTime: startEndpointMarker
+        ? startEndpointMarker.data.startTime
+        : undefined,
       sendStartTime: markers[1] ? markers[1].data.startTime : undefined,
       sendEndTime: markers[2] ? markers[2].data.startTime : undefined,
       recvEndTime: markers[3] ? markers[3].data.startTime : undefined,
-      endTime: markers[4] ? markers[4].data.startTime : undefined,
+      endTime: endEndpointMarker ? endEndpointMarker.data.startTime : undefined,
       sendTid,
       recvTid,
       sendThreadName: formatThreadName(sendTid),
       recvThreadName: formatThreadName(recvTid),
     };
 
-    for (const m of markers) {
-      if (m !== undefined) {
-        correlations.set(m.tid, m.index, sharedData);
+    const addedThreadIds = new Set();
+    if (startEndpointMarker) {
+      addedThreadIds.add(startEndpointMarker.tid);
+      correlations.set(
+        startEndpointMarker.tid,
+        startEndpointMarker.index,
+        sharedData
+      );
+    }
+    if (endEndpointMarker) {
+      addedThreadIds.add(endEndpointMarker.tid);
+      correlations.set(
+        endEndpointMarker.tid,
+        endEndpointMarker.index,
+        sharedData
+      );
+    }
+
+    // We added both endpoints to the correlations now (if they are present).
+    // If both of them are present at the same time, we don't need to add the
+    // middle three markers because these are the I/O related markers that
+    // happen in another thread (IPC I/O if profiled, main thread if not profiled).
+    if (!startEndpointMarker || !endEndpointMarker) {
+      // If both markers from sender and receiver threads are present, we can
+      // only add the markers of them to the correlations. That way, the middle
+      // markers from IPC I/O threads will not be visible in the main thread and
+      // make the main thread crowded. It's important to add all the threads to
+      // the marker.
+      for (const m of markers.slice(1, 4)) {
+        if (m !== undefined && !addedThreadIds.has(m.tid)) {
+          // Add the marker to a thread only if it's not already added.
+          correlations.set(m.tid, m.index, sharedData);
+          addedThreadIds.add(m.tid);
+        }
       }
     }
   }
@@ -627,9 +689,10 @@ export function deriveMarkersFromRawMarkerTable(
             rawMarkerIndex
           );
           if (!sharedData) {
-            // Since shared data is generated for every IPC message, this should
-            // never happen unless something has gone catastrophically wrong.
-            console.error('Unable to find shared data for IPC marker');
+            // Sometimes a thread can include multiple IPC markers from the same
+            // IPC message. We only show a single marker from that thread. That
+            // way, there won't be any duplicate markers for the same IPC
+            // message in the thread.
             continue;
           }
 

@@ -5,6 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
+import { BLUE_60 } from 'photon-colors';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -198,13 +199,13 @@ describe('MarkerChart', function () {
     );
     expect(arcOperationsXY.size).toBe(4);
 
-    // Check that we have a fillRect operation for the longer marker.
-    // We filter on the height to get only 1 relevant fillRect operation per marker
-    const fillRectOperations = drawCalls.filter(
-      ([operation, , , , height]) =>
-        operation === 'fillRect' && height > 1 && height < 16
+    // Check that we have a rect operation for the longer marker.
+    const rectOperations = drawCalls.filter(
+      ([operation]) => operation === 'rect'
     );
-    expect(fillRectOperations).toHaveLength(1);
+    // 2 is expected, because we have a rect first for the initial `clip`
+    // operation, and one for the longer marker.
+    expect(rectOperations).toHaveLength(2);
 
     delete window.devicePixelRatio;
   });
@@ -424,7 +425,8 @@ describe('MarkerChart', function () {
       // Expect that we have 2 markers drawn with this color.
       const drawCalls = flushDrawLog();
       const callsWithHighlightColor = drawCalls.filter(
-        ([, argument]) => argument === 'Highlight'
+        ([operation, argument]) =>
+          operation === 'set fillStyle' && argument === BLUE_60
       );
       expect(callsWithHighlightColor).toHaveLength(2);
     });

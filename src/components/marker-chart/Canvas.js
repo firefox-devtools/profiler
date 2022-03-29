@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { GREY_20, GREY_30 } from 'photon-colors';
+import { GREY_20, GREY_30, BLUE_60, BLUE_80 } from 'photon-colors';
 import * as React from 'react';
 import {
   withChartViewport,
@@ -18,7 +18,6 @@ import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
 } from 'firefox-profiler/actions/profile-view';
-import { BLUE_40 } from 'firefox-profiler/utils/colors';
 import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
   Milliseconds,
@@ -88,18 +87,14 @@ type Props = {|
   +viewport: Viewport,
 |};
 
-type State = {|
-  hoveredItem: null | number,
-|};
-
 const TEXT_OFFSET_TOP = 11;
+const TEXT_OFFSET_START = 3;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
-const TEXT_OFFSET_START = 3;
 const DOT_WIDTH = 10;
 const LABEL_PADDING = 5;
 
-class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
+class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
   drawCanvas = (
@@ -162,6 +157,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       // select the correct row.
       newRow = hoveredLabel;
     }
+
+    // Common properties that won't be changed later.
+    ctx.lineWidth = 1;
 
     if (isHoveredOnlyDifferent) {
       // Only re-draw the rows that have been updated if only the hovering information
@@ -267,32 +265,49 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
     h: CssPixels,
     uncutWidth: CssPixels,
     text: string,
-    backgroundColor: string = BLUE_40,
-    foregroundColor: string = 'white'
+    isHighlighted: boolean = false
   ) {
-    ctx.fillStyle = backgroundColor;
-
+    const { marginLeft } = this.props;
     const textMeasurement = this._getTextMeasurement(ctx);
 
     if (uncutWidth >= h) {
+      ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
+      ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
+
+      ctx.beginPath();
+
       // We want the rectangle to have a clear margin, that's why we increment y
       // and decrement h (twice, for both margins).
-      this.drawRoundedRect(ctx, x, y + 1, w, h - 2, 1);
+      // We also add "0.5" more so that the stroke is properly on a pixel.
+      // Indeed strokes are drawn on both sides equally, so half a pixel on each
+      // side in this case.
+      ctx.rect(
+        x + 0.5, // + 0.5 for the stroke
+        y + 1 + 0.5, // + 1 for the top margin, + 0.5 for the stroke
+        w - 1, // - 1 to account for left and right strokes.
+        h - 2 - 1 // + 2 accounts for top and bottom margins, + 1 accounts for top and bottom strokes
+      );
+      ctx.fill();
+      ctx.stroke();
 
       // Draw the text label
       // TODO - L10N RTL.
       // Constrain the x coordinate to the leftmost area.
-      const x2: CssPixels = x + TEXT_OFFSET_START;
-      const w2: CssPixels = Math.max(0, w - (x2 - x));
+      const x2: CssPixels =
+        x < marginLeft ? marginLeft + TEXT_OFFSET_START : x + TEXT_OFFSET_START;
+      const visibleWidth = x < marginLeft ? w - marginLeft + x : w;
+      const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
 
       if (w2 > textMeasurement.minWidth) {
         const fittedText = textMeasurement.getFittedText(text, w2);
         if (fittedText) {
-          ctx.fillStyle = foregroundColor;
+          ctx.fillStyle = isHighlighted ? 'white' : 'black';
           ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
         }
       }
     } else {
+      ctx.fillStyle = isHighlighted ? BLUE_80 : BLUE_60;
+
       ctx.beginPath();
       ctx.arc(
         x + uncutWidth / 2, // x
@@ -319,7 +334,13 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       marginLeft,
       marginRight,
       rightClickedMarkerIndex,
-      viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
+      viewport: {
+        containerWidth,
+        containerHeight,
+        viewportLeft,
+        viewportRight,
+        viewportTop,
+      },
     } = this.props;
 
     const { devicePixelRatio } = window;
@@ -328,8 +349,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
-
-    ctx.lineWidth = 1;
 
     // Decide which samples to actually draw
     const timeAtViewportLeft: Milliseconds =
@@ -341,6 +360,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       marginRight * ((viewportLength * rangeLength) / markerContainerWidth);
 
     const highlightedMarkers: MarkerDrawingInformation[] = [];
+
+    // We'll restore the context at the end, so that the clip region will be
+    // removed.
+    ctx.save();
+    // The clip operation forbids drawing in the label zone.
+    ctx.beginPath();
+    ctx.rect(marginLeft, 0, markerContainerWidth, containerHeight);
+    ctx.clip();
 
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
@@ -376,11 +403,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
           const h: CssPixels = rowHeight - 1;
 
           let w = uncutWidth;
-          if (x < marginLeft) {
-            // Adjust markers that are before the left margin.
-            w = w - marginLeft + x;
-            x = marginLeft;
-          }
           if (uncutWidth < DOT_WIDTH) {
             // Ensure that small durations render as a dot, but markers cut by the margins
             // are rendered as squares.
@@ -423,10 +445,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
         highlightedMarker.h,
         highlightedMarker.uncutWidth,
         highlightedMarker.text,
-        'Highlight', //    background color
-        'HighlightText' // foreground color
+        true /* isHighlighted */
       );
     });
+
+    ctx.restore();
   }
 
   clearRow(ctx: CanvasRenderingContext2D, rowIndex: number) {
@@ -464,9 +487,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       markerTimingAndBuckets,
       rowHeight,
       marginLeft,
+      marginRight,
       timelineTrackOrganization,
       viewport: { viewportTop, containerWidth, containerHeight },
     } = this.props;
+
+    const usefulContainerWidth = containerWidth - marginRight;
 
     // Draw separators
     ctx.fillStyle = GREY_20;
@@ -478,7 +504,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       // `- 1` at the end, because the top separator is not drawn in the canvas,
       // it's drawn using CSS' border property. And canvas positioning is 0-based.
       const y = (rowIndex + 1) * rowHeight - viewportTop - 1;
-      ctx.fillRect(0, y, containerWidth, 1);
+      ctx.fillRect(0, y, usefulContainerWidth, 1);
     }
 
     const textMeasurement = this._getTextMeasurement(ctx);
@@ -527,12 +553,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
 
       // Draw the backgound.
       ctx.fillStyle = GREY_20;
-      ctx.fillRect(0, y, containerWidth, rowHeight);
+      ctx.fillRect(0, y - 1, usefulContainerWidth, rowHeight);
 
-      // Draw the borders.
+      // Draw the borders./*
       ctx.fillStyle = GREY_30;
-      ctx.fillRect(0, y - 1, containerWidth, 1);
-      ctx.fillRect(0, y + rowHeight, containerWidth, 1);
+      ctx.fillRect(0, y - 1, usefulContainerWidth, 1);
+      ctx.fillRect(0, y + rowHeight - 1, usefulContainerWidth, 1);
 
       // Draw the text.
       ctx.fillStyle = '#000000';
@@ -701,22 +727,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
     const { changeRightClickedMarker, threadsKey } = this.props;
     changeRightClickedMarker(threadsKey, markerIndex);
   };
-
-  drawRoundedRect(
-    ctx: CanvasRenderingContext2D,
-    x: CssPixels,
-    y: CssPixels,
-    width: CssPixels,
-    height: CssPixels,
-    cornerSize: CssPixels
-  ) {
-    // Cut out c x c -sized squares in the corners.
-    const c = Math.min(width / 2, height / 2, cornerSize);
-    const bottom = y + height;
-    ctx.fillRect(x + c, y, width - 2 * c, c);
-    ctx.fillRect(x, y + c, width, height - 2 * c);
-    ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
-  }
 
   getHoveredMarkerInfo = ({
     markerIndex,
