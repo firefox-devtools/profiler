@@ -316,7 +316,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               key="CompositorScreenshot-window size"
             >
               <>
-                {data.windowWidth}px x {data.windowHeight}px
+                {data.windowWidth}px × {data.windowHeight}px
               </>
             </TooltipDetail>,
             <TooltipDetail
