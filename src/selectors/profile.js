@@ -832,17 +832,17 @@ export const getContainsPrivateBrowsingInformation: Selector<boolean> =
 /**
  * Returns the TIDs of the threads that are profiled.
  */
-export const getProfiledThreadTids: Selector<Set<Tid>> = createSelector(
+export const getProfiledThreadIds: Selector<Set<Tid>> = createSelector(
   getThreads,
   (threads) => {
-    const tids = threads.reduce((result, { tid }) => {
+    const profiledThreadIds = new Set();
+    for (const thread of threads) {
+      const { tid } = thread;
       if (tid) {
         // Do not include if tid is undefined.
-        result.push(tid);
+        profiledThreadIds.add(tid);
       }
-
-      return result;
-    }, []);
-    return new Set(tids);
+    }
+    return profiledThreadIds;
   }
 );
