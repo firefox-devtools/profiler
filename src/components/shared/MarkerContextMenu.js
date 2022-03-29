@@ -9,14 +9,17 @@ import { Localized } from '@fluent/react';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import {
   setContextMenuVisibility,
   updatePreviewSelection,
+  selectTrackFromTid,
 } from 'firefox-profiler/actions/profile-view';
 import {
   getPreviewSelection,
   getCommittedRange,
+  getProfiledThreadIds,
 } from 'firefox-profiler/selectors/profile';
 import { getRightClickedMarkerInfo } from 'firefox-profiler/selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
@@ -30,6 +33,7 @@ import type {
   IndexIntoStackTable,
   Thread,
   MarkerReference,
+  Tid,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -56,11 +60,13 @@ type StateProps = {|
   +thread: Thread | null,
   +implementationFilter: ImplementationFilter,
   +getMarkerLabelToCopy: (MarkerIndex) => string,
+  +profiledThreadIds: Set<Tid>,
 |};
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
+  +selectTrackFromTid: typeof selectTrackFromTid,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -194,6 +200,95 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       copy(marker.data.URI);
     }
   };
+
+  selectOtherThreadForIPCMarkers = () => {
+    const { marker, selectTrackFromTid } = this.props;
+    if (!marker.data || marker.data.type !== 'IPC') {
+      return;
+    }
+
+    // Select the other thread of that IPC marker.
+    const { data } = marker;
+    const tid = data.direction === 'sending' ? data.recvTid : data.sendTid;
+    if (!tid) {
+      console.warn('Unable to find the other tid for IPC marker');
+      return;
+    }
+    selectTrackFromTid(tid);
+  };
+
+  maybeRenderIPCMarkerMenuItem() {
+    const { marker, profiledThreadIds } = this.props;
+    const { data } = marker;
+
+    if (!data || data.type !== 'IPC') {
+      // It's not an IPC marker. Do not render anything.
+      return null;
+    }
+
+    let menuItemTextElement;
+    switch (data.direction) {
+      case 'sending':
+        if (!data.recvTid) {
+          console.warn('Unable to find the receiver tid for IPC marker');
+          return null;
+        }
+
+        if (!profiledThreadIds.has(data.recvTid)) {
+          console.warn('Unable to find the receiver thread for IPC marker');
+          return null;
+        }
+
+        menuItemTextElement = (
+          <Localized
+            id="MarkerContextMenu--select-the-receiver-thread"
+            vars={{ threadName: data.recvThreadName }}
+            elems={{ strong: <strong /> }}
+          >
+            <>
+              Select the receiver thread “<strong>{data.recvThreadName}</strong>
+              ”
+            </>
+          </Localized>
+        );
+        break;
+      case 'receiving':
+        if (!data.sendTid) {
+          console.warn('Unable to find the sender tid for IPC marker');
+          return null;
+        }
+
+        if (!profiledThreadIds.has(data.sendTid)) {
+          console.warn('Unable to find the sender thread for IPC marker');
+          return null;
+        }
+
+        menuItemTextElement = (
+          <Localized
+            id="MarkerContextMenu--select-the-sender-thread"
+            vars={{ threadName: data.sendThreadName }}
+            elems={{ strong: <strong /> }}
+          >
+            <>
+              Select the sender thread “<strong>{data.sendThreadName}</strong>”
+            </>
+          </Localized>
+        );
+        break;
+      default:
+        throw assertExhaustiveCheck(
+          data.direction,
+          `Unhandled IPC marker direction type.`
+        );
+    }
+
+    return (
+      <MenuItem onClick={this.selectOtherThreadForIPCMarkers}>
+        <span className="react-contextmenu-icon markerContextMenuSelectThread" />
+        {menuItemTextElement}
+      </MenuItem>
+    );
+  }
 
   // Using setTimeout here is a bit complex, but is necessary to make the menu
   // work fine when we want to display it somewhere when it's already open
@@ -364,6 +459,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             Copy as JSON
           </Localized>
         </MenuItem>
+        {this.maybeRenderIPCMarkerMenuItem()}
       </ContextMenu>
     );
   }
@@ -384,9 +480,14 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
       implementationFilter: getImplementationFilter(state),
       thread: selectors.getThread(state),
       getMarkerLabelToCopy: selectors.getMarkerLabelToCopyGetter(state),
+      profiledThreadIds: getProfiledThreadIds(state),
     };
   },
-  mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
+  mapDispatchToProps: {
+    updatePreviewSelection,
+    setContextMenuVisibility,
+    selectTrackFromTid,
+  },
   component: MarkerContextMenuImpl,
 });
 

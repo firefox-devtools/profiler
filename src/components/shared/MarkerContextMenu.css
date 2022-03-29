@@ -47,6 +47,10 @@
   background-image: url(firefox-profiler-res/img/svg/copy-marker-payload.svg);
 }
 
+.markerContextMenuSelectThread {
+  background-image: url(firefox-profiler-res/img/svg/select-thread.svg);
+}
+
 /* These icons don't look nice when selected, unless if we invert them. However
  * the other icons look better without the filter, so we don't change them in
  * this state. */
@@ -57,6 +61,8 @@
 .react-contextmenu-item--selected .markerContextMenuIconCopyStack,
 .react-contextmenu-item:hover .markerContextMenuIconCopyStack,
 .react-contextmenu-item--selected .markerContextMenuIconCopyPayload,
-.react-contextmenu-item:hover .markerContextMenuIconCopyPayload {
+.react-contextmenu-item:hover .markerContextMenuIconCopyPayload,
+.react-contextmenu-item--selected .markerContextMenuSelectThread,
+.react-contextmenu-item:hover .markerContextMenuSelectThread {
   filter: invert(1);
 }
