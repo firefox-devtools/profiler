@@ -13,6 +13,7 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import type { Thread } from 'firefox-profiler/types';
 
@@ -420,5 +421,73 @@ describe('mergeThreads function', function () {
     expect(markerStacksAfterMerge[1]).toBe(
       markerStacksBeforeMerge[1] + profile.threads[0].stackTable.length
     );
+  });
+
+  it('merges CompositorScreenshot marker urls properly', function () {
+    const { profile } = getProfileFromTextSamples(`A`, `B`);
+    const thread1 = profile.threads[0];
+    const thread2 = profile.threads[1];
+
+    // This screenshot marker will be added to the first thread.
+    const screenshotUrl1 = 'Url1';
+    const screenshot1UrlIndex =
+      thread1.stringTable.indexForString(screenshotUrl1);
+    // This screenshot marker will be added to the second thread.
+    const screenshotUrl2 = 'Url2';
+    const screenshot2UrlIndex =
+      thread2.stringTable.indexForString(screenshotUrl2);
+
+    // Let's add the markers now.
+    addMarkersToThreadWithCorrespondingSamples(thread1, [
+      [
+        'CompositorScreenshot',
+        1,
+        2,
+        {
+          type: 'CompositorScreenshot',
+          url: screenshot1UrlIndex,
+          windowID: 'XXX',
+          windowWidth: 300,
+          windowHeight: 600,
+        },
+      ],
+    ]);
+
+    addMarkersToThreadWithCorrespondingSamples(thread2, [
+      [
+        'CompositorScreenshot',
+        2,
+        3,
+        {
+          type: 'CompositorScreenshot',
+          url: screenshot2UrlIndex,
+          windowID: 'YYY',
+          windowWidth: 300,
+          windowHeight: 600,
+        },
+      ],
+    ]);
+
+    const mergedThread = mergeThreads(profile.threads);
+    const mergedMarkers = mergedThread.markers;
+
+    // Make sure that we have 2 markers in the merged thread.
+    expect(mergedMarkers).toHaveLength(2);
+
+    // Check if we properly merged the string tables and have the correct url fields.
+    const markerUrlsAfterMerge = mergedMarkers.data.map((markerData) =>
+      markerData && 'url' in markerData && markerData.url
+        ? markerData.url
+        : null
+    );
+    const url1AfterMerge = mergedThread.stringTable.getString(
+      ensureExists(markerUrlsAfterMerge[0])
+    );
+    const url2AfterMerge = mergedThread.stringTable.getString(
+      ensureExists(markerUrlsAfterMerge[1])
+    );
+
+    expect(url1AfterMerge).toBe(screenshotUrl1);
+    expect(url2AfterMerge).toBe(screenshotUrl2);
   });
 });

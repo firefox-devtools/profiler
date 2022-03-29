@@ -147,10 +147,12 @@ export function getProfileWithNiceTracks(): Profile {
   thread1.name = 'GeckoMain';
   thread1.processType = 'process';
   thread1.pid = 111;
+  thread1.tid = 11;
 
   thread2.name = 'GeckoMain';
   thread2.processType = 'tab';
   thread2.pid = 222;
+  thread2.tid = 22;
 
   // Add a refresh driver tick so that this thread will not be idle.
   thread2.markers.data.push({
@@ -169,10 +171,12 @@ export function getProfileWithNiceTracks(): Profile {
   thread3.name = 'DOM Worker';
   thread3.processType = 'tab';
   thread3.pid = 222;
+  thread3.tid = 33;
 
   thread4.name = 'Style';
   thread4.processType = 'tab';
   thread4.pid = 222;
+  thread4.tid = 44;
   return profile;
 }
 

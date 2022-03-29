@@ -1210,6 +1210,56 @@ export function getScreenshotTrackProfile() {
   ]);
 }
 
+/**
+ * Add IPC marker pair to both the sender and receiver threads.
+ * This is a helper function to make it easy to add it to both threads.
+ */
+export function addIPCMarkerPairToThreads(
+  payload: $Shape<IPCMarkerPayload>,
+  senderThread: Thread,
+  receiverThread: Thread
+) {
+  const ipcMarker = (
+    direction: 'sending' | 'receiving',
+    isParent: boolean,
+    otherThread: Thread
+  ) => [
+    'IPC',
+    payload.startTime,
+    payload.endTime,
+    {
+      type: 'IPC',
+      startTime: 1,
+      endTime: 10,
+      otherPid: otherThread.pid,
+      messageSeqno: 1,
+      messageType: 'PContent::Msg_PreferenceUpdate',
+      side: isParent ? 'parent' : 'child',
+      direction: direction,
+      phase: 'endpoint',
+      sync: false,
+      niceDirection: `sending to ${receiverThread.name}`,
+      sendTid: senderThread.tid,
+      sendThreadName: senderThread.name,
+      recvTid: receiverThread.tid,
+      recvThreadName: receiverThread.name,
+      ...payload,
+    },
+  ];
+
+  const isSenderParent =
+    senderThread.name === 'GeckoMain' && senderThread.processType === 'default'
+      ? true
+      : false;
+  addMarkersToThreadWithCorrespondingSamples(senderThread, [
+    ipcMarker('sending', isSenderParent, receiverThread),
+  ]);
+
+  addMarkersToThreadWithCorrespondingSamples(receiverThread, [
+    ipcMarker('receiving', !isSenderParent, senderThread),
+  ]);
+}
+
 export function getVisualProgressTrackProfile(profileString: string): Profile {
   const { profile } = getProfileFromTextSamples(profileString);
   profile.meta.visualMetrics = {

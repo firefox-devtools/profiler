@@ -5,7 +5,12 @@
 
 import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
-import type { IndexIntoStackTable, IndexIntoStringTable, Tid } from './profile';
+import type {
+  IndexIntoStackTable,
+  IndexIntoStringTable,
+  Tid,
+  Pid,
+} from './profile';
 import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
@@ -651,7 +656,7 @@ export type IPCMarkerPayload_Gecko = {|
   type: 'IPC',
   startTime: Milliseconds,
   endTime: Milliseconds,
-  otherPid: number,
+  otherPid: Pid,
   messageType: string,
   messageSeqno: number,
   side: 'parent' | 'child',
@@ -676,8 +681,8 @@ export type IPCMarkerPayload = {|
   sendEndTime?: Milliseconds,
   recvEndTime?: Milliseconds,
   endTime?: Milliseconds,
-  sendTid?: number,
-  recvTid?: number,
+  sendTid?: Tid,
+  recvTid?: Tid,
   sendThreadName?: string,
   recvThreadName?: string,
 
