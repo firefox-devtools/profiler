@@ -5,6 +5,7 @@
 import {
   getScreenshotTrackProfile,
   getNetworkTrackProfile,
+  addIPCMarkerPairToThreads,
 } from '../fixtures/profiles/processed-profile';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
@@ -629,6 +630,49 @@ describe('ordering and hiding', function () {
           localTrackOrder.map((trackIndex) => localTracks[trackIndex].type)
         ).toEqual(userFacingSortOrder);
       });
+    });
+
+    it('properly initializes the sorting with for the IPC tracks', function () {
+      // IPC tracks have a special case for the track ordering. They always
+      // appear after the thread tracks that they belong to. If they belong to
+      // the global track, then it should show up before the other local tracks.
+      // If it belongs to a local track, it should appear right after the local
+      // thread track.
+      const profile = getProfileWithNiceTracks();
+      const { pid } = profile.threads[1];
+      addIPCMarkerPairToThreads(
+        {
+          startTime: 1,
+          endTime: 10,
+          messageSeqno: 1,
+        },
+        profile.threads[1], // tab process
+        profile.threads[2] // DOM Worker
+      );
+      const { getState } = storeWithProfile(profile);
+      const localTracks = ProfileViewSelectors.getLocalTracks(getState(), pid);
+      const localTrackOrder = UrlStateSelectors.getLocalTrackOrder(
+        getState(),
+        pid
+      );
+
+      // Check that we properly put the two IPC tracks right after their threads.
+      // Since the first IPC track belongs to the global track, it should appear
+      // first, and the second IPC track should appear after the DOM Worker track.
+      expect(
+        localTrackOrder.map((trackIndex) => localTracks[trackIndex].type)
+      ).toEqual(['ipc', 'thread', 'ipc', 'thread']);
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        // Belongs to the global tab track.
+        '  - show [ipc GeckoMain] SELECTED',
+        '  - show [thread DOM Worker]',
+        // Belongs to the DOM Worker local track.
+        '  - show [ipc DOM Worker]',
+        '  - show [thread Style]',
+      ]);
     });
   });
 });
