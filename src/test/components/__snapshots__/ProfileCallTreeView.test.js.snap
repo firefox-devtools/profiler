@@ -3617,7 +3617,7 @@ exports[`calltree/ProfileCallTreeView TransformNavigator renders with multiple t
     </button>
   </li>
   <li
-    class="filterNavigatorBarItem filterNavigatorBarBeforeSelectedItem"
+    class="filterNavigatorBarItem"
   >
     <button
       class="filterNavigatorBarItemContent"
