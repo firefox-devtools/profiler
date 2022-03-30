@@ -140,7 +140,7 @@ exports[`timeline/LocalTrack with a thread track matches the snapshot of a local
     <div
       class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
       title="DOM Worker
-Thread: \\"DOM Worker\\" (0)
+Thread: \\"DOM Worker\\" (33)
 Process: \\"tab\\" (222)"
     >
       <button

@@ -40,6 +40,7 @@ import type {
   MarkerSchemaByName,
   MarkerDisplayLocation,
   Tid,
+  ScreenshotPayload,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -1352,4 +1353,30 @@ export function filterMarkerByDisplayLocation(
 
     return markerTypes.has(getMarkerSchemaName(markerSchemaByName, marker));
   });
+}
+
+/**
+ * Compute the Screenshot image's thumbnail size.
+ */
+export function computeScreenshotSize(
+  payload: ScreenshotPayload,
+  maximumSize: number
+): {| +width: number, +height: number |} {
+  const { windowWidth, windowHeight } = payload;
+
+  // Coefficient should be according to bigger side.
+  const coefficient =
+    windowHeight > windowWidth
+      ? maximumSize / windowHeight
+      : maximumSize / windowWidth;
+  let width = windowWidth * coefficient;
+  let height = windowHeight * coefficient;
+
+  width = Math.round(width);
+  height = Math.round(height);
+
+  return {
+    width,
+    height,
+  };
 }

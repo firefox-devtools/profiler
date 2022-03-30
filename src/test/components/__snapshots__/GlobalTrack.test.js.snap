@@ -10,7 +10,7 @@ exports[`timeline/GlobalTrack matches the snapshot of a global process track 1`]
     <div
       class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
       title="Content Process
-Thread: \\"GeckoMain\\" (0)
+Thread: \\"GeckoMain\\" (22)
 Process: \\"tab\\" (222)"
     >
       <button
@@ -136,7 +136,7 @@ Process: \\"tab\\" (222)"
         <div
           class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="DOM Worker
-Thread: \\"DOM Worker\\" (0)
+Thread: \\"DOM Worker\\" (33)
 Process: \\"tab\\" (222)"
         >
           <button
@@ -222,7 +222,7 @@ Process: \\"tab\\" (222)"
         <div
           class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="Style
-Thread: \\"Style\\" (0)
+Thread: \\"Style\\" (44)
 Process: \\"tab\\" (222)"
         >
           <button

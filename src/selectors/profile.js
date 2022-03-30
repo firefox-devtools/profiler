@@ -27,6 +27,7 @@ import type {
   Thread,
   ThreadIndex,
   Pid,
+  Tid,
   Counter,
   CounterIndex,
   PageList,
@@ -827,3 +828,21 @@ export const getContainsPrivateBrowsingInformation: Selector<boolean> =
 
     return hasPrivateThreads;
   });
+
+/**
+ * Returns the TIDs of the threads that are profiled.
+ */
+export const getProfiledThreadIds: Selector<Set<Tid>> = createSelector(
+  getThreads,
+  (threads) => {
+    const profiledThreadIds = new Set();
+    for (const thread of threads) {
+      const { tid } = thread;
+      if (tid) {
+        // Do not include if tid is undefined.
+        profiledThreadIds.add(tid);
+      }
+    }
+    return profiledThreadIds;
+  }
+);
