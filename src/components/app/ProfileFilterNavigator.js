@@ -70,7 +70,14 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
       );
     } else {
       firstItem = (
-        <Localized id="ProfileFilterNavigator--full-range">
+        <Localized
+          id="ProfileFilterNavigator--full-range-with-duration"
+          vars={{
+            fullRangeDuration: getFormattedTimeLength(
+              rootRange.end - rootRange.start
+            ),
+          }}
+        >
           Full Range
         </Localized>
       );
