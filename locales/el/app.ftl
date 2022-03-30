@@ -316,6 +316,16 @@ MarkerContextMenu--copy-description = Αντιγραφή περιγραφής
 MarkerContextMenu--copy-call-stack = Αντιγραφή στοίβας κλήσεων
 MarkerContextMenu--copy-url = Αντιγραφή URL
 MarkerContextMenu--copy-as-json = Αντιγραφή ως JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Επιλέξτε το νήμα παραλήπτη «<strong>{ $threadName }</strong>»
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Επιλέξτε το νήμα αποστολέα «<strong>{ $threadName }</strong>»
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
