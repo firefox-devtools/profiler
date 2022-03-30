@@ -351,7 +351,7 @@ describe('ordering and hiding', function () {
         );
       });
 
-      it('creates a separate user-facing ordering that is different from the internal sortiong', function () {
+      it('creates a separate user-facing ordering that is different from the internal sorting', function () {
         const { globalTracks, globalTrackOrder } = setup();
         expect(
           globalTrackOrder.map((trackIndex) => globalTracks[trackIndex].type)
@@ -623,7 +623,7 @@ describe('ordering and hiding', function () {
         );
       });
 
-      it('creates a separate user-facing ordering that is different from the internal sortiong', function () {
+      it('creates a separate user-facing ordering that is different from the internal sorting', function () {
         const { localTracks, localTrackOrder } = setup();
         expect(
           localTrackOrder.map((trackIndex) => localTracks[trackIndex].type)
