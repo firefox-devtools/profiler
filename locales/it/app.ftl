@@ -255,6 +255,16 @@ MarkerContextMenu--copy-description = Copia descrizione
 MarkerContextMenu--copy-call-stack = Copia stack di chiamata
 MarkerContextMenu--copy-url = Copia URL
 MarkerContextMenu--copy-as-json = Copia come JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Seleziona il thread di destinazione “<strong>{ $threadName }</strong>”
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Seleziona il thread di origine “<strong>{ $threadName }</strong>”
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
