@@ -477,7 +477,13 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
-ProfileFilterNavigator--full-range = Intervallo completo
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Intervallo completo ({ $fullRangeDuration })
 
 ## Profile Loader Animation
 
