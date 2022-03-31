@@ -203,6 +203,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       searchFilteredLocalTracksByPid === null
     ) {
       // This shouldn't happen!
+      console.warn('Unexpected null search filtered tracks');
       return;
     }
 
@@ -830,7 +831,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       newHiddenGlobalTrackCount < globalTracks.length;
 
     // 2.1. Check if there are any global tracks to hide.
-    const globalTracksToHide = [...searchFilteredGlobalTracks].filter(
+    const hasGlobalTracksToHide = [...searchFilteredGlobalTracks].some(
       (trackIndex) => !hiddenGlobalTracks.has(trackIndex)
     );
 
@@ -857,10 +858,9 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       }
 
       const hiddenLocalTracks = ensureExists(hiddenLocalTracksByPid.get(pid));
-      hasLocalTrackToHide =
-        [...searchFilteredLocalTracks].filter(
-          (trackIndex) => !hiddenLocalTracks.has(trackIndex)
-        ).length > 0;
+      hasLocalTrackToHide = [...searchFilteredLocalTracks].some(
+        (trackIndex) => !hiddenLocalTracks.has(trackIndex)
+      );
       if (hasLocalTrackToHide) {
         // There is at least one local track to hide. Skip the other global track checks.
         break;
@@ -869,7 +869,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     const isDisabled =
       visibleGlobalTracksLeftAfterHiding === false ||
-      (globalTracksToHide.length === 0 && hasLocalTrackToHide === false);
+      (!hasGlobalTracksToHide && hasLocalTrackToHide === false);
 
     return (
       <MenuItem onClick={this._hideMatchedTracks} disabled={isDisabled}>

@@ -786,6 +786,7 @@ export function hideProvidedTracks(
       newHiddenGlobalTrackCount < globalTracks.length;
     if (!visibleGlobalTracksLeftAfterHiding) {
       // Bail if there isn't any other visible global track left after hiding.
+      console.warn('No other visible global track left after hiding');
       return;
     }
 
@@ -815,8 +816,8 @@ export function hideProvidedTracks(
     }
 
     if (newSelectedThreadIndexes.size === 0) {
-      // Hiding this process would make it so that there is no selected thread.
-      // Bail out.
+      // Hiding this process would make it so that there is no selected thread
+      // since no more visible threads exist, bail out.
       return;
     }
 
