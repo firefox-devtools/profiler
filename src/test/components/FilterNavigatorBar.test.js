@@ -125,7 +125,7 @@ describe('app/ProfileFilterNavigator', () => {
 
   it('displays the "Full Range" text as its first element', () => {
     const { getByText } = setup();
-    expect(getByText('Full Range')).toBeInTheDocument();
+    expect(getByText(/Full Range/)).toBeInTheDocument();
   });
 
   it('renders the site hostname as its first element in the single tab view', () => {
@@ -147,7 +147,7 @@ describe('app/ProfileFilterNavigator', () => {
         tabID,
       })
     );
-    expect(queryByText('Full Range')).not.toBeInTheDocument();
+    expect(queryByText(/Full Range/)).not.toBeInTheDocument();
     // Using regexp because searching for a partial text.
     expect(getByText(/developer\.mozilla\.org/)).toBeInTheDocument();
   });
