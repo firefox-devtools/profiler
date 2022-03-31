@@ -155,7 +155,7 @@ CallTree--bytes-self = Zelf (bytes)
 # Variables:
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
-    .title = Sommige aanroepen naar { $callFunction } zijn inline door de compiler geplaatst.
+    .title = Sommige aanroepen naar { $calledFunction } zijn inline door de compiler geplaatst.
 # Variables:
 #   $calledFunction (String) - Name of the function whose call was inlined.
 #   $outerFunction (String) - Name of the outer function into which the called function was inlined.
@@ -252,10 +252,6 @@ Home--web-channel-unavailable =
     <code>devtools.performance.recording.ui-base-url</code>. Als u nieuwe profielen wilt vastleggen
     met deze instantie, en er programmatische controle over de profiler-menuknop aan wilt geven,
     dan kunt u naar <code>about:config</code> gaan en de voorkeur wijzigen.
-Home--record-instructions =
-    Klik om te starten met het maken van een profiel op de profielknop of gebruik de
-    sneltoetsen. Het pictogram is blauw als er een profiel wordt opgenomen.
-    Klik op SHIFT om de gegevens in profiler.firefox.com te laden.
 Home--instructions-title = Profielen bekijken en opnemen
 Home--instructions-content =
     Het opnemen van prestatieprofielen vereist <a>{ -firefox-brand-name }</a>.
