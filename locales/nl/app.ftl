@@ -252,6 +252,10 @@ Home--web-channel-unavailable =
     <code>devtools.performance.recording.ui-base-url</code>. Als u nieuwe profielen wilt vastleggen
     met deze instantie, en er programmatische controle over de profiler-menuknop aan wilt geven,
     dan kunt u naar <code>about:config</code> gaan en de voorkeur wijzigen.
+Home--record-instructions =
+    Klik om te starten met het maken van een profiel op de profielknop of gebruik de
+    sneltoetsen. Het pictogram is blauw als er een profiel wordt opgenomen.
+    Klik op <kbd>Vastleggen</kbd> om de gegevens in profiler.firefox.com te laden.
 Home--instructions-title = Profielen bekijken en opnemen
 Home--instructions-content =
     Het opnemen van prestatieprofielen vereist <a>{ -firefox-brand-name }</a>.
