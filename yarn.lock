@@ -1051,15 +1051,15 @@
     "@codemirror/state" "^0.19.0"
     "@codemirror/view" "^0.19.23"
 
-"@codemirror/highlight@^0.19.0", "@codemirror/highlight@^0.19.7":
-  version "0.19.7"
-  resolved "https://registry.yarnpkg.com/@codemirror/highlight/-/highlight-0.19.7.tgz#91a0c9994c759f5f153861e3aae74ff9e7c7c35b"
-  integrity sha512-3W32hBCY0pbbv/xidismw+RDMKuIag+fo4kZIbD7WoRj+Ttcaxjf+vP6RttRHXLaaqbWh031lTeON8kMlDhMYw==
+"@codemirror/highlight@^0.19.0", "@codemirror/highlight@^0.19.7", "@codemirror/highlight@^0.19.8":
+  version "0.19.8"
+  resolved "https://registry.yarnpkg.com/@codemirror/highlight/-/highlight-0.19.8.tgz#a95aee8ae4389b01f820aa79c48f7b4388087d92"
+  integrity sha512-v/lzuHjrYR8MN2mEJcUD6fHSTXXli9C1XGYpr+ElV6fLBIUhMTNKR3qThp611xuWfXfwDxeL7ppcbkM/MzPV3A==
   dependencies:
     "@codemirror/language" "^0.19.0"
     "@codemirror/rangeset" "^0.19.0"
     "@codemirror/state" "^0.19.3"
-    "@codemirror/view" "^0.19.0"
+    "@codemirror/view" "^0.19.39"
     "@lezer/common" "^0.15.0"
     style-mod "^4.0.0"
 
@@ -1153,10 +1153,10 @@
     "@codemirror/state" "^0.19.0"
     "@codemirror/view" "^0.19.0"
 
-"@codemirror/view@^0.19.0", "@codemirror/view@^0.19.23", "@codemirror/view@^0.19.47":
-  version "0.19.47"
-  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-0.19.47.tgz#2163c3016d7680bf50dd695c0e3abdaf80f45363"
-  integrity sha512-SfbagKvJQl5dtt+9wYpo9sa3ZkMgUxTq+/hXDf0KVwIx+zu3cJIqfEm9xSx6yXkq7it7RsPGHaPasApNffF/8g==
+"@codemirror/view@^0.19.0", "@codemirror/view@^0.19.23", "@codemirror/view@^0.19.39", "@codemirror/view@^0.19.47":
+  version "0.19.48"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-0.19.48.tgz#1c657e2b0f8ed896ac6448d6e2215ab115e2a0fc"
+  integrity sha512-0eg7D2Nz4S8/caetCTz61rK0tkHI17V/d15Jy0kLOT8dTLGGNJUponDnW28h2B6bERmPlVHKh8MJIr5OCp1nGw==
   dependencies:
     "@codemirror/rangeset" "^0.19.5"
     "@codemirror/state" "^0.19.3"
