@@ -165,15 +165,18 @@
   position: relative;
 }
 
-.homeTransition-enter {
-  opacity: 0.1;
-  transform: translateX(100px);
-}
+/* Only show the home transition when reduced motion is not preferred */
+@media (prefers-reduced-motion: no-preference) {
+  .homeTransition-enter {
+    opacity: 0.1;
+    transform: translateX(100px);
+  }
 
-.homeTransition-enter.homeTransition-enter-active {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 300ms ease-out, transform 300ms ease-out;
+  .homeTransition-enter.homeTransition-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 300ms ease-out, transform 300ms ease-out;
+  }
 }
 
 .homeSectionUploadFromFileInput {
