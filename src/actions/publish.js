@@ -18,26 +18,43 @@ import {
   getDataSource,
   getProfileNameForStorage,
   getUrlPredictor,
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
+  getGlobalTrackOrder,
+  getLocalTrackOrderByPid,
+  getTimelineTrackOrganization,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getProfile,
   getZeroAt,
   getCommittedRange,
   getProfileFilterPageData,
+  getGlobalTracks,
+  getLocalTracksByPid,
 } from 'firefox-profiler/selectors/profile';
-import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
-import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { persistUploadedProfileInformationToDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import {
+  computeGlobalTracks,
+  computeLocalTracksByPid,
+  computeOldTrackIndexToNewTrackIndexMap,
+  computeHiddenTracksAfterSanitization,
+  computeTrackOrderAfterSanitization,
+} from 'firefox-profiler/profile-logic/tracks';
 
 import type {
   Action,
   ThunkAction,
   CheckedSharingOptions,
+  GlobalTrack,
+  LocalTrack,
+  Pid,
+  Profile,
   StartEndRange,
   ThreadIndex,
   State,
+  TrackIndex,
 } from 'firefox-profiler/types';
 
 export function toggleCheckedSharingOptions(
@@ -92,7 +109,7 @@ export function uploadFailed(error: mixed): Action {
 async function persistJustUploadedProfileInformationToDb(
   profileToken: string,
   jwtToken: string | null,
-  sanitizedInformation,
+  finalPublishAction: Action,
   prepublishedState: State
 ): Promise<void> {
   if (process.env.NODE_ENV === 'test' && !window.indexedDB) {
@@ -119,34 +136,11 @@ async function persistJustUploadedProfileInformationToDb(
   // happens before the sanitization really happens in the main state, so we
   // need to simulate it.
   const urlPredictor = getUrlPredictor(prepublishedState);
-  let predictedUrl;
-
-  const removeProfileInformation =
-    getRemoveProfileInformation(prepublishedState);
-  if (removeProfileInformation) {
-    // In case you wonder, committedRanges is either an empty array (if the
-    // range was sanitized) or `null` (otherwise).
-    const { committedRanges, oldThreadIndexToNew } = sanitizedInformation;
-
-    // Predicts the URL we'll have after local sanitization.
-    predictedUrl = urlPredictor(
-      profileSanitized(
-        profileToken,
-        committedRanges,
-        oldThreadIndexToNew,
-        profileName,
-        null /* prepublished State */
-      )
-    );
-  } else {
-    // Predicts the URL we'll have after the process is finished.
-    predictedUrl = urlPredictor(
-      profilePublished(profileToken, profileName, null /* prepublished State */)
-    );
-  }
-
+  const predictedUrl = urlPredictor(finalPublishAction);
   const profileMeta = getProfile(prepublishedState).meta;
   const profileFilterPageData = getProfileFilterPageData(prepublishedState);
+  const removeProfileInformation =
+    getRemoveProfileInformation(prepublishedState);
 
   try {
     await persistUploadedProfileInformationToDb({
@@ -267,6 +261,126 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       });
 
       const hash = extractProfileTokenFromJwt(hashOrToken);
+      const newGlobalTracks = computeGlobalTracks(sanitizedInformation.profile);
+      const newLocalTracksByPid = computeLocalTracksByPid(
+        sanitizedInformation.profile
+      );
+
+      // These old states could still be valid, or we may need to recompute them
+      // if we remove some tracks.
+      let hiddenGlobalTracks = getHiddenGlobalTracks(prePublishedState);
+      let hiddenLocalTracksByPid = getHiddenLocalTracksByPid(prePublishedState);
+      let globalTrackOrder = getGlobalTrackOrder(prePublishedState);
+      let localTrackOrderByPid = getLocalTrackOrderByPid(prePublishedState);
+
+      const timelineTrackOrganization =
+        getTimelineTrackOrganization(prePublishedState);
+      if (
+        timelineTrackOrganization.type === 'full' &&
+        sanitizedInformation.oldThreadIndexToNew
+      ) {
+        // Some threads were removed, this means we need to compute the new hidden
+        // tracks and track order information.
+        // oldThreadIndexToNew contains the old thread indexes, but here we're
+        // talking about track indexes and doesn't contain only threads but also
+        // other types of tracks. Therefore we need to find and match the tracks
+        // that aren't threads.
+        const oldGlobalTracks = getGlobalTracks(prePublishedState);
+        const oldLocalTracksByPid = getLocalTracksByPid(prePublishedState);
+
+        const globalOldTrackIndexToNewTrackIndex =
+          computeOldTrackIndexToNewTrackIndexMap({
+            oldTracks: oldGlobalTracks,
+            newTracks: newGlobalTracks,
+          });
+
+        hiddenGlobalTracks = computeHiddenTracksAfterSanitization({
+          oldHiddenTracks: hiddenGlobalTracks,
+          oldTrackIndexToNewTrackIndex: globalOldTrackIndexToNewTrackIndex,
+        });
+        globalTrackOrder = computeTrackOrderAfterSanitization({
+          oldTrackOrder: globalTrackOrder,
+          oldTrackIndexToNewTrackIndex: globalOldTrackIndexToNewTrackIndex,
+        });
+
+        const newHiddenLocalTracksByPid = new Map();
+        const newLocalTrackOrderByPid = new Map();
+
+        for (const [pid, newLocalTracks] of newLocalTracksByPid.entries()) {
+          const oldHiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
+          const oldLocalTrackOrder = localTrackOrderByPid.get(pid);
+          if (
+            oldHiddenLocalTracks === undefined &&
+            oldLocalTrackOrder === undefined
+          ) {
+            // Nothing to do for this pid, let's move to the next.
+            continue;
+          }
+
+          // Compute the map for this PID.
+          const oldTrackIndexToNewTrackIndex =
+            computeOldTrackIndexToNewTrackIndexMap({
+              oldTracks: oldLocalTracksByPid.get(pid) ?? [],
+              newTracks: newLocalTracks,
+            });
+
+          // Handle the hidden local tracks for this PID
+          if (oldHiddenLocalTracks !== undefined) {
+            const newHiddenLocalTracks = computeHiddenTracksAfterSanitization({
+              oldHiddenTracks: oldHiddenLocalTracks,
+              oldTrackIndexToNewTrackIndex,
+            });
+            newHiddenLocalTracksByPid.set(pid, newHiddenLocalTracks);
+          }
+
+          // Handle the local track order for this PID
+          if (oldLocalTrackOrder !== undefined) {
+            const newLocalTrackOrder = computeTrackOrderAfterSanitization({
+              oldTrackOrder: oldLocalTrackOrder,
+              oldTrackIndexToNewTrackIndex,
+            });
+
+            newLocalTrackOrderByPid.set(pid, newLocalTrackOrder);
+          }
+        }
+        hiddenLocalTracksByPid = newHiddenLocalTracksByPid;
+        localTrackOrderByPid = newLocalTrackOrderByPid;
+      }
+
+      let finalPublishAction;
+      if (sanitizedInformation.isSanitized) {
+        // In case you wonder, committedRanges is either an empty array (if the
+        // range was sanitized) or `null` (otherwise).
+        const { committedRanges, oldThreadIndexToNew, profile } =
+          sanitizedInformation;
+
+        finalPublishAction = profileSanitized(
+          profile,
+          hash,
+          committedRanges,
+          oldThreadIndexToNew,
+          profileName,
+          prePublishedState,
+          newGlobalTracks,
+          newLocalTracksByPid,
+          hiddenGlobalTracks,
+          globalTrackOrder,
+          hiddenLocalTracksByPid,
+          localTrackOrderByPid
+        );
+      } else {
+        const dataSource = getDataSource(prePublishedState);
+        const isUnpublished =
+          dataSource === 'unpublished' || dataSource === 'from-browser';
+        finalPublishAction = profilePublished(
+          hash,
+          profileName,
+          // Only include the pre-published state if we want to be able to revert
+          // the profile. If we are viewing from-browser, then it's only a single
+          // profile.
+          isUnpublished ? null : prePublishedState
+        );
+      }
 
       // Because we want to store the published profile even when the upload
       // generation changed, we store the data here, before the state is fully
@@ -275,7 +389,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       await persistJustUploadedProfileInformationToDb(
         hash,
         hashOrToken === hash ? null : hashOrToken,
-        sanitizedInformation,
+        finalPublishAction,
         prePublishedState
       );
 
@@ -286,62 +400,12 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         return false;
       }
 
-      const removeProfileInformation =
-        getRemoveProfileInformation(prePublishedState);
-      if (removeProfileInformation) {
-        const { committedRanges, oldThreadIndexToNew, profile } =
-          sanitizedInformation;
+      if (sanitizedInformation.isSanitized) {
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
-
-        // Update the UrlState so that we are sanitized.
-        dispatch(
-          profileSanitized(
-            hash,
-            committedRanges,
-            oldThreadIndexToNew,
-            profileName,
-            prePublishedState
-          )
-        );
-
-        // At this moment, we don't have the profile data in state anymore,
-        // because the action profileSanitized will reset all the state of
-        // profile-view, including the profile data. In the future we may want
-        // to fix this (for example move the profile data in another reducer, or
-        // keep the profile state when resetting the state).
-        // This still works because it also sets the "phase" state to
-        // "TRANSITIONING_FROM_STALE_PROFILE" that avoids rendering anything
-        // (see AppViewRouter).
-        // viewProfile below needs to synchronously dispatch the new profile
-        // again so that the user doesn't see a glitch. This is still most
-        // probably a performance problem because all components are unmounted
-        // and mounted again.
-
-        // Swap out the URL state, since the view profile calculates all of the default
-        // settings. If we don't do this then we can go back in history to where we
-        // are trying to view a profile without valid view settings.
-        withHistoryReplaceStateSync(() => {
-          // Multiple dispatches are usually to be avoided, but viewProfile requires
-          // the next UrlState in place. It could be rewritten to have a UrlState passed
-          // in as a paremeter, but that doesn't seem worth it at the time of this writing.
-          dispatch(viewProfile(profile));
-        });
-      } else {
-        const dataSource = getDataSource(prePublishedState);
-        const isUnpublished =
-          dataSource === 'unpublished' || dataSource === 'from-browser';
-        dispatch(
-          profilePublished(
-            hash,
-            profileName,
-            // Only include the pre-published state if we want to be able to revert
-            // the profile. If we are viewing from-browser, then it's only a single
-            // profile.
-            isUnpublished ? null : prePublishedState
-          )
-        );
       }
+
+      dispatch(finalPublishAction);
 
       sendAnalytics({
         hitType: 'event',
@@ -382,19 +446,33 @@ export function resetUploadState(): Action {
  * indexes or information that has been sanitized away.
  */
 export function profileSanitized(
+  profile: Profile,
   hash: string,
   committedRanges: StartEndRange[] | null,
   oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
   profileName: string,
-  prePublishedState: State | null
+  prePublishedState: State | null,
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+  hiddenGlobalTracks: Set<TrackIndex>,
+  globalTrackOrder: TrackIndex[],
+  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+  localTrackOrderByPid: Map<Pid, TrackIndex[]>
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_PUBLISHED',
+    profile,
     hash,
     committedRanges,
     oldThreadIndexToNew,
     profileName,
     prePublishedState,
+    globalTracks,
+    localTracksByPid,
+    hiddenGlobalTracks,
+    globalTrackOrder,
+    hiddenLocalTracksByPid,
+    localTrackOrderByPid,
   };
 }
 

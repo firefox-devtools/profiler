@@ -11,6 +11,7 @@ import type {
   Pid,
   GlobalTrack,
   LocalTrack,
+  Track,
   TrackIndex,
   Counter,
   Tid,
@@ -711,6 +712,154 @@ export function getVisibleThreads(
     }
   }
   return visibleThreads;
+}
+
+/**
+ * This computes a map to translate old track indexes to the new track indexes
+ * we have after sanitization. Then it allows quick computation for hidden
+ * tracks and track orders.
+ * This function is used for both global and local track lists.
+ */
+export function computeOldTrackIndexToNewTrackIndexMap({
+  oldTracks,
+  newTracks,
+}: {|
+  +oldTracks: $ReadOnlyArray<Track>,
+  +newTracks: $ReadOnlyArray<Track>,
+|}): Map<TrackIndex, TrackIndex> {
+  const trackToNewTrackIndex = new Map();
+  for (
+    let newTrackIndex = 0;
+    newTrackIndex < newTracks.length;
+    newTrackIndex++
+  ) {
+    const track = newTracks[newTrackIndex];
+    let newTrackIndexMapForType = trackToNewTrackIndex.get(track.type);
+    if (newTrackIndexMapForType === undefined) {
+      newTrackIndexMapForType = new Map();
+      trackToNewTrackIndex.set(track.type, newTrackIndexMapForType);
+    }
+    switch (track.type) {
+      /* Global  tracks */
+      case 'process':
+        newTrackIndexMapForType.set(track.pid, newTrackIndex);
+        break;
+      case 'screenshots':
+        newTrackIndexMapForType.set(track.id, newTrackIndex);
+        break;
+      case 'visual-progress':
+      case 'perceptual-visual-progress':
+      case 'contentful-visual-progress':
+        newTrackIndexMapForType.set(null, newTrackIndex);
+        break;
+
+      /* Local tracks */
+      case 'thread':
+      case 'network':
+      case 'ipc':
+      case 'event-delay':
+        newTrackIndexMapForType.set(track.threadIndex, newTrackIndex);
+        break;
+      case 'memory':
+      case 'process-cpu':
+        newTrackIndexMapForType.set(track.counterIndex, newTrackIndex);
+        break;
+
+      default:
+        throw new Error(`Unknown track type ${track.type}`);
+    }
+  }
+
+  const oldTrackIndexToNewTrackIndex = new Map();
+  for (
+    let oldTrackIndex = 0;
+    oldTrackIndex < oldTracks.length;
+    oldTrackIndex++
+  ) {
+    const track = oldTracks[oldTrackIndex];
+    const newTrackIndexMapForType =
+      trackToNewTrackIndex.get(track.type) ?? new Map();
+    let newTrackIndex;
+    switch (track.type) {
+      /* Global tracks */
+      case 'process':
+        newTrackIndex = newTrackIndexMapForType.get(track.pid);
+        break;
+      case 'screenshots':
+        newTrackIndex = newTrackIndexMapForType.get(track.id);
+        break;
+      case 'visual-progress':
+      case 'perceptual-visual-progress':
+      case 'contentful-visual-progress':
+        newTrackIndex = newTrackIndexMapForType.get(null);
+        break;
+
+      /* Local tracks */
+      case 'thread':
+      case 'network':
+      case 'ipc':
+      case 'event-delay':
+        newTrackIndex = newTrackIndexMapForType.get(track.threadIndex);
+        break;
+      case 'memory':
+      case 'process-cpu':
+        newTrackIndex = newTrackIndexMapForType.get(track.counterIndex);
+        break;
+      default:
+        throw new Error(`Unknown track type ${track.type}`);
+    }
+
+    if (newTrackIndex !== undefined) {
+      oldTrackIndexToNewTrackIndex.set(oldTrackIndex, newTrackIndex);
+    }
+  }
+
+  return oldTrackIndexToNewTrackIndex;
+}
+
+/**
+ * Compute the new state for hidden tracks after some of them have been
+ * removed from the profile.
+ * This is used for both global and local tracks.
+ */
+export function computeHiddenTracksAfterSanitization({
+  oldHiddenTracks,
+  oldTrackIndexToNewTrackIndex,
+}: {|
+  +oldHiddenTracks: Set<TrackIndex>,
+  +oldTrackIndexToNewTrackIndex: Map<TrackIndex, TrackIndex>,
+|}): Set<TrackIndex> {
+  const newHiddenTracks = new Set();
+  for (const oldHiddenTrackIndex of oldHiddenTracks) {
+    const newHiddenTrackIndex =
+      oldTrackIndexToNewTrackIndex.get(oldHiddenTrackIndex);
+    if (newHiddenTrackIndex !== undefined) {
+      newHiddenTracks.add(newHiddenTrackIndex);
+    }
+  }
+
+  return newHiddenTracks;
+}
+
+/**
+ * Compute the new state for track orders after sanitization.
+ * This is used for both global and local track lists.
+ */
+export function computeTrackOrderAfterSanitization({
+  oldTrackOrder,
+  oldTrackIndexToNewTrackIndex,
+}: {|
+  +oldTrackOrder: TrackIndex[],
+  +oldTrackIndexToNewTrackIndex: Map<TrackIndex, TrackIndex>,
+|}): TrackIndex[] {
+  const newTrackOrder = [];
+  for (const oldTrackIndex of oldTrackOrder) {
+    const newTrackIndex = oldTrackIndexToNewTrackIndex.get(oldTrackIndex);
+    if (newTrackIndex !== undefined) {
+      newTrackOrder.push(newTrackIndex);
+    }
+  }
+  return newTrackOrder;
 }
 
 export function getGlobalTrackName(

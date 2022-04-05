@@ -115,7 +115,6 @@ export type ProfileViewState = {
 
 export type AppViewState =
   | {| +phase: 'ROUTE_NOT_FOUND' |}
-  | {| +phase: 'TRANSITIONING_FROM_STALE_PROFILE' |}
   | {| +phase: 'PROFILE_LOADED' |}
   | {| +phase: 'DATA_LOADED' |}
   | {| +phase: 'DATA_RELOAD' |}

@@ -321,12 +321,9 @@ const showJsTracerSummary: Reducer<boolean> = (state = false, action) => {
 const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
       return action.globalTrackOrder;
-    case 'SANITIZED_PROFILE_PUBLISHED':
-      // If some threads were removed, do not even attempt to figure this out. It's
-      // complicated, and not many people use this feature.
-      return action.oldThreadIndexToNew ? [] : state;
     default:
       return state;
   }
@@ -338,6 +335,7 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
 ) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'ISOLATE_LOCAL_TRACK':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
@@ -364,10 +362,6 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
       hiddenGlobalTracks.delete(action.trackIndex);
       return hiddenGlobalTracks;
     }
-    case 'SANITIZED_PROFILE_PUBLISHED':
-      // If any threads were removed, this was because they were hidden.
-      // Reset this state.
-      return action.oldThreadIndexToNew ? new Set() : state;
     default:
       return state;
   }
@@ -379,6 +373,7 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
 ) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return action.hiddenLocalTracksByPid;
     case 'HIDE_LOCAL_TRACK': {
       const hiddenLocalTracksByPid = new Map(state);
@@ -425,9 +420,6 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
       hiddenLocalTracksByPid.set(action.pid, action.hiddenLocalTracks);
       return hiddenLocalTracksByPid;
     }
-    case 'SANITIZED_PROFILE_PUBLISHED':
-      // If any threads were removed then this information is no longer valid.
-      return action.oldThreadIndexToNew ? new Map() : state;
     default:
       return state;
   }
@@ -439,6 +431,7 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
 ) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'ENABLE_EVENT_DELAY_TRACKS':
     case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
       return action.localTrackOrderByPid;
@@ -447,10 +440,6 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
       localTrackOrderByPid.set(action.pid, action.localTrackOrder);
       return localTrackOrderByPid;
     }
-    case 'SANITIZED_PROFILE_PUBLISHED':
-      // If any threads were removed then remove this information. It's complicated
-      // to compute, and not many people use it.
-      return action.oldThreadIndexToNew ? new Map() : state;
     default:
       return state;
   }
