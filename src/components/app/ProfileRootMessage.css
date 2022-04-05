@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 .rootMessageContainer {
   position: absolute;
   top: 0;
@@ -163,5 +167,14 @@
   100% {
     opacity: 0;
     transform: translateX(-100px);
+  }
+}
+
+/* Do not animate the loading animation when user prefers reduced motion. The
+ * other alternative was to remove these boxes completely, but it's still nice
+ * to keep the boxes as a nice visualization. */
+@media (prefers-reduced-motion) {
+  .loading-div {
+    animation: none;
   }
 }

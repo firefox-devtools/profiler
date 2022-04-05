@@ -160,3 +160,11 @@
   opacity: 0;
   transform: translateX(50%);
 }
+
+/* Do not animate the filter navigator bar items when user prefers reduced motion */
+@media (prefers-reduced-motion) {
+  .filterNavigatorBarItem {
+    animation: none;
+    transition: none;
+  }
+}
