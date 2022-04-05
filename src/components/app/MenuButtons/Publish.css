@@ -175,3 +175,10 @@
 .menuButtonsPublishError {
   margin: 10px 0;
 }
+
+/* Do not animate the publish animation for stripes at the top loading bar. */
+@media (prefers-reduced-motion) {
+  .menuButtonsPublishUploadBarInner {
+    animation: none;
+  }
+}

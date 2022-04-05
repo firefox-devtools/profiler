@@ -295,10 +295,10 @@ describe('MarkerTable', function () {
         'hide [thread GeckoMain process]',
         '  - show [ipc GeckoMain]',
         'show [thread GeckoMain tab] SELECTED',
-        '  - show [thread DOM Worker]',
-        '  - show [thread Style]',
         '  - show [ipc GeckoMain] SELECTED',
+        '  - show [thread DOM Worker]',
         '  - show [ipc DOM Worker]',
+        '  - show [thread Style]',
         '  - show [ipc Style]',
       ]);
 
@@ -313,10 +313,10 @@ describe('MarkerTable', function () {
         'show [thread GeckoMain process] SELECTED',
         '  - show [ipc GeckoMain] SELECTED',
         'show [thread GeckoMain tab]',
-        '  - show [thread DOM Worker]',
-        '  - show [thread Style]',
         '  - show [ipc GeckoMain]',
+        '  - show [thread DOM Worker]',
         '  - show [ipc DOM Worker]',
+        '  - show [thread Style]',
         '  - show [ipc Style]',
       ]);
     });
@@ -353,10 +353,10 @@ describe('MarkerTable', function () {
         'show [thread GeckoMain process] SELECTED',
         '  - show [ipc GeckoMain] SELECTED',
         'hide [thread GeckoMain tab]',
-        '  - hide [thread DOM Worker]',
-        '  - show [thread Style]',
         '  - show [ipc GeckoMain]',
+        '  - hide [thread DOM Worker]',
         '  - show [ipc DOM Worker]',
+        '  - show [thread Style]',
         '  - show [ipc Style]',
       ]);
 
@@ -371,10 +371,10 @@ describe('MarkerTable', function () {
         'show [thread GeckoMain process]',
         '  - show [ipc GeckoMain]',
         'show [thread GeckoMain tab]',
-        '  - show [thread DOM Worker] SELECTED',
-        '  - show [thread Style]',
         '  - show [ipc GeckoMain]',
+        '  - show [thread DOM Worker] SELECTED',
         '  - show [ipc DOM Worker] SELECTED',
+        '  - show [thread Style]',
         '  - show [ipc Style]',
       ]);
     });
