@@ -9,27 +9,53 @@ import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
-type FilterNavigatorBarButtonProps = {|
-  onClick: (number) => mixed,
-  index: number,
-  children: React.Node,
+type FilterNavigatorBarListItemProps = {|
+  +onClick?: null | ((number) => mixed),
+  +index: number,
+  +isFirstItem: boolean,
+  +isLastItem: boolean,
+  +isSelectedItem: boolean,
+  +title?: string,
+  +additionalClassName?: string,
+  +children: React.Node,
 |};
 
-class FilterNavigatorBarButton extends React.PureComponent<FilterNavigatorBarButtonProps> {
+class FilterNavigatorBarListItem extends React.PureComponent<FilterNavigatorBarListItemProps> {
   _onClick = () => {
     const { index, onClick } = this.props;
-    onClick(index);
+    if (onClick) {
+      onClick(index);
+    }
   };
 
   render() {
+    const {
+      isFirstItem,
+      isLastItem,
+      isSelectedItem,
+      children,
+      additionalClassName,
+      onClick,
+      title,
+    } = this.props;
     return (
-      <button
-        type="button"
-        className="filterNavigatorBarItemContent"
-        onClick={this._onClick}
+      <li
+        className={classNames('filterNavigatorBarItem', additionalClassName, {
+          filterNavigatorBarRootItem: isFirstItem,
+          filterNavigatorBarSelectedItem: isSelectedItem,
+          filterNavigatorBarLeafItem: isLastItem,
+        })}
+        title={title}
+        onClick={onClick ? this._onClick : null}
       >
-        {this.props.children}
-      </button>
+        {onClick ? (
+          <button type="button" className="filterNavigatorBarItemContent">
+            {children}
+          </button>
+        ) : (
+          <span className="filterNavigatorBarItemContent">{children}</span>
+        )}
+      </li>
     );
   }
 }
@@ -57,22 +83,17 @@ export class FilterNavigatorBar extends React.PureComponent<Props> {
             classNames="filterNavigatorBarTransition"
             timeout={250}
           >
-            <li
-              className={classNames('filterNavigatorBarItem', {
-                filterNavigatorBarRootItem: i === 0,
-                filterNavigatorBarBeforeSelectedItem: i === selectedItem - 1,
-                filterNavigatorBarSelectedItem: i === selectedItem,
-                filterNavigatorBarLeafItem: i === items.length - 1,
-              })}
+            <FilterNavigatorBarListItem
+              index={i}
+              onClick={
+                i === items.length - 1 && !uncommittedItem ? null : onPop
+              }
+              isFirstItem={i === 0}
+              isLastItem={i === items.length - 1}
+              isSelectedItem={i === selectedItem}
             >
-              {i === items.length - 1 && !uncommittedItem ? (
-                <span className="filterNavigatorBarItemContent">{item}</span>
-              ) : (
-                <FilterNavigatorBarButton index={i} onClick={onPop}>
-                  {item}
-                </FilterNavigatorBarButton>
-              )}
-            </li>
+              {item}
+            </FilterNavigatorBarListItem>
           </CSSTransition>
         ))}
         {uncommittedItem ? (
@@ -81,18 +102,16 @@ export class FilterNavigatorBar extends React.PureComponent<Props> {
             classNames="filterNavigatorBarUncommittedTransition"
             timeout={0}
           >
-            <li
-              className={classNames(
-                'filterNavigatorBarItem',
-                'filterNavigatorBarLeafItem',
-                'filterNavigatorBarUncommittedItem'
-              )}
+            <FilterNavigatorBarListItem
+              index={items.length}
+              isFirstItem={false}
+              isLastItem={true}
+              isSelectedItem={false}
+              additionalClassName="filterNavigatorBarUncommittedItem"
               title={uncommittedItem}
             >
-              <span className="filterNavigatorBarItemContent">
-                {uncommittedItem}
-              </span>
-            </li>
+              {uncommittedItem}
+            </FilterNavigatorBarListItem>
           </CSSTransition>
         ) : null}
       </TransitionGroup>

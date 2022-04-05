@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 @keyframes profileViewerFadeIn {
   0% {
     opacity: 0;
@@ -113,4 +117,14 @@
 
 .profileViewerSpacer {
   flex: 1;
+}
+
+/* Do no animate the whole profile viewer during loading and publishing if user
+ * prefers reduced motion. */
+@media (prefers-reduced-motion) {
+  .profileViewer,
+  .profileViewerFadeOut,
+  .profileViewerFadeInSanitized {
+    animation: none;
+  }
 }
