@@ -103,7 +103,7 @@ CallTree--bytes-self = Individuel (octets)
 # Variables:
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
-    .title = Certains appels à { $callFunction } ont été regroupés par le compilateur.
+    .title = Certains appels à { $calledFunction } ont été regroupés par le compilateur.
 # Variables:
 #   $calledFunction (String) - Name of the function whose call was inlined.
 #   $outerFunction (String) - Name of the outer function into which the called function was inlined.
@@ -468,7 +468,6 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
-ProfileFilterNavigator--full-range = Intervalle complet
 
 ## Profile Loader Animation
 

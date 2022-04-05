@@ -317,6 +317,16 @@ MarkerContextMenu--copy-description = Скопіювати опис
 MarkerContextMenu--copy-call-stack = Скопіювати стек викликів
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
 MarkerContextMenu--copy-as-json = Скопіювати як JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Виберіть потік-одержувач “<strong>{ $threadName }</strong>”
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Виберіть потік-відправник “<strong>{ $threadName }</strong>”
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -535,7 +545,13 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
-ProfileFilterNavigator--full-range = Повний спектр
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Повний діапазон ({ $fullRangeDuration })
 
 ## Profile Loader Animation
 
