@@ -155,7 +155,7 @@ CallTree--bytes-self = Zelf (bytes)
 # Variables:
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
-    .title = Sommige aanroepen naar { $callFunction } zijn inline door de compiler geplaatst.
+    .title = Sommige aanroepen naar { $calledFunction } zijn inline door de compiler geplaatst.
 # Variables:
 #   $calledFunction (String) - Name of the function whose call was inlined.
 #   $outerFunction (String) - Name of the outer function into which the called function was inlined.
@@ -255,7 +255,7 @@ Home--web-channel-unavailable =
 Home--record-instructions =
     Klik om te starten met het maken van een profiel op de profielknop of gebruik de
     sneltoetsen. Het pictogram is blauw als er een profiel wordt opgenomen.
-    Klik op SHIFT om de gegevens in profiler.firefox.com te laden.
+    Klik op <kbd>Vastleggen</kbd> om de gegevens in profiler.firefox.com te laden.
 Home--instructions-title = Profielen bekijken en opnemen
 Home--instructions-content =
     Het opnemen van prestatieprofielen vereist <a>{ -firefox-brand-name }</a>.
@@ -320,6 +320,16 @@ MarkerContextMenu--copy-description = Beschrijving kopiëren
 MarkerContextMenu--copy-call-stack = Aanroepstack kopiëren
 MarkerContextMenu--copy-url = URL kopiëren
 MarkerContextMenu--copy-as-json = Kopiëren als JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Selecteer de ontvangerthread ‘<strong>{ $threadName }</strong>’
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Selecteer de afzenderthread ‘<strong>{ $threadName }</strong>’
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -533,7 +543,13 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
-ProfileFilterNavigator--full-range = Volledig bereik
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Volledig bereik ({ $fullRangeDuration })
 
 ## Profile Loader Animation
 
