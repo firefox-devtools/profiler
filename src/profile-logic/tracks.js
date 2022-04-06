@@ -413,9 +413,17 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
 
   // Add the visual progress tracks if we have visualMetrics data.
   if (profile.meta && profile.meta.visualMetrics) {
-    globalTracks.push({ type: 'visual-progress' });
-    globalTracks.push({ type: 'perceptual-visual-progress' });
-    globalTracks.push({ type: 'contentful-visual-progress' });
+    const metrics = profile.meta.visualMetrics;
+    // Some metrics might be missing depending on the options specified to browsertime.
+    if (metrics.VisualProgress) {
+      globalTracks.push({ type: 'visual-progress' });
+    }
+    if (metrics.PerceptualSpeedIndexProgress) {
+      globalTracks.push({ type: 'perceptual-visual-progress' });
+    }
+    if (metrics.ContentfulSpeedIndexProgress) {
+      globalTracks.push({ type: 'contentful-visual-progress' });
+    }
   }
 
   // When adding a new track type, this sort ensures that the newer tracks are added

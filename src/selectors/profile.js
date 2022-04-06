@@ -170,14 +170,15 @@ export const getVisualMetrics: Selector<VisualMetrics> = (state) =>
     getVisualMetricsOrNull(state),
     'Tried to access the visual metrics when it does not exist.'
   );
-export const getVisualProgress: Selector<ProgressGraphData[]> = (state) =>
-  getVisualMetrics(state).VisualProgress;
-export const getPerceptualSpeedIndexProgress: Selector<ProgressGraphData[]> = (
+export const getVisualProgress: Selector<ProgressGraphData[] | null> = (
   state
-) => getVisualMetrics(state).PerceptualSpeedIndexProgress;
-export const getContentfulSpeedIndexProgress: Selector<ProgressGraphData[]> = (
-  state
-) => getVisualMetrics(state).ContentfulSpeedIndexProgress;
+) => getVisualMetrics(state).VisualProgress;
+export const getPerceptualSpeedIndexProgress: Selector<
+  ProgressGraphData[] | null
+> = (state) => getVisualMetrics(state).PerceptualSpeedIndexProgress ?? null;
+export const getContentfulSpeedIndexProgress: Selector<
+  ProgressGraphData[] | null
+> = (state) => getVisualMetrics(state).ContentfulSpeedIndexProgress ?? null;
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = (
   state
 ) => getMeta(state).configuration;
