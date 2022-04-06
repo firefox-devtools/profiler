@@ -2075,7 +2075,6 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.6 1`] =
       <span
         class="tooltipDetailsDim"
       />
-      
       <span
         class="tooltipDetailsDim"
       >
@@ -2131,7 +2130,6 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] =
       <span
         class="tooltipDetailsDim"
       />
-      
       <span
         class="tooltipDetailsDim"
       >
