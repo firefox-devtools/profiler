@@ -33,6 +33,8 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick, fireFullKeyPress } from '../fixtures/utils';
 
+import type { Profile } from 'firefox-profiler/types';
+
 describe('timeline/TrackContextMenu', function () {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -332,8 +334,8 @@ describe('timeline/TrackContextMenu', function () {
   });
 
   describe('hide all matching tracks', function () {
-    function setupAllTracks() {
-      const setupResults = setup();
+    function setupAllTracks(profile?: Profile) {
+      const setupResults = setup(profile);
       const selectHideAllMatchingTracksItem = () =>
         screen.getByText('Hide all matching tracks');
 
@@ -476,6 +478,47 @@ describe('timeline/TrackContextMenu', function () {
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
         'hide [thread GeckoMain tab]',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    it('hides process tracks without a main thread', function () {
+      const profile = getProfileWithNiceTracks();
+      // Remove the thread [thread GeckoMain tab]
+      profile.threads.splice(1, 1);
+      const { getState, selectHideAllMatchingTracksItem, changeSearchFilter } =
+        setupAllTracks(profile);
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [process]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('DOM Worker');
+      // Click the button.
+      fireFullClick(selectHideAllMatchingTracksItem());
+
+      // DOM Worker track should be hidden now.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [process]',
+        '  - hide [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // Search something to filter the tracks.
+      changeSearchFilter('Style');
+      // Click the button.
+      fireFullClick(selectHideAllMatchingTracksItem());
+
+      // Style and process tracks should be hidden now.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'hide [process]',
         '  - hide [thread DOM Worker]',
         '  - hide [thread Style]',
       ]);

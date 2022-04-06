@@ -701,7 +701,10 @@ function _removeSelectedThreadIndexesForGlobalTrack(
       }
     }
     if (selectedThreadIndexes.size === 0) {
-      const threadIndex = _findOtherVisibleThread(getState, trackIndex);
+      const threadIndex = _findOtherVisibleThread(
+        getState,
+        new Set([trackIndex])
+      );
       if (threadIndex === null) {
         // Could not find another thread index, bail out.
         return;
@@ -807,11 +810,45 @@ export function hideProvidedTracks(
 
     for (const [pid, localTracksToHide] of localTracksByPidToHide) {
       const localTracks = getLocalTracks(getState(), pid);
+      const hiddenLocalTracks = getHiddenLocalTracks(getState(), pid);
       for (const trackIndex of localTracksToHide) {
         const localTrack = localTracks[trackIndex];
         if (localTrack.type === 'thread') {
           newSelectedThreadIndexes.delete(localTrack.threadIndex);
         }
+      }
+
+      const newHiddenLocalTrackCount = new Set([
+        ...hiddenLocalTracks,
+        ...localTracksToHide,
+      ]).size;
+      if (newHiddenLocalTrackCount === localTracks.length) {
+        // Hiding these local tracks will hide all of the tracks for this process.
+        // At this point two different cases need to be handled:
+        //   1.) There is a main thread for the process, go ahead and hide all the
+        //       local tracks.
+        //   2.) There is no main thread for the process, attempt to hide the
+        //       processes' global track.
+        const { globalTrack, globalTrackIndex } = getGlobalTrackAndIndexByPid(
+          getState(),
+          pid
+        );
+
+        if (globalTrack.mainThreadIndex === null) {
+          // Since the process has no main thread, the entire process should be hidden.
+          dispatch(hideGlobalTrack(globalTrackIndex));
+        }
+      }
+    }
+
+    if (newSelectedThreadIndexes.size === 0) {
+      const otherThreadIndex = _findOtherVisibleThread(
+        getState,
+        globalTracksToHide,
+        localTracksByPidToHide
+      );
+      if (otherThreadIndex !== null) {
+        newSelectedThreadIndexes.add(otherThreadIndex);
       }
     }
 
@@ -1037,9 +1074,9 @@ export function changeLocalTrackOrder(
 function _findOtherVisibleThread(
   getState: () => State,
   // Either this global track is already hidden, or it has been taken into account.
-  globalTrackIndexToIgnore?: TrackIndex,
+  globalTrackIndexesToIgnore?: Set<TrackIndex>,
   // This is helpful when hiding a new local track index, it won't be selected.
-  localTrackIndexToIgnore?: TrackIndex
+  localTrackIndexesToIgnoreByPid?: Map<Pid, Set<TrackIndex>>
 ): ThreadIndex | null {
   const globalTracks = getGlobalTracks(getState());
   const globalTrackOrder = getGlobalTrackOrder(getState());
@@ -1049,8 +1086,8 @@ function _findOtherVisibleThread(
     const globalTrack = globalTracks[globalTrackIndex];
     if (
       // This track has already been accounted for.
-      (globalTrackIndexToIgnore !== undefined &&
-        globalTrackIndex === globalTrackIndexToIgnore) ||
+      (globalTrackIndexesToIgnore !== undefined &&
+        globalTrackIndexesToIgnore.has(globalTrackIndex)) ||
       // This global track is hidden.
       globalHiddenTracks.has(globalTrackIndex) ||
       globalTrack.type !== 'process'
@@ -1066,12 +1103,18 @@ function _findOtherVisibleThread(
     const localTracks = getLocalTracks(getState(), globalTrack.pid);
     const localTrackOrder = getLocalTrackOrder(getState(), globalTrack.pid);
     const hiddenLocalTracks = getHiddenLocalTracks(getState(), globalTrack.pid);
+    const localTrackIndexesToIgnore = localTrackIndexesToIgnoreByPid
+      ? localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set()
+      : new Set();
 
     for (const trackIndex of localTrackOrder) {
       const track = localTracks[trackIndex];
       if (!hiddenLocalTracks.has(trackIndex)) {
         // This track is visible.
-        if (track.type === 'thread' && trackIndex !== localTrackIndexToIgnore) {
+        if (
+          track.type === 'thread' &&
+          !localTrackIndexesToIgnore.has(trackIndex)
+        ) {
           return track.threadIndex;
         }
       }
@@ -1165,10 +1208,14 @@ export function hideLocalTrack(
 
       if (newSelectedThreadIndexes.size === 0) {
         // Case 2b: Try and find another threadIndex.
+        const globalTrackIndexesToIgnore = new Set([globalTrackIndex]);
+        const localTrackIndexesToIgnore = new Map([
+          [pid, new Set([trackIndexToHide])],
+        ]);
         const otherThreadIndex = _findOtherVisibleThread(
           getState,
-          globalTrackIndex,
-          trackIndexToHide
+          globalTrackIndexesToIgnore,
+          localTrackIndexesToIgnore
         );
         if (otherThreadIndex !== null) {
           newSelectedThreadIndexes.add(otherThreadIndex);
