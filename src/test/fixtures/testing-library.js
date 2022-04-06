@@ -17,7 +17,11 @@ function customRender(children: React$Element<any>, ...args: any) {
 
   const renderResult = render(
     <LocalizationProvider l10n={localization}>{children}</LocalizationProvider>,
-    ...args
+    {
+      // Stick to the React 17 behavior for now.
+      legacyRoot: true,
+      ...args,
+    }
   );
 
   // Rerender function should also wrap the children with the LocalizationProvider.
