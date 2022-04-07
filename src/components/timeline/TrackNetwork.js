@@ -15,7 +15,7 @@ import { VerticalIndicators } from './VerticalIndicators';
 import {
   getCommittedRange,
   getZeroAt,
-  getPageList,
+  getInnerWindowIDToPageMap,
   getPreviewSelection,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -36,11 +36,12 @@ import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import type {
   CssPixels,
   ThreadIndex,
-  PageList,
   Marker,
   MarkerIndex,
   MarkerTiming,
   Milliseconds,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
@@ -249,7 +250,7 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +isModifyingSelection: boolean,
@@ -334,7 +335,7 @@ class Network extends PureComponent<Props, State> {
 
   render() {
     const {
-      pages,
+      innerWindowIDToPageMap,
       rangeStart,
       rangeEnd,
       getMarker,
@@ -389,7 +390,7 @@ class Network extends PureComponent<Props, State> {
           <VerticalIndicators
             verticalMarkerIndexes={verticalMarkerIndexes}
             getMarker={getMarker}
-            pages={pages}
+            innerWindowIDToPageMap={innerWindowIDToPageMap}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             zeroAt={zeroAt}
@@ -426,7 +427,7 @@ export const TrackNetwork = explicitConnect<
     const networkTiming = selectors.getNetworkTrackTiming(state);
     return {
       getMarker: selectors.getMarkerGetter(state),
-      pages: getPageList(state),
+      innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
       networkTiming: networkTiming,
       rangeStart: start,
       rangeEnd: end,

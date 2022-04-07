@@ -33,7 +33,9 @@ describe('TooltipCallNode', function () {
           <TooltipCallNode
             thread={selectedThreadSelectors.getThread(getState())}
             weightType="samples"
-            pages={ProfileSelectors.getPageList(getState())}
+            innerWindowIDToPageMap={ProfileSelectors.getInnerWindowIDToPageMap(
+              getState()
+            )}
             callNodeIndex={ensureExists(
               selectedThreadSelectors.getSelectedCallNodeIndex(getState()),
               'Unable to find a selected call node index.'
