@@ -23,7 +23,6 @@ import { TooltipMarker } from '../tooltip/Marker';
 import type {
   Thread,
   CategoryList,
-  PageList,
   ThreadsKey,
   UserTimingMarkerPayload,
   WeightType,
@@ -36,6 +35,8 @@ import type {
   UnitIntervalOfProfileRange,
   MarkerIndex,
   Marker,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type {
@@ -47,7 +48,7 @@ import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {|
   +thread: Thread,
-  +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +threadsKey: ThreadsKey,
   +interval: Milliseconds,
   +weightType: WeightType,
@@ -418,7 +419,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       getMarker,
       shouldDisplayTooltips,
       interval,
-      pages,
+      innerWindowIDToPageMap,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -448,7 +449,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       <TooltipCallNode
         thread={thread}
         weightType={weightType}
-        pages={pages}
+        innerWindowIDToPageMap={innerWindowIDToPageMap}
         interval={interval}
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}

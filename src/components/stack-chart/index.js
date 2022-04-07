@@ -16,7 +16,7 @@ import {
   getPreviewSelection,
   getScrollToSelectionGeneration,
   getCategories,
-  getPageList,
+  getInnerWindowIDToPageMap,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
@@ -40,7 +40,6 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import type {
   Thread,
   CategoryList,
-  PageList,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
@@ -53,6 +52,8 @@ import type {
   WeightType,
   ThreadsKey,
   CssPixels,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -64,7 +65,7 @@ const STACK_FRAME_HEIGHT = 16;
 type StateProps = {|
   +thread: Thread,
   +weightType: WeightType,
-  +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +maxStackDepth: number,
   +combinedTimingRows: CombinedTimingRows,
   +timeRange: StartEndRange,
@@ -173,7 +174,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       categories,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
-      pages,
+      innerWindowIDToPageMap,
       getMarker,
       userTimings,
       weightType,
@@ -217,7 +218,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   interval,
                   thread,
                   weightType,
-                  pages,
+                  innerWindowIDToPageMap,
                   threadsKey,
                   combinedTimingRows,
                   getMarker,
@@ -269,7 +270,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       rightClickedCallNodeIndex:
         selectedThreadSelectors.getRightClickedCallNodeIndex(state),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-      pages: getPageList(state),
+      innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
       timelineMarginLeft: getTimelineMarginLeft(state),

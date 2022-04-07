@@ -23,7 +23,6 @@ import MixedTupleMap from 'mixedtuplemap';
 import type {
   Thread,
   CategoryList,
-  PageList,
   CssPixels,
   Milliseconds,
   CallNodeInfo,
@@ -32,6 +31,8 @@ import type {
   WeightType,
   SamplesLikeTable,
   TracedTiming,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type {
@@ -46,7 +47,7 @@ import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport
 export type OwnProps = {|
   +thread: Thread,
   +weightType: WeightType,
-  +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
   +maxStackDepth: number,
@@ -281,7 +282,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       interval,
       isInverted,
       callTreeSummaryStrategy,
-      pages,
+      innerWindowIDToPageMap,
       weightType,
       samples,
       unfilteredSamples,
@@ -322,7 +323,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       <TooltipCallNode
         thread={thread}
         weightType={weightType}
-        pages={pages}
+        innerWindowIDToPageMap={innerWindowIDToPageMap}
         interval={interval}
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}

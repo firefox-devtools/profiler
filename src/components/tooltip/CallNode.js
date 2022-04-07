@@ -18,13 +18,14 @@ import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 import type {
   Thread,
   CategoryList,
-  PageList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   CallNodeInfo,
   WeightType,
   Milliseconds,
   CallTreeSummaryStrategy,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type { TimingsForPath } from 'firefox-profiler/profile-logic/profile-data';
@@ -37,7 +38,7 @@ const GRAPH_HEIGHT = 10;
 type Props = {|
   +thread: Thread,
   +weightType: WeightType,
-  +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +callNodeIndex: IndexIntoCallNodeTable,
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
@@ -172,7 +173,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       callTree,
       timings,
       callTreeSummaryStrategy,
-      pages,
+      innerWindowIDToPageMap,
       callNodeInfo: { callNodeTable },
     } = this.props;
     const categoryIndex = callNodeTable.category[callNodeIndex];
@@ -240,8 +241,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
     // Finding current frame and parent frame URL(if there is).
     let pageAndParentPageURL;
-    if (pages) {
-      const page = pages.find((p) => p.innerWindowID === innerWindowID);
+    if (innerWindowIDToPageMap) {
+      const page = innerWindowIDToPageMap.get(innerWindowID);
       if (page) {
         if (page.embedderInnerWindowID !== 0) {
           // This is an iframe since it has an embedder.
@@ -255,8 +256,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           ];
 
           // Getting the embedder URL now.
-          const parentPage = pages.find(
-            (p) => p.innerWindowID === page.embedderInnerWindowID
+          const parentPage = innerWindowIDToPageMap.get(
+            page.embedderInnerWindowID
           );
           // Ideally it should find a page.
           if (parentPage) {
