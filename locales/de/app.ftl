@@ -304,6 +304,7 @@ MarkerContextMenu--end-selection-at-marker-end = Auswahl am <strong>Ende</strong
 MarkerContextMenu--copy-description = Beschreibung kopieren
 MarkerContextMenu--copy-call-stack = Aufrufstack kopieren
 MarkerContextMenu--copy-url = URL kopieren
+MarkerContextMenu--copy-page-url = URL der Seite kopieren
 MarkerContextMenu--copy-as-json = Als JSON kopieren
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
