@@ -316,6 +316,7 @@ MarkerContextMenu--end-selection-at-marker-end = Завершити вибір �
 MarkerContextMenu--copy-description = Скопіювати опис
 MarkerContextMenu--copy-call-stack = Скопіювати стек викликів
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
+MarkerContextMenu--copy-page-url = Копіювати URL-адресу сторінки
 MarkerContextMenu--copy-as-json = Скопіювати як JSON
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
