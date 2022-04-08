@@ -315,6 +315,7 @@ MarkerContextMenu--end-selection-at-marker-end = Διακοπή επιλογής
 MarkerContextMenu--copy-description = Αντιγραφή περιγραφής
 MarkerContextMenu--copy-call-stack = Αντιγραφή στοίβας κλήσεων
 MarkerContextMenu--copy-url = Αντιγραφή URL
+MarkerContextMenu--copy-page-url = Αντιγραφή URL σελίδας
 MarkerContextMenu--copy-as-json = Αντιγραφή ως JSON
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
