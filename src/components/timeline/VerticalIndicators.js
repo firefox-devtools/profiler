@@ -9,11 +9,12 @@ import { displayNiceUrl } from 'firefox-profiler/utils';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 
 import type {
-  PageList,
   Marker,
   MarkerIndex,
   Milliseconds,
   CssPixels,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import './VerticalIndicators.css';
@@ -21,7 +22,7 @@ import './VerticalIndicators.css';
 type Props = {|
   +getMarker: (MarkerIndex) => Marker,
   +verticalMarkerIndexes: MarkerIndex[],
-  +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +zeroAt: Milliseconds,
@@ -48,7 +49,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
     const {
       getMarker,
       verticalMarkerIndexes,
-      pages,
+      innerWindowIDToPageMap,
       rangeStart,
       rangeEnd,
       zeroAt,
@@ -84,16 +85,14 @@ export class VerticalIndicators extends React.PureComponent<Props> {
       let url = null;
       const { data } = marker;
       if (
-        pages &&
+        innerWindowIDToPageMap &&
         data &&
         data.type === 'tracing' &&
         data.category === 'Navigation'
       ) {
         const innerWindowID = data.innerWindowID;
         if (innerWindowID) {
-          const page = pages.find(
-            (page) => page.innerWindowID === innerWindowID
-          );
+          const page = innerWindowIDToPageMap.get(innerWindowID);
           if (page) {
             url = (
               <div className="timelineVerticalIndicatorsUrl">
