@@ -250,6 +250,7 @@ MarkerContextMenu--end-selection-at-marker-end = 至标记的<strong>终点</str
 MarkerContextMenu--copy-description = 复制描述
 MarkerContextMenu--copy-call-stack = 复制调用栈
 MarkerContextMenu--copy-url = 复制 URL
+MarkerContextMenu--copy-page-url = 复制页面网址
 MarkerContextMenu--copy-as-json = 复制为 JSON 格式
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
