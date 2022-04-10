@@ -312,6 +312,7 @@ MarkerContextMenu--end-selection-at-marker-end = Avsluta markering vid markören
 MarkerContextMenu--copy-description = Kopiera beskrivning
 MarkerContextMenu--copy-call-stack = Kopiera anropsstack
 MarkerContextMenu--copy-url = Kopiera URL
+MarkerContextMenu--copy-page-url = Kopiera sidans URL
 MarkerContextMenu--copy-as-json = Kopiera som JSON
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
