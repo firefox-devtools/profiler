@@ -431,6 +431,17 @@ TransformNavigator--collapse-direct-recursion = Fneẓ asniles: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Yettragu { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Yettraǧu { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Ulac aɣbalu
 # Displayed below SourceView--cannot-obtain-source, if the browser could not
 # be queried for source code using the symbolication API.
 # Variables:
