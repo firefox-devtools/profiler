@@ -20,6 +20,7 @@ import {
   getPreviewSelection,
   getCommittedRange,
   getProfiledThreadIds,
+  getInnerWindowIDToPageMap,
 } from 'firefox-profiler/selectors/profile';
 import { getRightClickedMarkerInfo } from 'firefox-profiler/selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
@@ -34,6 +35,8 @@ import type {
   Thread,
   MarkerReference,
   Tid,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -61,6 +64,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +getMarkerLabelToCopy: (MarkerIndex) => string,
   +profiledThreadIds: Set<Tid>,
+  innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
 |};
 
 type DispatchProps = {|
@@ -201,6 +205,24 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     }
   };
 
+  copyPageUrl = () => {
+    const { marker, innerWindowIDToPageMap } = this.props;
+    const { data } = marker;
+
+    if (!data || !data.innerWindowID || !innerWindowIDToPageMap) {
+      // Marker doesn't contain any page information. Do not do anything.
+      return;
+    }
+
+    const page = innerWindowIDToPageMap.get(data.innerWindowID);
+    if (!page) {
+      // Page couldn't be found. Do not do anything.
+      return;
+    }
+
+    copy(page.url);
+  };
+
   selectOtherThreadForIPCMarkers = () => {
     const { marker, selectTrackFromTid } = this.props;
     if (!marker.data || marker.data.type !== 'IPC') {
@@ -286,6 +308,31 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       <MenuItem onClick={this.selectOtherThreadForIPCMarkers}>
         <span className="react-contextmenu-icon markerContextMenuSelectThread" />
         {menuItemTextElement}
+      </MenuItem>
+    );
+  }
+
+  maybeRenderCopyPageUrlItem() {
+    const { marker, innerWindowIDToPageMap } = this.props;
+    const { data } = marker;
+
+    if (!data || !data.innerWindowID || !innerWindowIDToPageMap) {
+      // Marker doesn't contain any page information. Do not render anything.
+      return null;
+    }
+
+    const page = innerWindowIDToPageMap.get(data.innerWindowID);
+    if (!page) {
+      // Page couldn't be found. Do not render anything.
+      return null;
+    }
+
+    return (
+      <MenuItem onClick={this.copyPageUrl}>
+        <span className="react-contextmenu-icon markerContextMenuIconCopyUrl" />
+        <Localized id="MarkerContextMenu--copy-page-url">
+          Copy page URL
+        </Localized>
       </MenuItem>
     );
   }
@@ -453,6 +500,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             <Localized id="MarkerContextMenu--copy-url">Copy URL</Localized>
           </MenuItem>
         ) : null}
+        {this.maybeRenderCopyPageUrlItem()}
         <MenuItem onClick={this.copyMarkerJSON}>
           <span className="react-contextmenu-icon markerContextMenuIconCopyPayload" />
           <Localized id="MarkerContextMenu--copy-as-json">
@@ -481,6 +529,7 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
       thread: selectors.getThread(state),
       getMarkerLabelToCopy: selectors.getMarkerLabelToCopyGetter(state),
       profiledThreadIds: getProfiledThreadIds(state),
+      innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
     };
   },
   mapDispatchToProps: {

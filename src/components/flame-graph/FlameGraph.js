@@ -14,7 +14,7 @@ import {
   getPreviewSelection,
   getScrollToSelectionGeneration,
   getProfileInterval,
-  getPageList,
+  getInnerWindowIDToPageMap,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -33,7 +33,6 @@ import {
 import type {
   Thread,
   CategoryList,
-  PageList,
   Milliseconds,
   StartEndRange,
   WeightType,
@@ -44,6 +43,8 @@ import type {
   IndexIntoCallNodeTable,
   TracedTiming,
   ThreadsKey,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-graph';
@@ -66,7 +67,7 @@ const SELECTABLE_THRESHOLD = 0.001;
 type StateProps = {|
   +thread: Thread,
   +weightType: WeightType,
-  +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
   +maxStackDepth: number,
@@ -315,7 +316,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       categories,
       interval,
       isInverted,
-      pages,
+      innerWindowIDToPageMap,
       weightType,
       samples,
       unfilteredSamples,
@@ -350,7 +351,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
             // FlameGraphCanvas props
             chartProps={{
               thread,
-              pages,
+              innerWindowIDToPageMap,
               weightType,
               unfilteredThread,
               sampleIndexOffset,
@@ -415,7 +416,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     isInverted: getInvertCallstack(state),
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
-    pages: getPageList(state),
+    innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
     samples:
       selectedThreadSelectors.getPreviewFilteredSamplesForCallTree(state),
     unfilteredSamples:
