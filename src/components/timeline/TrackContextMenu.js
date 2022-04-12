@@ -816,7 +816,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     // 2. Are there any global (2.1) or local tracks (2.2) to hide for this
     // search filter?
     // Also, all these checks (1, 2.1, 2.2) are extracted into arrow functions,
-    // so we don't have to do all these checks if they are not needed anymore.
+    // so we don't have to do all these checks if they are not needed.
 
     // 1. First we need to check if there are going to be visible tracks left
     // after hiding the matching ones.
@@ -825,7 +825,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     // the hidden tracks.
 
     // New global tracks counts after this menu item is clicked.
-    const visibleGlobalTracksLeftAfterHiding = () => {
+    const hasVisibleGlobalTracksLeftAfterHiding = () => {
       const newHiddenGlobalTrackCount =
         hiddenGlobalTracks.size +
         searchFilteredGlobalTracks.size -
@@ -834,7 +834,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     };
 
     // 2.1. Check if there are any global tracks to hide.
-    const hasGlobalTracksToHide = () =>
+    const hasGlobalTrackToHide = () =>
       [...searchFilteredGlobalTracks].some(
         (trackIndex) => !hiddenGlobalTracks.has(trackIndex)
       );
@@ -842,8 +842,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     // 2.2. Check if there are any local tracks to hide. It's a bit more
     // complicated than checking the global tracks because of the nested Map/Sets.
 
-    // Create a hidden global track pids set for faster checks.
     const hasLocalTrackToHide = () => {
+      // Create a hidden global track pids set for faster checks.
       const hiddenGlobalTrackPids = new Set<Pid>();
       for (const trackIndex of hiddenGlobalTracks) {
         const globalTrack = globalTracks[trackIndex];
@@ -876,8 +876,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     };
 
     const isDisabled =
-      visibleGlobalTracksLeftAfterHiding() === false ||
-      (hasGlobalTracksToHide() === false && hasLocalTrackToHide() === false);
+      !hasVisibleGlobalTracksLeftAfterHiding() ||
+      (!hasGlobalTrackToHide() && !hasLocalTrackToHide());
 
     return (
       <MenuItem onClick={this._hideMatchedTracks} disabled={isDisabled}>

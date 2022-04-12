@@ -1069,13 +1069,15 @@ export function changeLocalTrackOrder(
  * that both hide that global tracks, and local tracks. When hiding a global track,
  * then it will not have a local track to ignore. When hiding local track, it will
  * need to ignore the local track index that's being hidden, AND the global track
- * that it's attached to, as it's already been checked.
+ * that it's attached to, as it's already been checked. When hiding multiple
+ * tracks that might include global and local tracks, it will need to ignore
+ * both global and local tracks.
  */
 function _findOtherVisibleThread(
   getState: () => State,
-  // Either this global track is already hidden, or it has been taken into account.
+  // Either these global tracks are already hidden, or they have been taken into account.
   globalTrackIndexesToIgnore?: Set<TrackIndex>,
-  // This is helpful when hiding a new local track index, it won't be selected.
+  // This is helpful when hiding new local track indexes, they won't be selected.
   localTrackIndexesToIgnoreByPid?: Map<Pid, Set<TrackIndex>>
 ): ThreadIndex | null {
   const globalTracks = getGlobalTracks(getState());
