@@ -873,7 +873,7 @@ type DefaultVisibilityScore = {|
 |};
 
 // Also called "padenot factor".
-const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 100;
+const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 
 // Compute a "default visibility" score for this thread.
 // See the DefaultVisibilityScore type for details.
