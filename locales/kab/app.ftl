@@ -103,6 +103,11 @@ Details--close-sidebar-button =
 FooterLinks--legal = Usḍif
 FooterLinks--Privacy = Tabaḍnit
 FooterLinks--Cookies = Inagan n tuqqna
+FooterLinks--languageSwitcher--select =
+    .title = Snifel tutlayt
+FooterLinks--hide-button =
+    .title = Ffer iseɣwan n uḍar n usebter
+    .aria-label = Ffer iseɣwan n uḍar n usebter
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -112,6 +117,13 @@ FullTimeline--graph-type = Anaw n udfil:
 FullTimeline--categories-with-cpu = taggayin s CPU
 FullTimeline--categories = Taggayin
 FullTimeline--stack-height = Teɣzi n tbursa
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tizlatin
 
 ## Home page
 
@@ -174,6 +186,8 @@ MarkerContextMenu--end-selection-here = Taggara n ufran da
 MarkerContextMenu--copy-description = Nɣel aglam
 MarkerContextMenu--copy-call-stack = Nɣel tanebdant n usiwel
 MarkerContextMenu--copy-url = Nɣel URL
+MarkerContextMenu--copy-page-url = Nɣel URL n usebter
+MarkerContextMenu--copy-as-json = Nɣel am JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -311,7 +325,6 @@ NumberFormat--short-date = { SHORTDATE($date) }
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
-ProfileFilterNavigator--full-range = Azilal ummid
 
 ## Profile Loader Animation
 
