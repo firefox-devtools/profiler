@@ -130,7 +130,7 @@
     "eslint-plugin-jest-formatting": "^3.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.29.4",
-    "eslint-plugin-testing-library": "^5.0.6",
+    "eslint-plugin-testing-library": "^5.2.1",
     "fake-indexeddb": "^3.1.7",
     "file-loader": "^6.2.0",
     "flow-bin": "^0.96.0",
@@ -160,7 +160,7 @@
     "stylelint-prettier": "^2.0.0",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^4.7.4"
+    "webpack-dev-server": "^4.8.1"
   },
   "jest": {
     "collectCoverageFrom": [
