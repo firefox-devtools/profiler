@@ -45,6 +45,9 @@ window.geckoProfilerPromise = new Promise(function (resolve) {
 
 const store = createStore();
 
+// This uses the React 17 API despite that we use React 18. When moving to the
+// newer API, don't forget to update the tests in
+// src/test/fixtures/testing-library.js.
 render(
   <Root store={store} />,
   ensureExists(

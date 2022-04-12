@@ -6,8 +6,8 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';

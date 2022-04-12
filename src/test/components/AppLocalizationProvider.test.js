@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { ReactLocalization, Localized } from '@fluent/react';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { lazilyParsedBundles } from 'firefox-profiler/app-logic/l10n';
 import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 import {
@@ -73,7 +73,16 @@ describe('AppLocalizationProvider', () => {
       );
     });
     (window: any).fetch = fetch;
-    return { store, dispatch, getState, translatedText };
+
+    function dispatchWithAct(action) {
+      // Wrap direct dispatch actions in `act` so that React behaves as if it's
+      // a single user interaction.
+      return act(() => {
+        dispatch(action);
+      });
+    }
+
+    return { store, dispatch, dispatchWithAct, getState, translatedText };
   }
 
   it('changes the state accordingly when the actions are dispatched', () => {
@@ -112,7 +121,7 @@ describe('AppLocalizationProvider', () => {
   });
 
   it('fetches the en-US FTL strings and renders them', async () => {
-    const { store, dispatch, translatedText } = setup();
+    const { store, dispatchWithAct, translatedText } = setup();
     render(
       <Provider store={store}>
         <AppLocalizationProvider>
@@ -131,21 +140,21 @@ describe('AppLocalizationProvider', () => {
     expect(document.dir).toBe('ltr');
 
     // Now we're testing the LTR pseudo-localization.
-    dispatch(togglePseudoStrategy('accented'));
+    dispatchWithAct(togglePseudoStrategy('accented'));
     expect(await screen.findByText('Ŧħīş īş ḗḗƞ-ŬŞ Ŧḗḗẋŧ')).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
 
     // And now the RTL pseudo-localization.
-    dispatch(togglePseudoStrategy('bidi'));
+    dispatchWithAct(togglePseudoStrategy('bidi'));
     expect(await screen.findByText(/⊥ɥıs ıs ǝu-∩S ⊥ǝxʇ/)).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('rtl');
 
     // Back to no pseudo-localization
-    dispatch(togglePseudoStrategy(null));
+    dispatchWithAct(togglePseudoStrategy(null));
     expect(
       await screen.findByText(translatedText('en-US'))
     ).toBeInTheDocument();
@@ -155,7 +164,7 @@ describe('AppLocalizationProvider', () => {
   });
 
   it('can switch the language', async () => {
-    const { store, dispatch, translatedText } = setup();
+    const { store, dispatchWithAct, translatedText } = setup();
     render(
       <Provider store={store}>
         <AppLocalizationProvider>
@@ -175,7 +184,7 @@ describe('AppLocalizationProvider', () => {
     expect(document.dir).toBe('ltr');
 
     // Switch to german
-    dispatch(requestL10n(['de']));
+    dispatchWithAct(requestL10n(['de']));
     expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
     // $FlowExpectError Our version of flow doesn't know about document.dir

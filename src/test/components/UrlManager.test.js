@@ -139,7 +139,7 @@ describe('UrlManager', function () {
   });
 
   it('sets the data source to from-browser when coming from the legacy URL /from-addon even when there are double slashes', async function () {
-    jest.spyOn(console, 'error');
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     const { getState, createUrlManager, waitUntilUrlSetupPhase } =
       setup('//from-addon');
     expect(getDataSource(getState())).toMatch('none');
@@ -147,7 +147,10 @@ describe('UrlManager', function () {
 
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('from-browser');
-    expect(console.error).not.toHaveBeenCalled();
+
+    // This is called by React 18 until we move to the createRoot API.
+    //expect(console.error).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalledTimes(1);
   });
 
   it('redirects from-file back to no data source', async function () {
