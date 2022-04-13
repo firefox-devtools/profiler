@@ -93,6 +93,7 @@ const TEXT_OFFSET_START = 3;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const LABEL_PADDING = 5;
+const MARKER_BORDER_COLOR = '#2c77d1';
 
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
@@ -291,7 +292,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       // the rectangle-with-borders would only be borders. With less than 2
       // pixels, the borders would collapse.
       // So let's draw it directly as a rect.
-      ctx.fillStyle = isHighlighted ? BLUE_80 : BLUE_60;
+      ctx.fillStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
 
       // w is rounded in the caller, but let's make sure it's at least 1.
       w = Math.max(w, 1);
@@ -301,7 +302,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       const textMeasurement = this._getTextMeasurement(ctx);
 
       ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
-      ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
+      ctx.strokeStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
 
       ctx.beginPath();
 
@@ -347,7 +348,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     h: CssPixels,
     isHighlighted: boolean
   ) {
-    ctx.fillStyle = isHighlighted ? BLUE_80 : BLUE_60;
+    ctx.fillStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
 
     ctx.beginPath();
     ctx.arc(
