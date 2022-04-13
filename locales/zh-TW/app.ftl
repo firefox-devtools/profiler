@@ -562,8 +562,11 @@ TrackContextMenu--hide-other-screenshots-tracks = 隱藏其他畫面擷圖軌
 TrackContextMenu--hide-track = 隱藏「{ $trackName }」
 TrackContextMenu--show-all-tracks = 顯示所有軌道
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = 在下方顯示所有軌道
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = 顯示所有符合的軌道
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = 隱藏所有符合的軌道
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:
