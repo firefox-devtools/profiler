@@ -33,14 +33,15 @@ import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 
 import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
-type MarkerDrawingInformation = {
-  x: CssPixels,
-  y: CssPixels,
-  w: CssPixels,
-  h: CssPixels,
-  uncutWidth: CssPixels,
-  text: string,
-};
+
+type MarkerDrawingInformation = {|
+  +x: CssPixels,
+  +y: CssPixels,
+  +w: CssPixels,
+  +h: CssPixels,
+  +isInstantMarker: boolean,
+  +text: string,
+|};
 
 // We can hover over multiple items with Marker chart when we are in the active
 // tab view. Usually on other charts, we only have one selected item at a time.
@@ -91,7 +92,6 @@ const TEXT_OFFSET_TOP = 11;
 const TEXT_OFFSET_START = 3;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
-const DOT_WIDTH = 10;
 const LABEL_PADDING = 5;
 
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
@@ -263,20 +263,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     y: CssPixels,
     w: CssPixels,
     h: CssPixels,
-    uncutWidth: CssPixels,
+    isInstantMarker: boolean,
     text: string,
     isHighlighted: boolean = false
   ) {
-    if (uncutWidth >= h) {
-      this.drawOneIntervalMarker(ctx, x, y, w, h, text, isHighlighted);
+    if (isInstantMarker) {
+      this.drawOneInstantMarker(ctx, x, y, h, isHighlighted);
     } else {
-      this.drawOneInstantMarker(
-        ctx,
-        x + uncutWidth / 2, // center of the marker's x
-        y,
-        h,
-        isHighlighted
-      );
+      this.drawOneIntervalMarker(ctx, x, y, w, h, text, isHighlighted);
     }
   }
 
@@ -414,31 +408,28 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       let previousMarkerDrawnAtX: number | null = null;
 
       for (let i = 0; i < markerTiming.length; i++) {
+        const startTimestamp = markerTiming.start[i];
+        const endTimestamp = markerTiming.end[i];
+        const isInstantMarker = startTimestamp === endTimestamp;
+
         // Only draw samples that are in bounds.
         if (
-          markerTiming.end[i] >= timeAtViewportLeft &&
-          markerTiming.start[i] < timeAtViewportRightPlusMargin
+          endTimestamp >= timeAtViewportLeft &&
+          startTimestamp < timeAtViewportRightPlusMargin
         ) {
           const startTime: UnitIntervalOfProfileRange =
-            (markerTiming.start[i] - rangeStart) / rangeLength;
+            (startTimestamp - rangeStart) / rangeLength;
           const endTime: UnitIntervalOfProfileRange =
-            (markerTiming.end[i] - rangeStart) / rangeLength;
+            (endTimestamp - rangeStart) / rangeLength;
 
           let x: CssPixels =
             ((startTime - viewportLeft) * markerContainerWidth) /
               viewportLength +
             marginLeft;
           const y: CssPixels = rowIndex * rowHeight - viewportTop;
-          const uncutWidth: CssPixels =
+          const w: CssPixels =
             ((endTime - startTime) * markerContainerWidth) / viewportLength;
           const h: CssPixels = rowHeight - 1;
-
-          let w = uncutWidth;
-          if (uncutWidth < DOT_WIDTH) {
-            // Ensure that small durations render as a dot, but markers cut by the margins
-            // are rendered as squares.
-            w = DOT_WIDTH;
-          }
 
           x = Math.round(x * devicePixelRatio) / devicePixelRatio;
 
@@ -450,16 +441,17 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
             hoveredItem === markerIndex;
 
           if (isHighlighted) {
-            highlightedMarkers.push({ x, y, w, h, uncutWidth, text });
+            highlightedMarkers.push({ x, y, w, h, isInstantMarker, text });
           } else if (
-            // Always render non-dot markers.
-            uncutWidth > DOT_WIDTH ||
+            // Always render non-dot markers and markers that are larger than
+            // one pixel.
+            w > 1 ||
             // Do not render dot markers that occupy the same pixel, as this can take
             // a lot of time, and not change the visual display of the chart.
             x !== previousMarkerDrawnAtX
           ) {
             previousMarkerDrawnAtX = x;
-            this.drawOneMarker(ctx, x, y, w, h, uncutWidth, text);
+            this.drawOneMarker(ctx, x, y, w, h, isInstantMarker, text);
           }
         }
       }
@@ -474,7 +466,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         highlightedMarker.y,
         highlightedMarker.w,
         highlightedMarker.h,
-        highlightedMarker.uncutWidth,
+        highlightedMarker.isInstantMarker,
         highlightedMarker.text,
         true /* isHighlighted */
       );
