@@ -628,8 +628,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Dölj andra Skärmdump-spår
 TrackContextMenu--hide-track = Dölj "{ $trackName }"
 TrackContextMenu--show-all-tracks = Visa alla spår
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Visa alla spår nedan
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Visa alla matchande spår
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Dölj alla matchande spår
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:
