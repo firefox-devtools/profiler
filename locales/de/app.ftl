@@ -620,8 +620,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Andere Screenshots-Tracks ausb
 TrackContextMenu--hide-track = „{ $trackName }“ verbergen
 TrackContextMenu--show-all-tracks = Alle Tracks anzeigen
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Alle darunterliegenden Tracks anzeigen
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Alle passenden Tracks anzeigen
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Alle passenden Tracks ausblenden
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:
