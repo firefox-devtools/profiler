@@ -450,6 +450,7 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'SELECT_TRACK':
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
+    case 'HIDE_PROVIDED_TRACKS':
     case 'CHANGE_SELECTED_MARKER':
     case 'CHANGE_SELECTED_NETWORK_MARKER':
       return state + 1;
