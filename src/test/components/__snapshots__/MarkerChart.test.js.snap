@@ -467,14 +467,6 @@ Array [
     "clip",
   ],
   Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
-  ],
-  Array [
     "set fillStyle",
     "#0060df",
   ],
@@ -491,6 +483,14 @@ Array [
   ],
   Array [
     "fill",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
   ],
   Array [
     "set fillStyle",

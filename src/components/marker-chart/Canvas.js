@@ -267,57 +267,88 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     text: string,
     isHighlighted: boolean = false
   ) {
+    if (uncutWidth >= h) {
+      this.drawOneIntervalMarker(ctx, x, y, w, h, text, isHighlighted);
+    } else {
+      this.drawOneInstantMarker(
+        ctx,
+        x + uncutWidth / 2, // center of the marker's x
+        y,
+        h,
+        isHighlighted
+      );
+    }
+  }
+
+  drawOneIntervalMarker(
+    ctx: CanvasRenderingContext2D,
+    x: CssPixels,
+    y: CssPixels,
+    w: CssPixels,
+    h: CssPixels,
+    text: string,
+    isHighlighted: boolean
+  ) {
     const { marginLeft } = this.props;
     const textMeasurement = this._getTextMeasurement(ctx);
 
-    if (uncutWidth >= h) {
-      ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
-      ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
+    ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
+    ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
 
-      ctx.beginPath();
+    ctx.beginPath();
 
-      // We want the rectangle to have a clear margin, that's why we increment y
-      // and decrement h (twice, for both margins).
-      // We also add "0.5" more so that the stroke is properly on a pixel.
-      // Indeed strokes are drawn on both sides equally, so half a pixel on each
-      // side in this case.
-      ctx.rect(
-        x + 0.5, // + 0.5 for the stroke
-        y + 1 + 0.5, // + 1 for the top margin, + 0.5 for the stroke
-        w - 1, // - 1 to account for left and right strokes.
-        h - 2 - 1 // + 2 accounts for top and bottom margins, + 1 accounts for top and bottom strokes
-      );
-      ctx.fill();
-      ctx.stroke();
+    // We want the rectangle to have a clear margin, that's why we increment y
+    // and decrement h (twice, for both margins).
+    // We also add "0.5" more so that the stroke is properly on a pixel.
+    // Indeed strokes are drawn on both sides equally, so half a pixel on each
+    // side in this case.
+    ctx.rect(
+      x + 0.5, // + 0.5 for the stroke
+      y + 1 + 0.5, // + 1 for the top margin, + 0.5 for the stroke
+      w - 1, // - 1 to account for left and right strokes.
+      h - 2 - 1 // + 2 accounts for top and bottom margins, + 1 accounts for top and bottom strokes
+    );
+    ctx.fill();
+    ctx.stroke();
 
-      // Draw the text label
-      // TODO - L10N RTL.
-      // Constrain the x coordinate to the leftmost area.
-      const x2: CssPixels =
-        x < marginLeft ? marginLeft + TEXT_OFFSET_START : x + TEXT_OFFSET_START;
-      const visibleWidth = x < marginLeft ? w - marginLeft + x : w;
-      const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
+    // Draw the text label
+    // TODO - L10N RTL.
+    // Constrain the x coordinate to the leftmost area.
+    const x2: CssPixels =
+      x < marginLeft ? marginLeft + TEXT_OFFSET_START : x + TEXT_OFFSET_START;
+    const visibleWidth = x < marginLeft ? w - marginLeft + x : w;
+    const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
 
-      if (w2 > textMeasurement.minWidth) {
-        const fittedText = textMeasurement.getFittedText(text, w2);
-        if (fittedText) {
-          ctx.fillStyle = isHighlighted ? 'white' : 'black';
-          ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
-        }
+    if (w2 > textMeasurement.minWidth) {
+      const fittedText = textMeasurement.getFittedText(text, w2);
+      if (fittedText) {
+        ctx.fillStyle = isHighlighted ? 'white' : 'black';
+        ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
       }
-    } else {
-      ctx.fillStyle = isHighlighted ? BLUE_80 : BLUE_60;
-
-      ctx.beginPath();
-      ctx.arc(
-        x + uncutWidth / 2, // x
-        y + h / 2, // y
-        h * MARKER_DOT_RADIUS, // radius
-        0, // arc start
-        TWO_PI // arc end
-      );
-      ctx.fill();
     }
+  }
+
+  // x indicates the center of this marker
+  // y indicates the top of the row
+  // h indicates the available height in the row
+  drawOneInstantMarker(
+    ctx: CanvasRenderingContext2D,
+    x: CssPixels,
+    y: CssPixels,
+    h: CssPixels,
+    isHighlighted: boolean
+  ) {
+    ctx.fillStyle = isHighlighted ? BLUE_80 : BLUE_60;
+
+    ctx.beginPath();
+    ctx.arc(
+      x,
+      y + h / 2,
+      h * MARKER_DOT_RADIUS, // radius
+      0, // arc start
+      TWO_PI // arc end
+    );
+    ctx.fill();
   }
 
   drawMarkers(
