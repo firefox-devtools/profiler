@@ -17,7 +17,7 @@ import type {
  * This structure is a simple array, as it makes it very easy to loop through the
  * fixed height rows in the canvas, and draw only what is in view.
  *
- * e.g. An array of 15 markers named either "A", "B", or "C" would be translated into
+ * e.g. An array of 20 markers named either "A", "B", or "C" would be translated into
  *      something that looks like:
  *
  *  [
@@ -28,6 +28,8 @@ import type {
  *      index: [0, 2, 5, 6, 8],
  *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"],
  *      bucket: "DOM",
+ *      instantOnly: false,
+ *      length: 5,
  *    },
  *    { // First line of B markers
  *      name: "B",
@@ -36,6 +38,8 @@ import type {
  *      index: [1, 3, 7, 9, 10],
  *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
  *      bucket: "DOM",
+ *      instantOnly: false,
+ *      length: 5,
  *    },
  *    { // Second line of B markers
  *      name: "B",
@@ -44,6 +48,8 @@ import type {
  *      index: [1, 3, 7, 9, 10],
  *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
  *      bucket: "DOM",
+ *      instantOnly: false,
+ *      length: 5,
  *    },
  *    {
  *      name: "C",
@@ -52,6 +58,8 @@ import type {
  *      index: [4, 11, 12, 13, 14],
  *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"],
  *      bucket: "Other",
+ *      instantOnly: false,
+ *      length: 5,
  *    },
  *  ]
  *
@@ -226,7 +234,7 @@ export function getMarkerTiming(
  * This function builds on `getMarkerTiming` above, inserting the bucket names
  * that are plain strings as items in the result array.
  *
- * Reusing the previous example of an array of 15 markers named either "A", "B",
+ * Reusing the previous example of an array of 20 markers named either "A", "B",
  * or "C", this is the result we'd get:
  *
  *  [
@@ -238,6 +246,8 @@ export function getMarkerTiming(
  *      index: [0, 2, 5, 6, 8],
  *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"],
  *      bucket: "DOM",
+ *      instantOnly: false,
+ *      length: 5,
  *    },
  *    {
  *      name: "B",
@@ -246,6 +256,8 @@ export function getMarkerTiming(
  *      index: [1, 3, 7, 9, 10],
  *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
  *      bucket: "DOM",
+ *      instantOnly: false,
+ *      length: 5,
  *    },
  *    { // Second line of B markers
  *      name: "B",
@@ -254,6 +266,8 @@ export function getMarkerTiming(
  *      index: [1, 3, 7, 9, 10],
  *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"],
  *      bucket: "DOM",
+ *      instantOnly: false,
+ *      length: 5,
  *    },
  *    "Other", // The bucket.
  *    {
@@ -263,6 +277,8 @@ export function getMarkerTiming(
  *      index: [4, 11, 12, 13, 14],
  *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"],
  *      bucket: "Other",
+ *      instantOnly: false,
+ *      length: 5,
  *    },
  *  ]
  */
