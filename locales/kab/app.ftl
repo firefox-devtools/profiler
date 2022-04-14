@@ -378,6 +378,7 @@ TrackContextMenu--hide-track = Ffer “{ $trackName }”
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -452,6 +453,12 @@ SourceView--browser-connection-error-when-obtaining-source = Ur yezmir ara ad ye
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--browser-api-error-when-obtaining-source = API n uzamul n yiminig yerra-d tuccḍa: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Afaylu { $pathInArchive } ur yettwaf ara deg teṛcivt n { $url }.
 # Displayed below SourceView--cannot-obtain-source, if the file format of an
 # "archive" file was not recognized. The only supported archive formats at the
 # moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
