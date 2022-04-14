@@ -803,6 +803,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       hiddenGlobalTracks,
       globalTracks,
       hiddenLocalTracksByPid,
+      localTracksByPid,
     } = this.props;
     if (rightClickedTrack !== null) {
       // This option should only be visible in the top context menu and not when
@@ -826,10 +827,52 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     // New global tracks counts after this menu item is clicked.
     const hasVisibleGlobalTracksLeftAfterHiding = () => {
+      // For the global tracks with no main threads, we should check if all of
+      // their local tracks are going to be hidden. If so, we should make sure
+      // that we account them while calculating the hidden global track count.
+      let newHiddenGlobalTracksWithoutMainThread = 0;
+      for (const [
+        pid,
+        searchFilteredLocalTracks,
+      ] of searchFilteredLocalTracksByPid) {
+        const globalTrackIndex = ensureExists(
+          globalTracks.findIndex(
+            (track) => track.type === 'process' && track.pid === pid
+          )
+        );
+        if (hiddenGlobalTracks.has(globalTrackIndex)) {
+          // Do not check the already hidden global tracks since they are already hidden.
+          continue;
+        }
+
+        const globalTrack = globalTracks[globalTrackIndex];
+        if (globalTrack.mainThreadIndex !== null) {
+          // We only need to check the global tracks without main threads.
+          continue;
+        }
+
+        // This is a process global track without main thread.
+        // We should check if all of its local tracks are going to be visible or not.
+        const localTracks = ensureExists(localTracksByPid.get(pid));
+        const hiddenLocalTracks = ensureExists(hiddenLocalTracksByPid.get(pid));
+        const newHiddenLocalTrackCount =
+          hiddenLocalTracks.size +
+          searchFilteredLocalTracks.size -
+          intersectSets(hiddenLocalTracks, searchFilteredLocalTracks).size;
+
+        if (newHiddenLocalTrackCount === localTracks.length) {
+          // All of this global track's local tracks are going to be hidden.
+          // This global track is going to be hidden as well, so add this to the
+          // hidden global tracks count.
+          newHiddenGlobalTracksWithoutMainThread += 1;
+        }
+      }
+
       const newHiddenGlobalTrackCount =
         hiddenGlobalTracks.size +
         searchFilteredGlobalTracks.size -
-        intersectSets(hiddenGlobalTracks, searchFilteredGlobalTracks).size;
+        intersectSets(hiddenGlobalTracks, searchFilteredGlobalTracks).size +
+        newHiddenGlobalTracksWithoutMainThread;
       return newHiddenGlobalTrackCount < globalTracks.length;
     };
 
