@@ -628,8 +628,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Celar altere tracias de instan
 TrackContextMenu--hide-track = Celar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Monstrar tote le tracias
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Monstrar tote le tracias infra
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Monstrar tote le tracias concordante
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Celar tote le tracias concordante
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:
