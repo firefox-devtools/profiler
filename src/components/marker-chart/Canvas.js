@@ -427,11 +427,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
               viewportLength +
             marginLeft;
           const y: CssPixels = rowIndex * rowHeight - viewportTop;
-          const w: CssPixels =
+          let w: CssPixels =
             ((endTime - startTime) * markerContainerWidth) / viewportLength;
           const h: CssPixels = rowHeight - 1;
 
           x = Math.round(x * devicePixelRatio) / devicePixelRatio;
+          w = Math.round(w * devicePixelRatio) / devicePixelRatio;
 
           const text = markerTiming.label[i];
           const markerIndex = markerTiming.index[i];
