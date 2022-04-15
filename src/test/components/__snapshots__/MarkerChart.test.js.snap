@@ -938,6 +938,15 @@ Array [
 ]
 `;
 
+exports[`MarkerChart sets a correct size for the marker chart even when dPR is non-integer 1`] = `
+<canvas
+  class="chartCanvas markerChartCanvas"
+  height="327"
+  style="width: 364.83333333333337px; height: 299.75px;"
+  width="398"
+/>
+`;
+
 exports[`MarkerChart with active tab does not render the hovered label 1`] = `
 Array [
   Array [
