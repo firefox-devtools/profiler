@@ -1179,10 +1179,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@firefox-devtools/react-contextmenu@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@firefox-devtools/react-contextmenu/-/react-contextmenu-4.0.0.tgz#0ff0569b342aedef3a822f4aa24c370d4e645805"
-  integrity sha512-tZrxjwPIO5Ey7HETAHKVPlNs8VUFNVkpCKUCablGF3rDUMcTS/DVWROAV855l8OvmRPF9PVSnhvkGc+0BUn4tw==
+"@firefox-devtools/react-contextmenu@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@firefox-devtools/react-contextmenu/-/react-contextmenu-4.1.0.tgz#ff00fe08f021cd2906112a7843f29b69dfdd22a1"
+  integrity sha512-1gi4RZ3mZCA8q6h+5jgB+OX5aIHFDE9NbzFlaulfmQffGnLl3JIPx4SkmHfUOCFC8ikssBhZs0NWQ7vw73N37A==
   dependencies:
     classnames "^2.3.1"
     object-assign "^4.1.0"
