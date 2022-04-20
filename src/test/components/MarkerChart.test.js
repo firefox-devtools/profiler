@@ -232,14 +232,24 @@ describe('MarkerChart', function () {
     );
     expect(arcOperationsXY.size).toBe(3);
 
-    // Check that we have rect operations for the first small interval marker
-    // and the later longer marker.
+    // Check that we have a fillRect operation for the first small interval
+    // marker. We filter also using w or h to filter out the initial clearing
+    // fillRect operation as well as the separators.
+    const fillRectOperations = drawCalls.filter(
+      ([operation, , , w, h]) =>
+        operation === 'fillRect' &&
+        w !== containerWidth - TIMELINE_MARGIN_RIGHT &&
+        h !== containerHeight
+    );
+    expect(fillRectOperations).toHaveLength(1);
+
+    // Check that the rect operation for the later longer marker is present.
     const rectOperations = drawCalls.filter(
       ([operation]) => operation === 'rect'
     );
-    // 3 is expected, because we also have a rect first for the initial `clip`
-    // operation, and one for the longer marker.
-    expect(rectOperations).toHaveLength(3);
+    // We'll actually have 2 rect operations, because we also have a rect first
+    // for the initial `clip` operation, and one for the longer marker.
+    expect(rectOperations).toHaveLength(2);
 
     delete window.devicePixelRatio;
   });

@@ -284,40 +284,55 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     isHighlighted: boolean
   ) {
     const { marginLeft } = this.props;
-    const textMeasurement = this._getTextMeasurement(ctx);
 
-    ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
-    ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
+    if (w <= 2) {
+      // This is an interval marker small enough that if we drew it as a
+      // rectangle, we wouldn't see any inside part. With a width of 2 pixels,
+      // the rectangle-with-borders would only be borders. With less than 2
+      // pixels, the borders would collapse.
+      // So let's draw it directly as a rect.
+      ctx.fillStyle = isHighlighted ? BLUE_80 : BLUE_60;
 
-    ctx.beginPath();
+      // w is rounded in the caller, but let's make sure it's at least 1.
+      w = Math.max(w, 1);
+      ctx.fillRect(x, y + 1, w, h - 2);
+    } else {
+      // This is a bigger interval marker.
+      const textMeasurement = this._getTextMeasurement(ctx);
 
-    // We want the rectangle to have a clear margin, that's why we increment y
-    // and decrement h (twice, for both margins).
-    // We also add "0.5" more so that the stroke is properly on a pixel.
-    // Indeed strokes are drawn on both sides equally, so half a pixel on each
-    // side in this case.
-    ctx.rect(
-      x + 0.5, // + 0.5 for the stroke
-      y + 1 + 0.5, // + 1 for the top margin, + 0.5 for the stroke
-      w - 1, // - 1 to account for left and right strokes.
-      h - 2 - 1 // + 2 accounts for top and bottom margins, + 1 accounts for top and bottom strokes
-    );
-    ctx.fill();
-    ctx.stroke();
+      ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
+      ctx.strokeStyle = isHighlighted ? BLUE_80 : BLUE_60;
 
-    // Draw the text label
-    // TODO - L10N RTL.
-    // Constrain the x coordinate to the leftmost area.
-    const x2: CssPixels =
-      x < marginLeft ? marginLeft + TEXT_OFFSET_START : x + TEXT_OFFSET_START;
-    const visibleWidth = x < marginLeft ? w - marginLeft + x : w;
-    const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
+      ctx.beginPath();
 
-    if (w2 > textMeasurement.minWidth) {
-      const fittedText = textMeasurement.getFittedText(text, w2);
-      if (fittedText) {
-        ctx.fillStyle = isHighlighted ? 'white' : 'black';
-        ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+      // We want the rectangle to have a clear margin, that's why we increment y
+      // and decrement h (twice, for both margins).
+      // We also add "0.5" more so that the stroke is properly on a pixel.
+      // Indeed strokes are drawn on both sides equally, so half a pixel on each
+      // side in this case.
+      ctx.rect(
+        x + 0.5, // + 0.5 for the stroke
+        y + 1 + 0.5, // + 1 for the top margin, + 0.5 for the stroke
+        w - 1, // - 1 to account for left and right strokes.
+        h - 2 - 1 // + 2 accounts for top and bottom margins, + 1 accounts for top and bottom strokes
+      );
+      ctx.fill();
+      ctx.stroke();
+
+      // Draw the text label
+      // TODO - L10N RTL.
+      // Constrain the x coordinate to the leftmost area.
+      const x2: CssPixels =
+        x < marginLeft ? marginLeft + TEXT_OFFSET_START : x + TEXT_OFFSET_START;
+      const visibleWidth = x < marginLeft ? w - marginLeft + x : w;
+      const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
+
+      if (w2 > textMeasurement.minWidth) {
+        const fittedText = textMeasurement.getFittedText(text, w2);
+        if (fittedText) {
+          ctx.fillStyle = isHighlighted ? 'white' : 'black';
+          ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+        }
       }
     }
   }
