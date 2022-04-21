@@ -1,10 +1,7 @@
+/* stylelint-disable */
+
 body {
   font-family: sans-serif;
-  color: #0c0c0d;
-}
-
-/* Match the black font on text headers. */
-.anchor span {
   color: #0c0c0d;
 }
 
@@ -87,6 +84,11 @@ body {
   height: 100%;
 }
 
+/* Makes it easier to read on big screens */
+.markdown-section {
+  max-width: 800px;
+}
+
 /* The markdown tables felt a little too tight. */
 .markdown-section td,
 .markdown-section th {
@@ -98,7 +100,6 @@ body {
 .markdown-section code,
 .markdown-section pre {
   color: #0c0c0d;
-  background-color: rgba(27, 31, 35, 0.05);
   border-radius: 3px;
 }
 
