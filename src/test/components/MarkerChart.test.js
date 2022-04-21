@@ -55,7 +55,7 @@ import type { CssPixels } from 'firefox-profiler/types';
 const MARKERS: TestDefinedMarkers = [
   ['Marker A', 0, 10],
   ['Marker A', 0, 10],
-  ['Marker A', 11, 15],
+  ['Marker A', 11, 17], // 17 is chosen on purpose so that we can test rounding on integer pixels
   [
     'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
     5,
@@ -636,8 +636,8 @@ describe('MarkerChart', function () {
         ],
         [
           'Marker DomEvent',
-          4,
-          10,
+          6,
+          13,
           {
             type: 'DOMEvent',
             latency: 7,

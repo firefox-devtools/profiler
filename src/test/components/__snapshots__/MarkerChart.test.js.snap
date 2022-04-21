@@ -215,9 +215,9 @@ Array [
   ],
   Array [
     "rect",
-    175.5,
+    172.5,
     129.5,
-    74,
+    65.66666666666666,
     12,
   ],
   Array [
@@ -233,7 +233,7 @@ Array [
   Array [
     "fillText",
     "Marker B",
-    178,
+    175,
     139,
   ],
   Array [
@@ -274,7 +274,7 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 189px; top: 150px;"
+  style="left: 186px; top: 150px;"
 >
   <div
     class="tooltipMarker"
@@ -483,7 +483,7 @@ Array [
   ],
   Array [
     "arc",
-    200,
+    194.5,
     23.5,
     3.75,
     0,
@@ -507,7 +507,7 @@ Array [
     "rect",
     150.5,
     33.5,
-    124,
+    110.11111111111111,
     12,
   ],
   Array [
@@ -533,9 +533,9 @@ Array [
   ],
   Array [
     "rect",
-    288,
+    272.5,
     33.5,
-    49,
+    65.66666666666666,
     12,
   ],
   Array [
@@ -559,7 +559,7 @@ Array [
     "rect",
     150.5,
     49.5,
-    124,
+    110.11111111111111,
     12,
   ],
   Array [
@@ -581,9 +581,9 @@ Array [
   ],
   Array [
     "rect",
-    213,
+    206,
     65.5,
-    61.5,
+    54.55555555555556,
     12,
   ],
   Array [
@@ -603,7 +603,7 @@ Array [
   Array [
     "fillText",
     "click",
-    215.5,
+    208.5,
     75,
   ],
   Array [
@@ -615,7 +615,7 @@ Array [
   ],
   Array [
     "arc",
-    268.75,
+    255.55555555555557,
     87.5,
     3.75,
     0,
@@ -639,7 +639,7 @@ Array [
     "rect",
     150.5,
     97.5,
-    36.5,
+    32.33333333333333,
     12,
   ],
   Array [
@@ -657,7 +657,7 @@ Array [
   ],
   Array [
     "arc",
-    237.5,
+    228,
     119.5,
     3.75,
     0,
@@ -679,9 +679,9 @@ Array [
   ],
   Array [
     "rect",
-    175.5,
+    172.5,
     129.5,
-    74,
+    65.66666666666666,
     12,
   ],
   Array [
@@ -701,7 +701,7 @@ Array [
   Array [
     "fillText",
     "Marker B",
-    178,
+    175,
     139,
   ],
   Array [
@@ -717,9 +717,9 @@ Array [
   ],
   Array [
     "rect",
-    213,
+    206,
     145.5,
-    124,
+    110.11111111111111,
     12,
   ],
   Array [
@@ -1004,9 +1004,9 @@ Array [
   ],
   Array [
     "rect",
-    88.5,
+    117.5,
     17.5,
-    130.25,
+    135.11111111111111,
     12,
   ],
   Array [
@@ -1022,7 +1022,7 @@ Array [
   Array [
     "fillText",
     "click",
-    91,
+    120,
     27,
   ],
   Array [
@@ -1088,9 +1088,9 @@ Array [
   ],
   Array [
     "rect",
-    88.5,
+    117.5,
     17.5,
-    130.25,
+    135.11111111111111,
     12,
   ],
   Array [
@@ -1106,7 +1106,7 @@ Array [
   Array [
     "fillText",
     "click",
-    91,
+    120,
     27,
   ],
   Array [
@@ -1155,7 +1155,7 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 102px; top: 38px;"
+  style="left: 131px; top: 38px;"
 >
   <div
     class="tooltipMarker"
@@ -1169,7 +1169,7 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
         <div
           class="tooltipTiming"
         >
-          6ms
+          7ms
         </div>
         <div
           class="tooltipTitle"
@@ -1353,9 +1353,9 @@ Array [
   ],
   Array [
     "rect",
-    88,
+    117,
     17.5,
-    130.25,
+    135.11111111111111,
     12,
   ],
   Array [
@@ -1375,7 +1375,7 @@ Array [
   Array [
     "fillText",
     "click",
-    90.5,
+    119.5,
     27,
   ],
   Array [
@@ -1387,7 +1387,7 @@ Array [
   ],
   Array [
     "arc",
-    65.5,
+    58.5,
     39.5,
     3.75,
     0,
