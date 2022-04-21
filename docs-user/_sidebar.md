@@ -1,5 +1,3 @@
-# Firefox Profiler - End user documentation
-
 * [User Guide](/)
   * [Profiler Fundamentals](./guide-profiler-fundamentals.md)
   * [UI Tour](./guide-ui-tour.md)
