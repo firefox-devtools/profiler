@@ -21,7 +21,6 @@
     "flow-stop": "flow stop",
     "flow-coverage": "flow-coverage-report -i 'src/**/*.js' -t html -t text",
     "flow-generate-libdefs": "flow-typed install --libdefDir src/types/libdef",
-    "init-docs": "gitbook install ./docs-user",
     "license-check": "devtools-license-check",
     "preinstall": "node bin/pre-install.js",
     "publish": "rimraf public_html && cp -r dist public_html",
