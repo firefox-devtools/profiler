@@ -57,7 +57,7 @@
     "@codemirror/rangeset": "^0.19.9",
     "@codemirror/state": "^0.19.9",
     "@codemirror/view": "^0.19.47",
-    "@firefox-devtools/react-contextmenu": "^4.0.0",
+    "@firefox-devtools/react-contextmenu": "^5.0.0",
     "@fluent/bundle": "^0.17.1",
     "@fluent/langneg": "^0.6.1",
     "@fluent/react": "^0.14.1",
