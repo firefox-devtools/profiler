@@ -76,8 +76,8 @@ body {
   width: 30px;
   height: 30px;
   display: inline-block;
-  margin-right: 8px;
-  background-image: url(../images/favicon.png);
+  margin-right: 12px;
+  background-image: url(../images/favicon.svg);
   background-position: 0;
   background-size: 100%;
 }
