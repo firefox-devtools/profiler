@@ -170,14 +170,15 @@ export const getVisualMetrics: Selector<VisualMetrics> = (state) =>
     getVisualMetricsOrNull(state),
     'Tried to access the visual metrics when it does not exist.'
   );
-export const getVisualProgress: Selector<ProgressGraphData[]> = (state) =>
-  getVisualMetrics(state).VisualProgress;
-export const getPerceptualSpeedIndexProgress: Selector<ProgressGraphData[]> = (
+export const getVisualProgress: Selector<ProgressGraphData[] | null> = (
   state
-) => getVisualMetrics(state).PerceptualSpeedIndexProgress;
-export const getContentfulSpeedIndexProgress: Selector<ProgressGraphData[]> = (
-  state
-) => getVisualMetrics(state).ContentfulSpeedIndexProgress;
+) => getVisualMetrics(state).VisualProgress;
+export const getPerceptualSpeedIndexProgress: Selector<
+  ProgressGraphData[] | null
+> = (state) => getVisualMetrics(state).PerceptualSpeedIndexProgress ?? null;
+export const getContentfulSpeedIndexProgress: Selector<
+  ProgressGraphData[] | null
+> = (state) => getVisualMetrics(state).ContentfulSpeedIndexProgress ?? null;
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = (
   state
 ) => getMeta(state).configuration;
@@ -613,6 +614,27 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 );
 
 /**
+ * Returns an InnerWindowID -> Page map, so we can look up the page from inner
+ * window id quickly. Returns null if there are no pages in the profile.
+ */
+export const getInnerWindowIDToPageMap: Selector<Map<
+  InnerWindowID,
+  Page
+> | null> = createSelector(getPageList, (pages) => {
+  if (!pages) {
+    // Return null if there are no pages.
+    return null;
+  }
+
+  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
+  for (const page of pages) {
+    innerWindowIDToPageMap.set(page.innerWindowID, page);
+  }
+
+  return innerWindowIDToPageMap;
+});
+
+/**
  * Get the pages array and construct a Map of pages that we can use to get the
  * relationships of tabs. The constructed map is `Map<TabID,Page[]>`.
  * The TabID we use in that map is the TabID of the topmost frame. That corresponds
@@ -621,22 +643,18 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
  */
 export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
   getPageList,
-  (pageList) => {
-    if (pageList === null || pageList.length === 0) {
+  getInnerWindowIDToPageMap,
+  (pageList, innerWindowIDToPageMap) => {
+    if (
+      pageList === null ||
+      innerWindowIDToPageMap === null ||
+      pageList.length === 0
+    ) {
       // There is no data, return null
       return null;
     }
 
-    // Constructing this map first so we won't have to walk through the page list
-    // all the time.
-    const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
-
-    for (const page of pageList) {
-      innerWindowIDToPageMap.set(page.innerWindowID, page);
-    }
-
-    // Now we have a way to fastly traverse back with the previous Map.
-    // We can do construction of TabID to Page array map.
+    // Construction of TabID to Page array map.
     const pageMap: Map<TabID, Page[]> = new Map();
     const appendPageMap = (tabID, page) => {
       const tabEntry = pageMap.get(tabID);

@@ -174,7 +174,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       }
       case 'visual-progress': {
         if (!progressGraphData) {
-          throw new Error('Progress Graph Data is null');
+          throw new Error('Visual progress graph data is missing');
         }
         return (
           <TrackVisualProgress
@@ -185,7 +185,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       }
       case 'perceptual-visual-progress': {
         if (!progressGraphData) {
-          throw new Error('Progress Graph Data is null');
+          throw new Error('Perceptual visual progress graph data is missing');
         }
         return (
           <TrackVisualProgress
@@ -196,7 +196,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       }
       case 'contentful-visual-progress': {
         if (!progressGraphData) {
-          throw new Error('Progress Graph Data is null');
+          throw new Error('Contentful visual progress graph data is missing');
         }
         return (
           <TrackVisualProgress

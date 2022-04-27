@@ -19,6 +19,7 @@ import {
   hideLocalTrack,
   showLocalTrack,
   showProvidedTracks,
+  hideProvidedTracks,
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -44,6 +45,7 @@ import {
 } from 'firefox-profiler/profile-logic/tracks';
 import { ContextMenuNoHidingOnEnter } from 'firefox-profiler/components/shared/ContextMenuNoHidingOnEnter';
 import classNames from 'classnames';
+import { intersectSets } from 'firefox-profiler/utils/set';
 
 import type {
   Thread,
@@ -83,6 +85,7 @@ type DispatchProps = {|
   +isolateProcessMainThread: typeof isolateProcessMainThread,
   +isolateScreenshot: typeof isolateScreenshot,
   +showProvidedTracks: typeof showProvidedTracks,
+  +hideProvidedTracks: typeof hideProvidedTracks,
 |};
 
 type TimelineTrackContextMenuProps = ConnectedProps<
@@ -108,7 +111,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     showAllTracks();
   };
 
-  _showProvidedTracks = (): void => {
+  _showMatchingTracks = (): void => {
     const {
       showProvidedTracks,
       globalTracks,
@@ -170,6 +173,44 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     }
 
     showProvidedTracks(searchFilteredGlobalTracks, localTracksByPidToShow);
+  };
+
+  _hideMatchedTracks = (): void => {
+    const {
+      globalTracks,
+      globalTrackNames,
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+      hideProvidedTracks,
+    } = this.props;
+    const { searchFilter } = this.state;
+    const searchFilteredGlobalTracks = getSearchFilteredGlobalTracks(
+      globalTracks,
+      globalTrackNames,
+      threads,
+      searchFilter
+    );
+    const searchFilteredLocalTracksByPid = getSearchFilteredLocalTracksByPid(
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+      searchFilter
+    );
+
+    if (
+      searchFilteredGlobalTracks === null ||
+      searchFilteredLocalTracksByPid === null
+    ) {
+      // This shouldn't happen!
+      console.warn('Unexpected null search filtered tracks');
+      return;
+    }
+
+    hideProvidedTracks(
+      searchFilteredGlobalTracks,
+      searchFilteredLocalTracksByPid
+    );
   };
 
   _toggleGlobalTrackVisibility = (
@@ -730,14 +771,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       hiddenLocalTracksCount + this.props.hiddenGlobalTracks.size === 0;
 
     return (
-      <React.Fragment>
-        <MenuItem onClick={this._showAllTracks} disabled={isDisabled}>
-          <Localized id="TrackContextMenu--show-all-tracks">
-            Show all tracks
-          </Localized>
-        </MenuItem>
-        <div className="react-contextmenu-separator" />
-      </React.Fragment>
+      <MenuItem onClick={this._showAllTracks} disabled={isDisabled}>
+        <Localized id="TrackContextMenu--show-all-tracks">
+          Show all tracks
+        </Localized>
+      </MenuItem>
     );
   }
 
@@ -748,14 +786,148 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     }
 
     return (
-      <React.Fragment>
-        <MenuItem onClick={this._showProvidedTracks}>
-          <Localized id="TrackContextMenu--show-all-tracks-below">
-            Show all tracks below
-          </Localized>
-        </MenuItem>
-        <div className="react-contextmenu-separator" />
-      </React.Fragment>
+      <MenuItem onClick={this._showMatchingTracks}>
+        <Localized id="TrackContextMenu--show-all-matching-tracks">
+          Show all matching tracks
+        </Localized>
+      </MenuItem>
+    );
+  }
+
+  renderHideMatchingTracks(
+    searchFilteredGlobalTracks: Set<TrackIndex>,
+    searchFilteredLocalTracksByPid: Map<Pid, Set<TrackIndex>>
+  ) {
+    const {
+      rightClickedTrack,
+      hiddenGlobalTracks,
+      globalTracks,
+      hiddenLocalTracksByPid,
+      localTracksByPid,
+    } = this.props;
+    if (rightClickedTrack !== null) {
+      // This option should only be visible in the top context menu and not when
+      // user right clicks on a track.
+      return null;
+    }
+
+    // We need to do a few checks here to determine if this menu item should be
+    // enabled or not. Two things we need to check:
+    // 1. Are there any global tracks left to show after hiding the matched tracks?
+    // 2. Are there any global (2.1) or local tracks (2.2) to hide for this
+    // search filter?
+    // Also, all these checks (1, 2.1, 2.2) are extracted into arrow functions,
+    // so we don't have to do all these checks if they are not needed.
+
+    // 1. First we need to check if there are going to be visible tracks left
+    // after hiding the matching ones.
+    // Check `subtractSets(visible tracks, search filtered tracks)`. Since we
+    // don't have the computed visible tracks, let's check the same thing with
+    // the hidden tracks.
+
+    // New global tracks counts after this menu item is clicked.
+    const hasVisibleGlobalTracksLeftAfterHiding = () => {
+      // For the global tracks with no main threads, we should check if all of
+      // their local tracks are going to be hidden. If so, we should make sure
+      // that we account them while calculating the hidden global track count.
+      let newHiddenGlobalTracksWithoutMainThread = 0;
+      for (const [
+        pid,
+        searchFilteredLocalTracks,
+      ] of searchFilteredLocalTracksByPid) {
+        const globalTrackIndex = ensureExists(
+          globalTracks.findIndex(
+            (track) => track.type === 'process' && track.pid === pid
+          )
+        );
+        if (hiddenGlobalTracks.has(globalTrackIndex)) {
+          // Do not check the already hidden global tracks since they are already hidden.
+          continue;
+        }
+
+        const globalTrack = globalTracks[globalTrackIndex];
+        if (globalTrack.mainThreadIndex !== null) {
+          // We only need to check the global tracks without main threads.
+          continue;
+        }
+
+        // This is a process global track without main thread.
+        // We should check if all of its local tracks are going to be visible or not.
+        const localTracks = ensureExists(localTracksByPid.get(pid));
+        const hiddenLocalTracks = ensureExists(hiddenLocalTracksByPid.get(pid));
+        const newHiddenLocalTrackCount =
+          hiddenLocalTracks.size +
+          searchFilteredLocalTracks.size -
+          intersectSets(hiddenLocalTracks, searchFilteredLocalTracks).size;
+
+        if (newHiddenLocalTrackCount === localTracks.length) {
+          // All of this global track's local tracks are going to be hidden.
+          // This global track is going to be hidden as well, so add this to the
+          // hidden global tracks count.
+          newHiddenGlobalTracksWithoutMainThread += 1;
+        }
+      }
+
+      const newHiddenGlobalTrackCount =
+        hiddenGlobalTracks.size +
+        searchFilteredGlobalTracks.size -
+        intersectSets(hiddenGlobalTracks, searchFilteredGlobalTracks).size +
+        newHiddenGlobalTracksWithoutMainThread;
+      return newHiddenGlobalTrackCount < globalTracks.length;
+    };
+
+    // 2.1. Check if there are any global tracks to hide.
+    const hasGlobalTrackToHide = () =>
+      [...searchFilteredGlobalTracks].some(
+        (trackIndex) => !hiddenGlobalTracks.has(trackIndex)
+      );
+
+    // 2.2. Check if there are any local tracks to hide. It's a bit more
+    // complicated than checking the global tracks because of the nested Map/Sets.
+
+    const hasLocalTrackToHide = () => {
+      // Create a hidden global track pids set for faster checks.
+      const hiddenGlobalTrackPids = new Set<Pid>();
+      for (const trackIndex of hiddenGlobalTracks) {
+        const globalTrack = globalTracks[trackIndex];
+        if (globalTrack.type === 'process') {
+          hiddenGlobalTrackPids.add(globalTrack.pid);
+        }
+      }
+
+      let hasLocalTrackToHide = false;
+      for (const [
+        pid,
+        searchFilteredLocalTracks,
+      ] of searchFilteredLocalTracksByPid) {
+        if (hiddenGlobalTrackPids.has(pid)) {
+          // The global track is already hidden. Do not check the local tracks of it.
+          continue;
+        }
+
+        const hiddenLocalTracks = ensureExists(hiddenLocalTracksByPid.get(pid));
+        hasLocalTrackToHide = [...searchFilteredLocalTracks].some(
+          (trackIndex) => !hiddenLocalTracks.has(trackIndex)
+        );
+        if (hasLocalTrackToHide) {
+          // There is at least one local track to hide. Skip the other global track checks.
+          break;
+        }
+      }
+
+      return hasLocalTrackToHide;
+    };
+
+    const isDisabled =
+      !hasVisibleGlobalTracksLeftAfterHiding() ||
+      (!hasGlobalTrackToHide() && !hasLocalTrackToHide());
+
+    return (
+      <MenuItem onClick={this._hideMatchedTracks} disabled={isDisabled}>
+        <Localized id="TrackContextMenu--hide-all-matching-tracks">
+          Hide all matching tracks
+        </Localized>
+      </MenuItem>
     );
   }
 
@@ -893,6 +1065,17 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {searchFilter
           ? this.renderShowProvidedTracks()
           : this.renderShowAllTracks()}
+        {searchFilter &&
+        searchFilteredGlobalTracks &&
+        searchFilteredLocalTracksByPid
+          ? this.renderHideMatchingTracks(
+              searchFilteredGlobalTracks,
+              searchFilteredLocalTracksByPid
+            )
+          : null}
+        {rightClickedTrack === null ? (
+          <div className="react-contextmenu-separator" />
+        ) : null}
         {isolateProcessMainThread}
         {isolateProcess}
         {isolateLocalTrack}
@@ -952,6 +1135,7 @@ export const TimelineTrackContextMenu = explicitConnect<
     hideLocalTrack,
     showLocalTrack,
     showProvidedTracks,
+    hideProvidedTracks,
   },
   component: TimelineTrackContextMenuImpl,
 });

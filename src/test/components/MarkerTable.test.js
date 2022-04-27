@@ -28,6 +28,7 @@ import {
   getMarkerTableProfile,
   addMarkersToThreadWithCorrespondingSamples,
   addIPCMarkerPairToThreads,
+  getNetworkTrackProfile,
 } from '../fixtures/profiles/processed-profile';
 import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
@@ -195,6 +196,30 @@ describe('MarkerTable', function () {
       D [libxul.so]
       E [libxul.so]
     `);
+  });
+
+  it("can copy a marker's page url using the context menu", () => {
+    // A simple profile that contains markers with page information.
+    // We will be using `DOMContentLoaded` that has a page url.
+    const profile = getNetworkTrackProfile();
+    setup(profile);
+
+    // Make sure that a marker without an innerWindowID doesn't have this
+    // context menu item. `Navigation::Start` doesn't have one.
+    //
+    // We are using `getAllByText` here because marker table puts the same text
+    // to both `type` and `name` columns. But right clicking on either of them
+    // results in the same menu item.
+    fireFullContextMenu(screen.getAllByText('Navigation::Start')[0]);
+    expect(screen.queryByText('Copy page URL')).not.toBeInTheDocument();
+
+    // Make sure that a marker with innerWindowID has this context menu item and
+    // can copy its page url successfully.
+    fireFullContextMenu(screen.getByText('DOMContentLoaded'));
+    fireFullClick(screen.getByText('Copy page URL'));
+    expect(copy).toHaveBeenLastCalledWith(
+      'https://developer.mozilla.org/en-US/'
+    );
   });
 
   describe('EmptyReasons', () => {

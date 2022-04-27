@@ -304,6 +304,7 @@ MarkerContextMenu--end-selection-at-marker-end = Auswahl am <strong>Ende</strong
 MarkerContextMenu--copy-description = Beschreibung kopieren
 MarkerContextMenu--copy-call-stack = Aufrufstack kopieren
 MarkerContextMenu--copy-url = URL kopieren
+MarkerContextMenu--copy-page-url = URL der Seite kopieren
 MarkerContextMenu--copy-as-json = Als JSON kopieren
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
@@ -538,12 +539,12 @@ ProfileFilterNavigator--full-range-with-duration = Vollständiger Zeitraum ({ $f
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-unpublished = Das Profil wird direkt von { -firefox-brand-name } importiert...
+ProfileLoaderAnimation--loading-unpublished = Das Profil wird direkt von { -firefox-brand-name } importiert…
 ProfileLoaderAnimation--loading-from-file = Datei lesen und Profil verarbeiten…
 ProfileLoaderAnimation--loading-local = Noch nicht implementiert.
 ProfileLoaderAnimation--loading-public = Profil herunterladen und bearbeiten…
 ProfileLoaderAnimation--loading-from-url = Profil herunterladen und bearbeiten…
-ProfileLoaderAnimation--loading-compare = Profile lesen und verarbeiten...
+ProfileLoaderAnimation--loading-compare = Profile lesen und verarbeiten…
 ProfileLoaderAnimation--loading-view-not-found = Ansicht nicht gefunden
 
 ## ProfileRootMessage
@@ -619,8 +620,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Andere Screenshots-Tracks ausb
 TrackContextMenu--hide-track = „{ $trackName }“ verbergen
 TrackContextMenu--show-all-tracks = Alle Tracks anzeigen
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Alle darunterliegenden Tracks anzeigen
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Alle passenden Tracks anzeigen
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Alle passenden Tracks ausblenden
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:

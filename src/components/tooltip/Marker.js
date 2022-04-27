@@ -16,6 +16,7 @@ import {
   getMarkerSchemaByName,
   getImplementationFilter,
   getPageList,
+  getInnerWindowIDToPageMap,
   getZeroAt,
   getThreadIdToNameMap,
   getThreadSelectorsFromThreadsKey,
@@ -49,6 +50,8 @@ import type {
   PageList,
   MarkerSchemaByName,
   MarkerIndex,
+  InnerWindowID,
+  Page,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -84,6 +87,7 @@ type StateProps = {|
   +thread: Thread,
   +implementationFilter: ImplementationFilter,
   +pages: PageList | null,
+  +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +zeroAt: Milliseconds,
   +threadIdToNameMap: Map<number, string>,
   +markerSchemaByName: MarkerSchemaByName,
@@ -102,14 +106,21 @@ const MAXIMUM_IMAGE_SIZE = 350;
  */
 class MarkerTooltipContents extends React.PureComponent<Props> {
   _maybeRenderPageUrl = (): TooltipDetailComponent => {
-    const { pages, marker } = this.props;
+    const { pages, innerWindowIDToPageMap, marker } = this.props;
 
-    if (!(pages && marker.data && marker.data.innerWindowID)) {
+    if (
+      !(
+        pages &&
+        innerWindowIDToPageMap &&
+        marker.data &&
+        marker.data.innerWindowID
+      )
+    ) {
       return null;
     }
 
     const innerWindowID = marker.data.innerWindowID;
-    const page = pages.find((page) => page.innerWindowID === innerWindowID);
+    const page = innerWindowIDToPageMap.get(innerWindowID);
 
     if (page) {
       // If multiple pages have the same url, show the innerWindowID to disambiguate.
@@ -464,6 +475,7 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
       thread: selectors.getThread(state),
       implementationFilter: getImplementationFilter(state),
       pages: getPageList(state),
+      innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
       zeroAt: getZeroAt(state),
       threadIdToNameMap: getThreadIdToNameMap(state),
       markerSchemaByName: getMarkerSchemaByName(state),

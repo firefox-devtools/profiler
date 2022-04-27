@@ -55,7 +55,7 @@ import type { CssPixels } from 'firefox-profiler/types';
 const MARKERS: TestDefinedMarkers = [
   ['Marker A', 0, 10],
   ['Marker A', 0, 10],
-  ['Marker A', 11, 15],
+  ['Marker A', 11, 17], // 17 is chosen on purpose so that we can test rounding on integer pixels
   [
     'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
     5,
@@ -130,10 +130,12 @@ function setupWithProfile(profile) {
 }
 
 describe('MarkerChart', function () {
+  const containerWidth = 200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT;
+  const containerHeight = 300;
   autoMockCanvasContext();
   autoMockElementSize({
-    width: 200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT,
-    height: 300,
+    width: containerWidth,
+    height: containerHeight,
   });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
@@ -154,29 +156,60 @@ describe('MarkerChart', function () {
     delete window.devicePixelRatio;
   });
 
-  it('does not render several dot markers on the same pixel', () => {
+  it('sets a correct size for the marker chart even when dPR is non-integer', () => {
+    window.devicePixelRatio = 12 / 11;
+
+    const profile = getProfileWithMarkers([...MARKERS]);
+    const { flushRafCalls, dispatch } = setupWithProfile(profile);
+
+    dispatch(changeSelectedTab('marker-chart'));
+    flushRafCalls();
+
+    const canvasElement = ensureExists(document.querySelector('canvas'));
+    const canvasCssWidth = parseFloat(canvasElement.style.width);
+    const canvasCssHeight = parseFloat(canvasElement.style.height);
+
+    // Always smaller than the container, so that it fits the available space
+    expect(canvasCssWidth).toBeLessThanOrEqual(containerWidth);
+    expect(canvasCssHeight).toBeLessThanOrEqual(containerHeight);
+
+    // The CSS size needs to match with the canvas size so that canvas pixels
+    // are aligned with device pixels.
+    expect(canvasCssWidth * window.devicePixelRatio).toEqual(
+      canvasElement.width
+    );
+    expect(canvasCssHeight * window.devicePixelRatio).toEqual(
+      canvasElement.height
+    );
+
+    expect(canvasElement).toMatchSnapshot();
+
+    delete window.devicePixelRatio;
+  });
+
+  it('does not render several small markers on the same pixel', () => {
     window.devicePixelRatio = 1;
     const rowName = 'TestMarker';
 
     const markers = [
-      // RENDERED: This marker defines the start of our range.
+      // DOT [RENDERED]: This marker defines the start of our range.
       [rowName, 0],
       // Now create four "dot" markers, but only two should be rendered.
-      // RENDERED: This is the first instant marker, so it's rendered.
+      // DOT [RENDERED]: This is the first instant marker, so it's rendered.
       [rowName, 5000],
-      // RENDERED: This marker has a duration, but it's very small, and would get
-      // rendered as a dot. It's rendered because it's the the first.
+      // RECTANGLE [RENDERED]: This marker has a duration, but it's very small,
+      // so it's rendered as a small rectangle. It's rendered because it's the the first.
       [rowName, 5001, 5001.1],
-      // NOT-RENDERED: The second instant marker, so it's not rendered.
+      // DOT [NOT-RENDERED]: The second instant marker, so it's not rendered.
       [rowName, 5002],
-      // NOT-RENDERED: This marker has a duration, but it's very small, and would get
-      // rendered as a dot if it was rendered. But it's not because it's close to
+      // RECTANGLE [NOT-RENDERED]: This marker has a duration, but it's very small, and would get
+      // rendered as 1 pixel wide rectangle if it was rendered. But it's not because it's close to
       // the previous one.
       [rowName, 5002, 5002.1],
-      // RENDERED: This is a longer marker, it should always be drawn even if it starts
-      // at the same location as a dot marker
-      [rowName, 5002, 7000],
-      // RENDERED: Add a final marker that's quite far away to have a big time range.
+      // RECTANGLE [RENDERED]: This is a longer marker, it should always be drawn even if it starts
+      // at the same location as a small marker
+      [rowName, 5002.1, 7000],
+      // DOT [RENDERED]: Add a final marker that's quite far away to have a big time range.
       [rowName, 15000],
     ];
 
@@ -186,25 +219,36 @@ describe('MarkerChart', function () {
 
     const drawCalls = flushDrawLog();
 
-    // Check that we have 4 arc operations (first marker, first instant marker,
-    // first small interval marker, and last marker)
+    // Check that we have 3 arc operations (first marker, first instant marker,
+    // and last marker)
     const arcOperations = drawCalls.filter(
       ([operation]) => operation === 'arc'
     );
-    expect(arcOperations).toHaveLength(4);
+    expect(arcOperations).toHaveLength(3);
 
     // Check that all X, Y values are different
     const arcOperationsXY = new Set(
       arcOperations.map(([, x, y]) => `${Math.round(x)};${Math.round(y)}`)
     );
-    expect(arcOperationsXY.size).toBe(4);
+    expect(arcOperationsXY.size).toBe(3);
 
-    // Check that we have a rect operation for the longer marker.
+    // Check that we have a fillRect operation for the first small interval
+    // marker. We filter also using w or h to filter out the initial clearing
+    // fillRect operation as well as the separators.
+    const fillRectOperations = drawCalls.filter(
+      ([operation, , , w, h]) =>
+        operation === 'fillRect' &&
+        w !== containerWidth - TIMELINE_MARGIN_RIGHT &&
+        h !== containerHeight
+    );
+    expect(fillRectOperations).toHaveLength(1);
+
+    // Check that the rect operation for the later longer marker is present.
     const rectOperations = drawCalls.filter(
       ([operation]) => operation === 'rect'
     );
-    // 2 is expected, because we have a rect first for the initial `clip`
-    // operation, and one for the longer marker.
+    // We'll actually have 2 rect operations, because we also have a rect first
+    // for the initial `clip` operation, and one for the longer marker.
     expect(rectOperations).toHaveLength(2);
 
     delete window.devicePixelRatio;
@@ -603,8 +647,8 @@ describe('MarkerChart', function () {
         ],
         [
           'Marker DomEvent',
-          4,
-          10,
+          6,
+          13,
           {
             type: 'DOMEvent',
             latency: 7,

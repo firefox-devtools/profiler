@@ -312,6 +312,7 @@ MarkerContextMenu--end-selection-at-marker-end = Fini le selection al <strong>fi
 MarkerContextMenu--copy-description = Copiar le description
 MarkerContextMenu--copy-call-stack = Copiar pila de appellos
 MarkerContextMenu--copy-url = Copiar URL
+MarkerContextMenu--copy-page-url = Copiar URL de pagina
 MarkerContextMenu--copy-as-json = Copiar como JSON
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
@@ -627,8 +628,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Celar altere tracias de instan
 TrackContextMenu--hide-track = Celar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Monstrar tote le tracias
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Monstrar tote le tracias infra
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Monstrar tote le tracias concordante
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Celar tote le tracias concordante
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:

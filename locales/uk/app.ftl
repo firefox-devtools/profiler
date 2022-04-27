@@ -316,6 +316,7 @@ MarkerContextMenu--end-selection-at-marker-end = Завершити вибір �
 MarkerContextMenu--copy-description = Скопіювати опис
 MarkerContextMenu--copy-call-stack = Скопіювати стек викликів
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
+MarkerContextMenu--copy-page-url = Копіювати URL-адресу сторінки
 MarkerContextMenu--copy-as-json = Скопіювати як JSON
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
@@ -636,8 +637,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Сховати доріжки 
 TrackContextMenu--hide-track = Сховати “{ $trackName }”
 TrackContextMenu--show-all-tracks = Показати всі доріжки
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Показати всі треки нижче
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Показати всі відповідні доріжки
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Сховати всі відповідні доріжки
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:

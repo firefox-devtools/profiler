@@ -215,9 +215,9 @@ Array [
   ],
   Array [
     "rect",
-    175.5,
+    172.5,
     129.5,
-    74,
+    66,
     12,
   ],
   Array [
@@ -233,7 +233,7 @@ Array [
   Array [
     "fillText",
     "Marker B",
-    178,
+    175,
     139,
   ],
   Array [
@@ -274,7 +274,7 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 189px; top: 150px;"
+  style="left: 186px; top: 150px;"
 >
   <div
     class="tooltipMarker"
@@ -467,23 +467,15 @@ Array [
     "clip",
   ],
   Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
-  ],
-  Array [
     "set fillStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "arc",
-    200,
+    194.5,
     23.5,
     3.75,
     0,
@@ -493,12 +485,20 @@ Array [
     "fill",
   ],
   Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
     "set fillStyle",
     "#8ac4ff",
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
@@ -507,7 +507,7 @@ Array [
     "rect",
     150.5,
     33.5,
-    124,
+    110,
     12,
   ],
   Array [
@@ -526,16 +526,16 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "rect",
-    288,
+    272.5,
     33.5,
-    49,
+    65.5,
     12,
   ],
   Array [
@@ -550,7 +550,7 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
@@ -559,7 +559,7 @@ Array [
     "rect",
     150.5,
     49.5,
-    124,
+    110,
     12,
   ],
   Array [
@@ -574,16 +574,16 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "rect",
-    213,
+    206,
     65.5,
-    61.5,
+    54.5,
     12,
   ],
   Array [
@@ -603,26 +603,8 @@ Array [
   Array [
     "fillText",
     "click",
-    215.5,
+    208.5,
     75,
-  ],
-  Array [
-    "set fillStyle",
-    "#0060df",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "arc",
-    268.75,
-    87.5,
-    3.75,
-    0,
-    6.283185307179586,
-  ],
-  Array [
-    "fill",
   ],
   Array [
     "set fillStyle",
@@ -630,16 +612,16 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "rect",
-    150.5,
-    97.5,
-    36.5,
+    250.5,
+    81.5,
+    10,
     12,
   ],
   Array [
@@ -650,14 +632,38 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0060df",
+    "#8ac4ff",
+  ],
+  Array [
+    "set strokeStyle",
+    "#2c77d1",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    150.5,
+    97.5,
+    32.5,
+    12,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "set fillStyle",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "arc",
-    237.5,
+    228,
     119.5,
     3.75,
     0,
@@ -672,16 +678,16 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "rect",
-    175.5,
+    172.5,
     129.5,
-    74,
+    65.5,
     12,
   ],
   Array [
@@ -701,7 +707,7 @@ Array [
   Array [
     "fillText",
     "Marker B",
-    178,
+    175,
     139,
   ],
   Array [
@@ -710,16 +716,16 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "rect",
-    213,
+    206,
     145.5,
-    124,
+    110,
     12,
   ],
   Array [
@@ -938,6 +944,15 @@ Array [
 ]
 `;
 
+exports[`MarkerChart sets a correct size for the marker chart even when dPR is non-integer 1`] = `
+<canvas
+  class="chartCanvas markerChartCanvas"
+  height="327"
+  style="width: 364.83333333333337px; height: 299.75px;"
+  width="398"
+/>
+`;
+
 exports[`MarkerChart with active tab does not render the hovered label 1`] = `
 Array [
   Array [
@@ -988,16 +1003,16 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "rect",
-    88.5,
+    117.5,
     17.5,
-    130.25,
+    135,
     12,
   ],
   Array [
@@ -1013,7 +1028,7 @@ Array [
   Array [
     "fillText",
     "click",
-    91,
+    120,
     27,
   ],
   Array [
@@ -1079,9 +1094,9 @@ Array [
   ],
   Array [
     "rect",
-    88.5,
+    117.5,
     17.5,
-    130.25,
+    135,
     12,
   ],
   Array [
@@ -1097,7 +1112,7 @@ Array [
   Array [
     "fillText",
     "click",
-    91,
+    120,
     27,
   ],
   Array [
@@ -1146,7 +1161,7 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 102px; top: 38px;"
+  style="left: 131px; top: 38px;"
 >
   <div
     class="tooltipMarker"
@@ -1160,7 +1175,7 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
         <div
           class="tooltipTiming"
         >
-          6ms
+          7ms
         </div>
         <div
           class="tooltipTitle"
@@ -1337,16 +1352,16 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "rect",
-    88,
+    117,
     17.5,
-    130.25,
+    135,
     12,
   ],
   Array [
@@ -1366,19 +1381,19 @@ Array [
   Array [
     "fillText",
     "click",
-    90.5,
+    119.5,
     27,
   ],
   Array [
     "set fillStyle",
-    "#0060df",
+    "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "arc",
-    65.5,
+    58.5,
     39.5,
     3.75,
     0,

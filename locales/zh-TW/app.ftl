@@ -250,6 +250,7 @@ MarkerContextMenu--end-selection-at-marker-end = 選擇到標記的<strong>終�
 MarkerContextMenu--copy-description = 複製描述
 MarkerContextMenu--copy-call-stack = 複製呼叫堆疊
 MarkerContextMenu--copy-url = 複製網址
+MarkerContextMenu--copy-page-url = 複製頁面網址
 MarkerContextMenu--copy-as-json = 以 JSON 格式複製
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
@@ -561,8 +562,11 @@ TrackContextMenu--hide-other-screenshots-tracks = 隱藏其他畫面擷圖軌
 TrackContextMenu--hide-track = 隱藏「{ $trackName }」
 TrackContextMenu--show-all-tracks = 顯示所有軌道
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = 在下方顯示所有軌道
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = 顯示所有符合的軌道
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = 隱藏所有符合的軌道
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:
