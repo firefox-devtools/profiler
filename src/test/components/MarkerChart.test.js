@@ -130,10 +130,12 @@ function setupWithProfile(profile) {
 }
 
 describe('MarkerChart', function () {
+  const containerWidth = 200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT;
+  const containerHeight = 300;
   autoMockCanvasContext();
   autoMockElementSize({
-    width: 200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT,
-    height: 300,
+    width: containerWidth,
+    height: containerHeight,
   });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
@@ -150,6 +152,37 @@ describe('MarkerChart', function () {
     const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
+
+    delete window.devicePixelRatio;
+  });
+
+  it('sets a correct size for the marker chart even when dPR is non-integer', () => {
+    window.devicePixelRatio = 12 / 11;
+
+    const profile = getProfileWithMarkers([...MARKERS]);
+    const { flushRafCalls, dispatch } = setupWithProfile(profile);
+
+    dispatch(changeSelectedTab('marker-chart'));
+    flushRafCalls();
+
+    const canvasElement = ensureExists(document.querySelector('canvas'));
+    const canvasCssWidth = parseFloat(canvasElement.style.width);
+    const canvasCssHeight = parseFloat(canvasElement.style.height);
+
+    // Always smaller than the container, so that it fits the available space
+    expect(canvasCssWidth).toBeLessThanOrEqual(containerWidth);
+    expect(canvasCssHeight).toBeLessThanOrEqual(containerHeight);
+
+    // The CSS size needs to match with the canvas size so that canvas pixels
+    // are aligned with device pixels.
+    expect(canvasCssWidth * window.devicePixelRatio).toEqual(
+      canvasElement.width
+    );
+    expect(canvasCssHeight * window.devicePixelRatio).toEqual(
+      canvasElement.height
+    );
+
+    expect(canvasElement).toMatchSnapshot();
 
     delete window.devicePixelRatio;
   });

@@ -136,12 +136,10 @@ export class ChartCanvas<HoveredItem> extends React.Component<
       // The canvas needs to be sized to the container.
       canvas.width = devicePixelWidth;
       canvas.height = devicePixelHeight;
-      // Round the style width as well, so the canvas will be sized according to
-      // the integer pixel size.
-      // TODO #2370 - We should review the correctness of this approach, to make sure
-      // we don't have any blank pixels at the edge, or that we overflow.
-      canvas.style.width = Math.floor(containerWidth) + 'px';
-      canvas.style.height = Math.floor(containerHeight) + 'px';
+      // Set the CSS width depending on the actual values of canvas.width and height.
+      // They can be float values depending on the value of devicePixelRatio.
+      canvas.style.width = canvas.width / devicePixelRatio + 'px';
+      canvas.style.height = canvas.height / devicePixelRatio + 'px';
       if (scaleCtxToCssPixels) {
         ctx.scale(this._devicePixelRatio, this._devicePixelRatio);
       }
