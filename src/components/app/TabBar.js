@@ -26,7 +26,8 @@ export class TabBar extends React.PureComponent<Props> {
     this.props.onSelectTab(e.currentTarget.dataset.name);
   };
 
-  _onMouseDown = (e: SyntheticMouseEvent<>) => {
+  _onMouseDown = (e: SyntheticMouseEvent<HTMLElement>) => {
+    this.props.onSelectTab(e.currentTarget.dataset.name);
     // Prevent focusing the tab so that actual content like the
     // calltree can perform its own focusing.
     e.preventDefault();
