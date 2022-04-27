@@ -55,7 +55,7 @@
     "@codemirror/lang-javascript": "^0.19.6",
     "@codemirror/lang-rust": "^0.19.2",
     "@codemirror/rangeset": "^0.19.9",
-    "@codemirror/state": "^0.19.9",
+    "@codemirror/state": "^0.20.0",
     "@codemirror/view": "^0.19.47",
     "@firefox-devtools/react-contextmenu": "^5.0.0",
     "@fluent/bundle": "^0.17.1",
