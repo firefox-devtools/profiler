@@ -315,6 +315,7 @@ MarkerContextMenu--end-selection-at-marker-end = Διακοπή επιλογής
 MarkerContextMenu--copy-description = Αντιγραφή περιγραφής
 MarkerContextMenu--copy-call-stack = Αντιγραφή στοίβας κλήσεων
 MarkerContextMenu--copy-url = Αντιγραφή URL
+MarkerContextMenu--copy-page-url = Αντιγραφή URL σελίδας
 MarkerContextMenu--copy-as-json = Αντιγραφή ως JSON
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
@@ -630,8 +631,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Απόκρυψη άλλων κ
 TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
 TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομματιών
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Εμφάνιση όλων των κομματιών παρακάτω
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Εμφάνιση όλων των αντίστοιχων κομματιών
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Απόκρυψη όλων των αντίστοιχων κομματιών
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:

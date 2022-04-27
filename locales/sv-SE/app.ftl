@@ -312,6 +312,7 @@ MarkerContextMenu--end-selection-at-marker-end = Avsluta markering vid markören
 MarkerContextMenu--copy-description = Kopiera beskrivning
 MarkerContextMenu--copy-call-stack = Kopiera anropsstack
 MarkerContextMenu--copy-url = Kopiera URL
+MarkerContextMenu--copy-page-url = Kopiera sidans URL
 MarkerContextMenu--copy-as-json = Kopiera som JSON
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
@@ -491,12 +492,12 @@ MenuButtons--publish--info-description-default = Som standard tas dina personupp
 MenuButtons--publish--info-description-firefox-nightly2 = Den här profilen är från { -firefox-nightly-brand-name }, så den mesta information ingår som standard.
 MenuButtons--publish--include-additional-data = Inkludera ytterligare data som kan identifieras
 MenuButtons--publish--button-upload = Ladda upp
-MenuButtons--publish--upload-title = Laddar upp profil...
+MenuButtons--publish--upload-title = Laddar upp profil…
 MenuButtons--publish--cancel-upload = Avbryt uppladdning
 MenuButtons--publish--message-something-went-wrong = Hoppsan, något gick fel när du laddade upp profilen.
 MenuButtons--publish--message-try-again = Försök igen
 MenuButtons--publish--download = Hämta
-MenuButtons--publish--compressing = Komprimerar...
+MenuButtons--publish--compressing = Komprimerar…
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -546,12 +547,12 @@ ProfileFilterNavigator--full-range-with-duration = Fullt intervall ({ $fullRange
 
 ## Profile Loader Animation
 
-ProfileLoaderAnimation--loading-unpublished = Importerar profilen direkt från { -firefox-brand-name }...
-ProfileLoaderAnimation--loading-from-file = Läser fil och bearbetar profil...
+ProfileLoaderAnimation--loading-unpublished = Importerar profilen direkt från { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Läser fil och bearbetar profil…
 ProfileLoaderAnimation--loading-local = Inte implementerat ännu.
-ProfileLoaderAnimation--loading-public = Laddar ner och bearbetar profil...
-ProfileLoaderAnimation--loading-from-url = Laddar ner och bearbetar profil...
-ProfileLoaderAnimation--loading-compare = Läser och bearbetar profil...
+ProfileLoaderAnimation--loading-public = Laddar ner och bearbetar profil…
+ProfileLoaderAnimation--loading-from-url = Laddar ner och bearbetar profil…
+ProfileLoaderAnimation--loading-compare = Läser och bearbetar profil…
 ProfileLoaderAnimation--loading-view-not-found = Vy hittades inte
 
 ## ProfileRootMessage
@@ -627,8 +628,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Dölj andra Skärmdump-spår
 TrackContextMenu--hide-track = Dölj "{ $trackName }"
 TrackContextMenu--show-all-tracks = Visa alla spår
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Visa alla spår nedan
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Visa alla matchande spår
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Dölj alla matchande spår
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:

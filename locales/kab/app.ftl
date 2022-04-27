@@ -103,6 +103,11 @@ Details--close-sidebar-button =
 FooterLinks--legal = Usḍif
 FooterLinks--Privacy = Tabaḍnit
 FooterLinks--Cookies = Inagan n tuqqna
+FooterLinks--languageSwitcher--select =
+    .title = Snifel tutlayt
+FooterLinks--hide-button =
+    .title = Ffer iseɣwan n uḍar n usebter
+    .aria-label = Ffer iseɣwan n uḍar n usebter
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -112,6 +117,13 @@ FullTimeline--graph-type = Anaw n udfil:
 FullTimeline--categories-with-cpu = taggayin s CPU
 FullTimeline--categories = Taggayin
 FullTimeline--stack-height = Teɣzi n tbursa
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tizlatin
 
 ## Home page
 
@@ -174,6 +186,8 @@ MarkerContextMenu--end-selection-here = Taggara n ufran da
 MarkerContextMenu--copy-description = Nɣel aglam
 MarkerContextMenu--copy-call-stack = Nɣel tanebdant n usiwel
 MarkerContextMenu--copy-url = Nɣel URL
+MarkerContextMenu--copy-page-url = Nɣel URL n usebter
+MarkerContextMenu--copy-as-json = Nɣel am JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -311,7 +325,6 @@ NumberFormat--short-date = { SHORTDATE($date) }
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
-ProfileFilterNavigator--full-range = Azilal ummid
 
 ## Profile Loader Animation
 
@@ -365,6 +378,7 @@ TrackContextMenu--hide-track = Ffer “{ $trackName }”
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -418,6 +432,17 @@ TransformNavigator--collapse-direct-recursion = Fneẓ asniles: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Yettragu { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Yettraǧu { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Ulac aɣbalu
 # Displayed below SourceView--cannot-obtain-source, if the browser could not
 # be queried for source code using the symbolication API.
 # Variables:
@@ -428,6 +453,12 @@ SourceView--browser-connection-error-when-obtaining-source = Ur yezmir ara ad ye
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--browser-api-error-when-obtaining-source = API n uzamul n yiminig yerra-d tuccḍa: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Afaylu { $pathInArchive } ur yettwaf ara deg teṛcivt n { $url }.
 # Displayed below SourceView--cannot-obtain-source, if the file format of an
 # "archive" file was not recognized. The only supported archive formats at the
 # moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.

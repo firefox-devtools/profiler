@@ -319,6 +319,7 @@ MarkerContextMenu--end-selection-at-marker-end = Selectie beëindigen bij <stron
 MarkerContextMenu--copy-description = Beschrijving kopiëren
 MarkerContextMenu--copy-call-stack = Aanroepstack kopiëren
 MarkerContextMenu--copy-url = URL kopiëren
+MarkerContextMenu--copy-page-url = Pagina-URL kopiëren
 MarkerContextMenu--copy-as-json = Kopiëren als JSON
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
@@ -634,8 +635,11 @@ TrackContextMenu--hide-other-screenshots-tracks = Andere schermafdruktracks verb
 TrackContextMenu--hide-track = ‘{ $trackName }’ verbergen
 TrackContextMenu--show-all-tracks = Alle tracks tonen
 # This is used in the tracks context menu as a button to show all the tracks
-# below it.
-TrackContextMenu--show-all-tracks-below = Alle tracks hieronder tonen
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Alle overeenkomende tracks tonen
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Alle overeenkomende tracks verbergen
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:
