@@ -287,19 +287,21 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               maxThreadCPUDelta={maxThreadCPUDelta}
               implementationFilter={implementationFilter}
             />
-            <ThreadSampleGraph
-              className="threadSampleGraph"
-              trackName={trackName}
-              interval={interval}
-              thread={filteredThread}
-              tabFilteredThread={tabFilteredThread}
-              rangeStart={rangeStart}
-              rangeEnd={rangeEnd}
-              callNodeInfo={callNodeInfo}
-              selectedCallNodeIndex={selectedCallNodeIndex}
-              categories={categories}
-              onSampleClick={this._onSampleClick}
-            />
+            {trackType === 'expanded' ? (
+              <ThreadSampleGraph
+                className="threadSampleGraph"
+                trackName={trackName}
+                interval={interval}
+                thread={filteredThread}
+                tabFilteredThread={tabFilteredThread}
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                callNodeInfo={callNodeInfo}
+                selectedCallNodeIndex={selectedCallNodeIndex}
+                categories={categories}
+                onSampleClick={this._onSampleClick}
+              />
+            ) : null}
             {isExperimentalCPUGraphsEnabled &&
             rangeFilteredThread.samples.threadCPUDelta !== undefined ? (
               <ThreadCPUGraph
