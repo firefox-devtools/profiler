@@ -4,6 +4,7 @@
 
 /* Removing styling from the button */
 .tabBarTabButton {
+  overflow: hidden;
   width: 100%;
   height: 100%;
   padding: 0;
@@ -11,29 +12,29 @@
   margin: 0;
   background: none;
   font: inherit;
+  text-overflow: ellipsis;
 }
 
 .tabBarTabWrapper {
   display: flex;
   min-width: 0; /* This makes the tab container actually shrinkable below min-content */
   flex-flow: row nowrap;
-  padding: 0 0.5px;
-  margin: 0 -1px;
+  padding: 0;
+  margin: 0 -0.5px; /* This combines with the -0.5px horizontal margin of .tabBarTab to clip off the first tab's 1px starting border */
   list-style: none;
 }
 
 .tabBarTab {
   position: relative;
-  overflow: hidden;
   min-width: 8em;
   padding: 6px 4px;
   border: solid transparent;
   border-width: 0 1px;
+  margin: 0 -0.5px; /* This makes the 1px border between adjacent tabs overlap */
   background-clip: padding-box;
   cursor: default;
   font-size: 12px;
   text-align: center;
-  text-overflow: ellipsis;
   transition: background-color 200ms, border-color 200ms;
   transition-timing-function: var(--animation-timing);
   user-select: none;
@@ -44,8 +45,8 @@
 .tabBarTab::before {
   position: absolute;
   top: 0;
+  right: -1px;
   left: -1px;
-  width: calc(100% + 2px);
   height: 2px;
   background-color: transparent;
   content: '';
@@ -54,9 +55,8 @@
 }
 
 .tabBarTab.selected::before {
-  /* The selected tab is shifted down a bit, so shift this bar back up a bit */
-  top: -1px;
   background-color: var(--blue-50);
+  transition: none; /* Switch the background color instantly when a tab is selected */
 }
 
 .tabBarTab:not(.selected):hover {
@@ -69,10 +69,10 @@
 }
 
 .tabBarTab.selected {
-  /* Cut off the bottom of the border for the tab line. */
-  top: 1px;
-  padding-top: 5px;
+  z-index: 1;
   border-color: var(--grey-30);
+  margin-bottom: -1px; /* Expand 1px towards the bottom to cover the tab bar bottom border. */
   background: #fff;
   color: var(--blue-60);
+  transition: none; /* Switch the background color instantly when a tab is selected */
 }
