@@ -6,7 +6,6 @@ import {
   uploadBinaryProfileData,
   deleteProfileOnServer,
 } from 'firefox-profiler/profile-logic/profile-store';
-import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 
 describe('profile upload', () => {
   function setup() {
@@ -167,14 +166,6 @@ describe('profile upload', () => {
 });
 
 describe('profile deletion', () => {
-  beforeEach(() => {
-    window.fetch = jest.fn();
-  });
-
-  afterEach(() => {
-    delete window.fetch;
-  });
-
   function mockFetchForDeleteProfile({
     endpointUrl,
     jwtToken,
@@ -182,39 +173,37 @@ describe('profile deletion', () => {
     endpointUrl: string,
     jwtToken: string,
   }) {
-    window.fetch.mockImplementation(async (urlString, options) => {
-      if (urlString !== endpointUrl) {
-        return new Response(null, { status: 404, statusText: 'Not found' });
-      }
+    window.fetch
+      .catch(404) // catchall
+      .mock(endpointUrl, async (urlString, options) => {
+        const { method, headers } = options;
 
-      const { method, headers } = options;
+        if (method !== 'DELETE') {
+          return new Response(null, {
+            status: 405,
+            statusText: 'Method not allowed',
+          });
+        }
 
-      if (method !== 'DELETE') {
-        return new Response(null, {
-          status: 405,
-          statusText: 'Method not allowed',
-        });
-      }
+        if (
+          headers['Content-Type'] !== 'application/json' ||
+          headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+        ) {
+          return new Response(null, {
+            status: 406,
+            statusText: 'Not acceptable',
+          });
+        }
 
-      if (
-        headers['Content-Type'] !== 'application/json' ||
-        headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
-      ) {
-        return new Response(null, {
-          status: 406,
-          statusText: 'Not acceptable',
-        });
-      }
+        if (headers.Authorization !== `Bearer ${jwtToken}`) {
+          return new Response(null, {
+            status: 401,
+            statusText: 'Forbidden',
+          });
+        }
 
-      if (headers.Authorization !== `Bearer ${jwtToken}`) {
-        return new Response(null, {
-          status: 401,
-          statusText: 'Forbidden',
-        });
-      }
-
-      return new Response('Profile successfully deleted.', { status: 200 });
-    });
+        return new Response('Profile successfully deleted.', { status: 200 });
+      });
   }
 
   it('can delete a profile', async () => {
