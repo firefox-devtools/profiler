@@ -38,6 +38,7 @@ import { classHighlightStyle } from '@codemirror/highlight';
 import { cpp } from '@codemirror/lang-cpp';
 import { rust } from '@codemirror/lang-rust';
 import { javascript } from '@codemirror/lang-javascript';
+import clamp from 'clamp';
 
 import type { LineTimings } from 'firefox-profiler/types';
 import { emptyLineTimings } from 'firefox-profiler/profile-logic/line-timings';
@@ -281,9 +282,8 @@ export class SourceViewEditor {
 
   scrollToLine(lineNumber: number) {
     // Clamp the line number to the document's line count.
-    if (lineNumber > this._view.state.doc.lines) {
-      lineNumber = this._view.state.doc.lines;
-    }
+    lineNumber = clamp(lineNumber, 1, this._view.state.doc.lines);
+
     // Convert the line number into a position.
     const pos = this._view.state.doc.line(lineNumber).from;
     // Dispatch the scroll action.
