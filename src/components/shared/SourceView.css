@@ -173,79 +173,79 @@
 }
 
 /**
- * Syntax highlighting uses the CodeMirror 6 classHighlightStyle. From its documentation:
+ * Syntax highlighting uses the Lezer's classHighlighter. From its documentation:
  *
- * These tags are mapped to their name prefixed with "cmt-" (for example "cmt-comment"):
+ *  This is a highlighter that adds stable, predictable classes to tokens, for styling with external CSS.
  *
- *  - link
- *  - heading
- *  - emphasis
- *  - strong
- *  - keyword
- *  - atom
- *  - bool
- *  - url
- *  - labelName
- *  - inserted
- *  - deleted
- *  - literal
- *  - string
- *  - number
- *  - variableName
- *  - typeName
- *  - namespace
- *  - className
- *  - macroName
- *  - propertyName
- *  - operator
- *  - comment
- *  - meta
- *  - punctuation
- *  - invalid
- * 
- * In addition, these mappings are provided:
- * 
- *  - regexp, escape, and special(string) are mapped to "cmt-string2"
- *  - special(variableName) to "cmt-variableName2"
- *  - local(variableName) to "cmt-variableName cmt-local"
- *  - definition(variableName) to "cmt-variableName cmt-definition"
- *  - definition(propertyName) to "cmt-propertyName cmt-definition"
+ *  The following tags are mapped to their name prefixed with "tok-" (for example "tok-comment"):
+ *  -  link
+ *  -  heading
+ *  -  emphasis
+ *  -  strong
+ *  -  keyword
+ *  -  atom bool
+ *  -  url
+ *  -  labelName
+ *  -  inserted
+ *  -  deleted
+ *  -  literal
+ *  -  string
+ *  -  number
+ *  -  variableName
+ *  -  typeName
+ *  -  namespace
+ *  -  className
+ *  -  macroName
+ *  -  propertyName
+ *  -  operator
+ *  -  comment
+ *  -  meta
+ *  -  punctuation
+ *  -  invalid
+ *
+ *  In addition, these mappings are provided:
+ *
+ *  -  regexp, escape, and special(string) are mapped to "tok-string2"
+ *  -  special(variableName) to "tok-variableName2"
+ *  -  local(variableName) to "tok-variableName tok-local"
+ *  -  definition(variableName) to "tok-variableName tok-definition"
+ *  -  definition(propertyName) to "tok-propertyName tok-definition"
  */
 
-.cmt-namespace,
-.cmt-variableName,
-.cmt-variableName2,
-.cmt-macroName {
+.tok-namespace,
+.tok-variableName,
+.tok-variableName2,
+.tok-macroName {
   color: var(--theme-highlight-variable);
 }
 
-.cmt-typeName {
+.tok-typeName {
   color: var(--theme-highlight-type);
 }
 
-.cmt-propertyName {
+.tok-propertyName {
   color: var(--theme-highlight-method);
 }
 
-.cmt-number,
-.cmt-string,
-.cmt-string2 {
+.tok-number,
+.tok-string,
+.tok-string2 {
   color: var(--theme-highlight-literal);
 }
 
-.cmt-bool,
-.cmt-atom,
-.cmt-error,
-.cmt-keyword {
+.tok-bool,
+.tok-atom,
+.tok-error,
+.tok-keyword {
   color: var(--theme-highlight-keyword);
 }
 
-.cmt-comment,
-.cmt-meta {
+.tok-comment,
+.tok-meta {
   color: var(--theme-highlight-comment);
 }
 
-.cmt-operator,
-.cmt-punctuation {
+.tok-operator,
+.tok-punctuation {
   color: var(--theme-highlight-punctuation);
 }
