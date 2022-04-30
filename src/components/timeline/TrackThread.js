@@ -24,7 +24,6 @@ import {
   getSelectedThreadIndexes,
   getTimelineType,
   getInvertCallstack,
-  getTimelineTrackOrganization,
   getThreadSelectorsFromThreadsKey,
   getMaxThreadCPUDelta,
   getIsExperimentalCPUGraphsEnabled,
@@ -64,7 +63,6 @@ import type {
   IndexIntoCallNodeTable,
   SelectedState,
   State,
-  TimelineTrackOrganization,
   ThreadsKey,
 } from 'firefox-profiler/types';
 
@@ -98,7 +96,6 @@ type StateProps = {|
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
-  +timelineTrackOrganization: TimelineTrackOrganization,
   +selectedThreadIndexes: Set<ThreadIndex>,
   +enableCPUUsage: boolean,
   +isExperimentalCPUGraphsEnabled: boolean,
@@ -210,7 +207,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       samplesSelectedStates,
       treeOrderSampleComparator,
       trackType,
-      timelineTrackOrganization,
       trackName,
       enableCPUUsage,
       maxThreadCPUDelta,
@@ -231,42 +227,39 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
 
     return (
       <div className={classNames('timelineTrackThread', trackType)}>
-        {timelineTrackOrganization.type !== 'active-tab' ? (
-          <>
-            {showMemoryMarkers ? (
-              <TimelineMarkersMemory
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadsKey={threadsKey}
-                onSelect={this._onMarkerSelect}
-              />
-            ) : null}
-            {hasFileIoMarkers ? (
-              <TimelineMarkersFileIo
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadsKey={threadsKey}
-                onSelect={this._onMarkerSelect}
-              />
-            ) : null}
-            {displayJank ? (
-              <TimelineMarkersJank
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadsKey={threadsKey}
-                onSelect={this._onMarkerSelect}
-              />
-            ) : null}
-            {displayMarkers ? (
-              <TimelineMarkersOverview
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadsKey={threadsKey}
-                onSelect={this._onMarkerSelect}
-              />
-            ) : null}
-          </>
+        {trackType === 'expanded' && showMemoryMarkers ? (
+          <TimelineMarkersMemory
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            threadsKey={threadsKey}
+            onSelect={this._onMarkerSelect}
+          />
         ) : null}
+        {trackType === 'expanded' && hasFileIoMarkers ? (
+          <TimelineMarkersFileIo
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            threadsKey={threadsKey}
+            onSelect={this._onMarkerSelect}
+          />
+        ) : null}
+        {displayJank ? (
+          <TimelineMarkersJank
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            threadsKey={threadsKey}
+            onSelect={this._onMarkerSelect}
+          />
+        ) : null}
+        {trackType === 'expanded' && displayMarkers ? (
+          <TimelineMarkersOverview
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            threadsKey={threadsKey}
+            onSelect={this._onMarkerSelect}
+          />
+        ) : null}
+
         {(timelineType === 'category' || timelineType === 'cpu-category') &&
         !filteredThread.isJsTracer ? (
           <>
@@ -335,42 +328,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
             onSampleClick={this._onSampleClick}
           />
         )}
-        {timelineTrackOrganization.type === 'active-tab' ? (
-          <div className="timelineTrackThreadMarkers">
-            {trackType === 'expanded' && showMemoryMarkers ? (
-              <TimelineMarkersMemory
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadsKey={threadsKey}
-                onSelect={this._onMarkerSelect}
-              />
-            ) : null}
-            {trackType === 'expanded' && hasFileIoMarkers ? (
-              <TimelineMarkersFileIo
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadsKey={threadsKey}
-                onSelect={this._onMarkerSelect}
-              />
-            ) : null}
-            {displayJank ? (
-              <TimelineMarkersJank
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadsKey={threadsKey}
-                onSelect={this._onMarkerSelect}
-              />
-            ) : null}
-            {trackType === 'expanded' && displayMarkers ? (
-              <TimelineMarkersOverview
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadsKey={threadsKey}
-                onSelect={this._onMarkerSelect}
-              />
-            ) : null}
-          </div>
-        ) : null}
         <EmptyThreadIndicator
           thread={filteredThread}
           interval={interval}
@@ -435,7 +392,6 @@ export const TimelineTrackThread = explicitConnect<
         selectors.getSamplesSelectedStatesInFilteredThread(state),
       treeOrderSampleComparator:
         selectors.getTreeOrderComparatorInFilteredThread(state),
-      timelineTrackOrganization: getTimelineTrackOrganization(state),
       selectedThreadIndexes,
       enableCPUUsage,
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
