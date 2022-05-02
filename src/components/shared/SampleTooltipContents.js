@@ -77,6 +77,8 @@ class SampleTooltipRestContents extends React.PureComponent<RestProps> {
     const categoryIndex = stackTable.category[stackIndex];
     const subcategoryIndex = stackTable.subcategory[stackIndex];
     const categoryColor = categories[categoryIndex].color;
+    const resolvedDynamicColor =
+      categoryColor === 'dynamic' ? '#54ab29' : undefined;
 
     return (
       <>
@@ -85,6 +87,7 @@ class SampleTooltipRestContents extends React.PureComponent<RestProps> {
           <div>
             <span
               className={`colored-square category-color-${categoryColor}`}
+              style={{ backgroundColor: resolvedDynamicColor }}
             />
             {getCategoryPairLabel(categories, categoryIndex, subcategoryIndex)}
           </div>

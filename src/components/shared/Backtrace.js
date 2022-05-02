@@ -50,21 +50,33 @@ export function Backtrace(props: Props) {
         {funcNamesAndOrigins
           // Truncate the stacks
           .slice(0, maxStacks)
-          .map(({ funcName, origin, isFrameLabel, category }, i) => (
-            <li
-              key={i}
-              className={classNames('backtraceStackFrame', {
-                backtraceStackFrame_isFrameLabel: isFrameLabel,
-              })}
-            >
-              <span
-                className={`colored-border category-color-${categories[category].color}`}
-                title={categories[category].name}
-              />
-              {funcName}
-              <em className="backtraceStackFrameOrigin">{origin}</em>
-            </li>
-          ))}
+          .map(
+            (
+              {
+                funcName,
+                origin,
+                isFrameLabel,
+                category,
+                resolvedDynamicColor,
+              },
+              i
+            ) => (
+              <li
+                key={i}
+                className={classNames('backtraceStackFrame', {
+                  backtraceStackFrame_isFrameLabel: isFrameLabel,
+                })}
+              >
+                <span
+                  className={`colored-border category-color-${categories[category].color}`}
+                  style={{ backgroundColor: resolvedDynamicColor }}
+                  title={categories[category].name}
+                />
+                {funcName}
+                <em className="backtraceStackFrameOrigin">{origin}</em>
+              </li>
+            )
+          )}
         {funcNamesAndOrigins.length > maxStacks
           ? [
               <span

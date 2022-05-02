@@ -56,3 +56,5 @@
 .category-color-brown {
   background-color: var(--magenta-60);
 }
+
+/* Note: For .category-color-dynamic, the color will be set with an inline style. */

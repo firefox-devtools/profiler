@@ -213,6 +213,7 @@ export type CallNodeDisplayData = $Exact<
     isFrameLabel: boolean,
     categoryName: string,
     categoryColor: string,
+    resolvedDynamicColor: string | void,
     iconSrc: string | null,
     badge?: ExtraBadgeInfo,
     icon: string | null,

@@ -45,6 +45,7 @@ describe('actions/icons', function () {
       isFrameLabel: false,
       categoryName: 'Other',
       categoryColor: 'grey',
+      resolvedDynamicColor: undefined,
       icon,
       iconSrc: 'https://edition.cnn.com/favicon.ico',
       ariaLabel: 'fake aria label',

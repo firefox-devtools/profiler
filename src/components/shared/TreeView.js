@@ -308,6 +308,7 @@ class TreeViewRowScrolledColumns<
           displayData.categoryColor && displayData.categoryName ? (
             <span
               className={`colored-square category-color-${displayData.categoryColor}`}
+              style={{ backgroundColor: displayData.resolvedDynamicColor }}
               title={displayData.categoryName}
             />
           ) : null

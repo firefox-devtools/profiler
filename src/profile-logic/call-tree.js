@@ -8,6 +8,7 @@ import { timeCode } from '../utils/time-code';
 import {
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
+  resolveDynamicColorForFunc,
   getCategoryPairLabel,
 } from './profile-data';
 import { resourceTypes } from './data-structures';
@@ -333,6 +334,12 @@ export class CallTree {
           throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
       }
 
+      const categoryColor = this._categories[categoryIndex].color;
+      const resolvedDynamicColor =
+        categoryColor === 'dynamic'
+          ? this._getDynamicColor(funcIndex)
+          : undefined;
+
       displayData = {
         total: total === 0 ? '—' : formattedTotal,
         totalWithUnit: total === 0 ? '—' : totalWithUnit,
@@ -349,7 +356,8 @@ export class CallTree {
           categoryIndex,
           subcategoryIndex
         ),
-        categoryColor: this._categories[categoryIndex].color,
+        categoryColor,
+        resolvedDynamicColor,
         iconSrc,
         icon,
         ariaLabel,
@@ -357,6 +365,15 @@ export class CallTree {
       this._displayDataByIndex.set(callNodeIndex, displayData);
     }
     return displayData;
+  }
+
+  _getDynamicColor(funcIndex: IndexIntoFuncTable): string {
+    return resolveDynamicColorForFunc(
+      funcIndex,
+      this._funcTable,
+      this._resourceTable,
+      this._stringTable
+    );
   }
 
   _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {

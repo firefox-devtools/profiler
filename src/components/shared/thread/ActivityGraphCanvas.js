@@ -12,6 +12,7 @@ import {
 } from './ActivityGraphFills';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
+import { BUCKET_COLOR_COUNT } from 'firefox-profiler/utils/dynamic-colors';
 
 import type {
   Thread,
@@ -22,7 +23,7 @@ import type {
 } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
-import type { CategoryDrawStyles } from './ActivityGraphFills';
+import type { CategoryDrawStyles, BucketDrawStyle } from './ActivityGraphFills';
 
 type CanvasProps = {|
   +className: string,
@@ -80,19 +81,32 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
   _getCategoryDrawStyles(ctx: CanvasRenderingContext2D): CategoryDrawStyles {
     if (this._categoryDrawStyles === null) {
       // Lazily initialize this list.
-      this._categoryDrawStyles = this.props.categories.map(
-        ({ color: colorName }, categoryIndex) => {
-          const styles = mapCategoryColorNameToStyles(colorName);
+      const categoryDrawStyles = this.props.categories.map(
+        ({ color: categoryColorName }, category) => {
+          if (categoryColorName === 'dynamic') {
+            const gravity = mapCategoryColorNameToStyles(`dynamic-0`).gravity;
+            const bucketDrawStyles = [];
+            for (let i = 0; i < BUCKET_COLOR_COUNT; i++) {
+              bucketDrawStyles.push(
+                _bucketColorNameToBucketDrawStyle(ctx, `dynamic-${i}`)
+                  .bucketDrawStyle
+              );
+            }
+            return {
+              category,
+              gravity,
+              type: 'dynamic',
+              bucketDrawStyles,
+            };
+          }
           return {
-            ...styles,
-            category: categoryIndex,
-            filteredOutByTransformFillStyle: _createDiagonalStripePattern(
-              ctx,
-              styles.unselectedFillStyle
-            ),
+            category,
+            type: 'single',
+            ..._bucketColorNameToBucketDrawStyle(ctx, categoryColorName),
           };
         }
       );
+      this._categoryDrawStyles = categoryDrawStyles;
     }
 
     return this._categoryDrawStyles;
@@ -229,6 +243,29 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       </InView>
     );
   }
+}
+
+function _bucketColorNameToBucketDrawStyle(
+  ctx: CanvasRenderingContext2D,
+  bucketColorName: string
+): {|
+  bucketDrawStyle: BucketDrawStyle,
+  gravity: number,
+|} {
+  const { selectedFillStyle, unselectedFillStyle, selectedTextColor, gravity } =
+    mapCategoryColorNameToStyles(bucketColorName);
+  return {
+    bucketDrawStyle: {
+      selectedFillStyle,
+      unselectedFillStyle,
+      selectedTextColor,
+      filteredOutByTransformFillStyle: _createDiagonalStripePattern(
+        ctx,
+        unselectedFillStyle
+      ),
+    },
+    gravity,
+  };
 }
 
 /**

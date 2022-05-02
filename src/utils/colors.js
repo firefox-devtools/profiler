@@ -11,6 +11,8 @@
  * https://github.com/FirefoxUX/photon-colors/blob/master/photon-colors.js
  */
 
+import { bucketColorForIndex } from './dynamic-colors';
+
 export const MAGENTA_50 = '#ff1ad9';
 export const MAGENTA_60 = '#ed00b5';
 export const MAGENTA_70 = '#b5007f';
@@ -74,12 +76,15 @@ export const INK_70 = '#363959';
 export const INK_80 = '#202340';
 export const INK_90 = '#0f1126';
 
-type ColorStyles = {|
+export type ColorStyles = {|
   +selectedFillStyle: string,
   +unselectedFillStyle: string,
   +selectedTextColor: string,
   +gravity: number,
 |};
+
+export type CategoryColorName = string;
+export type BucketColorName = string;
 
 /**
  * Map a color name, which comes from Gecko, into a CSS style color. These colors cannot
@@ -184,7 +189,26 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedTextColor: '#000',
         gravity: 10,
       };
+    case 'dynamic': {
+      // TODO: shouldn't get here after resolving the bucket color name
+      return {
+        selectedFillStyle: GREY_30,
+        unselectedFillStyle: GREY_30 + '60',
+        selectedTextColor: '#000',
+        gravity: 11,
+      };
+    }
     default:
+      if (colorName.startsWith('dynamic-')) {
+        const index = +colorName.slice('dynamic-'.length) | 0;
+        const bucketColor = bucketColorForIndex(index);
+        return {
+          selectedFillStyle: bucketColor,
+          unselectedFillStyle: bucketColor + 'C0',
+          selectedTextColor: '#000',
+          gravity: 11,
+        };
+      }
       console.error(
         `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
       );
@@ -196,6 +220,11 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
       };
   }
 }
+
+// const color = resolveDynamicColor(file, res);
+// function resolveDynamicColor(file: string, res: any) {
+//   return '1289bc';
+// }
 
 /**
  * This function tweaks the colors for the stack chart, but re-uses most

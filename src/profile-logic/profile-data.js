@@ -25,6 +25,11 @@ import { hashPath } from 'firefox-profiler/utils/path';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
+  resolveDynamicColor,
+  resolveBucketColorName,
+  resolveBucketIndex,
+} from 'firefox-profiler/utils/dynamic-colors';
+import {
   assertExhaustiveCheck,
   ensureExists,
   getFirstItemFromSet,
@@ -2274,6 +2279,69 @@ export function getOriginAnnotationForFunc(
   return '';
 }
 
+export function resolveDynamicColorForFunc(
+  funcIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray
+): string {
+  const resourceIndex = funcTable.resource[funcIndex];
+  const resourceNameIndex = resourceTable.name[resourceIndex];
+  const resourceType = resourceTable.type[resourceIndex];
+  const resourceName =
+    resourceNameIndex !== undefined
+      ? stringTable.getString(resourceNameIndex)
+      : null;
+
+  const fileNameIndex = funcTable.fileName[funcIndex];
+  const fileName =
+    fileNameIndex !== null ? stringTable.getString(fileNameIndex) : null;
+
+  return resolveDynamicColor(fileName, resourceName, resourceType);
+}
+
+export function resolveBucketColorNameForFunc(
+  funcIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray
+): string {
+  const resourceIndex = funcTable.resource[funcIndex];
+  const resourceNameIndex = resourceTable.name[resourceIndex];
+  const resourceType = resourceTable.type[resourceIndex];
+  const resourceName =
+    resourceNameIndex !== undefined
+      ? stringTable.getString(resourceNameIndex)
+      : null;
+
+  const fileNameIndex = funcTable.fileName[funcIndex];
+  const fileName =
+    fileNameIndex !== null ? stringTable.getString(fileNameIndex) : null;
+
+  return resolveBucketColorName(fileName, resourceName, resourceType);
+}
+
+export function resolveBucketIndexForFunc(
+  funcIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray
+): number {
+  const resourceIndex = funcTable.resource[funcIndex];
+  const resourceNameIndex = resourceTable.name[resourceIndex];
+  const resourceType = resourceTable.type[resourceIndex];
+  const resourceName =
+    resourceNameIndex !== undefined
+      ? stringTable.getString(resourceNameIndex)
+      : null;
+
+  const fileNameIndex = funcTable.fileName[funcIndex];
+  const fileName =
+    fileNameIndex !== null ? stringTable.getString(fileNameIndex) : null;
+
+  return resolveBucketIndex(fileName, resourceName, resourceType);
+}
+
 /**
  * From a valid call node path, this function returns a list of information
  * about each function in this path: their names and their origins.
@@ -2286,6 +2354,7 @@ export function getFuncNamesAndOriginsForPath(
   category: IndexIntoCategoryList,
   isFrameLabel: boolean,
   origin: string,
+  resolvedDynamicColor: string | void,
 }> {
   const { funcTable, stringTable, resourceTable } = thread;
 
@@ -2301,6 +2370,7 @@ export function getFuncNamesAndOriginsForPath(
         resourceTable,
         stringTable
       ),
+      resolvedDynamicColor: '#83a428',
     };
   });
 }
