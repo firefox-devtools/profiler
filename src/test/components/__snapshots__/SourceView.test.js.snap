@@ -17,12 +17,12 @@ exports[`SourceView should show the source view when double clicking on a line i
     class="cm-line"
   >
     <span
-      class="cmt-typeName"
+      class="tok-typeName"
     >
       line 
     </span>
     <span
-      class="cmt-number"
+      class="tok-number"
     >
       1
     </span>
@@ -31,13 +31,13 @@ exports[`SourceView should show the source view when double clicking on a line i
     class="cm-line"
   >
     <span
-      class="cmt-variableName"
+      class="tok-variableName"
     >
       line
     </span>
      
     <span
-      class="cmt-number"
+      class="tok-number"
     >
       2
     </span>
@@ -46,12 +46,12 @@ exports[`SourceView should show the source view when double clicking on a line i
     class="cm-line"
   >
     <span
-      class="cmt-typeName"
+      class="tok-typeName"
     >
       line 
     </span>
     <span
-      class="cmt-number"
+      class="tok-number"
     >
       3
     </span>
@@ -60,13 +60,13 @@ exports[`SourceView should show the source view when double clicking on a line i
     class="cm-nonZeroLine cm-line"
   >
     <span
-      class="cmt-variableName"
+      class="tok-variableName"
     >
       line
     </span>
      
     <span
-      class="cmt-number"
+      class="tok-number"
     >
       4
     </span>
@@ -75,12 +75,12 @@ exports[`SourceView should show the source view when double clicking on a line i
     class="cm-line"
   >
     <span
-      class="cmt-typeName"
+      class="tok-typeName"
     >
       line 
     </span>
     <span
-      class="cmt-number"
+      class="tok-number"
     >
       5
     </span>
@@ -89,13 +89,13 @@ exports[`SourceView should show the source view when double clicking on a line i
     class="cm-line"
   >
     <span
-      class="cmt-variableName"
+      class="tok-variableName"
     >
       line
     </span>
      
     <span
-      class="cmt-number"
+      class="tok-number"
     >
       6
     </span>
@@ -104,12 +104,12 @@ exports[`SourceView should show the source view when double clicking on a line i
     class="cm-line"
   >
     <span
-      class="cmt-variableName"
+      class="tok-variableName"
     >
       line 
     </span>
     <span
-      class="cmt-number"
+      class="tok-number"
     >
       7
     </span>
