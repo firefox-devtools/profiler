@@ -40,8 +40,9 @@ import fakeIndexedDB from 'fake-indexeddb';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
 import {
-  serializeProfile,
+  makeProfileSerializable,
   processGeckoProfile,
+  serializeProfile,
 } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
@@ -772,9 +773,7 @@ describe('actions/receive-profile', function () {
         }
       };
 
-      window.fetch = jest
-        .fn()
-        .mockRejectedValue(new Error('No symbolication API in place'));
+      window.fetch.any({ throws: new Error('No symbolication API in place') });
 
       simulateSymbolStoreHasNoCache();
 
@@ -837,7 +836,6 @@ describe('actions/receive-profile', function () {
     afterEach(function () {
       delete window.geckoProfilerPromise;
       delete window.TextDecoder;
-      delete window.fetch;
     });
 
     for (const setupWith of ['frame-script', 'web-channel']) {
@@ -911,22 +909,9 @@ describe('actions/receive-profile', function () {
   });
 
   describe('retrieveProfileFromStore', function () {
-    // Force type-casting to Response to allow to be used as return value for fetch
-    const fetch403Response = (({ ok: false, status: 403 }: any): Response);
-    const fetch500Response = (({ ok: false, status: 500 }: any): Response);
-    const fetch200Response = (({
-      ok: true,
-      status: 200,
-      headers: {
-        get: () => 'application/json',
-      },
-      arrayBuffer: () =>
-        Promise.resolve(encode(serializeProfile(_getSimpleProfile()))),
-    }: any): Response);
-
     beforeEach(function () {
       window.TextDecoder = TextDecoder;
-      window.fetch = jest.fn().mockResolvedValue(fetch403Response);
+      window.fetch.catch(403);
 
       // Call the argument of setTimeout asynchronously right away
       // (instead of waiting for the timeout).
@@ -937,17 +922,15 @@ describe('actions/receive-profile', function () {
 
     afterEach(function () {
       delete window.TextDecoder;
-      delete window.fetch;
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
 
-      window.fetch = jest.fn((url) =>
-        Promise.resolve(
-          url === expectedUrl ? fetch200Response : fetch403Response
-        )
+      window.fetch.get(
+        expectedUrl,
+        makeProfileSerializable(_getSimpleProfile())
       );
 
       const store = blankStore();
@@ -967,14 +950,12 @@ describe('actions/receive-profile', function () {
         getProfileFromTextSamples('0xA[lib:libxul]');
       unsymbolicatedProfile.meta.symbolicated = false;
 
-      window.fetch = jest.fn().mockResolvedValue(
-        (({
-          ...fetch200Response,
-          json: () => Promise.resolve(), // Used when fetching symbols.
-          arrayBuffer: () =>
-            Promise.resolve(encode(serializeProfile(unsymbolicatedProfile))),
-        }: any): Response)
-      );
+      window.fetch
+        .get(
+          'https://storage.googleapis.com/profile-store/FAKEHASH',
+          makeProfileSerializable(unsymbolicatedProfile)
+        )
+        .post('https://symbolication.services.mozilla.com/symbolicate/v5', {});
 
       simulateSymbolStoreHasNoCache();
 
@@ -1006,12 +987,10 @@ describe('actions/receive-profile', function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetch
-        .mockImplementationOnce((_) => Promise.resolve(fetch403Response))
-        .mockImplementationOnce((url) =>
-          Promise.resolve(
-            url === expectedUrl ? fetch200Response : fetch403Response
-          )
-        );
+        .getOnce(expectedUrl, 403)
+        .get(expectedUrl, makeProfileSerializable(_getSimpleProfile()), {
+          overwriteRoutes: false,
+        });
 
       const store = blankStore();
       const views = (
@@ -1044,6 +1023,8 @@ describe('actions/receive-profile', function () {
 
     it('fails in case the profile cannot be found after several tries', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
+      const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
+      window.fetch.get(expectedUrl, 403);
       const store = blankStore();
       const views = (
         await observeStoreStateChanges(store, () =>
@@ -1069,7 +1050,8 @@ describe('actions/receive-profile', function () {
 
     it('fails in case the fetch returns a server error', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      window.fetch = jest.fn().mockResolvedValue(fetch500Response);
+      const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
+      window.fetch.get(expectedUrl, 500);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -1081,31 +1063,10 @@ describe('actions/receive-profile', function () {
   });
 
   describe('retrieveProfileOrZipFromUrl', function () {
-    // Force type-casting to Response to allow to be used as return value for fetch
-    const fetch403Response = (({ ok: false, status: 403 }: any): Response);
-    const fetch500Response = (({ ok: false, status: 500 }: any): Response);
-    const fetch200Response = (({
-      ok: true,
-      status: 200,
-      headers: {
-        get: () => 'application/json',
-      },
-      arrayBuffer: () =>
-        Promise.resolve(encode(serializeProfile(_getSimpleProfile()))),
-    }: any): Response);
-    const fetch200GzippedResponse = (({
-      ok: true,
-      status: 200,
-      headers: {
-        get: () => 'application/json',
-      },
-      arrayBuffer: () => compress(serializeProfile(_getSimpleProfile())),
-    }: any): Response);
-
     beforeEach(function () {
       window.TextDecoder = TextDecoder;
       (window: any).TextEncoder = TextEncoder;
-      window.fetch = jest.fn().mockResolvedValue(fetch403Response);
+      window.fetch.catch(403);
 
       // Call the argument of setTimeout asynchronously right away
       // (instead of waiting for the timeout).
@@ -1117,15 +1078,13 @@ describe('actions/receive-profile', function () {
     afterEach(function () {
       delete window.TextDecoder;
       delete (window: any).TextEncoder;
-      delete window.fetch;
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch = jest.fn((url) =>
-        Promise.resolve(
-          url === expectedUrl ? fetch200Response : fetch403Response
-        )
+      window.fetch.get(
+        expectedUrl,
+        makeProfileSerializable(_getSimpleProfile())
       );
 
       const store = blankStore();
@@ -1142,12 +1101,11 @@ describe('actions/receive-profile', function () {
 
     it('can retrieve a gzipped profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch = jest.fn((url) =>
-        Promise.resolve(
-          url === expectedUrl ? fetch200GzippedResponse : fetch403Response
-        )
+      window.fetch.get(
+        expectedUrl,
+        compress(serializeProfile(_getSimpleProfile())),
+        { sendAsJson: false }
       );
-
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
 
@@ -1164,12 +1122,10 @@ describe('actions/receive-profile', function () {
       const expectedUrl = 'https://profiles.club/shared.json';
       // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
-        .mockResolvedValueOnce(fetch403Response)
-        .mockImplementationOnce((url) =>
-          Promise.resolve(
-            url === expectedUrl ? fetch200Response : fetch403Response
-          )
-        );
+        .getOnce(expectedUrl, 403)
+        .get(expectedUrl, makeProfileSerializable(_getSimpleProfile()), {
+          overwriteRoutes: false,
+        });
 
       const store = blankStore();
       const views = (
@@ -1202,6 +1158,8 @@ describe('actions/receive-profile', function () {
 
     it('fails in case the profile cannot be found after several tries', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
+      window.fetch.get(expectedUrl, 403);
+
       const store = blankStore();
       const views = (
         await observeStoreStateChanges(store, () =>
@@ -1227,7 +1185,7 @@ describe('actions/receive-profile', function () {
 
     it('fails in case the fetch returns a server error', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch = jest.fn().mockResolvedValue(fetch500Response);
+      window.fetch.any(500);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1247,12 +1205,10 @@ describe('actions/receive-profile', function () {
   describe('_fetchProfile', function () {
     beforeEach(function () {
       window.TextDecoder = TextDecoder;
-      window.fetch = jest.fn();
     });
 
     afterEach(function () {
       delete window.TextDecoder;
-      delete window.fetch;
     });
 
     /**
@@ -1262,54 +1218,37 @@ describe('actions/receive-profile', function () {
     async function configureFetch(obj: {
       url: string,
       contentType?: string,
-      isZipped?: true,
-      isJSON?: true,
-      arrayBuffer?: () => Promise<Uint8Array>,
-      json?: () => Promise<mixed>,
+      content: 'generated-zip' | 'generated-json' | Uint8Array,
     }) {
-      const { url, contentType, isZipped, isJSON } = obj;
+      const { url, contentType, content } = obj;
       const stringProfile = serializeProfile(_getSimpleProfile());
       const profile = JSON.parse(stringProfile);
-      let arrayBuffer = obj.arrayBuffer;
-      let json = obj.json;
+      let arrayBuffer;
 
-      if (isZipped) {
-        const zip = new JSZip();
-        zip.file('profile.json', stringProfile);
-        const buffer = await zip.generateAsync({ type: 'uint8array' });
-        arrayBuffer = () => buffer;
-        json = () => Promise.reject(new Error('Not JSON'));
+      switch (content) {
+        case 'generated-zip': {
+          const zip = new JSZip();
+          zip.file('profile.json', stringProfile);
+          arrayBuffer = await zip.generateAsync({ type: 'uint8array' });
+          break;
+        }
+        case 'generated-json':
+          arrayBuffer = encode(stringProfile);
+          break;
+        default:
+          arrayBuffer = content;
+          break;
       }
 
-      if (isJSON) {
-        arrayBuffer = () => Promise.resolve(encode(stringProfile));
-        json = () => Promise.reject(new Error('Not implemented'));
-      }
-
-      const zippedProfileResponse = (({
-        ok: true,
-        status: 200,
-        json,
-        arrayBuffer,
-        headers: {
-          get: (name: string) => {
-            switch (name) {
-              case 'content-type':
-                return contentType;
-              default:
-                throw new Error(
-                  "Unhandled stub for fetch's response.headers.get"
-                );
-            }
+      window.fetch.catch(403).get(
+        url,
+        {
+          body: arrayBuffer,
+          headers: {
+            'content-type': contentType,
           },
         },
-      }: any): Response);
-      const fetch403Response = (({ ok: false, status: 403 }: any): Response);
-
-      window.fetch = jest.fn((actualUrl) =>
-        Promise.resolve(
-          actualUrl === url ? zippedProfileResponse : fetch403Response
-        )
+        { sendAsJson: false }
       );
 
       const reportError = jest.fn();
@@ -1327,7 +1266,7 @@ describe('actions/receive-profile', function () {
       const { profile, args } = await configureFetch({
         url: 'https://example.com/profile.json',
         contentType: 'application/json',
-        isJSON: true,
+        content: 'generated-json',
       });
 
       const profileOrZip = await _fetchProfile(args);
@@ -1338,7 +1277,7 @@ describe('actions/receive-profile', function () {
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.zip',
         contentType: 'application/zip',
-        isZipped: true,
+        content: 'generated-zip',
       });
 
       const profileOrZip = await _fetchProfile(args);
@@ -1349,7 +1288,7 @@ describe('actions/receive-profile', function () {
     it('fetches a zipped profile with incorrect content-type headers, but .zip extension', async function () {
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.zip',
-        isZipped: true,
+        content: 'generated-zip',
       });
 
       const profileOrZip = await _fetchProfile(args);
@@ -1360,7 +1299,7 @@ describe('actions/receive-profile', function () {
     it('fetches a profile with incorrect content-type headers, but .json extension', async function () {
       const { profile, args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
-        isJSON: true,
+        content: 'generated-json',
       });
 
       const profileOrZip = await _fetchProfile(args);
@@ -1371,7 +1310,7 @@ describe('actions/receive-profile', function () {
     it('fetches a profile with incorrect content-type headers, no known extension, and attempts to JSON parse it it', async function () {
       const { profile, args, reportError } = await configureFetch({
         url: 'https://example.com/profile.file',
-        isJSON: true,
+        content: 'generated-json',
       });
 
       const profileOrZip = await _fetchProfile(args);
@@ -1383,7 +1322,7 @@ describe('actions/receive-profile', function () {
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.file',
         contentType: 'application/zip',
-        arrayBuffer: () => Promise.resolve(new Uint8Array([0, 1, 2, 3])),
+        content: new Uint8Array([0, 1, 2, 3]),
       });
 
       let userFacingError;
@@ -1402,7 +1341,7 @@ describe('actions/receive-profile', function () {
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
         contentType: 'application/json',
-        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
+        content: encode(invalidJSON),
       });
 
       let userFacingError;
@@ -1420,7 +1359,7 @@ describe('actions/receive-profile', function () {
       const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
-        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
+        content: encode(invalidJSON),
       });
 
       let userFacingError;
@@ -1438,7 +1377,7 @@ describe('actions/receive-profile', function () {
       const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.unknown',
-        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
+        content: encode(invalidJSON),
       });
 
       let userFacingError;
@@ -1512,9 +1451,7 @@ describe('actions/receive-profile', function () {
     it('symbolicates unsymbolicated profiles', async function () {
       simulateSymbolStoreHasNoCache();
 
-      window.fetch = jest
-        .fn()
-        .mockRejectedValue(new Error('No symbolication API in place'));
+      window.fetch.any({ throws: new Error('No symbolication API in place') });
 
       // Silence console logs coming from the previous rejections
       jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -1532,8 +1469,6 @@ describe('actions/receive-profile', function () {
           body: expect.stringMatching(/memoryMap.*firefox/),
         })
       );
-
-      delete window.fetch;
     });
 
     it('can load json with an empty mime type', async function () {
@@ -1727,17 +1662,6 @@ describe('actions/receive-profile', function () {
   });
 
   describe('retrieveProfilesToCompare', function () {
-    function fetch200Response(profile: string) {
-      return {
-        ok: true,
-        status: 200,
-        headers: {
-          get: () => 'application/json',
-        },
-        arrayBuffer: () => Promise.resolve(encode(profile)),
-      };
-    }
-
     function getSomeProfiles() {
       const { profile: profile1 } = getProfileFromTextSamples(
         `A  B  C  D  E`,
@@ -1842,8 +1766,10 @@ describe('actions/receive-profile', function () {
         );
       }
       window.fetch
-        .mockResolvedValueOnce(fetch200Response(serializeProfile(profile1)))
-        .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
+        .getOnce('*', makeProfileSerializable(profile1))
+        .getOnce('*', makeProfileSerializable(profile2), {
+          overwriteRoutes: false,
+        });
 
       const { dispatch, getState } = blankStore();
       await dispatch(retrieveProfilesToCompare([url1, url2]));
@@ -1870,14 +1796,9 @@ describe('actions/receive-profile', function () {
     }
 
     beforeEach(function () {
-      window.fetch = jest.fn();
-      window.fetch.mockImplementation(() =>
-        Promise.reject(new Error('No more answers have been configured.'))
-      );
-    });
-
-    afterEach(function () {
-      delete window.fetch;
+      window.fetch.catch({
+        throws: new Error('No more answers have been configured.'),
+      });
     });
 
     it('retrieves profiles and put them in the same view', async function () {
@@ -2075,17 +1996,6 @@ describe('actions/receive-profile', function () {
   });
 
   describe('retrieveProfileForRawUrl', function () {
-    function fetch200Response(profile: string) {
-      return {
-        ok: true,
-        status: 200,
-        headers: {
-          get: () => 'application/json',
-        },
-        arrayBuffer: () => Promise.resolve(encode(profile)),
-      };
-    }
-
     async function setup(
       location: $Shape<Location>,
       requiredProfile: number = 1
@@ -2096,9 +2006,9 @@ describe('actions/receive-profile', function () {
       // Add mock fetch response for the required number of times.
       // Usually it's 1 but it can be also 2 for `compare` dataSource.
       for (let i = 0; i < requiredProfile; i++) {
-        window.fetch.mockResolvedValueOnce(
-          fetch200Response(serializeProfile(profile))
-        );
+        window.fetch.getOnce('*', makeProfileSerializable(profile), {
+          overwriteRoutes: false,
+        });
       }
 
       const geckoProfiler = {
@@ -2156,14 +2066,12 @@ describe('actions/receive-profile', function () {
     }
 
     beforeEach(function () {
-      window.fetch = jest.fn();
-      window.fetch.mockImplementation(() =>
-        Promise.reject(new Error('No more answers have been configured.'))
-      );
+      window.fetch.catch({
+        throws: new Error('No more answers have been configured.'),
+      });
     });
 
     afterEach(function () {
-      delete window.fetch;
       delete window.geckoProfilerPromise;
     });
 

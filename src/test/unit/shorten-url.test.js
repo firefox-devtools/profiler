@@ -5,15 +5,6 @@
 // @flow
 
 import { shortenUrl, expandUrl } from 'firefox-profiler/utils/shorten-url';
-import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
-
-beforeEach(() => {
-  window.fetch = jest.fn();
-});
-
-afterEach(() => {
-  delete window.fetch;
-});
 
 // This implements some base checks and behavior to mock the fetch API when
 // testing functions dealing with this API.
@@ -22,38 +13,33 @@ function mockFetchForBitly({
   responseFromRequestPayload,
 }: {|
   endpointUrl: string,
-  responseFromRequestPayload: (any) => Response,
+  responseFromRequestPayload: (any) => any,
 |}) {
-  window.fetch.mockImplementation(async (urlString, options) => {
-    const { method, headers, body } = options;
+  window.fetch
+    .catch(404) // catch all
+    .mock(endpointUrl, async (urlString, options) => {
+      const { method, headers, body } = options;
 
-    if (urlString !== endpointUrl) {
-      return new Response(null, {
-        status: 404,
-        statusText: 'Not found',
-      });
-    }
+      if (method !== 'POST') {
+        return new Response(null, {
+          status: 405,
+          statusText: 'Method not allowed',
+        });
+      }
 
-    if (method !== 'POST') {
-      return new Response(null, {
-        status: 405,
-        statusText: 'Method not allowed',
-      });
-    }
+      if (
+        headers['Content-Type'] !== 'application/json' ||
+        headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+      ) {
+        return new Response(null, {
+          status: 406,
+          statusText: 'Not acceptable',
+        });
+      }
 
-    if (
-      headers['Content-Type'] !== 'application/json' ||
-      headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
-    ) {
-      return new Response(null, {
-        status: 406,
-        statusText: 'Not acceptable',
-      });
-    }
-
-    const payload = JSON.parse(body);
-    return responseFromRequestPayload(payload);
-  });
+      const payload = JSON.parse(body);
+      return responseFromRequestPayload(payload);
+    });
 }
 
 describe('shortenUrl', () => {
@@ -61,17 +47,9 @@ describe('shortenUrl', () => {
     mockFetchForBitly({
       endpointUrl: 'https://api.profiler.firefox.com/shorten',
       responseFromRequestPayload: () => {
-        return new Response(
-          JSON.stringify({
-            shortUrl: `https://share.firefox.dev/${returnedHash}`,
-          }),
-          {
-            status: 200,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return {
+          shortUrl: `https://share.firefox.dev/${returnedHash}`,
+        };
       },
     });
   }
@@ -122,17 +100,9 @@ describe('expandUrl', () => {
     mockFetchForBitly({
       endpointUrl: 'https://api.profiler.firefox.com/expand',
       responseFromRequestPayload: () => {
-        return new Response(
-          JSON.stringify({
-            longUrl: returnedLongUrl,
-          }),
-          {
-            status: 200,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return {
+          longUrl: returnedLongUrl,
+        };
       },
     });
   }
@@ -154,24 +124,14 @@ describe('expandUrl', () => {
   });
 
   it('forwards errors', async () => {
-    window.fetch.mockImplementation(
-      async () =>
-        new Response(null, {
-          status: 503,
-        })
-    );
+    window.fetch.any(503); // server error
 
     const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     await expect(expandUrl(shortUrl)).rejects.toThrow();
   });
 
   it('returns an error when there is no match for this hash', async () => {
-    window.fetch.mockImplementation(
-      async () =>
-        new Response(null, {
-          status: 404,
-        })
-    );
+    window.fetch.any(404); // not found
 
     const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     await expect(expandUrl(shortUrl)).rejects.toThrow();
