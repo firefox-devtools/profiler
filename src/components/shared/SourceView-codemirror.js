@@ -20,24 +20,27 @@
  *    a cm-nonZeroLine class to them. This highlight line goes across the entire
  *    width of the editor, it covers both the gutter and the main area.
  */
-import { EditorView, Decoration } from '@codemirror/view';
+import {
+  EditorView,
+  Decoration,
+  lineNumbers,
+  GutterMarker,
+  gutter,
+  gutterLineClass,
+} from '@codemirror/view';
 import {
   EditorState,
   StateField,
   StateEffect,
   Compartment,
+  RangeSet,
 } from '@codemirror/state';
-import {
-  lineNumbers,
-  GutterMarker,
-  gutter,
-  gutterLineClass,
-} from '@codemirror/gutter';
-import { RangeSet } from '@codemirror/rangeset';
-import { classHighlightStyle } from '@codemirror/highlight';
+import { syntaxHighlighting } from '@codemirror/language';
+import { classHighlighter } from '@lezer/highlight';
 import { cpp } from '@codemirror/lang-cpp';
 import { rust } from '@codemirror/lang-rust';
 import { javascript } from '@codemirror/lang-javascript';
+import clamp from 'clamp';
 
 import type { LineTimings } from 'firefox-profiler/types';
 import { emptyLineTimings } from 'firefox-profiler/profile-logic/line-timings';
@@ -238,7 +241,7 @@ export class SourceViewEditor {
         timingsExtension,
         lineNumbers(),
         languageConf.of(_languageExtForPath(path)),
-        classHighlightStyle,
+        syntaxHighlighting(classHighlighter),
         EditorState.readOnly.of(true),
         EditorView.editable.of(false),
       ],
@@ -281,9 +284,8 @@ export class SourceViewEditor {
 
   scrollToLine(lineNumber: number) {
     // Clamp the line number to the document's line count.
-    if (lineNumber > this._view.state.doc.lines) {
-      lineNumber = this._view.state.doc.lines;
-    }
+    lineNumber = clamp(lineNumber, 1, this._view.state.doc.lines);
+
     // Convert the line number into a position.
     const pos = this._view.state.doc.line(lineNumber).from;
     // Dispatch the scroll action.

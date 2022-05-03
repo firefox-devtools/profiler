@@ -5,7 +5,6 @@
 // @flow
 
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
-import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 import { TextDecoder } from 'util';
 
 describe('fetchSource', function () {
@@ -29,7 +28,7 @@ describe('fetchSource', function () {
             const r = new Response(`Fake response from ${url}`, {
               status: 200,
             });
-            return (r: any);
+            return r;
           },
           queryBrowserSymbolicationApi: async (
             _path: string,

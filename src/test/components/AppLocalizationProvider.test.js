@@ -22,13 +22,8 @@ import {
 } from 'firefox-profiler/actions/l10n';
 
 import { blankStore } from '../fixtures/stores';
-import { coerceMatchingShape } from '../../utils/flow';
 
 describe('AppLocalizationProvider', () => {
-  afterEach(function () {
-    delete window.fetch;
-  });
-
   function setup({
     languages,
     missingTranslation,
@@ -43,36 +38,19 @@ describe('AppLocalizationProvider', () => {
 
     const translatedText = (language) => `This is ${language} Text`;
     const fetchUrlRe = /^\/locales\/(?<language>[^/]+)\/app.ftl$/;
-    const fetch = jest.fn().mockImplementation((fetchUrl: string) => {
-      const matchUrlResult = fetchUrlRe.exec(fetchUrl);
-      if (matchUrlResult) {
-        // $FlowExpectError Our Flow doesn't know about named groups.
-        const { language } = matchUrlResult.groups;
-        const response = (({
-          ok: true,
-          status: 200,
-          headers: {
-            get: () => 'text/plain',
-          },
-          text: () =>
-            Promise.resolve(
-              missingTranslation.includes(language)
-                ? ``
-                : `test-id = ${translatedText(language)}`
-            ),
-        }: any): Response);
-
-        return Promise.resolve(response);
-      }
-      return Promise.reject(
-        coerceMatchingShape<Response>({
-          ok: false,
-          status: 404,
-          statusText: 'Not found',
-        })
-      );
-    });
-    (window: any).fetch = fetch;
+    window.fetch
+      .catch(404) // catchall
+      .get(fetchUrlRe, (fetchUrl) => {
+        const matchUrlResult = fetchUrlRe.exec(fetchUrl);
+        if (matchUrlResult) {
+          // $FlowExpectError Our Flow doesn't know about named groups.
+          const { language } = matchUrlResult.groups;
+          if (!missingTranslation.includes(language)) {
+            return `test-id = ${translatedText(language)}`;
+          }
+        }
+        return '';
+      });
 
     function dispatchWithAct(action) {
       // Wrap direct dispatch actions in `act` so that React behaves as if it's
@@ -210,8 +188,8 @@ describe('AppLocalizationProvider', () => {
 
     expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    expect(window.fetch).toBeCalledWith('/locales/de/app.ftl');
-    expect(window.fetch).toBeCalledWith('/locales/en-US/app.ftl');
+    expect(window.fetch).toBeCalledWith('/locales/de/app.ftl', undefined);
+    expect(window.fetch).toBeCalledWith('/locales/en-US/app.ftl', undefined);
     expect(window.fetch).toBeCalledTimes(2);
   });
 
@@ -236,8 +214,8 @@ describe('AppLocalizationProvider', () => {
       await screen.findByText(translatedText('en-US'))
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    expect(window.fetch).toBeCalledWith('/locales/de/app.ftl');
-    expect(window.fetch).toBeCalledWith('/locales/en-US/app.ftl');
+    expect(window.fetch).toBeCalledWith('/locales/de/app.ftl', undefined);
+    expect(window.fetch).toBeCalledWith('/locales/en-US/app.ftl', undefined);
     expect(window.fetch).toBeCalledTimes(2);
   });
 });

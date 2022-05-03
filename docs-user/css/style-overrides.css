@@ -1,10 +1,7 @@
+/* stylelint-disable */
+
 body {
   font-family: sans-serif;
-  color: #0c0c0d;
-}
-
-/* Match the black font on text headers. */
-.anchor span {
   color: #0c0c0d;
 }
 
@@ -21,6 +18,18 @@ body {
  * Add an underline to the current selected article by adding another pseudo-element. The
  * border property is not enough, as there is margin on the list elements.
  */
+.sidebar ul li::before {
+  /* This removes the "-" for the titles coming from the page inserted in the
+   * sidebar. Indeed they go in the way of the underline below and aren't
+   * especially nice either.
+   */
+  content: "";
+}
+
+/* Note that ::before is important here. Indeed we need to position the element
+ * using margin-top, which gives the position relatively to the top of the
+ * element. Note that the position context isn't the <li> but the full sidebar,
+ * so that it extends towards the left of the sidebar.*/
 .sidebar ul li.active::before {
   content: "";
   position: absolute;
@@ -67,8 +76,8 @@ body {
   width: 30px;
   height: 30px;
   display: inline-block;
-  margin-right: 8px;
-  background-image: url(../images/favicon.png);
+  margin-right: 12px;
+  background-image: url(../images/favicon.svg);
   background-position: 0;
   background-size: 100%;
 }
@@ -87,6 +96,11 @@ body {
   height: 100%;
 }
 
+/* Makes it easier to read on big screens */
+.markdown-section {
+  max-width: 800px;
+}
+
 /* The markdown tables felt a little too tight. */
 .markdown-section td,
 .markdown-section th {
@@ -98,7 +112,6 @@ body {
 .markdown-section code,
 .markdown-section pre {
   color: #0c0c0d;
-  background-color: rgba(27, 31, 35, 0.05);
   border-radius: 3px;
 }
 

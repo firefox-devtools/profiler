@@ -13,14 +13,41 @@ Array [
   ],
   Array [
     "Fetch response:",
-    Object {
-      "arrayBuffer": [Function],
-      "headers": Object {
-        "get": [Function],
+    Response {
+      "_fmResults": Object {
+        "arrayBuffer": Promise {},
       },
-      "json": undefined,
-      "ok": true,
-      "status": 200,
+      "size": 0,
+      "timeout": 0,
+      Symbol(Body internals): Object {
+        "body": Object {
+          "data": Array [
+            105,
+            110,
+            118,
+            97,
+            108,
+            105,
+            100,
+          ],
+          "type": "Buffer",
+        },
+        "disturbed": true,
+        "error": null,
+      },
+      Symbol(Response internals): Object {
+        "counter": undefined,
+        "headers": Headers {
+          Symbol(map): Object {
+            "content-type": Array [
+              "application/json",
+            ],
+          },
+        },
+        "status": 200,
+        "statusText": "OK",
+        "url": "https://example.com/profile.json",
+      },
     },
   ],
 ]
@@ -39,14 +66,41 @@ Array [
   ],
   Array [
     "Fetch response:",
-    Object {
-      "arrayBuffer": [Function],
-      "headers": Object {
-        "get": [Function],
+    Response {
+      "_fmResults": Object {
+        "arrayBuffer": Promise {},
       },
-      "json": undefined,
-      "ok": true,
-      "status": 200,
+      "size": 0,
+      "timeout": 0,
+      Symbol(Body internals): Object {
+        "body": Object {
+          "data": Array [
+            105,
+            110,
+            118,
+            97,
+            108,
+            105,
+            100,
+          ],
+          "type": "Buffer",
+        },
+        "disturbed": true,
+        "error": null,
+      },
+      Symbol(Response internals): Object {
+        "counter": undefined,
+        "headers": Headers {
+          Symbol(map): Object {
+            "content-type": Array [
+              "undefined",
+            ],
+          },
+        },
+        "status": 200,
+        "statusText": "OK",
+        "url": "https://example.com/profile.json",
+      },
     },
   ],
 ]
@@ -65,14 +119,38 @@ Array [
   ],
   Array [
     "Fetch response:",
-    Object {
-      "arrayBuffer": [Function],
-      "headers": Object {
-        "get": [Function],
+    Response {
+      "_fmResults": Object {
+        "arrayBuffer": Promise {},
       },
-      "json": undefined,
-      "ok": true,
-      "status": 200,
+      "size": 0,
+      "timeout": 0,
+      Symbol(Body internals): Object {
+        "body": Object {
+          "data": Array [
+            0,
+            1,
+            2,
+            3,
+          ],
+          "type": "Buffer",
+        },
+        "disturbed": true,
+        "error": null,
+      },
+      Symbol(Response internals): Object {
+        "counter": undefined,
+        "headers": Headers {
+          Symbol(map): Object {
+            "content-type": Array [
+              "application/zip",
+            ],
+          },
+        },
+        "status": 200,
+        "statusText": "OK",
+        "url": "https://example.com/profile.file",
+      },
     },
   ],
 ]
@@ -91,14 +169,41 @@ Array [
   ],
   Array [
     "Fetch response:",
-    Object {
-      "arrayBuffer": [Function],
-      "headers": Object {
-        "get": [Function],
+    Response {
+      "_fmResults": Object {
+        "arrayBuffer": Promise {},
       },
-      "json": undefined,
-      "ok": true,
-      "status": 200,
+      "size": 0,
+      "timeout": 0,
+      Symbol(Body internals): Object {
+        "body": Object {
+          "data": Array [
+            105,
+            110,
+            118,
+            97,
+            108,
+            105,
+            100,
+          ],
+          "type": "Buffer",
+        },
+        "disturbed": true,
+        "error": null,
+      },
+      Symbol(Response internals): Object {
+        "counter": undefined,
+        "headers": Headers {
+          Symbol(map): Object {
+            "content-type": Array [
+              "undefined",
+            ],
+          },
+        },
+        "status": 200,
+        "statusText": "OK",
+        "url": "https://example.com/profile.unknown",
+      },
     },
   ],
 ]

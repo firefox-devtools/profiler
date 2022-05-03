@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
-import { serializeProfile } from '../../profile-logic/process-profile';
+import { makeProfileSerializable } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import { UrlManager } from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
@@ -30,29 +30,14 @@ import {
 
 jest.mock('../../profile-logic/symbol-store');
 
-import { TextEncoder, TextDecoder } from 'util';
+import { TextDecoder } from 'util';
 import { simulateOldWebChannelAndFrameScript } from '../fixtures/mocks/web-channel';
 
 describe('UrlManager', function () {
   autoMockFullNavigation();
 
-  // This is a quite complicated function, that does something very simple:
-  // it returns a response with a good profile suitable to mock a fetch result.
-  function getSuccessfulFetchResponse() {
-    const fetch200Response = (({
-      ok: true,
-      status: 200,
-      headers: {
-        get: () => 'application/json',
-      },
-      arrayBuffer: () =>
-        Promise.resolve(
-          new TextEncoder().encode(
-            serializeProfile(getProfileFromTextSamples('A').profile)
-          )
-        ),
-    }: any): Response);
-    return fetch200Response;
+  function getSerializableProfile() {
+    return makeProfileSerializable(getProfileFromTextSamples('A').profile);
   }
 
   function setup(urlPath: ?string) {
@@ -85,9 +70,6 @@ describe('UrlManager', function () {
         .fn()
         .mockRejectedValue(new Error('No symbol tables available')),
     };
-    window.fetch = jest
-      .fn()
-      .mockRejectedValue(new Error('Simulated network error'));
     window.TextDecoder = TextDecoder;
     simulateOldWebChannelAndFrameScript(geckoProfiler);
   });
@@ -95,7 +77,6 @@ describe('UrlManager', function () {
   afterEach(function () {
     delete window.geckoProfilerPromise;
     delete window.TextDecoder;
-    delete window.fetch;
   });
 
   it('sets up the URL', async function () {
@@ -164,6 +145,7 @@ describe('UrlManager', function () {
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a fetch error`, async function () {
+    window.fetch.getAny({ throws: new Error('Simulated network error') });
     const urlPath = '/public/FAKE_HASH/marker-chart';
     const { getState, createUrlManager, waitUntilUrlSetupPhase } =
       setup(urlPath);
@@ -180,7 +162,7 @@ describe('UrlManager', function () {
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a URL upgrading error`, async function () {
-    window.fetch.mockResolvedValue(getSuccessfulFetchResponse());
+    window.fetch.getAny(getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/calltree';
     const searchString = '?v=' + (CURRENT_URL_VERSION + 1);
@@ -202,7 +184,7 @@ describe('UrlManager', function () {
   });
 
   it(`fetches profile and sets the phase to done when everything works`, async function () {
-    window.fetch.mockResolvedValue(getSuccessfulFetchResponse());
+    window.fetch.getAny(getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/';
     const expectedResultingPath = urlPath + 'calltree/';
@@ -223,7 +205,7 @@ describe('UrlManager', function () {
   });
 
   it('allows navigating back and forward when changing view options', async () => {
-    window.fetch.mockResolvedValue(getSuccessfulFetchResponse());
+    window.fetch.getAny(getSerializableProfile());
 
     const urlPath = '/public/FAKE_HASH/calltree/';
     const searchString = 'v=' + CURRENT_URL_VERSION;
