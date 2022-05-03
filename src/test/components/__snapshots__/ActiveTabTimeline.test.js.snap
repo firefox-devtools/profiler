@@ -14,6 +14,38 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
         class="timelineTrackThread expanded"
       >
         <div
+          class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <div>
+              <canvas
+                class="timelineMarkersCanvas"
+                height="300"
+                width="200"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="timelineMarkers timelineMarkersGeckoMain"
+          data-testid="TimelineMarkersOverview"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <div>
+              <canvas
+                class="timelineMarkersCanvas"
+                height="300"
+                width="200"
+              />
+            </div>
+          </div>
+        </div>
+        <div
           class="threadActivityGraph"
         >
           <div>
@@ -49,42 +81,6 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
                 This graph charts the stack height of each sample.
               </p>
             </canvas>
-          </div>
-        </div>
-        <div
-          class="timelineTrackThreadMarkers"
-        >
-          <div
-            class="timelineMarkers"
-            data-testid="TimelineMarkersJank"
-          >
-            <div
-              class="react-contextmenu-wrapper"
-            >
-              <div>
-                <canvas
-                  class="timelineMarkersCanvas"
-                  height="300"
-                  width="200"
-                />
-              </div>
-            </div>
-          </div>
-          <div
-            class="timelineMarkers timelineMarkersGeckoMain"
-            data-testid="TimelineMarkersOverview"
-          >
-            <div
-              class="react-contextmenu-wrapper"
-            >
-              <div>
-                <canvas
-                  class="timelineMarkersCanvas"
-                  height="300"
-                  width="200"
-                />
-              </div>
-            </div>
           </div>
         </div>
         <div
@@ -119,6 +115,22 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
         class="timelineTrackThread condensed"
       >
         <div
+          class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <div>
+              <canvas
+                class="timelineMarkersCanvas"
+                height="300"
+                width="200"
+              />
+            </div>
+          </div>
+        </div>
+        <div
           class="threadActivityGraph"
         >
           <div>
@@ -135,45 +147,6 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
                 This graph shows a visual chart of thread activity.
               </p>
             </canvas>
-          </div>
-        </div>
-        <div
-          class="threadSampleGraph"
-        >
-          <div>
-            <canvas
-              class="threadSampleGraphCanvas threadSampleGraphCanvas"
-              height="300"
-              width="200"
-            >
-              <h2>
-                Stack Graph for 
-                Page #3
-              </h2>
-              <p>
-                This graph charts the stack height of each sample.
-              </p>
-            </canvas>
-          </div>
-        </div>
-        <div
-          class="timelineTrackThreadMarkers"
-        >
-          <div
-            class="timelineMarkers"
-            data-testid="TimelineMarkersJank"
-          >
-            <div
-              class="react-contextmenu-wrapper"
-            >
-              <div>
-                <canvas
-                  class="timelineMarkersCanvas"
-                  height="300"
-                  width="200"
-                />
-              </div>
-            </div>
           </div>
         </div>
         <div
@@ -200,6 +173,22 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
       class="timelineTrackThread condensed"
     >
       <div
+        class="timelineMarkers"
+        data-testid="TimelineMarkersJank"
+      >
+        <div
+          class="react-contextmenu-wrapper"
+        >
+          <div>
+            <canvas
+              class="timelineMarkersCanvas"
+              height="300"
+              width="200"
+            />
+          </div>
+        </div>
+      </div>
+      <div
         class="threadActivityGraph"
       >
         <div>
@@ -216,45 +205,6 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
               This graph shows a visual chart of thread activity.
             </p>
           </canvas>
-        </div>
-      </div>
-      <div
-        class="threadSampleGraph"
-      >
-        <div>
-          <canvas
-            class="threadSampleGraphCanvas threadSampleGraphCanvas"
-            height="300"
-            width="200"
-          >
-            <h2>
-              Stack Graph for 
-              Merged resource tracks
-            </h2>
-            <p>
-              This graph charts the stack height of each sample.
-            </p>
-          </canvas>
-        </div>
-      </div>
-      <div
-        class="timelineTrackThreadMarkers"
-      >
-        <div
-          class="timelineMarkers"
-          data-testid="TimelineMarkersJank"
-        >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="300"
-                width="200"
-              />
-            </div>
-          </div>
         </div>
       </div>
       <div
@@ -280,6 +230,22 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
       class="timelineTrackThread condensed"
     >
       <div
+        class="timelineMarkers"
+        data-testid="TimelineMarkersJank"
+      >
+        <div
+          class="react-contextmenu-wrapper"
+        >
+          <div>
+            <canvas
+              class="timelineMarkersCanvas"
+              height="300"
+              width="200"
+            />
+          </div>
+        </div>
+      </div>
+      <div
         class="threadActivityGraph"
       >
         <div>
@@ -296,45 +262,6 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
               This graph shows a visual chart of thread activity.
             </p>
           </canvas>
-        </div>
-      </div>
-      <div
-        class="threadSampleGraph"
-      >
-        <div>
-          <canvas
-            class="threadSampleGraphCanvas threadSampleGraphCanvas"
-            height="300"
-            width="200"
-          >
-            <h2>
-              Stack Graph for 
-              Merged resource tracks
-            </h2>
-            <p>
-              This graph charts the stack height of each sample.
-            </p>
-          </canvas>
-        </div>
-      </div>
-      <div
-        class="timelineTrackThreadMarkers"
-      >
-        <div
-          class="timelineMarkers"
-          data-testid="TimelineMarkersJank"
-        >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="300"
-                width="200"
-              />
-            </div>
-          </div>
         </div>
       </div>
       <div
@@ -367,6 +294,22 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
             class="timelineTrackThread condensed"
           >
             <div
+              class="timelineMarkers"
+              data-testid="TimelineMarkersJank"
+            >
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <div>
+                  <canvas
+                    class="timelineMarkersCanvas"
+                    height="300"
+                    width="200"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
               class="threadActivityGraph"
             >
               <div>
@@ -383,45 +326,6 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
                     This graph shows a visual chart of thread activity.
                   </p>
                 </canvas>
-              </div>
-            </div>
-            <div
-              class="threadSampleGraph"
-            >
-              <div>
-                <canvas
-                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
-                  height="300"
-                  width="200"
-                >
-                  <h2>
-                    Stack Graph for 
-                    Page #2
-                  </h2>
-                  <p>
-                    This graph charts the stack height of each sample.
-                  </p>
-                </canvas>
-              </div>
-            </div>
-            <div
-              class="timelineTrackThreadMarkers"
-            >
-              <div
-                class="timelineMarkers"
-                data-testid="TimelineMarkersJank"
-              >
-                <div
-                  class="react-contextmenu-wrapper"
-                >
-                  <div>
-                    <canvas
-                      class="timelineMarkersCanvas"
-                      height="300"
-                      width="200"
-                    />
-                  </div>
-                </div>
               </div>
             </div>
             <div
@@ -515,6 +419,38 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                   class="timelineTrackThread expanded"
                 >
                   <div
+                    class="timelineMarkers selected"
+                    data-testid="TimelineMarkersJank"
+                  >
+                    <div
+                      class="react-contextmenu-wrapper"
+                    >
+                      <div>
+                        <canvas
+                          class="timelineMarkersCanvas"
+                          height="300"
+                          width="200"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="timelineMarkers timelineMarkersGeckoMain selected"
+                    data-testid="TimelineMarkersOverview"
+                  >
+                    <div
+                      class="react-contextmenu-wrapper"
+                    >
+                      <div>
+                        <canvas
+                          class="timelineMarkersCanvas"
+                          height="300"
+                          width="200"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
                     class="threadActivityGraph"
                   >
                     <div>
@@ -550,42 +486,6 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                           This graph charts the stack height of each sample.
                         </p>
                       </canvas>
-                    </div>
-                  </div>
-                  <div
-                    class="timelineTrackThreadMarkers"
-                  >
-                    <div
-                      class="timelineMarkers selected"
-                      data-testid="TimelineMarkersJank"
-                    >
-                      <div
-                        class="react-contextmenu-wrapper"
-                      >
-                        <div>
-                          <canvas
-                            class="timelineMarkersCanvas"
-                            height="300"
-                            width="200"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      class="timelineMarkers timelineMarkersGeckoMain selected"
-                      data-testid="TimelineMarkersOverview"
-                    >
-                      <div
-                        class="react-contextmenu-wrapper"
-                      >
-                        <div>
-                          <canvas
-                            class="timelineMarkersCanvas"
-                            height="300"
-                            width="200"
-                          />
-                        </div>
-                      </div>
                     </div>
                   </div>
                   <div

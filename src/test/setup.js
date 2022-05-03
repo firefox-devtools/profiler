@@ -6,11 +6,24 @@
 // Importing this here makes it work everywhere.
 import '@testing-library/jest-dom';
 
+// This installs jest matchers as a side effect as well.
+import fetchMock from 'fetch-mock-jest';
+import { Headers, Request, Response } from 'node-fetch';
+
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
 import { autoMockResizeObserver } from './fixtures/mocks/resize-observer';
 
 autoMockResizeObserver();
+
+beforeEach(function () {
+  // Install fetch and fetch-related objects globally.
+  // Using the sandbox ensures that parallel tests run properly.
+  global.fetch = fetchMock.sandbox();
+  global.Headers = Headers;
+  global.Request = Request;
+  global.Response = Response;
+});
 
 afterEach(function () {
   // This `__shutdownWorkers` function only exists in the mocked test environment,
@@ -29,6 +42,9 @@ afterEach(() => {
   jest.restoreAllMocks();
   jest.clearAllTimers();
   jest.useRealTimers();
+
+  // Do the same with fetch mocks
+  fetchMock.mockReset();
 });
 
 expect.extend({

@@ -55,14 +55,14 @@ CallNodeContextMenu--transform-merge-call-node = Nur Knoten zusammenführen
     .title =
         Wenn Sie einen Knoten zusammenführen, wird sie aus dem Profil entfernt und ihre Laufzeit wird dem Knoten der
         Funktion hinzugefügt, von der sie aufgerufen wurde. Die Funktion wird nur aus diesem Teil
-        des Baums entfernt. Alle anderen Orten, von denen aus die Funktion aufgerufen wurde,
+        des Baums entfernt. Alle anderen Orte, von denen aus die Funktion aufgerufen wurde,
         verbleiben im Profil.
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
 CallNodeContextMenu--transform-focus-function-title =
     Der Fokus auf eine Funktion entfernt jede Teilmenge, die diese Funktion nicht enthält.
-    Außerdem wird eine neue Wurzel für den Aufrufbau festgelegt, sodass die Funktion
-    die einzige Wurzel des Baumes ist. dies kann mehrere Aufruforte einer Funktion
+    Außerdem wird eine neue Wurzel für den Aufrufbaum festgelegt, sodass die Funktion
+    die einzige Wurzel des Baumes ist. Dies kann mehrere Aufruforte einer Funktion
     in einem Profil zu einem Aufrufknoten vereinen.
 CallNodeContextMenu--transform-focus-function = Auf Funktion fokussieren
     .title = { CallNodeContextMenu--transform-focus-function-title }
@@ -321,7 +321,7 @@ MarkerContextMenu--select-the-sender-thread = Absender-Thread „<strong>{ $thre
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
-    .label = Filtermarkierungen:
+    .label = Markierungen filtern:
     .title = Nur Markierungen anzeigen, die zu einem bestimmten Namen passen
 
 ## MarkerSidebar
@@ -596,7 +596,7 @@ StackSettings--panel-search =
 
 ## Tab Bar for the bottom half of the analysis UI.
 
-TabBar--calltree-tab = Aufrufbau
+TabBar--calltree-tab = Aufrufbaum
 TabBar--flame-graph-tab = Flammendiagramm
 TabBar--stack-chart-tab = Stack-Diagramm
 TabBar--marker-chart-tab = Markierungsdiagramm

@@ -21,12 +21,11 @@ import {
   resetHistoryWithUrl,
 } from '../fixtures/mocks/window-navigation';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
-import { coerceMatchingShape } from '../../utils/flow';
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 import type { SerializableProfile } from 'firefox-profiler/types';
 
-import { TextEncoder, TextDecoder } from 'util';
+import { TextDecoder } from 'util';
 
 // ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
 // just test we want to render it, but otherwise test it more fully in a
@@ -110,7 +109,6 @@ describe('Root with history', function () {
 
   afterEach(() => {
     delete window.TextDecoder;
-    delete window.fetch;
   });
 
   it('can view a file from the profile store, use history with it', async function () {
@@ -124,8 +122,6 @@ describe('Root with history', function () {
       screen.getByText('Downloading and processing the profile…')
     ).toBeInTheDocument();
     expect(screen.queryByText('Call Tree')).not.toBeInTheDocument();
-
-    await Promise.all((window: any).fetch.mock.results.map((n) => n.value));
 
     // Wait until the call tree is visible.
     await waitForTab({ name: 'Call Tree', selected: true });
@@ -205,32 +201,7 @@ function mockFetchProfileAtUrl(
   url: string,
   profile: SerializableProfile
 ): void {
-  const responses = [];
-  const fetch = jest.fn().mockImplementation((fetchUrl: string) => {
-    if (fetchUrl === url) {
-      const response = coerceMatchingShape<Response>({
-        ok: true,
-        status: 200,
-        headers: coerceMatchingShape<Headers>({
-          get: () => 'application/json',
-        }),
-        arrayBuffer: () =>
-          Promise.resolve(
-            new TextEncoder().encode(JSON.stringify(profile)).buffer
-          ),
-        json: () => Promise.resolve(profile),
-      });
-      responses.push(response);
-      return Promise.resolve(response);
-    }
-    return Promise.reject(
-      coerceMatchingShape<Response>({
-        ok: false,
-        status: 404,
-        statusText: 'Not found',
-      })
-    );
-  });
-
-  (window: any).fetch = fetch;
+  window.fetch
+    .catch(404) // catchall
+    .get(url, profile);
 }

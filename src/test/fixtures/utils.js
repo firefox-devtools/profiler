@@ -28,9 +28,6 @@ import { fireEvent, screen } from '@testing-library/react';
  */
 
 type FakeMouseEventInit = $Shape<{
-  bubbles: boolean,
-  cancelable: boolean,
-  composed: boolean,
   altKey: boolean,
   button: 0 | 1 | 2 | 3 | 4,
   buttons: number,
@@ -49,6 +46,14 @@ type FakeMouseEventInit = $Shape<{
   shiftKey: boolean,
   x: number,
   y: number,
+
+  // From UIEventInit
+  detail: number,
+
+  // From EventInit
+  bubbles: boolean,
+  cancelable: boolean,
+  composed: boolean,
 }>;
 
 class FakeMouseEvent extends MouseEvent {

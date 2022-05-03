@@ -26,7 +26,6 @@ import { ensureExists } from 'firefox-profiler/utils/flow';
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
 import { mockDate } from 'firefox-profiler/test/fixtures/mocks/date';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
-import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 
 import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
 autoMockIndexedDB();
@@ -284,14 +283,6 @@ describe('ListOfPublishedProfiles', () => {
   });
 
   describe('profile deletion', () => {
-    beforeEach(() => {
-      window.fetch = jest.fn();
-    });
-
-    afterEach(() => {
-      delete window.fetch;
-    });
-
     function mockFetchForDeleteProfile({
       endpointUrl,
       jwtToken,
@@ -299,39 +290,39 @@ describe('ListOfPublishedProfiles', () => {
       endpointUrl: string,
       jwtToken: string,
     }) {
-      window.fetch.mockImplementation(async (urlString, options) => {
-        if (urlString !== endpointUrl) {
-          return new Response(null, { status: 404, statusText: 'Not found' });
-        }
+      window.fetch
+        .catch(404) // Catchall
+        .mock(endpointUrl, (urlString, options) => {
+          const { method, headers } = options;
+          if (method !== 'DELETE') {
+            return new Response(null, {
+              status: 405,
+              statusText: 'Method not allowed',
+            });
+          }
 
-        const { method, headers } = options;
+          if (
+            headers['Content-Type'] !== 'application/json' ||
+            headers.Accept !==
+              'application/vnd.firefox-profiler+json;version=1.0'
+          ) {
+            return new Response(null, {
+              status: 406,
+              statusText: 'Not acceptable',
+            });
+          }
 
-        if (method !== 'DELETE') {
-          return new Response(null, {
-            status: 405,
-            statusText: 'Method not allowed',
+          if (headers.Authorization !== `Bearer ${jwtToken}`) {
+            return new Response(null, {
+              status: 401,
+              statusText: 'Forbidden',
+            });
+          }
+
+          return new Response('Profile successfully deleted.', {
+            status: 200,
           });
-        }
-
-        if (
-          headers['Content-Type'] !== 'application/json' ||
-          headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
-        ) {
-          return new Response(null, {
-            status: 406,
-            statusText: 'Not acceptable',
-          });
-        }
-
-        if (headers.Authorization !== `Bearer ${jwtToken}`) {
-          return new Response(null, {
-            status: 401,
-            statusText: 'Forbidden',
-          });
-        }
-
-        return new Response('Profile successfully deleted.', { status: 200 });
-      });
+        });
     }
 
     it('can delete profiles', async () => {
