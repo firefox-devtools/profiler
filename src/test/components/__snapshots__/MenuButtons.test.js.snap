@@ -16,13 +16,13 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile clicking on the butt
       <h2
         class="confirmDialogTitle"
       >
-        Delete 
-        PROFILE
+        Delete ⁨PROFILE⁩
       </h2>
       <div
         class="confirmDialogContent"
       >
-        Are you sure you want to delete uploaded data for this profile? Links that were previously shared will no longer work.
+        Are you sure you want to delete uploaded data for this profile? Links
+that were previously shared will no longer work.
       </div>
       <div
         class="confirmDialogButtons"
