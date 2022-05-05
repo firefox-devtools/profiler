@@ -235,7 +235,7 @@ export function ProfileDeleteSuccess(_props: {||}) {
   return (
     <Localized id="ProfileDeletePanel--message-success">
       <p className="profileDeleteButtonSuccess">
-        Successfully deleted uploaded data.
+        The uploaded data was successfully deleted.
       </p>
     </Localized>
   );

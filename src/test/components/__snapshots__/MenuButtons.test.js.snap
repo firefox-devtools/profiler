@@ -56,7 +56,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile confirming the delet
     <p
       class="profileDeleteButtonSuccess"
     >
-      Successfully deleted uploaded data.
+      The uploaded data was successfully deleted.
     </p>
   </div>
 </div>

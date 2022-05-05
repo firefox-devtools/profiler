@@ -607,7 +607,7 @@ ProfileDeletePanel--dialog-deleting-button =
     .value = Deleting…
 
 # This message is displayed when a profile has been successfully deleted.
-ProfileDeletePanel--message-success = Successfully deleted uploaded data.
+ProfileDeletePanel--message-success = The uploaded data was successfully deleted.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
