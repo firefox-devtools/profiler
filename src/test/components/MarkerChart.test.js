@@ -192,15 +192,14 @@ describe('MarkerChart', function () {
     const rowName = 'TestMarker';
 
     const markers = [
-      // DOT [RENDERED]: This marker defines the start of our range.
+      // DIAMOND [RENDERED]: This marker defines the start of our range.
       [rowName, 0],
-      // Now create four "dot" markers, but only two should be rendered.
-      // DOT [RENDERED]: This is the first instant marker, so it's rendered.
+      // DIAMOND [RENDERED]: This is the first instant marker, so it's rendered.
       [rowName, 5000],
       // RECTANGLE [RENDERED]: This marker has a duration, but it's very small,
       // so it's rendered as a small rectangle. It's rendered because it's the the first.
       [rowName, 5001, 5001.1],
-      // DOT [NOT-RENDERED]: The second instant marker, so it's not rendered.
+      // DIAMOND [NOT-RENDERED]: The second instant marker, so it's not rendered.
       [rowName, 5002],
       // RECTANGLE [NOT-RENDERED]: This marker has a duration, but it's very small, and would get
       // rendered as 1 pixel wide rectangle if it was rendered. But it's not because it's close to
@@ -209,7 +208,7 @@ describe('MarkerChart', function () {
       // RECTANGLE [RENDERED]: This is a longer marker, it should always be drawn even if it starts
       // at the same location as a small marker
       [rowName, 5002.1, 7000],
-      // DOT [RENDERED]: Add a final marker that's quite far away to have a big time range.
+      // DIAMOND [RENDERED]: Add a final marker that's quite far away to have a big time range.
       [rowName, 15000],
     ];
 
@@ -219,18 +218,19 @@ describe('MarkerChart', function () {
 
     const drawCalls = flushDrawLog();
 
-    // Check that we have 3 arc operations (first marker, first instant marker,
-    // and last marker)
-    const arcOperations = drawCalls.filter(
-      ([operation]) => operation === 'arc'
+    // Check that we have 3 diamonds (initial instant marker, first "middle"
+    // instant marker, and last marker). We use the moveTo operation as a proxy
+    // to know that a diamond is drawn.
+    const diamondOperations = drawCalls.filter(
+      ([operation]) => operation === 'moveTo'
     );
-    expect(arcOperations).toHaveLength(3);
+    expect(diamondOperations).toHaveLength(3);
 
     // Check that all X, Y values are different
-    const arcOperationsXY = new Set(
-      arcOperations.map(([, x, y]) => `${Math.round(x)};${Math.round(y)}`)
+    const diamondOperationsXY = new Set(
+      diamondOperations.map(([, x, y]) => `${Math.round(x)};${Math.round(y)}`)
     );
-    expect(arcOperationsXY.size).toBe(3);
+    expect(diamondOperationsXY.size).toBe(3);
 
     // Check that we have a fillRect operation for the first small interval
     // marker. We filter also using w or h to filter out the initial clearing

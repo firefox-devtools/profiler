@@ -6,6 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+import { Localized } from '@fluent/react';
 
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
 import { ProfileMetaInfoSummary } from 'firefox-profiler/components/shared/ProfileMetaInfoSummary';
@@ -20,7 +21,6 @@ import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 import type { StartEndRange } from 'firefox-profiler/types/units';
 
 import './ListOfPublishedProfiles.css';
-import { Localized } from '@fluent/react';
 
 // This component displays all published profile, and makes it possible to load
 // them by clicking on them, or delete them.
