@@ -163,12 +163,17 @@ export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
     }
 
     return (
-      <p className="profileDeleteButtonError">
-        An error happened while deleting this profile.{' '}
-        <a href="#" title={error.message} onClick={this.preventClick}>
-          Hover to know more.
-        </a>
-      </p>
+      <Localized
+        id="ProfileDeletePanel--delete-error"
+        elems={{
+          a: <a href="#" title={error.message} onClick={this.preventClick} />,
+        }}
+      >
+        <p className="profileDeleteButtonError">
+          An error happened while deleting this profile.{' '}
+          <a>Hover to know more.</a>
+        </p>
+      </Localized>
     );
   }
   render() {
@@ -181,27 +186,45 @@ export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
 
     return (
       <div className="confirmDialog">
-        <h2 className="confirmDialogTitle">Delete {profileName}</h2>
+        <Localized id="ProfileDeletePanel--dialog-title" vars={{ profileName }}>
+          <h2 className="confirmDialogTitle">Delete {profileName}</h2>
+        </Localized>
         <div className="confirmDialogContent">
-          Are you sure you want to delete uploaded data for this profile? Links
-          that were previously shared will no longer work.
+          <Localized id="ProfileDeletePanel--dialog-confirmation-question">
+            Are you sure you want to delete uploaded data for this profile?
+            Links that were previously shared will no longer work.
+          </Localized>
           {this._renderPossibleErrorMessage()}
         </div>
         <div className="confirmDialogButtons">
-          <input
-            type="button"
-            className="photon-button photon-button-default"
-            value="Cancel"
-            disabled={status === 'working'}
-            onClick={this.props.onProfileDeleteCanceled}
-          />
-          <input
-            type="button"
-            className="photon-button photon-button-destructive"
-            value={status === 'working' ? 'Deleting…' : 'Delete'}
-            disabled={status === 'working'}
-            onClick={this.onConfirmDeletion}
-          />
+          <Localized
+            id="ProfileDeletePanel--dialog-cancel-button"
+            attrs={{ value: true }}
+          >
+            <input
+              type="button"
+              className="photon-button photon-button-default"
+              value="Cancel"
+              disabled={status === 'working'}
+              onClick={this.props.onProfileDeleteCanceled}
+            />
+          </Localized>
+          <Localized
+            id={
+              status === 'working'
+                ? 'ProfileDeletePanel--dialog-deleting-button'
+                : 'ProfileDeletePanel--dialog-delete-button'
+            }
+            attrs={{ value: true }}
+          >
+            <input
+              type="button"
+              className="photon-button photon-button-destructive"
+              value={status === 'working' ? 'Deleting…' : 'Delete'}
+              disabled={status === 'working'}
+              onClick={this.onConfirmDeletion}
+            />
+          </Localized>
         </div>
       </div>
     );
@@ -210,8 +233,10 @@ export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
 
 export function ProfileDeleteSuccess(_props: {||}) {
   return (
-    <p className="profileDeleteButtonSuccess">
-      Successfully deleted uploaded data.
-    </p>
+    <Localized id="ProfileDeletePanel--message-success">
+      <p className="profileDeleteButtonSuccess">
+        The uploaded data was successfully deleted.
+      </p>
+    </Localized>
   );
 }
