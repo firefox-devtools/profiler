@@ -538,10 +538,14 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Un error eveniva durante le deletion de iste profilo. <a>Passa supra le mus pro saper plus.</a>
 # This is the title of the dialog
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
 ProfileDeletePanel--dialog-title = Deler { $profileName }
+ProfileDeletePanel--dialog-confirmation-question = Desira tu vermente deler le datos cargate pro iste profilo? Le ligamines que era previemente compartite non plus functionara.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Cancellar
 ProfileDeletePanel--dialog-delete-button =
