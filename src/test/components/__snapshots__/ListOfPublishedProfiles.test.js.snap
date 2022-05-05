@@ -159,13 +159,13 @@ exports[`ListOfPublishedProfiles profile deletion can delete profiles 1`] = `
     <h2
       class="confirmDialogTitle"
     >
-      Delete 
-      Profile #012345
+      Delete ⁨Profile #012345⁩
     </h2>
     <div
       class="confirmDialogContent"
     >
-      Are you sure you want to delete uploaded data for this profile? Links that were previously shared will no longer work.
+      Are you sure you want to delete uploaded data for this profile? Links
+that were previously shared will no longer work.
     </div>
     <div
       class="confirmDialogButtons"
@@ -195,13 +195,13 @@ exports[`ListOfPublishedProfiles profile deletion renders a generic message when
     <h2
       class="confirmDialogTitle"
     >
-      Delete 
-      Profile #012345
+      Delete ⁨Profile #012345⁩
     </h2>
     <div
       class="confirmDialogContent"
     >
-      Are you sure you want to delete uploaded data for this profile? Links that were previously shared will no longer work.
+      Are you sure you want to delete uploaded data for this profile? Links
+that were previously shared will no longer work.
     </div>
     <div
       class="confirmDialogButtons"
