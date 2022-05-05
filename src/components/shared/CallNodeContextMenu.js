@@ -669,7 +669,7 @@ export const CallNodeContextMenu = explicitConnect<
         rightClickedCallNodeInfo.threadsKey
       );
 
-      thread = selectors.getThread(state);
+      thread = selectors.getFilteredThread(state);
       threadsKey = rightClickedCallNodeInfo.threadsKey;
       callNodeInfo = selectors.getCallNodeInfo(state);
       rightClickedCallNodePath = rightClickedCallNodeInfo.callNodePath;
