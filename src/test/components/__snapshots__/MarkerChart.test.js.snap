@@ -468,21 +468,43 @@ Array [
   ],
   Array [
     "set fillStyle",
+    "#8ac4ff",
+  ],
+  Array [
+    "set strokeStyle",
     "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
-    "arc",
-    194.5,
+    "moveTo",
+    190.75,
     23.5,
-    3.75,
-    0,
-    6.283185307179586,
+  ],
+  Array [
+    "lineTo",
+    194.5,
+    17.5,
+  ],
+  Array [
+    "lineTo",
+    198.25,
+    23.5,
+  ],
+  Array [
+    "lineTo",
+    194.5,
+    29.5,
+  ],
+  Array [
+    "closePath",
   ],
   Array [
     "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "measureText",
@@ -656,21 +678,43 @@ Array [
   ],
   Array [
     "set fillStyle",
+    "#8ac4ff",
+  ],
+  Array [
+    "set strokeStyle",
     "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
-    "arc",
-    228,
+    "moveTo",
+    224.25,
     119.5,
-    3.75,
-    0,
-    6.283185307179586,
+  ],
+  Array [
+    "lineTo",
+    228,
+    113.5,
+  ],
+  Array [
+    "lineTo",
+    231.75,
+    119.5,
+  ],
+  Array [
+    "lineTo",
+    228,
+    125.5,
+  ],
+  Array [
+    "closePath",
   ],
   Array [
     "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "set fillStyle",
@@ -1386,21 +1430,43 @@ Array [
   ],
   Array [
     "set fillStyle",
+    "#8ac4ff",
+  ],
+  Array [
+    "set strokeStyle",
     "#2c77d1",
   ],
   Array [
     "beginPath",
   ],
   Array [
-    "arc",
-    58.5,
+    "moveTo",
+    54.75,
     39.5,
-    3.75,
-    0,
-    6.283185307179586,
+  ],
+  Array [
+    "lineTo",
+    58.5,
+    33.5,
+  ],
+  Array [
+    "lineTo",
+    62.25,
+    39.5,
+  ],
+  Array [
+    "lineTo",
+    58.5,
+    45.5,
+  ],
+  Array [
+    "closePath",
   ],
   Array [
     "fill",
+  ],
+  Array [
+    "stroke",
   ],
   Array [
     "restore",

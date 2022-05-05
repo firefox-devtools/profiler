@@ -90,7 +90,6 @@ type Props = {|
 
 const TEXT_OFFSET_TOP = 11;
 const TEXT_OFFSET_START = 3;
-const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const LABEL_PADDING = 5;
 const MARKER_BORDER_COLOR = '#2c77d1';
@@ -348,17 +347,18 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     h: CssPixels,
     isHighlighted: boolean
   ) {
-    ctx.fillStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
+    ctx.fillStyle = isHighlighted ? BLUE_60 : '#8ac4ff';
+    ctx.strokeStyle = isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR;
 
+    // We're drawing a diamond shape, whose height is h - 2, and width is h / 2.
     ctx.beginPath();
-    ctx.arc(
-      x,
-      y + h / 2,
-      h * MARKER_DOT_RADIUS, // radius
-      0, // arc start
-      TWO_PI // arc end
-    );
+    ctx.moveTo(x - h / 4, y + h / 2);
+    ctx.lineTo(x, y + 1.5);
+    ctx.lineTo(x + h / 4, y + h / 2);
+    ctx.lineTo(x, y + h - 1.5);
+    ctx.closePath();
     ctx.fill();
+    ctx.stroke();
   }
 
   drawMarkers(
