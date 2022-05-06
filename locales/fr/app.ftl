@@ -480,6 +480,9 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Une erreur s’est produite lors de la suppression de ce profil. <a>Passez la souris sur ce lien pour en savoir plus.</a>
 # This is the title of the dialog
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
