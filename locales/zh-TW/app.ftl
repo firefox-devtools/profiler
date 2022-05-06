@@ -467,6 +467,29 @@ ProfileDeleteButton--delete-button =
     .label = 刪除
     .title = 點擊此處刪除檢測檔 { $smallProfileName }
 
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = 刪除此效能檢測檔時發生錯誤，<a>將滑鼠移到此處即可了解更多資訊。</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = 刪除 { $profileName }
+ProfileDeletePanel--dialog-confirmation-question = 您確定要刪除這份效能檢測檔已上傳的資料嗎？刪除後，先前分享的鏈結將失效。
+ProfileDeletePanel--dialog-cancel-button =
+    .value = 取消
+ProfileDeletePanel--dialog-delete-button =
+    .value = 刪除
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = 刪除中…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = 已成功刪除上傳的資料。
+
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
