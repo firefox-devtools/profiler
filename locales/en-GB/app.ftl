@@ -541,6 +541,31 @@ ProfileDeleteButton--delete-button =
     .label = Delete
     .title = Click here to delete the profile { $smallProfileName }
 
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = An error happened while deleting this profile. <a>Hover to know more.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Delete { $profileName }
+ProfileDeletePanel--dialog-confirmation-question =
+    Are you sure you want to delete uploaded data for this profile? Links
+    that were previously shared will no longer work.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Cancel
+ProfileDeletePanel--dialog-delete-button =
+    .value = Delete
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Deleting…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = The uploaded data was successfully deleted.
+
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
