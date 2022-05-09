@@ -341,14 +341,8 @@ export class ActivityGraphFillComputer {
     cpuBeforeSample: number | null,
     cpuAfterSample: number | null
   ) {
-    const {
-      rangeEnd,
-      rangeStart,
-      categoryDrawStyles,
-      xPixelsPerMs,
-      canvasPixelWidth,
-      maxThreadCPUDelta,
-    } = this.renderedComponentSettings;
+    const { rangeEnd, rangeStart, categoryDrawStyles } =
+      this.renderedComponentSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
     }
@@ -360,92 +354,20 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;
-    const sampleCategoryEndTime = (sampleTime + nextSampleTime) / 2;
-    let sampleCategoryStartPixel =
-      (sampleCategoryStartTime - rangeStart) * xPixelsPerMs;
-    let sampleCategoryEndPixel =
-      (sampleCategoryEndTime - rangeStart) * xPixelsPerMs;
-    sampleCategoryStartPixel = Math.max(0, sampleCategoryStartPixel);
-    sampleCategoryEndPixel = Math.min(
-      canvasPixelWidth - 1,
-      sampleCategoryEndPixel
-    );
-    const samplePixel = (sampleTime - rangeStart) * xPixelsPerMs;
-    const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
-    const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
-    const intSamplePixel = Math.floor(samplePixel);
-
-    // Every sample has two parts because of different CPU usage values.
-    // For every sample part, we have a fractional interval of this sample part's
-    // contribution to the graph's pixels.
-    //
-    // v       v       v       v       v       v       v       v       v
-    // +-------+-------+-----+-+-------+-------+-----+-+-------+-------+
-    // |       |       |     |///////////////////////| |       |       |
-    // |       |       |     |///////////////////////| |       |       |
-    // |       |       |     |///////////////////////| |       |       |
-    // +-------+-------+-----+///////////////////////+-+-------+-------+
-    //
-    // We have a device-pixel array of contributions. We map the fractional
-    // interval to this array of device pixels: Fully overlapping pixels are
-    // 1, and the partial overlapping pixels are the degree of overlap.
-
-    //                                 |
-    //                                 v
-    //
-    // +-------+-------+-------+-------+-------+-------+-------+-------+
-    // |       |       |       |///////////////+-------+       |       |
-    // |       |       |       |///////////////////////|       |       |
-    // |       |       +-------+///////////////////////|       |       |
-    // +-------+-------+///////////////////////////////+-------+-------+
     const percentageBuffer = this._pickPercentageBuffer(
       percentageBuffers,
       sampleIndex
     );
 
-    // A number between 0 and 1 for sample ratio. It changes depending on
-    // the CPU usage if it's given. If not, it uses 1 directly.
-    const beforeSampleCpuRatio =
-      cpuBeforeSample === null ? 1 : cpuBeforeSample / maxThreadCPUDelta;
-    const afterSampleCpuRatio =
-      cpuAfterSample === null ? 1 : cpuAfterSample / maxThreadCPUDelta;
-
-    // Samples have two parts to be able to present the different CPU usages properly.
-    // This is because CPU usage number of a sample represents the CPU usage
-    // starting starting from the previous sample time to this sample time.
-    // These parts will be:
-    // - Between `sampleCategoryStartPixel` and `samplePixel` with beforeSampleCpuRatio.
-    // - Between `samplePixel` and `sampleCategoryEndPixel` with afterSampleCpuRatio.
-
-    // Here we are accumulating the first part of the sample. It will use the
-    // CPU delta number that belongs to this sample.
-    // This part starts from the "sample start time" to "sample time" and uses
-    // beforeSampleCpuRatio.
-    for (let i = intCategoryStartPixel; i <= intSamplePixel; i++) {
-      percentageBuffer[i] += beforeSampleCpuRatio;
-    }
-
-    // Subtract the partial pixels from start and end of the first part.
-    percentageBuffer[intCategoryStartPixel] -=
-      beforeSampleCpuRatio * (sampleCategoryStartPixel - intCategoryStartPixel);
-    percentageBuffer[intSamplePixel] -=
-      beforeSampleCpuRatio * (1 - (samplePixel - intSamplePixel));
-
-    // Here we are accumulating the second part of the sample. It will use the
-    // CPU delta number that belongs to the next sample.
-    // This part starts from "sample time" to "sample end time" and uses
-    // afterSampleCpuRatio.
-    for (let i = intSamplePixel; i <= intCategoryEndPixel; i++) {
-      percentageBuffer[i] += afterSampleCpuRatio;
-    }
-
-    // Subtract the partial pixels from start and end of the second part.
-    percentageBuffer[intSamplePixel] -=
-      afterSampleCpuRatio * (samplePixel - intSamplePixel);
-    percentageBuffer[intCategoryEndPixel] -=
-      afterSampleCpuRatio *
-      (1 - (sampleCategoryEndPixel - intCategoryEndPixel));
+    _accumulateInBuffer(
+      percentageBuffer,
+      this.renderedComponentSettings,
+      prevSampleTime,
+      sampleTime,
+      nextSampleTime,
+      cpuBeforeSample,
+      cpuAfterSample
+    );
   }
 
   /**
@@ -900,6 +822,99 @@ function _getCategoryFills(
   return [].concat(...nestedFills);
 }
 
+function _accumulateInBuffer(
+  percentageBuffer: Float32Array,
+  renderedComponentSettings: RenderedComponentSettings,
+  prevSampleTime: Milliseconds,
+  sampleTime: Milliseconds,
+  nextSampleTime: Milliseconds,
+  cpuBeforeSample: number | null,
+  cpuAfterSample: number | null
+) {
+  const { rangeStart, xPixelsPerMs, canvasPixelWidth, maxThreadCPUDelta } =
+    renderedComponentSettings;
+  const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;
+  const sampleCategoryEndTime = (sampleTime + nextSampleTime) / 2;
+  let sampleCategoryStartPixel =
+    (sampleCategoryStartTime - rangeStart) * xPixelsPerMs;
+  let sampleCategoryEndPixel =
+    (sampleCategoryEndTime - rangeStart) * xPixelsPerMs;
+  sampleCategoryStartPixel = Math.max(0, sampleCategoryStartPixel);
+  sampleCategoryEndPixel = Math.min(
+    canvasPixelWidth - 1,
+    sampleCategoryEndPixel
+  );
+  const samplePixel = (sampleTime - rangeStart) * xPixelsPerMs;
+  const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
+  const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
+  const intSamplePixel = Math.floor(samplePixel);
+
+  // Every sample has two parts because of different CPU usage values.
+  // For every sample part, we have a fractional interval of this sample part's
+  // contribution to the graph's pixels.
+  //
+  // v       v       v       v       v       v       v       v       v
+  // +-------+-------+-----+-+-------+-------+-----+-+-------+-------+
+  // |       |       |     |///////////////////////| |       |       |
+  // |       |       |     |///////////////////////| |       |       |
+  // |       |       |     |///////////////////////| |       |       |
+  // +-------+-------+-----+///////////////////////+-+-------+-------+
+  //
+  // We have a device-pixel array of contributions. We map the fractional
+  // interval to this array of device pixels: Fully overlapping pixels are
+  // 1, and the partial overlapping pixels are the degree of overlap.
+
+  //                                 |
+  //                                 v
+  //
+  // +-------+-------+-------+-------+-------+-------+-------+-------+
+  // |       |       |       |///////////////+-------+       |       |
+  // |       |       |       |///////////////////////|       |       |
+  // |       |       +-------+///////////////////////|       |       |
+  // +-------+-------+///////////////////////////////+-------+-------+
+
+  // A number between 0 and 1 for sample ratio. It changes depending on
+  // the CPU usage if it's given. If not, it uses 1 directly.
+  const beforeSampleCpuRatio =
+    cpuBeforeSample === null ? 1 : cpuBeforeSample / maxThreadCPUDelta;
+  const afterSampleCpuRatio =
+    cpuAfterSample === null ? 1 : cpuAfterSample / maxThreadCPUDelta;
+
+  // Samples have two parts to be able to present the different CPU usages properly.
+  // This is because CPU usage number of a sample represents the CPU usage
+  // starting starting from the previous sample time to this sample time.
+  // These parts will be:
+  // - Between `sampleCategoryStartPixel` and `samplePixel` with beforeSampleCpuRatio.
+  // - Between `samplePixel` and `sampleCategoryEndPixel` with afterSampleCpuRatio.
+
+  // Here we are accumulating the first part of the sample. It will use the
+  // CPU delta number that belongs to this sample.
+  // This part starts from the "sample start time" to "sample time" and uses
+  // beforeSampleCpuRatio.
+  for (let i = intCategoryStartPixel; i <= intSamplePixel; i++) {
+    percentageBuffer[i] += beforeSampleCpuRatio;
+  }
+
+  // Subtract the partial pixels from start and end of the first part.
+  percentageBuffer[intCategoryStartPixel] -=
+    beforeSampleCpuRatio * (sampleCategoryStartPixel - intCategoryStartPixel);
+  percentageBuffer[intSamplePixel] -=
+    beforeSampleCpuRatio * (1 - (samplePixel - intSamplePixel));
+
+  // Here we are accumulating the second part of the sample. It will use the
+  // CPU delta number that belongs to the next sample.
+  // This part starts from "sample time" to "sample end time" and uses
+  // afterSampleCpuRatio.
+  for (let i = intSamplePixel; i <= intCategoryEndPixel; i++) {
+    percentageBuffer[i] += afterSampleCpuRatio;
+  }
+
+  // Subtract the partial pixels from start and end of the second part.
+  percentageBuffer[intSamplePixel] -=
+    afterSampleCpuRatio * (samplePixel - intSamplePixel);
+  percentageBuffer[intCategoryEndPixel] -=
+    afterSampleCpuRatio * (1 - (sampleCategoryEndPixel - intCategoryEndPixel));
+}
 /**
  * Apply a 1d box blur to a destination array.
  */
