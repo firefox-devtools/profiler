@@ -685,32 +685,67 @@ export class ActivityFillGraphQuerier {
   ): number {
     const {
       rangeFilteredThread: { samples },
-      rangeStart,
+      enableCPUUsage,
+      interval,
+      sampleIndexOffset,
+      fullThread,
     } = this.renderedComponentSettings;
     const kernelPos = xPixel - SMOOTHING_RADIUS;
     const pixelsAroundX = new Float32Array(SMOOTHING_KERNEL.length);
     const sampleTime = samples.time[sample];
-    // xPixel in graph space maps to kernel[smoothingRadius]
-    const sampleTimeRangeStart =
-      sample > 0 ? (samples.time[sample - 1] + sampleTime) / 2 : -Infinity;
-    const sampleTimeRangeEnd =
-      sample + 1 < samples.length
-        ? (samples.time[sample + 1] + sampleTime) / 2
-        : Infinity;
+    // Use the fullThread here to properly get the next and previous in case zoomed in.
+    const fullThreadSample = sample + sampleIndexOffset;
+    const prevSampleTime =
+      fullThreadSample > 0
+        ? fullThread.samples.time[fullThreadSample - 1]
+        : sampleTime - interval;
+    const nextSampleTime =
+      fullThreadSample + 1 < fullThread.samples.length
+        ? fullThread.samples.time[fullThreadSample + 1]
+        : sampleTime + interval;
 
-    let pixelStart =
-      (sampleTimeRangeStart - rangeStart) * xPixelsPerMs - kernelPos;
-    let pixelEnd = (sampleTimeRangeEnd - rangeStart) * xPixelsPerMs - kernelPos;
-    pixelStart = clamp(pixelStart, 0, SMOOTHING_KERNEL.length - 1);
-    pixelEnd = clamp(pixelEnd, 0, SMOOTHING_KERNEL.length - 1);
-    const intPixelStart = pixelStart | 0;
-    const intPixelEnd = pixelEnd | 0;
+    let cpuBeforeSample = null;
+    let cpuAfterSample = null;
+    const { threadCPUDelta } = samples;
+    if (enableCPUUsage && threadCPUDelta) {
+      // It must be non-null because we are checking this in the processing
+      // step and eliminating all the null values.
+      const cpuDeltaBefore = ensureExists(threadCPUDelta[sample]);
+      // Use the fullThread here to properly get the next in case zoomed in.
+      const cpuDeltaAfter = ensureExists(fullThread.samples.threadCPUDelta)[
+        fullThreadSample + 1
+      ];
+      const intervalDistribution = (sampleTime - prevSampleTime) / interval;
+      const nextIntervalDistribution = (nextSampleTime - sampleTime) / interval;
 
-    for (let i = intPixelStart; i <= intPixelEnd; i++) {
-      pixelsAroundX[i] += 1;
+      // Figure out the CPU usage "per interval". This is needed for cases
+      // where we have some missing samples. For example:
+      //
+      // Interval:        1ms                  2ms                 1ms
+      // CPU:          100 cycles           200 cycles          200 cycles
+      // Samples:  [x-------------x--------------------------x-------------x]
+      //
+      // In this case, even though it has the max CPU cycle count, the CPU
+      // usage should be 50% because this cycle count is from 2ms area instead
+      // of 1ms like the latter one.
+      cpuBeforeSample = cpuDeltaBefore / intervalDistribution;
+      cpuAfterSample =
+        // It can be undefined if this is the last sample in the profile.
+        cpuDeltaAfter !== undefined && cpuDeltaAfter !== null
+          ? cpuDeltaAfter / nextIntervalDistribution
+          : cpuBeforeSample;
     }
-    pixelsAroundX[intPixelStart] -= pixelStart - intPixelStart;
-    pixelsAroundX[intPixelEnd] -= 1 - (pixelEnd - intPixelEnd);
+
+    _accumulateInBuffer(
+      pixelsAroundX,
+      this.renderedComponentSettings,
+      prevSampleTime,
+      sampleTime,
+      nextSampleTime,
+      cpuBeforeSample,
+      cpuAfterSample,
+      kernelPos
+    );
 
     let sum = 0;
     for (let i = 0; i < SMOOTHING_KERNEL.length; i++) {
@@ -829,22 +864,38 @@ function _accumulateInBuffer(
   sampleTime: Milliseconds,
   nextSampleTime: Milliseconds,
   cpuBeforeSample: number | null,
-  cpuAfterSample: number | null
+  cpuAfterSample: number | null,
+  kernelPos?: number
 ) {
   const { rangeStart, xPixelsPerMs, canvasPixelWidth, maxThreadCPUDelta } =
     renderedComponentSettings;
+  const kernelPosNum = kernelPos || 0;
   const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;
   const sampleCategoryEndTime = (sampleTime + nextSampleTime) / 2;
   let sampleCategoryStartPixel =
-    (sampleCategoryStartTime - rangeStart) * xPixelsPerMs;
+    (sampleCategoryStartTime - rangeStart) * xPixelsPerMs - kernelPosNum;
   let sampleCategoryEndPixel =
-    (sampleCategoryEndTime - rangeStart) * xPixelsPerMs;
+    (sampleCategoryEndTime - rangeStart) * xPixelsPerMs - kernelPosNum;
   sampleCategoryStartPixel = Math.max(0, sampleCategoryStartPixel);
   sampleCategoryEndPixel = Math.min(
     canvasPixelWidth - 1,
     sampleCategoryEndPixel
   );
-  const samplePixel = (sampleTime - rangeStart) * xPixelsPerMs;
+  let samplePixel = (sampleTime - rangeStart) * xPixelsPerMs - kernelPosNum;
+  if (kernelPos) {
+    // Clamp the pixels to smoothing kernel in case there is a kernel position.
+    sampleCategoryStartPixel = clamp(
+      sampleCategoryStartPixel,
+      0,
+      SMOOTHING_KERNEL.length - 1
+    );
+    sampleCategoryEndPixel = clamp(
+      sampleCategoryEndPixel,
+      0,
+      SMOOTHING_KERNEL.length - 1
+    );
+    samplePixel = clamp(samplePixel, 0, SMOOTHING_KERNEL.length - 1);
+  }
   const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
   const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
   const intSamplePixel = Math.floor(samplePixel);
