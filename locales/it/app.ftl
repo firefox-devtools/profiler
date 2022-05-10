@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Impossibile leggere il file o analizzare il pro
 AppViewRouter--error-local = Non ancora implementato.
 AppViewRouter--error-public = Impossibile scaricare il profilo.
 AppViewRouter--error-from-url = Impossibile scaricare il profilo.
+AppViewRouter--error-compare = Impossibile recuperare i profili.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
