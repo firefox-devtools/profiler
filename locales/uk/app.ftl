@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Не вдалося прочитати файл
 AppViewRouter--error-local = Ще не впроваджено.
 AppViewRouter--error-public = Не вдалося завантажити профіль.
 AppViewRouter--error-from-url = Не вдалося завантажити профіль.
+AppViewRouter--error-compare = Не вдалося відновити профілі.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
