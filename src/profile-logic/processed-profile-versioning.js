@@ -2053,9 +2053,43 @@ const _upgraders = {
     const libs = [];
     const libKeyToLibIndex = new Map();
     for (const thread of profile.threads) {
-      const { libs: threadLibs, resourceTable, stringTable } = thread;
+      const {
+        libs: threadLibs,
+        resourceTable,
+        nativeSymbols,
+        stringTable,
+      } = thread;
       const threadLibIndexToGlobalLibIndex = new Map();
       delete thread.libs;
+
+      const getOrAddNewLib = (libIndex) => {
+        let newLibIndex = threadLibIndexToGlobalLibIndex.get(libIndex);
+        if (newLibIndex === undefined) {
+          const lib = threadLibs[libIndex];
+          const { debugName, breakpadId } = lib;
+          const libKey = `${debugName}/${breakpadId}`;
+
+          newLibIndex = libKeyToLibIndex.get(libKey);
+          if (newLibIndex === undefined) {
+            newLibIndex = libs.length;
+            const { arch, name, path, debugPath, codeId } = lib;
+            libs.push({
+              arch,
+              name,
+              path,
+              debugName,
+              debugPath,
+              breakpadId,
+              codeId: codeId ?? null,
+            });
+            libKeyToLibIndex.set(libKey, newLibIndex);
+          }
+          threadLibIndexToGlobalLibIndex.set(libIndex, newLibIndex);
+        }
+
+        return newLibIndex;
+      };
+
       for (
         let resourceIndex = 0;
         resourceIndex < resourceTable.length;
@@ -2080,29 +2114,18 @@ const _upgraders = {
           continue;
         }
 
-        let newLibIndex = threadLibIndexToGlobalLibIndex.get(libIndex);
-        if (newLibIndex === undefined) {
-          const lib = threadLibs[libIndex];
-          const { debugName, breakpadId } = lib;
-          const libKey = `${debugName}/${breakpadId}`;
-
-          newLibIndex = libKeyToLibIndex.get(libKey);
-          if (newLibIndex === undefined) {
-            newLibIndex = libs.length;
-            const { arch, name, path, debugPath, codeId } = lib;
-            libs.push({
-              arch,
-              name,
-              path,
-              debugName,
-              debugPath,
-              breakpadId,
-              codeId: codeId ?? null,
-            });
-            libKeyToLibIndex.set(libKey, newLibIndex);
-          }
-        }
+        const newLibIndex = getOrAddNewLib(libIndex);
         resourceTable.lib[resourceIndex] = newLibIndex;
+      }
+
+      for (
+        let nativeSymbolIndex = 0;
+        nativeSymbolIndex < nativeSymbols.length;
+        nativeSymbolIndex++
+      ) {
+        const libIndex = nativeSymbols.libIndex[nativeSymbolIndex];
+        const newLibIndex = getOrAddNewLib(libIndex);
+        nativeSymbols.libIndex[nativeSymbolIndex] = newLibIndex;
       }
     }
     profile.libs = libs;
