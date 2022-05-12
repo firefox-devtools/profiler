@@ -3,8 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import clamp from 'clamp';
-
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
@@ -366,7 +364,8 @@ export class ActivityGraphFillComputer {
       sampleTime,
       nextSampleTime,
       cpuBeforeSample,
-      cpuAfterSample
+      cpuAfterSample,
+      rangeStart
     );
   }
 
@@ -602,16 +601,12 @@ export class ActivityFillGraphQuerier {
    * Determine which samples contributed to a given height at a specific time. The result
    * is an array of all candidate samples, with their contribution amount.
    */
-  _getSamplesAtTime(time: number): $ReadOnlyArray<SampleContributionToPixel> {
-    const {
-      rangeStart,
-      rangeEnd,
-      treeOrderSampleComparator,
-      canvasPixelWidth,
-    } = this.renderedComponentSettings;
+  _getSamplesAtTime(
+    time: Milliseconds
+  ): $ReadOnlyArray<SampleContributionToPixel> {
+    const { rangeStart, treeOrderSampleComparator, xPixelsPerMs } =
+      this.renderedComponentSettings;
 
-    const rangeLength = rangeEnd - rangeStart;
-    const xPixelsPerMs = canvasPixelWidth / rangeLength;
     const xPixel = ((time - rangeStart) * xPixelsPerMs) | 0;
     const [sampleRangeStart, sampleRangeEnd] =
       this._getSampleRangeContributingToPixelWhenSmoothed(xPixel);
@@ -620,7 +615,6 @@ export class ActivityFillGraphQuerier {
     for (let sample = sampleRangeStart; sample < sampleRangeEnd; sample++) {
       const contribution = this._getSmoothedContributionFromSampleToPixel(
         xPixel,
-        xPixelsPerMs,
         sample
       );
       if (contribution > 0) {
@@ -680,7 +674,6 @@ export class ActivityFillGraphQuerier {
    */
   _getSmoothedContributionFromSampleToPixel(
     xPixel: number,
-    xPixelsPerMs: number,
     sample: IndexIntoSamplesTable
   ): number {
     const {
@@ -689,6 +682,8 @@ export class ActivityFillGraphQuerier {
       interval,
       sampleIndexOffset,
       fullThread,
+      xPixelsPerMs,
+      rangeStart,
     } = this.renderedComponentSettings;
     const kernelPos = xPixel - SMOOTHING_RADIUS;
     const pixelsAroundX = new Float32Array(SMOOTHING_KERNEL.length);
@@ -736,6 +731,7 @@ export class ActivityFillGraphQuerier {
           : cpuBeforeSample;
     }
 
+    const kernelRangeStartTime = rangeStart + kernelPos / xPixelsPerMs;
     _accumulateInBuffer(
       pixelsAroundX,
       this.renderedComponentSettings,
@@ -744,7 +740,7 @@ export class ActivityFillGraphQuerier {
       nextSampleTime,
       cpuBeforeSample,
       cpuAfterSample,
-      kernelPos
+      kernelRangeStartTime
     );
 
     let sum = 0;
@@ -857,6 +853,12 @@ function _getCategoryFills(
   return [].concat(...nestedFills);
 }
 
+/**
+ * Mutates `percentageBuffer` by adding contributions from a single sample to
+ * the pixels that the sample overlaps with. The buffer covers the following
+ * time range: It starts at `rangeStart` and ends at
+ * `rangeStart + percentageBuffer.length / renderedComponentSettings.xPixelsPerMs`.
+ */
 function _accumulateInBuffer(
   percentageBuffer: Float32Array,
   renderedComponentSettings: RenderedComponentSettings,
@@ -865,37 +867,21 @@ function _accumulateInBuffer(
   nextSampleTime: Milliseconds,
   cpuBeforeSample: number | null,
   cpuAfterSample: number | null,
-  kernelPos?: number
+  bufferTimeRangeStart: Milliseconds
 ) {
-  const { rangeStart, xPixelsPerMs, canvasPixelWidth, maxThreadCPUDelta } =
-    renderedComponentSettings;
-  const kernelPosNum = kernelPos || 0;
+  const { xPixelsPerMs, maxThreadCPUDelta } = renderedComponentSettings;
   const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;
   const sampleCategoryEndTime = (sampleTime + nextSampleTime) / 2;
   let sampleCategoryStartPixel =
-    (sampleCategoryStartTime - rangeStart) * xPixelsPerMs - kernelPosNum;
+    (sampleCategoryStartTime - bufferTimeRangeStart) * xPixelsPerMs;
   let sampleCategoryEndPixel =
-    (sampleCategoryEndTime - rangeStart) * xPixelsPerMs - kernelPosNum;
+    (sampleCategoryEndTime - bufferTimeRangeStart) * xPixelsPerMs;
   sampleCategoryStartPixel = Math.max(0, sampleCategoryStartPixel);
   sampleCategoryEndPixel = Math.min(
-    canvasPixelWidth - 1,
+    percentageBuffer.length - 1,
     sampleCategoryEndPixel
   );
-  let samplePixel = (sampleTime - rangeStart) * xPixelsPerMs - kernelPosNum;
-  if (kernelPos) {
-    // Clamp the pixels to smoothing kernel in case there is a kernel position.
-    sampleCategoryStartPixel = clamp(
-      sampleCategoryStartPixel,
-      0,
-      SMOOTHING_KERNEL.length - 1
-    );
-    sampleCategoryEndPixel = clamp(
-      sampleCategoryEndPixel,
-      0,
-      SMOOTHING_KERNEL.length - 1
-    );
-    samplePixel = clamp(samplePixel, 0, SMOOTHING_KERNEL.length - 1);
-  }
+  const samplePixel = (sampleTime - bufferTimeRangeStart) * xPixelsPerMs;
   const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
   const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
   const intSamplePixel = Math.floor(samplePixel);
