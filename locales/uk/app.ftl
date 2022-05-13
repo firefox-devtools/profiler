@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Не вдалося прочитати файл
 AppViewRouter--error-local = Ще не впроваджено.
 AppViewRouter--error-public = Не вдалося завантажити профіль.
 AppViewRouter--error-from-url = Не вдалося завантажити профіль.
+AppViewRouter--error-compare = Не вдалося відновити профілі.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
@@ -542,6 +543,31 @@ PanelSearch--search-field-hint = Чи знаєте ви, що для пошук�
 ProfileDeleteButton--delete-button =
     .label = Видалити
     .title = Натисніть тут, щоб видалити профіль { $smallProfileName }
+
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Під час видалення цього профілю сталася помилка. <a>Наведіть курсор, щоб дізнатися більше.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Видалити { $profileName }
+ProfileDeletePanel--dialog-confirmation-question =
+    Ви впевнені, що хочете видалити вивантажені дані для цього профілю? Посилання,
+    які раніше були поширені більше не працюватимуть.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Скасувати
+ProfileDeletePanel--dialog-delete-button =
+    .value = Видалити
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Видалення…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Вивантажені дані було успішно видалено.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.

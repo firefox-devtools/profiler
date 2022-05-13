@@ -467,6 +467,29 @@ ProfileDeleteButton--delete-button =
     .label = 删除
     .title = 点击此处删除 Profile { $smallProfileName }
 
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = 删除此分析文件时出错。<a>鼠标悬停此处了解更多信息。</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = 删除 { $profileName }
+ProfileDeletePanel--dialog-confirmation-question = 您确定要删除此分析记录上传的数据吗？删除后，先前分享的链接将失效。
+ProfileDeletePanel--dialog-cancel-button =
+    .value = 取消
+ProfileDeletePanel--dialog-delete-button =
+    .value = 删除
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = 正在删除…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = 已成功删除上传的数据。
+
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 

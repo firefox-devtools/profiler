@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Die Datei konnte nicht gelesen oder das darin e
 AppViewRouter--error-local = Noch nicht implementiert.
 AppViewRouter--error-public = Das Profil konnte nicht heruntergeladen werden.
 AppViewRouter--error-from-url = Das Profil konnte nicht heruntergeladen werden.
+AppViewRouter--error-compare = Die Profile konnten nicht abgerufen werden.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
@@ -525,6 +526,31 @@ PanelSearch--search-field-hint = Wussten Sie, dass Sie das Komma (,) verwenden k
 ProfileDeleteButton--delete-button =
     .label = Löschen
     .title = Klicken Sie hier, um das Profil „{ $smallProfileName }“ zu löschen
+
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Beim Löschen dieses Profils ist ein Fehler aufgetreten. <a>Berühren Sie den Link mit dem Mauszeiger, um mehr zu erfahren.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = { $profileName } löschen
+ProfileDeletePanel--dialog-confirmation-question =
+    Sollen die hochgeladenen Daten dieses Profils wirklich gelöscht werden? Links
+    die zuvor geteilt wurden, werden nicht mehr funktionieren.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Abbrechen
+ProfileDeletePanel--dialog-delete-button =
+    .value = Löschen
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Wird gelöscht…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Die hochgeladenen Daten wurden erfolgreich gelöscht.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
