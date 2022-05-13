@@ -209,32 +209,32 @@ describe('SampleTooltipContents', function () {
   });
 
   it('renders the sample with µs CPU usage information properly', () => {
-    const profile = getProfileWithCPU([null, 400, 1000, 500], 'µs');
+    const profile = getProfileWithCPU([null, 450, 1000, 500], 'µs');
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
     const { getTooltip } = setup(profile, hoveredSampleIndex);
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
-    expect(cpuUsage).toHaveTextContent('40% (average over 1.0ms)');
+    expect(cpuUsage).toHaveTextContent('45% (average over 1.0ms)');
     expect(getTooltip()).toMatchSnapshot();
   });
 
   it('renders the sample with ns CPU usage information properly', () => {
-    const profile = getProfileWithCPU([null, 600000, 1000000, 500000], 'ns');
+    const profile = getProfileWithCPU([null, 700000, 1000000, 500000], 'ns');
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
     const { getTooltip } = setup(profile, hoveredSampleIndex);
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
-    expect(cpuUsage).toHaveTextContent('60% (average over 1.0ms)');
+    expect(cpuUsage).toHaveTextContent('70% (average over 1.0ms)');
     expect(getTooltip()).toMatchSnapshot();
   });
 
   it('renders the sample with "variable CPU cycles" CPU usage information properly', () => {
     const profile = getProfileWithCPU(
-      [null, 800, 900, 500],
+      [null, 450, 900, 500],
       'variable CPU cycles'
     );
 
@@ -243,12 +243,12 @@ describe('SampleTooltipContents', function () {
     const { getTooltip } = setup(profile, hoveredSampleIndex);
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
-    expect(cpuUsage).toHaveTextContent('89% (average over 1.0ms)');
+    expect(cpuUsage).toHaveTextContent('50% (average over 1.0ms)');
     expect(getTooltip()).toMatchSnapshot();
   });
 
   it('renders the CPU usage properly for the first part of the sample', () => {
-    const profile = getProfileWithCPU([null, 460, 1000, 500], 'µs');
+    const profile = getProfileWithCPU([null, 450, 1000, 500], 'µs');
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
@@ -256,7 +256,7 @@ describe('SampleTooltipContents', function () {
     setup(profile, hoveredSampleIndex, 'before');
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
-    expect(cpuUsage).toHaveTextContent('46% (average over 1.0ms)');
+    expect(cpuUsage).toHaveTextContent('45% (average over 1.0ms)');
   });
 
   it('renders the CPU usage properly for the second part of the sample', () => {
@@ -274,7 +274,7 @@ describe('SampleTooltipContents', function () {
   it('renders the CPU usage properly for the first part of the sample with irregular sample times', () => {
     // Normally there should be 4 samples in the profile. But second sample
     // takes spaces for 2 samples.
-    const profile = getProfileWithCPU([null, 800, 1000], 'µs');
+    const profile = getProfileWithCPU([null, 860, 1000], 'µs');
     profile.threads[0].samples.time = [0, 2, 3];
     profile.threads[0].samples.length = 3;
 
@@ -284,13 +284,13 @@ describe('SampleTooltipContents', function () {
     setup(profile, hoveredSampleIndex, 'before');
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
-    expect(cpuUsage).toHaveTextContent('40% (average over 1.0ms)');
+    expect(cpuUsage).toHaveTextContent('43% (average over 1.0ms)');
   });
 
   it('renders the CPU usage properly for the second part of the sample with when there is a missing sample', () => {
     // Normally there should be 4 samples in the profile. But third sample
     // takes spaces for 2 samples.
-    const profile = getProfileWithCPU([null, 1000, 800], 'µs');
+    const profile = getProfileWithCPU([null, 1000, 900], 'µs');
     profile.threads[0].samples.time = [0, 1, 3];
     profile.threads[0].samples.length = 3;
 
@@ -310,6 +310,6 @@ describe('SampleTooltipContents', function () {
     setup(profile, hoveredSampleIndex, 'after');
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
-    expect(cpuUsage).toHaveTextContent('40% (average over 1.0ms)');
+    expect(cpuUsage).toHaveTextContent('45% (average over 1.0ms)');
   });
 });
