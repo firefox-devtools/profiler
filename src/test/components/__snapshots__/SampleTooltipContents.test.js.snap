@@ -296,7 +296,7 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
       CPU:
     </div>
     <div>
-      89% (average over 1.0ms)
+      50% (average over 1.0ms)
     </div>
     <div
       class="tooltipDetailSeparator"
@@ -408,7 +408,7 @@ exports[`SampleTooltipContents renders the sample with ns CPU usage information 
       CPU:
     </div>
     <div>
-      60% (average over 1.0ms)
+      70% (average over 1.0ms)
     </div>
     <div
       class="tooltipDetailSeparator"
@@ -520,7 +520,7 @@ exports[`SampleTooltipContents renders the sample with µs CPU usage information
       CPU:
     </div>
     <div>
-      40% (average over 1.0ms)
+      45% (average over 1.0ms)
     </div>
     <div
       class="tooltipDetailSeparator"
