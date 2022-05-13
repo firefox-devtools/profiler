@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Δεν ήταν δυνατή η ανάγνωσ�
 AppViewRouter--error-local = Δεν έχει υλοποιηθεί ακόμα.
 AppViewRouter--error-public = Δεν ήταν δυνατή η λήψη του προφίλ.
 AppViewRouter--error-from-url = Δεν ήταν δυνατή η λήψη του προφίλ.
+AppViewRouter--error-compare = Δεν ήταν δυνατή η ανάκτηση των προφίλ.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
@@ -536,6 +537,31 @@ PanelSearch--search-field-hint = Ξέρατε ότι μπορείτε να χρ�
 ProfileDeleteButton--delete-button =
     .label = Διαγραφή
     .title = Κάντε κλικ εδώ για να διαγράψετε το προφίλ { $smallProfileName }
+
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Προέκυψε σφάλμα κατά τη διαγραφή αυτού του προφίλ. <a>Περάστε τον δείκτη του ποντικιού για να μάθετε περισσότερα.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Διαγραφή «{ $profileName }»
+ProfileDeletePanel--dialog-confirmation-question =
+    Θέλετε σίγουρα να διαγράψετε τα μεταφορτωμένα δεδομένα για αυτό το προφίλ; Οι σύνδεσμοι
+    που είχαν κοινοποιηθεί προηγουμένως, δεν θα λειτουργούν πλέον.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Ακύρωση
+ProfileDeletePanel--dialog-delete-button =
+    .value = Διαγραφή
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Διαγραφή…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Τα μεταφορτωμένα δεδομένα διαγράφηκαν επιτυχώς.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.

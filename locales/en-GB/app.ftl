@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Couldn’t read the file or parse the profile i
 AppViewRouter--error-local = Not implemented yet.
 AppViewRouter--error-public = Could not download the profile.
 AppViewRouter--error-from-url = Could not download the profile.
+AppViewRouter--error-compare = Could not retrieve the profiles.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
@@ -540,6 +541,31 @@ PanelSearch--search-field-hint = Did you know you can use the comma (,) to searc
 ProfileDeleteButton--delete-button =
     .label = Delete
     .title = Click here to delete the profile { $smallProfileName }
+
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = An error happened while deleting this profile. <a>Hover to know more.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Delete { $profileName }
+ProfileDeletePanel--dialog-confirmation-question =
+    Are you sure you want to delete uploaded data for this profile? Links
+    that were previously shared will no longer work.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Cancel
+ProfileDeletePanel--dialog-delete-button =
+    .value = Delete
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Deleting…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = The uploaded data was successfully deleted.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.

@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Impossibile leger le file o tractar le profilo 
 AppViewRouter--error-local = Non ancora implementate.
 AppViewRouter--error-public = Impossibile discargar le profilo.
 AppViewRouter--error-from-url = Impossibile discargar le profilo.
+AppViewRouter--error-compare = Impossibile recuperar le profilos.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
@@ -533,6 +534,29 @@ PanelSearch--search-field-hint = Sape tu que tu pote usar le comma (,) pro cerca
 ProfileDeleteButton--delete-button =
     .label = Deler
     .title = Clicca hic pro deler le profilo { $smallProfileName }
+
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Un error eveniva durante le deletion de iste profilo. <a>Passa supra le mus pro saper plus.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Deler { $profileName }
+ProfileDeletePanel--dialog-confirmation-question = Desira tu vermente deler le datos cargate pro iste profilo? Le ligamines que era previemente compartite non plus functionara.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Cancellar
+ProfileDeletePanel--dialog-delete-button =
+    .value = Deler
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Deletion…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Le datos cargate ha essite delite con successo.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
