@@ -102,7 +102,7 @@
     "@babel/preset-react": "^7.16.7",
     "@testing-library/dom": "^8.13.0",
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.1.1",
+    "@testing-library/react": "^13.2.0",
     "alex": "^10.0.0",
     "autoprefixer": "^10.4.5",
     "babel-jest": "^28.0.3",
@@ -118,7 +118,7 @@
     "cssnano": "^5.0.2",
     "devtools-license-check": "^0.9.0",
     "docsify-cli": "^4.4.4",
-    "eslint": "^8.13.0",
+    "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-flowtype": "^8.0.3",
@@ -153,14 +153,14 @@
     "raw-loader": "^4.0.2",
     "rimraf": "^3.0.2",
     "style-loader": "^2.0.0",
-    "stylelint": "^14.7.1",
+    "stylelint": "^14.8.2",
     "stylelint-config-idiomatic-order": "^8.1.0",
     "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-standard": "^25.0.0",
     "stylelint-prettier": "^2.0.0",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^4.8.1"
+    "webpack-dev-server": "^4.9.0"
   },
   "jest": {
     "collectCoverageFrom": [
