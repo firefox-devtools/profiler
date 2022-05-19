@@ -112,7 +112,7 @@ CallNodeContextMenu--copy-stack = Stack kopiëren
 CallTree--tracing-ms-total = Looptijd (ms)
     .title =
         De ‘totale’ looptijd bevat een samenvatting van alle tijd waarin deze
-        functie zich on de stack bevond. Dit omvat de tijd waarin de
+        functie zich op de stack bevond. Dit omvat de tijd waarin de
         functie daadwerkelijk werd uitgevoerd en de tijd die werd gespendeerd
         aan aanroepen vanuit deze functie.
 CallTree--tracing-ms-self = Zelf (ms)
