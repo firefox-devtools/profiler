@@ -121,12 +121,21 @@ export function convertPerfScriptProfile(
         frame = frameTable.data.length;
         const location = stringTable.length;
         stringTable.push(frameString);
-        // Heuristic: 'kallsyms' presence in a frame seems to be a reasonably
-        // reliable indicator of a Linux kernel frame, and easier/more portable
+        // Heuristic: Treat frames which match any of the following conditions
+        // as Linux kernel frames:
+        // - contains kallsyms
+        // - contains in '/vmlinux' (seen when full kernel debug symbols are present,
+        //   e.g. /usr/lib/debug/lib/modules/5.10.102-99.473.amzn2.aarch64/vmlinux)
+        // - ends in '.ko' (kernel module, e.g.
+        //   /lib/modules/5.10.102-99.473.amzn2.aarch64/kernel/drivers/amazon/net/ena/ena.ko
+        // Using such heuristics is and easier/more portable
         // than checking if the address is in kernel-space (e.g. starting with FF).
-        const category = frameString.includes('kallsyms')
-          ? KERNEL_CATEGORY_INDEX
-          : USER_CATEGORY_INDEX;
+        const category =
+          frameString.includes('kallsyms') ||
+          frameString.includes('/vmlinux)') ||
+          frameString.endsWith('.ko)')
+            ? KERNEL_CATEGORY_INDEX
+            : USER_CATEGORY_INDEX;
         const implementation = null;
         const optimizations = null;
         const line = null;
