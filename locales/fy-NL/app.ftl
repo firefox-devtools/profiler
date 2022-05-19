@@ -23,15 +23,38 @@
 ## This is used at the top of the homepage and other content pages.
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> – <subheader>Web-app foar prestaasjeanalyse fan { -firefox-brand-name }</subheader>
+AppHeader--github-icon =
+    .title = Nei ús Git-repository (dizze wurdt yn in nij finster iepene)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-unpublished = Kin it profyl net ophelje fan { -firefox-brand-name }.
+AppViewRouter--error-from-file = Kin it bestân net lêze of it profyl deryn ûntlede.
+AppViewRouter--error-local = Noch net ymplemintearre.
+AppViewRouter--error-public = Kin it profyl net downloade.
+AppViewRouter--error-from-url = Kin it profyl net downloade.
+AppViewRouter--error-compare = Kin de profilen net ophelje.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Fanwegen in <a>spesifike beheining yn Safari</a> kin { -profiler-brand-name } gjin
+    profilen fan de lokale kompjûter yn dizze browser ymportearje. Iepenje yn stee dêrfan
+    dizze side yn { -firefox-brand-name } of Chrome.
+    .title = Safari kan geen lokale profielen importeren
+AppViewRouter--route-not-found--home =
+    .specialMessage = De URL dy’t jo probearre te berikken, waard net werkend.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Funksje gearfoegje
+    .title =
+        As jo in funksje gearfoegje, wurdt dizze út it profyl fuortsmiten en wurdt de tiid tawezen oan
+        de funksje dy’t dizze oanroppen hat. Dit bart oeral wêr’t de funksje
+        yn de beam oanroppen waard.
 
 ## CallTree
 ## This is the component for Call Tree panel.
