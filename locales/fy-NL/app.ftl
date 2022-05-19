@@ -55,6 +55,29 @@ CallNodeContextMenu--transform-merge-function = Funksje gearfoegje
         As jo in funksje gearfoegje, wurdt dizze út it profyl fuortsmiten en wurdt de tiid tawezen oan
         de funksje dy’t dizze oanroppen hat. Dit bart oeral wêr’t de funksje
         yn de beam oanroppen waard.
+CallNodeContextMenu--transform-merge-call-node = Allinnich node gearfoegje
+    .title =
+        As jo in node gearfoegje, wurdt dizze út it profyl fuortsmiten en de tiid tawezen oan de
+        funksjenode dy’t dizze oanroppen hat. It smyt de funksje allinnich fan dat
+        spesifike part fan de beam fuort. Oare plakken fan wêr út de funksje oanroppen waard
+        bliuwe yn it profyl.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    As jo fokusje op in funksje, wurdt elk foarbyld dat dy funksje net befettet
+    fuortsmite. Dêrby wurdt de oanropbeam opnij root, sadat de funksje
+    de iennige root fan de beam is. Dit kin meardere funksje-oanropsites yn in profyl
+    kombinearje yn ien oanropnode.
+CallNodeContextMenu--transform-focus-function = Fokus op funksje
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Fokus op funksje (omkeard)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Allinnich fokus op substruktuer
+    .title =
+        As jo op in substruktuer fokust, wurdt elk foarbyld dat dat spesifike part
+        fan de oanropbeam net befettet fuortsmiten. It selektearret in tûke fan de oanropbeam,
+        echter dit bart allinnich foar dy inkelde oanropnode. Alle oare oanroppen
+        fan de funksje wurde negearre.
 
 ## CallTree
 ## This is the component for Call Tree panel.
