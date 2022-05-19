@@ -78,10 +78,43 @@ CallNodeContextMenu--transform-focus-subtree = Allinnich fokus op substruktuer
         fan de oanropbeam net befettet fuortsmiten. It selektearret in tûke fan de oanropbeam,
         echter dit bart allinnich foar dy inkelde oanropnode. Alle oare oanroppen
         fan de funksje wurde negearre.
+CallNodeContextMenu--transform-collapse-function-subtree = Funksje ynklappe
+    .title =
+        As jo in funksje ynklappe, wurdt alles dat dizze oanroppen hat fuortsmiten en alle
+        tiid oan de funksje tawezen. Dit kin helpe in profyl dat koade oanropt dy’t net
+        analysearre hoege te wurden te ferienfâldigjen.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }</strong> ynklappe
+    .title =
+        As jo in boarne ynklappe, wurde alle oanroppen fan dy boarne
+        ôfflakke ta ien inkelde ynklappe oanropnode.
+CallNodeContextMenu--transform-collapse-direct-recursion = Direkte rekursy ynklappe
+    .title =
+        As jo direkte rekursy ynklappe, wurde alle oanroppen dy’t hieltyd wer nei
+        deselde funksje tebekfalle fuortsmiten.
+CallNodeContextMenu--transform-drop-function = Meunsters mei dizze funksje weilitte
+    .title =
+        As jo meunsters weilitte, wurdt harren tiid út it profyl fuortsmiten. Dit is nuttich om
+        tiidsynformaasje dy’t net relevant foar de analyze is te eliminearjen.
+CallNodeContextMenu--expand-all = Alles útklappe
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = De funksjenamme op Searchfox opsykje
+CallNodeContextMenu--copy-function-name = Funksjenamme kopiearje
+CallNodeContextMenu--copy-script-url = Script-URL kopiearje
+CallNodeContextMenu--copy-stack = Stack kopiearje
 
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Rintiid (ms)
+    .title =
+        De ‘totale’ rintiid befettet in gearfetting fan alle tiid wêryn dizze
+        funksje harren op de stack wie. Dit omfettet de tiid wêryn de
+        funksje wurklik útfierd waard en de tiid dy’t spandearre waard
+        oan oanroppen fan dizze funksje út.
 
 ## Call tree "badges" (icons) with tooltips
 ##
