@@ -115,6 +115,12 @@ CallTree--tracing-ms-total = Rintiid (ms)
         funksje harren op de stack wie. Dit omfettet de tiid wêryn de
         funksje wurklik útfierd waard en de tiid dy’t spandearre waard
         oan oanroppen fan dizze funksje út.
+CallTree--tracing-ms-self = Sels (ms)
+    .title =
+        De ‘sels’-tiid omfettet allinnich de tiid wêryn de funksje harren oan it
+        ein fan de stack wie. As dizze funksje oare funksjes oanroppen hat,
+        is de tiid fan de ‘oare’ funksje net meinommen. De ‘sels’-tiid is nuttich
+        foar it begryp fan hokker tiid wurklik yn it programma bestege is.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -191,20 +197,75 @@ CallTree--tracing-ms-total = Rintiid (ms)
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } sekonde
+       *[other] { $configurationDuration } sekonden
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Unbeheind
+MenuButtons--metaInfo--application = Tapassing
+MenuButtons--metaInfo--name-and-version = Namme en ferzje:
+MenuButtons--metaInfo--update-channel = Fernijkanaal:
+MenuButtons--metaInfo--build-id = Build-ID:
+MenuButtons--metaInfo--build-type = Buildtype:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Debugge
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
+MenuButtons--metaInfo--platform = Platfoarm
+MenuButtons--metaInfo--device = Apparaat:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = Bestjoeringssysteem:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Fisuele statistiken
+MenuButtons--metaInfo--speed-index = Snelheidsyndeks:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Perceptual-snelheidsyndeks:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Contentful-snelheidsyndeks:
+MenuButtons--metaInfo-renderRowOfList-label-features = Funksjes:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Threadsfilter:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Utwreidingen:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name }-overhead
+MenuButtons--metaOverheadStatistics-mean = Gemiddeld
+MenuButtons--metaOverheadStatistics-max = Maks
+MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
+    .title = Tiid om alle threads te bemeunsterjen.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Opskjinje
+    .title = Tiid om ferrûne gegevens te wiskjen.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Teller
+    .title = Tiid om alle tellers te sammeljen.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Ynterfal
+    .title = Waarnommen ynterfal tusken twa meunsters.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Beskoattelingen
+    .title = Tiid om de beskoatteling te krijen eardat bemeunstere wurdt.
+MenuButtons--metaOverheadStatistics-overhead-duration = Overheaddoer:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Overheadpersintaazje:
+MenuButtons--metaOverheadStatistics-profiled-duration = Profilearre doer:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Ferburgen threads opnimme
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = De gegevens fan oare ljepblêden opnimme
+MenuButtons--publish--renderCheckbox-label-hidden-time = Ferburgen tiidrek opnimme
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Skermôfdrukken opnimme
+MenuButtons--publish--renderCheckbox-label-resource = Helpboarne-URL’s en -paden opnimme
+MenuButtons--publish--renderCheckbox-label-extension = Utwreidingsynformaasje opnimme
 
 ## NetworkSettings
 ## This is used in the network chart.
