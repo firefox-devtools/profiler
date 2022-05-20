@@ -162,7 +162,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         <span
           class="metaInfoLabel"
         >
-          Update Channel:
+          Update channel:
         </span>
         release
       </div>
@@ -281,7 +281,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         <span
           class="metaInfoLabel"
         >
-          Update Channel:
+          Update channel:
         </span>
         release
       </div>
@@ -374,7 +374,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile does not display the
         <span
           class="metaInfoLabel"
         >
-          Update Channel:
+          Update channel:
         </span>
         release
       </div>
@@ -435,7 +435,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         <span
           class="metaInfoLabel"
         >
-          Buffer Capacity:
+          Buffer capacity:
         </span>
         1GB
       </div>
@@ -445,7 +445,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         <span
           class="metaInfoLabel"
         >
-          Buffer Duration:
+          Buffer duration:
         </span>
         ⁨20⁩ seconds
       </div>
@@ -481,7 +481,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <span
             class="metaInfoLabel"
           >
-            Threads Filter:
+            Threads filter:
           </span>
           <ul
             class="metaInfoList"
@@ -547,7 +547,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         <span
           class="metaInfoLabel"
         >
-          Update Channel:
+          Update channel:
         </span>
         nightly
       </div>
@@ -567,7 +567,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         <span
           class="metaInfoLabel"
         >
-          Build Type:
+          Build type:
         </span>
         Debug
       </div>
@@ -643,7 +643,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
       <summary
         class="arrowPanelSubTitle"
       >
-        ⁨Profiler⁩ Overhead
+        ⁨Profiler⁩ overhead
       </summary>
       <div
         class="arrowPanelSection"
@@ -738,7 +738,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <span
             class="metaInfoWideLabel"
           >
-            Overhead Durations:
+            Overhead durations:
           </span>
           <span
             class="metaInfoValueRight"
@@ -752,7 +752,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <span
             class="metaInfoWideLabel"
           >
-            Overhead Percentage:
+            Overhead percentage:
           </span>
           <span
             class="metaInfoValueRight"
@@ -766,7 +766,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <span
             class="metaInfoWideLabel"
           >
-            Profiled Duration:
+            Profiled duration:
           </span>
           <span
             class="metaInfoValueRight"
@@ -824,7 +824,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         <span
           class="metaInfoLabel"
         >
-          Buffer Capacity:
+          Buffer capacity:
         </span>
         8MB
       </div>
@@ -834,7 +834,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         <span
           class="metaInfoLabel"
         >
-          Buffer Duration:
+          Buffer duration:
         </span>
         Unlimited
       </div>
@@ -889,7 +889,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         <span
           class="metaInfoLabel"
         >
-          Update Channel:
+          Update channel:
         </span>
         nightly
       </div>
@@ -909,7 +909,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         <span
           class="metaInfoLabel"
         >
-          Build Type:
+          Build type:
         </span>
         Debug
       </div>
@@ -995,7 +995,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
       <summary
         class="arrowPanelSubTitle"
       >
-        ⁨Profiler⁩ Overhead
+        ⁨Profiler⁩ overhead
       </summary>
       <div
         class="arrowPanelSection"
@@ -1090,7 +1090,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <span
             class="metaInfoWideLabel"
           >
-            Overhead Durations:
+            Overhead durations:
           </span>
           <span
             class="metaInfoValueRight"
@@ -1104,7 +1104,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <span
             class="metaInfoWideLabel"
           >
-            Overhead Percentage:
+            Overhead percentage:
           </span>
           <span
             class="metaInfoValueRight"
@@ -1118,7 +1118,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <span
             class="metaInfoWideLabel"
           >
-            Profiled Duration:
+            Profiled duration:
           </span>
           <span
             class="metaInfoValueRight"
@@ -1176,7 +1176,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         <span
           class="metaInfoLabel"
         >
-          Buffer Capacity:
+          Buffer capacity:
         </span>
         8MB
       </div>
@@ -1186,7 +1186,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         <span
           class="metaInfoLabel"
         >
-          Buffer Duration:
+          Buffer duration:
         </span>
         Unlimited
       </div>
@@ -1241,7 +1241,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         <span
           class="metaInfoLabel"
         >
-          Update Channel:
+          Update channel:
         </span>
         nightly
       </div>
@@ -1261,7 +1261,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         <span
           class="metaInfoLabel"
         >
-          Build Type:
+          Build type:
         </span>
         Debug
       </div>

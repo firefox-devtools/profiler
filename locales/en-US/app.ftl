@@ -453,8 +453,8 @@ MenuButtons--metaInfo--logical-cpu =
 
 MenuButtons--metaInfo--main-process-started = Main process started:
 MenuButtons--metaInfo--interval = Interval:
-MenuButtons--metaInfo--buffer-capacity = Buffer Capacity:
-MenuButtons--metaInfo--buffer-duration = Buffer Duration:
+MenuButtons--metaInfo--buffer-capacity = Buffer capacity:
+MenuButtons--metaInfo--buffer-duration = Buffer duration:
 
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
@@ -469,9 +469,9 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Unlimited
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Name and version:
-MenuButtons--metaInfo--update-channel = Update Channel:
+MenuButtons--metaInfo--update-channel = Update channel:
 MenuButtons--metaInfo--build-id = Build ID:
-MenuButtons--metaInfo--build-type = Build Type:
+MenuButtons--metaInfo--build-type = Build type:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -488,7 +488,7 @@ MenuButtons--metaInfo--os = OS:
 
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
-MenuButtons--metaInfo--visual-metrics = Visual Metrics
+MenuButtons--metaInfo--visual-metrics = Visual metrics
 MenuButtons--metaInfo--speed-index = Speed Index:
 # “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--perceptual-speed-index = Perceptual Speed Index:
@@ -496,13 +496,13 @@ MenuButtons--metaInfo--perceptual-speed-index = Perceptual Speed Index:
 MenuButtons--metaInfo--contentful-speed-Index = Contentful Speed Index:
 
 MenuButtons--metaInfo-renderRowOfList-label-features = Features:
-MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Threads Filter:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Threads filter:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensions:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
-MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } Overhead
+MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } overhead
 MenuButtons--metaOverheadStatistics-mean = Mean
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
@@ -516,9 +516,9 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Interval
     .title = Observed interval between two samples.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Lockings
     .title = Time to acquire the lock before sampling.
-MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
-MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
-MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
+MenuButtons--metaOverheadStatistics-overhead-duration = Overhead durations:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead percentage:
+MenuButtons--metaOverheadStatistics-profiled-duration = Profiled duration:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
