@@ -153,8 +153,8 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
           {meta.startTime ? (
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--recording-started">
-                  Recording started:
+                <Localized id="MenuButtons--metaInfo--main-process-started">
+                  Main process started:
                 </Localized>
               </span>
               {_formatDate(meta.startTime)}

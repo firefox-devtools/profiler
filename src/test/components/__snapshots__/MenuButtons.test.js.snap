@@ -415,7 +415,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         <span
           class="metaInfoLabel"
         >
-          Recording started:
+          Main process started:
         </span>
         toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
       </div>
@@ -804,7 +804,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         <span
           class="metaInfoLabel"
         >
-          Recording started:
+          Main process started:
         </span>
         toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
       </div>
@@ -1156,7 +1156,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         <span
           class="metaInfoLabel"
         >
-          Recording started:
+          Main process started:
         </span>
         toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
       </div>
