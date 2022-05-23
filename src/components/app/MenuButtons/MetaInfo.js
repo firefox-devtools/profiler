@@ -153,8 +153,8 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
           {meta.startTime ? (
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--recording-started">
-                  Recording started:
+                <Localized id="MenuButtons--metaInfo--main-process-started">
+                  Main process started:
                 </Localized>
               </span>
               {_formatDate(meta.startTime)}
@@ -175,7 +175,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
               <div className="metaInfoRow">
                 <span className="metaInfoLabel">
                   <Localized id="MenuButtons--metaInfo--buffer-capacity">
-                    Buffer Capacity:
+                    Buffer capacity:
                   </Localized>
                 </span>
                 {
@@ -186,7 +186,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
               <div className="metaInfoRow">
                 <span className="metaInfoLabel">
                   <Localized id="MenuButtons--metaInfo--buffer-duration">
-                    Buffer Duration:
+                    Buffer duration:
                   </Localized>
                 </span>
                 {configuration.duration ? (
@@ -236,7 +236,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
                 <Localized id="MenuButtons--metaInfo--update-channel">
-                  Update Channel:
+                  Update channel:
                 </Localized>
               </span>
               {meta.updateChannel}
@@ -267,7 +267,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
                 <Localized id="MenuButtons--metaInfo--build-type">
-                  Build Type:
+                  Build type:
                 </Localized>
               </span>
               <Localized
@@ -329,7 +329,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
           <>
             <h2 className="metaInfoSubTitle">
               <Localized id="MenuButtons--metaInfo--visual-metrics">
-                Visual Metrics
+                Visual metrics
               </Localized>
             </h2>
             <div className="metaInfoSection">
