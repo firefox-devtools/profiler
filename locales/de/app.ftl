@@ -401,7 +401,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logischer Kern
        *[other] { $logicalCPUs } logische Kerne
     }
-MenuButtons--metaInfo--recording-started = Aufzeichnungsbeginn:
+MenuButtons--metaInfo--main-process-started = Hauptprozess gestartet:
 MenuButtons--metaInfo--interval = Intervall:
 MenuButtons--metaInfo--buffer-capacity = Pufferkapazität:
 MenuButtons--metaInfo--buffer-duration = Pufferdauer:
