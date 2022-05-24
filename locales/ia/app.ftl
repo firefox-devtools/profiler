@@ -409,7 +409,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } nucleo logic
        *[other] { $logicalCPUs } nucleos logic
     }
-MenuButtons--metaInfo--recording-started = Registration comenciate:
+MenuButtons--metaInfo--main-process-started = Processo principal initiate:
 MenuButtons--metaInfo--interval = Intervallo:
 MenuButtons--metaInfo--buffer-capacity = Capacitate de buffer:
 MenuButtons--metaInfo--buffer-duration = Capacitate de buffer:
