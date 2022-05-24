@@ -96,7 +96,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
       <details>
         <summary className="arrowPanelSubTitle">
           <Localized id="MenuButtons--metaOverheadStatistics-subtitle">
-            Profiler Overhead
+            Profiler overhead
           </Localized>
         </summary>
         <div className="arrowPanelSection">
