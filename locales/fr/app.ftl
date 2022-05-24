@@ -351,7 +351,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } cœur logique
        *[other] { $logicalCPUs } cœurs logiques
     }
-MenuButtons--metaInfo--recording-started = Enregistrement commencé :
+MenuButtons--metaInfo--main-process-started = Processus principal démarré :
 MenuButtons--metaInfo--interval = Intervalle :
 MenuButtons--metaInfo--buffer-capacity = Capacité de la mémoire tampon :
 MenuButtons--metaInfo--buffer-duration = Durée de la mémoire tampon :
