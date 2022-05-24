@@ -28,6 +28,7 @@ type ResizeObserverOptions = {|
 type Item = {|
   callback: (ResizeObserverEntry[], MockResizeObserver) => void,
   elements: Set<HTMLElement>,
+  scheduledElements: Set<HTMLElement> | null,
 |};
 
 /**
@@ -45,11 +46,13 @@ export function autoMockResizeObserver() {
       const item = {
         callback: cb,
         elements: new Set(),
+        scheduledElements: null,
       };
 
       const instance: MockResizeObserver = {
         observe: jest.fn((element: HTMLElement) => {
           item.elements.add(element);
+          scheduleTriggerForElement(instance, item, element);
         }),
         unobserve: jest.fn((element: HTMLElement) => {
           item.elements.delete(element);
@@ -71,14 +74,41 @@ export function autoMockResizeObserver() {
   });
 }
 
+function scheduleTriggerForElement(
+  observer: MockResizeObserver,
+  item: Item,
+  element: HTMLElement
+) {
+  if (item.scheduledElements) {
+    item.scheduledElements.add(element);
+  } else {
+    item.scheduledElements = new Set([element]);
+    // This mock assumes requestAnimationFrame is present, either real or as a mock.
+    requestAnimationFrame(() => {
+      if (!item.scheduledElements) {
+        return;
+      }
+
+      triggerSingleObserver(observer, item, item.scheduledElements);
+      item.scheduledElements = null;
+    });
+  }
+}
+
 function triggerSingleObserver(
   observer: MockResizeObserver,
   item: Item,
+  iteratedElements: Iterable<HTMLElement>,
   newSize: DOMRectReadOnly | void
 ) {
   const entries: ResizeObserverEntry[] = [];
 
-  for (const element of item.elements) {
+  for (const element of iteratedElements) {
+    if (!item.elements.has(element)) {
+      // It may been unobserved already
+      continue;
+    }
+
     const size = newSize ?? element.getBoundingClientRect();
     entries.push(
       ({
@@ -111,6 +141,6 @@ export function triggerResizeObservers({
   newSize?: DOMRectReadOnly,
 |} = {}) {
   for (const [observer, item] of observers) {
-    triggerSingleObserver(observer, item, newSize);
+    triggerSingleObserver(observer, item, item.elements, newSize);
   }
 }
