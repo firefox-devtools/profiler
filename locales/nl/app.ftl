@@ -416,7 +416,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logische kern
        *[other] { $logicalCPUs } logische kernen
     }
-MenuButtons--metaInfo--recording-started = Opname gestart:
+MenuButtons--metaInfo--main-process-started = Hoofdproces gestart:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Buffercapaciteit:
 MenuButtons--metaInfo--buffer-duration = Bufferduur:
