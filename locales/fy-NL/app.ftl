@@ -137,6 +137,10 @@ CallTree--tracing-ms-self = Sels (ms)
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--form-label-profile1 = Profyl 1:
+CompareHome--form-label-profile2 = Profyl 2:
+CompareHome--submit-button =
+    .value = Profilen ophelje
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
