@@ -133,6 +133,12 @@ CallTree--samples-self = Sels
         oan it ein fan de stack wie. As dizze funksje oare funksjes oanroppen hat,
         binne de oantallen ‘oare’ funksjes net meiteld. It oantal kearen ‘sels’ is nuttich
         foar it begryp fan wêr tiid wurklik yn in programma bestege is.
+CallTree--bytes-total = Totale grutte (bytes)
+    .title =
+        De ‘totale grutte’ omfettet in gearfetting fan alle bytes dy’t allokearre of
+        de-allokearre binne, wylst dizze funksje harren yn de stack wie. Dit befettet
+        sawol de bytes wêrby de funksje wurklik útfierd waard as de
+        bytes fan de oanroppen fan dizze funksje út.
 
 ## Call tree "badges" (icons) with tooltips
 ##
