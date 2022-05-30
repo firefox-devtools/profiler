@@ -44,7 +44,7 @@ export function withSize<
   // See: https://github.com/firefox-devtools/profiler/issues/3062
   // eslint-disable-next-line flowtype/no-existential-type
   return class WithSizeWrapper extends React.PureComponent<*, State> {
-    _isSizeInfoDirty: boolean = false;
+    _dirtySize: DOMRectReadOnly | null = null;
     state = { width: 0, height: 0 };
     _container: HTMLElement | null;
 
@@ -59,28 +59,19 @@ export function withSize<
         'visibilitychange',
         this._visibilityChangeListener
       );
-
-      // Wrapping the first update in a requestAnimationFrame to defer the
-      // calculation until the full render is done.
-      requestAnimationFrame(() => {
-        // This component could have already been unmounted, check for the existence
-        // of the container.
-        if (this._container) {
-          this._updateSize(this._container);
-        }
-      });
     }
+
     // The size is only updated when the document is visible.
-    // In other cases resizing is registered in _isSizeInfoDirty.
-    _resizeListener = () => {
+    // In other cases resizing is registered in _dirtySize.
+    _resizeListener = (contentRect: DOMRectReadOnly) => {
       const container = this._container;
       if (!container) {
         return;
       }
       if (document.hidden) {
-        this._isSizeInfoDirty = true;
+        this._dirtySize = contentRect;
       } else {
-        this._updateSize(container);
+        this._updateSize(container, contentRect);
       }
     };
 
@@ -91,9 +82,9 @@ export function withSize<
       if (!container) {
         return;
       }
-      if (!document.hidden && this._isSizeInfoDirty) {
-        this._updateSize(container);
-        this._isSizeInfoDirty = false;
+      if (!document.hidden && this._dirtySize) {
+        this._updateSize(container, this._dirtySize);
+        this._dirtySize = null;
       }
     };
 
@@ -110,10 +101,10 @@ export function withSize<
       this._container = null;
     }
 
-    _updateSize(container: HTMLElement) {
+    _updateSize(container: HTMLElement, contentRect: DOMRectReadOnly) {
       this.setState({
-        width: container.offsetWidth,
-        height: container.offsetHeight,
+        width: contentRect.width,
+        height: contentRect.height,
       });
     }
 
