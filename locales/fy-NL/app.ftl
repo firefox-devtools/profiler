@@ -402,6 +402,14 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Annulearje
+ProfileDeletePanel--dialog-delete-button =
+    .value = Fuortsmite
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Fuortsmite…
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -412,19 +420,33 @@ ProfileDeleteButton--delete-button =
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Ynstallearje…
+ServiceWorkerManager--pending-button = Tapasse en opnij lade
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Alle stacks
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Ynboud
+StackSettings--use-data-source-label = Gegevensboarne:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Oanropstruktuer
+TabBar--flame-graph-tab = Flamgrafyk
+TabBar--stack-chart-tab = Stackdiagram
+TabBar--marker-chart-tab = Markearingsdiagram
+TabBar--marker-table-tab = Markearingstabel
+TabBar--network-tab = Netwurk
+TabBar--js-tracer-tab = JS-tracer
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
