@@ -151,17 +151,51 @@ CompareHome--submit-button =
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = De sidebalke iepenje
+Details--close-sidebar-button =
+    .title = De sidebalke slute
+Details--error-boundary-message =
+    .message = Uh oh, der is in ûnbekende flater yn dit paniel bard.
 
 ## Footer Links
 
+FooterLinks--legal = Juridysk
+FooterLinks--Privacy = Privacy
+FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Taal wizigje
+FooterLinks--hide-button =
+    .title = Fuottekstkeppelingen ferstopje
+    .aria-label = Fuottekstkeppelingen ferstopje
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = Grafyktype:
+FullTimeline--categories-with-cpu = Kategoryen mei CPU
+FullTimeline--categories = Kategoryen
+FullTimeline--stack-height = Stackhichte
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks
 
 ## Home page
 
+Home--upload-from-file-input-button = In profyl út in bestân lade
+Home--upload-from-url-button = In profyl fan in URL lade
+Home--load-from-url-submit-button =
+    .value = Lade
+Home--documentation-button = Dokumintaasje
+Home--menu-button = Menuknop { -profiler-brand-name } ynskeakelje
+Home--instructions-title = Profilen besjen en opnimme
+Home--record-instructions-start-stop = Profilearjen stopje en starte
+Home--record-instructions-capture-load = Profyl fêstlizze en lade
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -175,11 +209,14 @@ CompareHome--submit-button =
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Der is noch gjin profyl opladen!
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--copy-url = URL kopiearje
+MarkerContextMenu--copy-as-json = Kopiearje as JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -192,15 +229,78 @@ CompareHome--submit-button =
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Start
+MarkerTable--duration = Doer
+MarkerTable--type = Type
+MarkerTable--description = Beskriuwing
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Profylynfo
+MenuButtons--index--full-view = Folslein byld
+MenuButtons--index--cancel-upload = Opladen annulearje
+MenuButtons--index--share-upload =
+    .label = Lokaal profyl oplade
+MenuButtons--index--share-re-upload =
+    .label = Opnij oplade
+MenuButtons--index--share-error-uploading =
+    .label = Flater by it opladen
+MenuButtons--index--revert = Tebek nei orizjineel profyl
+MenuButtons--index--docs = Dokuminten
+MenuButtons--permalink--button =
+    .label = Permalink
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Opladen:
+MenuButtons--index--profile-info-uploaded-actions = Fuortsmite
+MenuButtons--index--metaInfo-subtitle = Profylynformaasje
+MenuButtons--metaInfo--symbols = Symboalen:
+MenuButtons--metaInfo--profile-symbolicated = Profyl is symbolisearre
+MenuButtons--metaInfo--profile-not-symbolicated = Profyl is net symbolisearre
+MenuButtons--metaInfo--resymbolicate-profile = Profyl opnij symbolisearje
+MenuButtons--metaInfo--symbolicate-profile = Profyl symbolisearje
+MenuButtons--metaInfo--attempting-resymbolicate = Besykjen ta opnij symbolisearjen profyl
+MenuButtons--metaInfo--currently-symbolicating = Profyl wurdt symbolisearre
+MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } fysike kearn,
+       *[other] { $physicalCPUs } fysike kearnen,
+    }{ $logicalCPUs ->
+        [one] { $logicalCPUs } logyske kearn
+       *[other] { $logicalCPUs } logyske kearnen
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } fysike kearn
+       *[other] { $physicalCPUs } fysike kearnen
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } logyske kearn
+       *[other] { $logicalCPUs } logyske kearnen
+    }
+MenuButtons--metaInfo--main-process-started = Haadproses start:
+MenuButtons--metaInfo--interval = Ynterfal:
+MenuButtons--metaInfo--buffer-capacity = Bufferkapasiteit:
+MenuButtons--metaInfo--buffer-duration = Bufferdoer:
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
 #   $configurationDuration (Number) - Configuration Duration in Seconds
@@ -270,6 +370,13 @@ MenuButtons--publish--renderCheckbox-label-hidden-time = Ferburgen tiidrek opnim
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Skermôfdrukken opnimme
 MenuButtons--publish--renderCheckbox-label-resource = Helpboarne-URL’s en -paden opnimme
 MenuButtons--publish--renderCheckbox-label-extension = Utwreidingsynformaasje opnimme
+MenuButtons--publish--renderCheckbox-label-preference = Foarkarswearden opnimme
+MenuButtons--publish--button-upload = Oplade
+MenuButtons--publish--upload-title = Profyl oplade…
+MenuButtons--publish--cancel-upload = Opladen annulearje
+MenuButtons--publish--message-try-again = Opnij probearje
+MenuButtons--publish--download = Downloade
+MenuButtons--publish--compressing = Komprimearje…
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -284,6 +391,12 @@ MenuButtons--publish--renderCheckbox-label-extension = Utwreidingsynformaasje op
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Fuortsmite
+    .title = Klik hjir om it profyl { $smallProfileName } fuort te smiten
 
 ## Profile Delete Panel
 ## This panel is displayed when the user clicks on the Profile Delete Button,
