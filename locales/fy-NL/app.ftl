@@ -121,6 +121,18 @@ CallTree--tracing-ms-self = Sels (ms)
         ein fan de stack wie. As dizze funksje oare funksjes oanroppen hat,
         is de tiid fan de ‘oare’ funksje net meinommen. De ‘sels’-tiid is nuttich
         foar it begryp fan hokker tiid wurklik yn it programma bestege is.
+CallTree--samples-total = Totaal (meunsters)
+    .title =
+        It ‘totale’ meunsteroantal omfettet in gearfetting fan elk meunster wêryn dizze
+        funksje harre yn de stack wie. Dit omfettet de tiid wêryn de funksje
+        wurklik útfierd waard en de spandearre tiid yn de oanroppen
+        fan dizze funksje út.
+CallTree--samples-self = Sels
+    .title =
+        It oantal ‘sels’-meunsters omfettet allinnich de meunsters wêryn de funksje harren
+        oan it ein fan de stack wie. As dizze funksje oare funksjes oanroppen hat,
+        binne de oantallen ‘oare’ funksjes net meiteld. It oantal kearen ‘sels’ is nuttich
+        foar it begryp fan wêr tiid wurklik yn in programma bestege is.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -558,8 +570,46 @@ SourceView--source-not-available-text = Sjoch <a>issue #3741</a> foar stipjende 
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Der is gjin bekende cross-origin-tagonklike URL foar dit bestân.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Der is in netwurkflater bard by it opheljen fan de URL { $url }: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Kin de symbolisearrings-API fan de browser net opfreegje: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = De symbolisearrings-API fan de browser hat in flater weromstjoerd: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = De symbolisearrings-API fan de lokale symboalserver hat in flater weromstjoerd: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = It bestân { $pathInArchive } is net fûn yn it argyf fan { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = It argyf op { $url } koe net ferwurke wurde: { $parsingErrorMessage }
+SourceView--close-button =
+    .title = Boarnewerjefte slute
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Opladen opnamen
