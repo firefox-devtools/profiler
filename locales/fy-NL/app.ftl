@@ -526,9 +526,38 @@ TransformNavigator--merge-function = Gearfoegje: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Droppe: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Rekursy ynklappe: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Subtree ynklappe: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Wachtsje op { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Wachtsje op { -firefox-brand-name }...
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Boarne net beskikber
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Sjoch <a>issue #3741</a> foar stipjende senario's en plande ferbetteringen.
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Der is gjin bekende cross-origin-tagonklike URL foar dit bestân.
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
