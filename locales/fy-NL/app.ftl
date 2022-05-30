@@ -452,16 +452,34 @@ TabBar--js-tracer-tab = JS-tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--show-all-tracks = Alle tracks toane
+# This is used in the tracks context menu as a button to show all the tracks
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Alle oerienkommende tracks toane
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Alle oerienkommende tracks ferstopje
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Gjin resultaten fûn foar ‘<span>{ $searchFilter }</span>’
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = relatyf ûnthâld op dit stuit
+TrackMemoryGraph--memory-range-in-graph = ûnthâldberik yn grafyk
+TrackMemoryGraph--operations-since-the-previous-sample = bewurkingen sûnt de foarige werjefte
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Fier filtertermen yn
+    .title = Allinnich tracks toane dy’t oerienkomme mei in bepaalde tekst
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -472,6 +490,42 @@ TabBar--js-tracer-tab = JS-tracer
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Folsleine ‘{ $item }’
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Ynklappe: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Node fokusje: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Fokusje: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Node gearfoegje: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Gearfoegje: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Droppe: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
