@@ -412,7 +412,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } λογικός πυρήνας
        *[other] { $logicalCPUs } λογικοί πυρήνες
     }
-MenuButtons--metaInfo--recording-started = Έναρξη καταγραφής:
+MenuButtons--metaInfo--main-process-started = Έναρξη κύριας διεργασίας:
 MenuButtons--metaInfo--interval = Διάστημα:
 MenuButtons--metaInfo--buffer-capacity = Χωρητικότητα buffer:
 MenuButtons--metaInfo--buffer-duration = Διάρκεια buffer:

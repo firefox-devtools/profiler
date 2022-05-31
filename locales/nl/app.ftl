@@ -112,7 +112,7 @@ CallNodeContextMenu--copy-stack = Stack kopiëren
 CallTree--tracing-ms-total = Looptijd (ms)
     .title =
         De ‘totale’ looptijd bevat een samenvatting van alle tijd waarin deze
-        functie zich on de stack bevond. Dit omvat de tijd waarin de
+        functie zich op de stack bevond. Dit omvat de tijd waarin de
         functie daadwerkelijk werd uitgevoerd en de tijd die werd gespendeerd
         aan aanroepen vanuit deze functie.
 CallTree--tracing-ms-self = Zelf (ms)
@@ -416,7 +416,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logische kern
        *[other] { $logicalCPUs } logische kernen
     }
-MenuButtons--metaInfo--recording-started = Opname gestart:
+MenuButtons--metaInfo--main-process-started = Hoofdproces gestart:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Buffercapaciteit:
 MenuButtons--metaInfo--buffer-duration = Bufferduur:

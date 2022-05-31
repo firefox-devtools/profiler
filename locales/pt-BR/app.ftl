@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Não foi possível ler o arquivo ou analisar o 
 AppViewRouter--error-local = Ainda não implementado.
 AppViewRouter--error-public = Não foi possível baixar o profile.
 AppViewRouter--error-from-url = Não foi possível baixar o profile.
+AppViewRouter--error-compare = Não foi possível carregar os perfis.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
@@ -352,7 +353,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } core lógico
        *[other] { $logicalCPUs } cores lógicos
     }
-MenuButtons--metaInfo--recording-started = Gravação iniciada:
+MenuButtons--metaInfo--main-process-started = Processo principal iniciado:
 MenuButtons--metaInfo--interval = Intervalo:
 MenuButtons--metaInfo--buffer-capacity = Capacidade do buffer:
 MenuButtons--metaInfo--buffer-duration = Duração do buffer:
@@ -477,6 +478,31 @@ PanelSearch--search-field-hint = Você sabia que pode usar vírgula (,) para pes
 ProfileDeleteButton--delete-button =
     .label = Excluir
     .title = Clique aqui para excluir o profile { $smallProfileName }
+
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Ocorreu um erro ao excluir este perfil. <a>Passe o mouse para saber mais.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Excluir { $profileName }
+ProfileDeletePanel--dialog-confirmation-question =
+    Tem certeza que quer excluir os dados enviados deste perfil? Links
+    compartilhados anteriormente não funcionarão mais.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Cancelar
+ProfileDeletePanel--dialog-delete-button =
+    .value = Excluir
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Excluindo…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Os dados enviados foram excluídos com êxito.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.

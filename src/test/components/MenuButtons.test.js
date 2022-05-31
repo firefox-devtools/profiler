@@ -468,7 +468,7 @@ describe('app/MenuButtons', function () {
         await setupForMetaInfoPanel(profile);
       await displayMetaInfoPanel();
       const renderedCapacity = ensureExists(
-        screen.getByText(/Buffer Capacity/).nextSibling
+        screen.getByText(/Buffer capacity/).nextSibling
       );
 
       /* This rule needs to be disabled because `renderedCapacity` is a text

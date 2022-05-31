@@ -409,7 +409,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logisk kärna
        *[other] { $logicalCPUs } logiska kärnor
     }
-MenuButtons--metaInfo--recording-started = Inspelningen startade:
+MenuButtons--metaInfo--main-process-started = Huvudprocessen startade:
 MenuButtons--metaInfo--interval = Intervall:
 MenuButtons--metaInfo--buffer-capacity = Buffertkapacitet:
 MenuButtons--metaInfo--buffer-duration = Buffertlängd:
