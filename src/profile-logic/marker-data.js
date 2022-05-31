@@ -923,6 +923,10 @@ export function filterRawMarkerTableToRange(
   rangeEnd: number
 ): RawMarkerTable {
   const newMarkerTable = getEmptyRawMarkerTable();
+  const newThreadId = [];
+  if (markerTable.threadId) {
+    newMarkerTable.threadId = newThreadId;
+  }
 
   const filteredMarkerIndexes = filterRawMarkerTableIndexesToRange(
     markerTable,
@@ -938,8 +942,12 @@ export function filterRawMarkerTableToRange(
     newMarkerTable.name.push(markerTable.name[index]);
     newMarkerTable.data.push(markerTable.data[index]);
     newMarkerTable.category.push(markerTable.category[index]);
+    if (markerTable.threadId) {
+      newThreadId.push(markerTable.threadId[index]);
+    }
     newMarkerTable.length++;
   }
+
   return newMarkerTable;
 }
 
@@ -993,6 +1001,10 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>,
 } {
   const newMarkerTable = getEmptyRawMarkerTable();
+  const newThreadId = [];
+  if (oldMarkerTable.threadId) {
+    newMarkerTable.threadId = newThreadId;
+  }
   const oldMarkerIndexToNew: Map<
     IndexIntoRawMarkerTable,
     IndexIntoRawMarkerTable
@@ -1008,6 +1020,9 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
     newMarkerTable.phase.push(oldMarkerTable.phase[index]);
     newMarkerTable.data.push(oldMarkerTable.data[index]);
     newMarkerTable.category.push(oldMarkerTable.category[index]);
+    if (oldMarkerTable.threadId) {
+      newThreadId.push(oldMarkerTable.threadId[index]);
+    }
     newMarkerTable.length++;
   };
 

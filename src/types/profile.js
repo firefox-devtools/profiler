@@ -256,6 +256,9 @@ export type RawMarkerTable = {|
   endTime: Array<number | null>,
   phase: MarkerPhase[],
   category: IndexIntoCategoryList[],
+  // This property isn't present in normal threads. However it's present for
+  // merged threads, so that we know the origin thread for these markers.
+  threadId?: Tid[],
   length: number,
 |};
 

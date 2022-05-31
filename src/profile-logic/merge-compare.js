@@ -208,8 +208,9 @@ export function mergeProfilesForDiffing(
       );
     }
 
-    // We're reseting the thread's PID to make sure we don't have any collision.
+    // We're reseting the thread's PID and TID to make sure we don't have any collision.
     thread.pid = `${thread.pid} from profile ${i + 1}`;
+    thread.tid = `${thread.tid} from profile ${i + 1}`;
     thread.processName = `${profileName || `Profile ${i + 1}`}: ${
       thread.processName || thread.name
     }`;
@@ -1197,7 +1198,9 @@ function mergeMarkers(
   markerTable: RawMarkerTable,
   translationMaps: TranslationMapForMarkers[],
 } {
-  const newMarkerTable = getEmptyRawMarkerTable();
+  const newThreadId = [];
+  const newMarkerTable = { ...getEmptyRawMarkerTable(), threadId: newThreadId };
+
   const translationMaps = [];
 
   threads.forEach((thread, threadIndex) => {
@@ -1252,6 +1255,9 @@ function mergeMarkers(
       newMarkerTable.endTime.push(markers.endTime[markerIndex]);
       newMarkerTable.phase.push(markers.phase[markerIndex]);
       newMarkerTable.category.push(markers.category[markerIndex]);
+      newThreadId.push(
+        markers.threadId ? markers.threadId[markerIndex] : thread.tid
+      );
 
       // Set the translation map and increase the table length.
       translationMap.set(markerIndex, newMarkerTable.length);
@@ -1314,6 +1320,11 @@ function mergeScreenshotMarkers(
           targetMarkerTable.endTime.push(markers.endTime[markerIndex]);
           targetMarkerTable.phase.push(markers.phase[markerIndex]);
           targetMarkerTable.category.push(markers.category[markerIndex]);
+          if (targetMarkerTable.threadId) {
+            targetMarkerTable.threadId.push(
+              markers.threadId ? markers.threadId[markerIndex] : thread.tid
+            );
+          }
 
           // Set the translation map and increase the table length.
           translationMap.set(markerIndex, targetMarkerTable.length);
