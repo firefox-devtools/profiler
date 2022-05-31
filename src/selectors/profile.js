@@ -817,9 +817,7 @@ export const getThreadIdToNameMap: Selector<Map<number, string>> =
   createSelector(getThreads, (threads) => {
     const threadIdToNameMap = new Map();
     for (const thread of threads) {
-      if (thread.tid !== undefined) {
-        threadIdToNameMap.set(thread.tid, thread.name);
-      }
+      threadIdToNameMap.set(thread.tid, thread.name);
     }
     return threadIdToNameMap;
   });
@@ -854,12 +852,8 @@ export const getProfiledThreadIds: Selector<Set<Tid>> = createSelector(
   getThreads,
   (threads) => {
     const profiledThreadIds = new Set();
-    for (const thread of threads) {
-      const { tid } = thread;
-      if (tid) {
-        // Do not include if tid is undefined.
-        profiledThreadIds.add(tid);
-      }
+    for (const { tid } of threads) {
+      profiledThreadIds.add(tid);
     }
     return profiledThreadIds;
   }
