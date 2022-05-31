@@ -633,7 +633,7 @@ export type Thread = {|
   processName?: string,
   isJsTracer?: boolean,
   pid: Pid,
-  tid: Tid | void,
+  tid: Tid,
   samples: SamplesTable,
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
