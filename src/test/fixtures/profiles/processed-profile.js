@@ -1664,10 +1664,12 @@ export function getProfileWithBalancedNativeAllocations() {
   const nativeAllocations = getEmptyBalancedNativeAllocationsTable();
   const [thread] = profile.threads;
   thread.nativeAllocations = nativeAllocations;
-  const threadId = ensureExists(
-    thread.tid,
-    'Expected there to be a tid on the thread'
-  );
+  const threadId = thread.tid;
+  if (typeof threadId !== 'number') {
+    throw new Error(
+      'Expected to have a number threadId in the thread structure.'
+    );
+  }
 
   // The stack table is built sequentially, so we can assume that the stack indexes
   // match the func indexes.
