@@ -8,26 +8,32 @@
 // ResizeObserver for each use.
 // This was inspired by the code in https://github.com/jaredLunde/react-hook/blob/master/packages/resize-observer/src/index.tsx
 
+export type ResizeObserverCallback = (DOMRectReadOnly) => mixed;
+export type ResizeObserverWrapper = {|
+  subscribe: (elt: HTMLElement, ResizeObserverCallback) => void,
+  unsubscribe: (elt: HTMLElement, ResizeObserverCallback) => void,
+|};
+
 function createResizeObserverWrapper() {
   // This keeps the list of callbacks for each observed element.
-  const callbacks: Map<Element, Set<() => mixed>> = new Map();
+  const callbacks: Map<Element, Set<ResizeObserverCallback>> = new Map();
   const resizeObserver = new ResizeObserver((entries) => {
     for (const entry of entries) {
       const callbacksForElement = callbacks.get(entry.target);
       if (callbacksForElement) {
-        callbacksForElement.forEach((callback) => callback());
+        callbacksForElement.forEach((callback) => callback(entry.contentRect));
       }
     }
   });
 
   return {
-    subscribe(element: HTMLElement, callback: () => mixed) {
+    subscribe(element: HTMLElement, callback: ResizeObserverCallback) {
       const callbacksForElement = callbacks.get(element) ?? new Set();
       callbacks.set(element, callbacksForElement);
       callbacksForElement.add(callback);
       resizeObserver.observe(element);
     },
-    unsubscribe(element: HTMLElement, callback: () => mixed) {
+    unsubscribe(element: HTMLElement, callback: ResizeObserverCallback) {
       const callbacksForElement = callbacks.get(element);
       if (callbacksForElement) {
         const wasDeleted = callbacksForElement.delete(callback);
@@ -53,11 +59,6 @@ function createResizeObserverWrapper() {
     },
   };
 }
-
-type ResizeObserverWrapper = {|
-  subscribe: (elt: HTMLElement, callback: () => mixed) => void,
-  unsubscribe: (elt: HTMLElement, callback: () => mixed) => void,
-|};
 
 let _resizeObserverWrapper: ResizeObserverWrapper | null = null;
 export function getResizeObserverWrapper(): ResizeObserverWrapper {
