@@ -813,14 +813,16 @@ export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> =
 /**
  * Get the map of Thread ID -> Thread Name for easy access.
  */
-export const getThreadIdToNameMap: Selector<Map<number, string>> =
-  createSelector(getThreads, (threads) => {
+export const getThreadIdToNameMap: Selector<Map<Tid, string>> = createSelector(
+  getThreads,
+  (threads) => {
     const threadIdToNameMap = new Map();
     for (const thread of threads) {
       threadIdToNameMap.set(thread.tid, thread.name);
     }
     return threadIdToNameMap;
-  });
+  }
+);
 
 // Gets whether this profile contains private information.
 export const getContainsPrivateBrowsingInformation: Selector<boolean> =
