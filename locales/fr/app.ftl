@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = Impossible de lire le fichier ou d’analyser l
 AppViewRouter--error-local = Pas encore implémenté.
 AppViewRouter--error-public = Impossible de télécharger le profil.
 AppViewRouter--error-from-url = Impossible de télécharger le profil.
+AppViewRouter--error-compare = Impossible de récupérer les profils.
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
@@ -350,7 +351,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } cœur logique
        *[other] { $logicalCPUs } cœurs logiques
     }
-MenuButtons--metaInfo--recording-started = Enregistrement commencé :
+MenuButtons--metaInfo--main-process-started = Processus principal démarré :
 MenuButtons--metaInfo--interval = Intervalle :
 MenuButtons--metaInfo--buffer-capacity = Capacité de la mémoire tampon :
 MenuButtons--metaInfo--buffer-duration = Durée de la mémoire tampon :

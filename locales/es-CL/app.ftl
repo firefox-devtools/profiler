@@ -355,7 +355,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } núcleo lógico
        *[other] { $logicalCPUs } núcleos lógicos
     }
-MenuButtons--metaInfo--recording-started = Inicio del registro:
+MenuButtons--metaInfo--main-process-started = Proceso principal iniciado:
 MenuButtons--metaInfo--interval = Intervalo:
 MenuButtons--metaInfo--buffer-capacity = Capacidad del búfer:
 MenuButtons--metaInfo--buffer-duration = Duración del búfer:

@@ -343,7 +343,7 @@ MenuButtons--metaInfo--logical-cpu =
     { $logicalCPUs ->
        *[other] { $logicalCPUs } 顆邏輯核心
     }
-MenuButtons--metaInfo--recording-started = 紀錄開始於:
+MenuButtons--metaInfo--main-process-started = 主處理程序開始:
 MenuButtons--metaInfo--interval = 間隔:
 MenuButtons--metaInfo--buffer-capacity = 緩衝容量:
 MenuButtons--metaInfo--buffer-duration = 緩衝間隔:

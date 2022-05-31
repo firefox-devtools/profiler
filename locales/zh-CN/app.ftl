@@ -34,6 +34,7 @@ AppViewRouter--error-from-file = 无法读取或解析其中的分析记录。
 AppViewRouter--error-local = 尚未实现。
 AppViewRouter--error-public = 无法下载分析记录。
 AppViewRouter--error-from-url = 无法下载分析记录。
+AppViewRouter--error-compare = 无法获取分析记录。
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/

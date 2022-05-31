@@ -417,7 +417,7 @@ MenuButtons--metaInfo--logical-cpu =
         [few] { $logicalCPUs } логічні ядра
        *[many] { $logicalCPUs } логічних ядер
     }
-MenuButtons--metaInfo--recording-started = Запис розпочато:
+MenuButtons--metaInfo--main-process-started = Основний процес розпочато:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--buffer-capacity = Обсяг буфера:
 MenuButtons--metaInfo--buffer-duration = Тривалість буфера:
