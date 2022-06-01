@@ -490,9 +490,19 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Skermôfdrukken
 MenuButtons--publish--renderCheckbox-label-resource = Helpboarne-URL’s en -paden opnimme
 MenuButtons--publish--renderCheckbox-label-extension = Utwreidingsynformaasje opnimme
 MenuButtons--publish--renderCheckbox-label-preference = Foarkarswearden opnimme
+MenuButtons--publish--renderCheckbox-label-private-browsing = De gegevens fan priveenavigaasjefinsters opnimme
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Dit profyl befettet priveenavigaasjegegevens
+MenuButtons--publish--reupload-performance-profile = Prestaasjeprofyl opnij oplade
+MenuButtons--publish--share-performance-profile = Prestaasjeprofyl diele
+MenuButtons--publish--info-description = Laad jo profyl op en meitsje it mei de keppeling tagonklik foar elkenien.
+MenuButtons--publish--info-description-default = Standert wurde jo persoanlike gegevens fuortsmiten.
+MenuButtons--publish--info-description-firefox-nightly2 = Dit profyl is fan { -firefox-nightly-brand-name }, dus standert wurde de measte gegevens opnommen.
+MenuButtons--publish--include-additional-data = Oanfoljende gegevens dy’t identifisearber wêze kinne tafoegje
 MenuButtons--publish--button-upload = Oplade
 MenuButtons--publish--upload-title = Profyl oplade…
 MenuButtons--publish--cancel-upload = Opladen annulearje
+MenuButtons--publish--message-something-went-wrong = Och heden, der is wat misgien by it opladen fan it profyl.
 MenuButtons--publish--message-try-again = Opnij probearje
 MenuButtons--publish--download = Downloade
 MenuButtons--publish--compressing = Komprimearje…
@@ -500,13 +510,28 @@ MenuButtons--publish--compressing = Komprimearje…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Netwurken filterje:
+    .title = Allinnich netwurkfersiken toane dy’t oerienkomme mei in bepaalde namme
 
 ## Timestamp formatting primitive
 
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Wisten jo dat jo de komma (,) brûke kinne om mei ferskate termen te sykjen?
 
 ## Profile Delete Button
 
