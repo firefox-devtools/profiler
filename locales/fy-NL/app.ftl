@@ -628,6 +628,12 @@ StackSettings--call-tree-strategy-native-deallocations-memory = De-allokearre û
     .title = Gearfetting mei gebrûk fan bytes de-allokearte ûnthâld, per website wêroan it ûnthâld allokearre wie
 StackSettings--call-tree-strategy-native-deallocations-sites = De-allokaasje fan websites
     .title = Gearfetting oan de hân fan de de-allokearre bytes ûnthâldromte, per website wêrfan de ûnthâldromte de-allokearre wie.
+StackSettings--invert-call-stack = Oanropstack omkeare
+    .title = Sortearje op de tiid dy’t yn in oanropnode bestege wurdt, wêrby ûnderlizzende nodes negearre wurde
+StackSettings--show-user-timing = Brûkerstiming toane
+StackSettings--panel-search =
+    .label = Stacks filterje:
+    .title = Allinnich stacks toane dy’t in funksje befetsje wêrfan de namme oerienkomt mei dizze substring
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -643,6 +649,16 @@ TabBar--js-tracer-tab = JS-tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Allinnich dit proses toane
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Allinnich ‘{ $trackName }’ toane
+TrackContextMenu--hide-other-screenshots-tracks = Oare skermôfdruktracks ferstopje
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = ‘{ $trackName }’ ferstopje
 TrackContextMenu--show-all-tracks = Alle tracks toane
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
