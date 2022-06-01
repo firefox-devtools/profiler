@@ -296,7 +296,10 @@ function getThreadInfo(
   }
   const thread = getEmptyThread();
   thread.pid = chunk.pid;
-  thread.tid = chunk.tid;
+  // It looks like the TID information in Chrome's data isn't the system's TID
+  // but some internal values only unique for a pid. Therefore let's generate a
+  // proper unique value.
+  thread.tid = `${chunk.pid},${chunk.tid}`;
 
   // Set the process type to something non-"Gecko". If this is left at
   // "default", threads + processes without samples will not be auto-hidden in
