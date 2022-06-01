@@ -245,13 +245,35 @@ Home--menu-button-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Dizze profiler-ynstânsje kin gjin ferbining meitsje mei it WebChannel, dus de Profiler-menuknop kin net ynskeakele wurde.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Dizze profiler-ynstânsje kin gjin ferbining meitsje mei it WebChannell. Dit betsjut meastentiids dat dizze
+    útfierd wurdt op in oare host as opjûn yn de foarkar
+    <code>devtools.performance.recording.ui-base-url</code>. As jo nije profilen fêstlizze wolle
+    mei dizze ynstânsje, en der programmatyske kontrôle oer de profiler-menuknop oan jaan wolle,
+    dan kinne jo nei <code>about:config</code> gean en de foarkar wizigje.
+Home--record-instructions =
+    Klik om te starten mei it meitsjen fan in profyl op de profylknop of brûk de
+    fluchtoetsen. It piktogram is blau as der in profyl opnommen wurdt.
+    Klik op <kbd>Fêstlizze</kbd> om de gegevens yn profiler.firefox.com te laden.
 Home--instructions-title = Profilen besjen en opnimme
+Home--instructions-content =
+    It opnimmen fan prestaasjeprofilen fereasket <a>{ -firefox-brand-name }</a>.
+    Besteande profilen kinne echter besjoen wurde yn elke moderne browser.
 Home--record-instructions-start-stop = Profilearjen stopje en starte
 Home--record-instructions-capture-load = Profyl fêstlizze en lade
+Home--profiler-motto = Lis in prestaasjeprofyl fêst. Analysearje it. Diel it. Meitsje it ynternet flugger.
+Home--additional-content-title = Besteande profilen lade
+Home--additional-content-content = Jo kinne in profylbestân hjirhinne <strong>fersleepje</strong> om it te laden, of:
+Home--compare-recordings-info = Jo kinne ek opnamen fergelykje. <a>De fergelikingsnterface iepenje.</a>
+Home--recent-uploaded-recordings-title = Resint opladen opnamen
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Fier filtertermen yn
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
