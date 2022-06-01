@@ -40,7 +40,7 @@ type RenderedComponentSettings = {|
   +sampleIndexOffset: number,
   +xPixelsPerMs: number,
   +enableCPUUsage: boolean,
-  +maxThreadCPUDelta: number,
+  +maxThreadCPUDeltaPerMs: number,
   +treeOrderSampleComparator: ?(
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -246,24 +246,8 @@ export class ActivityGraphFillComputer {
       if (enableCPUUsage && threadCPUDelta) {
         // It must be non-null because we are checking this in the processing
         // step and eliminating all the null values.
-        const cpuDeltaBefore = ensureExists(threadCPUDelta[i]);
-        const cpuDeltaAfter = ensureExists(threadCPUDelta[i + 1]);
-        const intervalDistribution = (sampleTime - prevSampleTime) / interval;
-        const nextIntervalDistribution =
-          (nextSampleTime - sampleTime) / interval;
-
-        // Figure out the CPU usage "per interval". This is needed for cases
-        // where we have some missing samples. For example:
-        //
-        // Interval:        1ms                  2ms                 1ms
-        // CPU:          100 cycles           200 cycles          200 cycles
-        // Samples:  [x-------------x--------------------------x-------------x]
-        //
-        // In this case, even though it has the max CPU cycle count, the CPU
-        // usage should be 50% because this cycle count is from 2ms area instead
-        // of 1ms like the latter one.
-        cpuBeforeSample = cpuDeltaBefore / intervalDistribution;
-        cpuAfterSample = cpuDeltaAfter / nextIntervalDistribution;
+        cpuBeforeSample = ensureExists(threadCPUDelta[i]);
+        cpuAfterSample = ensureExists(threadCPUDelta[i + 1]);
       }
 
       // Mutate the percentage buffers.
@@ -292,22 +276,16 @@ export class ActivityGraphFillComputer {
     let cpuBeforeSample = null;
     let cpuAfterSample = null;
     if (enableCPUUsage && threadCPUDelta) {
-      const cpuDeltaBefore = ensureExists(threadCPUDelta[lastIdx]);
-      const intervalDistribution = (sampleTime - prevSampleTime) / interval;
-      cpuBeforeSample = cpuDeltaBefore / intervalDistribution;
+      cpuBeforeSample = ensureExists(threadCPUDelta[lastIdx]);
 
       const nextIdxInFullThread = sampleIndexOffset + lastIdx + 1;
       if (nextIdxInFullThread < fullThread.samples.length) {
         // Since we are zoomed in the timeline, rangeFilteredThread will not
         // have the information of the next sample. So we need to get that
         // information from the full thread.
-        const cpuDeltaAfter = ensureExists(
+        cpuAfterSample = ensureExists(
           ensureExists(fullThread.samples.threadCPUDelta)[nextIdxInFullThread]
         );
-        const nextIntervalDistribution =
-          (fullThread.samples.time[nextIdxInFullThread] - sampleTime) /
-          interval;
-        cpuAfterSample = cpuDeltaAfter / nextIntervalDistribution;
       } else {
         // If we don't have this information in the full thread, simply use the
         // previous CPU delta.
@@ -705,29 +683,15 @@ export class ActivityFillGraphQuerier {
     if (enableCPUUsage && threadCPUDelta) {
       // It must be non-null because we are checking this in the processing
       // step and eliminating all the null values.
-      const cpuDeltaBefore = ensureExists(threadCPUDelta[sample]);
+      cpuBeforeSample = ensureExists(threadCPUDelta[sample]);
       // Use the fullThread here to properly get the next in case zoomed in.
-      const cpuDeltaAfter = ensureExists(fullThread.samples.threadCPUDelta)[
+      cpuAfterSample = ensureExists(fullThread.samples.threadCPUDelta)[
         fullThreadSample + 1
       ];
-      const intervalDistribution = (sampleTime - prevSampleTime) / interval;
-      const nextIntervalDistribution = (nextSampleTime - sampleTime) / interval;
-
-      // Figure out the CPU usage "per interval". This is needed for cases
-      // where we have some missing samples. For example:
-      //
-      // Interval:        1ms                  2ms                 1ms
-      // CPU:          100 cycles           200 cycles          200 cycles
-      // Samples:  [x-------------x--------------------------x-------------x]
-      //
-      // In this case, even though it has the max CPU cycle count, the CPU
-      // usage should be 50% because this cycle count is from 2ms area instead
-      // of 1ms like the latter one.
-      cpuBeforeSample = cpuDeltaBefore / intervalDistribution;
       cpuAfterSample =
         // It can be undefined if this is the last sample in the profile.
-        cpuDeltaAfter !== undefined && cpuDeltaAfter !== null
-          ? cpuDeltaAfter / nextIntervalDistribution
+        cpuAfterSample !== undefined && cpuAfterSample !== null
+          ? cpuAfterSample
           : cpuBeforeSample;
     }
 
@@ -869,7 +833,7 @@ function _accumulateInBuffer(
   cpuAfterSample: number | null,
   bufferTimeRangeStart: Milliseconds
 ) {
-  const { xPixelsPerMs, maxThreadCPUDelta } = renderedComponentSettings;
+  const { xPixelsPerMs, maxThreadCPUDeltaPerMs } = renderedComponentSettings;
   const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;
   const sampleCategoryEndTime = (sampleTime + nextSampleTime) / 2;
   let sampleCategoryStartPixel =
@@ -885,6 +849,8 @@ function _accumulateInBuffer(
   const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
   const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
   const intSamplePixel = Math.floor(samplePixel);
+  const prevInterval = sampleTime - prevSampleTime;
+  const nextInterval = nextSampleTime - sampleTime;
 
   // Every sample has two parts because of different CPU usage values.
   // For every sample part, we have a fractional interval of this sample part's
@@ -911,11 +877,15 @@ function _accumulateInBuffer(
   // +-------+-------+///////////////////////////////+-------+-------+
 
   // A number between 0 and 1 for sample ratio. It changes depending on
-  // the CPU usage if it's given. If not, it uses 1 directly.
+  // the CPU usage per ms if it's given. If not, it uses 1 directly.
   const beforeSampleCpuRatio =
-    cpuBeforeSample === null ? 1 : cpuBeforeSample / maxThreadCPUDelta;
+    cpuBeforeSample === null
+      ? 1
+      : cpuBeforeSample / prevInterval / maxThreadCPUDeltaPerMs;
   const afterSampleCpuRatio =
-    cpuAfterSample === null ? 1 : cpuAfterSample / maxThreadCPUDelta;
+    cpuAfterSample === null
+      ? 1
+      : cpuAfterSample / nextInterval / maxThreadCPUDeltaPerMs;
 
   // Samples have two parts to be able to present the different CPU usages properly.
   // This is because CPU usage number of a sample represents the CPU usage
