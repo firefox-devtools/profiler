@@ -600,6 +600,13 @@ ProfileRootMessage--additional = Tebek nei startside
 ServiceWorkerManager--installing-button = Ynstallearje…
 ServiceWorkerManager--pending-button = Tapasse en opnij lade
 ServiceWorkerManager--installed-button = De tapassing opnij lade
+ServiceWorkerManager--updated-while-not-ready =
+    Der is in nije ferzje fan de tapassing tapast eardat dizze side
+    folslein laden wie. Jo kinne fersteuringen sjen.
+ServiceWorkerManager--new-version-is-ready = In nije ferzje fan de tapassing is download en is klear foar gebrûk.
+ServiceWorkerManager--hide-notice-button =
+    .title = Melding opnij lade ferstopje
+    .aria-label = Melding opnij lade ferstopje
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -609,6 +616,14 @@ StackSettings--implementation-all-stacks = Alle stacks
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Ynboud
 StackSettings--use-data-source-label = Gegevensboarne:
+StackSettings--call-tree-strategy-timing = Timings
+    .title = Gearfetting oer de tiid mei gebrûk fan bemeunstere stacks fan útfierde koade
+StackSettings--call-tree-strategy-js-allocations = JavaScript-allokaasjes
+    .title = Gearfetting mei gebrûk fan allokearre bytes JavaScript (gjin de-allokaasjes)
+StackSettings--call-tree-strategy-native-retained-allocations = Behâlden ûnthâld
+    .title = Gearfetting mei gebrûk fan bytes ûnthâld dy’t allokearre en nea frijmakke binne yn de aktuele foarbyldseleksje
+StackSettings--call-tree-native-allocations = Allokearre ûnthâld
+    .title = Gearfetting mei gebrûk fan allokearre bytes ûnthâld
 
 ## Tab Bar for the bottom half of the analysis UI.
 
