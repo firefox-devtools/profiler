@@ -546,6 +546,16 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Der is in flater bard by it fuortsmiten fan dit profyl. <a>Wiis mei jo mûs oan foar mear ynfo.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = { $profileName } fuortsmite
+ProfileDeletePanel--dialog-confirmation-question =
+    Binne jo wis dat jo de opladen gegevens foar dit profyl fuortsmite wolle? Earder
+    dielde keppelingen sille net mear wurkje.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Annulearje
 ProfileDeletePanel--dialog-delete-button =
@@ -554,17 +564,34 @@ ProfileDeletePanel--dialog-delete-button =
 # progress indicator.
 ProfileDeletePanel--dialog-deleting-button =
     .value = Fuortsmite…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = De opladen gegevens binne mei sukses fuortsmiten.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Folslein berik ({ $fullRangeDuration })
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Profyl streekrjocht fan { -firefox-brand-name } út ymportearje…
+ProfileLoaderAnimation--loading-from-file = It bestân lêze en it profyl ferwurkje…
+ProfileLoaderAnimation--loading-local = Noch net ymplemintearre.
+ProfileLoaderAnimation--loading-public = It profyl downloade en ferwurkje…
+ProfileLoaderAnimation--loading-from-url = It profyl downloade en ferwurkje…
+ProfileLoaderAnimation--loading-compare = Profilen lêze en ferwurkje…
+ProfileLoaderAnimation--loading-view-not-found = Werjefte net fûn
 
 ## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Tebek nei startside
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
@@ -572,6 +599,7 @@ ProfileRootMessage--title = { -profiler-brand-name }
 
 ServiceWorkerManager--installing-button = Ynstallearje…
 ServiceWorkerManager--pending-button = Tapasse en opnij lade
+ServiceWorkerManager--installed-button = De tapassing opnij lade
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
