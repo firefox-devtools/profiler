@@ -624,6 +624,10 @@ StackSettings--call-tree-strategy-native-retained-allocations = Behâlden ûnth�
     .title = Gearfetting mei gebrûk fan bytes ûnthâld dy’t allokearre en nea frijmakke binne yn de aktuele foarbyldseleksje
 StackSettings--call-tree-native-allocations = Allokearre ûnthâld
     .title = Gearfetting mei gebrûk fan allokearre bytes ûnthâld
+StackSettings--call-tree-strategy-native-deallocations-memory = De-allokearre ûnthâld
+    .title = Gearfetting mei gebrûk fan bytes de-allokearte ûnthâld, per website wêroan it ûnthâld allokearre wie
+StackSettings--call-tree-strategy-native-deallocations-sites = De-allokaasje fan websites
+    .title = Gearfetting oan de hân fan de de-allokearre bytes ûnthâldromte, per website wêrfan de ûnthâldromte de-allokearre wie.
 
 ## Tab Bar for the bottom half of the analysis UI.
 
