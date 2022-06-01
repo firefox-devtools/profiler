@@ -157,15 +157,26 @@ CallTree--bytes-self = Sels (bytes)
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
     .title = Guon oproppen nei { $calledFunction } binne inline troch de compiler pleatst.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (inline pleatst)
+    .title = Oanroppen nei { $calledFunction } binne inline yn { $outerFunction } pleatst troch de compiler.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Selektearje in node om ynformaasje oer te toanen.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Fier de profyl-URL’s dy’t jo fergelykje wolle yn
+CompareHome--instruction-content =
+    It helpmiddel ekstrahearret de gegevens út de selektearre track en it berik foar
+    elk profyl en pleatst se tegearre yn deselde werjefte, om se maklik te
+    fergelykjen te meitsjen.
 CompareHome--form-label-profile1 = Profyl 1:
 CompareHome--form-label-profile2 = Profyl 2:
 CompareHome--submit-button =
@@ -175,6 +186,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Dit profyl is opnommen yn in build sûnder útjefte-optimalisaasjes.
+        Prestaasjeobservaasjes binne mooglik net fan tapassing op de útjeftepopulaasje.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -222,6 +237,14 @@ Home--load-from-url-submit-button =
     .value = Lade
 Home--documentation-button = Dokumintaasje
 Home--menu-button = Menuknop { -profiler-brand-name } ynskeakelje
+Home--menu-button-instructions =
+    Skeakelje de menuknop Profiler yn om te begjinnen mei it opnimmen fan in
+    prestaasjeprofyl yn { -firefox-brand-name }, analysearje dit en diel it mei profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Dizze profiler-ynstânsje kin gjin ferbining meitsje mei it WebChannel, dus de Profiler-menuknop kin net ynskeakele wurde.
 Home--instructions-title = Profilen besjen en opnimme
 Home--record-instructions-start-stop = Profilearjen stopje en starte
 Home--record-instructions-capture-load = Profyl fêstlizze en lade
