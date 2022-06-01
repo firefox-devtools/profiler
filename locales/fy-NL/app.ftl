@@ -139,6 +139,13 @@ CallTree--bytes-total = Totale grutte (bytes)
         de-allokearre binne, wylst dizze funksje harren yn de stack wie. Dit befettet
         sawol de bytes wêrby de funksje wurklik útfierd waard as de
         bytes fan de oanroppen fan dizze funksje út.
+CallTree--bytes-self = Sels (bytes)
+    .title =
+        De ‘sels’-bytes omfetsje alle bytes dy’t allokearre of de-allokearre binne, wylst
+        dizze funksje oan it ein fan de stack wie. As dizze funksje oare
+        funksjes oanroppen hat, dan binne de bytes fan ‘oare’ funksje net opnommen.
+        De ‘sels’-bytes binne nuttich om te begripen wêr’t ûnthâldromte wurklik
+        yn it programma allokearre of de-allokearre wie.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -146,6 +153,10 @@ CallTree--bytes-total = Totale grutte (bytes)
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Guon oproppen nei { $calledFunction } binne inline troch de compiler pleatst.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
