@@ -278,27 +278,72 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Allinnich selstiid toane
+    .title = Allinnich de tiid yn in oanropnode toane en ûnderlizzende oanroppen negearje.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Klik hjir om profyl { $smallProfileName } te laden
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Fuortsmite
+    .title = Dit profyl kin net fuortsmiten wurde, omdat wy gjin autorisaasjegegevens hawwen.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Der is noch gjin profyl opladen!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Al jo opnamen besjen en beheare (noch { $profilesRestCount })
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Dizze opname beheare
+       *[other] Dizze opnamen beheare
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Seleksje ynstelle fan doer markearring út
+MarkerContextMenu--start-selection-here = Seleksje hjir starte
+MarkerContextMenu--end-selection-here = Seleksje hjir stopje
+MarkerContextMenu--start-selection-at-marker-start = Seleksje starte by <strong>start</strong> markearring
+MarkerContextMenu--start-selection-at-marker-end = Seleksje starte by <strong>ein</strong> markearring
+MarkerContextMenu--end-selection-at-marker-start = Seleksje stopje by <strong>start</strong> markearring
+MarkerContextMenu--end-selection-at-marker-end = Seleksje stopje by <strong>ein</strong> markearring
+MarkerContextMenu--copy-description = Beskriuwing kopiearje
+MarkerContextMenu--copy-call-stack = Oanropstack kopiearje
 MarkerContextMenu--copy-url = URL kopiearje
+MarkerContextMenu--copy-page-url = Side-URL kopiearje
 MarkerContextMenu--copy-as-json = Kopiearje as JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Selektearje de ûntfangerthread ‘<strong>{ $threadName }</strong>’
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Selektearje de ôfstjoerderthread ‘<strong>{ $threadName }</strong>’
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Markearringen filterje:
+    .title = Allinnich markearringen toane dy’t oerienkommen mei in bepaalde namme
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Selektearje in markearringen om ynformaasje oer te toanen.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
