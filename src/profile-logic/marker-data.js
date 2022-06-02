@@ -494,7 +494,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
-  threadId: number | void,
+  threadId: Tid,
   threadRange: StartEndRange,
   ipcCorrelations: IPCMarkerCorrelations
 ): DerivedMarkerInfo {

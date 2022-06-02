@@ -314,10 +314,13 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     { name: 'Maximum Bytes', weight: maximumBytes },
     { name: 'Bytes at Global Max', weight: bytesAtGmax },
     { name: 'Bytes at End', weight: endBytes },
-  ].map(({ name, weight }) => {
+  ].map(({ name, weight }, i) => {
     const thread = getEmptyThread();
 
+    // This profile contains 4 threads with the same pid, and different tids.
+    // We rely on tids to be unique in some parts of the profiler code.
     thread.pid = dhat.pid;
+    thread.tid = i;
     thread.name = name;
     thread.stringTable = new UniqueStringArray(stringTable.serializeToArray());
 

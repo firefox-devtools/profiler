@@ -52,6 +52,7 @@ import type {
   MarkerIndex,
   InnerWindowID,
   Page,
+  Tid,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -89,7 +90,7 @@ type StateProps = {|
   +pages: PageList | null,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +zeroAt: Milliseconds,
-  +threadIdToNameMap: Map<number, string>,
+  +threadIdToNameMap: Map<Tid, string>,
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,
   +categories: CategoryList,
