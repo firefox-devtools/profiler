@@ -1316,6 +1316,13 @@ export function filterThreadSamplesToRange(
     );
   }
 
+  if (samples.threadId) {
+    newSamples.threadId = samples.threadId.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   const newThread: Thread = {
     ...thread,
     samples: newSamples,
