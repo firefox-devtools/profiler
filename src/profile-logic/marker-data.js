@@ -76,6 +76,7 @@ export function deriveJankMarkers(
       end: lastTimestamp,
       name: 'Jank',
       category: otherCategoryIndex,
+      threadId: null,
       data: { type: 'Jank' },
     });
 
@@ -552,6 +553,9 @@ export function deriveMarkersFromRawMarkerTable(
     const phase = rawMarkers.phase[rawMarkerIndex];
     const data = rawMarkers.data[rawMarkerIndex];
     const category = rawMarkers.category[rawMarkerIndex];
+    const markerThreadId = rawMarkers.threadId
+      ? rawMarkers.threadId[rawMarkerIndex]
+      : null;
 
     // Normally, we would look at the marker phase, but some types require special
     // handling. See if these need to be handled first.
@@ -608,6 +612,7 @@ export function deriveMarkersFromRawMarkerTable(
                 end: endEndTime,
                 name: stringTable.getString(name),
                 category,
+                threadId: markerThreadId,
                 data: {
                   ...endData,
                   startTime: startStartTime,
@@ -631,6 +636,7 @@ export function deriveMarkersFromRawMarkerTable(
                 end,
                 name: stringTable.getString(name),
                 category,
+                threadId: markerThreadId,
                 data: {
                   ...endData,
                   startTime: start,
@@ -665,11 +671,15 @@ export function deriveMarkersFromRawMarkerTable(
               'The CompositorScreenshot is assumed to have a start time.'
             );
             const data = rawMarkers.data[previousScreenshotMarker];
+            const markerThreadId = rawMarkers.threadId
+              ? rawMarkers.threadId[previousScreenshotMarker]
+              : null;
             addMarker([previousScreenshotMarker], {
               start: previousStartTime,
               end: thisStartTime,
               name: 'CompositorScreenshot',
               category,
+              threadId: markerThreadId,
               data,
             });
           }
@@ -744,6 +754,7 @@ export function deriveMarkersFromRawMarkerTable(
             end,
             name,
             category,
+            threadId: markerThreadId,
             data: allData,
             incomplete,
           });
@@ -766,6 +777,7 @@ export function deriveMarkersFromRawMarkerTable(
           end: null,
           name: stringTable.getString(name),
           category,
+          threadId: markerThreadId,
           data,
         });
         break;
@@ -785,6 +797,7 @@ export function deriveMarkersFromRawMarkerTable(
             end: endTime,
             name: stringTable.getString(name),
             category,
+            threadId: markerThreadId,
             data,
           });
         }
@@ -825,6 +838,7 @@ export function deriveMarkersFromRawMarkerTable(
               name: stringTable.getString(name),
               end: endTime,
               category,
+              threadId: markerThreadId,
               data: mergeIntervalData(rawMarkers.data[startIndex], data),
             });
           } else {
@@ -846,6 +860,7 @@ export function deriveMarkersFromRawMarkerTable(
               name: stringTable.getString(name),
               end: endTime,
               category,
+              threadId: markerThreadId,
               data,
               incomplete: true,
             });
@@ -873,6 +888,7 @@ export function deriveMarkersFromRawMarkerTable(
         name: stringTable.getString(rawMarkers.name[startIndex]),
         data: rawMarkers.data[startIndex],
         category: rawMarkers.category[startIndex],
+        threadId: rawMarkers.threadId ? rawMarkers.threadId[startIndex] : null,
         incomplete: true,
       });
     }
@@ -888,6 +904,7 @@ export function deriveMarkersFromRawMarkerTable(
       end: Math.max(endOfThread, startTime),
       name: stringTable.getString(rawMarkers.name[startIndex]),
       category: rawMarkers.category[startIndex],
+      threadId: rawMarkers.threadId ? rawMarkers.threadId[startIndex] : null,
       data: rawMarkers.data[startIndex],
       incomplete: true,
     });
@@ -904,6 +921,9 @@ export function deriveMarkersFromRawMarkerTable(
       end: Math.max(endOfThread, start),
       name: 'CompositorScreenshot',
       category: rawMarkers.category[previousScreenshotMarker],
+      threadId: rawMarkers.threadId
+        ? rawMarkers.threadId[previousScreenshotMarker]
+        : null,
       data: rawMarkers.data[previousScreenshotMarker],
     });
   }

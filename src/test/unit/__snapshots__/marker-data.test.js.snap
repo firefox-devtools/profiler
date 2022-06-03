@@ -12,6 +12,7 @@ Array [
     "incomplete": true,
     "name": "Rasterize",
     "start": 0,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -21,6 +22,7 @@ Array [
     "end": null,
     "name": "VsyncTimestamp",
     "start": 2,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -36,6 +38,7 @@ Array [
     "end": 8,
     "name": "Reflow",
     "start": 3,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -46,6 +49,7 @@ Array [
     "end": 5,
     "name": "Rasterize",
     "start": 4,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -57,6 +61,7 @@ Array [
     "end": 10,
     "name": "DOMEvent",
     "start": 9,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -66,6 +71,7 @@ Array [
     "end": 12,
     "name": "MinorGC",
     "start": 11,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -77,6 +83,7 @@ Array [
     "end": 13,
     "name": "UserTiming",
     "start": 12,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -92,6 +99,7 @@ Array [
     "end": 18,
     "name": "Reflow",
     "start": 13,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -107,6 +115,7 @@ Array [
     "end": 15,
     "name": "Reflow",
     "start": 14,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -117,6 +126,7 @@ Array [
     "end": null,
     "name": "ArbitraryName",
     "start": 21,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -144,6 +154,7 @@ Array [
     "end": 24,
     "name": "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5",
     "start": 22,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -161,6 +172,7 @@ Array [
     "end": 24,
     "name": "FileIO",
     "start": 22,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -174,6 +186,7 @@ Array [
     "end": 25,
     "name": "CompositorScreenshot",
     "start": 25,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -188,6 +201,7 @@ Array [
     "end": 27,
     "name": "PreferenceRead",
     "start": 26,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -215,6 +229,7 @@ Array [
     "incomplete": false,
     "name": "IPCOut",
     "start": 30,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -242,6 +257,7 @@ Array [
     "incomplete": true,
     "name": "IPCOut",
     "start": 40,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -253,6 +269,7 @@ Array [
     "incomplete": true,
     "name": "Rasterize",
     "start": 100,
+    "threadId": null,
   },
 ]
 `;
