@@ -13,7 +13,7 @@ import {
   getCounter,
 } from './profile';
 import { getThreadSelectors } from './per-thread';
-import { computeMaxThreadCPUDelta } from 'firefox-profiler/profile-logic/cpu';
+import { computeMaxThreadCPUDeltaPerMs } from 'firefox-profiler/profile-logic/cpu';
 
 import type { Selector, State, Thread } from 'firefox-profiler/types';
 
@@ -68,8 +68,8 @@ function getCPUProcessedThreads(state: State): Thread[] {
   return _cpuProcessedThreads;
 }
 
-export const getMaxThreadCPUDelta: Selector<number> = createSelector(
+export const getMaxThreadCPUDeltaPerMs: Selector<number> = createSelector(
   getCPUProcessedThreads,
   getProfileInterval,
-  computeMaxThreadCPUDelta
+  computeMaxThreadCPUDeltaPerMs
 );

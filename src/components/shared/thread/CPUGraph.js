@@ -35,7 +35,7 @@ type Props = {|
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
   +trackName: string,
-  +maxThreadCPUDelta: number,
+  +maxThreadCPUDeltaPerMs: number,
 |};
 
 export class ThreadCPUGraph extends PureComponent<Props> {
@@ -43,7 +43,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     sampleIndex,
     yPixelsPerHeight,
   }: HeightFunctionParams): number => {
-    const { interval, thread } = this.props;
+    const { thread } = this.props;
     const { samples } = thread;
 
     // Because the cpu value for one sample is about the interval between this
@@ -53,10 +53,9 @@ export class ThreadCPUGraph extends PureComponent<Props> {
       return 0;
     }
     const cpuDelta = ensureExists(samples.threadCPUDelta)[sampleIndex + 1] || 0;
-    const intervalFactor =
-      (samples.time[sampleIndex + 1] - samples.time[sampleIndex]) / interval;
-    const currentCPUPerInterval = cpuDelta / intervalFactor;
-    return currentCPUPerInterval * yPixelsPerHeight;
+    const interval = samples.time[sampleIndex + 1] - samples.time[sampleIndex];
+    const currentCPUPerMs = cpuDelta / interval;
+    return currentCPUPerMs * yPixelsPerHeight;
   };
 
   render() {
@@ -71,7 +70,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
       selectedCallNodeIndex,
       categories,
       trackName,
-      maxThreadCPUDelta,
+      maxThreadCPUDeltaPerMs,
       onSampleClick,
     } = this.props;
 
@@ -81,7 +80,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     return (
       <ThreadHeightGraph
         heightFunc={this._heightFunction}
-        maxValue={maxThreadCPUDelta}
+        maxValue={maxThreadCPUDeltaPerMs}
         className={className}
         trackName={trackName}
         interval={interval}
