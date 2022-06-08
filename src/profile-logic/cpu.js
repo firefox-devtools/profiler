@@ -36,9 +36,9 @@ export function computeMaxThreadCPUDeltaPerMs(
     // First element of CPU delta is always null because back-end doesn't know
     // the delta since there is no previous sample.
     for (let i = 1; i < samples.length; i++) {
-      const realIntervalInMs =
+      const sampleTimeDeltaInMs =
         i === 0 ? profileInterval : samples.time[i] - samples.time[i - 1];
-      const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / realIntervalInMs;
+      const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
       maxThreadCPUDeltaPerMs = Math.max(maxThreadCPUDeltaPerMs, cpuDeltaPerMs);
     }
   }

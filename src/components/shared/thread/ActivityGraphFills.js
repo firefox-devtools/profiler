@@ -677,22 +677,22 @@ export class ActivityFillGraphQuerier {
         ? fullThread.samples.time[fullThreadSample + 1]
         : sampleTime + interval;
 
-    let cpuBeforeSample = null;
-    let cpuAfterSample = null;
+    let cpuDeltaBeforeSample = null;
+    let cpuDeltaAfterSample = null;
     const { threadCPUDelta } = samples;
     if (enableCPUUsage && threadCPUDelta) {
       // It must be non-null because we are checking this in the processing
       // step and eliminating all the null values.
-      cpuBeforeSample = ensureExists(threadCPUDelta[sample]);
+      cpuDeltaBeforeSample = ensureExists(threadCPUDelta[sample]);
       // Use the fullThread here to properly get the next in case zoomed in.
-      cpuAfterSample = ensureExists(fullThread.samples.threadCPUDelta)[
+      cpuDeltaAfterSample = ensureExists(fullThread.samples.threadCPUDelta)[
         fullThreadSample + 1
       ];
-      cpuAfterSample =
+      cpuDeltaAfterSample =
         // It can be undefined if this is the last sample in the profile.
-        cpuAfterSample !== undefined && cpuAfterSample !== null
-          ? cpuAfterSample
-          : cpuBeforeSample;
+        cpuDeltaAfterSample !== undefined && cpuDeltaAfterSample !== null
+          ? cpuDeltaAfterSample
+          : cpuDeltaBeforeSample;
     }
 
     const kernelRangeStartTime = rangeStart + kernelPos / xPixelsPerMs;
@@ -702,8 +702,8 @@ export class ActivityFillGraphQuerier {
       prevSampleTime,
       sampleTime,
       nextSampleTime,
-      cpuBeforeSample,
-      cpuAfterSample,
+      cpuDeltaBeforeSample,
+      cpuDeltaAfterSample,
       kernelRangeStartTime
     );
 
@@ -829,8 +829,8 @@ function _accumulateInBuffer(
   prevSampleTime: Milliseconds,
   sampleTime: Milliseconds,
   nextSampleTime: Milliseconds,
-  cpuBeforeSample: number | null,
-  cpuAfterSample: number | null,
+  cpuDeltaBeforeSample: number | null,
+  cpuDeltaAfterSample: number | null,
   bufferTimeRangeStart: Milliseconds
 ) {
   const { xPixelsPerMs, maxThreadCPUDeltaPerMs } = renderedComponentSettings;
@@ -849,8 +849,8 @@ function _accumulateInBuffer(
   const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
   const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
   const intSamplePixel = Math.floor(samplePixel);
-  const prevInterval = sampleTime - prevSampleTime;
-  const nextInterval = nextSampleTime - sampleTime;
+  const sampleTimeDeltaBefore = sampleTime - prevSampleTime;
+  const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
 
   // Every sample has two parts because of different CPU usage values.
   // For every sample part, we have a fractional interval of this sample part's
@@ -879,13 +879,13 @@ function _accumulateInBuffer(
   // A number between 0 and 1 for sample ratio. It changes depending on
   // the CPU usage per ms if it's given. If not, it uses 1 directly.
   const beforeSampleCpuRatio =
-    cpuBeforeSample === null
+    cpuDeltaBeforeSample === null
       ? 1
-      : cpuBeforeSample / prevInterval / maxThreadCPUDeltaPerMs;
+      : cpuDeltaBeforeSample / sampleTimeDeltaBefore / maxThreadCPUDeltaPerMs;
   const afterSampleCpuRatio =
-    cpuAfterSample === null
+    cpuDeltaAfterSample === null
       ? 1
-      : cpuAfterSample / nextInterval / maxThreadCPUDeltaPerMs;
+      : cpuDeltaAfterSample / sampleTimeDeltaAfter / maxThreadCPUDeltaPerMs;
 
   // Samples have two parts to be able to present the different CPU usages properly.
   // This is because CPU usage number of a sample represents the CPU usage
