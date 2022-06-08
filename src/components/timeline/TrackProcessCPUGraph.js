@@ -41,7 +41,7 @@ type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +counter: Counter,
-  +maxCounterSampleCounts: number[],
+  +maxCounterSampleCountsPerMs: number[],
   +interval: Milliseconds,
   +width: CssPixels,
   +height: CssPixels,
@@ -66,7 +66,7 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
       width,
       lineWidth,
       interval,
-      maxCounterSampleCounts,
+      maxCounterSampleCountsPerMs,
     } = this.props;
     if (width === 0) {
       // This is attempting to draw before the canvas was laid out.
@@ -102,7 +102,7 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
       return;
     }
 
-    const countRange = maxCounterSampleCounts[0];
+    const countRangePerMs = maxCounterSampleCountsPerMs[0];
 
     {
       // Draw the chart.
@@ -130,7 +130,10 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
         x = (samples.time[i] - rangeStart) * millisecondWidth;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
-        const unitGraphCount = samples.count[i] / countRange;
+        const sampleTimeDeltaInMs =
+          i === 0 ? interval : samples.time[i] - samples.time[i - 1];
+        const unitGraphCount =
+          samples.count[i] / sampleTimeDeltaInMs / countRangePerMs;
         y =
           innerDeviceHeight -
           innerDeviceHeight * unitGraphCount +
@@ -207,7 +210,7 @@ type StateProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +counter: Counter,
-  +maxCounterSampleCounts: number[],
+  +maxCounterSampleCountsPerMs: number[],
   +interval: Milliseconds,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
@@ -296,16 +299,20 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(counterIndex: number): React.Node {
-    const { counter, maxCounterSampleCounts } = this.props;
+    const { counter, maxCounterSampleCountsPerMs, interval } = this.props;
     const samples = counter.sampleGroups[0].samples;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
       throw new Error('No sample found for process CPU counter');
     }
-    const maxCPU = maxCounterSampleCounts[0];
+    const maxCPUPerMs = maxCounterSampleCountsPerMs[0];
     const cpuUsage = samples.count[counterIndex];
-    const cpuRatio = cpuUsage / maxCPU;
+    const sampleTimeDeltaInMs =
+      counterIndex === 0
+        ? interval
+        : samples.time[counterIndex] - samples.time[counterIndex - 1];
+    const cpuRatio = cpuUsage / sampleTimeDeltaInMs / maxCPUPerMs;
     return (
       <div className="timelineTrackProcessCPUTooltip">
         <div className="timelineTrackProcessCPUTooltipLine">
@@ -330,7 +337,8 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      maxCounterSampleCounts,
+      maxCounterSampleCountsPerMs,
+      interval,
     } = this.props;
 
     if (counter.sampleGroups.length === 0) {
@@ -348,8 +356,13 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       // process CPU counter. Print an error and bail out early.
       throw new Error('No sample found for process CPU counter');
     }
-    const countRange = maxCounterSampleCounts[0];
-    const unitSampleCount = samples.count[counterIndex] / countRange;
+    const countRangePerMs = maxCounterSampleCountsPerMs[0];
+    const sampleTimeDeltaInMs =
+      counterIndex === 0
+        ? interval
+        : samples.time[counterIndex] - samples.time[counterIndex - 1];
+    const unitSampleCount =
+      samples.count[counterIndex] / sampleTimeDeltaInMs / countRangePerMs;
     const innerTrackHeight = graphHeight - lineWidth / 2;
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
@@ -371,7 +384,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      maxCounterSampleCounts,
+      maxCounterSampleCountsPerMs,
     } = this.props;
 
     return (
@@ -388,7 +401,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
           width={width}
           lineWidth={lineWidth}
           interval={interval}
-          maxCounterSampleCounts={maxCounterSampleCounts}
+          maxCounterSampleCountsPerMs={maxCounterSampleCountsPerMs}
         />
         {hoveredCounter === null ? null : (
           <>
@@ -424,7 +437,8 @@ export const TrackProcessCPUGraph = explicitConnect<
     return {
       counter,
       threadIndex: counter.mainThreadIndex,
-      maxCounterSampleCounts: counterSelectors.getMaxCounterSampleCounts(state),
+      maxCounterSampleCountsPerMs:
+        counterSelectors.getMaxCounterSampleCountsPerMs(state),
       rangeStart: start,
       rangeEnd: end,
       interval: getProfileInterval(state),
