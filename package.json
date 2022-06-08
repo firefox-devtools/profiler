@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^0.20.0",
-    "@codemirror/lang-javascript": "^0.20.0",
+    "@codemirror/lang-javascript": "^0.20.1",
     "@codemirror/lang-rust": "^0.20.0",
     "@codemirror/language": "^0.20.2",
     "@codemirror/state": "^0.20.0",
