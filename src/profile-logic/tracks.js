@@ -86,8 +86,9 @@ const GLOBAL_TRACK_DISPLAY_ORDER = {
   process: 4,
 };
 
-function _getDefaultLocalTrackOrder(tracks: LocalTrack[]) {
+function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
   const trackOrder = tracks.map((_, index) => index);
+  const naturalSort = new Intl.Collator('en-US', { numeric: true });
   // In place sort!
   trackOrder.sort((a, b) => {
     if (
@@ -108,6 +109,22 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[]) {
       // If the IPC track belongs to that local thread, put the IPC tracks right
       // after it.
       return 1;
+    }
+
+    // If the tracks are both threads, sort them by thread name, and then by
+    // creation time if they have the same name.
+    if (tracks[a].type === 'thread' && tracks[b].type === 'thread' && profile) {
+      const idxA = tracks[a].threadIndex;
+      const idxB = tracks[b].threadIndex;
+      if (idxA === undefined || idxB === undefined) {
+        return -1;
+      }
+      const nameA = profile.threads[idxA].name;
+      const nameB = profile.threads[idxB].name;
+      return (
+        naturalSort.compare(nameA, nameB) ||
+        profile.threads[idxA].registerTime - profile.threads[idxB].registerTime
+      );
     }
 
     return (
@@ -142,7 +159,8 @@ export function initializeLocalTrackOrderByPid(
   localTracksByPid: Map<Pid, LocalTrack[]>,
   // If viewing an old profile URL, there were not tracks, only thread indexes. Turn
   // the legacy ordering into track ordering.
-  legacyThreadOrder: ThreadIndex[] | null
+  legacyThreadOrder: ThreadIndex[] | null,
+  profile: ?Profile
 ): Map<Pid, TrackIndex[]> {
   const trackOrderByPid = new Map();
 
@@ -150,7 +168,7 @@ export function initializeLocalTrackOrderByPid(
     // Go through each set of tracks, determine the sort order.
     for (const [pid, tracks] of localTracksByPid) {
       // Create the default trackOrder.
-      let trackOrder = _getDefaultLocalTrackOrder(tracks);
+      let trackOrder = _getDefaultLocalTrackOrder(tracks, profile);
 
       if (urlTrackOrderByPid !== null) {
         // Sanitize the track information provided by the URL, and ensure it is valid.
