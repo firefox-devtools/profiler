@@ -25,7 +25,7 @@ import {
   getTimelineType,
   getInvertCallstack,
   getThreadSelectorsFromThreadsKey,
-  getMaxThreadCPUDelta,
+  getMaxThreadCPUDeltaPerMs,
   getIsExperimentalCPUGraphsEnabled,
   getImplementationFilter,
 } from 'firefox-profiler/selectors';
@@ -99,7 +99,7 @@ type StateProps = {|
   +selectedThreadIndexes: Set<ThreadIndex>,
   +enableCPUUsage: boolean,
   +isExperimentalCPUGraphsEnabled: boolean,
-  +maxThreadCPUDelta: number,
+  +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
 |};
 
@@ -209,7 +209,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       trackType,
       trackName,
       enableCPUUsage,
-      maxThreadCPUDelta,
+      maxThreadCPUDeltaPerMs,
       isExperimentalCPUGraphsEnabled,
       implementationFilter,
     } = this.props;
@@ -277,7 +277,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               samplesSelectedStates={samplesSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
               enableCPUUsage={enableCPUUsage}
-              maxThreadCPUDelta={maxThreadCPUDelta}
+              maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
               implementationFilter={implementationFilter}
             />
             {trackType === 'expanded' ? (
@@ -309,7 +309,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 selectedCallNodeIndex={selectedCallNodeIndex}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
-                maxThreadCPUDelta={maxThreadCPUDelta}
+                maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
               />
             ) : null}
           </>
@@ -395,7 +395,7 @@ export const TimelineTrackThread = explicitConnect<
       selectedThreadIndexes,
       enableCPUUsage,
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
-      maxThreadCPUDelta: getMaxThreadCPUDelta(state),
+      maxThreadCPUDeltaPerMs: getMaxThreadCPUDeltaPerMs(state),
       implementationFilter: getImplementationFilter(state),
     };
   },
