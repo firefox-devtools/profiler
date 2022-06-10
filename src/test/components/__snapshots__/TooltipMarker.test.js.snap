@@ -4776,7 +4776,7 @@ exports[`TooltipMarker shows the source thread for markers from a merged thread 
           Thread
           :
         </div>
-        Merged thread
+        https://mozilla.org
         <div
           class="tooltipLabel"
         >
@@ -4837,7 +4837,7 @@ exports[`TooltipMarker shows the source thread for markers from a merged thread 
           Thread
           :
         </div>
-        Merged thread
+        https://letsencrypt.org
         <div
           class="tooltipLabel"
         >
