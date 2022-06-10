@@ -52,7 +52,7 @@
     "@codemirror/lang-javascript": "^0.20.1",
     "@codemirror/lang-rust": "^0.20.0",
     "@codemirror/language": "^0.20.2",
-    "@codemirror/state": "^0.20.0",
+    "@codemirror/state": "^0.20.1",
     "@codemirror/view": "^0.20.7",
     "@firefox-devtools/react-contextmenu": "^5.0.0",
     "@fluent/bundle": "^0.17.1",
