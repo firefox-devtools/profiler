@@ -128,12 +128,12 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
         x = (samples.time[i] - rangeStart) * millisecondWidth;
-        // Add on half the stroke's line width so that it won't be cut off the edge
-        // of the graph.
         const sampleTimeDeltaInMs =
           i === 0 ? interval : samples.time[i] - samples.time[i - 1];
         const unitGraphCount =
           samples.count[i] / sampleTimeDeltaInMs / countRangePerMs;
+        // Add on half the stroke's line width so that it won't be cut off the edge
+        // of the graph.
         y =
           innerDeviceHeight -
           innerDeviceHeight * unitGraphCount +
