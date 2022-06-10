@@ -1475,15 +1475,21 @@ export function accumulateCounterSamples(
 }
 
 /**
- * Compute the max counter sample counts to determine the range of a counter.
+ * Compute the max counter sample counts per milliseconds to determine the range
+ * of a counter.
  */
-export function computeMaxCounterSampleCounts(
-  samplesArray: Array<CounterSamplesTable>
+export function computeMaxCounterSampleCountsPerMs(
+  samplesArray: Array<CounterSamplesTable>,
+  profileInterval: Milliseconds
 ): Array<number> {
   const maxSampleCounts = samplesArray.map((samples) => {
     let maxCount = 0;
     for (let i = 0; i < samples.length; i++) {
-      maxCount = Math.max(samples.count[i], maxCount);
+      const count = samples.count[i];
+      const sampleTimeDeltaInMs =
+        i === 0 ? profileInterval : samples.time[i] - samples.time[i - 1];
+      const countPerMs = count / sampleTimeDeltaInMs;
+      maxCount = Math.max(countPerMs, maxCount);
     }
 
     return maxCount;
