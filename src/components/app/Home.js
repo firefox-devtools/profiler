@@ -225,7 +225,9 @@ type PopupInstallPhase =
   | 'popup-enabled'
   | 'suggest-enable-popup'
   // Other browsers:
-  | 'other-browser';
+  | 'other-browser'
+  // Firefox Android
+  | 'firefox-android';
 
 class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   constructor(props: HomeProps) {
@@ -236,25 +238,30 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     if (_isFirefox()) {
       popupInstallPhase = 'checking-webchannel';
 
-      // Query the browser to see if the menu button is available.
-      queryIsMenuButtonEnabled().then(
-        (isMenuButtonEnabled) => {
-          this.setState({
-            popupInstallPhase: isMenuButtonEnabled
-              ? 'popup-enabled'
-              : 'suggest-enable-popup',
-          });
-        },
-        () => {
-          this.setState({ popupInstallPhase: 'webchannel-unavailable' });
-        }
-      );
+      if (isAndroid()) {
+        popupInstallPhase = 'firefox-android';
+      }
+      else{
+        // Query the browser to see if the menu button is available.
+        queryIsMenuButtonEnabled().then(
+          (isMenuButtonEnabled) => {
+            this.setState({
+              popupInstallPhase: isMenuButtonEnabled
+                ? 'popup-enabled'
+                : 'suggest-enable-popup',
+            });
+          },
+          () => {
+            this.setState({ popupInstallPhase: 'webchannel-unavailable' });
+          }
+        );
+      }
+  
+      this.state = {
+        popupInstallPhase,
+      };
     }
-
-    this.state = {
-      popupInstallPhase,
-    };
-  }
+      }
 
   _renderInstructions() {
     const { popupInstallPhase } = this.state;
@@ -268,6 +275,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
         return this._renderRecordInstructions(FirefoxPopupScreenshot);
       case 'other-browser':
         return this._renderOtherBrowserInstructions();
+      case 'firefox-android':
+        return this._renderFirefoxAndroidInstructions();
       default:
         throw assertExhaustiveCheck(
           popupInstallPhase,
@@ -440,6 +449,45 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     );
   }
 
+  _renderFirefoxAndroidInstructions() {
+    return (
+      <InstructionTransition key={0}>
+        <div
+          className="homeInstructions"
+          data-testid="home-firefox-android-instructions"
+        >
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
+            <DocsButton />
+            <Localized id="Home--instructions-title">
+              <h2>How to view and record profiles</h2>
+            </Localized>
+            <Localized
+              id="Home--instructions-content"
+              elems={{
+                a: <a href="https://www.mozilla.org/en-US/firefox/new/" />,
+              }}
+            >
+              <p>
+                Recording performance profiles requires{' '}
+                <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox for Desktop</a>
+                However, existing profiles can be viewed in any modern desktop browser.
+              </p>
+            </Localized>
+          </div>
+          {/* end of grid container */}
+        </div>
+      </InstructionTransition>
+    );
+  }
+
   _renderShortcuts() {
     return (
       <div>
@@ -551,6 +599,10 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
 
 function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
+}
+
+function isAndroid(): boolean {
+  return Boolean(navigator.userAgent.match(/Android/i));
 }
 
 export const Home = explicitConnect<
