@@ -11,7 +11,7 @@ import {
   filterCounterToRange,
   accumulateCounterSamples,
   extractProfileFilterPageData,
-  computeMaxCounterSampleCounts,
+  computeMaxCounterSampleCountsPerMs,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -287,13 +287,16 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     )
   );
 
-  const getMaxCounterSampleCounts: Selector<Array<number>> = createSelector(
-    getCounter,
-    (counters) =>
-      computeMaxCounterSampleCounts(
-        counters.sampleGroups.map((group) => group.samples)
-      )
-  );
+  const getMaxCounterSampleCountsPerMs: Selector<Array<number>> =
+    createSelector(
+      getCounter,
+      getProfileInterval,
+      (counters, profileInterval) =>
+        computeMaxCounterSampleCountsPerMs(
+          counters.sampleGroups.map((group) => group.samples),
+          profileInterval
+        )
+    );
 
   return {
     getCounter,
@@ -301,7 +304,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getPid,
     getCommittedRangeFilteredCounter,
     getAccumulateCounterSamples,
-    getMaxCounterSampleCounts,
+    getMaxCounterSampleCountsPerMs,
   };
 }
 

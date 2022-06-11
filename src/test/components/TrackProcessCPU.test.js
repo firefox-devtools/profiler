@@ -10,7 +10,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackProcessCPU } from '../../components/timeline/TrackProcessCPU';
 import { ensureExists } from '../../utils/flow';
 
@@ -56,6 +56,8 @@ describe('TrackProcessCPU', function () {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
+    // Changing one of the sample times, so we can test different intervals.
+    thread.samples.time[1] = 1.5; // It was 1 before.
     profile.counters = [
       getCounterForThreadWithSamples(
         thread,
@@ -170,5 +172,15 @@ describe('TrackProcessCPU', function () {
     const { moveMouseAtCounter, getProcessCPUDot } = setup();
     moveMouseAtCounter(1, 0.5);
     expect(getProcessCPUDot()).toMatchSnapshot();
+  });
+
+  it('accounts the real sample times correctly', function () {
+    const { moveMouseAtCounter } = setup();
+    moveMouseAtCounter(2, 0);
+    // 2nd index has 500 value in it. Without thinking about the intervals, it
+    // should be 50% CPU ratio since the highest value is 1000. But if we look
+    // at the intervals, we can see that the interval of this sample is 0.5ms
+    // therefore, the CPU usage should be 100% instead.
+    expect(screen.getByText(/CPU:/)).toHaveTextContent('100%');
   });
 });

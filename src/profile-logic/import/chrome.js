@@ -28,6 +28,8 @@ import { getOrCreateURIResource } from '../../profile-logic/profile-data';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+// See also the source code at:
+// https://source.chromium.org/chromium/chromium/src/+/main:base/trace_event/trace_event.h;l=1
 
 export type TracingEventUnion =
   | ProfileEvent
@@ -509,11 +511,11 @@ async function processTracingEvents(
     let profileChunks = [];
     if (profileEvent.name === 'Profile') {
       threadInfo.lastSeenTime = (profileEvent.args.data.startTime: any) / 1000;
-      const id = profileEvent.id;
+      const { id, pid } = profileEvent;
       profileChunks = findEvents<ProfileChunkEvent>(
         eventsByName,
         'ProfileChunk',
-        (e) => e.id === id
+        (e) => e.id === id && e.pid === pid
       );
     } else if (profileEvent.name === 'CpuProfile') {
       threadInfo.lastSeenTime =
