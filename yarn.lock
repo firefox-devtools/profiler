@@ -1430,6 +1430,11 @@
   resolved "https://registry.yarnpkg.com/@lezer/common/-/common-0.16.1.tgz#3b98b42fdb11454b89e8a340da10bee1b0f94071"
   integrity sha512-qPmG7YTZ6lATyTOAWf8vXE+iRrt1NJd4cm2nJHK+v7X9TsOF6+HtuU/ctaZy2RCrluxDb89hI6KWQ5LfQGQWuA==
 
+"@lezer/common@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@lezer/common/-/common-1.0.0.tgz#1c95ae53ec17706aa3cbcc88b52c23f22ed56096"
+  integrity sha512-ohydQe+Hb+w4oMDvXzs8uuJd2NoA3D8YDcLiuDsLqH+yflDTPEpgCsWI3/6rH5C3BAedtH1/R51dxENldQceEA==
+
 "@lezer/cpp@^0.16.0":
   version "0.16.0"
   resolved "https://registry.yarnpkg.com/@lezer/cpp/-/cpp-0.16.0.tgz#00b4e885455c02a427257695d106694d2207547e"
@@ -1444,6 +1449,13 @@
   integrity sha512-iE5f4flHlJ1g1clOStvXNLbORJoiW4Kytso6ubfYzHnaNo/eo5SKhxs4wv/rtvwZQeZrK3we8S9SyA7OGOoRKQ==
   dependencies:
     "@lezer/common" "^0.16.0"
+
+"@lezer/highlight@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@lezer/highlight/-/highlight-1.0.0.tgz#1dc82300f5d39fbd67ae1194b5519b4c381878d3"
+  integrity sha512-nsCnNtim90UKsB5YxoX65v3GEIw3iCHw9RM2DtdgkiqAbKh9pCdvi8AWNwkYf10Lu6fxNhXPpkpHbW6mihhvJA==
+  dependencies:
+    "@lezer/common" "^1.0.0"
 
 "@lezer/javascript@^0.16.0":
   version "0.16.0"
