@@ -29,3 +29,8 @@
   box-shadow: 0 0 0 2px var(--blue-50), 0 0 0 4px var(--blue-50-a30);
   outline: 0;
 }
+
+.profileDefaultName::before{
+  content: url(firefox-profiler-res/img/svg/edit-name-profiler.svg);
+}
+

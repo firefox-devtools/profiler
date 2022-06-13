@@ -128,7 +128,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
           onFocus={this.handleButtonFocus}
           onClick={this.handleButtonFocus}
         >
-          {profileNameWithDefault}
+         <span className="profileDefaultName"> {profileNameWithDefault} </span>
         </button>
         <input
           // Make sure and use the profile name and focus generation to support the
