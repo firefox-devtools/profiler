@@ -123,12 +123,12 @@
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-flowtype": "^8.0.3",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jest": "^26.2.2",
+    "eslint-plugin-jest": "^26.5.3",
     "eslint-plugin-jest-dom": "^4.0.2",
     "eslint-plugin-jest-formatting": "^3.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.30.0",
-    "eslint-plugin-testing-library": "^5.5.0",
+    "eslint-plugin-testing-library": "^5.5.1",
     "fake-indexeddb": "^3.1.7",
     "fetch-mock-jest": "^1.5.1",
     "file-loader": "^6.2.0",
@@ -160,7 +160,7 @@
     "stylelint-prettier": "^2.0.0",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^4.9.0"
+    "webpack-dev-server": "^4.9.2"
   },
   "jest": {
     "collectCoverageFrom": [
