@@ -86,7 +86,7 @@
     "redux": "^4.2.0",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.4.1",
-    "reselect": "^4.1.5",
+    "reselect": "^4.1.6",
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0"
   },
