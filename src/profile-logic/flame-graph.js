@@ -162,6 +162,23 @@ export function getRootsAndChildren(
     array[i] = callNodeIndex;
   }
   offsets[callNodeIndex] = ptr;
+
+  // The children are already sorted, but the roots aren't.
+  // Let's sort the roots in descending order, just like the children.
+  roots.sort((rootA, rootB) => {
+    const [nameA, nameB] = [rootA, rootB].map((callNodeIndex) =>
+      thread.stringTable.getString(
+        thread.funcTable.name[callNodeTable.func[callNodeIndex]]
+      )
+    );
+    if (nameA < nameB) {
+      return 1;
+    }
+    if (nameA === nameB) {
+      return 0;
+    }
+    return -1;
+  });
   return { roots, children: { array, offsets } };
 }
 

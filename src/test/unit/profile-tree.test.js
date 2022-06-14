@@ -128,8 +128,8 @@ describe('unfiltered call tree', function () {
           callNodeSummary.total
         )
       ).toEqual({
-        // Roots are not ordered, so they're ordered in the order they're found
-        roots: [Z, G, K],
+        // Roots are ordered in lexically descending order.
+        roots: [Z, K, G],
         children: {
           // Children are ordered in lexically descending order
           array: new Uint32Array([X, Y, W, H, J, I, N, M, 0, 0, 0]),
