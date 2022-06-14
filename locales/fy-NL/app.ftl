@@ -139,6 +139,13 @@ CallTree--bytes-total = Totale grutte (bytes)
         de-allokearre binne, wylst dizze funksje harren yn de stack wie. Dit befettet
         sawol de bytes wêrby de funksje wurklik útfierd waard as de
         bytes fan de oanroppen fan dizze funksje út.
+CallTree--bytes-self = Sels (bytes)
+    .title =
+        De ‘sels’-bytes omfetsje alle bytes dy’t allokearre of de-allokearre binne, wylst
+        dizze funksje oan it ein fan de stack wie. As dizze funksje oare
+        funksjes oanroppen hat, dan binne de bytes fan ‘oare’ funksje net opnommen.
+        De ‘sels’-bytes binne nuttich om te begripen wêr’t ûnthâldromte wurklik
+        yn it programma allokearre of de-allokearre wie.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -146,15 +153,30 @@ CallTree--bytes-total = Totale grutte (bytes)
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Guon oproppen nei { $calledFunction } binne inline troch de compiler pleatst.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (inline pleatst)
+    .title = Oanroppen nei { $calledFunction } binne inline yn { $outerFunction } pleatst troch de compiler.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Selektearje in node om ynformaasje oer te toanen.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Fier de profyl-URL’s dy’t jo fergelykje wolle yn
+CompareHome--instruction-content =
+    It helpmiddel ekstrahearret de gegevens út de selektearre track en it berik foar
+    elk profyl en pleatst se tegearre yn deselde werjefte, om se maklik te
+    fergelykjen te meitsjen.
 CompareHome--form-label-profile1 = Profyl 1:
 CompareHome--form-label-profile2 = Profyl 2:
 CompareHome--submit-button =
@@ -164,6 +186,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Dit profyl is opnommen yn in build sûnder útjefte-optimalisaasjes.
+        Prestaasjeobservaasjes binne mooglik net fan tapassing op de útjeftepopulaasje.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -211,38 +237,113 @@ Home--load-from-url-submit-button =
     .value = Lade
 Home--documentation-button = Dokumintaasje
 Home--menu-button = Menuknop { -profiler-brand-name } ynskeakelje
+Home--menu-button-instructions =
+    Skeakelje de menuknop Profiler yn om te begjinnen mei it opnimmen fan in
+    prestaasjeprofyl yn { -firefox-brand-name }, analysearje dit en diel it mei profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Dizze profiler-ynstânsje kin gjin ferbining meitsje mei it WebChannel, dus de Profiler-menuknop kin net ynskeakele wurde.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Dizze profiler-ynstânsje kin gjin ferbining meitsje mei it WebChannell. Dit betsjut meastentiids dat dizze
+    útfierd wurdt op in oare host as opjûn yn de foarkar
+    <code>devtools.performance.recording.ui-base-url</code>. As jo nije profilen fêstlizze wolle
+    mei dizze ynstânsje, en der programmatyske kontrôle oer de profiler-menuknop oan jaan wolle,
+    dan kinne jo nei <code>about:config</code> gean en de foarkar wizigje.
+Home--record-instructions =
+    Klik om te starten mei it meitsjen fan in profyl op de profylknop of brûk de
+    fluchtoetsen. It piktogram is blau as der in profyl opnommen wurdt.
+    Klik op <kbd>Fêstlizze</kbd> om de gegevens yn profiler.firefox.com te laden.
 Home--instructions-title = Profilen besjen en opnimme
+Home--instructions-content =
+    It opnimmen fan prestaasjeprofilen fereasket <a>{ -firefox-brand-name }</a>.
+    Besteande profilen kinne echter besjoen wurde yn elke moderne browser.
 Home--record-instructions-start-stop = Profilearjen stopje en starte
 Home--record-instructions-capture-load = Profyl fêstlizze en lade
+Home--profiler-motto = Lis in prestaasjeprofyl fêst. Analysearje it. Diel it. Meitsje it ynternet flugger.
+Home--additional-content-title = Besteande profilen lade
+Home--additional-content-content = Jo kinne in profylbestân hjirhinne <strong>fersleepje</strong> om it te laden, of:
+Home--compare-recordings-info = Jo kinne ek opnamen fergelykje. <a>De fergelikingsnterface iepenje.</a>
+Home--recent-uploaded-recordings-title = Resint opladen opnamen
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Fier filtertermen yn
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Allinnich selstiid toane
+    .title = Allinnich de tiid yn in oanropnode toane en ûnderlizzende oanroppen negearje.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Klik hjir om profyl { $smallProfileName } te laden
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Fuortsmite
+    .title = Dit profyl kin net fuortsmiten wurde, omdat wy gjin autorisaasjegegevens hawwen.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Der is noch gjin profyl opladen!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Al jo opnamen besjen en beheare (noch { $profilesRestCount })
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Dizze opname beheare
+       *[other] Dizze opnamen beheare
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Seleksje ynstelle fan doer markearring út
+MarkerContextMenu--start-selection-here = Seleksje hjir starte
+MarkerContextMenu--end-selection-here = Seleksje hjir stopje
+MarkerContextMenu--start-selection-at-marker-start = Seleksje starte by <strong>start</strong> markearring
+MarkerContextMenu--start-selection-at-marker-end = Seleksje starte by <strong>ein</strong> markearring
+MarkerContextMenu--end-selection-at-marker-start = Seleksje stopje by <strong>start</strong> markearring
+MarkerContextMenu--end-selection-at-marker-end = Seleksje stopje by <strong>ein</strong> markearring
+MarkerContextMenu--copy-description = Beskriuwing kopiearje
+MarkerContextMenu--copy-call-stack = Oanropstack kopiearje
 MarkerContextMenu--copy-url = URL kopiearje
+MarkerContextMenu--copy-page-url = Side-URL kopiearje
 MarkerContextMenu--copy-as-json = Kopiearje as JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Selektearje de ûntfangerthread ‘<strong>{ $threadName }</strong>’
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Selektearje de ôfstjoerderthread ‘<strong>{ $threadName }</strong>’
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Markearringen filterje:
+    .title = Allinnich markearringen toane dy’t oerienkommen mei in bepaalde namme
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Selektearje in markearringen om ynformaasje oer te toanen.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -389,9 +490,19 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Skermôfdrukken
 MenuButtons--publish--renderCheckbox-label-resource = Helpboarne-URL’s en -paden opnimme
 MenuButtons--publish--renderCheckbox-label-extension = Utwreidingsynformaasje opnimme
 MenuButtons--publish--renderCheckbox-label-preference = Foarkarswearden opnimme
+MenuButtons--publish--renderCheckbox-label-private-browsing = De gegevens fan priveenavigaasjefinsters opnimme
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Dit profyl befettet priveenavigaasjegegevens
+MenuButtons--publish--reupload-performance-profile = Prestaasjeprofyl opnij oplade
+MenuButtons--publish--share-performance-profile = Prestaasjeprofyl diele
+MenuButtons--publish--info-description = Laad jo profyl op en meitsje it mei de keppeling tagonklik foar elkenien.
+MenuButtons--publish--info-description-default = Standert wurde jo persoanlike gegevens fuortsmiten.
+MenuButtons--publish--info-description-firefox-nightly2 = Dit profyl is fan { -firefox-nightly-brand-name }, dus standert wurde de measte gegevens opnommen.
+MenuButtons--publish--include-additional-data = Oanfoljende gegevens dy’t identifisearber wêze kinne tafoegje
 MenuButtons--publish--button-upload = Oplade
 MenuButtons--publish--upload-title = Profyl oplade…
 MenuButtons--publish--cancel-upload = Opladen annulearje
+MenuButtons--publish--message-something-went-wrong = Och heden, der is wat misgien by it opladen fan it profyl.
 MenuButtons--publish--message-try-again = Opnij probearje
 MenuButtons--publish--download = Downloade
 MenuButtons--publish--compressing = Komprimearje…
@@ -399,13 +510,28 @@ MenuButtons--publish--compressing = Komprimearje…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Netwurken filterje:
+    .title = Allinnich netwurkfersiken toane dy’t oerienkomme mei in bepaalde namme
 
 ## Timestamp formatting primitive
 
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Wisten jo dat jo de komma (,) brûke kinne om mei ferskate termen te sykjen?
 
 ## Profile Delete Button
 
@@ -420,6 +546,16 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Der is in flater bard by it fuortsmiten fan dit profyl. <a>Wiis mei jo mûs oan foar mear ynfo.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = { $profileName } fuortsmite
+ProfileDeletePanel--dialog-confirmation-question =
+    Binne jo wis dat jo de opladen gegevens foar dit profyl fuortsmite wolle? Earder
+    dielde keppelingen sille net mear wurkje.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Annulearje
 ProfileDeletePanel--dialog-delete-button =
@@ -428,17 +564,34 @@ ProfileDeletePanel--dialog-delete-button =
 # progress indicator.
 ProfileDeletePanel--dialog-deleting-button =
     .value = Fuortsmite…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = De opladen gegevens binne mei sukses fuortsmiten.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Folslein berik ({ $fullRangeDuration })
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Profyl streekrjocht fan { -firefox-brand-name } út ymportearje…
+ProfileLoaderAnimation--loading-from-file = It bestân lêze en it profyl ferwurkje…
+ProfileLoaderAnimation--loading-local = Noch net ymplemintearre.
+ProfileLoaderAnimation--loading-public = It profyl downloade en ferwurkje…
+ProfileLoaderAnimation--loading-from-url = It profyl downloade en ferwurkje…
+ProfileLoaderAnimation--loading-compare = Profilen lêze en ferwurkje…
+ProfileLoaderAnimation--loading-view-not-found = Werjefte net fûn
 
 ## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Tebek nei startside
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
@@ -446,6 +599,14 @@ ProfileRootMessage--title = { -profiler-brand-name }
 
 ServiceWorkerManager--installing-button = Ynstallearje…
 ServiceWorkerManager--pending-button = Tapasse en opnij lade
+ServiceWorkerManager--installed-button = De tapassing opnij lade
+ServiceWorkerManager--updated-while-not-ready =
+    Der is in nije ferzje fan de tapassing tapast eardat dizze side
+    folslein laden wie. Jo kinne fersteuringen sjen.
+ServiceWorkerManager--new-version-is-ready = In nije ferzje fan de tapassing is download en is klear foar gebrûk.
+ServiceWorkerManager--hide-notice-button =
+    .title = Melding opnij lade ferstopje
+    .aria-label = Melding opnij lade ferstopje
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -455,6 +616,24 @@ StackSettings--implementation-all-stacks = Alle stacks
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Ynboud
 StackSettings--use-data-source-label = Gegevensboarne:
+StackSettings--call-tree-strategy-timing = Timings
+    .title = Gearfetting oer de tiid mei gebrûk fan bemeunstere stacks fan útfierde koade
+StackSettings--call-tree-strategy-js-allocations = JavaScript-allokaasjes
+    .title = Gearfetting mei gebrûk fan allokearre bytes JavaScript (gjin de-allokaasjes)
+StackSettings--call-tree-strategy-native-retained-allocations = Behâlden ûnthâld
+    .title = Gearfetting mei gebrûk fan bytes ûnthâld dy’t allokearre en nea frijmakke binne yn de aktuele foarbyldseleksje
+StackSettings--call-tree-native-allocations = Allokearre ûnthâld
+    .title = Gearfetting mei gebrûk fan allokearre bytes ûnthâld
+StackSettings--call-tree-strategy-native-deallocations-memory = De-allokearre ûnthâld
+    .title = Gearfetting mei gebrûk fan bytes de-allokearte ûnthâld, per website wêroan it ûnthâld allokearre wie
+StackSettings--call-tree-strategy-native-deallocations-sites = De-allokaasje fan websites
+    .title = Gearfetting oan de hân fan de de-allokearre bytes ûnthâldromte, per website wêrfan de ûnthâldromte de-allokearre wie.
+StackSettings--invert-call-stack = Oanropstack omkeare
+    .title = Sortearje op de tiid dy’t yn in oanropnode bestege wurdt, wêrby ûnderlizzende nodes negearre wurde
+StackSettings--show-user-timing = Brûkerstiming toane
+StackSettings--panel-search =
+    .label = Stacks filterje:
+    .title = Allinnich stacks toane dy’t in funksje befetsje wêrfan de namme oerienkomt mei dizze substring
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -470,6 +649,16 @@ TabBar--js-tracer-tab = JS-tracer
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Allinnich dit proses toane
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Allinnich ‘{ $trackName }’ toane
+TrackContextMenu--hide-other-screenshots-tracks = Oare skermôfdruktracks ferstopje
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = ‘{ $trackName }’ ferstopje
 TrackContextMenu--show-all-tracks = Alle tracks toane
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
@@ -564,7 +753,7 @@ TransformNavigator--collapse-function-subtree = Subtree ynklappe: { $item }
 SourceView--loading-url = Wachtsje op { $host }…
 # Displayed while the source view is waiting for the browser to deliver
 # the source code.
-SourceView--loading-browser-connection = Wachtsje op { -firefox-brand-name }...
+SourceView--loading-browser-connection = Wachtsje op { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Boarne net beskikber
