@@ -24,6 +24,23 @@ afterAll(async function () {
   delete (window: any).TextDecoder;
 });
 
+function checkProfileContainsUniqueTid(profile: Profile) {
+  const foundTids = new Set();
+
+  for (const thread of profile.threads) {
+    const { tid } = thread;
+    if (tid === undefined) {
+      throw new Error('Found an undefined tid!');
+    }
+
+    if (foundTids.has(tid)) {
+      console.error(`Found a duplicate tid ${tid}!`);
+    }
+
+    foundTids.add(tid);
+  }
+}
+
 describe('converting Linux perf profile', function () {
   async function loadProfile(filename: string): Promise<Profile> {
     const fs = require('fs');
@@ -43,6 +60,7 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/test.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 
@@ -51,6 +69,7 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/simple-perf.txt.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 
@@ -59,6 +78,7 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/gzip.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 
@@ -67,6 +87,7 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/graphviz.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 });
@@ -82,6 +103,7 @@ describe('converting dhat profiles', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 });
@@ -107,6 +129,7 @@ describe('converting Google Chrome profile', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 
@@ -130,6 +153,7 @@ describe('converting Google Chrome profile', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 
@@ -165,6 +189,7 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 });
@@ -181,6 +206,7 @@ describe('converting ART trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 
@@ -195,6 +221,7 @@ describe('converting ART trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
+    checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
 });

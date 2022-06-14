@@ -22,7 +22,9 @@ export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
-export type Tid = number;
+// The Tid is most often a number. However in some cases such as merged profiles
+// we could generate a string.
+export type Tid = number | string;
 export type IndexIntoJsTracerEvents = number;
 export type CounterIndex = number;
 export type TabID = number;
@@ -633,7 +635,7 @@ export type Thread = {|
   processName?: string,
   isJsTracer?: boolean,
   pid: Pid,
-  tid: Tid | void,
+  tid: Tid,
   samples: SamplesTable,
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,

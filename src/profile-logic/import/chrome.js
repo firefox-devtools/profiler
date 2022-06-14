@@ -28,6 +28,8 @@ import { getOrCreateURIResource } from '../../profile-logic/profile-data';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
+// See also the source code at:
+// https://source.chromium.org/chromium/chromium/src/+/main:base/trace_event/trace_event.h;l=1
 
 export type TracingEventUnion =
   | ProfileEvent
@@ -296,7 +298,10 @@ function getThreadInfo(
   }
   const thread = getEmptyThread();
   thread.pid = chunk.pid;
-  thread.tid = chunk.tid;
+  // It looks like the TID information in Chrome's data isn't the system's TID
+  // but some internal values only unique for a pid. Therefore let's generate a
+  // proper unique value.
+  thread.tid = `${chunk.pid},${chunk.tid}`;
 
   // Set the process type to something non-"Gecko". If this is left at
   // "default", threads + processes without samples will not be auto-hidden in
@@ -506,11 +511,11 @@ async function processTracingEvents(
     let profileChunks = [];
     if (profileEvent.name === 'Profile') {
       threadInfo.lastSeenTime = (profileEvent.args.data.startTime: any) / 1000;
-      const id = profileEvent.id;
+      const { id, pid } = profileEvent;
       profileChunks = findEvents<ProfileChunkEvent>(
         eventsByName,
         'ProfileChunk',
-        (e) => e.id === id
+        (e) => e.id === id && e.pid === pid
       );
     } else if (profileEvent.name === 'CpuProfile') {
       threadInfo.lastSeenTime =

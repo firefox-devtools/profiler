@@ -11,7 +11,7 @@ import {
   filterCounterToRange,
   accumulateCounterSamples,
   extractProfileFilterPageData,
-  computeMaxCounterSampleCounts,
+  computeMaxCounterSampleCountsPerMs,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -287,13 +287,16 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     )
   );
 
-  const getMaxCounterSampleCounts: Selector<Array<number>> = createSelector(
-    getCounter,
-    (counters) =>
-      computeMaxCounterSampleCounts(
-        counters.sampleGroups.map((group) => group.samples)
-      )
-  );
+  const getMaxCounterSampleCountsPerMs: Selector<Array<number>> =
+    createSelector(
+      getCounter,
+      getProfileInterval,
+      (counters, profileInterval) =>
+        computeMaxCounterSampleCountsPerMs(
+          counters.sampleGroups.map((group) => group.samples),
+          profileInterval
+        )
+    );
 
   return {
     getCounter,
@@ -301,7 +304,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getPid,
     getCommittedRangeFilteredCounter,
     getAccumulateCounterSamples,
-    getMaxCounterSampleCounts,
+    getMaxCounterSampleCountsPerMs,
   };
 }
 
@@ -813,16 +816,16 @@ export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> =
 /**
  * Get the map of Thread ID -> Thread Name for easy access.
  */
-export const getThreadIdToNameMap: Selector<Map<number, string>> =
-  createSelector(getThreads, (threads) => {
+export const getThreadIdToNameMap: Selector<Map<Tid, string>> = createSelector(
+  getThreads,
+  (threads) => {
     const threadIdToNameMap = new Map();
     for (const thread of threads) {
-      if (thread.tid !== undefined) {
-        threadIdToNameMap.set(thread.tid, thread.name);
-      }
+      threadIdToNameMap.set(thread.tid, thread.name);
     }
     return threadIdToNameMap;
-  });
+  }
+);
 
 // Gets whether this profile contains private information.
 export const getContainsPrivateBrowsingInformation: Selector<boolean> =
@@ -854,12 +857,8 @@ export const getProfiledThreadIds: Selector<Set<Tid>> = createSelector(
   getThreads,
   (threads) => {
     const profiledThreadIds = new Set();
-    for (const thread of threads) {
-      const { tid } = thread;
-      if (tid) {
-        // Do not include if tid is undefined.
-        profiledThreadIds.add(tid);
-      }
+    for (const { tid } of threads) {
+      profiledThreadIds.add(tid);
     }
     return profiledThreadIds;
   }

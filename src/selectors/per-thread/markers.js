@@ -27,6 +27,7 @@ import type {
   Selector,
   $ReturnType,
   ThreadsKey,
+  Tid,
 } from 'firefox-profiler/types';
 
 /**
@@ -75,7 +76,7 @@ export function getMarkerSelectorsPerThread(
    * (see below for more information about this function).
    */
 
-  const _getThreadId: Selector<number | void> = (state) =>
+  const _getThreadId: Selector<Tid> = (state) =>
     threadSelectors.getThread(state).tid;
 
   /* This selector exposes the result of the processing of the raw marker table
