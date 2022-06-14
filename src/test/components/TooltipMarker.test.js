@@ -959,18 +959,20 @@ describe('TooltipMarker', function () {
 
   it('shows the source thread for markers from a merged thread', function () {
     // We construct a profile that has 2 threads from 2 different tabs.
+    const tab1Domain = 'https://mozilla.org';
+    const tab2Domain = 'https://letsencrypt.org';
     const { profile } = getProfileFromTextSamples(`A`, `A`);
     profile.threads[0] = {
       ...profile.threads[0],
       name: 'GeckoMain',
       processName: 'Isolated Web Content',
-      'eTLD+1': 'https://mozilla.org',
+      'eTLD+1': tab1Domain,
     };
     profile.threads[1] = {
       ...profile.threads[1],
       name: 'GeckoMain',
       processName: 'Isolated Web Content',
-      'eTLD+1': 'https://letsencrypt.org',
+      'eTLD+1': tab2Domain,
     };
 
     const innerWindowID1 = 1;
@@ -1004,6 +1006,10 @@ describe('TooltipMarker', function () {
         },
       ],
     ]);
+
+    const screenshotUrl = 'Screenshot Url';
+    const screenshotUrlIndex =
+      profile.threads[1].stringTable.indexForString(screenshotUrl);
     addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
       [
         'DOMEvent',
@@ -1013,6 +1019,19 @@ describe('TooltipMarker', function () {
           type: 'DOMEvent',
           eventType: 'pageload',
           innerWindowID: innerWindowID2,
+        },
+      ],
+
+      [
+        'CompositorScreenshot',
+        3,
+        4,
+        {
+          type: 'CompositorScreenshot',
+          url: screenshotUrlIndex,
+          windowID: 'XXX',
+          windowWidth: 600,
+          windowHeight: 300,
         },
       ],
     ]);
@@ -1049,5 +1068,20 @@ describe('TooltipMarker', function () {
       </Provider>
     );
     expect(document.body).toMatchSnapshot();
+
+    // What about the compositor screenshot?
+    rerender(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={2}
+          marker={getMarker(2)}
+          threadsKey={threadsKey}
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+    const threadTitle = screen.getByText('Thread:');
+    const threadInfo = threadTitle.nextSibling;
+    expect(threadInfo).toHaveTextContent(tab2Domain);
   });
 });
