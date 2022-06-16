@@ -1,5 +1,7 @@
 * [User Guide](/)
-  * [UI Tour](./guide-ui-tour.md)
+  * [UI Tour: The Timeline](./guide-ui-tour-timeline.md)
+  * [UI Tour: The Panels](./guide-ui-tour-panels.md)
+  * [UI Tour: Sharing and Renaming](./guide-ui-tour-other.md)
   * [Profiler Fundamentals](./guide-profiler-fundamentals.md)
   * [Stack samples and call trees](./guide-stack-samples-and-call-trees.md)
   * [Filtering call trees](./guide-filtering-call-trees.md)
