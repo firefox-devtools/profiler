@@ -1,6 +1,6 @@
 * [User Guide](/)
-  * [Profiler Fundamentals](./guide-profiler-fundamentals.md)
   * [UI Tour](./guide-ui-tour.md)
+  * [Profiler Fundamentals](./guide-profiler-fundamentals.md)
   * [Stack samples and call trees](./guide-stack-samples-and-call-trees.md)
   * [Filtering call trees](./guide-filtering-call-trees.md)
   * [Remote Profiling Firefox for Android](./guide-remote-profiling.md)
