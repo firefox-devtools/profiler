@@ -9,4 +9,5 @@ window.$docsify = {
   ga: 'UA-35433268-81',
   // Photon blue-50
   themeColor: '#0a84ff',
+  noCompileLinks: ['.*\\.svg']
 };
