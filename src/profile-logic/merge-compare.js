@@ -208,8 +208,9 @@ export function mergeProfilesForDiffing(
       );
     }
 
-    // We're reseting the thread's PID to make sure we don't have any collision.
+    // We're reseting the thread's PID and TID to make sure we don't have any collision.
     thread.pid = `${thread.pid} from profile ${i + 1}`;
+    thread.tid = `${thread.tid} from profile ${i + 1}`;
     thread.processName = `${profileName || `Profile ${i + 1}`}: ${
       thread.processName || thread.name
     }`;
@@ -844,19 +845,21 @@ function combineSamplesDiffing(
   const translationMaps = [new Map(), new Map()];
   const [
     {
-      thread: { samples: samples1 },
+      thread: { samples: samples1, tid: tid1 },
       interval: interval1,
     },
     {
-      thread: { samples: samples2 },
+      thread: { samples: samples2, tid: tid2 },
       interval: interval2,
     },
   ] = threadsAndIntervals;
 
   const newWeight = [];
+  const newThreadId = [];
   const newSamples = {
     ...getEmptySamplesTableWithEventDelay(),
     weight: newWeight,
+    threadId: newThreadId,
   };
 
   let i = 0;
@@ -890,6 +893,7 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
       newSamples.time.push(samples1.time[i]);
+      newThreadId.push(samples1.threadId ? samples1.threadId[i] : tid1);
       // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
       // base profile.
@@ -916,6 +920,7 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
       newSamples.time.push(samples2.time[j]);
+      newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
       newWeight.push(interval2);
 
       translationMaps[1].set(j, newSamples.length);
@@ -1122,8 +1127,14 @@ function combineSamplesForMerging(
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
   const sampleIndexes = Array(sampleTables.length).fill(0);
+  // This array will contain the source thread ids. It will be added to the
+  // samples table after the loop.
+  const newThreadId = [];
   // Creating a new empty samples table to fill.
-  const newSamples = getEmptySamplesTableWithEventDelay();
+  const newSamples = {
+    ...getEmptySamplesTableWithEventDelay(),
+    threadId: newThreadId,
+  };
 
   while (true) {
     let selectedSamplesTableIndex: number | null = null;
@@ -1176,6 +1187,11 @@ function combineSamplesForMerging(
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
     newSamples.time.push(currentSamplesTable.time[oldSampleIndex]);
+    newThreadId.push(
+      currentSamplesTable.threadId
+        ? currentSamplesTable.threadId[oldSampleIndex]
+        : threads[selectedSamplesTableIndex].tid
+    );
 
     newSamples.length++;
     sampleIndexes[selectedSamplesTableIndex]++;
@@ -1197,7 +1213,9 @@ function mergeMarkers(
   markerTable: RawMarkerTable,
   translationMaps: TranslationMapForMarkers[],
 } {
-  const newMarkerTable = getEmptyRawMarkerTable();
+  const newThreadId = [];
+  const newMarkerTable = { ...getEmptyRawMarkerTable(), threadId: newThreadId };
+
   const translationMaps = [];
 
   threads.forEach((thread, threadIndex) => {
@@ -1252,6 +1270,9 @@ function mergeMarkers(
       newMarkerTable.endTime.push(markers.endTime[markerIndex]);
       newMarkerTable.phase.push(markers.phase[markerIndex]);
       newMarkerTable.category.push(markers.category[markerIndex]);
+      newThreadId.push(
+        markers.threadId ? markers.threadId[markerIndex] : thread.tid
+      );
 
       // Set the translation map and increase the table length.
       translationMap.set(markerIndex, newMarkerTable.length);
@@ -1314,6 +1335,11 @@ function mergeScreenshotMarkers(
           targetMarkerTable.endTime.push(markers.endTime[markerIndex]);
           targetMarkerTable.phase.push(markers.phase[markerIndex]);
           targetMarkerTable.category.push(markers.category[markerIndex]);
+          if (targetMarkerTable.threadId) {
+            targetMarkerTable.threadId.push(
+              markers.threadId ? markers.threadId[markerIndex] : thread.tid
+            );
+          }
 
           // Set the translation map and increase the table length.
           translationMap.set(markerIndex, targetMarkerTable.length);

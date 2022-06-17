@@ -17,6 +17,7 @@ import type {
   Page,
   IndexIntoRawMarkerTable,
   TabID,
+  Tid,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { StackTiming } from '../profile-logic/stack-timing';
@@ -170,6 +171,7 @@ export type Marker = {|
   end: Milliseconds | null,
   name: string,
   category: IndexIntoCategoryList,
+  threadId: Tid | null,
   data: MarkerPayload,
   incomplete?: boolean,
 |};

@@ -329,6 +329,7 @@ describe('mergeThreads function', function () {
     const markerNames = [];
     const markerStartTimes = [];
     const markerEndTimes = [];
+    const markerThreadIds = [];
     for (
       let markerIndex = 0;
       markerIndex < mergedMarkers.length;
@@ -342,6 +343,7 @@ describe('mergeThreads function', function () {
       markerNames.push(markerName);
       markerStartTimes.push(markerStarTime);
       markerEndTimes.push(markerEndTime);
+      markerThreadIds.push(mergedMarkers.threadId?.[markerIndex]);
     }
 
     expect(markerNames).toEqual([
@@ -357,6 +359,7 @@ describe('mergeThreads function', function () {
     // are getting it from selector anyway.
     expect(markerStartTimes).toEqual([2, 3, 6, 1, 3, 8]);
     expect(markerEndTimes).toEqual([null, 5, 7, null, 4, 9]);
+    expect(markerThreadIds).toEqual([0, 0, 0, 1, 1, 1]);
   });
 
   it('merges markers with stacks properly', function () {
