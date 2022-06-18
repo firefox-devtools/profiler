@@ -1806,6 +1806,7 @@ Array [
     "end": null,
     "name": "D",
     "start": 3,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1813,6 +1814,7 @@ Array [
     "end": null,
     "name": "E",
     "start": 4,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1820,6 +1822,7 @@ Array [
     "end": null,
     "name": "F",
     "start": 5,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1838,6 +1841,7 @@ Array [
     "end": 7,
     "name": "Load 6: https://mozilla.org",
     "start": 6,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1856,6 +1860,7 @@ Array [
     "end": 8,
     "name": "Load 7: https://mozilla.org",
     "start": 7,
+    "threadId": null,
   },
 ]
 `;
@@ -1868,6 +1873,7 @@ Array [
     "end": null,
     "name": "A",
     "start": 0,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1875,6 +1881,7 @@ Array [
     "end": null,
     "name": "B",
     "start": 1,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1882,6 +1889,7 @@ Array [
     "end": null,
     "name": "C",
     "start": 2,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1889,6 +1897,7 @@ Array [
     "end": null,
     "name": "D",
     "start": 3,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1896,6 +1905,7 @@ Array [
     "end": null,
     "name": "E",
     "start": 4,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1903,6 +1913,7 @@ Array [
     "end": null,
     "name": "F",
     "start": 5,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1921,6 +1932,7 @@ Array [
     "end": 7,
     "name": "Load 6: https://mozilla.org",
     "start": 6,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -1939,6 +1951,7 @@ Array [
     "end": 8,
     "name": "Load 7: https://mozilla.org",
     "start": 7,
+    "threadId": null,
   },
 ]
 `;
@@ -2033,6 +2046,7 @@ Array [
     "end": null,
     "name": "D",
     "start": 3,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -2040,6 +2054,7 @@ Array [
     "end": null,
     "name": "E",
     "start": 4,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -2047,6 +2062,7 @@ Array [
     "end": null,
     "name": "F",
     "start": 5,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -2065,6 +2081,7 @@ Array [
     "end": 7,
     "name": "Load 6: https://mozilla.org",
     "start": 6,
+    "threadId": null,
   },
   Object {
     "category": 0,
@@ -2083,6 +2100,7 @@ Array [
     "end": 8,
     "name": "Load 7: https://mozilla.org",
     "start": 7,
+    "threadId": null,
   },
 ]
 `;
@@ -3007,6 +3025,7 @@ Array [
     "end": 55,
     "name": "Jank",
     "start": 5,
+    "threadId": null,
   },
 ]
 `;

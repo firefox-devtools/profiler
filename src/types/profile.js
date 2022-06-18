@@ -171,6 +171,9 @@ export type SamplesTable = {|
   // versions may not have it or that feature could be disabled. No upgrader was
   // written for this change because it's a completely new data source.
   threadCPUDelta?: Array<number | null>,
+  // This property isn't present in normal threads. However it's present for
+  // merged threads, so that we know the origin thread for these samples.
+  threadId?: Tid[],
   length: number,
 |};
 
@@ -256,6 +259,9 @@ export type RawMarkerTable = {|
   endTime: Array<number | null>,
   phase: MarkerPhase[],
   category: IndexIntoCategoryList[],
+  // This property isn't present in normal threads. However it's present for
+  // merged threads, so that we know the origin thread for these markers.
+  threadId?: Tid[],
   length: number,
 |};
 

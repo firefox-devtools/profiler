@@ -13,7 +13,7 @@ The following are the different types of filtering operations that are supported
 
 ## Search filter
 
-![A screenshot of the search box](./images/search-2021-10-21.png)
+![A screenshot of the search box](./images/search-2022-06-16.png)
 
 Searching will exclude samples that do not match a search string. The search filter looks at every function in the sample's stack. If the function's name, resource, or URL match, then the sample will be retained; otherwise, it will be filtered out. Multiple search terms can be added, as long as they are separated by commas.
 
@@ -32,7 +32,7 @@ The following are some ideas on how to use search terms:
 
 ## Implementation filter
 
-![A screenshot of the implementation filter dropdown.](./images/implementation-2018-05.jpg)
+![A screenshot of the implementation filter dropdown.](./images/implementation-2022-06-16.png)
 
 The implementation filter is useful for narrowing down the call tree to a subset of stack types. For instance, it can be useful to only show native stacks (C++ and Rust) or to only show JavaScript stacks.
 
@@ -46,7 +46,7 @@ The implementation filter will modify the shape of stacks and generate a complet
 
 ## Invert call stack
 
-![A screenshot of the "Invert call stacks" checkbox.](./images/invert-2018-05.jpg)
+![A screenshot of the "Invert call stacks" checkbox.](./images/invert-2022-06-16.png)
 
 Inverting the call stacks of samples will produce an entirely new call tree. All of the self time will be at the roots of the call tree. The implications to the shape of the call tree may be surprising, but consider the following graphics.
 
@@ -63,6 +63,8 @@ Inversion is most useful in surfacing the functions where time is actually being
 ## Transforms
 
 Call tree transforms provide a finer grain control over how to modify the call tree. They modify the stack in different operations. They can operate at individual call nodes on the tree, or across the entire tree for a given function. Different programs use different terms to describe these operations, but the Firefox Profiler has defined certain operations.
+
+![A screenshot of the transforms in the contextmenu.](./images/transforms-2022-06-16.png)
 
 ### Merge
 

@@ -173,36 +173,47 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * they have threadId field.
    */
   _renderThreadDetails(): TooltipDetailComponent[] {
-    const { marker, threadName, threadIdToNameMap } = this.props;
+    const { marker, threadIdToNameMap } = this.props;
     const data = marker.data;
 
-    if (!data || data.threadId === undefined) {
+    // Markers might have threadId information if we're in a merged thread.
+    // Otherwise let's just take the thread information from the current thread.
+    const threadName =
+      marker.threadId !== null
+        ? threadIdToNameMap.get(marker.threadId)
+        : this.props.threadName;
+
+    if (data && data.threadId !== undefined) {
+      // This marker has some threadId data in its payload, which is about the
+      // thread where this event happened.
+      const threadId = data.threadId;
+      const occurringThreadName = threadIdToNameMap.get(threadId);
+
       return [
-        <TooltipDetail label="Thread" key="thread">
+        <TooltipDetail label="Recording Thread" key="recording">
           {threadName}
         </TooltipDetail>,
+        // If we have the thread information of the occurring thread, then show.
+        // Otherwise, only show the thread ID.
+        occurringThreadName ? (
+          <TooltipDetail
+            label="Occurring Thread"
+            key="occurring"
+          >{`${occurringThreadName} (TID: ${threadId})`}</TooltipDetail>
+        ) : (
+          <TooltipDetail label="Occurring Thread ID" key="occurring">
+            {threadId}
+          </TooltipDetail>
+        ),
       ];
     }
 
-    const threadId = data.threadId;
-    const occurringThreadName = threadIdToNameMap.get(threadId);
+    // This is the common case.
 
     return [
-      <TooltipDetail label="Recording Thread" key="recording">
+      <TooltipDetail label="Thread" key="thread">
         {threadName}
       </TooltipDetail>,
-      // If we have the thread information of the occurring thread, then show.
-      // Otherwise, only show the thread ID.
-      occurringThreadName ? (
-        <TooltipDetail
-          label="Occurring Thread"
-          key="occurring"
-        >{`${occurringThreadName} (TID: ${threadId})`}</TooltipDetail>
-      ) : (
-        <TooltipDetail label="Occurring Thread ID" key="occurring">
-          {threadId}
-        </TooltipDetail>
-      ),
     ];
   }
 

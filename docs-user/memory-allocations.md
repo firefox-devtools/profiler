@@ -16,9 +16,13 @@ The graph visualization tracks the relative memory usage over the committed rang
 
 ## Native Memory Allocations (experimental)
 
-The profiler has experimental support for analyzing allocations in native code (C++ and Rust) via stack sampling. These features require Nightly and the new Profiler Toolbar Icon (directions below). To follow along you can open this [example showing DevTools opening and closing](https://perfht.ml/2LKZsfY)
+The profiler has experimental support for analyzing allocations in native code (C++ and Rust) via stack sampling. These features require Nightly. To follow along you can open this [example showing DevTools opening and closing](https://perfht.ml/2LKZsfY)
 
 The Native Allocations feature works by collecting the stack and size of memory allocations from native (C++ or Rust) code. It does not collect every allocation, but only samples a subset of them. The sampling is biased towards larger allocations and larger frees. Larger allocations are more likely show up in the profile, and will most likely be more representative of the actual memory usage. Keep in mind that since these allocations are only sampled, not all allocations will be recorded. This means that memory track (the orange graph at the top) will most likely report different numbers for memory usage.
+
+Please note that this feature has a lot of overhead, therefore the timing data
+will be more skewed that usual. Don't pay too much attention to this data if a
+profile contains native allocations data.
 
 ### Allocations in various panels
 
@@ -31,12 +35,13 @@ The allocations can be viewed in the call tree, and flame graph, but not the sta
 ### Enable the Feature
 
 1. Open Nightly.
-2. Enable the Profiler Toolbar Icon via through the menu via: `Tools -> Web Developer -> Enable Profiler Toolbar Icon`.
-3. Click on the `Profiler Toolbar Icon` to open the `Profiler Popup`.
+2. Click on the `Profiler Icon` to open the `Profiler Popup`. If it's not
+   present, you can add it first by visiting https://profiler.firefox.com.
+3. Click on `Edit Settings`.
 4. Under Features, enable the `Native Allocations` checkbox. This will enable the feature.
 5. Record a profile.
 
-![A screenshot showing the Profiler Toolbar Icon and the Profiler Popup.](images/popup.jpg)
+![A screenshot showing the Profiler Icon and the Profiler Popup.](images/popup.png)
 
 ![A screenshot of the UI to turn on native allocations.](images/allocation-feature.png)
 
