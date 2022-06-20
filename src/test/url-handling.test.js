@@ -15,6 +15,7 @@ import {
   changeProfileName,
   changeSelectedThreads,
   changeGlobalTrackOrder,
+  changeLocalTrackOrder,
   commitRange,
   setDataSource,
 } from '../actions/profile-view';
@@ -281,7 +282,7 @@ describe('url handling tracks', function () {
         store.getState()
       );
 
-      // This simulate a page reload.
+      // This simulates a page reload.
       const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(
         store.getState()
       );
@@ -293,8 +294,43 @@ describe('url handling tracks', function () {
 
   describe('local tracks', function () {
     it('can reorder local tracks', function () {
-      const { getState } = initWithSearchParams('?localTrackOrderByPid=222-10');
+      const { dispatch, getState } = initWithSearchParams('');
       expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // The URL parameter for localTrackOrderByPid should be empty.
+      expect(getQueryStringFromState(getState())).not.toContain(
+        'localTrackOrderByPid='
+      );
+
+      // Change the order of Style and DOM Worker
+      dispatch(changeLocalTrackOrder(222, [1, 0]));
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread Style]',
+        '  - show [thread DOM Worker]',
+      ]);
+
+      // Now the URL parameter for localTrackOrderByPid should contain this change.
+      expect(getQueryStringFromState(getState())).toContain(
+        'localTrackOrderByPid=222-10'
+      );
+
+      const previousOrder = urlStateSelectors.getLocalTrackOrderByPid(
+        getState()
+      );
+      // This simulates a page reload.
+      const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(getState());
+      expect(
+        urlStateSelectors.getLocalTrackOrderByPid(storeAfterReload.getState())
+      ).toEqual(previousOrder);
+
+      expect(getHumanReadableTracks(storeAfterReload.getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread Style]',
