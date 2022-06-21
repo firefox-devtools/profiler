@@ -57,6 +57,7 @@ const LOCAL_TRACK_INDEX_ORDER = {
   ipc: 3,
   'event-delay': 4,
   'process-cpu': 5,
+  power: 6,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
@@ -69,6 +70,7 @@ const LOCAL_TRACK_DISPLAY_ORDER = {
   thread: 3,
   'event-delay': 4,
   'process-cpu': 5,
+  power: 6,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -248,14 +250,22 @@ export function computeLocalTracksByPid(
   const { counters } = profile;
   if (counters) {
     for (let counterIndex = 0; counterIndex < counters.length; counterIndex++) {
-      const { pid, category } = counters[counterIndex];
-      if (category === 'Memory') {
+      const { pid, category, sampleGroups } = counters[counterIndex];
+      if (category === 'Memory' || category === 'power') {
+        if (category === 'power' && sampleGroups[0].samples.length <= 2) {
+          // If we have only 2 samples, they are likely both 0 and we don't have a real counter.
+          continue;
+        }
         let tracks = localTracksByPid.get(pid);
         if (tracks === undefined) {
           tracks = [];
           localTracksByPid.set(pid, tracks);
         }
-        tracks.push({ type: 'memory', counterIndex });
+        if (category === 'Memory') {
+          tracks.push({ type: 'memory', counterIndex });
+        } else {
+          tracks.push({ type: 'power', counterIndex });
+        }
       }
     }
   }
@@ -770,7 +780,8 @@ export function getGlobalTrackName(
 
 export function getLocalTrackName(
   localTrack: LocalTrack,
-  threads: Thread[]
+  threads: Thread[],
+  counters: Counter[]
 ): string {
   switch (localTrack.type) {
     case 'thread':
@@ -791,6 +802,8 @@ export function getLocalTrackName(
       );
     case 'process-cpu':
       return 'Process CPU';
+    case 'power':
+      return counters[localTrack.counterIndex].name;
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -1170,6 +1183,7 @@ export function getSearchFilteredLocalTracksByPid(
         case 'memory':
         case 'ipc':
         case 'event-delay':
+        case 'power':
         case 'process-cpu': {
           const { type } = localTrack;
           if (searchRegExp.test(type)) {

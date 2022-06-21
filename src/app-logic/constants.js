@@ -52,6 +52,10 @@ export const TRACK_PROCESS_BLANK_HEIGHT = 30;
 // Height of timeline ruler.
 export const TIMELINE_RULER_HEIGHT = 20;
 
+// Height of the power track.
+export const TRACK_POWER_HEIGHT = 25;
+export const TRACK_POWER_LINE_WIDTH = 2;
+
 // Height of the process cpu track.
 export const TRACK_PROCESS_CPU_HEIGHT = 25;
 export const TRACK_PROCESS_CPU_LINE_WIDTH = 2;
