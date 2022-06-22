@@ -1,4 +1,4 @@
-# Getting Started <!-- {docsify-ignore-all} because of https://github.com/docsifyjs/docsify/issues/1822 -->
+# Getting Started
 
 This page is an overview of the general process of capturing a profile.
 
