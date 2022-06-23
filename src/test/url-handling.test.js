@@ -15,6 +15,7 @@ import {
   changeProfileName,
   changeSelectedThreads,
   changeGlobalTrackOrder,
+  changeLocalTrackOrder,
   commitRange,
   setDataSource,
 } from '../actions/profile-view';
@@ -108,6 +109,12 @@ function _getStoreWithURL(
     store.dispatch(viewProfile(profile));
   }
   return store;
+}
+
+function getQueryStringFromState(state: State) {
+  const urlState = urlStateSelectors.getUrlState(state);
+  const queryString = getQueryStringFromUrlState(urlState);
+  return queryString;
 }
 
 // Serialize the URL of the current state, and create a new store from that URL.
@@ -275,7 +282,7 @@ describe('url handling tracks', function () {
         store.getState()
       );
 
-      // This simulate a page reload.
+      // This simulates a page reload.
       const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(
         store.getState()
       );
@@ -287,8 +294,43 @@ describe('url handling tracks', function () {
 
   describe('local tracks', function () {
     it('can reorder local tracks', function () {
-      const { getState } = initWithSearchParams('?localTrackOrderByPid=222-10');
+      const { dispatch, getState } = initWithSearchParams('');
       expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // The URL parameter for localTrackOrderByPid should be empty.
+      expect(getQueryStringFromState(getState())).not.toContain(
+        'localTrackOrderByPid='
+      );
+
+      // Change the order of Style and DOM Worker
+      dispatch(changeLocalTrackOrder(222, [1, 0]));
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread Style]',
+        '  - show [thread DOM Worker]',
+      ]);
+
+      // Now the URL parameter for localTrackOrderByPid should contain this change.
+      expect(getQueryStringFromState(getState())).toContain(
+        'localTrackOrderByPid=222-10'
+      );
+
+      const previousOrder = urlStateSelectors.getLocalTrackOrderByPid(
+        getState()
+      );
+      // This simulates a page reload.
+      const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(getState());
+      expect(
+        urlStateSelectors.getLocalTrackOrderByPid(storeAfterReload.getState())
+      ).toEqual(previousOrder);
+
+      expect(getHumanReadableTracks(storeAfterReload.getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread Style]',
@@ -421,8 +463,7 @@ describe('search strings', function () {
 
     ['calltree', 'stack-chart', 'flame-graph'].forEach((tabSlug) => {
       dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
       expect(queryString).toContain(
         `search=${encodeURIComponent(callTreeSearchString)}`
       );
@@ -438,8 +479,7 @@ describe('search strings', function () {
 
     ['marker-chart', 'marker-table'].forEach((tabSlug) => {
       dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
       expect(queryString).toContain(`markerSearch=${markerSearchString}`);
     });
   });
@@ -451,8 +491,7 @@ describe('search strings', function () {
 
     dispatch(changeNetworkSearchString(networkSearchString));
     dispatch(changeSelectedTab('network-chart'));
-    const urlState = urlStateSelectors.getUrlState(getState());
-    const queryString = getQueryStringFromUrlState(urlState);
+    const queryString = getQueryStringFromState(getState());
     expect(queryString).toContain(`networkSearch=${networkSearchString}`);
   });
 });
@@ -463,8 +502,7 @@ describe('profileName', function () {
     const profileName = 'Good Profile';
 
     dispatch(changeProfileName(profileName));
-    const urlState = urlStateSelectors.getUrlState(getState());
-    const queryString = getQueryStringFromUrlState(urlState);
+    const queryString = getQueryStringFromState(getState());
     expect(queryString).toContain(
       `profileName=${encodeURIComponent(profileName)}`
     );
@@ -496,8 +534,7 @@ describe('ctxId', function () {
     const tabID = 123;
 
     dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
-    const urlState = urlStateSelectors.getUrlState(getState());
-    const queryString = getQueryStringFromUrlState(urlState);
+    const queryString = getQueryStringFromState(getState());
     expect(queryString).toContain(`ctxId=${tabID}`);
   });
 
@@ -608,8 +645,7 @@ describe('committed ranges', function () {
   describe('serialization', () => {
     it('serializes when there is no range', () => {
       const { getState } = _getStoreWithURL();
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
       expect(queryString).not.toContain(`range=`);
     });
 
@@ -617,8 +653,7 @@ describe('committed ranges', function () {
       const { getState, dispatch } = _getStoreWithURL();
 
       dispatch(commitRange(1514.587845, 25300));
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
       expect(queryString).toContain(`range=1514m23786`); // 1.514s + 23786ms
     });
 
@@ -626,8 +661,7 @@ describe('committed ranges', function () {
       const { getState, dispatch } = _getStoreWithURL();
 
       dispatch(commitRange(1510.58, 1519.59));
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
       expect(queryString).toContain(`range=1510m10`); // 1.510s + 10ms
     });
 
@@ -635,8 +669,7 @@ describe('committed ranges', function () {
       const { getState, dispatch } = _getStoreWithURL();
 
       dispatch(commitRange(1514, 1514));
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
       // In the following regexp we want to especially assert that the duration
       // isn't 0. That's why there's this negative look-ahead assertion.
       // Therefore here we're matching a start at 1.514s, and a non-zero
@@ -649,8 +682,7 @@ describe('committed ranges', function () {
 
       dispatch(commitRange(1514.587845, 25300));
       dispatch(commitRange(1800, 1800.1));
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
 
       // 1- 1.5145s + 23786ms
       // 2- 1.8s + 100µs
@@ -660,16 +692,14 @@ describe('committed ranges', function () {
     it('serializes when there is a small range', () => {
       const { getState, dispatch } = _getStoreWithURL();
       dispatch(commitRange(1000.08, 1000.09));
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
       expect(queryString).toContain(`range=1000080u10`); // 1s and 80µs + 10µs
     });
 
     it('serializes when there is a very small range', () => {
       const { getState, dispatch } = _getStoreWithURL();
       dispatch(commitRange(1000.00008, 1000.0001));
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
+      const queryString = getQueryStringFromState(getState());
       expect(queryString).toContain(`range=1000000080n20`); // 1s and 80ns + 20ns
     });
   });
@@ -740,9 +770,7 @@ describe('committed ranges', function () {
 
       ranges.forEach(({ start, end }) => dispatch(commitRange(start, end)));
 
-      const urlState = urlStateSelectors.getUrlState(getState());
-      const queryString = getQueryStringFromUrlState(urlState);
-      return queryString;
+      return getQueryStringFromState(getState());
     }
 
     function setup(ranges: $ReadOnlyArray<StartEndRange>) {
@@ -798,9 +826,7 @@ describe('implementation', function () {
     const store = _getStoreWithURL(settings, profile);
 
     function getQueryString() {
-      const urlState = urlStateSelectors.getUrlState(store.getState());
-      const queryString = getQueryStringFromUrlState(urlState);
-      return queryString;
+      return getQueryStringFromState(store.getState());
     }
 
     return {
@@ -1404,8 +1430,7 @@ describe('URL serialization of the transform stack', function () {
   });
 
   it('re-serializes the focus subtree transforms', function () {
-    const urlState = urlStateSelectors.getUrlState(getState());
-    const queryString = getQueryStringFromUrlState(urlState);
+    const queryString = getQueryStringFromState(getState());
     expect(queryString).toContain(`transforms=${transformString}`);
   });
 });
@@ -1659,8 +1684,7 @@ describe('symbolServerUrl', function () {
 
     const { getState } = _getStoreWithURL({ search });
     const symbolServerUrl = urlStateSelectors.getSymbolServerUrl(getState());
-    const urlState = urlStateSelectors.getUrlState(getState());
-    const queryString = getQueryStringFromUrlState(urlState);
+    const queryString = getQueryStringFromState(getState());
 
     return {
       symbolServerUrl,

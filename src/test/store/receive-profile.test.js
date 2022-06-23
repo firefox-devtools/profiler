@@ -1812,12 +1812,14 @@ describe('actions/receive-profile', function () {
         {
           ...profile1.threads[0],
           pid: '0 from profile 1',
+          tid: '0 from profile 1',
           processName: 'name 1: Empty',
           unregisterTime: getTimeRangeForThread(profile1.threads[0], 1).end,
         },
         {
           ...profile2.threads[1],
           pid: '0 from profile 2',
+          tid: '1 from profile 2',
           processName: 'Profile 2: Empty',
           unregisterTime: getTimeRangeForThread(profile2.threads[1], 1).end,
         },
