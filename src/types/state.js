@@ -281,6 +281,7 @@ export type FullProfileSpecificUrlState = {|
   hiddenGlobalTracks: Set<TrackIndex>,
   hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
   localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  localTrackOrderChangedPids: Set<Pid>,
   showJsTracerSummary: boolean,
   legacyThreadOrder: ThreadIndex[] | null,
   legacyHiddenThreads: ThreadIndex[] | null,
