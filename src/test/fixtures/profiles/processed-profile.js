@@ -335,9 +335,10 @@ export function getProfileWithMarkers(
       'getProfileWithMarkers expected to get at least one list of markers.'
     );
   }
-  profile.threads = markersPerThread.map((testDefinedMarkers) =>
-    getThreadWithMarkers(testDefinedMarkers)
-  );
+  profile.threads = markersPerThread.map((testDefinedMarkers, i) => ({
+    ...getThreadWithMarkers(testDefinedMarkers),
+    tid: i,
+  }));
   return profile;
 }
 
@@ -567,7 +568,7 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
 
   const globalDataCollector = new GlobalDataCollector();
 
-  profile.threads = allTextSamples.map((textSamples) => {
+  profile.threads = allTextSamples.map((textSamples, i) => {
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
 
@@ -607,13 +608,17 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
     funcNamesDictPerThread.push(funcNamesDict);
 
     // Turn this into a real thread.
-    return _buildThreadFromTextOnlyStacks(
-      textOnlyStacks,
-      funcNames,
-      categories,
-      globalDataCollector,
-      sampleTimes
-    );
+    return {
+      ..._buildThreadFromTextOnlyStacks(
+        textOnlyStacks,
+        funcNames,
+        categories,
+        globalDataCollector,
+        sampleTimes
+      ),
+      // Make sure all threads have a unique tid
+      tid: i,
+    };
   });
 
   profile = { ...profile, ...globalDataCollector.finish() };

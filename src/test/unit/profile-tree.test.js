@@ -89,32 +89,57 @@ describe('unfiltered call tree', function () {
   });
 
   describe('roots and children for flame graph', function () {
-    const profile = getProfile();
-    const [thread] = profile.threads;
-    const defaultCategory = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
-    const callNodeInfo = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
-
     it('returns roots and children', function () {
+      // On purpose, we build a profile where the call node indexes won't be in
+      // the same order than the function names.
+      const {
+        profile,
+        funcNamesDictPerThread: [{ G, H, I, J, K, M, N, W, X, Y, Z }],
+      } = getProfileFromTextSamples(`
+        Z  Z  G  G  K  K
+        X  X  H  H  M  N
+        Y  W  I  J
+      `);
+      const [thread] = profile.threads;
+      const defaultCategory = ensureExists(
+        profile.meta.categories,
+        'Expected to find categories'
+      ).findIndex((c) => c.name === 'Other');
+      const callNodeInfo = getCallNodeInfo(
+        thread.stackTable,
+        thread.frameTable,
+        thread.funcTable,
+        defaultCategory
+      );
+
+      const { callNodeChildCount, callNodeSummary } =
+        computeCallTreeCountsAndSummary(
+          thread.samples,
+          callNodeInfo,
+          profile.meta.interval,
+          false /* inverted */
+        );
+
       expect(
         getRootsAndChildren(
           thread,
           callNodeInfo.callNodeTable,
-          new Uint32Array([1, 2, 2, 1, 0, 1, 0, 1, 0]),
-          new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1])
+          callNodeChildCount,
+          callNodeSummary.total
         )
       ).toEqual({
-        roots: [0],
+        // Roots are ordered in lexically descending order.
+        roots: [Z, K, G],
         children: {
-          array: new Uint32Array([1, 7, 2, 5, 3, 4, 6, 8, 0]),
-          offsets: new Uint32Array([0, 1, 3, 5, 6, 6, 7, 7, 8, 8]),
+          // Children are ordered in lexically descending order
+          array: new Uint32Array([X, Y, W, H, J, I, N, M, 0, 0, 0]),
+          offsets: new Uint32Array([0, 1, 3, 3, 3, 4, 6, 6, 6, 8, 8, 8]),
+          /*                        Z, X, Y, W, G, H, I, J, K, M, N, <end> */
+          /* offsets represent where children of a parent are located in "array".
+           * For example:
+           *   children of G are located between indexes 3 and 4 (excluded). That is H.
+           *   children of H are located between indexes 4 and 6 (excluded). That is J and I.
+           */
         },
       });
     });

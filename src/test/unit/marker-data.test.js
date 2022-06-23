@@ -72,6 +72,7 @@ describe('Derive markers from Gecko phase markers', function () {
         end: null,
         name: 'TestDefinedMarker',
         start: 5,
+        threadId: null,
       },
     ]);
   });
@@ -92,6 +93,7 @@ describe('Derive markers from Gecko phase markers', function () {
         end: 6,
         name: 'TestDefinedMarker',
         start: 5,
+        threadId: null,
       },
     ]);
   });
@@ -135,6 +137,7 @@ describe('Derive markers from Gecko phase markers', function () {
         end: 6,
         name: 'TestDefinedMarker',
         start: 5,
+        threadId: null,
       },
     ]);
   });
@@ -156,6 +159,7 @@ describe('Derive markers from Gecko phase markers', function () {
         name: 'TestDefinedMarker',
         start: 0,
         incomplete: true,
+        threadId: null,
       },
     ]);
   });
@@ -179,6 +183,7 @@ describe('Derive markers from Gecko phase markers', function () {
         name: 'TestDefinedMarker',
         start: 2,
         incomplete: true,
+        threadId: null,
       },
     ]);
   });
@@ -214,6 +219,7 @@ describe('Derive markers from Gecko phase markers', function () {
         end: 7,
         name: 'TestDefinedMarker',
         start: 2,
+        threadId: null,
       },
       {
         category: 0,
@@ -221,6 +227,7 @@ describe('Derive markers from Gecko phase markers', function () {
         end: 5,
         name: 'TestDefinedMarker',
         start: 3,
+        threadId: null,
       },
     ]);
   });
@@ -260,6 +267,7 @@ describe('Derive markers from Gecko phase markers', function () {
         end: 5,
         name: 'Marker A',
         start: 2,
+        threadId: null,
       },
       {
         category: 0,
@@ -267,6 +275,7 @@ describe('Derive markers from Gecko phase markers', function () {
         end: 7,
         name: 'Marker B',
         start: 3,
+        threadId: null,
       },
     ]);
   });
@@ -339,6 +348,7 @@ describe('Derive markers from Gecko phase markers', function () {
         start: startTimesForWindowA[0],
         end: startTimesForWindowA[1],
         category: 0,
+        threadId: null,
       },
       {
         name: 'CompositorScreenshot',
@@ -346,6 +356,7 @@ describe('Derive markers from Gecko phase markers', function () {
         start: startTimesForWindowB[0],
         end: startTimesForWindowB[1],
         category: 0,
+        threadId: null,
       },
 
       // The 2 lasts have a duration until the end of the thread range.
@@ -355,6 +366,7 @@ describe('Derive markers from Gecko phase markers', function () {
         start: startTimesForWindowA[1],
         end: threadRange.end,
         category: 0,
+        threadId: null,
       },
       {
         name: 'CompositorScreenshot',
@@ -362,6 +374,7 @@ describe('Derive markers from Gecko phase markers', function () {
         start: startTimesForWindowB[1],
         end: threadRange.end,
         category: 0,
+        threadId: null,
       },
     ]);
   });
@@ -600,6 +613,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 22,
       category: 0,
+      threadId: null,
     });
     expect(markers[14]).toEqual({
       data: {
@@ -627,6 +641,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       name: 'IPCOut',
       start: 30,
       category: 0,
+      threadId: null,
     });
 
     // Test for a marker with a stack
@@ -648,6 +663,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       end: 24,
       name: 'FileIO',
       category: 0,
+      threadId: null,
     });
 
     expect(contentMarkers[0]).toEqual({
@@ -676,6 +692,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       name: 'IPCIn',
       start: 30,
       category: 0,
+      threadId: null,
     });
     expect(contentMarkers[11]).toEqual({
       data: {
@@ -702,6 +719,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 1022,
       category: 0,
+      threadId: null,
     });
     expect(contentMarkers[12]).toEqual({
       data: {
@@ -724,6 +742,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       end: 1024,
       name: 'FileIO',
       category: 0,
+      threadId: null,
     });
   });
 

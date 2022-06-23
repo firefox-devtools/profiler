@@ -12,6 +12,7 @@ import {
   accumulateCounterSamples,
   extractProfileFilterPageData,
   computeMaxCounterSampleCountsPerMs,
+  getFriendlyThreadName,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -821,7 +822,7 @@ export const getThreadIdToNameMap: Selector<Map<Tid, string>> = createSelector(
   (threads) => {
     const threadIdToNameMap = new Map();
     for (const thread of threads) {
-      threadIdToNameMap.set(thread.tid, thread.name);
+      threadIdToNameMap.set(thread.tid, getFriendlyThreadName(threads, thread));
     }
     return threadIdToNameMap;
   }

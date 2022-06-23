@@ -367,16 +367,16 @@ describe('actions/receive-profile', function () {
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
         'show [process]',
+        '  - hide [thread AudioIPC idle]', // hidden
         '  - show [thread AudioIPC work] SELECTED',
-        '  - show [thread MediaPDecoder work]',
-        '  - show [thread MediaTimer work]',
-        '  - show [thread MediaPlayback work]',
+        '  - hide [thread MediaDecoderStateMachine idle]', // hidden
         '  - show [thread MediaDecoderStateMachine work]',
-        '  - hide [thread AudioIPC idle]',
-        '  - hide [thread MediaPDecoder idle]',
-        '  - hide [thread MediaTimer idle]',
-        '  - hide [thread MediaPlayback idle]',
-        '  - hide [thread MediaDecoderStateMachine idle]',
+        '  - hide [thread MediaPDecoder idle]', // hidden
+        '  - show [thread MediaPDecoder work]',
+        '  - hide [thread MediaPlayback idle]', // hidden
+        '  - show [thread MediaPlayback work]',
+        '  - hide [thread MediaTimer idle]', // hidden
+        '  - show [thread MediaTimer work]',
       ]);
     });
 
@@ -419,8 +419,8 @@ describe('actions/receive-profile', function () {
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
           'show [process]',
-          '  - show [thread Thread with 100% CPU] SELECTED',
           '  - show [thread Thread with 20% CPU]', // <- Ensure this thread is not hidden.
+          '  - show [thread Thread with 100% CPU] SELECTED',
         ]);
       });
 
@@ -440,8 +440,8 @@ describe('actions/receive-profile', function () {
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
           'show [process]',
-          '  - show [thread Thread with 100% CPU] SELECTED',
           '  - hide [thread Thread with 10% CPU]', // <- Ensure this thread is hidden.
+          '  - show [thread Thread with 100% CPU] SELECTED',
         ]);
       });
 
@@ -478,8 +478,8 @@ describe('actions/receive-profile', function () {
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
           'show [process]',
-          '  - show [thread Thread with 100% CPU] SELECTED',
           '  - hide [thread Thread with 10% CPU]', // <- Ensure this thread is hidden.
+          '  - show [thread Thread with 100% CPU] SELECTED',
         ]);
       });
 
@@ -541,24 +541,24 @@ describe('actions/receive-profile', function () {
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
           'show [process]',
-          '  - show [thread Thread with 190 CPU] SELECTED',
-          '  - show [thread Thread with 160 CPU]',
-          '  - hide [thread Thread with 100 CPU]', // <-- hidden
-          '  - show [thread Thread with 270 CPU]',
-          '  - show [thread Thread with 330 CPU]',
-          '  - show [thread Thread with 180 CPU]',
-          '  - show [thread Thread with 310 CPU]',
           '  - hide [thread Thread with 0 CPU]', // <-- hidden
-          '  - show [thread Thread with 220 CPU]',
           '  - hide [thread Thread with 30 CPU]', // <-- hidden
-          '  - show [thread Thread with 120 CPU]',
-          '  - show [thread Thread with 350 CPU]',
-          '  - show [thread Thread with 130 CPU]',
+          '  - hide [thread Thread with 100 CPU]', // <-- hidden
           '  - show [thread Thread with 110 CPU]',
-          '  - show [thread Thread with 230 CPU]',
-          '  - show [thread Thread with 380 CPU]',
+          '  - show [thread Thread with 120 CPU]',
+          '  - show [thread Thread with 130 CPU]',
           '  - show [thread Thread with 140 CPU]',
+          '  - show [thread Thread with 160 CPU]',
+          '  - show [thread Thread with 180 CPU]',
+          '  - show [thread Thread with 190 CPU] SELECTED',
+          '  - show [thread Thread with 220 CPU]',
+          '  - show [thread Thread with 230 CPU]',
+          '  - show [thread Thread with 270 CPU]',
+          '  - show [thread Thread with 310 CPU]',
           '  - show [thread Thread with 320 CPU]',
+          '  - show [thread Thread with 330 CPU]',
+          '  - show [thread Thread with 350 CPU]',
+          '  - show [thread Thread with 380 CPU]',
         ]);
       });
 
@@ -604,24 +604,24 @@ describe('actions/receive-profile', function () {
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
           'show [process]',
-          '  - show [thread Thread with 190 CPU] SELECTED',
-          '  - hide [thread Renderer]', // <-- hidden
           '  - show [thread DOM Worker]',
-          '  - show [thread Thread with 270 CPU]',
-          '  - show [thread Thread with 330 CPU]',
-          '  - show [thread Thread with 180 CPU]',
-          '  - show [thread Thread with 310 CPU]',
+          '  - hide [thread Renderer]', // <-- hidden
           '  - hide [thread Thread with 0 CPU]', // <-- hidden
-          '  - show [thread Thread with 220 CPU]',
           '  - hide [thread Thread with 30 CPU]', // <-- hidden
-          '  - show [thread Thread with 120 CPU]',
-          '  - show [thread Thread with 350 CPU]',
-          '  - show [thread Thread with 130 CPU]',
           '  - show [thread Thread with 110 CPU]',
-          '  - show [thread Thread with 230 CPU]',
-          '  - show [thread Thread with 380 CPU]',
+          '  - show [thread Thread with 120 CPU]',
+          '  - show [thread Thread with 130 CPU]',
           '  - show [thread Thread with 140 CPU]',
+          '  - show [thread Thread with 180 CPU]',
+          '  - show [thread Thread with 190 CPU] SELECTED',
+          '  - show [thread Thread with 220 CPU]',
+          '  - show [thread Thread with 230 CPU]',
+          '  - show [thread Thread with 270 CPU]',
+          '  - show [thread Thread with 310 CPU]',
           '  - show [thread Thread with 320 CPU]',
+          '  - show [thread Thread with 330 CPU]',
+          '  - show [thread Thread with 350 CPU]',
+          '  - show [thread Thread with 380 CPU]',
         ]);
       });
     });
@@ -1812,12 +1812,14 @@ describe('actions/receive-profile', function () {
         {
           ...profile1.threads[0],
           pid: '0 from profile 1',
+          tid: '0 from profile 1',
           processName: 'name 1: Empty',
           unregisterTime: getTimeRangeForThread(profile1.threads[0], 1).end,
         },
         {
           ...profile2.threads[1],
           pid: '0 from profile 2',
+          tid: '1 from profile 2',
           processName: 'Profile 2: Empty',
           unregisterTime: getTimeRangeForThread(profile2.threads[1], 1).end,
         },

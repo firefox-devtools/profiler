@@ -46,6 +46,7 @@ describe('marker schema labels', function () {
       end: 5,
       name: 'TestDefinedMarker',
       category: 0,
+      threadId: 1,
       data: payload,
     };
     const getter = parseLabel(schema, categories, label);

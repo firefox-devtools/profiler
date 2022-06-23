@@ -18,8 +18,9 @@ import {
   addActiveTabInformationToProfile,
   markTabIdsAsPrivateBrowsing,
 } from '../fixtures/profiles/processed-profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
+import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import type { NetworkPayload } from 'firefox-profiler/types';
@@ -504,7 +505,7 @@ describe('TooltipMarker', function () {
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();
-    const threadIndex = getFirstSelectedThreadIndex(state);
+    const threadIndex = getSelectedThreadsKey(state);
     const getMarker = selectedThreadSelectors.getMarkerGetter(state);
     const markerIndexes =
       selectedThreadSelectors.getFullMarkerListIndexes(state);
@@ -869,7 +870,7 @@ describe('TooltipMarker', function () {
 
     const store = storeWithProfile(profile);
     const state = store.getState();
-    const threadIndex = getFirstSelectedThreadIndex(state);
+    const threadIndex = getSelectedThreadsKey(state);
     const getMarker = selectedThreadSelectors.getMarkerGetter(state);
     const markerIndexes =
       selectedThreadSelectors.getFullMarkerListIndexes(state);
@@ -954,5 +955,133 @@ describe('TooltipMarker', function () {
     );
 
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('shows the source thread for markers from a merged thread', function () {
+    // We construct a profile that has 2 threads from 2 different tabs.
+    const tab1Domain = 'https://mozilla.org';
+    const tab2Domain = 'https://letsencrypt.org';
+    const { profile } = getProfileFromTextSamples(`A`, `A`);
+    profile.threads[0] = {
+      ...profile.threads[0],
+      name: 'GeckoMain',
+      processName: 'Isolated Web Content',
+      'eTLD+1': tab1Domain,
+    };
+    profile.threads[1] = {
+      ...profile.threads[1],
+      name: 'GeckoMain',
+      processName: 'Isolated Web Content',
+      'eTLD+1': tab2Domain,
+    };
+
+    const innerWindowID1 = 1;
+    const tabID1 = 10;
+    const innerWindowID2 = 2;
+    const tabID2 = 11;
+    profile.pages = [
+      {
+        tabID: tabID1,
+        innerWindowID: innerWindowID1,
+        url: 'https://developer.mozilla.org/en-US/',
+        embedderInnerWindowID: 0,
+      },
+      {
+        tabID: tabID2,
+        innerWindowID: innerWindowID2,
+        url: 'https://letsencrypt.org/',
+        embedderInnerWindowID: 0,
+      },
+    ];
+
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      [
+        'DOMEvent',
+        1,
+        2,
+        {
+          type: 'DOMEvent',
+          eventType: 'click',
+          innerWindowID: innerWindowID1,
+        },
+      ],
+    ]);
+
+    const screenshotUrl = 'Screenshot Url';
+    const screenshotUrlIndex =
+      profile.threads[1].stringTable.indexForString(screenshotUrl);
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+      [
+        'DOMEvent',
+        2,
+        3,
+        {
+          type: 'DOMEvent',
+          eventType: 'pageload',
+          innerWindowID: innerWindowID2,
+        },
+      ],
+
+      [
+        'CompositorScreenshot',
+        3,
+        4,
+        {
+          type: 'CompositorScreenshot',
+          url: screenshotUrlIndex,
+          windowID: 'XXX',
+          windowWidth: 600,
+          windowHeight: 300,
+        },
+      ],
+    ]);
+
+    const store = storeWithProfile(profile);
+    store.dispatch(changeSelectedThreads(new Set([0, 1])));
+
+    const getMarker = selectedThreadSelectors.getMarkerGetter(store.getState());
+    const threadsKey = getSelectedThreadsKey(store.getState());
+
+    // We over on top of the first marker
+    const { rerender } = render(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={0}
+          marker={getMarker(0)}
+          threadsKey={threadsKey}
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+
+    expect(document.body).toMatchSnapshot();
+
+    // This simulates hovering on top of the other marker.
+    rerender(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={1}
+          marker={getMarker(1)}
+          threadsKey={threadsKey}
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+    expect(document.body).toMatchSnapshot();
+
+    // What about the compositor screenshot?
+    rerender(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={2}
+          marker={getMarker(2)}
+          threadsKey={threadsKey}
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+    const threadTitle = screen.getByText('Thread:');
+    const threadInfo = threadTitle.nextSibling;
+    expect(threadInfo).toHaveTextContent(tab2Domain);
   });
 });
