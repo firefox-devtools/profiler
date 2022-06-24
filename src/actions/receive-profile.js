@@ -291,7 +291,8 @@ export function finalizeFullProfileView(
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
       localTracksByPid,
-      legacyThreadOrder
+      legacyThreadOrder,
+      profile
     );
 
     const tracksWithOrder = {
