@@ -320,7 +320,8 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.full.hiddenLocalTracksByPid
       );
       baseQuery.localTrackOrderByPid = convertLocalTrackOrderByPidToString(
-        urlState.profileSpecific.full.localTrackOrderByPid
+        urlState.profileSpecific.full.localTrackOrderByPid,
+        urlState.profileSpecific.full.localTrackOrderChangedPids
       );
 
       break;
@@ -585,6 +586,11 @@ export function stateFromLocation(
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
 
+  const localTrackOrderByPid = convertLocalTrackOrderByPidFromString(
+    query.localTrackOrderByPid
+  );
+  const localTrackOrderChangedPids = new Set(localTrackOrderByPid.keys());
+
   return {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
@@ -625,9 +631,8 @@ export function stateFromLocation(
         hiddenLocalTracksByPid: convertHiddenLocalTracksByPidFromString(
           query.hiddenLocalTracksByPid
         ),
-        localTrackOrderByPid: convertLocalTrackOrderByPidFromString(
-          query.localTrackOrderByPid
-        ),
+        localTrackOrderByPid,
+        localTrackOrderChangedPids,
         legacyThreadOrder: query.threadOrder
           ? query.threadOrder.split('-').map((index) => Number(index))
           : null,
@@ -753,10 +758,15 @@ function convertLocalTrackOrderByPidFromString(
 }
 
 function convertLocalTrackOrderByPidToString(
-  localTrackOrderByPid: Map<Pid, TrackIndex[]>
+  localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  localTrackOrderChangedPids: Set<Pid>
 ): string | void {
   const strings = [];
-  for (const [pid, trackOrder] of localTrackOrderByPid) {
+  for (const pid of localTrackOrderChangedPids) {
+    const trackOrder = localTrackOrderByPid.get(pid);
+    if (!trackOrder) {
+      continue;
+    }
     if (trackOrder.length > 0) {
       strings.push(
         `${String(pid)}-${encodeUintArrayForUrlComponent(trackOrder)}`
