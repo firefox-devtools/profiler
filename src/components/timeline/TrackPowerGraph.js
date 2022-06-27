@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatNumber } from 'firefox-profiler/utils/format-numbers';
@@ -312,20 +313,31 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       ((powerUsageInPwh * 1e-12) /* pWh->Wh */ / sampleTimeDeltaInMs) *
       1000 * // ms->s
       3600; // s->h
-    let string;
+    let value;
+    let l10nId;
     if (power > 1) {
-      string = formatNumber(power, 3) + 'W';
+      value = formatNumber(power, 3);
+      l10nId = 'TrackPowerGraph--tooltip-power-watt';
     } else if (power === 0) {
-      string = '0W';
+      value = 0;
+      l10nId = 'TrackPowerGraph--tooltip-power-watt';
     } else {
-      string = formatNumber(power * 1000) + 'mW';
+      value = formatNumber(power * 1000);
+      l10nId = 'TrackPowerGraph--tooltip-power-milliwatt';
     }
     return (
       <div className="timelineTrackPowerTooltip">
-        <div className="timelineTrackPowerTooltipLine">
-          Power:{' '}
-          <span className="timelineTrackPowerTooltipNumber">{string}</span>
-        </div>
+        <Localized
+          id={l10nId}
+          vars={{ value }}
+          elems={{
+            em: <span className="timelineTrackPowerTooltipNumber"></span>,
+          }}
+        >
+          <div className="timelineTrackPowerTooltipLine">
+            Power: <em>{value}</em>
+          </div>
+        </Localized>
       </div>
     );
   }
