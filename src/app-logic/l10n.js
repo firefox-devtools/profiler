@@ -26,6 +26,7 @@ export const AVAILABLE_LOCALES_TO_LOCALIZED_NAMES = {
   'en-US': 'English (US)',
   'es-CL': 'Español', // Use "Español (CL)" once we have more spanish versions
   fr: 'Français',
+  'fy-NL': 'Frysk',
   ia: 'Interlingua',
   it: 'Italiano',
   nl: 'Nederlands',
