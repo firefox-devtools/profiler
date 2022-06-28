@@ -14,6 +14,7 @@ import {
   computeMaxCounterSampleCountsPerMs,
   getFriendlyThreadName,
   processCounter,
+  getInclusiveSampleIndexRangeForSelection,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -72,6 +73,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   SampleUnits,
+  IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
@@ -302,19 +304,28 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
         )
     );
 
+  const getCommittedRangeCounterSampleRanges: Selector<
+    Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
+  > = createSelector(getCounter, getCommittedRange, (counter, range) =>
+    counter.sampleGroups.map((group) =>
+      getInclusiveSampleIndexRangeForSelection(
+        group.samples,
+        range.start,
+        range.end
+      )
+    )
+  );
+
   const getMaxRangeCounterSampleCountsPerMs: Selector<Array<number>> =
     createSelector(
       getCounter,
       getProfileInterval,
-      getCommittedRange,
-      (counters, profileInterval, range) =>
+      getCommittedRangeCounterSampleRanges,
+      (counters, profileInterval, sampleRange) =>
         computeMaxCounterSampleCountsPerMs(
-          filterCounterToRange(
-            counters,
-            range.start,
-            range.end
-          ).sampleGroups.map((group) => group.samples),
-          profileInterval
+          counters.sampleGroups.map((group) => group.samples),
+          profileInterval,
+          sampleRange
         )
     );
 
@@ -326,6 +337,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getAccumulateCounterSamples,
     getMaxCounterSampleCountsPerMs,
     getMaxRangeCounterSampleCountsPerMs,
+    getCommittedRangeCounterSampleRanges,
   };
 }
 
