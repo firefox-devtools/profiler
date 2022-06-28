@@ -359,7 +359,8 @@ export function selectTrack(
             selectedThreadIndex = localTrack.threadIndex;
             break;
           }
-          case 'process-cpu': {
+          case 'process-cpu':
+          case 'power': {
             const { counterIndex } = localTrack;
             const counterSelectors = getCounterSelectors(counterIndex);
             const counter = counterSelectors.getCommittedRangeFilteredCounter(
