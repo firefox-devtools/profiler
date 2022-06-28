@@ -299,6 +299,22 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
         )
     );
 
+  const getMaxRangeCounterSampleCountsPerMs: Selector<Array<number>> =
+    createSelector(
+      getCounter,
+      getProfileInterval,
+      getCommittedRange,
+      (counters, profileInterval, range) =>
+        computeMaxCounterSampleCountsPerMs(
+          filterCounterToRange(
+            counters,
+            range.start,
+            range.end
+          ).sampleGroups.map((group) => group.samples),
+          profileInterval
+        )
+    );
+
   return {
     getCounter,
     getDescription,
@@ -306,6 +322,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getCommittedRangeFilteredCounter,
     getAccumulateCounterSamples,
     getMaxCounterSampleCountsPerMs,
+    getMaxRangeCounterSampleCountsPerMs,
   };
 }
 
@@ -469,13 +486,14 @@ export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
   createSelector(
     getLocalTracksByPid,
     getThreads,
-    (localTracksByPid, threads) => {
+    getCounter,
+    (localTracksByPid, threads, counters) => {
       const localTrackNamesByPid = new Map();
       for (const [pid, localTracks] of localTracksByPid) {
         localTrackNamesByPid.set(
           pid,
           localTracks.map((localTrack) =>
-            Tracks.getLocalTrackName(localTrack, threads)
+            Tracks.getLocalTrackName(localTrack, threads, counters || [])
           )
         );
       }
