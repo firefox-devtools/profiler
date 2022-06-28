@@ -13,6 +13,7 @@ import {
   extractProfileFilterPageData,
   computeMaxCounterSampleCountsPerMs,
   getFriendlyThreadName,
+  processCounter,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -264,10 +265,12 @@ export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
  */
 function _createCounterSelectors(counterIndex: CounterIndex) {
   const getCounter: Selector<Counter> = (state) =>
-    ensureExists(
-      getProfile(state).counters,
-      'Attempting to get a counter by index, but no counters exist.'
-    )[counterIndex];
+    processCounter(
+      ensureExists(
+        getProfile(state).counters,
+        'Attempting to get a counter by index, but no counters exist.'
+      )[counterIndex]
+    );
 
   const getDescription: Selector<string> = (state) =>
     getCounter(state).description;

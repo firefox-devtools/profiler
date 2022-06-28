@@ -48,6 +48,7 @@ import {
 import { ensureExists } from '../../utils/flow';
 import {
   getCallNodeIndexFromPath,
+  processCounter,
   type BreakdownByCategory,
 } from '../../profile-logic/profile-data';
 
@@ -3117,13 +3118,25 @@ describe('counter selectors', function () {
     const counterB = getCounterForThread(thread, threadIndex);
     profile.counters = [counterA, counterB];
     const { getState, dispatch } = storeWithProfile(profile);
-    return { getState, dispatch, counterA, counterB };
+    const processedCounterA = processCounter(counterA);
+    const processedCounterB = processCounter(counterB);
+    return {
+      getState,
+      dispatch,
+      counterA,
+      processedCounterA,
+      processedCounterB,
+    };
   }
 
   it('can get the counters', function () {
-    const { counterA, counterB, getState } = setup();
-    expect(getCounterSelectors(0).getCounter(getState())).toBe(counterA);
-    expect(getCounterSelectors(1).getCounter(getState())).toBe(counterB);
+    const { processedCounterA, processedCounterB, getState } = setup();
+    expect(getCounterSelectors(0).getCounter(getState())).toStrictEqual(
+      processedCounterA
+    );
+    expect(getCounterSelectors(1).getCounter(getState())).toStrictEqual(
+      processedCounterB
+    );
   });
 
   it('can get the counter description', function () {

@@ -1393,6 +1393,42 @@ export function filterThreadSamplesToRange(
   return newThread;
 }
 
+/**
+ * Process the samples in the counter sample groups.
+ */
+export function processCounter(counter: Counter): Counter {
+  const processedGroups = counter.sampleGroups.map((sampleGroup) => {
+    const { samples } = sampleGroup;
+    const count = samples.count.slice();
+    const number = samples.number.slice();
+
+    // These lines zero out the first values of the counters, as they are unreliable. In
+    // addition, there are probably some missed counts in the memory counters, so the
+    // first memory number slowly creeps up over time, and becomes very unrealistic.
+    // In order to not be affected by these platform limitations, zero out the first
+    // counter values.
+    //
+    // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
+    count[0] = 0;
+    number[0] = 0;
+
+    return {
+      ...sampleGroup,
+      samples: {
+        ...samples,
+        number,
+        count,
+      },
+    };
+  });
+
+  return {
+    ...counter,
+    sampleGroups: processedGroups,
+  };
+}
+
 export function filterCounterToRange(
   counter: Counter,
   rangeStart: number,
@@ -1417,19 +1453,6 @@ export function filterCounterToRange(
 
     const count = samples.count.slice(sBegin, sEnd);
     const number = samples.number.slice(sBegin, sEnd);
-
-    if (sBegin === 0) {
-      // These lines zero out the first values of the counters, as they are unreliable. In
-      // addition, there are probably some missed counts in the memory counters, so the
-      // first memory number slowly creeps up over time, and becomes very unrealistic.
-      // In order to not be affected by these platform limitations, zero out the first
-      // counter values.
-      //
-      // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
-      count[0] = 0;
-      number[0] = 0;
-    }
 
     return {
       ...sampleGroup,
