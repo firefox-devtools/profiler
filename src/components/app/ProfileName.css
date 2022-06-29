@@ -23,7 +23,7 @@
   white-space: nowrap;
 }
 
-.profileNameButton::before{
+.profileNameButton::before {
   padding-right: 14px;
   background: url(firefox-profiler-res/img/svg/edit-name-profiler.svg) no-repeat;
 }
