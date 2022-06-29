@@ -298,6 +298,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                   height += TRACK_IPC_HEIGHT + border;
                   break;
                 case 'process-cpu':
+                case 'power':
                   height += TRACK_PROCESS_CPU_HEIGHT + border;
                   break;
                 default:

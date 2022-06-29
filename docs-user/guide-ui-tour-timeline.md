@@ -10,7 +10,7 @@ The Firefox Profiler visualizes multi-threaded profiles. Each thread gets a row 
 
 ## Creating a range selection
 
-[A screenshot highlighting a range selection in the timeline.](images/ui-tour-selection.webm ':include :type=video controls width=100%')
+[A video highlighting a range selection in the timeline.](images/ui-tour-selection.webm ':include :type=video controls width=100%')
 
 Clicking and dragging in the timeline creates a new range selection. The selection is used to zoom in on information in the panels below. For example, the call tree recomputes dynamically when dragging across the timeline. These range selections can be committed by clicking the zoom button.
 
