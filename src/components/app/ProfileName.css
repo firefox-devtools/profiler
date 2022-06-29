@@ -16,13 +16,16 @@
 
 .profileNameButton {
   overflow: hidden;
-  padding: 0 9px;
-  background: url(firefox-profiler-res/img/svg/edit-name-profiler.svg) no-repeat
-    left / 12px;
+  padding: 0 12px;
   font-weight: 700;
   margin-inline-end: 5px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.profileNameButton::before{
+  padding-right: 14px;
+  background: url(firefox-profiler-res/img/svg/edit-name-profiler.svg) no-repeat;
 }
 
 /* Using the style for links rather than for normal inputs, because we don't

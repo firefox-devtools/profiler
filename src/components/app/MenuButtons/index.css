@@ -107,6 +107,12 @@
   background-image: url(firefox-profiler-res/img/svg/undo-dark-12.svg);
 }
 
+/* This is the profile name, appearing at the top left corner
+.profileNameButton::before{
+    padding-right: 16px;  
+  background: url(firefox-profiler-res/img/svg/edit-name-profiler.svg);
+}  */
+
 .menuButtonsRevertToFullView::before {
   background-image: url(firefox-profiler-res/img/svg/maximize-dark-12.svg);
 }
