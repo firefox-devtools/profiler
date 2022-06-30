@@ -24,8 +24,7 @@
 }
 
 .profileNameButton::before {
-  padding-right: 14px;
-  background: url(firefox-profiler-res/img/svg/edit-name-profiler.svg) no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/edit-name-profiler.svg);
 }
 
 /* Using the style for links rather than for normal inputs, because we don't
