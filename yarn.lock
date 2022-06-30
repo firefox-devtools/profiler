@@ -1094,10 +1094,10 @@
   resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-6.0.0.tgz#baac0d050ce9271259b0997e1693469c044deb3f"
   integrity sha512-UjP/jB2dz7B+1L+eiCm8YWhM1zBkFM2zUyp8hhtpvgmuOFmoWjwqHnICQmM34HNPBqMPcVY9ZcqJcOhDrB+dBQ==
 
-"@codemirror/view@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.0.0.tgz#b3aa07e9bec497a465c27767c825c83c9b2525cc"
-  integrity sha512-IdbZtg17jpLdNnetoPpSOMZNtsCEAexFNdG7tU6TlJkLQakaTNrzXiQEIx9oiZx3f1ql6Zbr8+qyLr/pkrmsng==
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.0.2":
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.0.2.tgz#27f4d08edd10a3678cf15390b4fba5e2a7220873"
+  integrity sha512-mnVT/q1JvKPjpmjXJNeCi/xHyaJ3abGJsumIVpdQ1nE1MXAyHf7GHWt8QpWMUvDiqF0j+inkhVR2OviTdFFX7Q==
   dependencies:
     "@codemirror/state" "^6.0.0"
     style-mod "^4.0.0"
