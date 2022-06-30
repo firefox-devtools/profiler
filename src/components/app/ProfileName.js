@@ -121,10 +121,10 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
         <button
           type="button"
           style={{
-            display: isFocused ? 'none' : 'block',
+            display: isFocused ? 'none' : null,
           }}
           title={title}
-          className="profileNameButton menuButtonsButton menuButtonsButton-hasRightBorder"
+          className="profileNameButton menuButtonsButton menuButtonsButton-hasRightBorder menuButtonsButton-hasIcon"
           onFocus={this.handleButtonFocus}
           onClick={this.handleButtonFocus}
         >
@@ -136,7 +136,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
           key={key}
           className="profileNameInput"
           style={{
-            display: isFocused ? 'block' : 'none',
+            display: isFocused ? null : 'none',
           }}
           defaultValue={profileNameWithDefault}
           aria-label="Profile name"
