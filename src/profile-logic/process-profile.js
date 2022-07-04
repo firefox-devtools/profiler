@@ -1503,6 +1503,21 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     []
   );
 
+  // Profiling log is not present by default. But it may be present if backend
+  // has recorded it.
+  let profilingLog = { ...(geckoProfile.profilingLog || {}) };
+
+  for (const subprocessProfile of geckoProfile.processes) {
+    profilingLog = {
+      ...profilingLog,
+      ...(subprocessProfile.profilingLog || {}),
+    };
+  }
+
+  // Only parent process has this log, therefore we don't need to check the
+  // sub-processes.
+  const profileGatheringLog = { ...(geckoProfile.profileGatheringLog || {}) };
+
   // Convert JS tracer information into their own threads. This mutates
   // the threads array.
   for (const thread of threads.slice()) {
@@ -1532,6 +1547,8 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     counters,
     profilerOverhead,
     threads,
+    profilingLog,
+    profileGatheringLog,
   };
   return result;
 }

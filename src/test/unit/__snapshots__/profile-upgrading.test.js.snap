@@ -53,7 +53,9 @@ Object {
     "visualMetrics": undefined,
   },
   "pages": Array [],
+  "profileGatheringLog": Object {},
   "profilerOverhead": Array [],
+  "profilingLog": Object {},
   "threads": Array [
     Object {
       "eTLD+1": undefined,

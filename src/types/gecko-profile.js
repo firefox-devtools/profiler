@@ -426,6 +426,24 @@ export type LibMapping = {|
   codeId?: string, // e.g. "6132B96B70fd000"
 |};
 
+/**
+ * Log object that holds the profiling-related logging information for a
+ * single process only. This is optional and older profiles don't have it.
+ * This type might also change in the future without warning.
+ */
+export type ProcessProfilingLog = {
+  [log: string]: mixed,
+};
+
+/**
+ * Log object that holds the profiling-related logging information.
+ * This is optional and older profiles don't have it.
+ * This type might also change in the future without warning.
+ */
+export type ProfilingLog = {
+  [pid: number]: ProcessProfilingLog,
+};
+
 export type GeckoProfileWithMeta<Meta> = {|
   counters?: GeckoCounter[],
   // Optional because older Firefox versions may not have that data and
@@ -438,6 +456,9 @@ export type GeckoProfileWithMeta<Meta> = {|
   pausedRanges: PausedRange[],
   processes: GeckoSubprocessProfile[],
   jsTracerDictionary?: string[],
+  // Logs are optional because older Firefox versions may not have that data.
+  profilingLog?: ProfilingLog,
+  profileGatheringLog?: ProfilingLog,
 |};
 
 export type GeckoSubprocessProfile =
