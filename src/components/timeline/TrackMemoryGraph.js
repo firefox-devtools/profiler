@@ -348,45 +348,59 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(counterIndex: number): React.Node {
-    const { accumulatedSamples, counter } = this.props;
+    const { accumulatedSamples, counter, rangeStart, rangeEnd } = this.props;
+    const { mouseX, mouseY } = this.state;
     if (accumulatedSamples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
       throw new Error('No accumulated sample found for memory counter');
     }
+
+    const { samples } = counter.sampleGroups[0];
+    const sampleTime = samples.time[counterIndex];
+    if (sampleTime < rangeStart || sampleTime > rangeEnd) {
+      // Do not draw the tooltip if it will be rendered outside of the timeline.
+      // This could happen when a sample time is outside of the time range.
+      // While range filtering the counters, we add the sample before start and
+      // after end, so charts will not be cut off at the edges.
+      return null;
+    }
+
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
     const bytes = accumulatedCounts[counterIndex] - minCount;
-    const operationsCounters = counter.sampleGroups[0].samples.number;
+    const operationsCounters = samples.number;
     const operations = operationsCounters[counterIndex];
     return (
-      <div className="timelineTrackMemoryTooltip">
-        <div className="timelineTrackMemoryTooltipLine">
-          <span className="timelineTrackMemoryTooltipNumber">
-            {formatNumber(operations, 2, 0)}
-          </span>
-          <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
-            operations since the previous sample
-          </Localized>
-        </div>
+      <Tooltip mouseX={mouseX} mouseY={mouseY}>
+        <div className="timelineTrackMemoryTooltip">
+          <div className="timelineTrackMemoryTooltipLine">
+            <span className="timelineTrackMemoryTooltipNumber">
+              {formatNumber(operations, 2, 0)}
+            </span>
+            <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
+              operations since the previous sample
+            </Localized>
+          </div>
 
-        <div className="timelineTrackMemoryTooltipLine">
-          <span className="timelineTrackMemoryTooltipNumber">
-            {formatBytes(bytes)}
-          </span>
-          <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
-            relative memory at this time
-          </Localized>
-        </div>
+          <div className="timelineTrackMemoryTooltipLine">
+            <span className="timelineTrackMemoryTooltipNumber">
+              {formatBytes(bytes)}
+            </span>
+            <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
+              relative memory at this time
+            </Localized>
+          </div>
 
-        <div className="timelineTrackMemoryTooltipLine">
-          <span className="timelineTrackMemoryTooltipNumber">
-            {formatBytes(countRange)}
-          </span>
-          <Localized id="TrackMemoryGraph--memory-range-in-graph">
-            memory range in graph
-          </Localized>
+          <div className="timelineTrackMemoryTooltipLine">
+            <span className="timelineTrackMemoryTooltipNumber">
+              {formatBytes(countRange)}
+            </span>
+            <Localized id="TrackMemoryGraph--memory-range-in-graph">
+              memory range in graph
+            </Localized>
+          </div>
         </div>
-      </div>
+      </Tooltip>
     );
   }
 
@@ -412,8 +426,17 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     }
     const { samples } = counter.sampleGroups[0];
     const rangeLength = rangeEnd - rangeStart;
-    const left =
-      (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
+    const sampleTime = samples.time[counterIndex];
+
+    if (sampleTime < rangeStart || sampleTime > rangeEnd) {
+      // Do not draw the dot if it will be rendered outside of the timeline.
+      // This could happen when a sample time is outside of the time range.
+      // While range filtering the counters, we add the sample before start and
+      // after end, so charts will not be cut off at the edges.
+      return null;
+    }
+
+    const left = (width * (sampleTime - rangeStart)) / rangeLength;
 
     if (accumulatedSamples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
@@ -433,7 +456,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { hoveredCounter, mouseX, mouseY } = this.state;
+    const { hoveredCounter } = this.state;
     const {
       filteredThread,
       interval,
@@ -466,9 +489,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
         {hoveredCounter === null ? null : (
           <>
             {this._renderMemoryDot(hoveredCounter)}
-            <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              {this._renderTooltip(hoveredCounter)}
-            </Tooltip>
+            {this._renderTooltip(hoveredCounter)}
           </>
         )}
         <EmptyThreadIndicator
