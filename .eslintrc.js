@@ -52,6 +52,7 @@ module.exports = {
     // 'react/no-unused-prop-types': 'error',
     'react/no-unused-state': 'error',
     'react/jsx-no-bind': 'error',
+    'react/jsx-no-leaked-render': 'error',
     'flowtype/require-valid-file-annotation': [
       'error',
       'always',
