@@ -364,6 +364,7 @@ describe('Timeline', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
   autoMockIntersectionObserver();
+  autoMockDomRect();
 
   beforeEach(() => {
     jest
@@ -393,6 +394,54 @@ describe('Timeline', function () {
     expect(drawCalls).toMatchSnapshot();
 
     delete window.devicePixelRatio;
+  });
+
+  it('displays a context menu when right clicking global and local tracks', () => {
+    const profile = getProfileWithNiceTracks();
+
+    const store = storeWithProfile(profile);
+    render(
+      <Provider store={store}>
+        <Timeline />
+      </Provider>
+    );
+
+    fireFullContextMenu(screen.getByRole('button', { name: /GeckoMain/ }));
+    // Note that Fluent inserts isolation characters between variables.
+    expect(screen.getByText(/Only show “/)).toHaveTextContent(
+      'Only show “\u2068GeckoMain\u2069”'
+    );
+    fireFullContextMenu(screen.getByRole('button', { name: /Style/ }));
+    expect(screen.getByText(/Only show “/)).toHaveTextContent(
+      'Only show “\u2068Style\u2069”'
+    );
+  });
+
+  it('displays a context menu when ctrl + left clicking global and local tracks on MacOS', () => {
+    const profile = getProfileWithNiceTracks();
+
+    const store = storeWithProfile(profile);
+    render(
+      <Provider store={store}>
+        <Timeline />
+      </Provider>
+    );
+
+    fireFullContextMenu(screen.getByRole('button', { name: /GeckoMain/ }), {
+      ctrlKey: true,
+    });
+
+    // Note that Fluent inserts isolation characters between variables.
+    expect(screen.getByText(/Only show “/)).toHaveTextContent(
+      'Only show “\u2068GeckoMain\u2069”'
+    );
+
+    fireFullContextMenu(screen.getByRole('button', { name: /Style/ }), {
+      ctrlKey: true,
+    });
+    expect(screen.getByText(/Only show “/)).toHaveTextContent(
+      'Only show “\u2068Style\u2069”'
+    );
   });
 
   // These tests are disabled for now because active tab view checkbox is disabled for now.
@@ -447,8 +496,6 @@ describe('Timeline', function () {
   });
 
   describe('TimelineSettingsHiddenTracks', () => {
-    autoMockDomRect();
-
     it('resets "rightClickedTrack" state when clicked', () => {
       const profile = _getProfileWithDroppedSamples();
 
@@ -467,7 +514,9 @@ describe('Timeline', function () {
         type: 'global',
       });
 
-      fireFullClick(screen.getByText('/ tracks'));
+      // Fluent adds isolate characters around variables, that's why we have
+      // these `.` in the regexp, that will match these extra characters.
+      fireFullClick(screen.getByRole('button', { name: /.4. \/ .4. tracks/ }));
       expect(getRightClickedTrack(store.getState())).toEqual(null);
     });
   });

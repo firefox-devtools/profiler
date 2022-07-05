@@ -64,11 +64,9 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class LocalTrackComponent extends PureComponent<Props> {
-  _onLabelMouseDown = (event: MouseEvent) => {
-    if (event.button === 2) {
-      // Notify the redux store that this was right clicked.
-      this.props.changeRightClickedTrack(this._getTrackReference());
-    }
+  _onContextMenu = () => {
+    // Notify the redux store that this was right clicked.
+    this.props.changeRightClickedTrack(this._getTrackReference());
   };
 
   _selectCurrentTrack = (
@@ -146,7 +144,7 @@ class LocalTrackComponent extends PureComponent<Props> {
               title: titleText,
               className:
                 'timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy',
-              onMouseDown: this._onLabelMouseDown,
+              onContextMenu: this._onContextMenu,
             }}
           >
             <button type="button" className="timelineTrackNameButton">

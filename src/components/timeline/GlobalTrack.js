@@ -85,12 +85,10 @@ class GlobalTrackComponent extends PureComponent<Props> {
   _container: HTMLElement | null = null;
   _isInitialSelectedPane: boolean | null = null;
 
-  _onLabelMouseDown = (event: MouseEvent) => {
-    if (event.button === 2) {
-      const { changeRightClickedTrack, trackReference } = this.props;
-      // Notify the redux store that this was right clicked.
-      changeRightClickedTrack(trackReference);
-    }
+  _onContextMenu = () => {
+    const { changeRightClickedTrack, trackReference } = this.props;
+    // Notify the redux store that this was right clicked.
+    changeRightClickedTrack(trackReference);
   };
 
   _selectCurrentTrack = (
@@ -257,7 +255,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
             attributes={{
               title: titleText,
               className: 'timelineTrackLabel timelineTrackGlobalGrippy',
-              onMouseDown: this._onLabelMouseDown,
+              onContextMenu: this._onContextMenu,
             }}
           >
             <button type="button" className="timelineTrackNameButton">
