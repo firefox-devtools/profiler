@@ -435,4 +435,19 @@ export function fireFullKeyPress(
   fireEvent.keyDown(element, optionsConfigured);
   fireEvent.keyPress(element, optionsConfigured);
   fireEvent.keyUp(element, optionsConfigured);
+  if (
+    ['Enter', ' '].includes(optionsConfigured.key) &&
+    isControlInput(element)
+  ) {
+    // Enter and space trigger a click event on control elements.
+    fireEvent.click(element);
+  }
+}
+
+function isControlInput(element: HTMLElement): boolean {
+  return (
+    element instanceof HTMLButtonElement ||
+    (element instanceof HTMLInputElement &&
+      ['button', 'submit', 'clear'].includes(element.type || ''))
+  );
 }
