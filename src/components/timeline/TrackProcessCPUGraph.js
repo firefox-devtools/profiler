@@ -299,13 +299,29 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(counterIndex: number): React.Node {
-    const { counter, maxCounterSampleCountsPerMs, interval } = this.props;
+    const {
+      counter,
+      maxCounterSampleCountsPerMs,
+      interval,
+      rangeStart,
+      rangeEnd,
+    } = this.props;
+    const { mouseX, mouseY } = this.state;
     const samples = counter.sampleGroups[0].samples;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
       throw new Error('No sample found for process CPU counter');
     }
+    const sampleTime = samples.time[counterIndex];
+    if (sampleTime < rangeStart || sampleTime > rangeEnd) {
+      // Do not draw the tooltip if it will be rendered outside of the timeline.
+      // This could happen when a sample time is outside of the time range.
+      // While range filtering the counters, we add the sample before start and
+      // after end, so charts will not be cut off at the edges.
+      return null;
+    }
+
     const maxCPUPerMs = maxCounterSampleCountsPerMs[0];
     const cpuUsage = samples.count[counterIndex];
     const sampleTimeDeltaInMs =
@@ -314,14 +330,16 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
         : samples.time[counterIndex] - samples.time[counterIndex - 1];
     const cpuRatio = cpuUsage / sampleTimeDeltaInMs / maxCPUPerMs;
     return (
-      <div className="timelineTrackProcessCPUTooltip">
-        <div className="timelineTrackProcessCPUTooltipLine">
-          CPU:{' '}
-          <span className="timelineTrackProcessCPUTooltipNumber">
-            {formatPercent(cpuRatio)}
-          </span>
+      <Tooltip mouseX={mouseX} mouseY={mouseY}>
+        <div className="timelineTrackProcessCPUTooltip">
+          <div className="timelineTrackProcessCPUTooltipLine">
+            CPU:{' '}
+            <span className="timelineTrackProcessCPUTooltipNumber">
+              {formatPercent(cpuRatio)}
+            </span>
+          </div>
         </div>
-      </div>
+      </Tooltip>
     );
   }
 
@@ -348,6 +366,16 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
     }
     const { samples } = counter.sampleGroups[0];
     const rangeLength = rangeEnd - rangeStart;
+    const sampleTime = samples.time[counterIndex];
+
+    if (sampleTime < rangeStart || sampleTime > rangeEnd) {
+      // Do not draw the dot if it will be rendered outside of the timeline.
+      // This could happen when a sample time is outside of the time range.
+      // While range filtering the counters, we add the sample before start and
+      // after end, so charts will not be cut off at the edges.
+      return null;
+    }
+
     const left =
       (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
 
@@ -373,7 +401,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { hoveredCounter, mouseX, mouseY } = this.state;
+    const { hoveredCounter } = this.state;
     const {
       filteredThread,
       interval,
@@ -406,9 +434,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
         {hoveredCounter === null ? null : (
           <>
             {this._renderDot(hoveredCounter)}
-            <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              {this._renderTooltip(hoveredCounter)}
-            </Tooltip>
+            {this._renderTooltip(hoveredCounter)}
           </>
         )}
         <EmptyThreadIndicator
