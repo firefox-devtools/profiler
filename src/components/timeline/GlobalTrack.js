@@ -96,14 +96,6 @@ class GlobalTrackComponent extends PureComponent<Props> {
   _selectCurrentTrack = (
     event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
   ) => {
-    if (
-      event.button === 2 ||
-      (window.navigator.platform === 'MacIntel' && event.ctrlKey)
-    ) {
-      // This is a right click, do nothing.
-      return;
-    }
-
     const { selectTrack, trackReference } = this.props;
     selectTrack(trackReference, getTrackSelectionModifier(event));
   };

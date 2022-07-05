@@ -74,15 +74,6 @@ class LocalTrackComponent extends PureComponent<Props> {
   _selectCurrentTrack = (
     event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
   ) => {
-    if (
-      event.button === 2 ||
-      // Macs can right click with the ctrl key.
-      (window.navigator.platform === 'MacIntel' && event.ctrlKey)
-    ) {
-      // This is a right click, do nothing.
-      return;
-    }
-
     this.props.selectTrack(
       this._getTrackReference(),
       getTrackSelectionModifier(event)
