@@ -30,7 +30,7 @@
     "start-l10n": "yarn build:clean && cross-env NODE_ENV=development L10N=1 node server.js",
     "start-l10n-prod": "yarn build-l10n-prod && yarn serve-static",
     "start-examples": "ws -d examples/ -s index.html -p 4242",
-    "start-docs": "docsify serve ./docs-user",
+    "start-docs": "ws -d docs-user/ -p 3000",
     "start-photon": "node res/photon/server",
     "test": "cross-env LC_ALL=C TZ=UTC NODE_ENV=test jest",
     "test-all": "run-p --max-parallel 4 flow license-check lint test test-alex test-lockfile",
