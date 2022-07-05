@@ -7,7 +7,7 @@
 import type { Milliseconds, Address, Microseconds, Bytes } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload, MarkerSchema } from './markers';
-import type { MarkerPhase } from './gecko-profile';
+import type { MarkerPhase, ProfilingLog } from './gecko-profile';
 
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
@@ -872,6 +872,8 @@ export type Profile = {|
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
   threads: Thread[],
+  profilingLog?: ProfilingLog,
+  profileGatheringLog?: ProfilingLog,
 |};
 
 type SerializableThread = {|
