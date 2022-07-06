@@ -275,9 +275,9 @@ export function changeSelectedThreads(
  * thread index, and may also change the selected tab if it makes sense for this
  * track.
  */
-export function selectTrack(
+export function selectTrackWithModifiers(
   trackReference: TrackReference,
-  modifier: 'none' | 'ctrl'
+  modifiers: $Shape<{ ctrlOrMeta: boolean, shift: boolean }> = {}
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const currentlySelectedTab = getSelectedTab(getState());
@@ -389,27 +389,22 @@ export function selectTrack(
       selectedTab = visibleTabs[0];
     }
 
-    let selectedThreadIndexes = new Set(getSelectedThreadIndexes(getState()));
-    switch (modifier) {
-      case 'none':
-        // Only select the single thread.
-        selectedThreadIndexes = new Set([selectedThreadIndex]);
-        break;
-      case 'ctrl':
-        // Toggle the selection.
-        if (selectedThreadIndexes.has(selectedThreadIndex)) {
-          selectedThreadIndexes.delete(selectedThreadIndex);
-          if (selectedThreadIndexes.size === 0) {
-            // Always keep at least one thread selected.
-            return;
-          }
-        } else {
-          selectedThreadIndexes.add(selectedThreadIndex);
+    let selectedThreadIndexes;
+    if (modifiers.ctrlOrMeta) {
+      selectedThreadIndexes = new Set(getSelectedThreadIndexes(getState()));
+      // Toggle the selection.
+      if (selectedThreadIndexes.has(selectedThreadIndex)) {
+        selectedThreadIndexes.delete(selectedThreadIndex);
+        if (selectedThreadIndexes.size === 0) {
+          // Always keep at least one thread selected. Bail out.
+          return;
         }
-        break;
-      default:
-        assertExhaustiveCheck(modifier, 'Unhandled modifier case.');
-        break;
+      } else {
+        selectedThreadIndexes.add(selectedThreadIndex);
+      }
+    } else {
+      // Only select the single thread.
+      selectedThreadIndexes = new Set([selectedThreadIndex]);
     }
 
     dispatch({
@@ -463,7 +458,7 @@ export function selectTrackFromTid(tid: Tid): ThunkAction<void> {
         throw assertExhaustiveCheck(trackReference.type);
     }
 
-    dispatch(selectTrack(trackReference, 'none'));
+    dispatch(selectTrackWithModifiers(trackReference));
   };
 }
 

@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import {
   changeRightClickedTrack,
-  selectTrack,
+  selectTrackWithModifiers,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
@@ -30,7 +30,7 @@ import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
 import { TrackProcessCPU } from './TrackProcessCPU';
 import { TrackPower } from './TrackPower';
-import { getTrackSelectionModifier } from 'firefox-profiler/utils';
+import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import type {
   TrackReference,
   Pid,
@@ -58,7 +58,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +selectTrack: typeof selectTrack,
+  +selectTrackWithModifiers: typeof selectTrackWithModifiers,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -72,9 +72,9 @@ class LocalTrackComponent extends PureComponent<Props> {
   _selectCurrentTrack = (
     event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
   ) => {
-    this.props.selectTrack(
+    this.props.selectTrackWithModifiers(
       this._getTrackReference(),
-      getTrackSelectionModifier(event)
+      getTrackSelectionModifiers(event)
     );
   };
 
@@ -234,7 +234,7 @@ export const TimelineLocalTrack = explicitConnect<
   },
   mapDispatchToProps: {
     changeRightClickedTrack,
-    selectTrack,
+    selectTrackWithModifiers,
   },
   component: LocalTrackComponent,
 });

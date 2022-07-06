@@ -96,22 +96,16 @@ export function getStartEndRangeForMarker(
 /**
  * This logic is shared between multiple components, but it is used to determine how a
  * track gets selected, based on the modifiers used.
- *
- * See issue #2710 about adding "shift" behavior.
  */
-export function getTrackSelectionModifier(
+export function getTrackSelectionModifiers(
   event:
     | MouseEvent
     | KeyboardEvent
     | SyntheticMouseEvent<>
     | SyntheticKeyboardEvent<>
-): 'ctrl' | 'none' {
-  if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
-    return 'ctrl';
-  }
-  // Uncomment the following lines to implement issue #2710:
-  // if (event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
-  //   return 'shift';
-  // }
-  return 'none';
+): {| ctrlOrMeta: boolean, shift: boolean |} {
+  return {
+    ctrlOrMeta: (event.ctrlKey || event.metaKey) && !event.altKey,
+    shift: event.shiftKey && !event.altKey,
+  };
 }
