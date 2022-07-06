@@ -75,7 +75,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
             visibleTabs={visibleTabs}
             onSelectTab={this._onSelectTab}
           />
-          {hasSidebar && (
+          {hasSidebar ? (
             <Localized
               id={
                 isSidebarOpen
@@ -100,7 +100,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
                 onClick={this._onClickSidebarButton}
               />
             </Localized>
-          )}
+          ) : null}
         </div>
         <Localized
           id="Details--error-boundary-message"
