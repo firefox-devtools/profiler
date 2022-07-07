@@ -74,7 +74,7 @@ export const TrackProcessCPU = explicitConnect<
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;
     const counterSelectors = getCounterSelectors(counterIndex);
-    const counter = counterSelectors.getCommittedRangeFilteredCounter(state);
+    const counter = counterSelectors.getCounter(state);
     const { start, end } = getCommittedRange(state);
     return {
       threadIndex: counter.mainThreadIndex,

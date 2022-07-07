@@ -1457,36 +1457,6 @@ export function processCounter(counter: Counter): Counter {
   };
 }
 
-export function filterCounterToRange(
-  counter: Counter,
-  rangeStart: number,
-  rangeEnd: number
-): Counter {
-  const filteredGroups = counter.sampleGroups.map((sampleGroup) => {
-    const samples = sampleGroup.samples;
-    const [sBegin, sEnd] = getInclusiveSampleIndexRangeForSelection(
-      samples,
-      rangeStart,
-      rangeEnd
-    );
-
-    return {
-      ...sampleGroup,
-      samples: {
-        time: samples.time.slice(sBegin, sEnd),
-        number: samples.number.slice(sBegin, sEnd),
-        count: samples.count.slice(sBegin, sEnd),
-        length: sEnd - sBegin,
-      },
-    };
-  });
-
-  return {
-    ...counter,
-    sampleGroups: filteredGroups,
-  };
-}
-
 /**
  * The memory counter contains relative offsets of memory. In order to draw an interesting
  * graph, take the memory counts, and find the minimum and maximum values, by

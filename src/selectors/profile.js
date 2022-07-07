@@ -8,7 +8,6 @@ import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
-  filterCounterToRange,
   accumulateCounterSamples,
   extractProfileFilterPageData,
   computeMaxCounterSampleCountsPerMs,
@@ -279,12 +278,6 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
 
   const getPid: Selector<Pid> = (state) => getCounter(state).pid;
 
-  const getCommittedRangeFilteredCounter: Selector<Counter> = createSelector(
-    getCounter,
-    getCommittedRange,
-    (counters, range) => filterCounterToRange(counters, range.start, range.end)
-  );
-
   const getCommittedRangeCounterSampleRanges: Selector<
     Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
   > = createSelector(getCounter, getCommittedRange, (counter, range) =>
@@ -337,7 +330,6 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getCounter,
     getDescription,
     getPid,
-    getCommittedRangeFilteredCounter,
     getAccumulateCounterSamples,
     getMaxCounterSampleCountsPerMs,
     getMaxRangeCounterSampleCountsPerMs,

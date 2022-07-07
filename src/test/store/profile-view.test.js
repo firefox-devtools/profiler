@@ -3151,22 +3151,6 @@ describe('counter selectors', function () {
     expect(getCounterSelectors(0).getPid(getState())).toBe(0);
   });
 
-  it('can get the commited range filtered counters', function () {
-    const { getState, dispatch } = setup();
-    // The range includes the sample just before and the sample just after the selection
-    // range.
-    dispatch(ProfileView.commitRange(3.5, 5.5));
-    const originalCounter = getCounterSelectors(0).getCounter(getState());
-    expect(originalCounter.sampleGroups[0].samples.time).toEqual([
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-    ]);
-
-    const filteredCounter = getCounterSelectors(
-      0
-    ).getCommittedRangeFilteredCounter(getState());
-    expect(filteredCounter.sampleGroups[0].samples.time).toEqual([3, 4, 5, 6]);
-  });
-
   it('can accumulate samples', function () {
     const { getState, counterA } = setup();
     counterA.sampleGroups[0].samples.count = [
