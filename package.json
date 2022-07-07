@@ -30,7 +30,7 @@
     "start-l10n": "yarn build:clean && cross-env NODE_ENV=development L10N=1 node server.js",
     "start-l10n-prod": "yarn build-l10n-prod && yarn serve-static",
     "start-examples": "ws -d examples/ -s index.html -p 4242",
-    "start-docs": "docsify serve ./docs-user",
+    "start-docs": "ws -d docs-user/ -p 3000",
     "start-photon": "node res/photon/server",
     "test": "cross-env LC_ALL=C TZ=UTC NODE_ENV=test jest",
     "test-all": "run-p --max-parallel 4 flow license-check lint test test-alex test-lockfile",
@@ -48,8 +48,8 @@
     "url": "https://github.com/firefox-devtools/profiler"
   },
   "dependencies": {
-    "@codemirror/lang-cpp": "^6.0.0",
-    "@codemirror/lang-javascript": "^6.0.0",
+    "@codemirror/lang-cpp": "^6.0.1",
+    "@codemirror/lang-javascript": "^6.0.1",
     "@codemirror/lang-rust": "^6.0.0",
     "@codemirror/language": "^6.0.0",
     "@codemirror/state": "^6.0.1",
@@ -117,7 +117,6 @@
     "css-loader": "^5.2.7",
     "cssnano": "^5.0.2",
     "devtools-license-check": "^0.9.0",
-    "docsify-cli": "^4.4.4",
     "eslint": "^8.18.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-alias": "^1.1.2",
