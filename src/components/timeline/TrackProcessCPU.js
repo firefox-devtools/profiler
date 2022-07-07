@@ -45,7 +45,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {||};
 
-export class TracProcessCPUImpl extends React.PureComponent<Props, State> {
+export class TrackProcessCPUImpl extends React.PureComponent<Props, State> {
   render() {
     const { counterIndex } = this.props;
     return (
@@ -83,5 +83,5 @@ export const TrackProcessCPU = explicitConnect<
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
-  component: TracProcessCPUImpl,
+  component: TrackProcessCPUImpl,
 });
