@@ -285,12 +285,28 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     (counters, range) => filterCounterToRange(counters, range.start, range.end)
   );
 
+  const getCommittedRangeCounterSampleRanges: Selector<
+    Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
+  > = createSelector(getCounter, getCommittedRange, (counter, range) =>
+    counter.sampleGroups.map((group) =>
+      getInclusiveSampleIndexRangeForSelection(
+        group.samples,
+        range.start,
+        range.end
+      )
+    )
+  );
+
   const getAccumulateCounterSamples: Selector<
     Array<AccumulatedCounterSamples>
-  > = createSelector(getCommittedRangeFilteredCounter, (counters) =>
-    accumulateCounterSamples(
-      counters.sampleGroups.map((group) => group.samples)
-    )
+  > = createSelector(
+    getCounter,
+    getCommittedRangeCounterSampleRanges,
+    (counters, sampleRanges) =>
+      accumulateCounterSamples(
+        counters.sampleGroups.map((group) => group.samples),
+        sampleRanges
+      )
   );
 
   const getMaxCounterSampleCountsPerMs: Selector<Array<number>> =
@@ -303,18 +319,6 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
           profileInterval
         )
     );
-
-  const getCommittedRangeCounterSampleRanges: Selector<
-    Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
-  > = createSelector(getCounter, getCommittedRange, (counter, range) =>
-    counter.sampleGroups.map((group) =>
-      getInclusiveSampleIndexRangeForSelection(
-        group.samples,
-        range.start,
-        range.end
-      )
-    )
-  );
 
   const getMaxRangeCounterSampleCountsPerMs: Selector<Array<number>> =
     createSelector(

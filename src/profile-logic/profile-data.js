@@ -1494,14 +1494,24 @@ export function filterCounterToRange(
  * accumulatedCounts array.
  */
 export function accumulateCounterSamples(
-  samplesArray: Array<CounterSamplesTable>
+  samplesArray: Array<CounterSamplesTable>,
+  sampleRanges?: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
 ): Array<AccumulatedCounterSamples> {
-  const accumulatedSamples = samplesArray.map((samples) => {
+  const accumulatedSamples = samplesArray.map((samples, index) => {
     let minCount = 0;
     let maxCount = 0;
     let accumulated = 0;
-    const accumulatedCounts = [];
-    for (let i = 0; i < samples.length; i++) {
+    const accumulatedCounts = Array(samples.length).fill(0);
+    // If a range is provided, use it instead. This will also include the
+    // samples right before and after the range.
+    const startSampleIndex =
+      sampleRanges && sampleRanges[index] ? sampleRanges[index][0] : 0;
+    const endSampleIndex =
+      sampleRanges && sampleRanges[index]
+        ? sampleRanges[index][1]
+        : samples.length;
+
+    for (let i = startSampleIndex; i < endSampleIndex; i++) {
       accumulated += samples.count[i];
       minCount = Math.min(accumulated, minCount);
       maxCount = Math.max(accumulated, maxCount);
