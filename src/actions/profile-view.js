@@ -380,14 +380,13 @@ export function selectTrack(
         );
     }
 
-    const doesNextTrackHaveSelectedTab = getThreadSelectors(selectedThreadIndex)
-      .getUsefulTabs(getState())
-      .includes(selectedTab);
-
-    if (!doesNextTrackHaveSelectedTab) {
+    const visibleTabs = getThreadSelectors(selectedThreadIndex).getUsefulTabs(
+      getState()
+    );
+    if (!visibleTabs.includes(selectedTab)) {
       // If the user switches to another track that doesn't have the current
-      // selectedTab then switch to the calltree.
-      selectedTab = 'calltree';
+      // selectedTab then switch to the first tab.
+      selectedTab = visibleTabs[0];
     }
 
     let selectedThreadIndexes = new Set(getSelectedThreadIndexes(getState()));
@@ -546,16 +545,13 @@ export function selectActiveTabTrack(
         );
     }
 
-    const doesNextTrackHaveSelectedTab = getThreadSelectors(
-      selectedThreadIndexes
-    )
-      .getUsefulTabs(getState())
-      .includes(selectedTab);
-
-    if (!doesNextTrackHaveSelectedTab) {
+    const visibleTabs = getThreadSelectors(selectedThreadIndexes).getUsefulTabs(
+      getState()
+    );
+    if (!visibleTabs.includes(selectedTab)) {
       // If the user switches to another track that doesn't have the current
-      // selectedTab then switch to the calltree.
-      selectedTab = 'calltree';
+      // selectedTab then switch to the first tab.
+      selectedTab = visibleTabs[0];
     }
 
     if (

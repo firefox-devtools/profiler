@@ -7,6 +7,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
+  getMarkerTableProfile,
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getNetworkMarkers,
@@ -33,9 +34,6 @@ describe('getUsefulTabs', function () {
     const profile = getProfileWithMarkers(getNetworkMarkers());
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
-      'calltree',
-      'flame-graph',
-      'stack-chart',
       'marker-chart',
       'marker-table',
       'network-chart',
@@ -46,9 +44,6 @@ describe('getUsefulTabs', function () {
     const profile = getProfileWithJsTracerEvents([['A', 0, 10]]);
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
-      'calltree',
-      'flame-graph',
-      'stack-chart',
       'marker-chart',
       'marker-table',
       'js-tracer',
@@ -97,12 +92,27 @@ describe('getUsefulTabs', function () {
 
     // Check the tabs and make sure that the network chart is there.
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
-      'calltree',
-      'flame-graph',
-      'stack-chart',
       'marker-chart',
       'marker-table',
       'network-chart',
+    ]);
+  });
+
+  it('hides sample related tabs when there is no sample data in the profile', function () {
+    const profile = getMarkerTableProfile();
+    const { getState } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'marker-chart',
+      'marker-table',
+    ]);
+  });
+
+  it('hides sample related tabs when samples contain only the (root) frame', function () {
+    const { profile } = getProfileFromTextSamples('(root)');
+    const { getState } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'marker-chart',
+      'marker-table',
     ]);
   });
 });
