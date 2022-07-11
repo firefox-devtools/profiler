@@ -949,6 +949,7 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
     dispatch({
       type: 'HIDE_GLOBAL_TRACK',
       trackIndex,
+      pid: globalTrackToHide.type === 'process' ? globalTrackToHide.pid : null,
       selectedThreadIndexes: newSelectedThreadIndexes,
     });
   };

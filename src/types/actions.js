@@ -232,6 +232,7 @@ type ProfileAction =
   | {|
       +type: 'HIDE_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
+      +pid: Pid | null,
       +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
