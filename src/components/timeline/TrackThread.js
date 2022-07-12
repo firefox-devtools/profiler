@@ -37,7 +37,6 @@ import {
 } from './Markers';
 import {
   updatePreviewSelection,
-  changeRightClickedTrack,
   changeSelectedCallNode,
   focusCallTree,
   selectLeafCallNode,
@@ -104,7 +103,6 @@ type StateProps = {|
 |};
 
 type DispatchProps = {|
-  +changeRightClickedTrack: typeof changeRightClickedTrack,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
@@ -401,7 +399,6 @@ export const TimelineTrackThread = explicitConnect<
   },
   mapDispatchToProps: {
     updatePreviewSelection,
-    changeRightClickedTrack,
     changeSelectedCallNode,
     focusCallTree,
     selectLeafCallNode,

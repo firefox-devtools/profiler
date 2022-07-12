@@ -300,7 +300,7 @@ MenuButtons--index--share-error-uploading =
 MenuButtons--index--revert = 恢复到原始分析记录
 MenuButtons--index--docs = 文档
 MenuButtons--permalink--button =
-    .label = 固定链接
+    .label = 永久链接
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
@@ -312,7 +312,7 @@ MenuButtons--index--metaInfo-subtitle = “分析记录”信息
 MenuButtons--metaInfo--symbols = 符号：
 MenuButtons--metaInfo--profile-symbolicated = 分析记录已符号化
 MenuButtons--metaInfo--profile-not-symbolicated = 分析记录未符号化
-MenuButtons--metaInfo--resymbolicate-profile = 重新将分析记录符号化
+MenuButtons--metaInfo--resymbolicate-profile = 重新符号化分析记录
 MenuButtons--metaInfo--symbolicate-profile = 符号化分析记录
 MenuButtons--metaInfo--attempting-resymbolicate = 正在尝试重新符号化分析记录
 MenuButtons--metaInfo--currently-symbolicating = 当前符号化的分析记录
@@ -605,6 +605,21 @@ TrackContextMenu--no-results-found = 找不到“<span>{ $searchFilter }</span>�
 TrackMemoryGraph--relative-memory-at-this-time = 此时的相对内存用量
 TrackMemoryGraph--memory-range-in-graph = 图表里的内存范围
 TrackMemoryGraph--operations-since-the-previous-sample = 自前一次采样以来的操作次数
+
+## TrackPowerGraph
+## This is used to show the power used by the CPU and other chips in a computer,
+## graphed over time.
+## It's not displayed by default in the UI, but an example can be found at
+## https://share.firefox.dev/3a1fiT7.
+
+# This is used in the tooltip when the power value uses the Watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPowerGraph--tooltip-power-watt = 功率：<em>{ $value } W</em>
+# This is used in the tooltip when the power value uses the Milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPowerGraph--tooltip-power-milliwatt = 功率：<em>{ $value } mW</em>
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
