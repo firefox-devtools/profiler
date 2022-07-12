@@ -266,7 +266,7 @@ Home--record-instructions-capture-load = Profyl fêstlizze en lade
 Home--profiler-motto = Lis in prestaasjeprofyl fêst. Analysearje it. Diel it. Meitsje it ynternet flugger.
 Home--additional-content-title = Besteande profilen lade
 Home--additional-content-content = Jo kinne in profylbestân hjirhinne <strong>fersleepje</strong> om it te laden, of:
-Home--compare-recordings-info = Jo kinne ek opnamen fergelykje. <a>De fergelikingsnterface iepenje.</a>
+Home--compare-recordings-info = Jo kinne ek opnamen fergelykje. <a>De fergelikingsinterface iepenje.</a>
 Home--recent-uploaded-recordings-title = Resint opladen opnamen
 
 ## IdleSearchField
@@ -680,6 +680,21 @@ TrackContextMenu--no-results-found = Gjin resultaten fûn foar ‘<span>{ $searc
 TrackMemoryGraph--relative-memory-at-this-time = relatyf ûnthâld op dit stuit
 TrackMemoryGraph--memory-range-in-graph = ûnthâldberik yn grafyk
 TrackMemoryGraph--operations-since-the-previous-sample = bewurkingen sûnt de foarige werjefte
+
+## TrackPowerGraph
+## This is used to show the power used by the CPU and other chips in a computer,
+## graphed over time.
+## It's not displayed by default in the UI, but an example can be found at
+## https://share.firefox.dev/3a1fiT7.
+
+# This is used in the tooltip when the power value uses the Watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPowerGraph--tooltip-power-watt = Fermogen: <em>{ $value } W</em>
+# This is used in the tooltip when the power value uses the Milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPowerGraph--tooltip-power-milliwatt = Fermogen: <em>{ $value } mW</em>
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

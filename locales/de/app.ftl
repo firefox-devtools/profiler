@@ -666,6 +666,21 @@ TrackMemoryGraph--relative-memory-at-this-time = Relativer Speicherverbrauch zu 
 TrackMemoryGraph--memory-range-in-graph = Speicherbereich im Diagramm
 TrackMemoryGraph--operations-since-the-previous-sample = Operationen seit der vorherigen Stichprobe
 
+## TrackPowerGraph
+## This is used to show the power used by the CPU and other chips in a computer,
+## graphed over time.
+## It's not displayed by default in the UI, but an example can be found at
+## https://share.firefox.dev/3a1fiT7.
+
+# This is used in the tooltip when the power value uses the Watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPowerGraph--tooltip-power-watt = Leistung: <em>{ $value } W</em>
+# This is used in the tooltip when the power value uses the Milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPowerGraph--tooltip-power-milliwatt = Leistung: <em>{ $value } mW</em>
+
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
