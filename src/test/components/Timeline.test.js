@@ -606,6 +606,46 @@ describe('Timeline multiple thread selection', function () {
     ]);
   });
 
+  it('can select a range of tracks with shift clicking starting at the selected track', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Just shift-click on another local track below the selected track
+    fireFullClick(screen.getByRole('button', { name: 'AudioPool#2' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1] SELECTED',
+      '  - show [thread AudioPool#2] SELECTED',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
   it('can select a range of tracks with shift clicking in the reverse order too', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([

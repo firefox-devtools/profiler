@@ -42,10 +42,16 @@ import {
   getSampleCategories,
   findBestAncestorCallNode,
 } from 'firefox-profiler/profile-logic/profile-data';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import {
+  assertExhaustiveCheck,
+  getFirstItemFromSet,
+} from 'firefox-profiler/utils/flow';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import { objectShallowEquals } from 'firefox-profiler/utils/index';
-import { getTrackReferenceFromTid } from 'firefox-profiler/profile-logic/tracks';
+import {
+  getTrackReferenceFromTid,
+  getTrackReferenceFromThreadIndex,
+} from 'firefox-profiler/profile-logic/tracks';
 
 import type {
   PreviewSelection,
@@ -609,10 +615,18 @@ function selectRangeOfTracks(
   return (dispatch, getState) => {
     const lastNonShiftClickInformation = getLastNonShiftClick(getState());
 
-    const lastClickedTrack =
+    let lastClickedTrack =
       lastNonShiftClickInformation && lastNonShiftClickInformation.clickedTrack;
     if (!lastClickedTrack) {
-      // TODO get the track reference from the selected thread
+      const selectedThreadIndexes = getSelectedThreadIndexes(getState());
+      const threadIndex = getFirstItemFromSet(selectedThreadIndexes);
+      if (threadIndex !== undefined) {
+        lastClickedTrack = getTrackReferenceFromThreadIndex(
+          threadIndex,
+          getGlobalTracks(getState()),
+          getLocalTracksByPid(getState())
+        );
+      }
     }
 
     if (lastClickedTrack) {
