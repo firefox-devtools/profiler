@@ -281,6 +281,8 @@ type TrackInformation = {|
   relatedThreadIndex: ThreadIndex,
   // This is the track index for the global track where this track is located.
   globalTrackIndex: TrackIndex,
+  // This is the PID for the process that this track belongs to.
+  pid: Pid,
   // This is the track index of the local track in its process group.
   localTrackIndex: null | TrackIndex,
   // This is the tab that should be selected from this track. `null` if this
@@ -307,7 +309,7 @@ function getInformationFromTrackReference(
       // Go through each type, and determine the selected slug and thread index.
       switch (globalTrack.type) {
         case 'process': {
-          const { mainThreadIndex } = globalTrack;
+          const { mainThreadIndex, pid } = globalTrack;
           if (mainThreadIndex === null) {
             // Do not allow selecting process tracks without a thread index.
             return null;
@@ -319,6 +321,7 @@ function getInformationFromTrackReference(
             threadIndex: mainThreadIndex,
             relatedThreadIndex: mainThreadIndex,
             globalTrackIndex: trackReference.trackIndex,
+            pid,
             localTrackIndex: null,
             // Move to a relevant thread-based tab when the previous tab was
             // the network chart.
@@ -351,6 +354,7 @@ function getInformationFromTrackReference(
       const commonLocalProperties = {
         type: 'local',
         trackReference,
+        pid: trackReference.pid,
         globalTrackIndex,
         localTrackIndex: trackReference.trackIndex,
       };
@@ -467,6 +471,36 @@ function toggleOneTrack(
 }
 
 /**
+ * This compares the relative order of two tracks.
+ * Returns:
+ *   < 0 => if trackA is above track B
+ *   > 0 => if trackB is above track A
+ *   0   => if trackA and trackB represent the same track
+ */
+function compareTrackOrder(
+  state,
+  trackA: TrackInformation,
+  trackB: TrackInformation
+): number {
+  if (trackA.globalTrackIndex === trackB.globalTrackIndex) {
+    // Same global track!
+    // Then we need to look at their local order
+    // If one is a global track, its localTrackIndex is null, and therefore the
+    // indexOf operation will return -1, which is exactly what we want.
+    const localTrackOrder = getLocalTrackOrder(state, trackA.pid);
+    const orderA = localTrackOrder.indexOf(trackA.localTrackIndex);
+    const orderB = localTrackOrder.indexOf(trackB.localTrackIndex);
+    return orderA - orderB;
+  }
+  // Different global tracks, let's check the global track order
+  const globalTrackOrder = getGlobalTrackOrder(state);
+  const orderA = globalTrackOrder.indexOf(trackA.globalTrackIndex);
+  const orderB = globalTrackOrder.indexOf(trackB.globalTrackIndex);
+
+  return orderA - orderB;
+}
+
+/**
  * This computes the set of threads that's between two tracks (including
  * themselves). This skips over hidden tracks.
  */
@@ -481,11 +515,14 @@ function findThreadsBetweenTracks(
 
   const foundThreadIndexes = [];
 
+  // Check the relative order of from and to, and possibly invert them
+  if (compareTrackOrder(state, fromTrack, toTrack) > 0) {
+    [toTrack, fromTrack] = [fromTrack, toTrack];
+  }
+
   // Where are they located in the track order?
   const fromGlobalOrder = globalTrackOrder.indexOf(fromTrack.globalTrackIndex);
   const toGlobalOrder = globalTrackOrder.indexOf(toTrack.globalTrackIndex);
-
-  // TODO Check the relative order of from and to, and possibly invert them
 
   for (
     let globalOrderIndex = fromGlobalOrder;

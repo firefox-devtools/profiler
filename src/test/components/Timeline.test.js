@@ -606,6 +606,92 @@ describe('Timeline multiple thread selection', function () {
     ]);
   });
 
+  it('can select a range of tracks with shift clicking in the reverse order too', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on on a local track
+    // Then shift-click on another local track above
+    fireFullClick(screen.getByRole('button', { name: 'AudioPool#2' }));
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1] SELECTED',
+      '  - show [thread AudioPool#2] SELECTED',
+      '  - show [thread Renderer]',
+    ]);
+
+    // We can also select tracks where start and end are in the same global process.
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#5' }));
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#1' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // This also works if the start track is the global track.
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#5' }));
+    fireFullClick(screen.getByRole('button', { name: /PID: 1000/ }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
   it('is possible to mix both ctrl and shift modifiers', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
@@ -677,8 +763,6 @@ describe('Timeline multiple thread selection', function () {
       '  - show [thread Renderer]',
     ]);
 
-    /* NOTE: this comment will be removed in a commit later, because this needs
-     * another commit to work properly.
     // Shift-clicking again above the initial track should unselect the ones
     // that were selected before and select the new ones. Indeed everything
     // happens as if the previous selection was canceled.
@@ -699,7 +783,7 @@ describe('Timeline multiple thread selection', function () {
       '  - show [thread AudioPool#1]',
       '  - show [thread AudioPool#2]',
       '  - show [thread Renderer]',
-    ]);*/
+    ]);
   });
 
   it('selects also the related thread when a related track is first clicked', function () {
