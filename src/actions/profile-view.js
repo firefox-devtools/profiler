@@ -349,9 +349,7 @@ export function selectTrack(
           case 'memory': {
             const { counterIndex } = localTrack;
             const counterSelectors = getCounterSelectors(counterIndex);
-            const counter = counterSelectors.getCommittedRangeFilteredCounter(
-              getState()
-            );
+            const counter = counterSelectors.getCounter(getState());
             selectedThreadIndex = counter.mainThreadIndex;
             break;
           }
@@ -363,9 +361,7 @@ export function selectTrack(
           case 'power': {
             const { counterIndex } = localTrack;
             const counterSelectors = getCounterSelectors(counterIndex);
-            const counter = counterSelectors.getCommittedRangeFilteredCounter(
-              getState()
-            );
+            const counter = counterSelectors.getCounter(getState());
             selectedThreadIndex = counter.mainThreadIndex;
             break;
           }

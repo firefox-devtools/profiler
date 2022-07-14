@@ -8,11 +8,12 @@ import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
-  filterCounterToRange,
   accumulateCounterSamples,
   extractProfileFilterPageData,
   computeMaxCounterSampleCountsPerMs,
   getFriendlyThreadName,
+  processCounter,
+  getInclusiveSampleIndexRangeForSelection,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -71,6 +72,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   SampleUnits,
+  IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
@@ -264,28 +266,40 @@ export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
  */
 function _createCounterSelectors(counterIndex: CounterIndex) {
   const getCounter: Selector<Counter> = (state) =>
-    ensureExists(
-      getProfile(state).counters,
-      'Attempting to get a counter by index, but no counters exist.'
-    )[counterIndex];
+    processCounter(
+      ensureExists(
+        getProfile(state).counters,
+        'Attempting to get a counter by index, but no counters exist.'
+      )[counterIndex]
+    );
 
   const getDescription: Selector<string> = (state) =>
     getCounter(state).description;
 
   const getPid: Selector<Pid> = (state) => getCounter(state).pid;
 
-  const getCommittedRangeFilteredCounter: Selector<Counter> = createSelector(
-    getCounter,
-    getCommittedRange,
-    (counters, range) => filterCounterToRange(counters, range.start, range.end)
+  const getCommittedRangeCounterSampleRanges: Selector<
+    Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
+  > = createSelector(getCounter, getCommittedRange, (counter, range) =>
+    counter.sampleGroups.map((group) =>
+      getInclusiveSampleIndexRangeForSelection(
+        group.samples,
+        range.start,
+        range.end
+      )
+    )
   );
 
   const getAccumulateCounterSamples: Selector<
     Array<AccumulatedCounterSamples>
-  > = createSelector(getCommittedRangeFilteredCounter, (counters) =>
-    accumulateCounterSamples(
-      counters.sampleGroups.map((group) => group.samples)
-    )
+  > = createSelector(
+    getCounter,
+    getCommittedRangeCounterSampleRanges,
+    (counters, sampleRanges) =>
+      accumulateCounterSamples(
+        counters.sampleGroups.map((group) => group.samples),
+        sampleRanges
+      )
   );
 
   const getMaxCounterSampleCountsPerMs: Selector<Array<number>> =
@@ -303,15 +317,12 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     createSelector(
       getCounter,
       getProfileInterval,
-      getCommittedRange,
-      (counters, profileInterval, range) =>
+      getCommittedRangeCounterSampleRanges,
+      (counters, profileInterval, sampleRange) =>
         computeMaxCounterSampleCountsPerMs(
-          filterCounterToRange(
-            counters,
-            range.start,
-            range.end
-          ).sampleGroups.map((group) => group.samples),
-          profileInterval
+          counters.sampleGroups.map((group) => group.samples),
+          profileInterval,
+          sampleRange
         )
     );
 
@@ -319,10 +330,10 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getCounter,
     getDescription,
     getPid,
-    getCommittedRangeFilteredCounter,
     getAccumulateCounterSamples,
     getMaxCounterSampleCountsPerMs,
     getMaxRangeCounterSampleCountsPerMs,
+    getCommittedRangeCounterSampleRanges,
   };
 }
 
