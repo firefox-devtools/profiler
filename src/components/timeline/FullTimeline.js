@@ -26,7 +26,6 @@ import {
   getGlobalTrackOrder,
   getTimelineType,
   getPanelLayoutGeneration,
-  getIsCPUUtilizationProvided,
 } from 'firefox-profiler/selectors';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -72,7 +71,6 @@ type StateProps = {|
   +hiddenTrackCount: HiddenTrackCount,
   +activeTabID: TabID | null,
   +timelineTrackOrganization: TimelineTrackOrganization,
-  +isCPUUtilizationProvided: boolean,
 |};
 
 type DispatchProps = {|
@@ -90,62 +88,6 @@ type Props = {|
 type State = {|
   initialSelected: InitialSelectedTrackReference | null,
 |};
-
-class TimelineSettingsGraphType extends React.PureComponent<{|
-  +timelineType: TimelineType,
-  +changeTimelineType: typeof changeTimelineType,
-  +isCPUUtilizationProvided: boolean,
-|}> {
-  _changeToCategories = () => this.props.changeTimelineType('category');
-  _changeToCPUCategories = () => this.props.changeTimelineType('cpu-category');
-  _changeToStacks = () => this.props.changeTimelineType('stack');
-
-  render() {
-    const { timelineType, isCPUUtilizationProvided } = this.props;
-
-    return (
-      <form>
-        <div className="timelineSettingsToggle">
-          <Localized id="FullTimeline--graph-type">Graph type:</Localized>
-          {isCPUUtilizationProvided ? (
-            <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
-              <input
-                type="radio"
-                name="timelineSettingsToggle"
-                className="photon-radio photon-radio-micro timelineSettingsToggleInput"
-                checked={timelineType === 'cpu-category'}
-                onChange={this._changeToCPUCategories}
-              />
-              <Localized id="FullTimeline--categories-with-cpu">
-                Categories with CPU
-              </Localized>
-            </label>
-          ) : null}
-          <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
-            <input
-              type="radio"
-              name="timelineSettingsToggle"
-              className="photon-radio photon-radio-micro timelineSettingsToggleInput"
-              checked={timelineType === 'category'}
-              onChange={this._changeToCategories}
-            />
-            <Localized id="FullTimeline--categories">Categories</Localized>
-          </label>
-          <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
-            <input
-              type="radio"
-              name="timelineSettingsToggle"
-              className="photon-radio photon-radio-micro timelineSettingsToggleInput"
-              checked={timelineType === 'stack'}
-              onChange={this._changeToStacks}
-            />
-            <Localized id="FullTimeline--stack-height">Stack height</Localized>
-          </label>
-        </div>
-      </form>
-    );
-  }
-}
 
 class TimelineSettingsHiddenTracks extends React.PureComponent<{|
   +hiddenTrackCount: HiddenTrackCount,
@@ -269,7 +211,6 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       activeTabID,
       timelineTrackOrganization,
       changeTimelineTrackOrganization,
-      isCPUUtilizationProvided,
     } = this.props;
 
     // Do not include the left and right margins when computing the timeline width.
@@ -283,11 +224,6 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
             '--timeline-settings-height': `${TIMELINE_SETTINGS_HEIGHT}px`,
           }}
         >
-          <TimelineSettingsGraphType
-            timelineType={timelineType}
-            changeTimelineType={changeTimelineType}
-            isCPUUtilizationProvided={isCPUUtilizationProvided}
-          />
           {/*
             Removing the active tab view checkbox for now.
             TODO: Bring it back once we are done with the new active tab UI implementation.
@@ -356,7 +292,6 @@ export const FullTimeline = explicitConnect<{||}, StateProps, DispatchProps>({
     hiddenTrackCount: getHiddenTrackCount(state),
     activeTabID: getActiveTabID(state),
     timelineTrackOrganization: getTimelineTrackOrganization(state),
-    isCPUUtilizationProvided: getIsCPUUtilizationProvided(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,

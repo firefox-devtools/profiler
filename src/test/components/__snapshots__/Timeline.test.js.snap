@@ -4,36 +4,7 @@ exports[`Timeline renders the header 1`] = `
 <div
   class="timelineSettings"
   style="--timeline-settings-height: 26px;"
->
-  <form>
-    <div
-      class="timelineSettingsToggle"
-    >
-      Graph type:
-      <label
-        class="photon-label photon-label-micro timelineSettingsToggleLabel"
-      >
-        <input
-          checked=""
-          class="photon-radio photon-radio-micro timelineSettingsToggleInput"
-          name="timelineSettingsToggle"
-          type="radio"
-        />
-        Categories
-      </label>
-      <label
-        class="photon-label photon-label-micro timelineSettingsToggleLabel"
-      >
-        <input
-          class="photon-radio photon-radio-micro timelineSettingsToggleInput"
-          name="timelineSettingsToggle"
-          type="radio"
-        />
-        Stack height
-      </label>
-    </div>
-  </form>
-</div>
+/>
 `;
 
 exports[`Timeline renders the header 2`] = `
