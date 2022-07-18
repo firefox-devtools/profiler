@@ -30,36 +30,6 @@
   list-style: none;
 }
 
-.timelineSettings {
-  display: flex;
-  height: var(--timeline-settings-height);
-
-  /* Ensure the --timeline-settings-height defines the outer height of the component. */
-  box-sizing: border-box;
-  flex: none;
-  flex-flow: row nowrap;
-  padding: 0;
-  border-bottom: 1px solid var(--grey-30);
-  color: var(--ink-70);
-  line-height: 25px;
-  white-space: nowrap;
-}
-
-.timelineSettingsToggle {
-  display: flex;
-  padding: 0 8px;
-  border-right: 1px solid var(--grey-30);
-}
-
-.timelineSettingsToggleInput {
-  margin: 0 5px;
-  vertical-align: middle;
-}
-
-.timelineSettingsToggleLabel {
-  padding: 0;
-}
-
 .timelineSettingsHiddenTracks {
   /* Make sure and override all rules that have to do with button defaults. */
   position: relative;

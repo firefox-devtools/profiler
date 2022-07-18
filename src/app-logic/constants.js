@@ -18,8 +18,6 @@ export const TIMELINE_MARGIN_RIGHT = 15;
 export const TIMELINE_MARGIN_LEFT = 150;
 export const ACTIVE_TAB_TIMELINE_MARGIN_LEFT = 0;
 
-export const TIMELINE_SETTINGS_HEIGHT = 26;
-
 // Export the value for tests, and for computing the max height of the timeline
 // for the splitter.
 export const FULL_TRACK_SCREENSHOT_HEIGHT = 50;

@@ -10,10 +10,7 @@ import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import {
-  autoMockCanvasContext,
-  flushDrawLog,
-} from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import {
@@ -371,28 +368,6 @@ describe('Timeline', function () {
       .mockImplementation(() =>
         getElementWithFixedSize({ width: 200, height: 300 })
       );
-  });
-
-  it('renders the header', () => {
-    const flushRafCalls = mockRaf();
-    window.devicePixelRatio = 1;
-
-    const profile = _getProfileWithDroppedSamples();
-
-    const { container } = render(
-      <Provider store={storeWithProfile(profile)}>
-        <Timeline />
-      </Provider>
-    );
-
-    flushRafCalls();
-
-    const drawCalls = flushDrawLog();
-
-    expect(container.firstChild).toMatchSnapshot();
-    expect(drawCalls).toMatchSnapshot();
-
-    delete window.devicePixelRatio;
   });
 
   it('displays a context menu when right clicking global and local tracks', () => {

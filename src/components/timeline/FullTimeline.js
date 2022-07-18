@@ -24,11 +24,6 @@ import {
   getGlobalTrackOrder,
   getPanelLayoutGeneration,
 } from 'firefox-profiler/selectors';
-import {
-  TIMELINE_MARGIN_LEFT,
-  TIMELINE_MARGIN_RIGHT,
-  TIMELINE_SETTINGS_HEIGHT,
-} from 'firefox-profiler/app-logic/constants';
 import { TimelineTrackContextMenu } from './TrackContextMenu';
 
 import './index.css';
@@ -151,18 +146,9 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       changeRightClickedTrack,
     } = this.props;
 
-    // Do not include the left and right margins when computing the timeline width.
-    const timelineWidth = width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
-
     return (
       <>
-        <div
-          className="timelineSettings"
-          style={{
-            '--timeline-settings-height': `${TIMELINE_SETTINGS_HEIGHT}px`,
-          }}
-        ></div>
-        <TimelineSelection width={timelineWidth}>
+        <TimelineSelection width={width}>
           <div className="timelineHeader">
             <TimelineSettingsHiddenTracks
               hiddenTrackCount={hiddenTrackCount}
@@ -172,7 +158,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
               zeroAt={zeroAt}
               rangeStart={committedRange.start}
               rangeEnd={committedRange.end}
-              width={timelineWidth}
+              width={width}
             />
           </div>
           <OverflowEdgeIndicator
