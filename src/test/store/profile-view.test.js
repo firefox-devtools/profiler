@@ -3725,10 +3725,12 @@ describe('mouseTimePosition', function () {
 });
 
 describe('timeline type', function () {
-  it('should default to the category view', () => {
+  it('should default to the cpu-category view', () => {
     const { profile } = getProfileFromTextSamples('A');
     const { getState } = storeWithProfile(profile);
-    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual(
+      'cpu-category'
+    );
   });
 
   it('should use the stack height view when using an imported profile', () => {

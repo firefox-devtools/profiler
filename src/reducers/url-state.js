@@ -226,7 +226,10 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
   }
 };
 
-const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
+const timelineType: Reducer<TimelineType> = (
+  state = 'cpu-category',
+  action
+) => {
   switch (action.type) {
     case 'PROFILE_LOADED':
       if (!action.profile.meta.categories) {
