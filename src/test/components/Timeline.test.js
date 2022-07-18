@@ -27,7 +27,6 @@ import {
 } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
 import {
-  getTimelineTrackOrganization,
   selectedThreadSelectors,
   getRightClickedTrack,
 } from 'firefox-profiler/selectors';
@@ -442,57 +441,6 @@ describe('Timeline', function () {
     expect(screen.getByText(/Only show “/)).toHaveTextContent(
       'Only show “\u2068Style\u2069”'
     );
-  });
-
-  // These tests are disabled for now because active tab view checkbox is disabled for now.
-  // TODO: Enable it again once we have that checbox back.
-  // eslint-disable-next-line jest/no-disabled-tests
-  describe.skip('TimelineSettingsActiveTabView', function () {
-    autoMockCanvasContext();
-
-    it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {
-      const store = storeWithProfile();
-      render(
-        <Provider store={store}>
-          <Timeline />
-        </Provider>
-      );
-
-      expect(
-        screen.queryByText('Show active tab only')
-      ).not.toBeInTheDocument();
-    });
-
-    it('can switch between active tab view and advanced view', () => {
-      const profile = _getProfileWithDroppedSamples();
-      profile.meta.configuration = {
-        threads: [],
-        features: [],
-        capacity: 1000000,
-        activeTabID: 123,
-      };
-      const store = storeWithProfile(profile);
-      render(
-        <Provider store={store}>
-          <Timeline />
-        </Provider>
-      );
-
-      expect(getTimelineTrackOrganization(store.getState())).toEqual({
-        type: 'full',
-      });
-
-      fireFullClick(screen.getByText('Show active tab only'));
-      expect(getTimelineTrackOrganization(store.getState())).toEqual({
-        type: 'active-tab',
-        tabID: 123,
-      });
-
-      fireFullClick(screen.getByText('Show active tab only'));
-      expect(getTimelineTrackOrganization(store.getState())).toEqual({
-        type: 'full',
-      });
-    });
   });
 
   describe('TimelineSettingsHiddenTracks', () => {
