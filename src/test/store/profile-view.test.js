@@ -18,6 +18,7 @@ import {
   getProfileWithJsAllocations,
   addActiveTabInformationToProfile,
   getProfileWithEventDelays,
+  getProfileWithThreadCPUDelta,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
@@ -3725,15 +3726,23 @@ describe('mouseTimePosition', function () {
 });
 
 describe('timeline type', function () {
-  it('should default to the cpu-category view', () => {
-    const { profile } = getProfileFromTextSamples('A');
+  it('should use the cpu-category view when CPU usage is provided', () => {
+    const profile = getProfileWithThreadCPUDelta([[1, 2, 1]]);
     const { getState } = storeWithProfile(profile);
     expect(UrlStateSelectors.getTimelineType(getState())).toEqual(
       'cpu-category'
     );
   });
 
-  it('should use the stack height view when using an imported profile', () => {
+  it('should use the category view when cpu is not provided', () => {
+    const { profile } = getProfileFromTextSamples('A');
+
+    // Load the store after mutating the profile.
+    const { getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
+  });
+
+  it('should use the stack height view when category and cpu is not provided', () => {
     const { profile } = getProfileFromTextSamples('A');
     delete profile.meta.categories;
 

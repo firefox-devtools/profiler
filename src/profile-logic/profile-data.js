@@ -74,6 +74,7 @@ import type {
   MarkerPayload,
   Address,
   AddressProof,
+  TimelineType,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -3433,4 +3434,33 @@ export function findAddressProofForFile(
     };
   }
   return null;
+}
+
+/**
+ * Determines the timeline type by looking at the profile data.
+ *
+ * There are three options:
+ * 'cpu-category': If a profile has both category and cpu usage information.
+ * 'category': If a profile has category information but not the cpu usage.
+ * 'stack': If a profile doesn't have category or cpu usage information.
+ */
+export function determineTimelineType(profile: Profile): TimelineType {
+  if (!profile.meta.categories) {
+    // Profile doesn't have categories. We don't have enough information to draw
+    // a proper category view with activity graph. Use the stack chart instead.
+    // It can be either an imported or a very old profile.
+    return 'stack';
+  }
+
+  if (
+    !profile.meta.sampleUnits ||
+    !profile.threads.some((thread) => thread.samples.threadCPUDelta)
+  ) {
+    // Have category information but doesn't have the CPU usage information.
+    // Use 'category'.
+    return 'category';
+  }
+
+  // Have both category and CPU usage information. Use 'cpu-category'.
+  return 'cpu-category';
 }

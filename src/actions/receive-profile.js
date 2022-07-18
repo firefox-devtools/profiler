@@ -33,7 +33,6 @@ import {
   getProfile,
   getView,
   getRelevantPagesForActiveTab,
-  getIsCPUUtilizationProvided,
   getSymbolServerUrl,
   getActiveTabID,
 } from 'firefox-profiler/selectors';
@@ -58,6 +57,7 @@ import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-ta
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
+import { determineTimelineType } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   RequestedLib,
@@ -335,20 +335,9 @@ export function finalizeFullProfileView(
       profile
     );
 
-    // Check the profile to see if we have threadCPUDelta values and switch to
-    // the category view with CPU if we have. This is needed only while we are
-    // still experimenting with the new activity graph. We should remove this
-    // when we have this on by default.
     let timelineType = null;
-    if (
-      !hasUrlInfo &&
-      profile.meta.sampleUnits &&
-      profile.threads.some((thread) => thread.samples.threadCPUDelta)
-    ) {
-      const hasCPUDeltaValues = getIsCPUUtilizationProvided(getState());
-      if (hasCPUDeltaValues) {
-        timelineType = 'cpu-category';
-      }
+    if (!hasUrlInfo) {
+      timelineType = determineTimelineType(profile);
     }
 
     withHistoryReplaceStateSync(() => {
@@ -588,15 +577,8 @@ export function finalizeActiveTabProfileView(
     // still experimenting with the new activity graph. We should remove this
     // when we have this on by default.
     let timelineType = null;
-    if (
-      !hasUrlInfo &&
-      profile.meta.sampleUnits &&
-      profile.threads[0].samples.threadCPUDelta
-    ) {
-      const hasCPUDeltaValues = getIsCPUUtilizationProvided(getState());
-      if (hasCPUDeltaValues) {
-        timelineType = 'cpu-category';
-      }
+    if (!hasUrlInfo) {
+      timelineType = determineTimelineType(profile);
     }
 
     dispatch({
