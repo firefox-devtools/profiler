@@ -179,8 +179,7 @@ export const TimelineLocalTrack = explicitConnect<
         const selectors = getThreadSelectors(threadIndex);
         isSelected =
           selectedThreadIndexes.has(threadIndex) &&
-          selectedTab !== 'network-chart' &&
-          selectedTab !== 'event-delay';
+          selectedTab !== 'network-chart';
         titleText = selectors.getThreadProcessDetails(state);
         break;
       }
@@ -209,11 +208,8 @@ export const TimelineLocalTrack = explicitConnect<
       case 'event-delay': {
         // Look up the thread information for the process if it exists.
         const threadIndex = localTrack.threadIndex;
-        const selectedTab = getSelectedTab(state);
         const selectors = getThreadSelectors(threadIndex);
-        isSelected =
-          threadIndex === selectedThreadIndexes.has(threadIndex) &&
-          selectedTab !== 'event-delay';
+        isSelected = threadIndex === selectedThreadIndexes.has(threadIndex);
         titleText =
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
         break;
