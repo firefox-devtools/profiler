@@ -1,4 +1,4 @@
-# Profiling Firefox for android directly on device
+# Profiling Firefox for Android directly on device
 
 The Firefox Profiler can be used without the remote debugging option. It offers a little less flexibility (can't edit the options and the profile is 
 automatically uploaded). However, it does allow you to capture a profile without the need of a PC.
