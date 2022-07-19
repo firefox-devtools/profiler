@@ -7,7 +7,11 @@ import * as React from 'react';
 
 import { Backtrace } from './Backtrace';
 import { TooltipDetailSeparator } from '../tooltip/TooltipDetails';
-import { getCategoryPairLabel } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getCategoryPairLabel,
+  getFuncNamesAndOriginsForPath,
+  convertStackToCallNodeAndCategoryPath,
+} from 'firefox-profiler/profile-logic/profile-data';
 import {
   formatMilliseconds,
   formatPercent,
@@ -20,6 +24,7 @@ import type {
   Thread,
 } from 'firefox-profiler/types';
 import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
+import { ensureExists } from '../../utils/flow';
 
 type CPUProps = CpuRatioInTimeRange;
 
@@ -52,7 +57,6 @@ class SampleTooltipCPUContents extends React.PureComponent<CPUProps> {
       <div className="tooltipDetails">
         <div className="tooltipLabel">CPU:</div>
         <div>{cpuUsageAndPercentage}</div>
-        <TooltipDetailSeparator />
       </div>
     );
   }
@@ -117,6 +121,22 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       categories,
       implementationFilter,
     } = this.props;
+
+    const { samples, stackTable } = rangeFilteredThread;
+    const stackIndex = samples.stack[sampleIndex];
+    const hasSamples = samples.length > 0 && stackTable.length > 1;
+    let hasStack = false;
+    if (hasSamples) {
+      const stack = getFuncNamesAndOriginsForPath(
+        convertStackToCallNodeAndCategoryPath(
+          rangeFilteredThread,
+          ensureExists(stackIndex)
+        ),
+        rangeFilteredThread
+      );
+      hasStack = stack.length > 1 || stack[0].funcName !== '(root)';
+    }
+
     return (
       <>
         {cpuRatioInTimeRange === null ? null : (
@@ -125,12 +145,17 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
             timeRange={cpuRatioInTimeRange.timeRange}
           />
         )}
-        <SampleTooltipRestContents
-          sampleIndex={sampleIndex}
-          rangeFilteredThread={rangeFilteredThread}
-          categories={categories}
-          implementationFilter={implementationFilter}
-        />
+        {hasStack && cpuRatioInTimeRange !== null ? (
+          <TooltipDetailSeparator />
+        ) : null}
+        {!hasStack ? null : (
+          <SampleTooltipRestContents
+            sampleIndex={sampleIndex}
+            rangeFilteredThread={rangeFilteredThread}
+            categories={categories}
+            implementationFilter={implementationFilter}
+          />
+        )}
       </>
     );
   }

@@ -5,7 +5,11 @@
 // @flow
 import { createSelector } from 'reselect';
 
-import { tabSlugs, type TabSlug } from '../../app-logic/tabs-handling';
+import {
+  tabSlugs,
+  type TabSlug,
+  tabsShowingSampleData,
+} from '../../app-logic/tabs-handling';
 
 import type {
   Selector,
@@ -21,6 +25,8 @@ import type {
   StackTiming,
   StackTimingByDepth,
 } from '../../profile-logic/stack-timing';
+
+import { ensureExists } from '../../utils/flow';
 
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
@@ -59,7 +65,15 @@ export function getComposedSelectorsPerThread(
     threadSelectors.getThread,
     threadSelectors.getIsNetworkChartEmptyInFullRange,
     threadSelectors.getJsTracerTable,
-    ({ processType }, isNetworkChartEmpty, jsTracerTable) => {
+    (thread, isNetworkChartEmpty, jsTracerTable) => {
+      const {
+        processType,
+        samples,
+        stackTable,
+        stringTable,
+        frameTable,
+        funcTable,
+      } = thread;
       if (processType === 'comparison') {
         // For a diffing tracks, we display only the calltree tab for now, because
         // other views make no or not much sense.
@@ -75,6 +89,27 @@ export function getComposedSelectorsPerThread(
       }
       if (!jsTracerTable) {
         visibleTabs = visibleTabs.filter((tabSlug) => tabSlug !== 'js-tracer');
+      }
+      let hasSamples = samples.length > 0 && stackTable.length > 0;
+      if (hasSamples) {
+        const stackIndex = ensureExists(samples.stack[0]);
+        if (stackTable.prefix[stackIndex] === null) {
+          // There's only a single stack frame, check if it's '(root)'.
+          const frameIndex = stackTable.frame[stackIndex];
+          const funcIndex = frameTable.func[frameIndex];
+          const stringIndex = funcTable.name[funcIndex];
+          if (stringTable.getString(stringIndex) === '(root)') {
+            // If the first sample's stack is only the root, check if any other
+            // sample is different.
+            hasSamples = samples.stack.some((s) => s !== stackIndex);
+          }
+        }
+      }
+
+      if (!hasSamples) {
+        visibleTabs = visibleTabs.filter(
+          (tabSlug) => !tabsShowingSampleData.includes(tabSlug)
+        );
       }
       return visibleTabs;
     }
