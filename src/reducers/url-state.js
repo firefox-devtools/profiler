@@ -231,8 +231,6 @@ const timelineType: Reducer<TimelineType> = (
   action
 ) => {
   switch (action.type) {
-    case 'PROFILE_LOADED':
-      return state;
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
     case 'VIEW_FULL_PROFILE':
