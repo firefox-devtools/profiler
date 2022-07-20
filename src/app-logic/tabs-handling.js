@@ -40,3 +40,9 @@ export const tabsWithTitleL10nIdArray: $ReadOnlyArray<TabsWithTitleL10nId> =
     name: tabSlug,
     title: tabsWithTitleL10nId[tabSlug],
   }));
+
+export const tabsShowingSampleData: $ReadOnlyArray<TabSlug> = [
+  'calltree',
+  'flame-graph',
+  'stack-chart',
+];

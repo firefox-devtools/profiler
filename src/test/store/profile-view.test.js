@@ -441,12 +441,12 @@ describe('actions/ProfileView', function () {
       it('can switch back to the thread, which remembers the last viewed panel', function () {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
-        dispatch(App.changeSelectedTab('flame-graph'));
+        dispatch(App.changeSelectedTab('marker-table'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
         );
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'flame-graph'
+          'marker-table'
         );
         dispatch(ProfileView.selectTrack(networkTrack, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
@@ -460,7 +460,7 @@ describe('actions/ProfileView', function () {
           new Set([0])
         );
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'flame-graph'
+          'marker-table'
         );
       });
     });
@@ -519,9 +519,15 @@ describe('actions/ProfileView', function () {
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'calltree'
         );
+        // The thread with the memory track doesn't have samples, so switch to
+        // a tab that exists even for tables without samples.
+        dispatch(App.changeSelectedTab('marker-table'));
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'marker-table'
+        );
         dispatch(ProfileView.selectTrack(memoryTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
+          'marker-table'
         );
       });
     });
