@@ -79,7 +79,7 @@
     "query-string": "^7.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-intersection-observer": "^9.3.4",
+    "react-intersection-observer": "^9.3.5",
     "react-redux": "^8.0.2",
     "react-splitter-layout": "^4.0.0",
     "react-transition-group": "^4.4.2",
