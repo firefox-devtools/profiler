@@ -82,56 +82,61 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     updatedWhileNotReady: false,
   };
 
+  _workbox: Workbox | null = null;
+
   _installServiceWorker() {
-    const runtime = require('offline-plugin/runtime');
-    runtime.install({
-      onInstalled: () => {
-        console.log('[ServiceWorker] App is ready for offline usage!');
-      },
-      onUpdating: () => {
-        // XXX Strangely, this doesn't seem to be called...
-        console.log(
-          '[ServiceWorker] An update has been found and the browser is downloading the new assets.'
-        );
-      },
-      onUpdateReady: () => {
-        console.log(
-          '[ServiceWorker] We have downloaded the new assets and we are ready to go.'
-        );
-        this.setState({
-          installStatus: 'pending',
-          isNoticeDisplayed: true,
-        });
-      },
-      onUpdated: () => {
-        // The update could have been triggered by this tab or another tab.
-        // We distinguish these cases by looking at this.state.installStatus.
-        console.log(
-          '[ServiceWorker] The new version of the application has been enabled.'
-        );
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
 
-        if (this.state.installStatus === 'installing') {
-          // In this page the user clicked on the "reload" button.
-          this.reloadPage();
-          return;
-        }
+    const wb = (this._workbox = new Workbox('/sw.js'));
+    wb.register();
 
-        // In another page, the user clicked on the "reload" button.
+    wb.addEventListener('installing', () => {
+      console.log(
+        '[ServiceWorker] An update has been found and the browser is downloading the new assets.'
+      );
+    });
 
-        const ready =
-          !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
+    wb.addEventListener('installed', () => {
+      // We cached all assets.
+      console.log('[ServiceWorker] App is ready for offline usage!');
+    });
 
-        this.setState({
-          installStatus: 'installed',
-          // But if we weren't quite ready, we should write it in the notice.
-          updatedWhileNotReady: !ready,
-        });
-      },
-      onUpdateFailed: () => {
-        console.log(
-          '[ServiceWorker] We failed to update the application for an unknown reason.'
-        );
-      },
+    wb.addEventListener('waiting', () => {
+      // Update is ready to be applied.
+      console.log(
+        '[ServiceWorker] We have downloaded the new assets and we are ready to go.'
+      );
+      this.setState({
+        installStatus: 'pending',
+        isNoticeDisplayed: true,
+      });
+    });
+
+    wb.addEventListener('activated', () => {
+      // The update could have been triggered by this tab or another tab.
+      // We distinguish these cases by looking at this.state.installStatus.
+      console.log(
+        '[ServiceWorker] The new version of the application has been enabled.'
+      );
+
+      if (this.state.installStatus === 'installing') {
+        // In this page the user clicked on the "reload" button.
+        this.reloadPage();
+        return;
+      }
+
+      // In another page, the user clicked on the "reload" button.
+
+      const ready =
+        !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
+
+      this.setState({
+        installStatus: 'installed',
+        // But if we weren't quite ready, we should write it in the notice.
+        updatedWhileNotReady: !ready,
+      });
     });
   }
 
@@ -229,6 +234,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     const { installStatus } = this.state;
 
     if (
+      this._workbox &&
       installStatus !== 'idle' &&
       phase === 'FATAL_ERROR' &&
       dataSource !== 'from-file' // we can't reload and keep the context for this dataSource.
@@ -236,16 +242,17 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       // If we got a fatal error and a new version of the application is
       // available, let's try to reload automatically, as this might fix the
       // fatal error.
-      const runtime = require('offline-plugin/runtime');
-      runtime.applyUpdate();
+      this._workbox.messageSkipWaiting();
       this.reloadPage();
     }
   }
 
   applyServiceWorkerUpdate = () => {
-    this.setState({ installStatus: 'installing' });
-    const runtime = require('offline-plugin/runtime');
-    runtime.applyUpdate();
+    const wb = this._workbox;
+    if (wb) {
+      this.setState({ installStatus: 'installing' });
+      wb.messageSkipWaiting();
+    }
   };
 
   reloadPage = () => {
