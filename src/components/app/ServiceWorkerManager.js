@@ -5,6 +5,7 @@
 
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
+import { Workbox } from 'workbox-window';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
