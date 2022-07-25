@@ -29,7 +29,7 @@ type StateProps = {|
 |};
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-type InstallStatus = 'pending' | 'installing' | 'installed' | 'idle';
+type InstallStatus = 'pending' | 'activating' | 'activated' | 'idle';
 type State = {|
   installStatus: InstallStatus,
   isNoticeDisplayed: boolean,
@@ -121,7 +121,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         '[ServiceWorker] The new version of the application has been enabled.'
       );
 
-      if (this.state.installStatus === 'installing') {
+      if (this.state.installStatus === 'activating') {
         // In this page the user clicked on the "reload" button.
         this.reloadPage();
         return;
@@ -133,7 +133,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
 
       this.setState({
-        installStatus: 'installed',
+        installStatus: 'activated',
         // But if we weren't quite ready, we should write it in the notice.
         updatedWhileNotReady: !ready,
       });
@@ -250,7 +250,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   applyServiceWorkerUpdate = () => {
     const wb = this._workbox;
     if (wb) {
-      this.setState({ installStatus: 'installing' });
+      this.setState({ installStatus: 'activating' });
       wb.messageSkipWaiting();
     }
   };
@@ -267,14 +267,14 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     const { installStatus } = this.state;
 
     switch (installStatus) {
-      case 'installing':
+      case 'activating':
         return (
-          <Localized id="ServiceWorkerManager--installing-button">
+          <Localized id="ServiceWorkerManager--applying-button">
             <button
               className="photon-button photon-button-micro photon-message-bar-action-button"
               type="button"
             >
-              Installing…
+              Applying…
             </button>
           </Localized>
         );
@@ -294,7 +294,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
             </button>
           </Localized>
         );
-      case 'installed':
+      case 'activated':
         // Another tab applied the new service worker.
         return (
           <Localized id="ServiceWorkerManager--installed-button">

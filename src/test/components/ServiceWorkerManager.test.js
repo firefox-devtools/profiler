@@ -194,7 +194,7 @@ describe('app/ServiceWorkerManager', () => {
       fireFullClick(reloadButton);
 
       expect(instance.messageSkipWaiting).toHaveBeenCalled();
-      expect(reloadButton).toHaveTextContent('Installing…');
+      expect(reloadButton).toHaveTextContent('Applying…');
 
       // And we should now reload automatically when the SW is fully updated.
       instance.dispatchEvent('activated');
