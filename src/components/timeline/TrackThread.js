@@ -277,6 +277,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               enableCPUUsage={enableCPUUsage}
               maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
               implementationFilter={implementationFilter}
+              timelineType={timelineType}
             />
             {trackType === 'expanded' ? (
               <ThreadSampleGraph

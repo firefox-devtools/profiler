@@ -223,11 +223,6 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
-FullTimeline--graph-type = Graph type:
-FullTimeline--categories-with-cpu = Categories with CPU
-FullTimeline--categories = Categories
-FullTimeline--stack-height = Stack height
-
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
