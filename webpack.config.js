@@ -21,11 +21,10 @@ const availableStagingLocales = process.env.L10N
   : JSON.stringify(undefined);
 
 const config = {
-  entry: ['./src/index'],
+  entry: './src/index',
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[hash].bundle.js',
-    chunkFilename: '[id].[hash].bundle.js',
+    filename: '[name].[hash].bundle.js',
     publicPath: '/',
   },
   mode: process.env.NODE_ENV,
@@ -101,12 +100,13 @@ const config = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'res/_headers' },
-        { from: 'res/_redirects' },
+        'res/_headers',
+        'res/_redirects',
+        'res/zee-worker.js',
+        'res/before-load.js',
+        'res/contribute.json',
+        'res/service-worker-compat.js',
         { from: 'docs-user', to: 'docs' },
-        { from: 'res/zee-worker.js' },
-        { from: 'res/before-load.js' },
-        { from: 'res/contribute.json' },
         { from: 'locales', to: 'locales' },
       ],
     }),
@@ -132,6 +132,15 @@ if (config.mode === 'production') {
       // service worker.
       maximumFileSizeToCacheInBytes:
         config.mode === 'development' ? 10 * 1024 * 1024 : 2 * 1024 * 1024,
+      // All scripts, including imported scripts, will be requested bypassing
+      // HTTP cache, to determine if an update is needed, because we use
+      // `updateViaCache: none` during the register. That's why we don't need to
+      // use a hash or version in this file name.
+      // For more information and background, see:
+      // - discussion in https://github.com/w3c/ServiceWorker/issues/106
+      // - chrome update in https://developer.chrome.com/blog/fresher-sw/
+      // - step 8.21 in https://w3c.github.io/ServiceWorker/#update-algorithm
+      importScripts: ['/service-worker-compat.js'],
       navigateFallbackDenylist: [
         // requests to docs and photon example pages shouldn't be redirected to
         // the index file as they're not part of the SPA
@@ -151,6 +160,8 @@ if (config.mode === 'production') {
         '_redirects',
         // do not cache source maps
         /.map$/,
+        // nor the service worker imported script
+        'service-worker-compat.js',
       ],
       // This is the service worker file name. It should never change if we want
       // that the browser updates it. If this changes it will never be updated

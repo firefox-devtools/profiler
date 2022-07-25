@@ -158,7 +158,9 @@ describe('app/ServiceWorkerManager', () => {
 
       const { container, getCloseButton, getReloadButton, getWorkboxInstance } =
         setup();
-      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js');
+      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
+        updateViaCache: 'none',
+      });
 
       const instance = getWorkboxInstance();
       expect(instance.register).toHaveBeenCalled();

@@ -89,7 +89,19 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       return;
     }
 
-    const wb = (this._workbox = new Workbox('/sw.js'));
+    const wb = (this._workbox = new Workbox('/sw.js', {
+      // With this option, all scripts, including imported scripts, will be
+      // requested bypassing HTTP cache, to determine if an update is needed.
+      // The default is to bypass cache only for the serviceworker script but
+      // otherwise use the cache for the imported scripts, this property changes
+      // this behavior. We do this so that we can simply copy the imported file
+      // service-worker-compat.js without adding a hash to the file name.
+      // For more information and background, see:
+      // - discussion in https://github.com/w3c/ServiceWorker/issues/106
+      // - chrome update in https://developer.chrome.com/blog/fresher-sw/
+      // - step 8.21 in https://w3c.github.io/ServiceWorker/#update-algorithm
+      updateViaCache: 'none',
+    }));
     wb.register();
 
     wb.addEventListener('installing', () => {
