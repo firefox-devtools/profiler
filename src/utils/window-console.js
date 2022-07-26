@@ -127,6 +127,26 @@ export function addDataToWindowObject(
     }
   };
 
+  target.toggleTimelineType = function (timelineType?: string) {
+    if (
+      timelineType !== 'cpu-category' &&
+      timelineType !== 'category' &&
+      timelineType !== 'stack'
+    ) {
+      console.log(stripIndent`
+        ❗ The timeline type "${timelineType}" is unknown.
+        💡 Valid types are: "cpu-category", "category", or "stack".
+        Please try again 😊
+      `);
+      return;
+    }
+
+    dispatch(actions.changeTimelineType(timelineType));
+    console.log(stripIndent`
+      ✅ The timeline type "${timelineType}" is now enabled for the timeline.
+    `);
+  };
+
   target.getState = getState;
   target.selectors = selectorsForConsole;
   target.dispatch = dispatch;
@@ -183,6 +203,7 @@ export function logFriendlyPreamble() {
       %cwindow.actions%c - All the actions that can be dispatched to change the state.
       %cwindow.experimental%c - The object that holds flags of all the experimental features.
       %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
+      %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category", "category", or "stack".
 
       The profile format is documented here:
       %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
@@ -221,6 +242,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.togglePseudoLocalization"
+    bold,
+    reset,
+    // "window.toggleTimelineType"
     bold,
     reset,
     // "processed-profile-format.md"

@@ -1339,6 +1339,67 @@ describe('url upgrading', function () {
     });
   });
 
+  describe('version 7: change default timeline type', function () {
+    it('removes the explicit cpu-category from the url', function () {
+      const { getState } = _getStoreWithURL({
+        pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+        search: '?timelineType=cpu-category',
+        v: 6,
+      });
+
+      expect(urlStateSelectors.getTimelineType(getState())).toBe(
+        'cpu-category'
+      );
+
+      const newUrl = new URL(
+        urlFromState(urlStateSelectors.getUrlState(getState())),
+        'https://profiler.firefox.com'
+      );
+      const query = queryString.parse(newUrl.search.substr(1), {
+        arrayFormat: 'bracket',
+      });
+      expect(query.timelineType).toBeFalsy();
+    });
+
+    it('add an explicit category from the url', function () {
+      const { getState } = _getStoreWithURL({
+        pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+        search: '',
+        v: 6,
+      });
+
+      expect(urlStateSelectors.getTimelineType(getState())).toBe('category');
+
+      const newUrl = new URL(
+        urlFromState(urlStateSelectors.getUrlState(getState())),
+        'https://profiler.firefox.com'
+      );
+      const query = queryString.parse(newUrl.search.substr(1), {
+        arrayFormat: 'bracket',
+      });
+      expect(query.timelineType).toBe('category');
+    });
+
+    it('keeps stack category the same', function () {
+      const { getState } = _getStoreWithURL({
+        pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+        search: '?timelineType=stack',
+        v: 6,
+      });
+
+      expect(urlStateSelectors.getTimelineType(getState())).toBe('stack');
+
+      const newUrl = new URL(
+        urlFromState(urlStateSelectors.getUrlState(getState())),
+        'https://profiler.firefox.com'
+      );
+      const query = queryString.parse(newUrl.search.substr(1), {
+        arrayFormat: 'bracket',
+      });
+      expect(query.timelineType).toBe('stack');
+    });
+  });
+
   // More general checks
   it("won't run if the current version is specified", function () {
     const { getState } = _getStoreWithURL({
@@ -1555,7 +1616,7 @@ describe('urlFromState', function () {
       '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree';
     const newUrlState = stateFromLocation({
       pathname: pathname,
-      search: '',
+      search: `?v=${CURRENT_URL_VERSION}`,
       hash: '',
     });
     expect(urlFromState(newUrlState)).toEqual(

@@ -226,19 +226,16 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
   }
 };
 
-const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
+const timelineType: Reducer<TimelineType> = (
+  state = 'cpu-category',
+  action
+) => {
   switch (action.type) {
-    case 'PROFILE_LOADED':
-      if (!action.profile.meta.categories) {
-        // An imported profile did not provide its own categories. Use the stack view instead.
-        return 'stack';
-      }
-      return state;
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
     case 'VIEW_FULL_PROFILE':
     case 'VIEW_ACTIVE_TAB_PROFILE':
-      // The timelineType can be set at loadtime from a URL value.
+      // The timelineType can be set at load time from a URL value.
       // If it's not set from a URL value we provide a default value from this action.
       // When it's null we don't want to override the value that was set already.
       if (action.timelineType !== null) {

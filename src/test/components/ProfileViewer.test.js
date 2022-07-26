@@ -70,6 +70,6 @@ describe('ProfileViewer', function () {
     const { getState } = setup();
 
     // Note: You should update this total height if you changed the height calculation algorithm.
-    expect(getTimelineHeight(getState())).toBe(1250);
+    expect(getTimelineHeight(getState())).toBe(1224);
   });
 });

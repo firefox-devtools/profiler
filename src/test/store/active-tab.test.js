@@ -293,7 +293,7 @@ describe('finalizeProfileView', function () {
       tabID: null,
     });
 
-    // Check if we have the 'cpu-categories' as the timelineType
+    // Check if we have the 'categories' as the timelineType
     expect(getTimelineType(getState())).toBe('category');
   });
 });

@@ -28,7 +28,6 @@ import {
   TRACK_IPC_HEIGHT,
   TRACK_PROCESS_BLANK_HEIGHT,
   TIMELINE_RULER_HEIGHT,
-  TIMELINE_SETTINGS_HEIGHT,
   TRACK_VISUAL_PROGRESS_HEIGHT,
   ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT,
   TRACK_EVENT_DELAY_HEIGHT,
@@ -214,9 +213,6 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
         return height;
       }
       case 'full': {
-        // Only the full view has the timeline settings panel.
-        height += TIMELINE_SETTINGS_HEIGHT;
-
         for (const [trackIndex, globalTrack] of globalTracks.entries()) {
           if (!hiddenGlobalTracks.has(trackIndex)) {
             switch (globalTrack.type) {
