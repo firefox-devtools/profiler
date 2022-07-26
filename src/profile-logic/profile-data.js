@@ -74,6 +74,7 @@ import type {
   MarkerPayload,
   Address,
   AddressProof,
+  TimelineType,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -1276,6 +1277,34 @@ export function getSampleIndexRangeForSelection(
   return [sampleStart, sampleEnd];
 }
 
+/**
+ * This function takes a samples table and returns the sample range
+ * including the sample just before and after the range. This is needed to make
+ * sure that some charts will not be cut off at the edges when zoomed in to a range.
+ */
+export function getInclusiveSampleIndexRangeForSelection(
+  table: { time: Milliseconds[], length: number },
+  rangeStart: number,
+  rangeEnd: number
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  let [sampleStart, sampleEnd] = getSampleIndexRangeForSelection(
+    table,
+    rangeStart,
+    rangeEnd
+  );
+
+  // Include the samples just before and after the selection range, so that charts will
+  // not be cut off at the edges.
+  if (sampleStart > 0) {
+    sampleStart--;
+  }
+  if (sampleEnd < table.length) {
+    sampleEnd++;
+  }
+
+  return [sampleStart, sampleEnd];
+}
+
 export function filterThreadSamplesToRange(
   thread: Thread,
   rangeStart: number,
@@ -1393,58 +1422,39 @@ export function filterThreadSamplesToRange(
   return newThread;
 }
 
-export function filterCounterToRange(
-  counter: Counter,
-  rangeStart: number,
-  rangeEnd: number
-): Counter {
-  const filteredGroups = counter.sampleGroups.map((sampleGroup) => {
-    const samples = sampleGroup.samples;
-    let [sBegin, sEnd] = getSampleIndexRangeForSelection(
-      samples,
-      rangeStart,
-      rangeEnd
-    );
+/**
+ * Process the samples in the counter sample groups.
+ */
+export function processCounter(counter: Counter): Counter {
+  const processedGroups = counter.sampleGroups.map((sampleGroup) => {
+    const { samples } = sampleGroup;
+    const count = samples.count.slice();
+    const number = samples.number.slice();
 
-    // Include the samples just before and after the selection range, so that charts will
-    // not be cut off at the edges.
-    if (sBegin > 0) {
-      sBegin--;
-    }
-    if (sEnd < samples.length) {
-      sEnd++;
-    }
-
-    const count = samples.count.slice(sBegin, sEnd);
-    const number = samples.number.slice(sBegin, sEnd);
-
-    if (sBegin === 0) {
-      // These lines zero out the first values of the counters, as they are unreliable. In
-      // addition, there are probably some missed counts in the memory counters, so the
-      // first memory number slowly creeps up over time, and becomes very unrealistic.
-      // In order to not be affected by these platform limitations, zero out the first
-      // counter values.
-      //
-      // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
-      count[0] = 0;
-      number[0] = 0;
-    }
+    // These lines zero out the first values of the counters, as they are unreliable. In
+    // addition, there are probably some missed counts in the memory counters, so the
+    // first memory number slowly creeps up over time, and becomes very unrealistic.
+    // In order to not be affected by these platform limitations, zero out the first
+    // counter values.
+    //
+    // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
+    count[0] = 0;
+    number[0] = 0;
 
     return {
       ...sampleGroup,
       samples: {
-        time: samples.time.slice(sBegin, sEnd),
+        ...samples,
         number,
         count,
-        length: sEnd - sBegin,
       },
     };
   });
 
   return {
     ...counter,
-    sampleGroups: filteredGroups,
+    sampleGroups: processedGroups,
   };
 }
 
@@ -1455,14 +1465,24 @@ export function filterCounterToRange(
  * accumulatedCounts array.
  */
 export function accumulateCounterSamples(
-  samplesArray: Array<CounterSamplesTable>
+  samplesArray: Array<CounterSamplesTable>,
+  sampleRanges?: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
 ): Array<AccumulatedCounterSamples> {
-  const accumulatedSamples = samplesArray.map((samples) => {
+  const accumulatedSamples = samplesArray.map((samples, index) => {
     let minCount = 0;
     let maxCount = 0;
     let accumulated = 0;
-    const accumulatedCounts = [];
-    for (let i = 0; i < samples.length; i++) {
+    const accumulatedCounts = Array(samples.length).fill(0);
+    // If a range is provided, use it instead. This will also include the
+    // samples right before and after the range.
+    const startSampleIndex =
+      sampleRanges && sampleRanges[index] ? sampleRanges[index][0] : 0;
+    const endSampleIndex =
+      sampleRanges && sampleRanges[index]
+        ? sampleRanges[index][1]
+        : samples.length;
+
+    for (let i = startSampleIndex; i < endSampleIndex; i++) {
       accumulated += samples.count[i];
       minCount = Math.min(accumulated, minCount);
       maxCount = Math.max(accumulated, maxCount);
@@ -1484,14 +1504,26 @@ export function accumulateCounterSamples(
 /**
  * Compute the max counter sample counts per milliseconds to determine the range
  * of a counter.
+ * If a start-end range is provided, it only computes the max value between that
+ * range.
  */
 export function computeMaxCounterSampleCountsPerMs(
   samplesArray: Array<CounterSamplesTable>,
-  profileInterval: Milliseconds
+  profileInterval: Milliseconds,
+  sampleRanges?: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
 ): Array<number> {
-  const maxSampleCounts = samplesArray.map((samples) => {
+  const maxSampleCounts = samplesArray.map((samples, index) => {
     let maxCount = 0;
-    for (let i = 0; i < samples.length; i++) {
+    // If a range is provided, use it instead. This will also include the
+    // samples right before and after the range.
+    const startSampleIndex =
+      sampleRanges && sampleRanges[index] ? sampleRanges[index][0] : 0;
+    const endSampleIndex =
+      sampleRanges && sampleRanges[index]
+        ? sampleRanges[index][1]
+        : samples.length;
+
+    for (let i = startSampleIndex; i < endSampleIndex; i++) {
       const count = samples.count[i];
       const sampleTimeDeltaInMs =
         i === 0 ? profileInterval : samples.time[i] - samples.time[i - 1];
@@ -3402,4 +3434,33 @@ export function findAddressProofForFile(
     };
   }
   return null;
+}
+
+/**
+ * Determines the timeline type by looking at the profile data.
+ *
+ * There are three options:
+ * 'cpu-category': If a profile has both category and cpu usage information.
+ * 'category': If a profile has category information but not the cpu usage.
+ * 'stack': If a profile doesn't have category or cpu usage information.
+ */
+export function determineTimelineType(profile: Profile): TimelineType {
+  if (!profile.meta.categories) {
+    // Profile doesn't have categories. We don't have enough information to draw
+    // a proper category view with activity graph. Use the stack chart instead.
+    // It can be either an imported or a very old profile.
+    return 'stack';
+  }
+
+  if (
+    !profile.meta.sampleUnits ||
+    !profile.threads.some((thread) => thread.samples.threadCPUDelta)
+  ) {
+    // Have category information but doesn't have the CPU usage information.
+    // Use 'category'.
+    return 'category';
+  }
+
+  // Have both category and CPU usage information. Use 'cpu-category'.
+  return 'cpu-category';
 }

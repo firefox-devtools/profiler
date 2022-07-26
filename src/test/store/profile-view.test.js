@@ -18,6 +18,7 @@ import {
   getProfileWithJsAllocations,
   addActiveTabInformationToProfile,
   getProfileWithEventDelays,
+  getProfileWithThreadCPUDelta,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
@@ -48,6 +49,7 @@ import {
 import { ensureExists } from '../../utils/flow';
 import {
   getCallNodeIndexFromPath,
+  processCounter,
   type BreakdownByCategory,
 } from '../../profile-logic/profile-data';
 
@@ -440,12 +442,12 @@ describe('actions/ProfileView', function () {
       it('can switch back to the thread, which remembers the last viewed panel', function () {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
-        dispatch(App.changeSelectedTab('flame-graph'));
+        dispatch(App.changeSelectedTab('marker-table'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
         );
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'flame-graph'
+          'marker-table'
         );
         dispatch(ProfileView.selectTrack(networkTrack, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
@@ -459,7 +461,7 @@ describe('actions/ProfileView', function () {
           new Set([0])
         );
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'flame-graph'
+          'marker-table'
         );
       });
     });
@@ -518,9 +520,15 @@ describe('actions/ProfileView', function () {
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'calltree'
         );
+        // The thread with the memory track doesn't have samples, so switch to
+        // a tab that exists even for tables without samples.
+        dispatch(App.changeSelectedTab('marker-table'));
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'marker-table'
+        );
         dispatch(ProfileView.selectTrack(memoryTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
+          'marker-table'
         );
       });
     });
@@ -3117,13 +3125,25 @@ describe('counter selectors', function () {
     const counterB = getCounterForThread(thread, threadIndex);
     profile.counters = [counterA, counterB];
     const { getState, dispatch } = storeWithProfile(profile);
-    return { getState, dispatch, counterA, counterB };
+    const processedCounterA = processCounter(counterA);
+    const processedCounterB = processCounter(counterB);
+    return {
+      getState,
+      dispatch,
+      counterA,
+      processedCounterA,
+      processedCounterB,
+    };
   }
 
   it('can get the counters', function () {
-    const { counterA, counterB, getState } = setup();
-    expect(getCounterSelectors(0).getCounter(getState())).toBe(counterA);
-    expect(getCounterSelectors(1).getCounter(getState())).toBe(counterB);
+    const { processedCounterA, processedCounterB, getState } = setup();
+    expect(getCounterSelectors(0).getCounter(getState())).toStrictEqual(
+      processedCounterA
+    );
+    expect(getCounterSelectors(1).getCounter(getState())).toStrictEqual(
+      processedCounterB
+    );
   });
 
   it('can get the counter description', function () {
@@ -3136,22 +3156,6 @@ describe('counter selectors', function () {
   it('can get the counter pid', function () {
     const { getState } = setup();
     expect(getCounterSelectors(0).getPid(getState())).toBe(0);
-  });
-
-  it('can get the commited range filtered counters', function () {
-    const { getState, dispatch } = setup();
-    // The range includes the sample just before and the sample just after the selection
-    // range.
-    dispatch(ProfileView.commitRange(3.5, 5.5));
-    const originalCounter = getCounterSelectors(0).getCounter(getState());
-    expect(originalCounter.sampleGroups[0].samples.time).toEqual([
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-    ]);
-
-    const filteredCounter = getCounterSelectors(
-      0
-    ).getCommittedRangeFilteredCounter(getState());
-    expect(filteredCounter.sampleGroups[0].samples.time).toEqual([3, 4, 5, 6]);
   });
 
   it('can accumulate samples', function () {
@@ -3722,13 +3726,23 @@ describe('mouseTimePosition', function () {
 });
 
 describe('timeline type', function () {
-  it('should default to the category view', () => {
+  it('should use the cpu-category view when CPU usage is provided', () => {
+    const profile = getProfileWithThreadCPUDelta([[1, 2, 1]]);
+    const { getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual(
+      'cpu-category'
+    );
+  });
+
+  it('should use the category view when cpu is not provided', () => {
     const { profile } = getProfileFromTextSamples('A');
+
+    // Load the store after mutating the profile.
     const { getState } = storeWithProfile(profile);
     expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
   });
 
-  it('should use the stack height view when using an imported profile', () => {
+  it('should use the stack height view when category and cpu is not provided', () => {
     const { profile } = getProfileFromTextSamples('A');
     delete profile.meta.categories;
 

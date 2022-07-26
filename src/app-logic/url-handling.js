@@ -46,7 +46,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 6;
+export const CURRENT_URL_VERSION = 7;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -366,10 +366,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         ? undefined
         : urlState.profileSpecific.implementation,
     timelineType:
-      // The default is the category view, so only add it to the URL if it's the
-      // stack or cpu-category view.
-      // TODO: We should make the 'cpu-category' the new default with an upgrader.
-      urlState.profileSpecific.timelineType === 'category'
+      // The default is the cpu-category view, so only add it to the URL if it's
+      // the stack or category view.
+      urlState.profileSpecific.timelineType === 'cpu-category'
         ? undefined
         : urlState.profileSpecific.timelineType,
   }: BaseQueryShape);
@@ -1088,6 +1087,26 @@ const _upgraders: {|
       delete query.transforms;
     }
   },
+  [7]: ({ query }: ProcessedLocationBeforeUpgrade) => {
+    // Default timeline type has been changed to 'cpu-category' from 'category'.
+    // Default timeline type isn't needed to be in the url, revert the values in
+    // the query to reflect that.
+    switch (query.timelineType) {
+      case 'cpu-category':
+        // This is the default value now. It's not needed in the url.
+        delete query.timelineType;
+        break;
+      case 'stack':
+        // Do nothing for this.
+        break;
+      case 'category':
+      default:
+        // We can either have 'category' or nothing for this value. We should
+        // explicitly add for this case.
+        query.timelineType = 'category';
+        break;
+    }
+  },
 };
 
 for (let destVersion = 1; destVersion <= CURRENT_URL_VERSION; destVersion++) {
@@ -1213,6 +1232,6 @@ function validateTimelineType(type: ?string): TimelineType {
     default:
       // Type assert we've checked everything:
       (timelineType: empty);
-      return 'category';
+      return 'cpu-category';
   }
 }

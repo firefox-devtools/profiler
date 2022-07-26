@@ -10,10 +10,7 @@ import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import {
-  autoMockCanvasContext,
-  flushDrawLog,
-} from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import {
@@ -27,7 +24,6 @@ import {
 } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
 import {
-  getTimelineTrackOrganization,
   selectedThreadSelectors,
   getRightClickedTrack,
 } from 'firefox-profiler/selectors';
@@ -374,28 +370,6 @@ describe('Timeline', function () {
       );
   });
 
-  it('renders the header', () => {
-    const flushRafCalls = mockRaf();
-    window.devicePixelRatio = 1;
-
-    const profile = _getProfileWithDroppedSamples();
-
-    const { container } = render(
-      <Provider store={storeWithProfile(profile)}>
-        <Timeline />
-      </Provider>
-    );
-
-    flushRafCalls();
-
-    const drawCalls = flushDrawLog();
-
-    expect(container.firstChild).toMatchSnapshot();
-    expect(drawCalls).toMatchSnapshot();
-
-    delete window.devicePixelRatio;
-  });
-
   it('displays a context menu when right clicking global and local tracks', () => {
     const profile = getProfileWithNiceTracks();
 
@@ -442,57 +416,6 @@ describe('Timeline', function () {
     expect(screen.getByText(/Only show “/)).toHaveTextContent(
       'Only show “\u2068Style\u2069”'
     );
-  });
-
-  // These tests are disabled for now because active tab view checkbox is disabled for now.
-  // TODO: Enable it again once we have that checbox back.
-  // eslint-disable-next-line jest/no-disabled-tests
-  describe.skip('TimelineSettingsActiveTabView', function () {
-    autoMockCanvasContext();
-
-    it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {
-      const store = storeWithProfile();
-      render(
-        <Provider store={store}>
-          <Timeline />
-        </Provider>
-      );
-
-      expect(
-        screen.queryByText('Show active tab only')
-      ).not.toBeInTheDocument();
-    });
-
-    it('can switch between active tab view and advanced view', () => {
-      const profile = _getProfileWithDroppedSamples();
-      profile.meta.configuration = {
-        threads: [],
-        features: [],
-        capacity: 1000000,
-        activeTabID: 123,
-      };
-      const store = storeWithProfile(profile);
-      render(
-        <Provider store={store}>
-          <Timeline />
-        </Provider>
-      );
-
-      expect(getTimelineTrackOrganization(store.getState())).toEqual({
-        type: 'full',
-      });
-
-      fireFullClick(screen.getByText('Show active tab only'));
-      expect(getTimelineTrackOrganization(store.getState())).toEqual({
-        type: 'active-tab',
-        tabID: 123,
-      });
-
-      fireFullClick(screen.getByText('Show active tab only'));
-      expect(getTimelineTrackOrganization(store.getState())).toEqual({
-        type: 'full',
-      });
-    });
   });
 
   describe('TimelineSettingsHiddenTracks', () => {
