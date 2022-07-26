@@ -19,3 +19,34 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// Cleanup offline-plugin's storage
+// This is the cache name prefix for the old service worker.
+const OFFLINE_PLUGIN_PREFIX = 'webpack-offline:';
+
+// The code in these 2 functions was heavily inspired by workbox' own code.
+async function cleanupOfflinePluginStorage() {
+  const cacheNames = await self.caches.keys();
+  const cacheNamesToDelete = cacheNames.filter((cacheName) =>
+    cacheName.startsWith(OFFLINE_PLUGIN_PREFIX)
+  );
+  await Promise.all(
+    cacheNamesToDelete.map((cacheName) => self.caches.delete(cacheName))
+  );
+  return cacheNamesToDelete;
+}
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    cleanupOfflinePluginStorage().then((cachesDeleted) => {
+      {
+        if (cachesDeleted.length > 0) {
+          console.log(
+            `The following out-of-date precaches from the old offline-plugin-based service worker were cleaned up automatically:`,
+            cachesDeleted
+          );
+        }
+      }
+    })
+  );
+});
