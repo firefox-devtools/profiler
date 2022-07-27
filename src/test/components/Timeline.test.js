@@ -42,8 +42,87 @@ describe('Timeline multiple thread selection', function () {
   autoMockElementSize({ width: 200, height: 300 });
   autoMockIntersectionObserver();
 
-  function setup() {
-    const profile = getProfileWithNiceTracks();
+  /** This function produces a profile that will have several global tracks and
+   * local tracks, that look like this as displayed by getHumanReadableTracks:
+   *  [
+   *    'show [thread GeckoMain process]',
+   *    '  - show [thread ThreadPool#1]',
+   *    '  - show [thread ThreadPool#2]',
+   *    '  - show [thread ThreadPool#3]',
+   *    '  - show [thread ThreadPool#4]',
+   *    '  - show [thread ThreadPool#5]',
+   *    'show [thread GeckoMain tab]',
+   *    '  - show [thread DOM Worker]',
+   *    '  - show [thread Style]',
+   *    'show [thread GeckoMain tab]',
+   *    '  - show [thread AudioPool#1]',
+   *    '  - show [thread AudioPool#2]',
+   *    '  - show [thread Renderer]',
+   *  ]
+   */
+  function getProfileWithMoreNiceTracks() {
+    const { profile } = getProfileFromTextSamples(
+      ...Array.from({ length: 13 }, () => 'A')
+    );
+
+    const { threads } = profile;
+    let tid = 1000;
+    let pid = 1000;
+
+    // Global thread 1
+    threads[0].name = 'GeckoMain';
+    threads[0].processType = 'process';
+    threads[0].pid = pid;
+    threads[0].tid = tid++;
+
+    for (let i = 1; i <= 5; i++) {
+      threads[i].name = `ThreadPool#${i}`;
+      threads[i].processType = 'tab';
+      threads[i].pid = pid;
+      threads[i].tid = tid++;
+    }
+
+    // Global thread 2
+    threads[6].name = 'GeckoMain';
+    threads[6].processType = 'tab';
+    threads[6].pid = ++pid;
+    threads[6].tid = tid++;
+
+    threads[7].name = 'DOM Worker';
+    threads[7].processType = 'tab';
+    threads[7].pid = pid;
+    threads[7].tid = tid++;
+
+    threads[8].name = 'Style';
+    threads[8].processType = 'tab';
+    threads[8].pid = pid;
+    threads[8].tid = tid++;
+
+    // Global thread 3
+    threads[9].name = 'GeckoMain';
+    threads[9].processType = 'tab';
+    threads[9].pid = ++pid;
+    threads[9].tid = tid++;
+
+    threads[10].name = 'AudioPool#1';
+    threads[10].processType = 'tab';
+    threads[10].pid = pid;
+    threads[10].tid = tid++;
+
+    threads[11].name = 'AudioPool#2';
+    threads[11].processType = 'tab';
+    threads[11].pid = pid;
+    threads[11].tid = tid++;
+
+    threads[12].name = 'Renderer';
+    threads[12].processType = 'tab';
+    threads[12].pid = pid;
+    threads[12].tid = tid++;
+
+    return profile;
+  }
+
+  function setup(profile = getProfileWithNiceTracks()) {
     const store = storeWithProfile(profile);
 
     // We need a properly laid out ActivityGraph for some of the operations in
@@ -302,6 +381,63 @@ describe('Timeline multiple thread selection', function () {
       'show [thread GeckoMain tab]',
       '  - show [thread DOM Worker]',
       '  - show [thread Style] SELECTED',
+    ]);
+  });
+
+  it('unselects a selected local track whose global process is hidden', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on on a local track
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }));
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Then hides its global track
+    fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
+    fireFullClick(screen.getByText(/Hide/));
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'hide [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
     ]);
   });
 });

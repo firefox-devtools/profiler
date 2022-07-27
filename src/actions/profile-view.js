@@ -689,7 +689,6 @@ function _removeSelectedThreadIndexesForGlobalTrack(
       )) {
         if (localTrack.type === 'thread') {
           selectedThreadIndexes.delete(localTrack.threadIndex);
-          break;
         }
       }
     }
