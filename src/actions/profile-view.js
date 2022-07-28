@@ -386,8 +386,52 @@ function getInformationFromTrackReference(
 }
 
 /**
- * This selects a track from its reference.
- * This will ultimately select the thread that this track belongs to, using its
+ * This Redux action selects one track only from its reference as well as the
+ * related tab.
+ */
+function setOneTrackSelection(
+  trackInformation: TrackInformation,
+  selectedTab: TabSlug
+): Action {
+  return {
+    type: 'SELECT_TRACK',
+    selectedThreadIndexes: new Set([trackInformation.relatedThreadIndex]),
+    selectedTab,
+  };
+}
+
+/*
+ * This thunk action changes the current selection, by either selecting this
+ * additional track, or unselecting if it's already selected.
+ */
+function toggleOneTrack(
+  trackInformation: TrackInformation,
+  selectedTab: TabSlug
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const selectedThreadIndexes = new Set(getSelectedThreadIndexes(getState()));
+    // Toggle the selection.
+    if (selectedThreadIndexes.has(trackInformation.relatedThreadIndex)) {
+      selectedThreadIndexes.delete(trackInformation.relatedThreadIndex);
+      if (selectedThreadIndexes.size === 0) {
+        // Always keep at least one thread selected. Bail out.
+        return;
+      }
+    } else {
+      selectedThreadIndexes.add(trackInformation.relatedThreadIndex);
+    }
+    dispatch({
+      type: 'SELECT_TRACK',
+      selectedThreadIndexes,
+      selectedTab,
+    });
+  };
+}
+
+/**
+ * This selects a track or several tracks from its reference and the passed
+ * modifiers.
+ * This will ultimately select the threads that this track belongs to, using its
  * thread index, and may also change the selected tab if it makes sense for this
  * track.
  */
@@ -417,35 +461,11 @@ export function selectTrackWithModifiers(
       selectedTab = visibleTabs[0];
     }
 
-    let selectedThreadIndexes;
     if (modifiers.ctrlOrMeta) {
-      selectedThreadIndexes = new Set(getSelectedThreadIndexes(getState()));
-      // Toggle the selection.
-      if (
-        selectedThreadIndexes.has(clickedTrackInformation.relatedThreadIndex)
-      ) {
-        selectedThreadIndexes.delete(
-          clickedTrackInformation.relatedThreadIndex
-        );
-        if (selectedThreadIndexes.size === 0) {
-          // Always keep at least one thread selected. Bail out.
-          return;
-        }
-      } else {
-        selectedThreadIndexes.add(clickedTrackInformation.relatedThreadIndex);
-      }
+      dispatch(toggleOneTrack(clickedTrackInformation, selectedTab));
     } else {
-      // Only select the single thread.
-      selectedThreadIndexes = new Set([
-        clickedTrackInformation.relatedThreadIndex,
-      ]);
+      dispatch(setOneTrackSelection(clickedTrackInformation, selectedTab));
     }
-
-    dispatch({
-      type: 'SELECT_TRACK',
-      selectedThreadIndexes,
-      selectedTab,
-    });
   };
 }
 
