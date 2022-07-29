@@ -25,7 +25,7 @@ import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import './Markers.css';
 
 import type {
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
   Marker,
   MarkerIndex,
@@ -51,8 +51,8 @@ function _stopPropagation(e: TransitionEvent) {
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +width: CssPixels,
   +height: CssPixels,
   +getMarker: (MarkerIndex) => Marker,
@@ -288,10 +288,10 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
  */
 
 export type OwnProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +threadsKey: ThreadsKey,
-  +onSelect: (Milliseconds, Milliseconds) => mixed,
+  +onSelect: (Nanoseconds, Nanoseconds) => mixed,
 |};
 
 export type StateProps = {|

@@ -10,7 +10,7 @@ import { oneLine } from 'common-tags';
 
 import type {
   Thread,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
 } from 'firefox-profiler/types';
 
@@ -23,10 +23,10 @@ type SyntheticCssDeclarations = {
 };
 
 type Props = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +thread: Thread,
-  +interval: Milliseconds,
+  +interval: Nanoseconds,
   +unfilteredSamplesRange: StartEndRange | null,
   ...SizeProps,
 |};
@@ -129,9 +129,9 @@ export function getIndicatorPositions(props: Props): {|
     // Only show this if it's actually in the current range.
     registerTime < rangeEnd
   ) {
-    const startMilliseconds = Math.max(0, registerTime - rangeStart);
+    const startNanoseconds = Math.max(0, registerTime - rangeStart);
     emptyBufferStart = {
-      left: startMilliseconds * xPixelsPerMs,
+      left: startNanoseconds * xPixelsPerMs,
       width: Math.min(
         width,
         (unfilteredSamplesRange.start - Math.max(registerTime, rangeStart)) *

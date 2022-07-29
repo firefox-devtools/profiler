@@ -22,7 +22,7 @@ import type {
   CallNodeDisplayData,
   CallNodeInfo,
   WeightType,
-  Milliseconds,
+  Nanoseconds,
   CallTreeSummaryStrategy,
   InnerWindowID,
   Page,
@@ -42,7 +42,7 @@ type Props = {|
   +callNodeIndex: IndexIntoCallNodeTable,
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
-  +interval: Milliseconds,
+  +interval: Nanoseconds,
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
   +durationText: string,

@@ -52,7 +52,7 @@ type SymbolPrimaryKey = [string, string];
 type SymbolDateKey = $PropertyType<SymbolItem, 'lastUsedDate'>;
 type SymbolStore = IDBObjectStore<SymbolPrimaryKey, SymbolItem>;
 
-const kTwoWeeksInMilliseconds = 2 * 7 * 24 * 60 * 60 * 1000;
+const kTwoWeeksInNanoseconds = 2 * 7 * 24 * 60 * 60 * 1000;
 
 /**
  * A wrapper around an IndexedDB table that stores symbol tables.
@@ -75,7 +75,7 @@ export default class SymbolStoreDB {
   constructor(
     dbName: string,
     maxCount: number = 200,
-    maxAge: number = kTwoWeeksInMilliseconds
+    maxAge: number = kTwoWeeksInNanoseconds
   ) {
     this._dbPromise = this._setupDB(dbName);
     this._maxCount = maxCount;

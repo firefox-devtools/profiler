@@ -37,7 +37,7 @@ export type HorizontalViewport = {
   length: UnitIntervalOfProfileRange,
 };
 
-export type StartEndRange = {| start: Milliseconds, end: Milliseconds |};
+export type StartEndRange = {| start: Nanoseconds, end: Nanoseconds |};
 
 // An absolute address that was valid in the (virtual memory) address space of
 // the profiled process, in bytes.

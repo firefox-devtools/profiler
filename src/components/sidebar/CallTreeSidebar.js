@@ -30,7 +30,7 @@ import type {
   CallNodeTable,
   IndexIntoCallNodeTable,
   TracedTiming,
-  Milliseconds,
+  Nanoseconds,
   WeightType,
 } from 'firefox-profiler/types';
 
@@ -41,7 +41,7 @@ import type {
   TimingsForPath,
 } from 'firefox-profiler/profile-logic/profile-data';
 import {
-  formatMilliseconds,
+  formatNanoseconds,
   formatPercent,
   formatBytes,
   formatNumber,
@@ -99,7 +99,7 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
   render() {
     const { breakdown, number } = this.props;
 
-    const data: Array<{| +group: string, +value: Milliseconds | number |}> = [];
+    const data: Array<{| +group: string, +value: Nanoseconds | number |}> = [];
 
     for (const implementation of this._orderedImplementations) {
       const value = breakdown[implementation];
@@ -310,7 +310,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           return {
             running: 'Running time',
             self: 'Self time',
-            number: (n) => formatMilliseconds(n, 3, 1),
+            number: (n) => formatNanoseconds(n, 3, 1),
           };
         case 'samples':
           return {
@@ -391,7 +391,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           {tracedTiming ? (
             <SidebarDetail
               label="Traced running time"
-              value={formatMilliseconds(
+              value={formatNanoseconds(
                 tracedTiming.running[selectedNodeIndex],
                 3,
                 1
@@ -404,7 +404,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
               value={
                 tracedTiming.self[selectedNodeIndex] === 0
                   ? '—'
-                  : formatMilliseconds(
+                  : formatNanoseconds(
                       tracedTiming.self[selectedNodeIndex],
                       3,
                       1

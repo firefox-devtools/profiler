@@ -25,7 +25,7 @@ import type {
   Counter,
   Thread,
   ThreadIndex,
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
   StartEndRange,
   IndexIntoSamplesTable,
@@ -40,12 +40,12 @@ import './TrackPower.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +counter: Counter,
   +counterSampleRanges: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>,
   +maxCounterSampleCountsPerMs: number[],
-  +interval: Milliseconds,
+  +interval: Nanoseconds,
   +width: CssPixels,
   +height: CssPixels,
   +lineWidth: CssPixels,
@@ -209,12 +209,12 @@ type OwnProps = {|
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +counter: Counter,
   +counterSampleRanges: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>,
   +maxCounterSampleCountsPerMs: number[],
-  +interval: Milliseconds,
+  +interval: Nanoseconds,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
 |};

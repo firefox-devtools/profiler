@@ -20,7 +20,7 @@ import {
 } from 'firefox-profiler/actions/profile-view';
 import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
   UnitIntervalOfProfileRange,
   ThreadsKey,
@@ -67,8 +67,8 @@ type HoveredMarkerChartItems = {|
 |};
 
 type OwnProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +rowHeight: CssPixels,
   +getMarker: (MarkerIndex) => Marker,
@@ -387,14 +387,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const { devicePixelRatio } = window;
     const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const rangeLength: Nanoseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
 
     // Decide which samples to actually draw
-    const timeAtViewportLeft: Milliseconds =
+    const timeAtViewportLeft: Nanoseconds =
       rangeStart + rangeLength * viewportLeft;
-    const timeAtViewportRightPlusMargin: Milliseconds =
+    const timeAtViewportRightPlusMargin: Nanoseconds =
       rangeStart +
       rangeLength * viewportRight +
       // This represents the amount of seconds in the right margin:
@@ -628,7 +628,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     let rowIndexOfLabel = null;
     const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const rangeLength: Nanoseconds = rangeEnd - rangeStart;
 
     // Reminder: this is a value between 0 and 1, and represents a percentage of
     // the full time range.
@@ -642,7 +642,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const dotRadiusInTime =
       (dotRadius / markerContainerWidth) * viewportLength * rangeLength;
 
-    const xInTime: Milliseconds = rangeStart + xInUnitInterval * rangeLength;
+    const xInTime: Nanoseconds = rangeStart + xInUnitInterval * rangeLength;
     const rowIndex = Math.floor((y + viewportTop) / rowHeight);
 
     const markerTiming = markerTimingAndBuckets[rowIndex];

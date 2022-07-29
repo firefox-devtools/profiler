@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { Milliseconds, Address, Microseconds, Bytes } from './units';
+import type { Nanoseconds, Address, Microseconds, Bytes } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload, MarkerSchema } from './markers';
 import type { MarkerPhase, ProfilingLog } from './gecko-profile';
@@ -129,7 +129,7 @@ export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
 
 type SamplesLikeTableShape = {
   stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
+  time: Nanoseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[],
@@ -153,14 +153,14 @@ export type SamplesLikeTable =
 export type SamplesTable = {|
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
   // This is optional because newer profiles don't have that field anymore.
-  responsiveness?: Array<?Milliseconds>,
+  responsiveness?: Array<?Nanoseconds>,
   // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
   // view of jank by inferring what would be the delay of a hypothetical input event at
   // any point in time. It requires a pre-processing to be able to visualize properly.
   // This is optional because older profiles didn't have that field.
-  eventDelay?: Array<?Milliseconds>,
+  eventDelay?: Array<?Nanoseconds>,
   stack: Array<IndexIntoStackTable | null>,
-  time: Milliseconds[],
+  time: Nanoseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[],
@@ -182,7 +182,7 @@ export type SamplesTable = {|
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
  */
 export type JsAllocationsTable = {|
-  time: Milliseconds[],
+  time: Nanoseconds[],
   className: string[],
   typeName: string[], // Currently only 'JSObject'
   coarseType: string[], // Currently only 'Object',
@@ -200,7 +200,7 @@ export type JsAllocationsTable = {|
  * and threadId were added.
  */
 export type UnbalancedNativeAllocationsTable = {|
-  time: Milliseconds[],
+  time: Nanoseconds[],
   // "weight" is used here rather than "bytes", so that this type will match the
   // SamplesLikeTableShape.
   weight: Bytes[],
@@ -235,8 +235,8 @@ export type NativeAllocationsTable =
  */
 export type ProfilerMarkerPayload = {
   type: string,
-  startTime?: Milliseconds,
-  endTime?: Milliseconds,
+  startTime?: Nanoseconds,
+  endTime?: Nanoseconds,
   stack?: Thread,
 };
 
@@ -493,9 +493,9 @@ export type PageList = Array<Page>;
 export type PausedRange = {|
   // null if the profiler was already paused at the beginning of the period of
   // time that was present in the profile buffer
-  startTime: Milliseconds | null,
+  startTime: Nanoseconds | null,
   // null if the profiler was still paused when the profile was captured
-  endTime: Milliseconds | null,
+  endTime: Nanoseconds | null,
   reason: 'profiler-paused' | 'collecting',
 |};
 
@@ -509,7 +509,7 @@ export type JsTracerTable = {|
 |};
 
 export type CounterSamplesTable = {|
-  time: Milliseconds[],
+  time: Nanoseconds[],
   // The number of times the Counter's "number" was changed since the previous sample.
   number: number[],
   // The count of the data, for instance for memory this would be bytes.
@@ -588,7 +588,7 @@ export type ProfilerOverheadSamplesTable = {|
   expiredMarkerCleaning: Array<Microseconds>,
   locking: Array<Microseconds>,
   threads: Array<Microseconds>,
-  time: Array<Milliseconds>,
+  time: Array<Nanoseconds>,
   length: number,
 |};
 
@@ -625,10 +625,10 @@ export type Thread = {|
     // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/toolkit/xre/nsEmbedFunctions.cpp#232
     | 'invalid'
     | string,
-  processStartupTime: Milliseconds,
-  processShutdownTime: Milliseconds | null,
-  registerTime: Milliseconds,
-  unregisterTime: Milliseconds | null,
+  processStartupTime: Nanoseconds,
+  processShutdownTime: Nanoseconds | null,
+  registerTime: Nanoseconds,
+  unregisterTime: Nanoseconds | null,
   pausedRanges: PausedRange[],
   name: string,
   // The eTLD+1 of the isolated content process if provided by the back-end.
@@ -682,7 +682,7 @@ export type ProgressGraphData = {|
   // A percentage that describes the visual completeness of the webpage, ranging from 0% - 100%
   percent: number,
   // The time in milliseconds which the sample was taken.
-  timestamp: Milliseconds,
+  timestamp: Nanoseconds,
 |};
 
 /**
@@ -739,9 +739,9 @@ export type SampleUnits = {|
  */
 export type ProfileMeta = {|
   // The interval at which the threads are sampled.
-  interval: Milliseconds,
+  interval: Nanoseconds,
   // The number of milliseconds since midnight January 1, 1970 GMT.
-  startTime: Milliseconds,
+  startTime: Nanoseconds,
   // The process type where the Gecko profiler was started. This is the raw enum
   // numeric value as defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#365

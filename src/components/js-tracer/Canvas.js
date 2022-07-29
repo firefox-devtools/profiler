@@ -21,7 +21,7 @@ import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { BLUE_40 } from 'firefox-profiler/utils/colors';
 
 import type {
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
   UnitIntervalOfProfileRange,
   DevicePixels,
@@ -35,8 +35,8 @@ import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +jsTracerTimingRows: JsTracerTiming[],
   +jsTracerTable: JsTracerTable,
   +rowHeight: CssPixels,
@@ -241,7 +241,7 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
       viewport: { viewportLeft, viewportRight },
     } = this.props;
 
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const rangeLength: Nanoseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
 
@@ -278,9 +278,9 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
       // currentPixelPartialValue: 0.2
 
       // Decide which samples to actually draw
-      const timeAtViewportLeft: Milliseconds =
+      const timeAtViewportLeft: Nanoseconds =
         rangeStart + rangeLength * viewportLeft;
-      const timeAtViewportRightPlusMargin: Milliseconds =
+      const timeAtViewportRightPlusMargin: Nanoseconds =
         rangeStart +
         rangeLength * viewportRight +
         // This represents the amount of seconds in the right margin:
@@ -545,16 +545,16 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
     const innerContainerWidth =
       containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
 
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const rangeLength: Nanoseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
       viewportLeft +
       viewportLength * ((x - TIMELINE_MARGIN_LEFT) / innerContainerWidth);
-    const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
+    const time: Nanoseconds = rangeStart + unitIntervalTime * rangeLength;
     const rowIndex = Math.floor((y + viewportTop) / rowHeight);
     const timing = jsTracerTimingRows[rowIndex];
-    const minDuration: Milliseconds =
+    const minDuration: Nanoseconds =
       (rangeLength * viewportLength) / innerContainerWidth;
 
     if (!timing) {

@@ -29,7 +29,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 import type {
-  Milliseconds,
+  Nanoseconds,
   MixedObject,
   PreviewSelection,
   StartEndRange,
@@ -708,7 +708,7 @@ function setup(profileOverrides: MixedObject = {}) {
    * `performance.now` and the timestamps sent to the
    * requestAnimationFrame `_keyboardNavigation` callback.
    */
-  function depressKey(code: string, duration: Milliseconds) {
+  function depressKey(code: string, duration: Nanoseconds) {
     fireEvent.keyDown(viewportContainer(), { code });
     // we run requestAnimationFrame callbacks only once here: indeed Viewport
     // will schedule callbacks as long as the keyup event isn't sent, and we'd

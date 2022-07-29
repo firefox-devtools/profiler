@@ -22,7 +22,7 @@ import {
 import type {
   CounterIndex,
   ThreadIndex,
-  Milliseconds,
+  Nanoseconds,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -35,8 +35,8 @@ type OwnProps = {|
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
 |};
 
 type DispatchProps = {|
@@ -48,7 +48,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type State = {||};
 
 export class TrackMemoryImpl extends React.PureComponent<Props, State> {
-  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
+  _onMarkerSelect = (start: Nanoseconds, end: Nanoseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,

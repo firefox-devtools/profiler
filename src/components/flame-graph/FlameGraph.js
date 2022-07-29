@@ -33,7 +33,7 @@ import {
 import type {
   Thread,
   CategoryList,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
   WeightType,
   SamplesLikeTable,
@@ -81,7 +81,7 @@ type StateProps = {|
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
-  +interval: Milliseconds,
+  +interval: Nanoseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,

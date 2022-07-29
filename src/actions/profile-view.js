@@ -67,7 +67,7 @@ import type {
   MarkerIndex,
   Transform,
   ThreadsKey,
-  Milliseconds,
+  Nanoseconds,
   Tid,
   GlobalTrack,
 } from 'firefox-profiler/types';
@@ -1653,7 +1653,7 @@ export function setDataSource(dataSource: DataSource): Action {
 }
 
 export function changeMouseTimePosition(
-  mouseTimePosition: Milliseconds | null
+  mouseTimePosition: Nanoseconds | null
 ): Action {
   return {
     type: 'CHANGE_MOUSE_TIME_POSITION',

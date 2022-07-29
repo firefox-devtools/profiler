@@ -22,7 +22,7 @@ import { ensureExists } from '../../utils/flow';
 
 import type {
   CssPixels,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
   ThreadsKey,
   Marker,
@@ -84,7 +84,7 @@ type NetworkPhaseProps = {|
   +name: string,
   +previousName: string,
   +value: number | string,
-  +duration: Milliseconds,
+  +duration: Nanoseconds,
   +style: MixedObject,
 |};
 
@@ -127,7 +127,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
    * This function takes into account the range used, as well as the container sizing
    * as passed in by the WithSize component.
    */
-  _timeToCssPixels(time: Milliseconds): CssPixels {
+  _timeToCssPixels(time: Nanoseconds): CssPixels {
     const { timeRange, width } = this.props;
     const timeRangeTotal = timeRange.end - timeRange.start;
     const innerContainerWidth =

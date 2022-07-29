@@ -9,8 +9,8 @@ import NamedTupleMap from 'namedtuplemap';
 
 import type {
   Microseconds,
-  Milliseconds,
   Nanoseconds,
+  Milliseconds,
   WeightType,
 } from 'firefox-profiler/types';
 import { assertExhaustiveCheck } from './flow';
@@ -235,7 +235,7 @@ export function formatMilliseconds(
 }
 
 export function formatSeconds(
-  time: Milliseconds,
+  time: Nanoseconds,
   significantDigits: number = 5,
   maxFractionalDigits: number = 3
 ) {
@@ -245,7 +245,7 @@ export function formatSeconds(
 }
 
 export function formatTimestamp(
-  time: Milliseconds,
+  time: Nanoseconds,
   significantDigits: number = 5,
   maxFractionalDigits: number = 3
 ) {
@@ -259,7 +259,7 @@ export function formatTimestamp(
     );
   }
   if (time >= 1) {
-    return formatMilliseconds(
+    return formatNanoseconds(
       time,
       significantDigits,
       Number.isInteger(time) ? 0 : maxFractionalDigits

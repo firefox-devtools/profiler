@@ -55,7 +55,7 @@ import {
 
 import type {
   TrackReference,
-  Milliseconds,
+  Nanoseconds,
   TabID,
   Thread,
 } from 'firefox-profiler/types';
@@ -1981,7 +1981,7 @@ describe('getTimingsForSidebar', () => {
   // subcategory (the "Other" subcategory), so that it's easier to write the
   // reference structures.
   function withSingleSubcategory(
-    categoryBreakdown: Milliseconds[]
+    categoryBreakdown: Nanoseconds[]
   ): BreakdownByCategory {
     return categoryBreakdown.map((value) => ({
       entireCategoryValue: value,
@@ -3523,7 +3523,7 @@ describe('traced timing', function () {
 // Verify that getProcessedEventDelays gives the correct values for event delays.
 describe('getProcessedEventDelays', function () {
   // Setup a profile with meaningful event delay values.
-  function setup(eventDelay: ?Array<?Milliseconds>) {
+  function setup(eventDelay: ?Array<?Nanoseconds>) {
     const profile = getEmptyProfile();
 
     // Create event delay values.

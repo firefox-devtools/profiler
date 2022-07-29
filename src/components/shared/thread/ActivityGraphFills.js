@@ -13,7 +13,7 @@ import type {
   IndexIntoCategoryList,
   Thread,
   SelectedState,
-  Milliseconds,
+  Nanoseconds,
   DevicePixels,
   CssPixels,
 } from 'firefox-profiler/types';
@@ -34,9 +34,9 @@ type RenderedComponentSettings = {|
   +canvasPixelHeight: DevicePixels,
   +fullThread: Thread,
   +rangeFilteredThread: Thread,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +interval: Nanoseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +sampleIndexOffset: number,
   +xPixelsPerMs: number,
   +enableCPUUsage: boolean,
@@ -88,7 +88,7 @@ type SelectedPercentageAtPixelBuffers = {|
 
 export type CpuRatioInTimeRange = {|
   +cpuRatio: number,
-  +timeRange: Milliseconds,
+  +timeRange: Nanoseconds,
 |};
 
 const BOX_BLUR_RADII = [3, 2, 2];
@@ -311,9 +311,9 @@ export class ActivityGraphFillComputer {
   _accumulateInCategory(
     category: IndexIntoCategoryList,
     sampleIndex: IndexIntoSamplesTable,
-    prevSampleTime: Milliseconds,
-    sampleTime: Milliseconds,
-    nextSampleTime: Milliseconds,
+    prevSampleTime: Nanoseconds,
+    sampleTime: Nanoseconds,
+    nextSampleTime: Nanoseconds,
     cpuBeforeSample: number | null,
     cpuAfterSample: number | null
   ) {
@@ -401,7 +401,7 @@ export class ActivityFillGraphQuerier {
   getSampleAndCpuRatioAtClick(
     cssX: CssPixels,
     cssY: CssPixels,
-    time: Milliseconds
+    time: Nanoseconds
   ): HoveredPixelState | null {
     const {
       rangeFilteredThread: { samples, stackTable },
@@ -580,7 +580,7 @@ export class ActivityFillGraphQuerier {
    * is an array of all candidate samples, with their contribution amount.
    */
   _getSamplesAtTime(
-    time: Milliseconds
+    time: Nanoseconds
   ): $ReadOnlyArray<SampleContributionToPixel> {
     const { rangeStart, treeOrderSampleComparator, xPixelsPerMs } =
       this.renderedComponentSettings;
@@ -826,12 +826,12 @@ function _getCategoryFills(
 function _accumulateInBuffer(
   percentageBuffer: Float32Array,
   renderedComponentSettings: RenderedComponentSettings,
-  prevSampleTime: Milliseconds,
-  sampleTime: Milliseconds,
-  nextSampleTime: Milliseconds,
+  prevSampleTime: Nanoseconds,
+  sampleTime: Nanoseconds,
+  nextSampleTime: Nanoseconds,
   cpuDeltaBeforeSample: number | null,
   cpuDeltaAfterSample: number | null,
-  bufferTimeRangeStart: Milliseconds
+  bufferTimeRangeStart: Nanoseconds
 ) {
   const { xPixelsPerMs, maxThreadCPUDeltaPerMs } = renderedComponentSettings;
   const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;

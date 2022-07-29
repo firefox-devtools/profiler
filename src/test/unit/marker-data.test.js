@@ -37,7 +37,7 @@ import { storeWithProfile } from '../fixtures/stores';
 
 import type {
   IndexIntoRawMarkerTable,
-  Milliseconds,
+  Nanoseconds,
 } from 'firefox-profiler/types';
 
 describe('Derive markers from Gecko phase markers', function () {
@@ -765,8 +765,8 @@ describe('deriveMarkersFromRawMarkerTable', function () {
 
 describe('filterRawMarkerTableToRange', () => {
   type TestConfig = {|
-    start: Milliseconds,
-    end: Milliseconds,
+    start: Nanoseconds,
+    end: Nanoseconds,
     markers: Array<TestDefinedRawMarker>,
   |};
 
@@ -1251,7 +1251,7 @@ describe('filterRawMarkerTableToRange', () => {
 // tested in `filterRawMarkerTableToRange` tests.
 describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
   type TestConfig = {|
-    timeRange: {| start: Milliseconds, end: Milliseconds |} | null,
+    timeRange: {| start: Nanoseconds, end: Nanoseconds |} | null,
     markersToDelete: Set<IndexIntoRawMarkerTable>,
     markers: Array<TestDefinedRawMarker>,
   |};

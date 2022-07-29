@@ -7,7 +7,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import {
-  formatMilliseconds,
+  formatNanoseconds,
   formatTimestamp,
 } from 'firefox-profiler/utils/format-numbers';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -42,7 +42,7 @@ import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-dat
 
 import type {
   CategoryList,
-  Milliseconds,
+  Nanoseconds,
   Marker,
   ImplementationFilter,
   Thread,
@@ -67,7 +67,7 @@ function _maybeFormatDuration(
   end: number | void
 ): string {
   if (start !== undefined && end !== undefined) {
-    return formatMilliseconds(end - start);
+    return formatNanoseconds(end - start);
   }
   return 'unknown';
 }
@@ -89,7 +89,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +pages: PageList | null,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +zeroAt: Milliseconds,
+  +zeroAt: Nanoseconds,
   +threadIdToNameMap: Map<Tid, string>,
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,

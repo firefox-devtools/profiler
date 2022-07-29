@@ -39,7 +39,7 @@ import type {
   Marker,
   MarkerIndex,
   MarkerTiming,
-  Milliseconds,
+  Nanoseconds,
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
@@ -53,8 +53,8 @@ import './TrackNetwork.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +hoveredMarkerIndex: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +selectedNetworkMarkerIndex: MarkerIndex | null,
@@ -85,7 +85,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
     const rangeLength = rangeEnd - rangeStart;
     const time = rangeStart + (x / width) * rangeLength;
     const minimumSize: CssPixels = 5;
-    const minimumDuration: Milliseconds = (minimumSize / width) * rangeLength;
+    const minimumDuration: Nanoseconds = (minimumSize / width) * rangeLength;
 
     // Row i matches network timing's rows i, i + TRACK_NETWORK_ROW_REPEAT, i +
     // TRACK_NETWORK_ROW_REPEAT * 2, etc
@@ -251,10 +251,10 @@ type OwnProps = {|
 
 type StateProps = {|
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +isModifyingSelection: boolean,
-  +zeroAt: Milliseconds,
+  +zeroAt: Nanoseconds,
   +getMarker: (MarkerIndex) => Marker,
   +networkTiming: MarkerTiming[],
   +verticalMarkerIndexes: MarkerIndex[],

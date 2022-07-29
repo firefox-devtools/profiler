@@ -27,7 +27,7 @@ import type {
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,
   GlobalTrackReference,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
 } from 'firefox-profiler/types';
 
@@ -38,7 +38,7 @@ type StateProps = {|
   +globalTracks: ActiveTabGlobalTrack[],
   +globalTrackReferences: GlobalTrackReference[],
   +panelLayoutGeneration: number,
-  +zeroAt: Milliseconds,
+  +zeroAt: Nanoseconds,
 |};
 
 type Props = {|

@@ -157,7 +157,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
         data: [
           [
             24,           // index into stringTable - Marker name
-            37070.186708, // milliseconds since since profile.meta.startTime
+            37070186708,  // integer nanosecond since since profile.meta.startTime
             {             // arbitrary JSON about the marker
               "type": "tracing",
               "category": "Paint",
@@ -181,8 +181,8 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
         data: [
           [
             1,             // index into stackTable - The current stack of the sample.
-            37067.409299,  // milliseconds since since profile.meta.startTime
-            1.437998,      // milliseconds since the last event was processed in this
+            37067409299,   // integer nanoseconds since since profile.meta.startTime
+            1437998,       // integer nanoseconds since the last event was processed in this
                            // thread's event loop at the time that the sample was taken
           ]
         ]

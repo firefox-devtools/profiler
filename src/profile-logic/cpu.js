@@ -8,7 +8,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   Thread,
-  Milliseconds,
+  Nanoseconds,
   SampleUnits,
   ThreadCPUDeltaUnit,
   Profile,
@@ -20,7 +20,7 @@ import type {
  */
 export function computeMaxThreadCPUDeltaPerMs(
   threads: Thread[],
-  profileInterval: Milliseconds
+  profileInterval: Nanoseconds
 ): number {
   let maxThreadCPUDeltaPerMs = 0;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
@@ -111,7 +111,7 @@ export function computeMaxCPUDeltaPerInterval(profile: Profile): number | null {
 export function processThreadCPUDelta(
   thread: Thread,
   sampleUnits: SampleUnits,
-  profileInterval: Milliseconds
+  profileInterval: Nanoseconds
 ): Thread {
   const { samples } = thread;
   const { threadCPUDelta } = samples;

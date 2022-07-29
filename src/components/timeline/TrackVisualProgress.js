@@ -14,7 +14,7 @@ import {
   TRACK_VISUAL_PROGRESS_HEIGHT,
 } from 'firefox-profiler/app-logic/constants';
 
-import type { ProgressGraphData, Milliseconds } from 'firefox-profiler/types';
+import type { ProgressGraphData, Nanoseconds } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -26,8 +26,8 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
 |};
 
 type DispatchProps = {|

@@ -17,7 +17,7 @@ import type {
   Localization,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { StartEndRange, CssPixels, Milliseconds } from './units';
+import type { StartEndRange, CssPixels, Nanoseconds } from './units';
 import type { Profile, ThreadIndex, Pid, TabID } from './profile';
 
 import type {
@@ -105,7 +105,7 @@ export type ProfileViewState = {
     rightClickedCallNode: RightClickedCallNode | null,
     rightClickedMarker: MarkerReference | null,
     hoveredMarker: MarkerReference | null,
-    mouseTimePosition: Milliseconds | null,
+    mouseTimePosition: Nanoseconds | null,
   |},
   +profile: Profile | null,
   +full: FullProfileViewState,

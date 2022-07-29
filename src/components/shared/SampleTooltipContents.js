@@ -13,7 +13,7 @@ import {
   convertStackToCallNodeAndCategoryPath,
 } from 'firefox-profiler/profile-logic/profile-data';
 import {
-  formatMilliseconds,
+  formatNanoseconds,
   formatPercent,
 } from 'firefox-profiler/utils/format-numbers';
 
@@ -49,7 +49,7 @@ class SampleTooltipCPUContents extends React.PureComponent<CPUProps> {
     const { cpuRatio, timeRange } = this.props;
 
     const percentageText = formatPercent(cpuRatio);
-    const cpuUsageAndPercentage = `${percentageText} (average over ${formatMilliseconds(
+    const cpuUsageAndPercentage = `${percentageText} (average over ${formatNanoseconds(
       timeRange
     )})`;
 

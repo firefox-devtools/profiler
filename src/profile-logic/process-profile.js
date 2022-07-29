@@ -56,7 +56,7 @@ import type {
   JsAllocationsTable,
   ProfilerOverhead,
   NativeAllocationsTable,
-  Milliseconds,
+  Nanoseconds,
   Microseconds,
   Address,
   GeckoProfile,
@@ -132,8 +132,8 @@ function _sortMarkers(markers: GeckoMarkers): GeckoMarkers {
   // Sort the markers based on their startTime. If there is no startTime, then use
   // endtime.
   sortedData.sort((a, b) => {
-    const aTime: null | Milliseconds = a[endTime] || a[startTime];
-    const bTime: null | Milliseconds = b[endTime] || b[startTime];
+    const aTime: null | Nanoseconds = a[endTime] || a[startTime];
+    const bTime: null | Nanoseconds = b[endTime] || b[startTime];
     if (aTime === null) {
       console.error(a);
       throw new Error('A marker had null start and end time.');
@@ -822,7 +822,7 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): {|
 }
 
 function convertPhaseTimes(
-  old_phases: PhaseTimes<Milliseconds>
+  old_phases: PhaseTimes<Nanoseconds>
 ): PhaseTimes<Microseconds> {
   const phases = {};
   for (const phase in old_phases) {
@@ -954,7 +954,7 @@ function _processCounters(
   stableThreadList: Thread[],
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
-  delta: Milliseconds
+  delta: Nanoseconds
 ): Counter[] {
   const geckoCounters = geckoProfile.counters;
   const mainThread = geckoProfile.threads.find(
@@ -1021,7 +1021,7 @@ function _processProfilerOverhead(
   stableThreadList: Thread[],
   // The timing across processes must be normalized, this is the timing delta between
   // various processes.
-  delta: Milliseconds
+  delta: Nanoseconds
 ): ProfilerOverhead | null {
   const geckoProfilerOverhead: ?GeckoProfilerOverhead =
     geckoProfile.profilerOverhead;
@@ -1196,9 +1196,9 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
+export function adjustTableTimestamps<Table: { time: Nanoseconds[] }>(
   table: Table,
-  delta: Milliseconds
+  delta: Nanoseconds
 ): Table {
   return {
     ...table,
@@ -1214,7 +1214,7 @@ export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
  */
 function _adjustJsTracerTimestamps(
   jsTracer: JsTracerTable,
-  delta: Milliseconds
+  delta: Nanoseconds
 ): JsTracerTable {
   const deltaMicroseconds = delta * 1000;
   return {
@@ -1233,7 +1233,7 @@ function _adjustJsTracerTimestamps(
  */
 export function adjustProfilerOverheadTimestamps<
   Table: { time: Microseconds[] }
->(table: Table, delta: Milliseconds): Table {
+>(table: Table, delta: Nanoseconds): Table {
   return {
     ...table,
     // Converting microseconds to milliseconds here since we use milliseconds
@@ -1250,7 +1250,7 @@ export function adjustProfilerOverheadTimestamps<
  */
 export function adjustMarkerTimestamps(
   markers: RawMarkerTable,
-  delta: Milliseconds
+  delta: Nanoseconds
 ): RawMarkerTable {
   function adjustTimeIfNotNull(time: number | null) {
     return time === null ? time : time + delta;

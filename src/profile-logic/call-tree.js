@@ -27,7 +27,7 @@ import type {
   CallNodeInfo,
   CallNodeData,
   CallNodeDisplayData,
-  Milliseconds,
+  Nanoseconds,
   TracedTiming,
   SamplesTable,
   ExtraBadgeInfo,
@@ -445,8 +445,8 @@ function _getStackSelf(
   callNodeTable: CallNodeTable,
   sampleIndexToCallNodeIndex: Array<null | IndexIntoCallNodeTable>
 ): {
-  callNodeSelf: Float32Array, // Milliseconds[]
-  callNodeLeaf: Float32Array, // Milliseconds[]
+  callNodeSelf: Float32Array, // Nanoseconds[]
+  callNodeLeaf: Float32Array, // Nanoseconds[]
 } {
   const callNodeSelf = new Float32Array(callNodeTable.length);
 
@@ -476,7 +476,7 @@ function _getStackSelf(
 export function computeCallTreeCountsAndSummary(
   samples: SamplesLikeTable,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
-  interval: Milliseconds,
+  interval: Nanoseconds,
   invertCallstack: boolean
 ): CallTreeCountsAndSummary {
   const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
@@ -539,7 +539,7 @@ export function computeCallTreeCountsAndSummary(
  */
 export function getCallTree(
   thread: Thread,
-  interval: Milliseconds,
+  interval: Nanoseconds,
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
   implementationFilter: string,
@@ -652,7 +652,7 @@ export function extractSamplesLikeTable(
 export function computeTracedTiming(
   samples: SamplesLikeTable,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
-  interval: Milliseconds,
+  interval: Nanoseconds,
   invertCallstack: boolean
 ): TracedTiming | null {
   if (samples.weightType !== 'samples' || samples.weight) {
