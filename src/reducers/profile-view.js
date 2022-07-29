@@ -13,6 +13,7 @@ import type {
   Pid,
   LocalTrack,
   GlobalTrack,
+  LastNonShiftClickInformation,
   OriginsTimeline,
   StartEndRange,
   PreviewSelection,
@@ -486,6 +487,18 @@ const rootRange: Reducer<StartEndRange> = (
   }
 };
 
+const lastNonShiftClick: Reducer<LastNonShiftClickInformation | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'SELECT_TRACK':
+      return action.lastNonShiftClickInformation;
+    default:
+      return state;
+  }
+};
+
 const rightClickedTrack: Reducer<TrackReference | null> = (
   state = null,
   action
@@ -661,6 +674,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       scrollToSelectionGeneration,
       focusCallTreeGeneration,
       rootRange,
+      lastNonShiftClick,
       rightClickedTrack,
       rightClickedCallNode,
       rightClickedMarker,

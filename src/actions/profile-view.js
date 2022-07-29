@@ -280,6 +280,8 @@ type TrackInformation = {|
   // This is the tab that should be selected from this track. `null` if this
   // track doesn't have a prefered tab.
   relatedTab: null | TabSlug,
+  // This is the initial track reference
+  trackReference: TrackReference,
 |};
 
 /**
@@ -306,6 +308,7 @@ function getInformationFromTrackReference(
           }
 
           return {
+            trackReference,
             threadIndex: mainThreadIndex,
             relatedThreadIndex: mainThreadIndex,
             relatedTab:
@@ -335,6 +338,7 @@ function getInformationFromTrackReference(
       switch (localTrack.type) {
         case 'thread':
           return {
+            trackReference,
             threadIndex: localTrack.threadIndex,
             relatedThreadIndex: localTrack.threadIndex,
             // Move to a relevant thread-based tab when the previous tab was
@@ -346,18 +350,21 @@ function getInformationFromTrackReference(
           };
         case 'network':
           return {
+            trackReference,
             threadIndex: null,
             relatedThreadIndex: localTrack.threadIndex,
             relatedTab: 'network-chart',
           };
         case 'ipc':
           return {
+            trackReference,
             threadIndex: null,
             relatedThreadIndex: localTrack.threadIndex,
             relatedTab: 'marker-chart',
           };
         case 'event-delay':
           return {
+            trackReference,
             threadIndex: null,
             relatedThreadIndex: localTrack.threadIndex,
             relatedTab: null,
@@ -368,6 +375,7 @@ function getInformationFromTrackReference(
           const counterSelectors = getCounterSelectors(localTrack.counterIndex);
           const counter = counterSelectors.getCounter(state);
           return {
+            trackReference,
             threadIndex: null,
             relatedThreadIndex: counter.mainThreadIndex,
             relatedTab: null,
@@ -393,10 +401,15 @@ function setOneTrackSelection(
   trackInformation: TrackInformation,
   selectedTab: TabSlug
 ): Action {
+  const selectedThreadIndexes = new Set([trackInformation.relatedThreadIndex]);
   return {
     type: 'SELECT_TRACK',
-    selectedThreadIndexes: new Set([trackInformation.relatedThreadIndex]),
+    selectedThreadIndexes,
     selectedTab,
+    lastNonShiftClickInformation: {
+      clickedTrack: trackInformation.trackReference,
+      selection: selectedThreadIndexes,
+    },
   };
 }
 
@@ -424,6 +437,10 @@ function toggleOneTrack(
       type: 'SELECT_TRACK',
       selectedThreadIndexes,
       selectedTab,
+      lastNonShiftClickInformation: {
+        clickedTrack: trackInformation.trackReference,
+        selection: selectedThreadIndexes,
+      },
     });
   };
 }
@@ -614,6 +631,7 @@ export function selectActiveTabTrack(
       type: 'SELECT_TRACK',
       selectedThreadIndexes,
       selectedTab,
+      lastNonShiftClickInformation: null,
     });
   };
 }

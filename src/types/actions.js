@@ -106,6 +106,11 @@ export type LocalTrackReference = {|
 
 export type TrackReference = GlobalTrackReference | LocalTrackReference;
 
+export type LastNonShiftClickInformation = {|
+  clickedTrack: TrackReference,
+  selection: Set<ThreadIndex>,
+|};
+
 /**
  * Active tab track references
  * A TrackReference uniquely identifies a track.
@@ -409,6 +414,7 @@ type UrlStateAction =
     |}
   | {|
       +type: 'SELECT_TRACK',
+      +lastNonShiftClickInformation: LastNonShiftClickInformation | null,
       +selectedThreadIndexes: Set<ThreadIndex>,
       +selectedTab: TabSlug,
     |}
