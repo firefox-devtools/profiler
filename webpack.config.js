@@ -3,7 +3,7 @@ const path = require('path');
 const webpack = require('webpack');
 const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const OfflinePlugin = require('offline-plugin');
+const { GenerateSW } = require('workbox-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
@@ -21,6 +21,13 @@ const availableStagingLocales = process.env.L10N
   : JSON.stringify(undefined);
 
 const config = {
+  entry: './src/index',
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: '[name].[hash].bundle.js',
+    publicPath: '/',
+  },
+  mode: process.env.NODE_ENV,
   resolve: {
     alias: {
       // Note: the alias for firefox-profiler is defined at the Babel level, so
@@ -93,80 +100,73 @@ const config = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'res/_headers' },
-        { from: 'res/_redirects' },
+        'res/_headers',
+        'res/_redirects',
+        'res/zee-worker.js',
+        'res/before-load.js',
+        'res/contribute.json',
+        'res/service-worker-compat.js',
         { from: 'docs-user', to: 'docs' },
-        { from: 'res/zee-worker.js' },
-        { from: 'res/before-load.js' },
-        { from: 'res/contribute.json' },
         { from: 'locales', to: 'locales' },
       ],
     }),
   ],
-  entry: ['./src/index'],
-  output: {
-    path: path.join(__dirname, 'dist'),
-    filename: '[hash].bundle.js',
-    chunkFilename: '[id].[hash].bundle.js',
-    publicPath: '/',
-  },
 };
 
-if (process.env.NODE_ENV === 'development') {
-  config.mode = 'development';
-}
-
-if (process.env.NODE_ENV === 'production') {
-  config.mode = 'production';
-
+if (config.mode === 'production') {
+  // For an easier debugging with an unminified service worker, add this plugin
+  // in development mode as well.
   config.plugins.push(
-    new OfflinePlugin({
-      relativePaths: false,
-      AppCache: false,
-      ServiceWorker: {
-        scope: '/',
-        events: true,
-      },
-      /* Exclude the files used but not served by netlify. When trying to fetch
-       * them we get a 404, and so the SW registration fails. */
-      excludes: ['_headers', '_redirects', 'docs/**', 'photon/**'],
-      cacheMaps: [
-        {
-          requestTypes: ['navigate'],
-          match: function (url, _request) {
-            // This function is called for "navigate" requests to URLs within
-            // our origin, whose URL does not match any files in the service
-            // worker's list of assets. We can return a different URL which
-            // will be looked up in the cache for this request.
-            // There are two cases in which this happens:
-            if (url.pathname === '/sw.js') {
-              // 1. The service worker script itself is not in the list of
-              // assets. Return null, which means "no override". The service
-              // worker will fall back to getting this file from the network,
-              // which is what we want to happen.
-              // Doing this is not necessary for the service worker (and for
-              // service worker updates) to work, but it makes debugging easier
-              // because you can load the /sw.js URL from the address bar of
-              // your browser and see the actual service worker script
-              return null;
-            }
-            if (
-              url.pathname.startsWith('/docs/') ||
-              url.pathname === '/docs' ||
-              url.pathname.startsWith('/photon/') ||
-              url.pathname === '/photon'
-            ) {
-              // 2. We exclude the /docs from being cached, but we still want
-              // the user to be able to access them.
-              return null;
-            }
-            // 3. It's a URL like /from-browser/, or /public/.../?... .
-            // For those URLs we want to respond with index.html, which is
-            // cached as the "/" URL.
-            return url.origin + '/';
-          },
-        },
+    new GenerateSW({
+      // All navigation that's not in the cache will respond the entry for /index.html. ("SPA" mode)
+      navigateFallback: '/index.html',
+      // Cleanup the caches from old workbox installations. This isn't useful
+      // for us _now_ but this can be later for future versions.
+      cleanupOutdatedCaches: true,
+      // Our biggest asset in production is currently 1.34MB. Therefore 2MB in
+      // production looks sensible (this is the default too).
+      // If it's not cached then index.html is answered instead because of
+      // navigateFallback, then everything it's broken.
+      // In development we want to use a higher limit so that we don't hit the
+      // limit. This isn't normally used but can be used when debugging the
+      // service worker.
+      maximumFileSizeToCacheInBytes:
+        config.mode === 'development' ? 10 * 1024 * 1024 : 2 * 1024 * 1024,
+      // All scripts, including imported scripts, will be requested bypassing
+      // HTTP cache, to determine if an update is needed, because we use
+      // `updateViaCache: none` during the register. That's why we don't need to
+      // use a hash or version in this file name.
+      // For more information and background, see:
+      // - discussion in https://github.com/w3c/ServiceWorker/issues/106
+      // - chrome update in https://developer.chrome.com/blog/fresher-sw/
+      // - step 8.21 in https://w3c.github.io/ServiceWorker/#update-algorithm
+      importScripts: ['/service-worker-compat.js'],
+      navigateFallbackDenylist: [
+        // requests to docs and photon example pages shouldn't be redirected to
+        // the index file as they're not part of the SPA
+        /^\/docs(?:\/|$)/,
+        /^\/photon(?:\/|$)/,
+        // While excluding the service worker file isn't necessary to work, it's
+        // convenient that we can just access it from a browser.
+        /^\/sw\.js/,
       ],
+      exclude: [
+        // exclude user docs and photon from the cache
+        'docs',
+        'photon',
+        // exclude also the netlify-specific files that aren't actually served
+        // because this would fail the service worker installation
+        '_headers',
+        '_redirects',
+        // do not cache source maps
+        /.map$/,
+        // nor the service worker imported script
+        'service-worker-compat.js',
+      ],
+      // This is the service worker file name. It should never change if we want
+      // that the browser updates it. If this changes it will never be updated
+      // and the user will be stuck with an old version.
+      swDest: 'sw.js',
     })
   );
 }
