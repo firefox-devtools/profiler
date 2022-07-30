@@ -74,7 +74,6 @@
     "memoize-one": "^6.0.0",
     "mixedtuplemap": "^1.0.0",
     "namedtuplemap": "^1.0.0",
-    "offline-plugin": "^5.0.7",
     "photon-colors": "^3.3.2",
     "query-string": "^7.1.1",
     "react": "^18.2.0",
@@ -88,7 +87,8 @@
     "redux-thunk": "^2.4.1",
     "reselect": "^4.1.6",
     "url": "^0.11.0",
-    "weaktuplemap": "^1.0.0"
+    "weaktuplemap": "^1.0.0",
+    "workbox-window": "^6.5.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.6",
@@ -159,7 +159,8 @@
     "stylelint-prettier": "^2.0.0",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^4.9.3"
+    "webpack-dev-server": "^4.9.3",
+    "workbox-webpack-plugin": "^6.5.3"
   },
   "jest": {
     "collectCoverageFrom": [

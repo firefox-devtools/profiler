@@ -5,6 +5,7 @@
 
 import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
+import { Workbox } from 'workbox-window';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
@@ -28,7 +29,7 @@ type StateProps = {|
 |};
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-type InstallStatus = 'pending' | 'installing' | 'installed' | 'idle';
+type InstallStatus = 'pending' | 'activating' | 'activated' | 'idle';
 type State = {|
   installStatus: InstallStatus,
   isNoticeDisplayed: boolean,
@@ -81,56 +82,73 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     updatedWhileNotReady: false,
   };
 
+  _workbox: Workbox | null = null;
+
   _installServiceWorker() {
-    const runtime = require('offline-plugin/runtime');
-    runtime.install({
-      onInstalled: () => {
-        console.log('[ServiceWorker] App is ready for offline usage!');
-      },
-      onUpdating: () => {
-        // XXX Strangely, this doesn't seem to be called...
-        console.log(
-          '[ServiceWorker] An update has been found and the browser is downloading the new assets.'
-        );
-      },
-      onUpdateReady: () => {
-        console.log(
-          '[ServiceWorker] We have downloaded the new assets and we are ready to go.'
-        );
-        this.setState({
-          installStatus: 'pending',
-          isNoticeDisplayed: true,
-        });
-      },
-      onUpdated: () => {
-        // The update could have been triggered by this tab or another tab.
-        // We distinguish these cases by looking at this.state.installStatus.
-        console.log(
-          '[ServiceWorker] The new version of the application has been enabled.'
-        );
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
 
-        if (this.state.installStatus === 'installing') {
-          // In this page the user clicked on the "reload" button.
-          this.reloadPage();
-          return;
-        }
+    const wb = (this._workbox = new Workbox('/sw.js', {
+      // With this option, all scripts, including imported scripts, will be
+      // requested bypassing HTTP cache, to determine if an update is needed.
+      // The default is to bypass cache only for the serviceworker script but
+      // otherwise use the cache for the imported scripts, this property changes
+      // this behavior. We do this so that we can simply copy the imported file
+      // service-worker-compat.js without adding a hash to the file name.
+      // For more information and background, see:
+      // - discussion in https://github.com/w3c/ServiceWorker/issues/106
+      // - chrome update in https://developer.chrome.com/blog/fresher-sw/
+      // - step 8.21 in https://w3c.github.io/ServiceWorker/#update-algorithm
+      updateViaCache: 'none',
+    }));
+    wb.register();
 
-        // In another page, the user clicked on the "reload" button.
+    wb.addEventListener('installing', () => {
+      console.log(
+        '[ServiceWorker] An update has been found and the browser is downloading the new assets.'
+      );
+    });
 
-        const ready =
-          !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
+    wb.addEventListener('installed', () => {
+      // We cached all assets.
+      console.log('[ServiceWorker] App is ready for offline usage!');
+    });
 
-        this.setState({
-          installStatus: 'installed',
-          // But if we weren't quite ready, we should write it in the notice.
-          updatedWhileNotReady: !ready,
-        });
-      },
-      onUpdateFailed: () => {
-        console.log(
-          '[ServiceWorker] We failed to update the application for an unknown reason.'
-        );
-      },
+    wb.addEventListener('waiting', () => {
+      // Update is ready to be applied.
+      console.log(
+        '[ServiceWorker] We have downloaded the new assets and we are ready to go.'
+      );
+      this.setState({
+        installStatus: 'pending',
+        isNoticeDisplayed: true,
+      });
+    });
+
+    wb.addEventListener('activated', () => {
+      // The update could have been triggered by this tab or another tab.
+      // We distinguish these cases by looking at this.state.installStatus.
+      console.log(
+        '[ServiceWorker] The new version of the application has been enabled.'
+      );
+
+      if (this.state.installStatus === 'activating') {
+        // In this page the user clicked on the "reload" button.
+        this.reloadPage();
+        return;
+      }
+
+      // In another page, the user clicked on the "reload" button.
+
+      const ready =
+        !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
+
+      this.setState({
+        installStatus: 'activated',
+        // But if we weren't quite ready, we should write it in the notice.
+        updatedWhileNotReady: !ready,
+      });
     });
   }
 
@@ -228,6 +246,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     const { installStatus } = this.state;
 
     if (
+      this._workbox &&
       installStatus !== 'idle' &&
       phase === 'FATAL_ERROR' &&
       dataSource !== 'from-file' // we can't reload and keep the context for this dataSource.
@@ -235,16 +254,17 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       // If we got a fatal error and a new version of the application is
       // available, let's try to reload automatically, as this might fix the
       // fatal error.
-      const runtime = require('offline-plugin/runtime');
-      runtime.applyUpdate();
+      this._workbox.messageSkipWaiting();
       this.reloadPage();
     }
   }
 
   applyServiceWorkerUpdate = () => {
-    this.setState({ installStatus: 'installing' });
-    const runtime = require('offline-plugin/runtime');
-    runtime.applyUpdate();
+    const wb = this._workbox;
+    if (wb) {
+      this.setState({ installStatus: 'activating' });
+      wb.messageSkipWaiting();
+    }
   };
 
   reloadPage = () => {
@@ -259,14 +279,14 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     const { installStatus } = this.state;
 
     switch (installStatus) {
-      case 'installing':
+      case 'activating':
         return (
-          <Localized id="ServiceWorkerManager--installing-button">
+          <Localized id="ServiceWorkerManager--applying-button">
             <button
               className="photon-button photon-button-micro photon-message-bar-action-button"
               type="button"
             >
-              Installing…
+              Applying…
             </button>
           </Localized>
         );
@@ -286,7 +306,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
             </button>
           </Localized>
         );
-      case 'installed':
+      case 'activated':
         // Another tab applied the new service worker.
         return (
           <Localized id="ServiceWorkerManager--installed-button">
