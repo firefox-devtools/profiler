@@ -207,10 +207,6 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
-FullTimeline--graph-type = Graphentyp:
-FullTimeline--categories-with-cpu = Kategorien mit CPU
-FullTimeline--categories = Kategorien
-FullTimeline--stack-height = Höhe des Stacks
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
@@ -582,7 +578,7 @@ ProfileRootMessage--additional = Zurück zur Startseite
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--installing-button = Installieren…
+ServiceWorkerManager--applying-button = Wird angewendet...
 ServiceWorkerManager--pending-button = Anwenden und neu laden
 ServiceWorkerManager--installed-button = Anwendung neu laden
 ServiceWorkerManager--updated-while-not-ready =
