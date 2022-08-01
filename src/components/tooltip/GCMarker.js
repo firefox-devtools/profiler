@@ -11,7 +11,7 @@ import {
   formatBytes,
   formatSI,
   formatMicroseconds,
-  formatMilliseconds,
+  formatNanoseconds,
   formatValueTotal,
 } from 'firefox-profiler/utils/format-numbers';
 
@@ -37,7 +37,7 @@ export function getGCMinorDetails(
         // CollectToFP phase since that's the main phase.  If it's
         // missing then there's something wrong with the profile and
         // we'd only get bogus data.  All these times are in
-        // Milliseconds
+        // Nanoseconds
         const evictTimeMS = nursery.phase_times.CollectToFP
           ? _sumMaybeEntries(nursery.phase_times, [
               'TraceValues',
@@ -270,14 +270,14 @@ export function getGCMajorDetails(
           {timings.reason}
         </TooltipDetail>,
         <TooltipDetail label="Total slice times" key="GMajor-Total slice times">
-          {formatMilliseconds(
+          {formatNanoseconds(
             timings.total_time,
             /* significantDigits */ 3,
             /* maxFractionalDigits */ 2
           )}
         </TooltipDetail>,
         <TooltipDetail label="Max Pause" key="GMajor-Make Pause">
-          {formatMilliseconds(
+          {formatNanoseconds(
             timings.max_pause,
             /* significantDigits */ 3,
             /* maxFractionalDigits */ 2
@@ -359,7 +359,7 @@ type PhaseTimeTuple = {| name: string, time: Microseconds |};
 function _markerDetailPhase(p: PhaseTimeTuple) {
   return (
     <TooltipDetail key={'GC Phase - ' + p.name} label={'Phase ' + p.name}>
-      {formatMilliseconds(p.time / 1000)}
+      {formatNanoseconds(p.time / 1000)}
     </TooltipDetail>
   );
 }

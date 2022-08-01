@@ -23,7 +23,7 @@ import type {
   NativeAllocationPayload_Gecko,
   GeckoThread,
   IndexIntoGeckoStackTable,
-  Milliseconds,
+  Nanoseconds,
 } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function () {
@@ -534,11 +534,11 @@ describe('gecko samples table processing', function () {
     });
 
     // Add some values to the samples table so we can have hardcoded tests.
-    const hardcodedTime: Milliseconds[] = [1, 2];
+    const hardcodedTime: Nanoseconds[] = [1, 2];
     const hardcodedStack: Array<null | IndexIntoGeckoStackTable> = [6, 5];
     const hardcodedStackAfterProcessing: Array<null | IndexIntoGeckoStackTable> =
       [9, 8];
-    const hardcodedEventDelay: Milliseconds[] = [0, 1];
+    const hardcodedEventDelay: Nanoseconds[] = [0, 1];
     const hardcodedThreadCPUDelta: Array<number | null> = [0.1, 0.2];
     const hardcodedSamplesTable = [
       [

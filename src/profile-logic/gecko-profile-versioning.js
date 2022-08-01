@@ -1365,5 +1365,146 @@ const _upgraders = {
     // capturing this data and no new mandatory values are present in this
     // version.
   },
+  [26]: (profile) => {
+    // Milliseconds changed to nanoseconds almost everywhere.
+    function ms2ns(milliseconds: number): number {
+      return Math.round(milliseconds * 1000000);
+    }
+    function convertMarkerData(data) {
+      if (data.stack) {
+        data.stack.time = ms2ns(data.stack.time);
+      }
+      switch (data.type) {
+        case 'gpu_timer_query': {
+          data.cpustart = ms2ns(data.cpustart);
+          data.cpuend = ms2ns(data.cpuend);
+          data.gpustart = ms2ns(data.gpustart);
+          data.gpuend = ms2ns(data.gpuend);
+          break;
+        }
+        case 'Network': {
+          data.startTime = ms2ns(data.startTime);
+          data.endTime = ms2ns(data.endTime);
+          const props = [
+            'fetchStart',
+            'domainLookupStart',
+            'domainLookupEnd',
+            'connectStart',
+            'tcpConnectEnd',
+            'secureConnectionStart',
+            'connectEnd',
+            'requestStart',
+            'responseStart',
+            'responseEnd',
+          ];
+          for (const prop of props) {
+            if (data[prop]) {
+              data[prop] = ms2ns(data[prop]);
+            }
+          }
+          break;
+        }
+        case 'IPC': {
+          data.startTime = ms2ns(data.startTime);
+          data.endTime = ms2ns(data.endTime);
+          break;
+        }
+        case 'DOMEvent': {
+          if (data.latency) {
+            data.latency = ms2ns(data.latency);
+          }
+          break;
+        }
+        case 'GCMajor': {
+          data.max_pause = ms2ns(data.max_pause);
+          data.total_time = ms2ns(data.total_time);
+          data.scc_sweep_total = ms2ns(data.scc_sweep_total);
+          data.scc_sweep_max_pause = ms2ns(data.scc_sweep_max_pause);
+          if (data.slices_list) {
+            for (const slice of data.slices_list) {
+              
+            }
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
+    function convertToVersion26Recursive(p) {
+      const meta = p.meta;
+      meta.interval = ms2ns(meta.interval);
+      if (meta.profilingStartTime) {
+        meta.profilingStartTime = ms2ns(meta.profilingStartTime);
+      }
+      if (meta.profilingEndTime) {
+        meta.profilingEndTime = ms2ns(meta.profilingEndTime);
+      }
+      if (meta.shutdownTime) {
+        meta.shutdownTime = ms2ns(meta.shutdownTime);
+      }
+      if (meta.sampleUnits) {
+        meta.sampleUnits.eventDelay = 'ns';
+        meta.sampleUnits.time = 'ns';
+      }
+      if (p.counters) {
+        for (const counter of p.counters) {
+          for (const group of counter.sample_groups) {
+            const { schema, data } = group.samples;
+            const timeIndex = schema.time;
+            for (let i = 0; i < data.length; i++) {
+              data[i][timeIndex] = ms2ns(data[i][timeIndex]);
+            }
+          }
+        }
+      }
+      if (p.pausedRanges) {
+        for (const pausedRange of p.pausedRanges) {
+          pausedRange.startTime = ms2ns(pausedRange.startTime);
+          pausedRange.endTime = ms2ns(pausedRange.endTime);
+        }
+      }
+      for (const thread of p.threads) {
+        if (thread.registerTime) {
+          thread.registerTime = ms2ns(thread.registerTime);
+        }
+        if (thread.unregisterTime) {
+          thread.unregisterTime = ms2ns(thread.unregisterTime);
+        }
+        if (thread.samples) {
+          const { schema, data } = thread.samples;
+          const timeIndex = schema.time;
+          for (let i = 0; i < data.length; i++) {
+            data[i][timeIndex] = ms2ns(data[i][timeIndex]);
+          }
+          const eventDelayIndex = schema.eventDelay;
+          if (eventDelayIndex) {
+            for (let i = 0; i < data.length; i++) {
+              if (data[i][eventDelayIndex]) {
+                data[i][eventDelayIndex] = ms2ns(data[i][eventDelayIndex]);
+              }
+            }
+          }
+        }
+        if (thread.markers) {
+          const { schema, data } = thread.markers;
+          const startTimeIndex = schema.startTime;
+          const endTimeIndex = schema.endTime;
+          const dataIndex = schema.data;
+          for (let i = 0; i < data.length; i++) {
+            data[i][startTimeIndex] = ms2ns(data[i][startTimeIndex]);
+            data[i][endTimeIndex] = ms2ns(data[i][endTimeIndex]);
+            if (data[i][dataIndex]) {
+              convertMarkerData(data[i][dataIndex]);
+            }
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion26Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion26Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */

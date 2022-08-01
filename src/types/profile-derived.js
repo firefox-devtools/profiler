@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Milliseconds, StartEndRange, Address } from './units';
+import type { Nanoseconds, StartEndRange, Address } from './units';
 import type { MarkerPayload } from './markers';
 import type {
   IndexIntoFuncTable,
@@ -167,8 +167,8 @@ export type DerivedMarkerInfo = {|
 |};
 
 export type Marker = {|
-  start: Milliseconds,
-  end: Milliseconds | null,
+  start: Nanoseconds,
+  end: Nanoseconds | null,
   name: string,
   category: IndexIntoCategoryList,
   threadId: Tid | null,
@@ -476,7 +476,7 @@ export type ProfileFilterPageData = {|
 
 /**
  * This struct contains the traced timing for each call node. The arrays are indexed
- * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
+ * by the CallNodeIndex, and the values in the Float32Arrays are Nanoseconds. The
  * traced timing is computed by summing the distance between samples for a given call
  * node. See the `computeTracedTiming` for more details.
  */
@@ -494,9 +494,9 @@ export type TracedTiming = {|
  */
 export type EventDelayInfo = {|
   +eventDelays: Float32Array,
-  +minDelay: Milliseconds,
-  +maxDelay: Milliseconds,
-  +delayRange: Milliseconds,
+  +minDelay: Nanoseconds,
+  +maxDelay: Nanoseconds,
+  +delayRange: Nanoseconds,
 |};
 
 /**

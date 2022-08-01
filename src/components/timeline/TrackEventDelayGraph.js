@@ -8,7 +8,7 @@ import * as React from 'react';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize, type SizeProps } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
-import { formatMilliseconds } from '../../utils/format-numbers';
+import { formatNanoseconds } from '../../utils/format-numbers';
 import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { Tooltip } from '../tooltip/Tooltip';
@@ -17,7 +17,7 @@ import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import type {
   Thread,
   ThreadIndex,
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
   StartEndRange,
   EventDelayInfo,
@@ -31,9 +31,9 @@ import './TrackEventDelay.css';
  */
 type CanvasProps = {|
   +thread: Thread,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +interval: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
+  +interval: Nanoseconds,
   +width: CssPixels,
   +height: CssPixels,
   +lineWidth: CssPixels,
@@ -175,9 +175,9 @@ type OwnProps = {|
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +interval: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
+  +interval: Nanoseconds,
   +thread: Thread,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
@@ -264,13 +264,13 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
       <div className="timelineTrackEventDelayTooltip">
         <div className="timelineTrackEventDelayTooltipLine">
           <span className="timelineTrackEventDelayTooltipNumber">
-            {formatMilliseconds(eventDelays[delayIndex])}
+            {formatNanoseconds(eventDelays[delayIndex])}
           </span>
           {' event delay'}
         </div>
         <div className="timelineTrackEventDelayTooltipLine">
           <span className="timelineTrackEventDelayTooltipNumber">
-            {formatMilliseconds(delayRange)}
+            {formatNanoseconds(delayRange)}
           </span>
           {' delay range in graph'}
         </div>

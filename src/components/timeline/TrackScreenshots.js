@@ -25,7 +25,7 @@ import type {
   ThreadIndex,
   Thread,
   Marker,
-  Milliseconds,
+  Nanoseconds,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -39,8 +39,8 @@ type OwnProps = {|
 |};
 type StateProps = {|
   +thread: Thread,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +screenshots: Marker[],
   +threadName: string,
   +isMakingPreviewSelection: boolean,
@@ -219,8 +219,8 @@ export const TimelineTrackScreenshots = explicitConnect<
 
 type HoverPreviewProps = {|
   +thread: Thread,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +isMakingPreviewSelection: boolean,
   +offsetX: null | number,
   +pageX: null | number,
@@ -309,8 +309,8 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
 
 type ScreenshotStripProps = {|
   +thread: Thread,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +screenshots: Marker[],
   +width: number,
   +trackHeight: number,

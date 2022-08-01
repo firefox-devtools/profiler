@@ -30,7 +30,7 @@ import type {
   ThreadsKey,
   Marker,
   MarkerIndex,
-  Milliseconds,
+  Nanoseconds,
   MarkerSchemaByName,
 } from 'firefox-profiler/types';
 
@@ -50,7 +50,7 @@ type MarkerDisplayData = {|
 class MarkerTree {
   _getMarker: (MarkerIndex) => Marker;
   _markerIndexes: MarkerIndex[];
-  _zeroAt: Milliseconds;
+  _zeroAt: Nanoseconds;
   _displayDataByIndex: Map<MarkerIndex, MarkerDisplayData>;
   _markerSchemaByName: MarkerSchemaByName;
   _getMarkerLabel: (MarkerIndex) => string;
@@ -58,7 +58,7 @@ class MarkerTree {
   constructor(
     getMarker: (MarkerIndex) => Marker,
     markerIndexes: MarkerIndex[],
-    zeroAt: Milliseconds,
+    zeroAt: Nanoseconds,
     markerSchemaByName: MarkerSchemaByName,
     getMarkerLabel: (MarkerIndex) => string
   ) {
@@ -141,7 +141,7 @@ type StateProps = {|
   +markerIndexes: MarkerIndex[],
   +selectedMarker: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
-  +zeroAt: Milliseconds,
+  +zeroAt: Nanoseconds,
   +scrollToSelectionGeneration: number,
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,

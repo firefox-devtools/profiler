@@ -5,17 +5,17 @@
 // @flow
 
 import * as React from 'react';
-import type { Milliseconds } from 'firefox-profiler/types';
+import type { Nanoseconds } from 'firefox-profiler/types';
 
 export type OnMove = (
-  originalValue: { +selectionEnd: Milliseconds, +selectionStart: Milliseconds },
+  originalValue: { +selectionEnd: Nanoseconds, +selectionStart: Nanoseconds },
   dx: number,
   dy: number,
   isModifying: boolean
 ) => void;
 
 type Props = {
-  value: { +selectionStart: Milliseconds, +selectionEnd: Milliseconds },
+  value: { +selectionStart: Nanoseconds, +selectionEnd: Nanoseconds },
   onMove: OnMove,
   className: string,
   children?: React.Node,

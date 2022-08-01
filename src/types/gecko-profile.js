@@ -16,7 +16,7 @@ import type {
   SampleUnits,
 } from './profile';
 import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
-import type { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
+import type { Nanoseconds, Milliseconds, MemoryOffset, Bytes } from './units';
 import type { MixedObject } from './utils';
 
 export type IndexIntoGeckoFrameTable = number;
@@ -40,8 +40,8 @@ export type MarkerPhase = 0 | 1 | 2 | 3;
 
 export type GeckoMarkerTuple = [
   IndexIntoStringTable,
-  Milliseconds | null,
-  Milliseconds | null,
+  Nanoseconds | null,
+  Nanoseconds | null,
   MarkerPhase,
   IndexIntoCategoryList,
   MarkerPayload_Gecko
@@ -67,8 +67,8 @@ export type GeckoMarkers = {
  */
 export type GeckoMarkerStruct = {|
   name: IndexIntoStringTable[],
-  startTime: Milliseconds[],
-  endTime: Milliseconds[],
+  startTime: Nanoseconds[],
+  endTime: Nanoseconds[],
   phase: MarkerPhase[],
   data: MarkerPayload_Gecko[],
   category: IndexIntoCategoryList[],
@@ -102,17 +102,17 @@ export type GeckoSamples = {|
   data: Array<
     | [
         null | IndexIntoGeckoStackTable,
-        Milliseconds, // since profile.meta.startTime
-        // milliseconds since the last event was processed in this
+        Nanoseconds, // since profile.meta.startTime
+        // integer nanoseconds since the last event was processed in this
         // thread's event loop at the time that the sample was taken
-        Milliseconds
+        Nanoseconds
       ]
     | [
         null | IndexIntoGeckoStackTable,
-        Milliseconds, // since profile.meta.startTime
-        // milliseconds since the last event was processed in this
+        Nanoseconds, // since profile.meta.startTime
+        // integer nanoseconds since the last event was processed in this
         // thread's event loop at the time that the sample was taken
-        Milliseconds,
+        Nanoseconds,
         // CPU usage value of the current thread.
         // It's present only when the CPU Utilization feature is enabled in Firefox.
         number | null
@@ -123,8 +123,8 @@ export type GeckoSamples = {|
 // Older profiles have samples with `responsiveness` values.
 export type GeckoSampleStructWithResponsiveness = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
-  time: Milliseconds[],
-  responsiveness: Array<?Milliseconds>,
+  time: Nanoseconds[],
+  responsiveness: Array<?Nanoseconds>,
   // CPU usage value of the current thread. Its values are null only if the back-end
   // fails to get the CPU usage from operating system.
   // It's landed in Firefox 86, and it is optional because older profile
@@ -137,8 +137,8 @@ export type GeckoSampleStructWithResponsiveness = {|
 // Newer profiles have the improved version of `responsiveness`, `eventDelay`.
 export type GeckoSampleStructWithEventDelay = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
-  time: Milliseconds[],
-  eventDelay: Array<?Milliseconds>,
+  time: Nanoseconds[],
+  eventDelay: Array<?Nanoseconds>,
   // CPU usage value of the current thread. Its values are null only if the back-end
   // fails to get the CPU usage from operating system.
   // It's landed in Firefox 86, and it is optional because older profile
@@ -309,7 +309,8 @@ export type GeckoProfilerOverhead = {|
 export type GeckoProfileShortMeta = {|
   version: number,
   startTime: Milliseconds,
-  shutdownTime: Milliseconds | null,
+  // since startTime
+  shutdownTime: Nanoseconds | null,
   categories: CategoryList,
   markerSchema: MarkerSchema[],
 |};
@@ -320,7 +321,7 @@ export type GeckoProfileShortMeta = {|
  * */
 export type GeckoProfileFullMeta = {|
   ...GeckoProfileShortMeta,
-  interval: Milliseconds,
+  interval: Nanoseconds,
   stackwalk: 0 | 1,
   // This value represents a boolean, but for some reason is written out as an int
   // value as the previous field.

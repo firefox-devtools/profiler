@@ -20,7 +20,7 @@ import {
 import type {
   CounterIndex,
   ThreadIndex,
-  Milliseconds,
+  Nanoseconds,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -33,8 +33,8 @@ type OwnProps = {|
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
 |};
 
 type DispatchProps = {|

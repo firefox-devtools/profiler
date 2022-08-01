@@ -144,7 +144,7 @@ export function getJsTracerTiming(
         jsTracerTiming.push(timingRow);
       }
 
-      // The timing is converted here from Microseconds to Milliseconds.
+      // The timing is converted here from Microseconds to Nanoseconds.
       const start = jsTracer.timestamps[tracerEventIndex] / 1000;
       const durationRaw = jsTracer.durations[tracerEventIndex];
       const duration = durationRaw === null ? 0 : durationRaw / 1000;

@@ -41,7 +41,7 @@ import type {
   InitialSelectedTrackReference,
   GlobalTrackReference,
   HiddenTrackCount,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
 } from 'firefox-profiler/types';
 
@@ -53,7 +53,7 @@ type StateProps = {|
   +globalTrackOrder: TrackIndex[],
   +globalTrackReferences: GlobalTrackReference[],
   +panelLayoutGeneration: number,
-  +zeroAt: Milliseconds,
+  +zeroAt: Nanoseconds,
   +hiddenTrackCount: HiddenTrackCount,
 |};
 

@@ -7,7 +7,7 @@
 import { processThreadCPUDelta } from 'firefox-profiler/profile-logic/cpu';
 import { getProfileWithThreadCPUDelta } from '../fixtures/profiles/processed-profile';
 
-import type { ThreadCPUDeltaUnit, Milliseconds } from 'firefox-profiler/types';
+import type { ThreadCPUDeltaUnit, Nanoseconds } from 'firefox-profiler/types';
 
 const MS_TO_US_MULTIPLIER = 1000;
 const MS_TO_NS_MULTIPLIER = 1000000;
@@ -16,7 +16,7 @@ describe('processThreadCPUDelta', function () {
   function setup(
     threadCPUDelta?: Array<number | null>,
     unit: ThreadCPUDeltaUnit = 'ns',
-    interval: Milliseconds = 1
+    interval: Nanoseconds = 1
   ) {
     const profile = getProfileWithThreadCPUDelta(
       [threadCPUDelta],

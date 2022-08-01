@@ -11,7 +11,7 @@ import { TimelineMarkersIPC } from './Markers';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TRACK_IPC_MARKERS_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
-import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
+import type { ThreadIndex, Nanoseconds } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -22,8 +22,8 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
 |};
 
 type DispatchProps = {|
@@ -38,7 +38,7 @@ type State = {||};
  * A component for showing IPC messages for a particular thread.
  */
 export class TrackIPCImpl extends React.PureComponent<Props, State> {
-  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
+  _onMarkerSelect = (start: Nanoseconds, end: Nanoseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,

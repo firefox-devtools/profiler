@@ -48,7 +48,7 @@ import type {
   ActiveTabGlobalTrack,
   OriginsTimeline,
   ActiveTabResourceTrack,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
   GlobalTrackReference,
   LocalTrackReference,
@@ -99,7 +99,7 @@ export const getScrollToSelectionGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).scrollToSelectionGeneration;
 export const getFocusCallTreeGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).focusCallTreeGeneration;
-export const getZeroAt: Selector<Milliseconds> = (state) =>
+export const getZeroAt: Selector<Nanoseconds> = (state) =>
   getProfileRootRange(state).start;
 
 export const getCommittedRange: Selector<StartEndRange> = createSelector(
@@ -117,7 +117,7 @@ export const getCommittedRange: Selector<StartEndRange> = createSelector(
   }
 );
 
-export const getMouseTimePosition: Selector<Milliseconds | null> = (state) =>
+export const getMouseTimePosition: Selector<Nanoseconds | null> = (state) =>
   getProfileViewOptions(state).mouseTimePosition;
 
 export const getPreviewSelection: Selector<PreviewSelection> = (state) =>
@@ -151,7 +151,7 @@ export const getProfile: Selector<Profile> = (state) =>
     getProfileOrNull(state),
     'Tried to access the profile before it was loaded.'
   );
-export const getProfileInterval: Selector<Milliseconds> = (state) =>
+export const getProfileInterval: Selector<Nanoseconds> = (state) =>
   getProfile(state).meta.interval;
 export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;

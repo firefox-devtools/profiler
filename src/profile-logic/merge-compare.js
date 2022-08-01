@@ -59,7 +59,7 @@ import type {
   UrlState,
   ImplementationFilter,
   TransformStacksPerThread,
-  Milliseconds,
+  Nanoseconds,
   DerivedMarkerInfo,
   RawMarkerTable,
   MarkerIndex,
@@ -937,7 +937,7 @@ function combineSamplesDiffing(
 
 type ThreadAndInterval = {|
   thread: Thread,
-  interval: Milliseconds,
+  interval: Nanoseconds,
 |};
 
 /**

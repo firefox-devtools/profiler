@@ -6,7 +6,7 @@
 import type {
   StartEndRange,
   Marker,
-  Milliseconds,
+  Nanoseconds,
 } from 'firefox-profiler/types';
 
 /**
@@ -77,8 +77,8 @@ export function displayNiceUrl(rawUrl: string): string {
  * of the range selection (typically the committed range).
  */
 export function getStartEndRangeForMarker(
-  rangeStart: Milliseconds,
-  rangeEnd: Milliseconds,
+  rangeStart: Nanoseconds,
+  rangeEnd: Nanoseconds,
   marker: Marker
 ): StartEndRange {
   let start = marker.start;

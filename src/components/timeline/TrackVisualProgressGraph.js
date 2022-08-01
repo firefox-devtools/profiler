@@ -18,7 +18,7 @@ import { BLUE_50, BLUE_60 } from 'photon-colors';
 
 import type {
   ProgressGraphData,
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
 } from 'firefox-profiler/types';
 
@@ -31,10 +31,10 @@ import './TrackVisualProgress.css';
  * When adding properties to these props, please consider the comment above the component.
  */
 type CanvasProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +progressGraphData: ProgressGraphData[],
-  +interval: Milliseconds,
+  +interval: Nanoseconds,
   +width: CssPixels,
   +height: CssPixels,
   +lineWidth: CssPixels,
@@ -179,9 +179,9 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +interval: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
+  +interval: Nanoseconds,
 |};
 
 type DispatchProps = {||};

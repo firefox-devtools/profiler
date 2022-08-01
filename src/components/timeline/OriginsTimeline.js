@@ -29,7 +29,7 @@ import type {
   InitialSelectedTrackReference,
   OriginsTimeline,
   OriginsTimelineTrack,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
 } from 'firefox-profiler/types';
 
@@ -41,7 +41,7 @@ type StateProps = {|
   +committedRange: StartEndRange,
   +panelLayoutGeneration: number,
   +originsTimeline: OriginsTimeline,
-  +zeroAt: Milliseconds,
+  +zeroAt: Nanoseconds,
   +threads: Thread[],
 |};
 

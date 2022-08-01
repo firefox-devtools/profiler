@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
+import type { Nanoseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type {
   IndexIntoStackTable,
@@ -126,7 +126,7 @@ export type CauseBacktrace = {|
   // `tid` is optional because older processed profiles may not have it.
   // No upgrader was written for this change.
   tid?: Tid,
-  time: Milliseconds,
+  time: Nanoseconds,
   stack: IndexIntoStackTable,
 |};
 
@@ -138,11 +138,11 @@ export type IPCSharedData = {|
   // Each of these fields comes from a specific marker corresponding to each
   // phase of an IPC message; since we can't guarantee that any particular
   // marker was recorded, all of the fields are optional.
-  startTime?: Milliseconds,
-  sendStartTime?: Milliseconds,
-  sendEndTime?: Milliseconds,
-  recvEndTime?: Milliseconds,
-  endTime?: Milliseconds,
+  startTime?: Nanoseconds,
+  sendStartTime?: Nanoseconds,
+  sendEndTime?: Nanoseconds,
+  recvEndTime?: Nanoseconds,
+  endTime?: Nanoseconds,
   sendTid?: number,
   recvTid?: number,
   sendThreadName?: string,
@@ -173,10 +173,10 @@ export type $ReplaceCauseWithStack<
  */
 export type GPUMarkerPayload = {|
   type: 'gpu_timer_query',
-  cpustart: Milliseconds,
-  cpuend: Milliseconds,
-  gpustart: Milliseconds, // Always 0.
-  gpuend: Milliseconds, // The time the GPU took to execute the command.
+  cpustart: Nanoseconds,
+  cpuend: Nanoseconds,
+  gpustart: Nanoseconds, // Always 0.
+  gpuend: Nanoseconds, // The time the GPU took to execute the command.
 |};
 
 /**
@@ -210,7 +210,7 @@ type GCSliceData_Shared = {|
   // Slice number within the GCMajor collection.
   slice: number,
 
-  pause: Milliseconds,
+  pause: Nanoseconds,
 
   // The reason for this slice.
   reason: string,
@@ -238,7 +238,7 @@ type GCSliceData_Shared = {|
 |};
 export type GCSliceData_Gecko = {|
   ...GCSliceData_Shared,
-  times: PhaseTimes<Milliseconds>,
+  times: PhaseTimes<Nanoseconds>,
 |};
 export type GCSliceData = {|
   ...GCSliceData_Shared,
@@ -251,10 +251,10 @@ export type GCMajorAborted = {|
 
 type GCMajorCompleted_Shared = {|
   status: 'completed',
-  max_pause: Milliseconds,
+  max_pause: Nanoseconds,
 
   // The sum of all the slice durations
-  total_time: Milliseconds,
+  total_time: Nanoseconds,
 
   // The reason from the first slice. see JS::gcreason::Reason
   reason: string,
@@ -269,8 +269,8 @@ type GCMajorCompleted_Shared = {|
   slices: number,
 
   // Timing for the SCC sweep phase.
-  scc_sweep_total: Milliseconds,
-  scc_sweep_max_pause: Milliseconds,
+  scc_sweep_total: Nanoseconds,
+  scc_sweep_max_pause: Nanoseconds,
 
   // The reason why this GC ran non-incrementally. Older profiles could have the string
   // 'None' as a reason.
@@ -315,7 +315,7 @@ export type GCMajorCompleted_Gecko = {|
   // As above except in parts of 100.
   mmu_20ms: number,
   mmu_50ms: number,
-  totals: PhaseTimes<Milliseconds>,
+  totals: PhaseTimes<Nanoseconds>,
 |};
 
 export type GCMajorMarkerPayload = {|
@@ -473,17 +473,17 @@ export type NetworkPayload = {|
 
   // startTime is when the channel opens. This happens on the process' main
   // thread.
-  startTime: Milliseconds,
+  startTime: Nanoseconds,
   // endTime is the time when the response is sent back to the caller, this
   // happens on the process' main thread.
-  endTime: Milliseconds,
+  endTime: Nanoseconds,
 
   // fetchStart doesn't exist directly in raw markers. This is added in the
   // deriving process and represents the junction between START and END markers.
   // This is the same value as the start marker's endTime and the end marker's
   // startTime (which are the same values).
   // We don't expose it directly but this is useful for debugging.
-  fetchStart?: Milliseconds,
+  fetchStart?: Nanoseconds,
 
   // The following properties are present only in non-START markers.
   // domainLookupStart, if present, should be the first timestamp for an event
@@ -492,19 +492,19 @@ export type NetworkPayload = {|
   // `tcpConnectEnd`, `secureConnectionStart`, and `connectEnd`.
   // NOTE: If you add a new property, don't forget to adjust its timestamp in
   // `adjustMarkerTimestamps` in `process-profile.js`.
-  domainLookupStart?: Milliseconds,
-  domainLookupEnd?: Milliseconds,
-  connectStart?: Milliseconds,
-  tcpConnectEnd?: Milliseconds,
-  secureConnectionStart?: Milliseconds,
-  connectEnd?: Milliseconds,
+  domainLookupStart?: Nanoseconds,
+  domainLookupEnd?: Nanoseconds,
+  connectStart?: Nanoseconds,
+  tcpConnectEnd?: Nanoseconds,
+  secureConnectionStart?: Nanoseconds,
+  connectEnd?: Nanoseconds,
   // `requestStart`, `responseStart` and `responseEnd` should always be present
   // for STOP markers.
-  requestStart?: Milliseconds,
-  responseStart?: Milliseconds,
+  requestStart?: Nanoseconds,
+  responseStart?: Nanoseconds,
   // responseEnd is when we received the response from the server, this happens
   // on the socket thread.
-  responseEnd?: Milliseconds,
+  responseEnd?: Nanoseconds,
 |};
 
 export type FileIoPayload = {|
@@ -573,14 +573,14 @@ export type LogMarkerPayload = {|
 
 export type DOMEventMarkerPayload = {|
   type: 'DOMEvent',
-  latency?: Milliseconds,
+  latency?: Nanoseconds,
   eventType: string,
   innerWindowID?: number,
 |};
 
 export type PrefMarkerPayload = {|
   type: 'PreferenceRead',
-  prefAccessTime: Milliseconds,
+  prefAccessTime: Nanoseconds,
   prefName: string,
   prefKind: string,
   prefType: string,
@@ -654,8 +654,8 @@ export type NativeAllocationPayload_Gecko = {|
 
 export type IPCMarkerPayload_Gecko = {|
   type: 'IPC',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
+  startTime: Nanoseconds,
+  endTime: Nanoseconds,
   otherPid: Pid,
   messageType: string,
   messageSeqno: number,
@@ -676,11 +676,11 @@ export type IPCMarkerPayload = {|
   // These fields are added in the deriving process from `IPCSharedData`, and
   // correspond to data from all the markers associated with a particular IPC
   // message.
-  startTime?: Milliseconds,
-  sendStartTime?: Milliseconds,
-  sendEndTime?: Milliseconds,
-  recvEndTime?: Milliseconds,
-  endTime?: Milliseconds,
+  startTime?: Nanoseconds,
+  sendStartTime?: Nanoseconds,
+  sendEndTime?: Nanoseconds,
+  recvEndTime?: Nanoseconds,
+  endTime?: Nanoseconds,
   sendTid?: Tid,
   recvTid?: Tid,
   sendThreadName?: string,

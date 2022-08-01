@@ -24,7 +24,7 @@ import type {
   ImplementationFilter,
   IndexIntoSamplesTable,
   SelectedState,
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
   TimelineType,
 } from 'firefox-profiler/types';
@@ -38,9 +38,9 @@ export type Props = {|
   +trackName: string,
   +fullThread: Thread,
   +rangeFilteredThread: Thread,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +interval: Nanoseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +sampleIndexOffset: number,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,

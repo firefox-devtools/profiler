@@ -8,10 +8,9 @@ import {
   formatPercent,
   formatBytes,
   formatSeconds,
-  formatMilliseconds,
+  formatNanoseconds,
   formatTimestamp,
   formatMicroseconds,
-  formatNanoseconds,
 } from '../utils/format-numbers';
 import { ensureExists } from '../utils/flow';
 import type {
@@ -379,7 +378,7 @@ export function formatFromMarkerSchema(
     case 'seconds':
       return formatSeconds(value);
     case 'milliseconds':
-      return formatMilliseconds(value);
+      return formatNanoseconds(value);
     case 'microseconds':
       return formatMicroseconds(value);
     case 'nanoseconds':

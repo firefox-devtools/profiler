@@ -15,14 +15,14 @@ import {
 import {
   formatBytes,
   formatNumber,
-  formatMilliseconds,
+  formatNanoseconds,
 } from 'firefox-profiler/utils/format-numbers';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   NetworkPayload,
   NetworkStatus,
-  Milliseconds,
+  Nanoseconds,
 } from 'firefox-profiler/types';
 
 import './NetworkMarker.css';
@@ -129,9 +129,9 @@ const NETWORK_PROPERTY_OPACITIES = {
 
 type NetworkPhaseProps = {|
   +propertyName: string,
-  +dur: Milliseconds,
-  +startPosition: Milliseconds,
-  +phaseDuration: Milliseconds,
+  +dur: Nanoseconds,
+  +startPosition: Nanoseconds,
+  +phaseDuration: Nanoseconds,
 |};
 
 class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
@@ -153,7 +153,7 @@ class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
             phaseDuration
           )} milliseconds`}
         >
-          {formatMilliseconds(phaseDuration)}
+          {formatNanoseconds(phaseDuration)}
         </div>
         <div
           className={classNames('tooltipNetworkPhase', {
@@ -173,14 +173,14 @@ class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
 
 type Props = {|
   +payload: NetworkPayload,
-  +zeroAt: Milliseconds,
+  +zeroAt: Nanoseconds,
 |};
 
 export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
   _getPhasesForProperties(
     properties: string[],
-    sectionDuration: Milliseconds,
-    startTime: Milliseconds
+    sectionDuration: Nanoseconds,
+    startTime: Nanoseconds
   ): Array<React.Element<typeof NetworkPhase>> | null {
     if (properties.length < 2) {
       console.error(
@@ -276,7 +276,7 @@ export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
     return (
       <>
         <h3 className="tooltipNetworkTitle3">
-          Preconnect (starting at {formatMilliseconds(preconnectStart - zeroAt)}
+          Preconnect (starting at {formatNanoseconds(preconnectStart - zeroAt)}
           )
         </h3>
         {phases}

@@ -31,7 +31,7 @@ import type {
   UploadedProfileInformation,
   SourceLoadingError,
 } from './state';
-import type { CssPixels, StartEndRange, Milliseconds } from './units';
+import type { CssPixels, StartEndRange, Nanoseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
 
 export type DataSource =
@@ -477,7 +477,7 @@ type UrlStateAction =
     |}
   | {|
       +type: 'CHANGE_MOUSE_TIME_POSITION',
-      +mouseTimePosition: Milliseconds | null,
+      +mouseTimePosition: Nanoseconds | null,
     |}
   | {|
       +type: 'TOGGLE_RESOURCES_PANEL',

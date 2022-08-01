@@ -55,7 +55,7 @@ import type {
   ThreadIndex,
   CategoryList,
   IndexIntoSamplesTable,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
   CallNodeInfo,
   ImplementationFilter,
@@ -82,9 +82,9 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +unfilteredSamplesRange: StartEndRange | null,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +interval: Nanoseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +sampleIndexOffset: number,
   +categories: CategoryList,
   +timelineType: TimelineType,
@@ -167,7 +167,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
     }
   };
 
-  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
+  _onMarkerSelect = (start: Nanoseconds, end: Nanoseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,

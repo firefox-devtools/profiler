@@ -14,7 +14,7 @@ import {
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
-import { formatMilliseconds } from '../../utils/format-numbers';
+import { formatNanoseconds } from '../../utils/format-numbers';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
@@ -29,7 +29,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
   DevicePixels,
   UnitIntervalOfProfileRange,
@@ -50,10 +50,10 @@ type OwnProps = {|
   +thread: Thread,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +threadsKey: ThreadsKey,
-  +interval: Milliseconds,
+  +interval: Nanoseconds,
   +weightType: WeightType,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
+  +rangeStart: Nanoseconds,
+  +rangeEnd: Nanoseconds,
   +combinedTimingRows: CombinedTimingRows,
   +stackFrameHeight: CssPixels,
   +updatePreviewSelection: WrapFunctionInDispatch<
@@ -179,7 +179,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
 
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const rangeLength: Nanoseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const viewportDevicePixelsTop = viewportTop * devicePixelRatio;
@@ -236,9 +236,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       const timePerPixel = rangeLength / pixelsInViewport;
 
       // Decide which samples to actually draw
-      const timeAtStart: Milliseconds =
+      const timeAtStart: Nanoseconds =
         rangeStart + rangeLength * viewportLeft - timePerPixel * marginLeft;
-      const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
+      const timeAtEnd: Nanoseconds = rangeStart + rangeLength * viewportRight;
 
       let lastDrawnPixelX = 0;
       for (let i = 0; i < stackTiming.length; i++) {
@@ -456,7 +456,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         categories={categories}
         // The stack chart doesn't support other call tree summary types.
         callTreeSummaryStrategy="timing"
-        durationText={formatMilliseconds(duration)}
+        durationText={formatNanoseconds(duration)}
       />
     );
   };
@@ -532,13 +532,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     const innerDevicePixelsWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const rangeLength: Nanoseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
       viewportLeft +
       viewportLength * ((x - marginLeft) / innerDevicePixelsWidth);
-    const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
+    const time: Nanoseconds = rangeStart + unitIntervalTime * rangeLength;
     const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
     const stackTiming = combinedTimingRows[depth];
 

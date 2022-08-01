@@ -5,7 +5,7 @@
 // @flow
 import type {
   SamplesLikeTable,
-  Milliseconds,
+  Nanoseconds,
   CallNodeInfo,
   CallNodeTable,
   IndexIntoCallNodeTable,
@@ -49,8 +49,8 @@ export type StackTimingDepth = number;
 export type IndexIntoStackTiming = number;
 
 export type StackTiming = {|
-  start: Milliseconds[],
-  end: Milliseconds[],
+  start: Nanoseconds[],
+  end: Nanoseconds[],
   callNode: IndexIntoCallNodeTable[],
   length: number,
 |};
@@ -69,7 +69,7 @@ export function getStackTimingByDepth(
   samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo,
   maxDepth: number,
-  interval: Milliseconds
+  interval: Nanoseconds
 ): StackTimingByDepth {
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({

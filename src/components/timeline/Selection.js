@@ -23,7 +23,7 @@ import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed
 import './Selection.css';
 
 import type {
-  Milliseconds,
+  Nanoseconds,
   CssPixels,
   StartEndRange,
   PreviewSelection,
@@ -42,7 +42,7 @@ type OwnProps = {|
 type StateProps = {|
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +zeroAt: Milliseconds,
+  +zeroAt: Nanoseconds,
 |};
 
 type DispatchProps = {|

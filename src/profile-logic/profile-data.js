@@ -64,7 +64,7 @@ import type {
   SamplesLikeTable,
   SelectedState,
   ProfileFilterPageData,
-  Milliseconds,
+  Nanoseconds,
   StartEndRange,
   ImplementationFilter,
   CallTreeSummaryStrategy,
@@ -380,22 +380,22 @@ export type JsImplementation =
   | 'ion'
   | 'unknown';
 export type StackImplementation = 'native' | JsImplementation;
-export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
+export type BreakdownByImplementation = { [StackImplementation]: Nanoseconds };
 export type OneCategoryBreakdown = {|
-  entireCategoryValue: Milliseconds,
-  subcategoryBreakdown: Milliseconds[], // { [IndexIntoSubcategoryList]: Milliseconds }
+  entireCategoryValue: Nanoseconds,
+  subcategoryBreakdown: Nanoseconds[], // { [IndexIntoSubcategoryList]: Nanoseconds }
 |};
 export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
 type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
-    value: Milliseconds,
+    value: Nanoseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
     breakdownByCategory: BreakdownByCategory | null,
   |},
   totalTime: {|
     // time spent including children
-    value: Milliseconds,
+    value: Nanoseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
     breakdownByCategory: BreakdownByCategory | null,
   |},
@@ -406,7 +406,7 @@ export type TimingsForPath = {|
   forPath: ItemTimings,
   // timings for this func across the tree
   forFunc: ItemTimings,
-  rootTime: Milliseconds, // time for all the samples in the current tree
+  rootTime: Nanoseconds, // time for all the samples in the current tree
 |};
 
 /**
@@ -416,7 +416,7 @@ export type TimingsForPath = {|
 export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
-  interval: Milliseconds,
+  interval: Nanoseconds,
   isInvertedTree: boolean,
   thread: Thread,
   unfilteredThread: Thread,
@@ -450,7 +450,7 @@ export function getTimingsForPath(
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
-  interval: Milliseconds,
+  interval: Nanoseconds,
   isInvertedTree: boolean,
   thread: Thread,
   unfilteredThread: Thread,
@@ -607,7 +607,7 @@ export function getTimingsForCallNodeIndex(
     },
     sampleIndex: IndexIntoSamplesTable,
     stackIndex: IndexIntoStackTable,
-    duration: Milliseconds
+    duration: Nanoseconds
   ): void {
     // Step 1: increment the total value
     timings.value += duration;
@@ -815,7 +815,7 @@ export function getTimingsForCallNodeIndex(
 // for memoization is still the right one.
 function _getTimeRangeForThread(
   { samples, markers, jsAllocations, nativeAllocations }: Thread,
-  interval: Milliseconds
+  interval: Nanoseconds
 ): StartEndRange {
   const result = { start: Infinity, end: -Infinity };
 
@@ -1268,7 +1268,7 @@ export function filterThreadByTab(
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
-  table: { time: Milliseconds[], length: number },
+  table: { time: Nanoseconds[], length: number },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -1283,7 +1283,7 @@ export function getSampleIndexRangeForSelection(
  * sure that some charts will not be cut off at the edges when zoomed in to a range.
  */
 export function getInclusiveSampleIndexRangeForSelection(
-  table: { time: Milliseconds[], length: number },
+  table: { time: Nanoseconds[], length: number },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -1509,7 +1509,7 @@ export function accumulateCounterSamples(
  */
 export function computeMaxCounterSampleCountsPerMs(
   samplesArray: Array<CounterSamplesTable>,
-  profileInterval: Milliseconds,
+  profileInterval: Nanoseconds,
   sampleRanges?: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
 ): Array<number> {
   const maxSampleCounts = samplesArray.map((samples, index) => {
@@ -1614,7 +1614,7 @@ export function computeMaxCounterSampleCountsPerMs(
  */
 export function processEventDelays(
   samples: SamplesTable,
-  interval: Milliseconds
+  interval: Nanoseconds
 ): EventDelayInfo {
   if (!samples.eventDelay) {
     throw new Error(
@@ -2063,7 +2063,7 @@ export function getMapStackUpdater(
 export function getSampleIndexClosestToStartTime(
   samples: SamplesTable,
   time: number,
-  interval: Milliseconds
+  interval: Nanoseconds
 ): IndexIntoSamplesTable {
   // Bisect to find the index of the first sample after the provided time.
   const index = bisectionRight(samples.time, time);
