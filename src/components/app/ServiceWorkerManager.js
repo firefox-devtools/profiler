@@ -29,7 +29,7 @@ type StateProps = {|
 |};
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-type InstallStatus = 'pending' | 'activating' | 'activated' | 'idle';
+type InstallStatus = 'pending' | 'activating' | 'controlling' | 'idle';
 type State = {|
   installStatus: InstallStatus,
   isNoticeDisplayed: boolean,
@@ -145,7 +145,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
 
       this.setState({
-        installStatus: 'activated',
+        installStatus: 'controlling',
         // But if we weren't quite ready, we should write it in the notice.
         updatedWhileNotReady: !ready,
       });
@@ -306,7 +306,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
             </button>
           </Localized>
         );
-      case 'activated':
+      case 'controlling':
         // Another tab applied the new service worker.
         return (
           <Localized id="ServiceWorkerManager--installed-button">
