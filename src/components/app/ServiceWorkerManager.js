@@ -126,20 +126,20 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       });
     });
 
-    wb.addEventListener('activated', () => {
+    wb.addEventListener('controlling', () => {
       // The update could have been triggered by this tab or another tab.
       // We distinguish these cases by looking at this.state.installStatus.
       console.log(
-        '[ServiceWorker] The new version of the application has been enabled.'
+        '[ServiceWorker] The new version of the application has started handling the fetch requests.'
       );
 
       if (this.state.installStatus === 'activating') {
-        // In this page the user clicked on the "reload" button.
+        // In this page the user clicked on the "Apply and reload" button.
         this.reloadPage();
         return;
       }
 
-      // In another page, the user clicked on the "reload" button.
+      // In another page, the user clicked on the "Apply and reload" button.
 
       const ready =
         !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
