@@ -578,7 +578,7 @@ ProfileRootMessage--additional = Zurück zur Startseite
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--applying-button = Wird angewendet...
+ServiceWorkerManager--applying-button = Wird angewendet…
 ServiceWorkerManager--pending-button = Anwenden und neu laden
 ServiceWorkerManager--installed-button = Anwendung neu laden
 ServiceWorkerManager--updated-while-not-ready =
