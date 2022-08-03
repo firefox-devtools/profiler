@@ -4,9 +4,10 @@
 // @flow
 
 import type {
-  StartEndRange,
+  KeyboardModifiers,
   Marker,
   Milliseconds,
+  StartEndRange,
 } from 'firefox-profiler/types';
 
 /**
@@ -103,7 +104,7 @@ export function getTrackSelectionModifiers(
     | KeyboardEvent
     | SyntheticMouseEvent<>
     | SyntheticKeyboardEvent<>
-): {| ctrlOrMeta: boolean, shift: boolean |} {
+): KeyboardModifiers {
   return {
     ctrlOrMeta: (event.ctrlKey || event.metaKey) && !event.altKey,
     shift: event.shiftKey && !event.altKey,

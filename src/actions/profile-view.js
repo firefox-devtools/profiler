@@ -77,6 +77,7 @@ import type {
   Milliseconds,
   Tid,
   GlobalTrack,
+  KeyboardModifiers,
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
@@ -289,12 +290,14 @@ type TrackInformation = {|
   globalTrackIndex: TrackIndex,
   // This is the PID for the process that this track belongs to.
   pid: Pid,
-  // This is the track index of the local track in its process group.
+  // This is the track index of the local track in its process group. This is
+  // null for global tracks.
   localTrackIndex: null | TrackIndex,
   // This is the tab that should be selected from this track. `null` if this
   // track doesn't have a prefered tab.
   relatedTab: null | TabSlug,
-  // This is the initial track reference
+  // This is the track reference that was passed to
+  // getInformationFromTrackReference to generate this structure.
   trackReference: TrackReference,
 |};
 
@@ -611,7 +614,7 @@ function findThreadsBetweenTracks(
 function selectRangeOfTracks(
   clickedTrackInformation: TrackInformation,
   selectedTab: TabSlug
-) {
+): ThunkAction<void> {
   return (dispatch, getState) => {
     const lastNonShiftClickInformation = getLastNonShiftClick(getState());
 
@@ -675,7 +678,7 @@ function selectRangeOfTracks(
  */
 export function selectTrackWithModifiers(
   trackReference: TrackReference,
-  modifiers: $Shape<{ ctrlOrMeta: boolean, shift: boolean }> = {}
+  modifiers: $Shape<KeyboardModifiers> = {}
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     // These get assigned based on the track type.

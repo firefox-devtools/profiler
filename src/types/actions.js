@@ -159,6 +159,10 @@ export type CheckedSharingOptions = {|
 
 export type Localization = ReactLocalization;
 
+// This type is used when selecting tracks in the timeline. Ctrl and Meta are
+// stored in the same property to accommodate all OSes.
+export type KeyboardModifiers = {| ctrlOrMeta: boolean, shift: boolean |};
+
 type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',
