@@ -36,22 +36,28 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackPower.css';
 
-type TooltipProps = {|
+type TooltipOwnProps = {|
   counter: Counter,
-  counterIndex: number,
+  counterSampleIndex: number,
+|};
+
+type TooltipStateProps = {|
   interval: Milliseconds,
 |};
 
-class TrackPowerTooltip extends React.PureComponent<TooltipProps> {
+type TooltipProps = ConnectedProps<TooltipOwnProps, TooltipStateProps, {||}>;
+
+class TrackPowerTooltipImpl extends React.PureComponent<TooltipProps> {
   render() {
-    const { counter, counterIndex, interval } = this.props;
+    const { counter, counterSampleIndex, interval } = this.props;
     const samples = counter.sampleGroups[0].samples;
 
-    const powerUsageInPwh = samples.count[counterIndex]; // picowatt-hour
+    const powerUsageInPwh = samples.count[counterSampleIndex]; // picowatt-hour
     const sampleTimeDeltaInMs =
-      counterIndex === 0
+      counterSampleIndex === 0
         ? interval
-        : samples.time[counterIndex] - samples.time[counterIndex - 1];
+        : samples.time[counterSampleIndex] -
+          samples.time[counterSampleIndex - 1];
     const power =
       ((powerUsageInPwh * 1e-12) /* pWh->Wh */ / sampleTimeDeltaInMs) *
       1000 * // ms->s
@@ -85,6 +91,17 @@ class TrackPowerTooltip extends React.PureComponent<TooltipProps> {
     );
   }
 }
+
+export const TrackPowerTooltip = explicitConnect<
+  TooltipOwnProps,
+  TooltipStateProps,
+  {||}
+>({
+  mapStateToProps: (state) => ({
+    interval: getProfileInterval(state),
+  }),
+  component: TrackPowerTooltipImpl,
+});
 
 /**
  * When adding properties to these props, please consider the comment above the component.
@@ -364,8 +381,8 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _renderTooltip(counterIndex: number): React.Node {
-    const { counter, interval, rangeStart, rangeEnd } = this.props;
+  _renderTooltip(counterSampleIndex: number): React.Node {
+    const { counter, rangeStart, rangeEnd } = this.props;
     const { mouseX, mouseY } = this.state;
 
     const samples = counter.sampleGroups[0].samples;
@@ -375,7 +392,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       throw new Error('No sample found for power counter');
     }
 
-    const sampleTime = samples.time[counterIndex];
+    const sampleTime = samples.time[counterSampleIndex];
     if (sampleTime < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the tooltip if it will be rendered outside of the timeline.
       // This could happen when a sample time is outside of the time range.
@@ -388,8 +405,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
         <TrackPowerTooltip
           counter={counter}
-          interval={interval}
-          counterIndex={counterIndex}
+          counterSampleIndex={counterSampleIndex}
         />
       </Tooltip>
     );
