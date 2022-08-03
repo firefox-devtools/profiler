@@ -9,11 +9,20 @@ import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatNumber } from 'firefox-profiler/utils/format-numbers';
-import { getProfileInterval } from 'firefox-profiler/selectors/profile';
+import {
+  getCommittedRange,
+  getPreviewSelection,
+  getProfileInterval,
+} from 'firefox-profiler/selectors/profile';
 
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 
-import type { Counter, Milliseconds } from 'firefox-profiler/types';
+import type {
+  Counter,
+  Milliseconds,
+  PreviewSelection,
+  StartEndRange,
+} from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -24,6 +33,8 @@ type OwnProps = {|
 
 type StateProps = {|
   interval: Milliseconds,
+  committedRange: StartEndRange,
+  previewSelection: PreviewSelection,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
@@ -81,6 +92,8 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 export const TooltipTrackPower = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state) => ({
     interval: getProfileInterval(state),
+    committedRange: getCommittedRange(state),
+    previewSelection: getPreviewSelection(state),
   }),
   component: TooltipTrackPowerImpl,
 });
