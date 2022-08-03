@@ -106,6 +106,11 @@ export type LocalTrackReference = {|
 
 export type TrackReference = GlobalTrackReference | LocalTrackReference;
 
+export type LastNonShiftClickInformation = {|
+  clickedTrack: TrackReference,
+  selection: Set<ThreadIndex>,
+|};
+
 /**
  * Active tab track references
  * A TrackReference uniquely identifies a track.
@@ -153,6 +158,10 @@ export type CheckedSharingOptions = {|
 |};
 
 export type Localization = ReactLocalization;
+
+// This type is used when selecting tracks in the timeline. Ctrl and Meta are
+// stored in the same property to accommodate all OSes.
+export type KeyboardModifiers = {| ctrlOrMeta: boolean, shift: boolean |};
 
 type ProfileAction =
   | {|
@@ -227,6 +236,7 @@ type ProfileAction =
   | {|
       +type: 'HIDE_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
+      +pid: Pid | null,
       +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
@@ -409,6 +419,7 @@ type UrlStateAction =
     |}
   | {|
       +type: 'SELECT_TRACK',
+      +lastNonShiftClickInformation: LastNonShiftClickInformation | null,
       +selectedThreadIndexes: Set<ThreadIndex>,
       +selectedTab: TabSlug,
     |}

@@ -1272,3 +1272,50 @@ export function getTrackReferenceFromTid(
   // Failed to find the thread from tid.
   return null;
 }
+
+/**
+ * Returns the track reference from a threadIndex
+ * Returns null if the given threadIndex is not found.
+ */
+export function getTrackReferenceFromThreadIndex(
+  threadIndex: ThreadIndex,
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>
+): TrackReference | null {
+  // First, check if it's a global track.
+  for (
+    let globalTrackIndex = 0;
+    globalTrackIndex < globalTracks.length;
+    globalTrackIndex++
+  ) {
+    const globalTrack = globalTracks[globalTrackIndex];
+
+    if (
+      globalTrack.type === 'process' &&
+      globalTrack.mainThreadIndex === threadIndex
+    ) {
+      return { type: 'global', trackIndex: globalTrackIndex };
+    }
+  }
+
+  // Then, check if it's a local track
+  for (const [pid, localTracks] of localTracksByPid) {
+    for (
+      let localTrackIndex = 0;
+      localTrackIndex < localTracks.length;
+      localTrackIndex++
+    ) {
+      const localTrack = localTracks[localTrackIndex];
+
+      if (
+        localTrack.type === 'thread' &&
+        localTrack.threadIndex === threadIndex
+      ) {
+        return { type: 'local', pid: pid, trackIndex: localTrackIndex };
+      }
+    }
+  }
+
+  // Failed to find the thread from its thread index.
+  return null;
+}

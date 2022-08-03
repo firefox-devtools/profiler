@@ -29,7 +29,7 @@ type StateProps = {|
 |};
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-type InstallStatus = 'pending' | 'activating' | 'activated' | 'idle';
+type InstallStatus = 'pending' | 'activating' | 'controlling' | 'idle';
 type State = {|
   installStatus: InstallStatus,
   isNoticeDisplayed: boolean,
@@ -126,26 +126,26 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       });
     });
 
-    wb.addEventListener('activated', () => {
+    wb.addEventListener('controlling', () => {
       // The update could have been triggered by this tab or another tab.
       // We distinguish these cases by looking at this.state.installStatus.
       console.log(
-        '[ServiceWorker] The new version of the application has been enabled.'
+        '[ServiceWorker] The new version of the application has started handling the fetch requests.'
       );
 
       if (this.state.installStatus === 'activating') {
-        // In this page the user clicked on the "reload" button.
+        // In this page the user clicked on the "Apply and reload" button.
         this.reloadPage();
         return;
       }
 
-      // In another page, the user clicked on the "reload" button.
+      // In another page, the user clicked on the "Apply and reload" button.
 
       const ready =
         !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
 
       this.setState({
-        installStatus: 'activated',
+        installStatus: 'controlling',
         // But if we weren't quite ready, we should write it in the notice.
         updatedWhileNotReady: !ready,
       });
@@ -306,7 +306,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
             </button>
           </Localized>
         );
-      case 'activated':
+      case 'controlling':
         // Another tab applied the new service worker.
         return (
           <Localized id="ServiceWorkerManager--installed-button">

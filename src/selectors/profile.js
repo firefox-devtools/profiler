@@ -53,6 +53,7 @@ import type {
   GlobalTrackReference,
   LocalTrackReference,
   TrackReference,
+  LastNonShiftClickInformation,
   PreviewSelection,
   HiddenTrackCount,
   ActiveTabGlobalTrackReference,
@@ -161,6 +162,9 @@ export const getThreads: Selector<Thread[]> = (state) =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = (state) =>
   getProfile(state).threads.map((t) => t.name);
+export const getLastNonShiftClick: Selector<
+  LastNonShiftClickInformation | null
+> = (state) => getProfileViewOptions(state).lastNonShiftClick;
 export const getRightClickedTrack: Selector<TrackReference | null> = (state) =>
   getProfileViewOptions(state).rightClickedTrack;
 export const getCounter: Selector<Counter[] | null> = (state) =>

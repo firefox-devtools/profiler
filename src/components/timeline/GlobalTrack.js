@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import {
   changeRightClickedTrack,
   changeLocalTrackOrder,
-  selectTrack,
+  selectTrackWithModifiers,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
@@ -36,7 +36,7 @@ import { TimelineLocalTrack } from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
 import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
-import { getTrackSelectionModifier } from 'firefox-profiler/utils';
+import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -76,7 +76,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +changeLocalTrackOrder: typeof changeLocalTrackOrder,
-  +selectTrack: typeof selectTrack,
+  +selectTrackWithModifiers: typeof selectTrackWithModifiers,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -94,8 +94,8 @@ class GlobalTrackComponent extends PureComponent<Props> {
   _selectCurrentTrack = (
     event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
   ) => {
-    const { selectTrack, trackReference } = this.props;
-    selectTrack(trackReference, getTrackSelectionModifier(event));
+    const { selectTrackWithModifiers, trackReference } = this.props;
+    selectTrackWithModifiers(trackReference, getTrackSelectionModifiers(event));
   };
 
   renderTrack() {
@@ -361,7 +361,7 @@ export const TimelineGlobalTrack = explicitConnect<
   mapDispatchToProps: {
     changeRightClickedTrack,
     changeLocalTrackOrder,
-    selectTrack,
+    selectTrackWithModifiers,
   },
   component: GlobalTrackComponent,
 });
