@@ -5,10 +5,8 @@
 // @flow
 
 import * as React from 'react';
-import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { formatNumber } from 'firefox-profiler/utils/format-numbers';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
@@ -18,6 +16,7 @@ import {
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { GREY_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
+import { TooltipTrackPower } from 'firefox-profiler/components/tooltip/TrackPower';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
 import type {
@@ -35,73 +34,6 @@ import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackPower.css';
-
-type TooltipOwnProps = {|
-  counter: Counter,
-  counterSampleIndex: number,
-|};
-
-type TooltipStateProps = {|
-  interval: Milliseconds,
-|};
-
-type TooltipProps = ConnectedProps<TooltipOwnProps, TooltipStateProps, {||}>;
-
-class TrackPowerTooltipImpl extends React.PureComponent<TooltipProps> {
-  render() {
-    const { counter, counterSampleIndex, interval } = this.props;
-    const samples = counter.sampleGroups[0].samples;
-
-    const powerUsageInPwh = samples.count[counterSampleIndex]; // picowatt-hour
-    const sampleTimeDeltaInMs =
-      counterSampleIndex === 0
-        ? interval
-        : samples.time[counterSampleIndex] -
-          samples.time[counterSampleIndex - 1];
-    const power =
-      ((powerUsageInPwh * 1e-12) /* pWh->Wh */ / sampleTimeDeltaInMs) *
-      1000 * // ms->s
-      3600; // s->h
-    let value;
-    let l10nId;
-    if (power > 1) {
-      value = formatNumber(power, 3);
-      l10nId = 'TrackPowerGraph--tooltip-power-watt';
-    } else if (power === 0) {
-      value = 0;
-      l10nId = 'TrackPowerGraph--tooltip-power-watt';
-    } else {
-      value = formatNumber(power * 1000);
-      l10nId = 'TrackPowerGraph--tooltip-power-milliwatt';
-    }
-    return (
-      <div className="timelineTrackPowerTooltip">
-        <Localized
-          id={l10nId}
-          vars={{ value }}
-          elems={{
-            em: <span className="timelineTrackPowerTooltipNumber"></span>,
-          }}
-        >
-          <div className="timelineTrackPowerTooltipLine">
-            Power: <em>{value}</em>
-          </div>
-        </Localized>
-      </div>
-    );
-  }
-}
-
-export const TrackPowerTooltip = explicitConnect<
-  TooltipOwnProps,
-  TooltipStateProps,
-  {||}
->({
-  mapStateToProps: (state) => ({
-    interval: getProfileInterval(state),
-  }),
-  component: TrackPowerTooltipImpl,
-});
 
 /**
  * When adding properties to these props, please consider the comment above the component.
@@ -403,7 +335,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <TrackPowerTooltip
+        <TooltipTrackPower
           counter={counter}
           counterSampleIndex={counterSampleIndex}
         />
