@@ -17,6 +17,11 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
       >
         Memory
       </button>
+      <button
+        class="timelineTrackCloseButton"
+        title="Hide track"
+        type="button"
+      />
     </div>
     <div
       class="timelineTrackTrack"
@@ -77,6 +82,11 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
       >
         Network
       </button>
+      <button
+        class="timelineTrackCloseButton"
+        title="Hide track"
+        type="button"
+      />
     </div>
     <div
       class="timelineTrackTrack"
@@ -149,6 +159,11 @@ Process: \\"tab\\" (222)"
       >
         DOM Worker
       </button>
+      <button
+        class="timelineTrackCloseButton"
+        title="Hide track"
+        type="button"
+      />
     </div>
     <div
       class="timelineTrackTrack"
@@ -235,6 +250,11 @@ exports[`timeline/LocalTrack with an IPC track matches the snapshot of the IPC t
       >
         IPC — Empty
       </button>
+      <button
+        class="timelineTrackCloseButton"
+        title="Hide track"
+        type="button"
+      />
     </div>
     <div
       class="timelineTrackTrack"

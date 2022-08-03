@@ -25,6 +25,11 @@ Process: \\"tab\\" (222)"
           222
         </div>
       </button>
+      <button
+        class="timelineTrackCloseButton"
+        title="Hide process"
+        type="button"
+      />
     </div>
     <div
       class="timelineTrackTrack"
@@ -145,6 +150,11 @@ Process: \\"tab\\" (222)"
           >
             DOM Worker
           </button>
+          <button
+            class="timelineTrackCloseButton"
+            title="Hide track"
+            type="button"
+          />
         </div>
         <div
           class="timelineTrackTrack"
@@ -231,6 +241,11 @@ Process: \\"tab\\" (222)"
           >
             Style
           </button>
+          <button
+            class="timelineTrackCloseButton"
+            title="Hide track"
+            type="button"
+          />
         </div>
         <div
           class="timelineTrackTrack"
@@ -319,6 +334,11 @@ exports[`timeline/GlobalTrack matches the snapshot of a global process track wit
       >
         Process 5555
       </button>
+      <button
+        class="timelineTrackCloseButton"
+        title="Hide process"
+        type="button"
+      />
     </div>
     <div
       class="timelineTrackTrack"
@@ -350,6 +370,11 @@ Process: \\"default\\" (5555)"
           >
             NoMain
           </button>
+          <button
+            class="timelineTrackCloseButton"
+            title="Hide track"
+            type="button"
+          />
         </div>
         <div
           class="timelineTrackTrack"

@@ -50,7 +50,6 @@
   height: calc(100% - 8px);
   padding: 0 0 0 10px;
   border: none;
-  margin: auto;
   background: none;
   font: inherit;
   text-align: left;
@@ -61,6 +60,26 @@
 .timelineTrackNameButtonAdditionalDetails {
   color: var(--grey-90-a60);
   font-size: 10px;
+}
+
+.timelineTrackCloseButton {
+  position: relative;
+  right: 5px;
+  overflow: hidden;
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border: 0;
+  background: url(../../../res/img/svg/searchfield-cancel.svg) top left
+    no-repeat;
+  background-size: contain;
+  color: transparent;
+  margin-inline-start: 8px;
+  -moz-user-focus: ignore;
+}
+
+.timelineTrackLabel:not(:hover) > .timelineTrackCloseButton {
+  display: none;
 }
 
 .timelineTrackTrack {
