@@ -12,14 +12,15 @@ exports[`TrackPower has a tooltip that matches the snapshot 1`] = `
   class="timelineTrackPowerTooltip"
 >
   <div
-    class="timelineTrackPowerTooltipLine"
+    class="tooltipDetails"
   >
-    Power: 
-    <span
-      class="timelineTrackPowerTooltipNumber"
+    <div
+      class="tooltipLabel"
     >
-      ⁨1.8⁩ mW
-    </span>
+      Power
+      :
+    </div>
+    ⁨1.8⁩ mW
   </div>
 </div>
 `;

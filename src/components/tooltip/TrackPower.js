@@ -6,9 +6,12 @@
 
 import * as React from 'react';
 import { Localized } from '@fluent/react';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatNumber } from 'firefox-profiler/utils/format-numbers';
 import { getProfileInterval } from 'firefox-profiler/selectors/profile';
+
+import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 
 import type { Counter, Milliseconds } from 'firefox-profiler/types';
 
@@ -44,27 +47,21 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     let l10nId;
     if (power > 1) {
       value = formatNumber(power, 3);
-      l10nId = 'TrackPowerGraph--tooltip-power-watt';
+      l10nId = 'TrackPower--tooltip-power-watt';
     } else if (power === 0) {
       value = 0;
-      l10nId = 'TrackPowerGraph--tooltip-power-watt';
+      l10nId = 'TrackPower--tooltip-power-watt';
     } else {
       value = formatNumber(power * 1000);
-      l10nId = 'TrackPowerGraph--tooltip-power-milliwatt';
+      l10nId = 'TrackPower--tooltip-power-milliwatt';
     }
     return (
       <div className="timelineTrackPowerTooltip">
-        <Localized
-          id={l10nId}
-          vars={{ value }}
-          elems={{
-            em: <span className="timelineTrackPowerTooltipNumber"></span>,
-          }}
-        >
-          <div className="timelineTrackPowerTooltipLine">
-            Power: <em>{value}</em>
-          </div>
-        </Localized>
+        <TooltipDetails>
+          <Localized id={l10nId} vars={{ value }} attrs={{ label: true }}>
+            <TooltipDetail label="Power">{value}</TooltipDetail>
+          </Localized>
+        </TooltipDetails>
       </div>
     );
   }

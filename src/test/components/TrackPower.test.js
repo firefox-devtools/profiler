@@ -179,6 +179,8 @@ describe('TrackPower', function () {
     moveMouseAtCounter(3, 0);
     // 1000pWh spent over 1ms is 3.6mW
     // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
-    expect(screen.getByText(/Power:/)).toHaveTextContent('3.6\u2069 mW');
+    expect(screen.getByText(/Power:/).nextSibling).toHaveTextContent(
+      '3.6\u2069 mW'
+    );
   });
 });

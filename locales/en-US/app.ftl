@@ -738,7 +738,7 @@ TrackMemoryGraph--relative-memory-at-this-time = relative memory at this time
 TrackMemoryGraph--memory-range-in-graph = memory range in graph
 TrackMemoryGraph--operations-since-the-previous-sample = operations since the previous sample
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
@@ -747,12 +747,14 @@ TrackMemoryGraph--operations-since-the-previous-sample = operations since the pr
 # This is used in the tooltip when the power value uses the Watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-watt = Power: <em>{ $value } W</em>
+TrackPower--tooltip-power-watt = { $value } W
+  .label = Power
 
 # This is used in the tooltip when the power value uses the Milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-milliwatt = Power: <em>{ $value } mW</em>
+TrackPower--tooltip-power-milliwatt = { $value } mW
+  .label = Power
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
