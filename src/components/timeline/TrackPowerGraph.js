@@ -36,6 +36,56 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackPower.css';
 
+type TooltipProps = {|
+  counter: Counter,
+  counterIndex: number,
+  interval: Milliseconds,
+|};
+
+class TrackPowerTooltip extends React.PureComponent<TooltipProps> {
+  render() {
+    const { counter, counterIndex, interval } = this.props;
+    const samples = counter.sampleGroups[0].samples;
+
+    const powerUsageInPwh = samples.count[counterIndex]; // picowatt-hour
+    const sampleTimeDeltaInMs =
+      counterIndex === 0
+        ? interval
+        : samples.time[counterIndex] - samples.time[counterIndex - 1];
+    const power =
+      ((powerUsageInPwh * 1e-12) /* pWh->Wh */ / sampleTimeDeltaInMs) *
+      1000 * // ms->s
+      3600; // s->h
+    let value;
+    let l10nId;
+    if (power > 1) {
+      value = formatNumber(power, 3);
+      l10nId = 'TrackPowerGraph--tooltip-power-watt';
+    } else if (power === 0) {
+      value = 0;
+      l10nId = 'TrackPowerGraph--tooltip-power-watt';
+    } else {
+      value = formatNumber(power * 1000);
+      l10nId = 'TrackPowerGraph--tooltip-power-milliwatt';
+    }
+    return (
+      <div className="timelineTrackPowerTooltip">
+        <Localized
+          id={l10nId}
+          vars={{ value }}
+          elems={{
+            em: <span className="timelineTrackPowerTooltipNumber"></span>,
+          }}
+        >
+          <div className="timelineTrackPowerTooltipLine">
+            Power: <em>{value}</em>
+          </div>
+        </Localized>
+      </div>
+    );
+  }
+}
+
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
@@ -317,6 +367,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
   _renderTooltip(counterIndex: number): React.Node {
     const { counter, interval, rangeStart, rangeEnd } = this.props;
     const { mouseX, mouseY } = this.state;
+
     const samples = counter.sampleGroups[0].samples;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
@@ -333,42 +384,13 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const powerUsageInPwh = samples.count[counterIndex]; // picowatt-hour
-    const sampleTimeDeltaInMs =
-      counterIndex === 0
-        ? interval
-        : samples.time[counterIndex] - samples.time[counterIndex - 1];
-    const power =
-      ((powerUsageInPwh * 1e-12) /* pWh->Wh */ / sampleTimeDeltaInMs) *
-      1000 * // ms->s
-      3600; // s->h
-    let value;
-    let l10nId;
-    if (power > 1) {
-      value = formatNumber(power, 3);
-      l10nId = 'TrackPowerGraph--tooltip-power-watt';
-    } else if (power === 0) {
-      value = 0;
-      l10nId = 'TrackPowerGraph--tooltip-power-watt';
-    } else {
-      value = formatNumber(power * 1000);
-      l10nId = 'TrackPowerGraph--tooltip-power-milliwatt';
-    }
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <div className="timelineTrackPowerTooltip">
-          <Localized
-            id={l10nId}
-            vars={{ value }}
-            elems={{
-              em: <span className="timelineTrackPowerTooltipNumber"></span>,
-            }}
-          >
-            <div className="timelineTrackPowerTooltipLine">
-              Power: <em>{value}</em>
-            </div>
-          </Localized>
-        </div>
+        <TrackPowerTooltip
+          counter={counter}
+          interval={interval}
+          counterIndex={counterIndex}
+        />
       </Tooltip>
     );
   }
