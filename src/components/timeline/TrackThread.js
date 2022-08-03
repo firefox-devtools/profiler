@@ -45,8 +45,7 @@ import {
 import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
-import { getTrackSelectionModifier } from 'firefox-profiler/utils';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import './TrackThread.css';
 
 import type {
@@ -125,45 +124,39 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
     event: SyntheticMouseEvent<>,
     sampleIndex: IndexIntoSamplesTable
   ) => {
-    const modifier = getTrackSelectionModifier(event);
-    switch (modifier) {
-      case 'none': {
-        const {
-          threadsKey,
-          selectLeafCallNode,
-          selectRootCallNode,
-          focusCallTree,
-          invertCallstack,
-          selectedThreadIndexes,
-        } = this.props;
+    const modifiers = getTrackSelectionModifiers(event);
+    if (modifiers.ctrlOrMeta || modifiers.shift) {
+      // Do nothing, the track selection logic will kick in.
+      return;
+    }
 
-        // Sample clicking only works for one thread. See issue #2709
-        if (selectedThreadIndexes.size === 1) {
-          if (invertCallstack) {
-            // When we're displaying the inverted call stack, the "leaf" call node we're
-            // interested in is actually displayed as the "root" of the tree.
-            selectRootCallNode(threadsKey, sampleIndex);
-          } else {
-            selectLeafCallNode(threadsKey, sampleIndex);
-          }
-          focusCallTree();
-        }
-        if (
-          typeof threadsKey === 'number' &&
-          selectedThreadIndexes.has(threadsKey)
-        ) {
-          // We could have multiple threads selected here, and we wouldn't want
-          // to de-select one when interacting with it.
-          event.stopPropagation();
-        }
-        break;
+    const {
+      threadsKey,
+      selectLeafCallNode,
+      selectRootCallNode,
+      focusCallTree,
+      invertCallstack,
+      selectedThreadIndexes,
+    } = this.props;
+
+    // Sample clicking only works for one thread. See issue #2709
+    if (selectedThreadIndexes.size === 1) {
+      if (invertCallstack) {
+        // When we're displaying the inverted call stack, the "leaf" call node we're
+        // interested in is actually displayed as the "root" of the tree.
+        selectRootCallNode(threadsKey, sampleIndex);
+      } else {
+        selectLeafCallNode(threadsKey, sampleIndex);
       }
-      case 'ctrl':
-        // Do nothing, the track selection logic will kick in.
-        break;
-      default:
-        assertExhaustiveCheck(modifier, 'Unhandled modifier case.');
-        break;
+      focusCallTree();
+    }
+    if (
+      typeof threadsKey === 'number' &&
+      selectedThreadIndexes.has(threadsKey)
+    ) {
+      // We could have multiple threads selected here, and we wouldn't want
+      // to de-select one when interacting with it.
+      event.stopPropagation();
     }
   };
 

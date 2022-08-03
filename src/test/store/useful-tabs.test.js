@@ -65,6 +65,7 @@ describe('getUsefulTabs', function () {
       type: 'SELECT_TRACK',
       selectedThreadIndexes: new Set([2]),
       selectedTab: 'calltree',
+      lastNonShiftClickInformation: null,
     });
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
       'calltree',

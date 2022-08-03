@@ -13,6 +13,7 @@ import type {
   Pid,
   LocalTrack,
   GlobalTrack,
+  LastNonShiftClickInformation,
   OriginsTimeline,
   StartEndRange,
   PreviewSelection,
@@ -486,6 +487,53 @@ const rootRange: Reducer<StartEndRange> = (
   }
 };
 
+const lastNonShiftClick: Reducer<LastNonShiftClickInformation | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'SELECT_TRACK':
+      return action.lastNonShiftClickInformation;
+
+    // Reset the state if the user hides the previously clicked track.
+    case 'HIDE_GLOBAL_TRACK': {
+      if (!state) {
+        return null;
+      }
+      const { clickedTrack } = state;
+      if (
+        clickedTrack.type === 'global' &&
+        clickedTrack.trackIndex === action.trackIndex
+      ) {
+        // This global track is hidden.
+        return null;
+      }
+      if (clickedTrack.type === 'local' && clickedTrack.pid === action.pid) {
+        // The global track where this local track belongs is hidden.
+        return null;
+      }
+      return state;
+    }
+    case 'HIDE_LOCAL_TRACK': {
+      if (!state) {
+        return null;
+      }
+      const { clickedTrack } = state;
+      if (
+        clickedTrack.type === 'local' &&
+        clickedTrack.pid === action.pid &&
+        clickedTrack.trackIndex === action.trackIndex
+      ) {
+        // This local track is hidden.
+        return null;
+      }
+      return state;
+    }
+    default:
+      return state;
+  }
+};
+
 const rightClickedTrack: Reducer<TrackReference | null> = (
   state = null,
   action
@@ -661,6 +709,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       scrollToSelectionGeneration,
       focusCallTreeGeneration,
       rootRange,
+      lastNonShiftClick,
       rightClickedTrack,
       rightClickedCallNode,
       rightClickedMarker,

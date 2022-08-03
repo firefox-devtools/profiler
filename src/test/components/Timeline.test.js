@@ -8,8 +8,17 @@ import { Provider } from 'react-redux';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
+import {
+  selectedThreadSelectors,
+  getRightClickedTrack,
+} from 'firefox-profiler/selectors';
+import { ensureExists } from '../../utils/flow';
+
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  addIPCMarkerPairToThreads,
+} from '../fixtures/profiles/processed-profile';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
@@ -24,14 +33,9 @@ import {
 } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
 import {
-  selectedThreadSelectors,
-  getRightClickedTrack,
-} from 'firefox-profiler/selectors';
-import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
-import { ensureExists } from '../../utils/flow';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 import type { Profile } from 'firefox-profiler/types';
@@ -42,8 +46,87 @@ describe('Timeline multiple thread selection', function () {
   autoMockElementSize({ width: 200, height: 300 });
   autoMockIntersectionObserver();
 
-  function setup() {
-    const profile = getProfileWithNiceTracks();
+  /** This function produces a profile that will have several global tracks and
+   * local tracks, that look like this as displayed by getHumanReadableTracks:
+   *  [
+   *    'show [thread GeckoMain process]',
+   *    '  - show [thread ThreadPool#1]',
+   *    '  - show [thread ThreadPool#2]',
+   *    '  - show [thread ThreadPool#3]',
+   *    '  - show [thread ThreadPool#4]',
+   *    '  - show [thread ThreadPool#5]',
+   *    'show [thread GeckoMain tab]',
+   *    '  - show [thread DOM Worker]',
+   *    '  - show [thread Style]',
+   *    'show [thread GeckoMain tab]',
+   *    '  - show [thread AudioPool#1]',
+   *    '  - show [thread AudioPool#2]',
+   *    '  - show [thread Renderer]',
+   *  ]
+   */
+  function getProfileWithMoreNiceTracks() {
+    const { profile } = getProfileFromTextSamples(
+      ...Array.from({ length: 13 }, () => 'A')
+    );
+
+    const { threads } = profile;
+    let tid = 1000;
+    let pid = 1000;
+
+    // Global thread 1
+    threads[0].name = 'GeckoMain';
+    threads[0].processType = 'process';
+    threads[0].pid = pid;
+    threads[0].tid = tid++;
+
+    for (let i = 1; i <= 5; i++) {
+      threads[i].name = `ThreadPool#${i}`;
+      threads[i].processType = 'tab';
+      threads[i].pid = pid;
+      threads[i].tid = tid++;
+    }
+
+    // Global thread 2
+    threads[6].name = 'GeckoMain';
+    threads[6].processType = 'tab';
+    threads[6].pid = ++pid;
+    threads[6].tid = tid++;
+
+    threads[7].name = 'DOM Worker';
+    threads[7].processType = 'tab';
+    threads[7].pid = pid;
+    threads[7].tid = tid++;
+
+    threads[8].name = 'Style';
+    threads[8].processType = 'tab';
+    threads[8].pid = pid;
+    threads[8].tid = tid++;
+
+    // Global thread 3
+    threads[9].name = 'GeckoMain';
+    threads[9].processType = 'tab';
+    threads[9].pid = ++pid;
+    threads[9].tid = tid++;
+
+    threads[10].name = 'AudioPool#1';
+    threads[10].processType = 'tab';
+    threads[10].pid = pid;
+    threads[10].tid = tid++;
+
+    threads[11].name = 'AudioPool#2';
+    threads[11].processType = 'tab';
+    threads[11].pid = pid;
+    threads[11].tid = tid++;
+
+    threads[12].name = 'Renderer';
+    threads[12].processType = 'tab';
+    threads[12].pid = pid;
+    threads[12].tid = tid++;
+
+    return profile;
+  }
+
+  function setup(profile = getProfileWithNiceTracks()) {
     const store = storeWithProfile(profile);
 
     // We need a properly laid out ActivityGraph for some of the operations in
@@ -302,6 +385,833 @@ describe('Timeline multiple thread selection', function () {
       'show [thread GeckoMain tab]',
       '  - show [thread DOM Worker]',
       '  - show [thread Style] SELECTED',
+    ]);
+  });
+
+  it('unselects a selected local track whose global process is hidden', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on on a local track
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }));
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Then hides its global track
+    fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
+    fireFullClick(screen.getByText(/Hide/));
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'hide [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('can select a range of tracks with shift clicking', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on on a local track
+    // Then shift-click on another local track below
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }));
+    fireFullClick(screen.getByRole('button', { name: 'AudioPool#2' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1] SELECTED',
+      '  - show [thread AudioPool#2] SELECTED',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Shift-clicking on another local track will still use the first clicked
+    // track as the start.
+    fireFullClick(screen.getByRole('button', { name: 'Style' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // We can also select tracks where start and end are in the same global process.
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#1' }));
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#5' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // This also works if the start track is the global track.
+    fireFullClick(screen.getByRole('button', { name: /PID: 1000/ }));
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#5' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('skips over hidden tracks', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+
+    // Hide the "middle" global track
+    fireFullContextMenu(screen.getByRole('button', { name: /PID: 1001/ }));
+    fireFullClick(screen.getByText(/Hide/));
+
+    // And hide a local track in the first process
+    fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
+    fireFullClick(screen.getByRole('menuitem', { name: 'ThreadPool#1' }));
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - hide [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'hide [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Click a track in the first process, then shift click another track in the
+    // last process
+    fireFullClick(screen.getByRole('button', { name: /PID: 1000/ }));
+    fireFullClick(screen.getByRole('button', { name: /PID: 1002/ }), {
+      shiftKey: true,
+    });
+
+    // Notice that the tracks in the hidden process aren't selected, nor the
+    // hidden local track in the first process.
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - hide [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'hide [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('can select a range of tracks with shift clicking starting at the selected track', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Just shift-click on another local track below the selected track
+    fireFullClick(screen.getByRole('button', { name: 'AudioPool#2' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1] SELECTED',
+      '  - show [thread AudioPool#2] SELECTED',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('can select a range of tracks with shift clicking in the reverse order too', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on on a local track
+    // Then shift-click on another local track above
+    fireFullClick(screen.getByRole('button', { name: 'AudioPool#2' }));
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1] SELECTED',
+      '  - show [thread AudioPool#2] SELECTED',
+      '  - show [thread Renderer]',
+    ]);
+
+    // We can also select tracks where start and end are in the same global process.
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#5' }));
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#1' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // This also works if the start track is the global track.
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#5' }));
+    fireFullClick(screen.getByRole('button', { name: /PID: 1000/ }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('is possible to mix both ctrl and shift modifiers', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on on a track
+    // Then ctrl-click on another track.
+    // Finally shift-ctrl-click on a third track.
+    fireFullClick(screen.getByRole('button', { name: /PID: 1000/ }));
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }), {
+      ctrlKey: true,
+    });
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#4' }), {
+      ctrlKey: true,
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // This is also additive when the ctrlKey is pressed only at the first click
+    // but not the second click.
+    fireFullClick(screen.getByRole('button', { name: /PID: 1002/ }), {
+      ctrlKey: true,
+    });
+    fireFullClick(screen.getByRole('button', { name: 'AudioPool#2' }), {
+      shiftKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1] SELECTED',
+      '  - show [thread AudioPool#2] SELECTED',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Shift-clicking again above the initial track should unselect the ones
+    // that were selected before and select the new ones. Indeed everything
+    // happens as if the previous selection was canceled.
+    fireFullClick(screen.getByRole('button', { name: /PID: 1001/ }), {
+      shiftKey: true,
+    });
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('forgets a local clicked track whose process is hidden later', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on on a local track
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }));
+
+    // Then hides its global track
+    fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
+    fireFullClick(screen.getByText(/Hide/));
+
+    // Then shift-click another track
+    fireFullClick(screen.getByRole('button', { name: 'AudioPool#2' }), {
+      shiftKey: true,
+    });
+
+    // The selected tracks are between the track that's been selected after the
+    // hiding operation and the newly clicked track.
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'hide [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1] SELECTED',
+      '  - show [thread AudioPool#2] SELECTED',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('forgets a global clicked track whose process is hidden later', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on a global track
+    fireFullClick(screen.getByRole('button', { name: /PID: 1002/ }));
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Then hide this global track
+    fireFullContextMenu(screen.getByRole('button', { name: /PID: 1002/ }));
+    fireFullClick(screen.getByText(/Hide/));
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'hide [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Then shift-click another track
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#3' }), {
+      shiftKey: true,
+    });
+
+    // The selected tracks are between the track that's been selected after the
+    // hiding operation and the newly clicked track.
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - show [thread ThreadPool#2] SELECTED',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'hide [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('forgets a local clicked track that is hidden later', function () {
+    const { getState } = setup(getProfileWithMoreNiceTracks());
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on a local track
+    fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }));
+
+    // Then hides its global track
+    fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
+    fireFullClick(screen.getByRole('menuitem', { name: 'ThreadPool#2' }));
+
+    // Another thread has been selected because the currently selected one has
+    // been hidden.
+    // Note because the newly selected thread is a local track, this also tests
+    // the path of finding the local track from a thread index.
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - hide [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Then shift-click another track
+    fireFullClick(screen.getByRole('button', { name: 'AudioPool#2' }), {
+      shiftKey: true,
+    });
+
+    // The selected tracks are between the track that's been selected after the
+    // hiding operation and the newly clicked track.
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [thread ThreadPool#1] SELECTED',
+      '  - hide [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3] SELECTED',
+      '  - show [thread ThreadPool#4] SELECTED',
+      '  - show [thread ThreadPool#5] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread AudioPool#1] SELECTED',
+      '  - show [thread AudioPool#2] SELECTED',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  it('selects also the related thread when a related track is first clicked', function () {
+    const profile = getProfileWithMoreNiceTracks();
+
+    // Change the profile to have some local tracks that aren't threads
+    addIPCMarkerPairToThreads(
+      {
+        startTime: 1,
+        endTime: 10,
+        messageSeqno: 1,
+      },
+      profile.threads[0], // Parent process
+      profile.threads[6] // tab process
+    );
+
+    addIPCMarkerPairToThreads(
+      {
+        startTime: 11,
+        endTime: 20,
+        messageSeqno: 2,
+      },
+      profile.threads[0], // Parent process
+      profile.threads[7] // DOM Worker
+    );
+
+    const { getState } = setup(profile);
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [ipc GeckoMain]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [ipc GeckoMain] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [ipc DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on the first ipc track in the tab process.
+    fireFullClick(
+      screen.getByRole('button', { name: 'IPC — Content Process (1/2)' })
+    );
+
+    // No change is expected because this track was already selected.
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [ipc GeckoMain]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [ipc GeckoMain] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [ipc DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Then shift click on the second ipc track in the same process
+    fireFullClick(screen.getByRole('button', { name: 'IPC — DOM Worker' }), {
+      shiftKey: true,
+    });
+
+    // The DOM Worker thread is selected, but also the main thread in this
+    // process, despite that it was outside of the range.
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [ipc GeckoMain]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [ipc GeckoMain] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [ipc DOM Worker] SELECTED',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+  });
+
+  // This test is similar to the previous one, except that the "related track"
+  // is selected last.
+  it('selects also the related thread when a related track is last clicked', function () {
+    const profile = getProfileWithMoreNiceTracks();
+
+    // Change the profile to have some local tracks that aren't threads
+    addIPCMarkerPairToThreads(
+      {
+        startTime: 1,
+        endTime: 10,
+        messageSeqno: 1,
+      },
+      profile.threads[0], // Parent process
+      profile.threads[6] // tab process
+    );
+
+    addIPCMarkerPairToThreads(
+      {
+        startTime: 11,
+        endTime: 20,
+        messageSeqno: 2,
+      },
+      profile.threads[0], // Parent process
+      profile.threads[7] // DOM Worker
+    );
+
+    const { getState } = setup(profile);
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [ipc GeckoMain]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [ipc GeckoMain] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [ipc DOM Worker]',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // First click on the second ipc track in the tab process.
+    fireFullClick(screen.getByRole('button', { name: 'IPC — DOM Worker' }));
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [ipc GeckoMain]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab]',
+      '  - show [ipc GeckoMain]',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [ipc DOM Worker] SELECTED',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
+    ]);
+
+    // Then shift click on the first ipc track in the same process
+    fireFullClick(
+      screen.getByRole('button', { name: 'IPC — Content Process (1/2)' }),
+      { shiftKey: true }
+    );
+
+    // The DOM Worker thread is selected, but also the main thread in this
+    // process, despite that it was outside of the range.
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      '  - show [ipc GeckoMain]',
+      '  - show [thread ThreadPool#1]',
+      '  - show [thread ThreadPool#2]',
+      '  - show [thread ThreadPool#3]',
+      '  - show [thread ThreadPool#4]',
+      '  - show [thread ThreadPool#5]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [ipc GeckoMain] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [ipc DOM Worker] SELECTED',
+      '  - show [thread Style]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread AudioPool#1]',
+      '  - show [thread AudioPool#2]',
+      '  - show [thread Renderer]',
     ]);
   });
 });

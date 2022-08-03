@@ -16,7 +16,6 @@ import '../res/css/categories.css';
 import '../res/css/network.css';
 import 'react-splitter-layout/lib/index.css';
 
-// Now import the JS after the CSS.
 import React from 'react';
 import { render } from 'react-dom';
 import { Root } from './components/app/Root';

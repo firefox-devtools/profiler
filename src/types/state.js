@@ -15,6 +15,7 @@ import type {
   TimelineType,
   CheckedSharingOptions,
   Localization,
+  LastNonShiftClickInformation,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange, CssPixels, Milliseconds } from './units';
@@ -101,6 +102,7 @@ export type ProfileViewState = {
     scrollToSelectionGeneration: number,
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
+    lastNonShiftClick: LastNonShiftClickInformation | null,
     rightClickedTrack: TrackReference | null,
     rightClickedCallNode: RightClickedCallNode | null,
     rightClickedMarker: MarkerReference | null,
