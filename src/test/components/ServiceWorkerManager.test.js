@@ -174,7 +174,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(container.firstChild).toMatchSnapshot();
 
       // Some other tab applied the update before we had the chance.
-      instance.dispatchEvent('activated');
+      instance.dispatchEvent('controlling');
       expect(getReloadButton()).toHaveTextContent('Reload the application');
       expect(container.firstChild).toMatchSnapshot();
 
@@ -199,7 +199,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(reloadButton).toHaveTextContent('Applying…');
 
       // And we should now reload automatically when the SW is fully updated.
-      instance.dispatchEvent('activated');
+      instance.dispatchEvent('controlling');
       expect(window.location.reload).toHaveBeenCalledTimes(1);
     });
   });
@@ -282,7 +282,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(container).toBeEmptyDOMElement();
 
       // Some other tabs updated the SW.
-      instance.dispatchEvent('activated');
+      instance.dispatchEvent('controlling');
       expect(
         ensureExists(container.querySelector('.photon-message-bar')).className
       ).toMatch(/\bphoton-message-bar-warning\b/);
@@ -319,7 +319,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(container).toBeEmptyDOMElement();
 
       // And we still don't if it was updated elsewhere.
-      instance.dispatchEvent('activated');
+      instance.dispatchEvent('controlling');
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
       expect(container).toBeEmptyDOMElement();
     });
@@ -346,7 +346,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(container).toBeEmptyDOMElement();
 
       // But we do if it's updated from another tab.
-      instance.dispatchEvent('activated');
+      instance.dispatchEvent('controlling');
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
       expect(
         ensureExists(container.querySelector('.photon-message-bar')).className
@@ -389,7 +389,7 @@ describe('app/ServiceWorkerManager', () => {
       dispatch(fatalError(new Error('Error while loading profile')));
       expect(window.location.reload).not.toHaveBeenCalled();
       // Dispatch the event that an update has been activated in another tab.
-      instance.dispatchEvent('activated');
+      instance.dispatchEvent('controlling');
       expect(window.location.reload).toHaveBeenCalled();
     });
 
@@ -399,7 +399,7 @@ describe('app/ServiceWorkerManager', () => {
       const { dispatch, getWorkboxInstance } = setup();
       const instance = getWorkboxInstance();
 
-      instance.dispatchEvent('activated');
+      instance.dispatchEvent('controlling');
       expect(window.location.reload).not.toHaveBeenCalled();
       dispatch(fatalError(new Error('Error while loading profile')));
       expect(window.location.reload).toHaveBeenCalled();
