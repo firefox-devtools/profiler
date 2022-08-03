@@ -17,6 +17,7 @@ import {
   getActiveTabResourceTrackFromReference,
   getLocalTracksByPid,
   getThreads,
+  getLastNonShiftClick,
 } from 'firefox-profiler/selectors/profile';
 import {
   getThreadSelectors,
@@ -41,10 +42,16 @@ import {
   getSampleCategories,
   findBestAncestorCallNode,
 } from 'firefox-profiler/profile-logic/profile-data';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import {
+  assertExhaustiveCheck,
+  getFirstItemFromSet,
+} from 'firefox-profiler/utils/flow';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import { objectShallowEquals } from 'firefox-profiler/utils/index';
-import { getTrackReferenceFromTid } from 'firefox-profiler/profile-logic/tracks';
+import {
+  getTrackReferenceFromTid,
+  getTrackReferenceFromThreadIndex,
+} from 'firefox-profiler/profile-logic/tracks';
 
 import type {
   PreviewSelection,
@@ -70,6 +77,7 @@ import type {
   Milliseconds,
   Tid,
   GlobalTrack,
+  KeyboardModifiers,
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
@@ -269,154 +277,438 @@ export function changeSelectedThreads(
   };
 }
 
+// This structure contains information needed to find the selected track from a
+// track reference.
+type TrackInformation = {|
+  type: 'global' | 'local',
+  // This is the thread index for this specific track reference. This is null if
+  // this track isn't a thread track.
+  threadIndex: null | ThreadIndex,
+  // This is the thread index for the thread related to this track.
+  relatedThreadIndex: ThreadIndex,
+  // This is the track index for the global track where this track is located.
+  globalTrackIndex: TrackIndex,
+  // This is the PID for the process that this track belongs to.
+  pid: Pid,
+  // This is the track index of the local track in its process group. This is
+  // null for global tracks.
+  localTrackIndex: null | TrackIndex,
+  // This is the tab that should be selected from this track. `null` if this
+  // track doesn't have a prefered tab.
+  relatedTab: null | TabSlug,
+  // This is the track reference that was passed to
+  // getInformationFromTrackReference to generate this structure.
+  trackReference: TrackReference,
+|};
+
+/**
+ * This function collects some information about a track by requesting
+ * information in the state. Because of all possible cases this isn't trivial.
+ * This will return null for tracks that are not selectable.
+ */
+function getInformationFromTrackReference(
+  state: State,
+  trackReference: TrackReference
+): null | TrackInformation {
+  switch (trackReference.type) {
+    case 'global': {
+      // Handle the case of global tracks.
+      const globalTrack = getGlobalTrackFromReference(state, trackReference);
+
+      // Go through each type, and determine the selected slug and thread index.
+      switch (globalTrack.type) {
+        case 'process': {
+          const { mainThreadIndex, pid } = globalTrack;
+          if (mainThreadIndex === null) {
+            // Do not allow selecting process tracks without a thread index.
+            return null;
+          }
+
+          return {
+            type: 'global',
+            trackReference,
+            threadIndex: mainThreadIndex,
+            relatedThreadIndex: mainThreadIndex,
+            globalTrackIndex: trackReference.trackIndex,
+            pid,
+            localTrackIndex: null,
+            // Move to a relevant thread-based tab when the previous tab was
+            // the network chart.
+            relatedTab:
+              getSelectedTab(state) === 'network-chart'
+                ? getLastVisibleThreadTabSlug(state)
+                : null,
+          };
+        }
+        case 'screenshots':
+        case 'visual-progress':
+        case 'perceptual-visual-progress':
+        case 'contentful-visual-progress':
+          // Do not allow selecting these tracks.
+          return null;
+        default:
+          throw assertExhaustiveCheck(
+            globalTrack,
+            `Unhandled GlobalTrack type.`
+          );
+      }
+    }
+    case 'local': {
+      // Handle the case of local tracks.
+      const localTrack = getLocalTrackFromReference(state, trackReference);
+      const { globalTrackIndex } = getGlobalTrackAndIndexByPid(
+        state,
+        trackReference.pid
+      );
+      const commonLocalProperties = {
+        type: 'local',
+        trackReference,
+        pid: trackReference.pid,
+        globalTrackIndex,
+        localTrackIndex: trackReference.trackIndex,
+      };
+
+      // Go through each type, and determine the tab slug and thread index.
+      switch (localTrack.type) {
+        case 'thread':
+          return {
+            ...commonLocalProperties,
+            threadIndex: localTrack.threadIndex,
+            relatedThreadIndex: localTrack.threadIndex,
+            // Move to a relevant thread-based tab when the previous tab was
+            // the network chart.
+            relatedTab:
+              getSelectedTab(state) === 'network-chart'
+                ? getLastVisibleThreadTabSlug(state)
+                : null,
+          };
+        case 'network':
+          return {
+            ...commonLocalProperties,
+            threadIndex: null,
+            relatedThreadIndex: localTrack.threadIndex,
+            relatedTab: 'network-chart',
+          };
+        case 'ipc':
+          return {
+            ...commonLocalProperties,
+            threadIndex: null,
+            relatedThreadIndex: localTrack.threadIndex,
+            relatedTab: 'marker-chart',
+          };
+        case 'event-delay':
+          return {
+            ...commonLocalProperties,
+            threadIndex: null,
+            relatedThreadIndex: localTrack.threadIndex,
+            relatedTab: null,
+          };
+        case 'memory':
+        case 'process-cpu':
+        case 'power': {
+          const counterSelectors = getCounterSelectors(localTrack.counterIndex);
+          const counter = counterSelectors.getCounter(state);
+          return {
+            ...commonLocalProperties,
+            threadIndex: null,
+            relatedThreadIndex: counter.mainThreadIndex,
+            relatedTab: null,
+          };
+        }
+        default:
+          throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
+      }
+    }
+    default:
+      throw assertExhaustiveCheck(
+        trackReference,
+        'Unhandled TrackReference type'
+      );
+  }
+}
+
+/**
+ * This Redux action selects one track only from its reference as well as the
+ * related tab.
+ */
+function setOneTrackSelection(
+  trackInformation: TrackInformation,
+  selectedTab: TabSlug
+): Action {
+  const selectedThreadIndexes = new Set([trackInformation.relatedThreadIndex]);
+  return {
+    type: 'SELECT_TRACK',
+    selectedThreadIndexes,
+    selectedTab,
+    lastNonShiftClickInformation: {
+      clickedTrack: trackInformation.trackReference,
+      selection: selectedThreadIndexes,
+    },
+  };
+}
+
+/*
+ * This thunk action changes the current selection, by either selecting this
+ * additional track, or unselecting if it's already selected.
+ */
+function toggleOneTrack(
+  trackInformation: TrackInformation,
+  selectedTab: TabSlug
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const selectedThreadIndexes = new Set(getSelectedThreadIndexes(getState()));
+    // Toggle the selection.
+    if (selectedThreadIndexes.has(trackInformation.relatedThreadIndex)) {
+      selectedThreadIndexes.delete(trackInformation.relatedThreadIndex);
+      if (selectedThreadIndexes.size === 0) {
+        // Always keep at least one thread selected. Bail out.
+        return;
+      }
+    } else {
+      selectedThreadIndexes.add(trackInformation.relatedThreadIndex);
+    }
+    dispatch({
+      type: 'SELECT_TRACK',
+      selectedThreadIndexes,
+      selectedTab,
+      lastNonShiftClickInformation: {
+        clickedTrack: trackInformation.trackReference,
+        selection: selectedThreadIndexes,
+      },
+    });
+  };
+}
+
+/**
+ * This compares the relative order of two tracks.
+ * Returns:
+ *   < 0 => if trackA is above track B
+ *   > 0 => if trackB is above track A
+ *   0   => if trackA and trackB represent the same track
+ */
+function compareTrackOrder(
+  state,
+  trackA: TrackInformation,
+  trackB: TrackInformation
+): number {
+  if (trackA.globalTrackIndex === trackB.globalTrackIndex) {
+    // Same global track!
+    // Then we need to look at their local order
+    // If one is a global track, its localTrackIndex is null, and therefore the
+    // indexOf operation will return -1, which is exactly what we want.
+    const localTrackOrder = getLocalTrackOrder(state, trackA.pid);
+    const orderA = localTrackOrder.indexOf(trackA.localTrackIndex);
+    const orderB = localTrackOrder.indexOf(trackB.localTrackIndex);
+    return orderA - orderB;
+  }
+  // Different global tracks, let's check the global track order
+  const globalTrackOrder = getGlobalTrackOrder(state);
+  const orderA = globalTrackOrder.indexOf(trackA.globalTrackIndex);
+  const orderB = globalTrackOrder.indexOf(trackB.globalTrackIndex);
+
+  return orderA - orderB;
+}
+
+/**
+ * This computes the set of threads that's between two tracks (including
+ * themselves). This skips over hidden tracks.
+ */
+function findThreadsBetweenTracks(
+  state: State,
+  fromTrack: TrackInformation,
+  toTrack: TrackInformation
+): Array<ThreadIndex> {
+  const globalTracks = getGlobalTracks(state);
+  const globalTrackOrder = getGlobalTrackOrder(state);
+  const hiddenGlobalTracks = getHiddenGlobalTracks(state);
+
+  const foundThreadIndexes = [];
+
+  // Check the relative order of from and to, and possibly invert them
+  if (compareTrackOrder(state, fromTrack, toTrack) > 0) {
+    [toTrack, fromTrack] = [fromTrack, toTrack];
+  }
+
+  // Where are they located in the track order?
+  const fromGlobalOrder = globalTrackOrder.indexOf(fromTrack.globalTrackIndex);
+  const toGlobalOrder = globalTrackOrder.indexOf(toTrack.globalTrackIndex);
+
+  for (
+    let globalOrderIndex = fromGlobalOrder;
+    globalOrderIndex <= toGlobalOrder;
+    globalOrderIndex++
+  ) {
+    const globalTrackIndex = globalTrackOrder[globalOrderIndex];
+    if (hiddenGlobalTracks.has(globalTrackIndex)) {
+      continue;
+    }
+    const globalTrack = globalTracks[globalTrackIndex];
+    if (globalTrack.type !== 'process') {
+      continue;
+    }
+
+    const localTrackOrder = getLocalTrackOrder(state, globalTrack.pid);
+    const hiddenLocalTracks = getHiddenLocalTracks(state, globalTrack.pid);
+    const localTracks = getLocalTracks(state, globalTrack.pid);
+
+    let shouldAddStartGlobalTrack = true;
+    let localTrackOrderStart = 0;
+    let localTrackOrderEnd = localTrackOrder.length - 1;
+    if (globalOrderIndex === fromGlobalOrder) {
+      // This is the first process group, this means we possibly shouldn't add
+      // all tracks.
+      if (fromTrack.type === 'local') {
+        shouldAddStartGlobalTrack = false;
+        localTrackOrderStart = localTrackOrder.indexOf(
+          fromTrack.localTrackIndex
+        );
+      }
+    }
+
+    if (globalOrderIndex === toGlobalOrder) {
+      // This is the last process group, this means we possibly shouldn't add
+      // all tracks.
+      if (toTrack.type === 'global') {
+        // No local track should be added
+        localTrackOrderEnd = -1;
+      } else {
+        localTrackOrderEnd = localTrackOrder.indexOf(toTrack.localTrackIndex);
+      }
+    }
+
+    // Add the global track if it's not a virtual track and not out of the range.
+    if (shouldAddStartGlobalTrack && globalTrack.mainThreadIndex !== null) {
+      foundThreadIndexes.push(globalTrack.mainThreadIndex);
+    }
+
+    // Then add the local tracks.
+    for (
+      let localTrackOrderIndex = localTrackOrderStart;
+      localTrackOrderIndex <= localTrackOrderEnd;
+      localTrackOrderIndex++
+    ) {
+      const localTrackIndex = localTrackOrder[localTrackOrderIndex];
+      if (hiddenLocalTracks.has(localTrackIndex)) {
+        continue;
+      }
+      const localTrack = localTracks[localTrackIndex];
+      if (localTrack.type !== 'thread') {
+        continue;
+      }
+      foundThreadIndexes.push(localTrack.threadIndex);
+    }
+  }
+
+  // Also add the related threads, just like the user clicked them without using
+  // the shift modifier.
+  foundThreadIndexes.push(fromTrack.relatedThreadIndex);
+  foundThreadIndexes.push(toTrack.relatedThreadIndex);
+
+  return foundThreadIndexes;
+}
+
+/**
+ * This thunk action selects a range of tracks that are between 2 clicked
+ * tracks.
+ */
+function selectRangeOfTracks(
+  clickedTrackInformation: TrackInformation,
+  selectedTab: TabSlug
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const lastNonShiftClickInformation = getLastNonShiftClick(getState());
+
+    let lastClickedTrack =
+      lastNonShiftClickInformation && lastNonShiftClickInformation.clickedTrack;
+    if (!lastClickedTrack) {
+      const selectedThreadIndexes = getSelectedThreadIndexes(getState());
+      const threadIndex = getFirstItemFromSet(selectedThreadIndexes);
+      if (threadIndex !== undefined) {
+        lastClickedTrack = getTrackReferenceFromThreadIndex(
+          threadIndex,
+          getGlobalTracks(getState()),
+          getLocalTracksByPid(getState())
+        );
+      }
+    }
+
+    if (lastClickedTrack) {
+      const lastClickedTrackInformation = getInformationFromTrackReference(
+        getState(),
+        lastClickedTrack
+      );
+      if (lastClickedTrackInformation) {
+        const foundThreadIndexes = findThreadsBetweenTracks(
+          getState(),
+          lastClickedTrackInformation,
+          clickedTrackInformation
+        );
+        const newSelectedThreadIndexes = new Set([
+          ...foundThreadIndexes,
+          ...(lastNonShiftClickInformation
+            ? lastNonShiftClickInformation.selection
+            : []),
+        ]);
+
+        dispatch({
+          type: 'SELECT_TRACK',
+          selectedThreadIndexes: newSelectedThreadIndexes,
+          selectedTab,
+          // In this case, we keep the old information.
+          // This allows the user to do shift+click again to cancel the last
+          // shift+click and do it again.
+          lastNonShiftClickInformation,
+        });
+        return;
+      }
+    }
+
+    // If we couldn't select a range for some reason, then select just the
+    // clicked track. Most likely the user just loaded a profile with several
+    // selected tracks, and tried to use shift-click immediately.
+    dispatch(setOneTrackSelection(clickedTrackInformation, selectedTab));
+  };
+}
+
 /**
  * This selects a track from its reference.
  * This will ultimately select the thread that this track belongs to, using its
  * thread index, and may also change the selected tab if it makes sense for this
  * track.
  */
-export function selectTrack(
+export function selectTrackWithModifiers(
   trackReference: TrackReference,
-  modifier: 'none' | 'ctrl'
+  modifiers: $Shape<KeyboardModifiers> = {}
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const currentlySelectedTab = getSelectedTab(getState());
     // These get assigned based on the track type.
-    let selectedThreadIndex = null;
-    let selectedTab = currentlySelectedTab;
-
-    switch (trackReference.type) {
-      case 'global': {
-        // Handle the case of global tracks.
-        const globalTrack = getGlobalTrackFromReference(
-          getState(),
-          trackReference
-        );
-
-        // Go through each type, and determine the selected slug and thread index.
-        switch (globalTrack.type) {
-          case 'process': {
-            if (globalTrack.mainThreadIndex === null) {
-              // Do not allow selecting process tracks without a thread index.
-              return;
-            }
-            selectedThreadIndex = globalTrack.mainThreadIndex;
-            // Ensure a relevant thread-based tab is used.
-            if (selectedTab === 'network-chart') {
-              selectedTab = getLastVisibleThreadTabSlug(getState());
-            }
-            break;
-          }
-          case 'screenshots':
-          case 'visual-progress':
-          case 'perceptual-visual-progress':
-          case 'contentful-visual-progress':
-            // Do not allow selecting these tracks.
-            return;
-          default:
-            throw assertExhaustiveCheck(
-              globalTrack,
-              `Unhandled GlobalTrack type.`
-            );
-        }
-        break;
-      }
-      case 'local': {
-        // Handle the case of local tracks.
-        const localTrack = getLocalTrackFromReference(
-          getState(),
-          trackReference
-        );
-
-        // Go through each type, and determine the tab slug and thread index.
-        switch (localTrack.type) {
-          case 'thread': {
-            // Ensure a relevant thread-based tab is used.
-            selectedThreadIndex = localTrack.threadIndex;
-            if (selectedTab === 'network-chart') {
-              selectedTab = getLastVisibleThreadTabSlug(getState());
-            }
-            break;
-          }
-          case 'network':
-            selectedThreadIndex = localTrack.threadIndex;
-            selectedTab = 'network-chart';
-            break;
-          case 'ipc':
-            selectedThreadIndex = localTrack.threadIndex;
-            selectedTab = 'marker-chart';
-            break;
-          case 'memory': {
-            const { counterIndex } = localTrack;
-            const counterSelectors = getCounterSelectors(counterIndex);
-            const counter = counterSelectors.getCounter(getState());
-            selectedThreadIndex = counter.mainThreadIndex;
-            break;
-          }
-          case 'event-delay': {
-            selectedThreadIndex = localTrack.threadIndex;
-            break;
-          }
-          case 'process-cpu':
-          case 'power': {
-            const { counterIndex } = localTrack;
-            const counterSelectors = getCounterSelectors(counterIndex);
-            const counter = counterSelectors.getCounter(getState());
-            selectedThreadIndex = counter.mainThreadIndex;
-            break;
-          }
-          default:
-            throw assertExhaustiveCheck(
-              localTrack,
-              `Unhandled LocalTrack type.`
-            );
-        }
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(
-          trackReference,
-          'Unhandled TrackReference type'
-        );
+    const clickedTrackInformation = getInformationFromTrackReference(
+      getState(),
+      trackReference
+    );
+    if (!clickedTrackInformation) {
+      // This track isn't selectable.
+      return;
     }
 
-    const visibleTabs = getThreadSelectors(selectedThreadIndex).getUsefulTabs(
-      getState()
-    );
+    let selectedTab =
+      clickedTrackInformation.relatedTab ?? getSelectedTab(getState());
+    const visibleTabs = getThreadSelectors(
+      clickedTrackInformation.relatedThreadIndex
+    ).getUsefulTabs(getState());
     if (!visibleTabs.includes(selectedTab)) {
       // If the user switches to another track that doesn't have the current
       // selectedTab then switch to the first tab.
       selectedTab = visibleTabs[0];
     }
 
-    let selectedThreadIndexes = new Set(getSelectedThreadIndexes(getState()));
-    switch (modifier) {
-      case 'none':
-        // Only select the single thread.
-        selectedThreadIndexes = new Set([selectedThreadIndex]);
-        break;
-      case 'ctrl':
-        // Toggle the selection.
-        if (selectedThreadIndexes.has(selectedThreadIndex)) {
-          selectedThreadIndexes.delete(selectedThreadIndex);
-          if (selectedThreadIndexes.size === 0) {
-            // Always keep at least one thread selected.
-            return;
-          }
-        } else {
-          selectedThreadIndexes.add(selectedThreadIndex);
-        }
-        break;
-      default:
-        assertExhaustiveCheck(modifier, 'Unhandled modifier case.');
-        break;
+    if (modifiers.shift) {
+      dispatch(selectRangeOfTracks(clickedTrackInformation, selectedTab));
+    } else if (modifiers.ctrlOrMeta) {
+      dispatch(toggleOneTrack(clickedTrackInformation, selectedTab));
+    } else {
+      dispatch(setOneTrackSelection(clickedTrackInformation, selectedTab));
     }
-
-    dispatch({
-      type: 'SELECT_TRACK',
-      selectedThreadIndexes,
-      selectedTab,
-    });
   };
 }
 
@@ -463,7 +755,7 @@ export function selectTrackFromTid(tid: Tid): ThunkAction<void> {
         throw assertExhaustiveCheck(trackReference.type);
     }
 
-    dispatch(selectTrack(trackReference, 'none'));
+    dispatch(selectTrackWithModifiers(trackReference));
   };
 }
 
@@ -565,6 +857,7 @@ export function selectActiveTabTrack(
       type: 'SELECT_TRACK',
       selectedThreadIndexes,
       selectedTab,
+      lastNonShiftClickInformation: null,
     });
   };
 }
@@ -659,6 +952,7 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
     dispatch({
       type: 'HIDE_GLOBAL_TRACK',
       trackIndex,
+      pid: globalTrackToHide.type === 'process' ? globalTrackToHide.pid : null,
       selectedThreadIndexes: newSelectedThreadIndexes,
     });
   };

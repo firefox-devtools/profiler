@@ -17,7 +17,7 @@ import {
   changeMarkersSearchString,
   hideGlobalTrack,
   hideLocalTrack,
-  selectTrack,
+  selectTrackWithModifiers,
 } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
@@ -348,7 +348,7 @@ describe('MarkerTable', function () {
 
     it('can switch to a local track', function () {
       const { getState, dispatch } = setupWithTracksAndIPCMarker();
-      dispatch(selectTrack(parentTrackReference, 'none'));
+      dispatch(selectTrackWithModifiers(parentTrackReference));
       // Make sure that we are in the parent process thread.
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([parentThreadIndex])
@@ -365,7 +365,7 @@ describe('MarkerTable', function () {
 
     it('can switch to a hidden local track', function () {
       const { getState, dispatch } = setupWithTracksAndIPCMarker();
-      dispatch(selectTrack(parentTrackReference, 'none'));
+      dispatch(selectTrackWithModifiers(parentTrackReference));
       // Make sure that we are in the parent process thread.
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([parentThreadIndex])
@@ -406,7 +406,7 @@ describe('MarkerTable', function () {
 
     it('does not render when the other thread is not profiled', function () {
       const { getState, dispatch } = setupWithTracksAndIPCMarker();
-      dispatch(selectTrack(styleTrackReference, 'none'));
+      dispatch(selectTrackWithModifiers(styleTrackReference));
       // Make sure that we are in the Style thread.
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([styleThreadIndex])
