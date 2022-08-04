@@ -21,6 +21,13 @@ exports[`TrackPower has a tooltip that matches the snapshot 1`] = `
       :
     </div>
     ⁨1.8⁩ mW
+    <div
+      class="tooltipLabel"
+    >
+      Power used in range
+      :
+    </div>
+    ⁨0.000⁩ mWh
   </div>
 </div>
 `;

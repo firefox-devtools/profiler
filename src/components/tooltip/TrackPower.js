@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import { Localized } from '@fluent/react';
+import memoize from 'memoize-one';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatNumber } from 'firefox-profiler/utils/format-numbers';
@@ -14,6 +15,7 @@ import {
   getPreviewSelection,
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
+import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 
@@ -40,6 +42,43 @@ type StateProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
 
 class TooltipTrackPowerImpl extends React.PureComponent<Props> {
+  // This compute the sum of the power in the range. This returns a value in Wh.
+  _computePowerSumForRange(start: Milliseconds, end: Milliseconds): number {
+    const { counter } = this.props;
+    const samples = counter.sampleGroups[0].samples;
+    const [beginIndex, endIndex] = getSampleIndexRangeForSelection(
+      samples,
+      start,
+      end
+    );
+
+    let sum = 0;
+    for (
+      let counterSampleIndex = beginIndex;
+      counterSampleIndex < endIndex;
+      counterSampleIndex++
+    ) {
+      sum += samples.count[counterSampleIndex]; // picowatt-hour;
+    }
+    return sum * 1e-12;
+  }
+
+  _computePowerSumForCommittedRange = memoize(
+    ({ start, end }: StartEndRange): number =>
+      this._computePowerSumForRange(start, end)
+  );
+
+  _computePowerSumForPreviewRange = memoize(
+    ({
+      selectionStart,
+      selectionEnd,
+    }: {
+      +hasSelection: true,
+      +selectionStart: number,
+      +selectionEnd: number,
+    }): number => this._computePowerSumForRange(selectionStart, selectionEnd)
+  );
+
   _formatPowerValue(power: number, l10nIdUnit, l10nIdMilliUnit): Localized {
     let value, l10nId;
     if (power > 1) {
@@ -61,7 +100,13 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
   }
 
   render() {
-    const { counter, counterSampleIndex, interval } = this.props;
+    const {
+      counter,
+      counterSampleIndex,
+      interval,
+      committedRange,
+      previewSelection,
+    } = this.props;
     const samples = counter.sampleGroups[0].samples;
 
     const powerUsageInPwh = samples.count[counterSampleIndex]; // picowatt-hour
@@ -82,6 +127,18 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             power,
             'TrackPower--tooltip-power-watt',
             'TrackPower--tooltip-power-milliwatt'
+          )}
+          {previewSelection.hasSelection
+            ? this._formatPowerValue(
+                this._computePowerSumForPreviewRange(previewSelection),
+                'TrackPower--tooltip-energy-used-in-preview-watthour',
+                'TrackPower--tooltip-energy-used-in-preview-milliwatthour'
+              )
+            : null}
+          {this._formatPowerValue(
+            this._computePowerSumForCommittedRange(committedRange),
+            'TrackPower--tooltip-energy-used-in-range-watthour',
+            'TrackPower--tooltip-energy-used-in-range-milliwatthour'
           )}
         </TooltipDetails>
       </div>
