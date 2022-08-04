@@ -29,6 +29,26 @@ type StateProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
 
 class TooltipTrackPowerImpl extends React.PureComponent<Props> {
+  _formatPowerValue(power: number, l10nIdUnit, l10nIdMilliUnit): Localized {
+    let value, l10nId;
+    if (power > 1) {
+      value = formatNumber(power, 3);
+      l10nId = l10nIdUnit;
+    } else if (power === 0) {
+      value = 0;
+      l10nId = l10nIdUnit;
+    } else {
+      value = formatNumber(power * 1000);
+      l10nId = l10nIdMilliUnit;
+    }
+
+    return (
+      <Localized id={l10nId} vars={{ value }} attrs={{ label: true }}>
+        <TooltipDetail label="">{value}</TooltipDetail>
+      </Localized>
+    );
+  }
+
   render() {
     const { counter, counterSampleIndex, interval } = this.props;
     const samples = counter.sampleGroups[0].samples;
@@ -43,24 +63,15 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
       ((powerUsageInPwh * 1e-12) /* pWh->Wh */ / sampleTimeDeltaInMs) *
       1000 * // ms->s
       3600; // s->h
-    let value;
-    let l10nId;
-    if (power > 1) {
-      value = formatNumber(power, 3);
-      l10nId = 'TrackPower--tooltip-power-watt';
-    } else if (power === 0) {
-      value = 0;
-      l10nId = 'TrackPower--tooltip-power-watt';
-    } else {
-      value = formatNumber(power * 1000);
-      l10nId = 'TrackPower--tooltip-power-milliwatt';
-    }
+
     return (
       <div className="timelineTrackPowerTooltip">
         <TooltipDetails>
-          <Localized id={l10nId} vars={{ value }} attrs={{ label: true }}>
-            <TooltipDetail label="Power">{value}</TooltipDetail>
-          </Localized>
+          {this._formatPowerValue(
+            power,
+            'TrackPower--tooltip-power-watt',
+            'TrackPower--tooltip-power-milliwatt'
+          )}
         </TooltipDetails>
       </div>
     );
