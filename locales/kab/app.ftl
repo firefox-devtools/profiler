@@ -113,10 +113,6 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
-FullTimeline--graph-type = Anaw n udfil:
-FullTimeline--categories-with-cpu = taggayin s CPU
-FullTimeline--categories = Taggayin
-FullTimeline--stack-height = Teɣzi n tbursa
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
@@ -232,7 +228,6 @@ MenuButtons--index--profile-info-uploaded-actions = Kkes
 MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
 MenuButtons--metaInfo--cpu = CPU:
-MenuButtons--metaInfo--recording-started = Asekles yebda:
 MenuButtons--metaInfo--interval = Azilal:
 MenuButtons--metaInfo--buffer-capacity = Tazmert n uḥraz:
 MenuButtons--metaInfo--buffer-duration = Tanzgat n uḥraz:
@@ -322,6 +317,19 @@ NumberFormat--short-date = { SHORTDATE($date) }
 ## Profile Delete Button
 
 
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Sefsex
+ProfileDeletePanel--dialog-delete-button =
+    .value = Kkes
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Tukksa...
+
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
@@ -338,7 +346,6 @@ ProfileRootMessage--additional = Uɣal ɣer ugejdan
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--installing-button = Asebded…
 ServiceWorkerManager--pending-button = Snes syen ales asali
 ServiceWorkerManager--installed-button = Ales asali n usnas
 ServiceWorkerManager--hide-notice-button =
@@ -379,6 +386,13 @@ TrackContextMenu--hide-track = Ffer “{ $trackName }”
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
 TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
+
+## TrackPowerGraph
+## This is used to show the power used by the CPU and other chips in a computer,
+## graphed over time.
+## It's not displayed by default in the UI, but an example can be found at
+## https://share.firefox.dev/3a1fiT7.
+
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
