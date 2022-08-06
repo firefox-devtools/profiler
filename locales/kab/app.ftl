@@ -328,7 +328,7 @@ ProfileDeletePanel--dialog-delete-button =
 # This is used inside the Delete button after the user has clicked it, as a cheap
 # progress indicator.
 ProfileDeletePanel--dialog-deleting-button =
-    .value = Tukksa...
+    .value = Tukksa…
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
