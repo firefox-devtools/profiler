@@ -5,11 +5,13 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
 import classNames from 'classnames';
 import {
   changeRightClickedTrack,
   changeLocalTrackOrder,
   selectTrackWithModifiers,
+  hideGlobalTrack,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
@@ -77,6 +79,7 @@ type DispatchProps = {|
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +changeLocalTrackOrder: typeof changeLocalTrackOrder,
   +selectTrackWithModifiers: typeof selectTrackWithModifiers,
+  +hideGlobalTrack: typeof hideGlobalTrack,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -96,6 +99,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
   ) => {
     const { selectTrackWithModifiers, trackReference } = this.props;
     selectTrackWithModifiers(trackReference, getTrackSelectionModifiers(event));
+  };
+
+  _hideCurrentTrack = (
+    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+  ) => {
+    const { trackIndex, hideGlobalTrack } = this.props;
+    hideGlobalTrack(trackIndex);
+    event.stopPropagation();
   };
 
   renderTrack() {
@@ -274,6 +285,17 @@ class GlobalTrackComponent extends PureComponent<Props> {
                 </div>
               ) : null}
             </button>
+            <Localized
+              id="TrackNameButton--hide-process"
+              attrs={{ title: true }}
+            >
+              <button
+                type="button"
+                className="timelineTrackCloseButton"
+                title="Hide process"
+                onClick={this._hideCurrentTrack}
+              />
+            </Localized>
           </ContextMenuTrigger>
           <div className="timelineTrackTrack">{this.renderTrack()}</div>
         </div>
@@ -362,6 +384,7 @@ export const TimelineGlobalTrack = explicitConnect<
     changeRightClickedTrack,
     changeLocalTrackOrder,
     selectTrackWithModifiers,
+    hideGlobalTrack,
   },
   component: GlobalTrackComponent,
 });
