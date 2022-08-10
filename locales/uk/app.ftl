@@ -669,6 +669,12 @@ TrackContextMenu--hide-all-matching-tracks = Сховати всі відпов�
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Не знайдено результатів за запитом “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Сховати доріжку
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Сховати процес
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
