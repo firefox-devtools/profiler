@@ -592,6 +592,12 @@ TrackContextMenu--hide-all-matching-tracks = 隱藏所有符合的軌道
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = 找不到「<span>{ $searchFilter }</span>」的結果
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = 隱藏軌道
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = 隱藏處理程序
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
