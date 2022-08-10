@@ -69,7 +69,7 @@
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.3.3",
     "idb": "^7.0.2",
-    "jszip": "^3.10.0",
+    "jszip": "^3.10.1",
     "memoize-immutable": "^3.0.0",
     "memoize-one": "^6.0.0",
     "mixedtuplemap": "^1.0.0",
