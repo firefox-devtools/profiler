@@ -658,6 +658,12 @@ TrackContextMenu--hide-all-matching-tracks = Celar tote le tracias concordante
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Nulle resultatos trovate pro “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Celar tracia
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Celar processo
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
