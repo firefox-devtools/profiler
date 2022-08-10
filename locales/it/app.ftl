@@ -597,6 +597,12 @@ TrackContextMenu--hide-all-matching-tracks = Nascondi tutte le tracce corrispond
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Nessun risultato trovato per “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Nascondi traccia
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Nascondi processo
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
