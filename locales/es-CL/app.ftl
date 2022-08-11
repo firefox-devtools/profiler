@@ -602,6 +602,12 @@ TrackContextMenu--hide-all-matching-tracks = Ocultar todas las pistas coincident
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = No se encontraron resultados para "<span>{ $searchFilter }</span>"
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Ocultar pista
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Ocultar proceso
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
