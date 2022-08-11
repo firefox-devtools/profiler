@@ -663,6 +663,12 @@ TrackContextMenu--hide-all-matching-tracks = Απόκρυψη όλων των α
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Δεν βρέθηκαν αποτελέσματα για «<span>{ $searchFilter }</span>»
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Απόκρυψη κομματιού
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Απόκρυψη διεργασίας
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
