@@ -160,10 +160,6 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
-FullTimeline--graph-type = 图标类型：
-FullTimeline--categories-with-cpu = 含 CPU 的分类
-FullTimeline--categories = 分类
-FullTimeline--stack-height = 栈深度
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
@@ -521,7 +517,7 @@ ProfileRootMessage--additional = 返回主页
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--installing-button = 正在安装…
+ServiceWorkerManager--applying-button = 正在应用…
 ServiceWorkerManager--pending-button = 应用并重新加载
 ServiceWorkerManager--installed-button = 重新加载应用程序
 ServiceWorkerManager--updated-while-not-ready =
@@ -596,6 +592,12 @@ TrackContextMenu--hide-all-matching-tracks = 隐藏所有匹配的轨道
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = 找不到“<span>{ $searchFilter }</span>”的结果
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = 隐藏轨道
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = 隐藏进程
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
