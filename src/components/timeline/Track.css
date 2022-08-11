@@ -63,19 +63,27 @@
 }
 
 .timelineTrackCloseButton {
-  position: relative;
-  right: 5px;
   overflow: hidden;
-  width: 11px;
-  height: 11px;
-  padding: 0;
+  width: 15px;
+  height: 15px;
+  box-sizing: content-box;
+  padding: 1px;
   border: 0;
-  background: url(../../../res/img/svg/searchfield-cancel.svg) top left
-    no-repeat;
+  margin: 0 2px;
+  background: url(../../../res/img/svg/close-dark.svg) no-repeat center;
+  background-origin: content-box;
   background-size: contain;
+  border-radius: 2px;
   color: transparent;
-  margin-inline-start: 8px;
   -moz-user-focus: ignore;
+}
+
+.timelineTrackCloseButton:hover {
+  background-color: rgb(0 0 0 / 0.15);
+}
+
+.timelineTrackCloseButton:active:hover {
+  background-color: rgb(0 0 0 / 0.3);
 }
 
 .timelineTrackLabel:not(:hover) > .timelineTrackCloseButton {
