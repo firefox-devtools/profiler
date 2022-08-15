@@ -154,7 +154,7 @@ profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com
         <h2
           class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
         >
-          Recent uploaded recordings
+          Your recent uploaded recordings
         </h2>
         <list-of-published-profiles
           limit="3"
@@ -345,7 +345,7 @@ However, existing profiles can be viewed in any modern browser.
         <h2
           class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
         >
-          Recent uploaded recordings
+          Your recent uploaded recordings
         </h2>
         <list-of-published-profiles
           limit="3"

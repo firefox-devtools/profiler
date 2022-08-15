@@ -534,8 +534,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
             <section>
               {/* Recent recordings: right column */}
               <h2 className="homeRecentUploadedRecordingsTitle protocol-display-xxs">
-                <Localized id="Home--recent-uploaded-recordings-title">
-                  Recent uploaded recordings
+                <Localized id="Home--your-recent-uploaded-recordings-title">
+                  Your recent uploaded recordings
                 </Localized>
               </h2>
               <ListOfPublishedProfiles limit={3} withActionButtons={false} />
