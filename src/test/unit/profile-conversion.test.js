@@ -4,6 +4,7 @@
 // @flow
 
 import { unserializeProfileOfArbitraryFormat } from '../../profile-logic/process-profile';
+import { isPerfScriptFormat } from '../../profile-logic/import/linux-perf';
 import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
 import type {
   TracingEventUnion,
@@ -54,6 +55,12 @@ describe('converting Linux perf profile', function () {
     }
     return profile;
   }
+
+  it('should not detect a JSON profile as perf script', function () {
+    expect(
+      isPerfScriptFormat('{"meta": {"product": "Cool stuff 123 456:"}}')
+    ).toBe(false);
+  });
 
   it('should import a perf profile', async function () {
     const profile = await loadProfile(
