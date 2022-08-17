@@ -54,9 +54,9 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
     const isSymbolicated = profile.meta.symbolicated;
 
     const isSymbolicationUnsupported =
-      profile.meta.symbolicationNotSupported === false;
+      profile.meta.symbolicationNotSupported === true;
     if (isSymbolicationUnsupported) {
-      return <></>;
+      return null;
     }
 
     switch (symbolicationStatus) {

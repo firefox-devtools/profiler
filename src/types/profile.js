@@ -823,7 +823,7 @@ export type ProfileMeta = {|
   // "unknown" state.  For now we don't do much with it but we may want to
   // propose a manual symbolication in the future.
   symbolicated?: boolean,
-  // A boolean flag indicating that symbolication is not supported, default false
+  // A boolean flag indicating that symbolication is not supported
   // Used for imported profiles that cannot be symbolicated
   symbolicationNotSupported?: boolean,
   // The Update channel for this build of the application.
