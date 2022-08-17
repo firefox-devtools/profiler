@@ -217,10 +217,6 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
-FullTimeline--graph-type = Grafiektype:
-FullTimeline--categories-with-cpu = Categorieën met CPU
-FullTimeline--categories = Categorieën
-FullTimeline--stack-height = Stackhoogte
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
@@ -267,7 +263,7 @@ Home--profiler-motto = Leg een prestatieprofiel vast. Analyseer het. Deel het. M
 Home--additional-content-title = Bestaande profielen laden
 Home--additional-content-content = U kunt een profielbestand hierheen <strong>verslepen</strong> om het te laden, of:
 Home--compare-recordings-info = U kunt ook opnamen vergelijken. <a>De vergelijkingsinterface openen.</a>
-Home--recent-uploaded-recordings-title = Onlangs geüploade opnamen
+Home--your-recent-uploaded-recordings-title = Uw onlangs geüploade opnamen
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -293,9 +289,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Verwijderen
     .title = Dit profiel kan niet worden verwijderd, omdat we geen autorisatiegegevens hebben.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Er is nog geen profiel geüpload!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Al uw opnamen bekijken en beheren (nog { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -597,7 +593,7 @@ ProfileRootMessage--additional = Terug naar startpagina
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--installing-button = Installeren…
+ServiceWorkerManager--applying-button = Toepassen…
 ServiceWorkerManager--pending-button = Toepassen en opnieuw laden
 ServiceWorkerManager--installed-button = De toepassing opnieuw laden
 ServiceWorkerManager--updated-while-not-ready =
@@ -671,6 +667,12 @@ TrackContextMenu--hide-all-matching-tracks = Alle overeenkomende tracks verberge
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Geen resultaten gevonden voor ‘<span>{ $searchFilter }</span>’
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Track verbergen
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Proces verbergen
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
