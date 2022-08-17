@@ -194,7 +194,7 @@ Home--profiler-motto = 捕捉效能檢測檔。分析、分享、讓網站運作
 Home--additional-content-title = 載入現有檢測檔
 Home--additional-content-content = 您可以將效能檢測檔<strong>拖曳</strong>到此處，或:
 Home--compare-recordings-info = 您也可以比較紀錄內容。<a>開啟比較介面。</a>
-Home--recent-uploaded-recordings-title = 近期上傳的紀錄
+Home--your-recent-uploaded-recordings-title = 您近期上傳的紀錄
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -220,9 +220,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = 刪除
     .title = 由於缺少授權資訊，無法刪除此效能檢測檔。
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = 還沒有上傳任何檢測檔！
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = 檢視並管理您的所有紀錄檔（還有 { $profilesRestCount } 筆）
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
