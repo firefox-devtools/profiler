@@ -468,7 +468,7 @@ MenuButtons--metaInfo--name-and-version = Name and version:
 MenuButtons--metaInfo--update-channel = Update channel:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build type:
-MenuButtons--metaInfo--arguments = Program arguments:
+MenuButtons--metaInfo--arguments = Arguments:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 

@@ -305,7 +305,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
                 <Localized id="MenuButtons--metaInfo--arguments">
-                  Program arguments:
+                  Arguments:
                 </Localized>
               </span>
               {meta.arguments}
