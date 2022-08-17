@@ -867,7 +867,10 @@ export type ProfileMeta = {|
   hasImplementationData?: boolean,
   // Show the "Look up the function name on Searchfox" menu entry
   // default is true
-  showSearchFoxInMenu?: boolean
+  showSearchFoxInMenu?: boolean,
+  // Show the "Copy script URL" menu entry
+  // default is true
+  showCopyScriptURLInMenu?: boolean,
 |};
 
 /**

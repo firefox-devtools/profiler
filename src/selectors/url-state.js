@@ -284,6 +284,15 @@ export const getShowSearchFoxInMenu: Selector<boolean> = (state) => {
   return profile.meta.showSearchFoxInMenu !== false;
 };
 
+/** Should the "Copy script URL" menu entry be presented? */
+export const getShowCopyScriptURLInMenu: Selector<boolean> = (state) => {
+  const { profile } = state.profileView;
+  if (!profile) {
+    return true;
+  }
+  return profile.meta.showCopyScriptURLInMenu !== false;
+};
+
 /**
  * Get just the file name from the zip file path, if it exists.
  */

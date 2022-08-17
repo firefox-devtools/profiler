@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { Profiler, PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
 import {
@@ -21,8 +21,6 @@ import {
   getShowUserTimings,
   getCurrentSearchString,
   getShowNativeFrameSelection,
-  getShowSearchFoxInMenu,
-  hasImplementationData,
 } from 'firefox-profiler/selectors/url-state';
 import { PanelSearch } from './PanelSearch';
 
@@ -57,8 +55,6 @@ type StateProps = {|
   +hasNativeAllocations: boolean,
   +canShowRetainedMemory: boolean,
   +showNativeFrameSelection: boolean,
-  +hasImplementationData: boolean,
-  +showSearchFoxInMenu: boolean,
 |};
 
 type DispatchProps = {|
@@ -165,7 +161,7 @@ class StackSettingsImpl extends PureComponent<Props> {
                 'cpp'
               )}
             </li>
-          ) : null }
+          ) : null}
           {hasAllocations ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
@@ -283,8 +279,6 @@ export const StackSettings = explicitConnect<
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
     showNativeFrameSelection: getShowNativeFrameSelection(state),
-    hasImplementationData: hasImplementationData(state),
-    showSearchFoxInMenu: getShowSearchFoxInMenu(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,

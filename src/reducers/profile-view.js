@@ -714,7 +714,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rightClickedCallNode,
       rightClickedMarker,
       hoveredMarker,
-      mouseTimePosition
+      mouseTimePosition,
     }),
     profile,
     full: combineReducers({

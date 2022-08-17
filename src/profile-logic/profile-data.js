@@ -423,7 +423,8 @@ export function getTimingsForPath(
   sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable
+  unfilteredSamples: SamplesLikeTable,
+  hasImplementationData: boolean
 ) {
   return getTimingsForCallNodeIndex(
     getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
@@ -435,7 +436,8 @@ export function getTimingsForPath(
     sampleIndexOffset,
     categories,
     samples,
-    unfilteredSamples
+    unfilteredSamples,
+    hasImplementationData
   );
 }
 
@@ -457,7 +459,8 @@ export function getTimingsForCallNodeIndex(
   sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable
+  unfilteredSamples: SamplesLikeTable,
+  hasImplementationData: boolean
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
@@ -616,13 +619,17 @@ export function getTimingsForCallNodeIndex(
     const implementation = getImplementationForStack(sampleIndex);
 
     // Step 3: increment the right value in the implementation breakdown
-    if (timings.breakdownByImplementation === null) {
-      timings.breakdownByImplementation = {};
+    if (hasImplementationData) {
+      if (timings.breakdownByImplementation === null) {
+        timings.breakdownByImplementation = {};
+      }
+      if (timings.breakdownByImplementation[implementation] === undefined) {
+        timings.breakdownByImplementation[implementation] = 0;
+      }
+      timings.breakdownByImplementation[implementation] += duration;
+    } else {
+      timings.breakdownByImplementation = null;
     }
-    if (timings.breakdownByImplementation[implementation] === undefined) {
-      timings.breakdownByImplementation[implementation] = 0;
-    }
-    timings.breakdownByImplementation[implementation] += duration;
 
     // step 4: find the category value for this stack. We want to use the
     // category of the unfilteredThread.
