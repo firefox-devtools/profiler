@@ -446,7 +446,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } logical cores
     }
 
-MenuButtons--metaInfo--main-process-started = Started:
+MenuButtons--metaInfo--main-process-started = Start:
 MenuButtons--metaInfo--main-process-ended = End:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Buffer capacity:
