@@ -748,7 +748,6 @@ export type ProfileMeta = {|
   // numeric value as defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#365
   processType: number,
-  // The size of the main memory in bytes
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
@@ -788,7 +787,7 @@ export type ProfileMeta = {|
   misc?: string,
   // The OS and CPU. e.g. "Intel Mac OS X"
   oscpu?: string,
-  // Size of the main memory
+  // The size of the main memory in bytes
   mainMemory?: Bytes,
   // The current platform, as taken from the user agent string.
   // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.cpp#992
