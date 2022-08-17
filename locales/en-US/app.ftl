@@ -276,7 +276,7 @@ Home--profiler-motto = Capture a performance profile. Analyze it. Share it. Make
 Home--additional-content-title = Load existing profiles
 Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
-Home--recent-uploaded-recordings-title = Recent uploaded recordings
+Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -305,9 +305,9 @@ ListOfPublishedProfiles--published-profiles-delete-button-disabled = Delete
 
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = No profile has been uploaded yet!
 
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = See and manage all your recordings ({ $profilesRestCount } more)
 
 # Depending on the number of uploaded profiles, the message is different.

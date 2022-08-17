@@ -11,29 +11,45 @@ import type { MixedObject } from 'firefox-profiler/types';
  * invocation of `perf script`, where `perf` is the Linux perf command line tool.
  */
 export function isPerfScriptFormat(profile: string): boolean {
-  // Slice the input to a reasonable length, because this can
-  // also be abused by one very long line.
+  // We can have two different types of perf script files:
+  // Files with header and files without header.
+  //
+  // The header, if present, looks like this (generated here [1]):
+  //
+  // # ========
+  // # captured on    : Mon Aug 30 11:15:28 2021
+  // # header version : 1
+  // # data offset    : 336
+  // # data size      : 31672
+  // # feat offset    : 32008
+  // # hostname : somehost
+  // # os release : 5.10.40-amd64
+  // # ========
+  // #
+  //
+  // Then the first sample begins. Each sample starts with a line containing the
+  // thread name, tid/pid, and timestamp.
+  // eg, "V8 WorkerThread 24636/25607 [000] 94564.109216: cycles:"
+  //
+  // If there's no header, the file starts with the first sample immediately.
+  //
+  // To detect these files, we detect the header if present, or the first line
+  // of the first sample if no header is present.
+  //
+  // [1] https://github.com/torvalds/linux/blob/20cf903a0c407cef19300e5c85a03c82593bde36/tools/perf/util/session.c#L2755-L2757
 
-  // One test showed a header 2KB long:
-  // $ cat src/test/fixtures/upgrades/graphviz.perf.gz | gunzip | grep '#' | wc -c
-  // 2286
-  // 10x margin of error => 20KB should be enough.
-  profile = profile.slice(0, 20 * 1024);
+  if (profile.startsWith('# ========\n')) {
+    return true;
+  }
 
-  // Optimisation: The simplest way to solve this would be using
-  // the same logic as parsing: looping over profile.split('\n').
-  // But fingerprinting the profile should be fast. So we use a
-  // multiline regex to avoid processing the entire profile.
-
-  // This regexp matches the first line that doesn't start with #,
-  // and has at least one character.
-  const firstLineFinderRe = /^(?!#).+$/m;
-  const maybeFirstLine = firstLineFinderRe.exec(profile);
-  if (!maybeFirstLine) {
+  if (profile.startsWith('{')) {
+    // Make sure we don't accidentally match JSON
     return false;
   }
 
-  const firstLine = maybeFirstLine[0];
+  // There was no header, so we need to match the first line of the first sample.
+  const firstLine = profile.substring(0, profile.indexOf('\n'));
+
   //          +- process name (anything before the rest of the regexp, can contain spaces)
   //          |        +- PID/ (optional)
   //          |        |      +- TID
