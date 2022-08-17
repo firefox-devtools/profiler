@@ -810,7 +810,7 @@ export type ProfileMeta = {|
 
   // The build ID/date of the application.
   appBuildID?: string,
-  // Arguments to the program (used for external tools)
+  // Arguments to the program (currently only used for imported profiles)
   arguments?: string,
   // The URL to the source revision for this build of the application.
   sourceURL?: string,
@@ -825,7 +825,7 @@ export type ProfileMeta = {|
   // propose a manual symbolication in the future.
   symbolicated?: boolean,
   // A boolean flag indicating that symbolication is not supported, default false
-  // Used for external profiles that cannot be symbolicated
+  // Used for imported profiles that cannot be symbolicated
   symbolicationNotSupported?: boolean,
   // The Update channel for this build of the application.
   // This property is landed in Firefox 67, and is optional because older
