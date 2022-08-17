@@ -256,7 +256,7 @@ Home--profiler-motto = Capturar un profilo de prestation. Analysar lo. Compartir
 Home--additional-content-title = Cargar profilos existente
 Home--additional-content-content = Tu pote <strong>traher e deponer</strong> hic un file profilo pro cargar lo, o:
 Home--compare-recordings-info = Tu pote alsi comparar registrationes. <a>Aperir le interfacie de comparation.</a>
-Home--recent-uploaded-recordings-title = Registrationes cargate recentemente
+Home--your-recent-uploaded-recordings-title = Tu registrationes cargate recentemente
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -282,9 +282,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Deler
     .title = Iste profilo non pote esser delite perque nos care de informationes de autorisation.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nulle profilo ha essite cargate ancora!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Vide e gere tote tu ({ $profilesRestCount } restante registrationes)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
