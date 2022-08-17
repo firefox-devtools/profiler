@@ -160,7 +160,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
                 <Localized id="MenuButtons--metaInfo--main-process-started">
-                  Start:
+                  Main process started:
                 </Localized>
               </span>
               {_formatDate(meta.startTime)}
@@ -170,7 +170,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
                 <Localized id="MenuButtons--metaInfo--main-process-ended">
-                  End:
+                  Main process ended:
                 </Localized>
               </span>
               {_formatDate(meta.endTime)}
