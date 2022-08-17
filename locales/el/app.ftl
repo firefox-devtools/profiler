@@ -259,7 +259,7 @@ Home--profiler-motto = Καταγράψτε ένα προφίλ επιδόσεω
 Home--additional-content-title = Φόρτωση υπαρχόντων προφίλ
 Home--additional-content-content = Μπορείτε να <strong>σύρετε και να εναποθέσετε</strong> ένα αρχείο προφίλ εδώ για φόρτωση, ή:
 Home--compare-recordings-info = Μπορείτε επίσης να συγκρίνετε καταγραφές. <a>Άνοιγμα περιβάλλοντος σύγκρισης.</a>
-Home--recent-uploaded-recordings-title = Πρόσφατα μεταφορτωμένες καταγραφές
+Home--your-recent-uploaded-recordings-title = Πρόσφατα μεταφορτωμένες καταγραφές
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -285,9 +285,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Διαγραφή
     .title = Δεν είναι δυνατή η διαγραφή αυτού του προφίλ επειδή μας λείπουν πληροφορίες εξουσιοδότησης.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Δεν έχει μεταφορτωθεί ακόμη κανένα προφίλ!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Προβολή και διαχείριση όλων των καταγραφών σας ({ $profilesRestCount } ακόμη)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
