@@ -248,7 +248,7 @@ Home--profiler-motto = Zeichnen Sie ein Leistungsprofil auf. Analysieren Sie es.
 Home--additional-content-title = Bestehende Profile laden
 Home--additional-content-content = Sie können eine Profildatei per <strong>Ziehen und Ablegen</strong> hierher bewegen, um sie zu laden, oder:
 Home--compare-recordings-info = Sie können auch Aufnahmen vergleichen. <a>Öffnen Sie die Vergleichsschnittstelle.</a>
-Home--recent-uploaded-recordings-title = Kürzlich hochgeladene Aufzeichnungen
+Home--your-recent-uploaded-recordings-title = Ihre kürzlich hochgeladenen Aufzeichnungen
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -274,9 +274,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Löschen
     .title = Dieses Profil kann nicht gelöscht werden, weil die Berechtigung fehlt.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Es wurde noch kein Profil hochgeladen!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Sehen und verwalten Sie alle Ihre Aufzeichnungen ({ $profilesRestCount } weitere)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
