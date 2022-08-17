@@ -259,7 +259,7 @@ Home--profiler-motto = Отримайте профіль швидкодії. П�
 Home--additional-content-title = Завантажити наявні профілі
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
 Home--compare-recordings-info = Ви також можете порівняти записи. <a>Відкрити інтерфейс порівняння.</a>
-Home--recent-uploaded-recordings-title = Останні завантаження
+Home--your-recent-uploaded-recordings-title = Ваші недавно вивантажені записи
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -285,9 +285,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Видалити
     .title = Цей профіль не можна видалити оскільки ми не маємо інформації про авторизацію.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Жодного профілю ще не завантажено!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Переглянути всі свої записи та керувати ними (ще { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
