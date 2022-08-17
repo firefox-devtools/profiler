@@ -863,14 +863,14 @@ export type ProfileMeta = {|
   // default is true
   showNativeFrameSelection?: boolean,
   // Show the "implementation" information in the UI (see #3709)
-  // default is true
   hasImplementationData?: boolean,
   // Show the "Look up the function name on Searchfox" menu entry
   // default is true
   showSearchFoxInMenu?: boolean,
   // Show the "Copy script URL" menu entry
-  // default is true
   showCopyScriptURLInMenu?: boolean,
+  // Show the stack type of frames in context menus
+  showStackType?: boolean,
 |};
 
 /**

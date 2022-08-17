@@ -70,6 +70,7 @@ export type OwnProps = {|
   +unfilteredSamples: SamplesLikeTable,
   +tracedTiming: TracedTiming | null,
   +hasImplementationData: boolean,
+  +showStackType: boolean,
 |};
 
 type Props = {|
@@ -289,6 +290,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       unfilteredSamples,
       tracedTiming,
       hasImplementationData,
+      showStackType,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -350,6 +352,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
               )
             : undefined
         }
+        showStackType={showStackType}
       />
     );
   };

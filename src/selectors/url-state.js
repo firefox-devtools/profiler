@@ -293,6 +293,15 @@ export const getShowCopyScriptURLInMenu: Selector<boolean> = (state) => {
   return profile.meta.showCopyScriptURLInMenu !== false;
 };
 
+/* Show the stack type of frames in context menus? */
+export const getShowStackType: Selector<boolean> = (state) => {
+  const { profile } = state.profileView;
+  if (!profile) {
+    return true;
+  }
+  return profile.meta.showStackType !== false;
+};
+
 /**
  * Get just the file name from the zip file path, if it exists.
  */

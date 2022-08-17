@@ -48,13 +48,15 @@ exports[`TooltipCallNode handles native allocations 1`] = `
     <div
       class="tooltipDetails tooltipCallNodeDetailsLeft"
     >
-      <div
-        class="tooltipLabel"
-      >
-        Stack Type:
-      </div>
       <div>
-        JavaScript
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          JavaScript
+        </div>
       </div>
       <div
         class="tooltipLabel"
@@ -100,13 +102,15 @@ exports[`TooltipCallNode with page information displays Page URL for iframe page
     <div
       class="tooltipDetails tooltipCallNodeDetailsLeft"
     >
-      <div
-        class="tooltipLabel"
-      >
-        Stack Type:
-      </div>
       <div>
-        JavaScript
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          JavaScript
+        </div>
       </div>
       <div
         class="tooltipLabel"
@@ -170,13 +174,15 @@ exports[`TooltipCallNode with page information displays Page URL for non-iframe 
     <div
       class="tooltipDetails tooltipCallNodeDetailsLeft"
     >
-      <div
-        class="tooltipLabel"
-      >
-        Stack Type:
-      </div>
       <div>
-        JavaScript
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          JavaScript
+        </div>
       </div>
       <div
         class="tooltipLabel"
