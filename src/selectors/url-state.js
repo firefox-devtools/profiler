@@ -257,6 +257,33 @@ export const getFormattedMetaInfoString: Selector<string | null> = (state) => {
   return formatMetaInfoString(profile.meta);
 };
 
+/** Does the UI allow to distinguish between native and JavaScript frames */
+export const getShowNativeFrameSelection: Selector<boolean> = (state) => {
+  const { profile } = state.profileView;
+  if (!profile) {
+    return true;
+  }
+  return profile.meta.showNativeFrameSelection !== false;
+};
+
+/** Does the profile have implementation data? */
+export const hasImplementationData: Selector<boolean> = (state) => {
+  const { profile } = state.profileView;
+  if (!profile) {
+    return true;
+  }
+  return profile.meta.showSearchFoxInMenu !== false;
+};
+
+/** Should the "Look up the function name on Searchfox" menu entry be presented? */
+export const getShowSearchFoxInMenu: Selector<boolean> = (state) => {
+  const { profile } = state.profileView;
+  if (!profile) {
+    return true;
+  }
+  return profile.meta.showSearchFoxInMenu !== false;
+};
+
 /**
  * Get just the file name from the zip file path, if it exists.
  */

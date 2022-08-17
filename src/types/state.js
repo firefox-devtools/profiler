@@ -107,7 +107,7 @@ export type ProfileViewState = {
     rightClickedCallNode: RightClickedCallNode | null,
     rightClickedMarker: MarkerReference | null,
     hoveredMarker: MarkerReference | null,
-    mouseTimePosition: Milliseconds | null,
+    mouseTimePosition: Milliseconds | null
   |},
   +profile: Profile | null,
   +full: FullProfileViewState,

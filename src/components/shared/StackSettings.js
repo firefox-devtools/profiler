@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import React, { Profiler, PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
 import {
@@ -20,6 +20,9 @@ import {
   getSelectedTab,
   getShowUserTimings,
   getCurrentSearchString,
+  getShowNativeFrameSelection,
+  getShowSearchFoxInMenu,
+  hasImplementationData,
 } from 'firefox-profiler/selectors/url-state';
 import { PanelSearch } from './PanelSearch';
 
@@ -53,6 +56,9 @@ type StateProps = {|
   +hasJsAllocations: boolean,
   +hasNativeAllocations: boolean,
   +canShowRetainedMemory: boolean,
+  +showNativeFrameSelection: boolean,
+  +hasImplementationData: boolean,
+  +showSearchFoxInMenu: boolean,
 |};
 
 type DispatchProps = {|
@@ -136,6 +142,7 @@ class StackSettingsImpl extends PureComponent<Props> {
       hasNativeAllocations,
       canShowRetainedMemory,
       callTreeSummaryStrategy,
+      showNativeFrameSelection,
     } = this.props;
 
     const hasAllocations = hasJsAllocations || hasNativeAllocations;
@@ -143,20 +150,22 @@ class StackSettingsImpl extends PureComponent<Props> {
     return (
       <div className="stackSettings">
         <ul className="stackSettingsList">
-          <li className="stackSettingsListItem stackSettingsFilter">
-            {this._renderImplementationRadioButton(
-              'StackSettings--implementation-all-stacks',
-              'combined'
-            )}
-            {this._renderImplementationRadioButton(
-              'StackSettings--implementation-javascript',
-              'js'
-            )}
-            {this._renderImplementationRadioButton(
-              'StackSettings--implementation-native',
-              'cpp'
-            )}
-          </li>
+          {showNativeFrameSelection ? (
+            <li className="stackSettingsListItem stackSettingsFilter">
+              {this._renderImplementationRadioButton(
+                'StackSettings--implementation-all-stacks',
+                'combined'
+              )}
+              {this._renderImplementationRadioButton(
+                'StackSettings--implementation-javascript',
+                'js'
+              )}
+              {this._renderImplementationRadioButton(
+                'StackSettings--implementation-native',
+                'cpp'
+              )}
+            </li>
+          ) : null }
           {hasAllocations ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
@@ -273,6 +282,9 @@ export const StackSettings = explicitConnect<
       selectedThreadSelectors.getCanShowRetainedMemory(state),
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
+    showNativeFrameSelection: getShowNativeFrameSelection(state),
+    hasImplementationData: hasImplementationData(state),
+    showSearchFoxInMenu: getShowSearchFoxInMenu(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,
