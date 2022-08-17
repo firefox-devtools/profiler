@@ -742,10 +742,13 @@ export type ProfileMeta = {|
   interval: Milliseconds,
   // The number of milliseconds since midnight January 1, 1970 GMT.
   startTime: Milliseconds,
+  // The number of milliseconds since midnight January 1, 1970 GMT.
+  endTime?: Milliseconds,
   // The process type where the Gecko profiler was started. This is the raw enum
   // numeric value as defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#365
   processType: number,
+  // The size of the main memory in bytes
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
@@ -785,6 +788,8 @@ export type ProfileMeta = {|
   misc?: string,
   // The OS and CPU. e.g. "Intel Mac OS X"
   oscpu?: string,
+  // Size of the main memory
+  mainMemory?: Bytes,
   // The current platform, as taken from the user agent string.
   // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.cpp#992
   platform?:
@@ -805,6 +810,8 @@ export type ProfileMeta = {|
 
   // The build ID/date of the application.
   appBuildID?: string,
+  // Arguments to the program (used for external tools)
+  arguments?: string,
   // The URL to the source revision for this build of the application.
   sourceURL?: string,
   // The physical number of CPU cores for the machine.
@@ -817,6 +824,9 @@ export type ProfileMeta = {|
   // "unknown" state.  For now we don't do much with it but we may want to
   // propose a manual symbolication in the future.
   symbolicated?: boolean,
+  // A boolean flag indicating that symbolication is not supported, default false
+  // Used for external profiles that cannot be symbolicated
+  symbolicationNotSupported?: boolean,
   // The Update channel for this build of the application.
   // This property is landed in Firefox 67, and is optional because older
   // processed profile versions may not have them. No upgrader was necessary.
