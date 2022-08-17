@@ -304,6 +304,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         throw new Error(`Unknown stack type case "${stackType}".`);
     }
 
+    let renderedTimings;
+
     return (
       <div
         className="tooltipCallNode"
@@ -322,7 +324,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           </div>
         </div>
         <div className="tooltipCallNodeDetails">
-          {this._renderTimings(timings, displayData)}
+          {(renderedTimings = this._renderTimings(timings, displayData))}
           {callTreeSummaryStrategy !== 'timing' && displayData ? (
             <div className="tooltipDetails tooltipCallNodeDetailsLeft">
               {/* Everything in this div needs to come in pairs of two in order to
@@ -338,8 +340,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           <div className="tooltipDetails tooltipCallNodeDetailsLeft">
             {/* Everything in this div needs to come in pairs of two in order to
                 respect the CSS grid. */}
-            <div className="tooltipLabel">Stack Type:</div>
-            <div>{stackTypeLabel}</div>
+            {renderedTimings !== null ? (
+              <div>
+                <div className="tooltipLabel">Stack Type:</div>
+                <div>{stackTypeLabel}</div>
+              </div>
+            ) : null}
             {/* --------------------------------------------------------------- */}
             <div className="tooltipLabel">Category:</div>
             <div>
