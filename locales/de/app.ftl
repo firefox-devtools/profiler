@@ -84,7 +84,7 @@ CallNodeContextMenu--transform-collapse-function-subtree = Funktion einklappen
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }</strong> einklappen
     .title =
-        Wenn eine Ressource eingeklappt wird, werden alle Aufrufe dieser 
+        Wenn eine Ressource eingeklappt wird, werden alle Aufrufe dieser
         Ressource in einen einzigen eingeklappten Aufrufknoten umgewandelt.
 CallNodeContextMenu--transform-collapse-direct-recursion = Direkte Rekursion einklappen
     .title =
