@@ -441,7 +441,6 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
             <React.Fragment>
               <h4 className="sidebar-title3 sidebar-title-label">
                 <div>Implementation</div>
-
                 <div>Running {getWeightTypeLabel(weightType)}</div>
               </h4>
               <ImplementationBreakdown
