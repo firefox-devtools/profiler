@@ -5,6 +5,7 @@
 // @flow
 
 import type { MarkerPhase } from 'firefox-profiler/types';
+import { ORANGE_50 } from 'photon-colors';
 
 // The current version of the Gecko profile format.
 export const GECKO_PROFILE_VERSION = 26;
@@ -43,6 +44,13 @@ export const TRACK_EVENT_DELAY_LINE_WIDTH = 2;
 // The following values are for IPC track.
 export const TRACK_IPC_MARKERS_HEIGHT = 25;
 export const TRACK_IPC_HEIGHT = TRACK_IPC_MARKERS_HEIGHT;
+
+// The following values are the defaults for marker tracks
+export const TRACK_MARKER_MARKERS_DEFAULT_HEIGHT = 25;
+export const TRACK_MARKER_DEFAULT_HEIGHT = TRACK_MARKER_MARKERS_DEFAULT_HEIGHT;
+export const TRACK_MARKER_DEFAULT_LINE_WIDTH = 2;
+export const TRACK_MARKER_DEFAULT_LINE_FILL_COLOR = 'transparent';
+export const TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR = ORANGE_50;
 
 // Height of the blank area in process track.
 export const TRACK_PROCESS_BLANK_HEIGHT = 30;

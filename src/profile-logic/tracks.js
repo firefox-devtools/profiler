@@ -15,6 +15,7 @@ import type {
   Counter,
   Tid,
   TrackReference,
+  MarkerSchema,
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
@@ -22,6 +23,20 @@ import { computeMaxCPUDeltaPerInterval } from './cpu';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
+import {
+  TRACK_MARKER_DEFAULT_LINE_FILL_COLOR,
+  TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR,
+  TRACK_MARKER_DEFAULT_LINE_WIDTH,
+} from '../app-logic/constants';
+import {
+  GREEN_50,
+  MAGENTA_50,
+  ORANGE_50,
+  PURPLE_50,
+  RED_50,
+  TEAL_50,
+  YELLOW_50,
+} from 'photon-colors';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -34,6 +49,72 @@ export type HiddenTracks = {|
   +hiddenGlobalTracks: Set<TrackIndex>,
   +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
 |};
+
+export const getMarkerTrackConfig = (schema: MarkerSchema) => {
+  if (schema.trackConfig === undefined) {
+    throw new Error('No track config for marker ' + schema.name);
+  }
+  return schema.trackConfig;
+};
+
+export const getMarkerTrackLineConfig = (
+  schema: MarkerSchema,
+  line: number
+) => {
+  return getMarkerTrackConfig(schema).lines[line];
+};
+
+export const getMarkerTrackLineWidth = (schema: MarkerSchema, line: number) => {
+  return (
+    getMarkerTrackLineConfig(schema, line).width ||
+    TRACK_MARKER_DEFAULT_LINE_WIDTH
+  );
+};
+
+export const getMaximumMarkerTrackLineWidth = (schema: MarkerSchema) => {
+  return Math.max(
+    ...getMarkerTrackConfig(schema).lines.map(
+      (conf) => conf.width || TRACK_MARKER_DEFAULT_LINE_WIDTH
+    )
+  );
+};
+
+export const getMarkerTrackLineFillColor = (
+  schema: MarkerSchema,
+  line: number
+) => {
+  return (
+    getMarkerTrackLineConfig(schema, line).fillColor ||
+    TRACK_MARKER_DEFAULT_LINE_FILL_COLOR
+  );
+};
+
+export const getMarkerTrackLineStrokeColor = (
+  schema: MarkerSchema,
+  line: number
+) => {
+  const color =
+    getMarkerTrackLineConfig(schema, line).strokeColor ||
+    TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR;
+  switch (color) {
+    case 'magenta':
+      return MAGENTA_50;
+    case 'purple':
+      return PURPLE_50;
+    case 'teal':
+      return TEAL_50;
+    case 'green':
+      return GREEN_50;
+    case 'yellow':
+      return YELLOW_50;
+    case 'orange':
+      return ORANGE_50;
+    case 'red':
+      return RED_50;
+    default:
+      return color;
+  }
+};
 
 /**
  * This file collects all the logic that goes into validating URL-encoded view options.
@@ -57,7 +138,8 @@ const LOCAL_TRACK_INDEX_ORDER = {
   ipc: 3,
   'event-delay': 4,
   'process-cpu': 5,
-  power: 6,
+  marker: 6,
+  power: 7,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
@@ -70,7 +152,8 @@ const LOCAL_TRACK_DISPLAY_ORDER = {
   thread: 3,
   'event-delay': 4,
   'process-cpu': 5,
-  power: 6,
+  marker: 6,
+  power: 7,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -236,6 +319,13 @@ export function computeLocalTracksByPid(
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
+  // find markers that might be shown
+  const timelineAwareMarkers = profile.meta.markerSchema
+    ? profile.meta.markerSchema.filter(
+        (schema) => schema.trackConfig !== undefined
+      )
+    : [];
+
   for (
     let threadIndex = 0;
     threadIndex < profile.threads.length;
@@ -265,6 +355,30 @@ export function computeLocalTracksByPid(
     if (thread.markers.data.some((datum) => datum && datum.type === 'IPC')) {
       // This thread has IPC markers.
       tracks.push({ type: 'ipc', threadIndex });
+    }
+
+    const timelineAwareMarkerConsts = new Set(
+      timelineAwareMarkers.map((marker) =>
+        thread.stringTable.indexForString(marker.name)
+      )
+    );
+    const containedMarkerConsts = new Set(
+      thread.markers.name.filter((x) => timelineAwareMarkerConsts.has(x))
+    );
+    for (const marker of timelineAwareMarkers) {
+      if (
+        containedMarkerConsts.has(
+          thread.stringTable.indexForString(marker.name)
+        )
+      ) {
+        if (marker.trackConfig) {
+          tracks.push({
+            type: 'marker',
+            threadIndex,
+            markerSchema: marker,
+          });
+        }
+      }
     }
   }
 
@@ -841,6 +955,8 @@ export function getLocalTrackName(
       return 'Process CPU';
     case 'power':
       return counters[localTrack.counterIndex].name;
+    case 'marker':
+      return getMarkerTrackConfig(localTrack.markerSchema).label;
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -1226,6 +1342,7 @@ export function getSearchFilteredLocalTracksByPid(
         }
         case 'network':
         case 'memory':
+        case 'marker':
         case 'ipc':
         case 'event-delay':
         case 'power':

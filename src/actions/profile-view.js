@@ -335,6 +335,7 @@ function getInformationFromTrackReference(
             relatedThreadIndex: localTrack.threadIndex,
             relatedTab: 'network-chart',
           };
+        case 'marker':
         case 'ipc':
           return {
             ...commonLocalProperties,

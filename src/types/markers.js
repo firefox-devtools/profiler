@@ -86,6 +86,28 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
+export type MarkerTrackConfig = {|
+  label: string,
+  // height of the track in pixels
+  height?: number,
+  lines: Array<{|
+    key: string,
+    fillColor?: string,
+    strokeColor?:
+      | 'magenta'
+      | 'purple'
+      | 'teal'
+      | 'green'
+      | 'yellow'
+      | 'orange'
+      | 'red'
+      | 'transparent'
+      | 'grey'
+      | string,
+    width?: number,
+  |}>,
+|};
+
 export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
@@ -120,6 +142,9 @@ export type MarkerSchema = {|
         value: string,
       |}
   >,
+
+  // if present, give the marker its own local track
+  trackConfig?: MarkerTrackConfig,
 |};
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
