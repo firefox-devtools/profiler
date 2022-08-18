@@ -68,7 +68,7 @@ type OwnProps = {|
   +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
   +marginLeft: CssPixels,
-  +hideStackType: boolean,
+  +displayStackType: boolean,
 |};
 
 type Props = $ReadOnly<{|
@@ -421,7 +421,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       shouldDisplayTooltips,
       interval,
       innerWindowIDToPageMap,
-      hideStackType,
+      displayStackType,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -459,7 +459,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         // The stack chart doesn't support other call tree summary types.
         callTreeSummaryStrategy="timing"
         durationText={formatMilliseconds(duration)}
-        hideStackType={hideStackType}
+        displayStackType={displayStackType}
       />
     );
   };

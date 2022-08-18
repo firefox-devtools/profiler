@@ -257,31 +257,22 @@ export const getFormattedMetaInfoString: Selector<string | null> = (state) => {
   return formatMetaInfoString(profile.meta);
 };
 
-/** Hide the distinguishing buttons for native vs JavaScript frames? */
-export const getHideNativeFrameSelection: Selector<boolean> = (state) => {
-  const { profile } = state.profileView;
-  if (!profile) {
-    return true;
-  }
-  return profile.meta.hideNativeFrameSelection === true;
-};
-
 /** Does the profile have implementation data? */
-export const getHideImplementationData: Selector<boolean> = (state) => {
+export const getProfileUsesFrameImplementation: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
   if (!profile) {
     return true;
   }
-  return profile.meta.hideImplementationData === true;
+  return profile.meta.doesNotUseFrameImplementation !== true;
 };
 
 /** Should the "Look up the function name on Searchfox" menu entry be hidden? */
-export const getHideSearchFoxInMenu: Selector<boolean> = (state) => {
+export const getShouldDisplaySearchfox: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
   if (!profile) {
     return true;
   }
-  return profile.meta.hideSearchFoxInMenu === true;
+  return profile.meta.sourceCodeIsNotOnSearchfox !== true;
 };
 
 /** Should the "Copy script URL" menu entry be hidden? */
@@ -294,12 +285,12 @@ export const getHideCopyScriptURLInMenu: Selector<boolean> = (state) => {
 };
 
 /* Hide the stack type of frames in context menus? */
-export const getHideStackType: Selector<boolean> = (state) => {
+export const getProfileUsesMultipleStackTypes: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
   if (!profile) {
     return true;
   }
-  return profile.meta.hideStackType === true;
+  return profile.meta.usesOnlyOneStackType !== true;
 };
 
 /**

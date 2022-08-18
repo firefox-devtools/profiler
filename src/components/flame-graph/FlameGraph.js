@@ -20,8 +20,8 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getSelectedThreadsKey,
   getInvertCallstack,
-  getHideImplementationData,
-  getHideStackType,
+  getProfileUsesFrameImplementation,
+  getProfileUsesMultipleStackTypes,
 } from '../../selectors/url-state';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
@@ -89,8 +89,8 @@ type StateProps = {|
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
   +tracedTiming: TracedTiming | null,
-  +hideImplementationData: boolean,
-  +hideStackType: boolean,
+  +displayImplementation: boolean,
+  +displayStackType: boolean,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -325,8 +325,8 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       samples,
       unfilteredSamples,
       tracedTiming,
-      hideImplementationData,
-      hideStackType,
+      displayImplementation,
+      displayStackType,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -380,8 +380,8 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               samples,
               unfilteredSamples,
               tracedTiming,
-              hideImplementationData,
-              hideStackType,
+              displayImplementation,
+              displayStackType,
             }}
           />
         </ContextMenuTrigger>
@@ -430,8 +430,8 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     unfilteredSamples:
       selectedThreadSelectors.getUnfilteredSamplesForCallTree(state),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
-    hideImplementationData: getHideImplementationData(state),
-    hideStackType: getHideStackType(state),
+    displayImplementation: getProfileUsesFrameImplementation(state),
+    displayStackType: getProfileUsesMultipleStackTypes(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,

@@ -69,8 +69,8 @@ export type OwnProps = {|
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
   +tracedTiming: TracedTiming | null,
-  +hideImplementationData: boolean,
-  +hideStackType: boolean,
+  +displayImplementation: boolean,
+  +displayStackType: boolean,
 |};
 
 type Props = {|
@@ -289,8 +289,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       samples,
       unfilteredSamples,
       tracedTiming,
-      hideImplementationData,
-      hideStackType,
+      displayImplementation,
+      displayStackType,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -348,11 +348,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 categories,
                 samples,
                 unfilteredSamples,
-                hideImplementationData
+                displayImplementation
               )
             : undefined
         }
-        hideStackType={hideStackType}
+        displayStackType={displayStackType}
       />
     );
   };

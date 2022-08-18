@@ -22,7 +22,7 @@ import {
   getSelectedTab,
   getImplementationFilter,
   getInvertCallstack,
-  getHideSearchFoxInMenu,
+  getShouldDisplaySearchfox,
   getHideCopyScriptURLInMenu,
 } from 'firefox-profiler/selectors/url-state';
 import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
@@ -56,7 +56,7 @@ type StateProps = {|
   +implementation: ImplementationFilter,
   +inverted: boolean,
   +selectedTab: TabSlug,
-  +hideSearchFoxInMenu: boolean,
+  +displaySearchfox: boolean,
   +hideCopyScriptURLInMenu: boolean,
 |};
 
@@ -423,12 +423,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderContextMenuContents() {
-    const {
-      inverted,
-      selectedTab,
-      hideSearchFoxInMenu,
-      hideCopyScriptURLInMenu,
-    } = this.props;
+    const { inverted, selectedTab, displaySearchfox, hideCopyScriptURLInMenu } =
+      this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -561,7 +557,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             <div className="react-contextmenu-separator" />
           </>
         ) : null}
-        {!hideSearchFoxInMenu ? (
+        {displaySearchfox ? (
           <Localized id="CallNodeContextMenu--searchfox">
             <MenuItem onClick={this._handleClick} data={{ type: 'searchfox' }}>
               Look up the function name on Searchfox
@@ -696,7 +692,7 @@ export const CallNodeContextMenu = explicitConnect<
       implementation: getImplementationFilter(state),
       inverted: getInvertCallstack(state),
       selectedTab: getSelectedTab(state),
-      hideSearchFoxInMenu: getHideSearchFoxInMenu(state),
+      displaySearchfox: getShouldDisplaySearchfox(state),
       hideCopyScriptURLInMenu: getHideCopyScriptURLInMenu(state),
     };
   },

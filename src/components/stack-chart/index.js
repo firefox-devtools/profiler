@@ -22,7 +22,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getShowUserTimings,
   getSelectedThreadsKey,
-  getHideStackType,
+  getProfileUsesMultipleStackTypes,
 } from '../../selectors/url-state';
 import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
@@ -81,7 +81,7 @@ type StateProps = {|
   +getMarker: (MarkerIndex) => Marker,
   +userTimings: MarkerIndex[],
   +timelineMarginLeft: CssPixels,
-  +hideStackType: boolean,
+  +displayStackType: boolean,
 |};
 
 type DispatchProps = {|
@@ -181,7 +181,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       userTimings,
       weightType,
       timelineMarginLeft,
-      hideStackType,
+      displayStackType,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -239,7 +239,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   shouldDisplayTooltips: this._shouldDisplayTooltips,
                   scrollToSelectionGeneration,
                   marginLeft: timelineMarginLeft,
-                  hideStackType: hideStackType,
+                  displayStackType: displayStackType,
                 }}
               />
             </div>
@@ -278,7 +278,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
-      hideStackType: getHideStackType(state),
+      displayStackType: getProfileUsesMultipleStackTypes(state),
     };
   },
   mapDispatchToProps: {
