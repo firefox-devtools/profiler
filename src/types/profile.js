@@ -855,6 +855,16 @@ export type ProfileMeta = {|
   // They also use the "product" field in the meta information, but this is somewhat
   // ambiguous. This field, if present, is unambiguous that it was imported.
   importedFrom?: string,
+
+  // The following are settings that are used to configure the views for
+  // imported profiles, as some features do not make sense for them
+
+  // Do not distinguish between different stack types?
+  usesOnlyOneStackType?: boolean,
+  // Hide the "implementation" information in the UI (see #3709)?
+  doesNotUseFrameImplementation?: boolean,
+  // Hide the "Look up the function name on Searchfox" menu entry?
+  sourceCodeIsNotOnSearchfox?: boolean,
 |};
 
 /**
