@@ -308,7 +308,9 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
                   Arguments:
                 </Localized>
               </span>
+              <div className="metaInfoLargeContent">
               {meta.arguments}
+              </div>
             </div>
           ) : null}
         </div>
