@@ -862,7 +862,7 @@ export type ProfileMeta = {|
   // Hide the distinguishing buttons for native vs JavaScript frames?
   hideNativeFrameSelection?: boolean,
   // Hide the "implementation" information in the UI (see #3709)?
-  hasImplementationData?: boolean,
+  hideImplementationData?: boolean,
   // Hide the "Look up the function name on Searchfox" menu entry?
   hideSearchFoxInMenu?: boolean,
   // Hide the "Copy script URL" menu entry?

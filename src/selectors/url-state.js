@@ -267,12 +267,12 @@ export const getHideNativeFrameSelection: Selector<boolean> = (state) => {
 };
 
 /** Does the profile have implementation data? */
-export const hasImplementationData: Selector<boolean> = (state) => {
+export const getHideImplementationData: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
   if (!profile) {
     return true;
   }
-  return profile.meta.hasImplementationData !== false;
+  return profile.meta.hideImplementationData === true;
 };
 
 /** Should the "Look up the function name on Searchfox" menu entry be hidden? */

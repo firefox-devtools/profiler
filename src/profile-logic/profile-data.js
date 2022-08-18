@@ -424,7 +424,7 @@ export function getTimingsForPath(
   categories: CategoryList,
   samples: SamplesLikeTable,
   unfilteredSamples: SamplesLikeTable,
-  hasImplementationData: boolean
+  hideImplementationData: boolean
 ) {
   return getTimingsForCallNodeIndex(
     getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
@@ -437,7 +437,7 @@ export function getTimingsForPath(
     categories,
     samples,
     unfilteredSamples,
-    hasImplementationData
+    hideImplementationData
   );
 }
 
@@ -460,7 +460,7 @@ export function getTimingsForCallNodeIndex(
   categories: CategoryList,
   samples: SamplesLikeTable,
   unfilteredSamples: SamplesLikeTable,
-  hasImplementationData: boolean
+  hideImplementationData: boolean
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
@@ -619,7 +619,7 @@ export function getTimingsForCallNodeIndex(
     const implementation = getImplementationForStack(sampleIndex);
 
     // Step 3: increment the right value in the implementation breakdown
-    if (hasImplementationData) {
+    if (!hideImplementationData) {
       if (timings.breakdownByImplementation === null) {
         timings.breakdownByImplementation = {};
       }

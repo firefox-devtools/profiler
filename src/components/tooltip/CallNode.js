@@ -341,10 +341,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {/* Everything in this div needs to come in pairs of two in order to
                 respect the CSS grid. */}
             {!hideStackType ? (
-              <div>
+              <>
                 <div className="tooltipLabel">Stack Type:</div>
                 <div>{stackTypeLabel}</div>
-              </div>
+              </>
             ) : null}
             {/* --------------------------------------------------------------- */}
             <div className="tooltipLabel">Category:</div>

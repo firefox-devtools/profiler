@@ -69,7 +69,7 @@ export type OwnProps = {|
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
   +tracedTiming: TracedTiming | null,
-  +hasImplementationData: boolean,
+  +hideImplementationData: boolean,
   +hideStackType: boolean,
 |};
 
@@ -289,7 +289,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       samples,
       unfilteredSamples,
       tracedTiming,
-      hasImplementationData,
+      hideImplementationData,
       hideStackType,
     } = this.props;
 
@@ -348,7 +348,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 categories,
                 samples,
                 unfilteredSamples,
-                hasImplementationData
+                hideImplementationData
               )
             : undefined
         }

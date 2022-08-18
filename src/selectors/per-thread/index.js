@@ -248,7 +248,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     ProfileSelectors.getCategories,
     selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
     selectedThreadSelectors.getUnfilteredSamplesForCallTree,
-    UrlState.hasImplementationData,
+    UrlState.getHideImplementationData,
     ProfileData.getTimingsForPath
   );
 
