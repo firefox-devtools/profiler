@@ -194,7 +194,7 @@ Home--profiler-motto = 捕捉性能分析记录。剖析、分享、让网站速
 Home--additional-content-title = 加载现有分析记录
 Home--additional-content-content = 您可以将分析记录<strong>拖放</strong>至此处，或：
 Home--compare-recordings-info = 您也可以比较记录内容。<a>打开比较界面。</a>
-Home--recent-uploaded-recordings-title = 近期上传的记录
+Home--your-recent-uploaded-recordings-title = 您最近上传的记录
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -220,9 +220,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = 删除
     .title = 由于缺少授权信息，无法删除此 Profile。
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = 还未上传任何分析记录！
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = 查看并管理您的所有记录（还有 { $profilesRestCount } 条）
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
