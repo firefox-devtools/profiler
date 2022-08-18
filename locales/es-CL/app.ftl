@@ -202,7 +202,7 @@ Home--profiler-motto = Captura un perfil de rendimiento. Analízalo. Compártelo
 Home--additional-content-title = Cargar perfiles existentes
 Home--additional-content-content = Puedes <strong>arrastrar y soltar</strong> un archivo de perfil aquí para cargarlo, o:
 Home--compare-recordings-info = También puedes comparar los registros. <a>Abre la interfaz de comparación.</a>
-Home--recent-uploaded-recordings-title = Registros subidos recientemente
+Home--your-recent-uploaded-recordings-title = Tus registros subidos recientemente
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -228,9 +228,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Borrar
     .title = Este perfil no puede ser eliminado porque no tenemos la información de autorización.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = ¡Aún no se ha subido ningún perfil!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Revisa y gestiona todos tus registros ({ $profilesRestCount } más)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
