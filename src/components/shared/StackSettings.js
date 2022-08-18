@@ -20,7 +20,6 @@ import {
   getSelectedTab,
   getShowUserTimings,
   getCurrentSearchString,
-  getProfileUsesMultipleStackTypes,
 } from 'firefox-profiler/selectors/url-state';
 import { PanelSearch } from './PanelSearch';
 
@@ -32,6 +31,8 @@ import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+
+import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
 
 import './StackSettings.css';
 

@@ -17,12 +17,12 @@ import {
   getScrollToSelectionGeneration,
   getCategories,
   getInnerWindowIDToPageMap,
+  getProfileUsesMultipleStackTypes,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getShowUserTimings,
   getSelectedThreadsKey,
-  getProfileUsesMultipleStackTypes,
 } from '../../selectors/url-state';
 import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';

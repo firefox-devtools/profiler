@@ -15,13 +15,13 @@ import {
   getScrollToSelectionGeneration,
   getProfileInterval,
   getInnerWindowIDToPageMap,
+  getProfileUsesMultipleStackTypes,
+  getProfileUsesFrameImplementation,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getSelectedThreadsKey,
   getInvertCallstack,
-  getProfileUsesFrameImplementation,
-  getProfileUsesMultipleStackTypes,
 } from '../../selectors/url-state';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';

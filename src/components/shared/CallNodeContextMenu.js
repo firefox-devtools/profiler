@@ -22,7 +22,6 @@ import {
   getSelectedTab,
   getImplementationFilter,
   getInvertCallstack,
-  getShouldDisplaySearchfox,
 } from 'firefox-profiler/selectors/url-state';
 import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
@@ -32,6 +31,8 @@ import {
   convertToTransformType,
   assertExhaustiveCheck,
 } from 'firefox-profiler/utils/flow';
+
+import { getShouldDisplaySearchfox } from 'firefox-profiler/selectors/profile';
 
 import type {
   TransformType,
