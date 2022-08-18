@@ -26,8 +26,8 @@
 }
 
 .metaInfoLargeContent {
-  height: 100px;
   overflow: scroll;
+  height: 100px;
   overflow-wrap: anywhere;
 }
 

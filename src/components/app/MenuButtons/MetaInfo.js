@@ -53,9 +53,9 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
     const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
     const isSymbolicated = profile.meta.symbolicated;
 
-    const isSymbolicationUnsupported =
-      profile.meta.symbolicationNotSupported === true;
-    if (isSymbolicationUnsupported) {
+    const supportsSymbolication =
+      profile.meta.symbolicationNotSupported !== true;
+    if (!supportsSymbolication) {
       return null;
     }
 
@@ -308,9 +308,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
                   Arguments:
                 </Localized>
               </span>
-              <div className="metaInfoLargeContent">
-              {meta.arguments}
-              </div>
+              <div className="metaInfoLargeContent">{meta.arguments}</div>
             </div>
           ) : null}
         </div>
