@@ -20,7 +20,7 @@ import {
   getSelectedTab,
   getShowUserTimings,
   getCurrentSearchString,
-  getShowNativeFrameSelection,
+  getHideNativeFrameSelection,
 } from 'firefox-profiler/selectors/url-state';
 import { PanelSearch } from './PanelSearch';
 
@@ -54,7 +54,7 @@ type StateProps = {|
   +hasJsAllocations: boolean,
   +hasNativeAllocations: boolean,
   +canShowRetainedMemory: boolean,
-  +showNativeFrameSelection: boolean,
+  +hideNativeFrameSelection: boolean,
 |};
 
 type DispatchProps = {|
@@ -138,7 +138,7 @@ class StackSettingsImpl extends PureComponent<Props> {
       hasNativeAllocations,
       canShowRetainedMemory,
       callTreeSummaryStrategy,
-      showNativeFrameSelection,
+      hideNativeFrameSelection,
     } = this.props;
 
     const hasAllocations = hasJsAllocations || hasNativeAllocations;
@@ -146,7 +146,7 @@ class StackSettingsImpl extends PureComponent<Props> {
     return (
       <div className="stackSettings">
         <ul className="stackSettingsList">
-          {showNativeFrameSelection ? (
+          {!hideNativeFrameSelection ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               {this._renderImplementationRadioButton(
                 'StackSettings--implementation-all-stacks',
@@ -278,7 +278,7 @@ export const StackSettings = explicitConnect<
       selectedThreadSelectors.getCanShowRetainedMemory(state),
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
-    showNativeFrameSelection: getShowNativeFrameSelection(state),
+    hideNativeFrameSelection: getHideNativeFrameSelection(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,

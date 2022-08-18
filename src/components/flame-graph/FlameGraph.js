@@ -21,7 +21,7 @@ import {
   getSelectedThreadsKey,
   getInvertCallstack,
   hasImplementationData,
-  getShowStackType,
+  getHideStackType,
 } from '../../selectors/url-state';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
@@ -90,7 +90,7 @@ type StateProps = {|
   +unfilteredSamples: SamplesLikeTable,
   +tracedTiming: TracedTiming | null,
   +hasImplementationData: boolean,
-  +showStackType: boolean,
+  +hideStackType: boolean,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -326,7 +326,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       unfilteredSamples,
       tracedTiming,
       hasImplementationData,
-      showStackType,
+      hideStackType,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -381,7 +381,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               unfilteredSamples,
               tracedTiming,
               hasImplementationData,
-              showStackType,
+              hideStackType,
             }}
           />
         </ContextMenuTrigger>
@@ -431,7 +431,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
       selectedThreadSelectors.getUnfilteredSamplesForCallTree(state),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
     hasImplementationData: hasImplementationData(state),
-    showStackType: getShowStackType(state),
+    hideStackType: getHideStackType(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,

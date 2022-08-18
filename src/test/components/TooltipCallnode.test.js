@@ -48,7 +48,7 @@ describe('TooltipCallNode', function () {
             callTreeSummaryStrategy={selectedThreadSelectors.getCallTreeSummaryStrategy(
               getState()
             )}
-            showStackType={true}
+            hideStackType={true}
           />
         </Provider>
       );

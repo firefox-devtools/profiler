@@ -22,8 +22,8 @@ import {
   getSelectedTab,
   getImplementationFilter,
   getInvertCallstack,
-  getShowSearchFoxInMenu,
-  getShowCopyScriptURLInMenu,
+  getHideSearchFoxInMenu,
+  getHideCopyScriptURLInMenu,
 } from 'firefox-profiler/selectors/url-state';
 import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
@@ -56,8 +56,8 @@ type StateProps = {|
   +implementation: ImplementationFilter,
   +inverted: boolean,
   +selectedTab: TabSlug,
-  +showSearchFoxInMenu: boolean,
-  +showCopyScriptURLInMenu: boolean,
+  +hideSearchFoxInMenu: boolean,
+  +hideCopyScriptURLInMenu: boolean,
 |};
 
 type DispatchProps = {|
@@ -426,8 +426,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       inverted,
       selectedTab,
-      showSearchFoxInMenu,
-      showCopyScriptURLInMenu,
+      hideSearchFoxInMenu,
+      hideCopyScriptURLInMenu,
     } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
@@ -561,7 +561,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             <div className="react-contextmenu-separator" />
           </>
         ) : null}
-        {showSearchFoxInMenu ? (
+        {!hideSearchFoxInMenu ? (
           <Localized id="CallNodeContextMenu--searchfox">
             <MenuItem onClick={this._handleClick} data={{ type: 'searchfox' }}>
               Look up the function name on Searchfox
@@ -576,7 +576,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             Copy function name
           </MenuItem>
         </Localized>
-        {isJS && showCopyScriptURLInMenu ? (
+        {isJS && !hideCopyScriptURLInMenu ? (
           <Localized id="CallNodeContextMenu--copy-script-url">
             <MenuItem onClick={this._handleClick} data={{ type: 'copy-url' }}>
               Copy script URL
@@ -696,8 +696,8 @@ export const CallNodeContextMenu = explicitConnect<
       implementation: getImplementationFilter(state),
       inverted: getInvertCallstack(state),
       selectedTab: getSelectedTab(state),
-      showSearchFoxInMenu: getShowSearchFoxInMenu(state),
-      showCopyScriptURLInMenu: getShowCopyScriptURLInMenu(state),
+      hideSearchFoxInMenu: getHideSearchFoxInMenu(state),
+      hideCopyScriptURLInMenu: getHideCopyScriptURLInMenu(state),
     };
   },
   mapDispatchToProps: {

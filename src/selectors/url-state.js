@@ -257,13 +257,13 @@ export const getFormattedMetaInfoString: Selector<string | null> = (state) => {
   return formatMetaInfoString(profile.meta);
 };
 
-/** Does the UI allow to distinguish between native and JavaScript frames */
-export const getShowNativeFrameSelection: Selector<boolean> = (state) => {
+/** Hide the distinguishing buttons for native vs JavaScript frames? */
+export const getHideNativeFrameSelection: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
   if (!profile) {
     return true;
   }
-  return profile.meta.showNativeFrameSelection !== false;
+  return profile.meta.hideNativeFrameSelection === true;
 };
 
 /** Does the profile have implementation data? */
@@ -272,34 +272,34 @@ export const hasImplementationData: Selector<boolean> = (state) => {
   if (!profile) {
     return true;
   }
-  return profile.meta.showSearchFoxInMenu !== false;
+  return profile.meta.hasImplementationData !== false;
 };
 
-/** Should the "Look up the function name on Searchfox" menu entry be presented? */
-export const getShowSearchFoxInMenu: Selector<boolean> = (state) => {
+/** Should the "Look up the function name on Searchfox" menu entry be hidden? */
+export const getHideSearchFoxInMenu: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
   if (!profile) {
     return true;
   }
-  return profile.meta.showSearchFoxInMenu !== false;
+  return profile.meta.hideSearchFoxInMenu === true;
 };
 
-/** Should the "Copy script URL" menu entry be presented? */
-export const getShowCopyScriptURLInMenu: Selector<boolean> = (state) => {
+/** Should the "Copy script URL" menu entry be hidden? */
+export const getHideCopyScriptURLInMenu: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
   if (!profile) {
     return true;
   }
-  return profile.meta.showCopyScriptURLInMenu !== false;
+  return profile.meta.hideCopyScriptURLInMenu === true;
 };
 
-/* Show the stack type of frames in context menus? */
-export const getShowStackType: Selector<boolean> = (state) => {
+/* Hide the stack type of frames in context menus? */
+export const getHideStackType: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
   if (!profile) {
     return true;
   }
-  return profile.meta.showStackType !== false;
+  return profile.meta.hideStackType === true;
 };
 
 /**

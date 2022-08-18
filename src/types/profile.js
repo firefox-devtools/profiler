@@ -857,20 +857,18 @@ export type ProfileMeta = {|
   importedFrom?: string,
 
   // The following are settings that are used to configure the views for
-  // imported profiles, as some features do not work for them
+  // imported profiles, as some features do not make sense for them
 
-  // Does the UI allow to distinguish between native and JavaScript frames
-  // default is true
-  showNativeFrameSelection?: boolean,
-  // Show the "implementation" information in the UI (see #3709)
+  // Hide the distinguishing buttons for native vs JavaScript frames?
+  hideNativeFrameSelection?: boolean,
+  // Hide the "implementation" information in the UI (see #3709)?
   hasImplementationData?: boolean,
-  // Show the "Look up the function name on Searchfox" menu entry
-  // default is true
-  showSearchFoxInMenu?: boolean,
-  // Show the "Copy script URL" menu entry
-  showCopyScriptURLInMenu?: boolean,
-  // Show the stack type of frames in context menus
-  showStackType?: boolean,
+  // Hide the "Look up the function name on Searchfox" menu entry?
+  hideSearchFoxInMenu?: boolean,
+  // Hide the "Copy script URL" menu entry?
+  hideCopyScriptURLInMenu?: boolean,
+  // Hide the stack type of frames in context menus?
+  hideStackType?: boolean,
 |};
 
 /**
