@@ -23,7 +23,6 @@ import {
   getImplementationFilter,
   getInvertCallstack,
   getShouldDisplaySearchfox,
-  getHideCopyScriptURLInMenu,
 } from 'firefox-profiler/selectors/url-state';
 import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
@@ -57,7 +56,6 @@ type StateProps = {|
   +inverted: boolean,
   +selectedTab: TabSlug,
   +displaySearchfox: boolean,
-  +hideCopyScriptURLInMenu: boolean,
 |};
 
 type DispatchProps = {|
@@ -423,8 +421,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderContextMenuContents() {
-    const { inverted, selectedTab, displaySearchfox, hideCopyScriptURLInMenu } =
-      this.props;
+    const { inverted, selectedTab, displaySearchfox } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -445,7 +442,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();
     const showExpandAll = selectedTab === 'calltree';
-
+    const canCopyURL =
+      isJS && funcTable.fileName[callNodeTable.func[callNodeIndex]] !== null;
     return (
       <>
         {this.renderTransformMenuItem({
@@ -572,7 +570,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             Copy function name
           </MenuItem>
         </Localized>
-        {isJS && !hideCopyScriptURLInMenu ? (
+        {canCopyURL ? (
           <Localized id="CallNodeContextMenu--copy-script-url">
             <MenuItem onClick={this._handleClick} data={{ type: 'copy-url' }}>
               Copy script URL
@@ -693,7 +691,6 @@ export const CallNodeContextMenu = explicitConnect<
       inverted: getInvertCallstack(state),
       selectedTab: getSelectedTab(state),
       displaySearchfox: getShouldDisplaySearchfox(state),
-      hideCopyScriptURLInMenu: getHideCopyScriptURLInMenu(state),
     };
   },
   mapDispatchToProps: {

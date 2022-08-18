@@ -865,8 +865,6 @@ export type ProfileMeta = {|
   doesNotUseFrameImplementation?: boolean,
   // Hide the "Look up the function name on Searchfox" menu entry?
   sourceCodeIsNotOnSearchfox?: boolean,
-  // Hide the "Copy script URL" menu entry?
-  hideCopyScriptURLInMenu?: boolean,
 |};
 
 /**

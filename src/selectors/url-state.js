@@ -275,15 +275,6 @@ export const getShouldDisplaySearchfox: Selector<boolean> = (state) => {
   return profile.meta.sourceCodeIsNotOnSearchfox !== true;
 };
 
-/** Should the "Copy script URL" menu entry be hidden? */
-export const getHideCopyScriptURLInMenu: Selector<boolean> = (state) => {
-  const { profile } = state.profileView;
-  if (!profile) {
-    return true;
-  }
-  return profile.meta.hideCopyScriptURLInMenu === true;
-};
-
 /* Hide the stack type of frames in context menus? */
 export const getProfileUsesMultipleStackTypes: Selector<boolean> = (state) => {
   const { profile } = state.profileView;
