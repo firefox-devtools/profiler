@@ -32,6 +32,8 @@ import explicitConnect, {
 } from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
+import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
+
 import './StackSettings.css';
 
 import type {
@@ -53,6 +55,7 @@ type StateProps = {|
   +hasJsAllocations: boolean,
   +hasNativeAllocations: boolean,
   +canShowRetainedMemory: boolean,
+  +allowSwitchingStackType: boolean,
 |};
 
 type DispatchProps = {|
@@ -136,6 +139,7 @@ class StackSettingsImpl extends PureComponent<Props> {
       hasNativeAllocations,
       canShowRetainedMemory,
       callTreeSummaryStrategy,
+      allowSwitchingStackType,
     } = this.props;
 
     const hasAllocations = hasJsAllocations || hasNativeAllocations;
@@ -143,20 +147,22 @@ class StackSettingsImpl extends PureComponent<Props> {
     return (
       <div className="stackSettings">
         <ul className="stackSettingsList">
-          <li className="stackSettingsListItem stackSettingsFilter">
-            {this._renderImplementationRadioButton(
-              'StackSettings--implementation-all-stacks',
-              'combined'
-            )}
-            {this._renderImplementationRadioButton(
-              'StackSettings--implementation-javascript',
-              'js'
-            )}
-            {this._renderImplementationRadioButton(
-              'StackSettings--implementation-native',
-              'cpp'
-            )}
-          </li>
+          {allowSwitchingStackType ? (
+            <li className="stackSettingsListItem stackSettingsFilter">
+              {this._renderImplementationRadioButton(
+                'StackSettings--implementation-all-stacks',
+                'combined'
+              )}
+              {this._renderImplementationRadioButton(
+                'StackSettings--implementation-javascript',
+                'js'
+              )}
+              {this._renderImplementationRadioButton(
+                'StackSettings--implementation-native',
+                'cpp'
+              )}
+            </li>
+          ) : null}
           {hasAllocations ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
@@ -273,6 +279,7 @@ export const StackSettings = explicitConnect<
       selectedThreadSelectors.getCanShowRetainedMemory(state),
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
+    allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,

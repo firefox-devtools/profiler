@@ -53,6 +53,12 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
     const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
     const isSymbolicated = profile.meta.symbolicated;
 
+    const supportsSymbolication =
+      profile.meta.symbolicationNotSupported !== true;
+    if (!supportsSymbolication) {
+      return null;
+    }
+
     switch (symbolicationStatus) {
       case 'DONE':
         return (
@@ -158,6 +164,16 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
                 </Localized>
               </span>
               {_formatDate(meta.startTime)}
+            </div>
+          ) : null}
+          {meta.endTime ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--main-process-ended">
+                  Main process ended:
+                </Localized>
+              </span>
+              {_formatDate(meta.endTime)}
             </div>
           ) : null}
           {meta.interval ? (
@@ -285,6 +301,16 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
                 meta.extensions.name
               )
             : null}
+          {meta.arguments ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--arguments">
+                  Arguments:
+                </Localized>
+              </span>
+              <div className="metaInfoLargeContent">{meta.arguments}</div>
+            </div>
+          ) : null}
         </div>
         <h2 className="metaInfoSubTitle">
           <Localized id="MenuButtons--metaInfo--platform">Platform</Localized>
@@ -322,6 +348,16 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
                 <Localized id="MenuButtons--metaInfo--cpu">CPU:</Localized>
               </span>
               {cpuCount}
+            </div>
+          ) : null}
+          {meta.mainMemory ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--main-memory">
+                  Main memory:
+                </Localized>
+              </span>
+              {formatBytes(meta.mainMemory)}
             </div>
           ) : null}
         </div>

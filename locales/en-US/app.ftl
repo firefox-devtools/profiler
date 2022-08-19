@@ -412,6 +412,7 @@ MenuButtons--metaInfo--symbolicate-profile = Symbolicate profile
 MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate profile
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = Main memory:
 
 # This string is used when we have the information about both physical and
 # logical CPU cores.
@@ -447,6 +448,7 @@ MenuButtons--metaInfo--logical-cpu =
     }
 
 MenuButtons--metaInfo--main-process-started = Main process started:
+MenuButtons--metaInfo--main-process-ended = Main process ended:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Buffer capacity:
 MenuButtons--metaInfo--buffer-duration = Buffer duration:
@@ -467,6 +469,7 @@ MenuButtons--metaInfo--name-and-version = Name and version:
 MenuButtons--metaInfo--update-channel = Update channel:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build type:
+MenuButtons--metaInfo--arguments = Arguments:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
