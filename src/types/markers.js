@@ -112,7 +112,6 @@ export type MarkerTrackConfig = {|
   |}>,
 |};
 
-// todo: add format string to marker schema to show only selected keys (e.g. "blub: %key %key2")
 export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
@@ -141,7 +140,15 @@ export type MarkerSchema = {|
         format: MarkerFormatType,
         searchable?: boolean,
         // hidden in the side bar and tooltips?
-        hidden?: boolean,
+        isHidden?: boolean,
+        // Show a summary for the passed keys
+        // idea:
+        //           | current | diff to previous |  avg/min/max in selection
+        // pauseTime | 20ms    | 200ms | 100%     | 205ms | 100ms | 300ms
+        //
+        // later: add this to every marker and other tracks like memory
+        // also: add the possibility to enable thin mean/max/min lines (and to zero) it (two buttons beside the normal track remove buttons)
+
         showInSummaryTable?: boolean,
       |}
     | {|
@@ -153,14 +160,6 @@ export type MarkerSchema = {|
 
   // if present, give the marker its own local track
   trackConfig?: MarkerTrackConfig,
-  // Show a summary for the passed keys
-  // idea:
-  //           | current | diff to previous |  avg/min/max in selection
-  // pauseTime | 20ms    | 200ms | 100%     | 205ms | 100ms | 300ms
-  //
-  // later: add this to every marker and other tracks like memory
-  // also: add the possibility to enable thin mean/max/min lines (and to zero) it (two buttons beside the normal track remove buttons)
-  showSummaryFor?: string[],
 |};
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
