@@ -24,9 +24,11 @@ import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
+  TRACK_MARKER_DEFAULT_HEIGHT,
   TRACK_MARKER_DEFAULT_LINE_FILL_COLOR,
   TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR,
   TRACK_MARKER_DEFAULT_LINE_WIDTH,
+  TRACK_MARKER_HEIGHTS,
 } from '../app-logic/constants';
 import {
   GREEN_50,
@@ -55,6 +57,15 @@ export const getMarkerTrackConfig = (schema: MarkerSchema) => {
     throw new Error('No track config for marker ' + schema.name);
   }
   return schema.trackConfig;
+};
+
+export const getMarkerTrackHeight = (schema: MarkerSchema) => {
+  const heightName =
+    getMarkerTrackConfig(schema).height || TRACK_MARKER_DEFAULT_HEIGHT;
+  if (!(heightName in TRACK_MARKER_HEIGHTS)) {
+    throw new Error('Unknown height ' + heightName);
+  }
+  return (TRACK_MARKER_HEIGHTS[heightName]: number);
 };
 
 export const getMarkerTrackLineConfig = (
@@ -87,6 +98,20 @@ export const getMarkerTrackLineFillColor = (
     getMarkerTrackLineConfig(schema, line).fillColor ||
     TRACK_MARKER_DEFAULT_LINE_FILL_COLOR
   );
+};
+
+export const getMarkerTrackConfigLineType = (
+  schema: MarkerSchema,
+  line: number
+) => {
+  return getMarkerTrackLineConfig(schema, line).type || 'line';
+};
+
+export const isMarkerTrackLinePreScaled = (
+  schema: MarkerSchema,
+  line: number
+) => {
+  return getMarkerTrackLineConfig(schema, line).isPreScaled === true;
 };
 
 export const getMarkerTrackLineStrokeColor = (

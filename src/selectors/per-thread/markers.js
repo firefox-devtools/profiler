@@ -686,12 +686,10 @@ export function getMarkerSelectorsPerThread(
           const maxNumber = Math.min(
             ...numbersPerLine.map((x) => Math.max(...x))
           );
-          const numberRange = maxNumber - minNumber;
           const length = numbersPerLine.length;
           return {
             minNumber,
             maxNumber,
-            numberRange,
             time: filteredTimes,
             numbersPerLine,
             indexes: filteredIndexes,

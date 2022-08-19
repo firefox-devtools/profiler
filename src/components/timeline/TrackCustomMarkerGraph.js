@@ -4,6 +4,8 @@
 
 // @flow
 
+// todo: allow to increase the size of the tracks
+
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
@@ -16,8 +18,10 @@ import {
 import {
   getMarkerTrackLineFillColor,
   getMarkerTrackLineStrokeColor,
-  getMaximumMarkerTrackLineWidth,
   getMarkerTrackLineWidth,
+  getMarkerTrackConfigLineType,
+  getMarkerTrackConfig,
+  isMarkerTrackLinePreScaled,
 } from 'firefox-profiler/profile-logic/tracks';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
@@ -32,12 +36,13 @@ import type {
   IndexIntoSamplesTable,
   MarkerSchema,
   CollectedCustomMarkerSamples,
+  MarkerTrackConfigLineType,
 } from 'firefox-profiler/types';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackMemory.css';
+import './TrackCustomMarker.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.
@@ -52,6 +57,33 @@ type CanvasProps = {|
   +width: CssPixels,
   +height: CssPixels,
 |};
+
+function _calculateUnitValue(
+  type: MarkerTrackConfigLineType,
+  minNumber: number,
+  maxNumber: number,
+  value: number,
+  isPreScaled
+) {
+  let scaled = value;
+  if (isPreScaled) {
+    if (scaled < 0 || scaled > 1) {
+      throw new Error(`${scaled} is not pre-scaled`);
+    }
+  } else {
+    switch (type) {
+      case 'line':
+        scaled = (value - minNumber) / (maxNumber - minNumber);
+        break;
+      case 'bar':
+        scaled = value / maxNumber;
+        break;
+      default:
+        throw new Error('Unknown type ' + type);
+    }
+  }
+  return scaled * 0.9;
+}
 
 /**
  * This component controls the rendering of the canvas. Every render call through
@@ -106,7 +138,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       throw new Error('No track config for marker');
     }
 
-    const { minNumber, numberRange } = collectedSamples;
+    const { minNumber, maxNumber } = collectedSamples;
     const [sampleStart, sampleEnd] = markerSampleRanges;
 
     {
@@ -115,8 +147,12 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         lineIndex < trackConfig.lines.length;
         lineIndex++
       ) {
-        const samples = collectedSamples[lineIndex];
+        const type = getMarkerTrackConfigLineType(markerSchema, lineIndex);
+        const samples = collectedSamples.numbersPerLine[lineIndex];
+        const isPreScaled = isMarkerTrackLinePreScaled(markerSchema, lineIndex);
         // Draw the chart.
+        //
+        // Here the schematics for the line chart
         //
         //                 ...--`
         //  1 ...---```..--      `--. 2
@@ -128,59 +164,94 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         const deviceLineWidth =
           getMarkerTrackLineWidth(markerSchema, lineIndex) * devicePixelRatio;
         const deviceLineHalfWidth = deviceLineWidth * 0.5;
-        const innerDeviceHeight = deviceHeight - deviceLineWidth;
+        const innerDeviceHeight = deviceHeight;
         ctx.lineWidth = deviceLineWidth;
         ctx.strokeStyle = getMarkerTrackLineStrokeColor(
           markerSchema,
           lineIndex
         );
         ctx.fillStyle = getMarkerTrackLineFillColor(markerSchema, lineIndex);
-        ctx.beginPath();
 
-        // The x and y are used after the loop.
         let x = 0;
         let y = 0;
         let firstX = 0;
-        for (let i = sampleStart; i < sampleEnd; i++) {
-          // Create a path for the top of the chart. This is the line that will have
-          // a stroke applied to it.
-          x = (samples.time[i] - rangeStart) * millisecondWidth;
-          // Add on half the stroke's line width so that it won't be cut off the edge
-          // of the graph.
-          const unitGraphCount = (samples[i] - minNumber) / numberRange;
-          y =
-            innerDeviceHeight -
-            innerDeviceHeight * unitGraphCount +
-            deviceLineHalfWidth;
-          if (i === 0) {
-            // This is the first iteration, only move the line, do not draw it. Also
-            // remember this first X, as the bottom of the graph will need to connect
-            // back up to it.
-            firstX = x;
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
+
+        switch (type) {
+          case 'line':
+            ctx.beginPath();
+
+            for (let i = sampleStart; i < sampleEnd; i++) {
+              // Create a path for the top of the chart. This is the line that will have
+              // a stroke applied to it.
+              x = (collectedSamples.time[i] - rangeStart) * millisecondWidth;
+              // Add on half the stroke's line width so that it won't be cut off the edge
+              // of the graph.
+              const unitValue = _calculateUnitValue(
+                type,
+                minNumber,
+                maxNumber,
+                samples[i],
+                isPreScaled
+              );
+              y =
+                innerDeviceHeight -
+                innerDeviceHeight * unitValue +
+                deviceLineHalfWidth;
+              if (i === sampleStart) {
+                // This is the first iteration, only move the line, do not draw it. Also
+                // remember this first X, as the bottom of the graph will need to connect
+                // back up to it.
+                firstX = x;
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+
+            // Don't do the fill yet, just stroke the top line. This will draw a line from
+            // point 1 to 2 in the diagram above.
+            ctx.stroke();
+
+            // After doing the stroke, continue the path to complete the fill to the bottom
+            // of the canvas. This continues the path to point 3 and then 4.
+
+            // Create a line from 2 to 3.
+            ctx.lineTo(x + intervalWidth, deviceHeight);
+
+            // Create a line from 3 to 4.
+            ctx.lineTo(firstX, deviceHeight);
+
+            // The line from 4 to 1 will be implicitly filled in.
+            ctx.fill();
+            break;
+          case 'bar':
+            for (let i = sampleStart; i < sampleEnd; i++) {
+              // Create a path for the top of the chart. This is the line that will have
+              // a stroke applied to it.
+              const x =
+                (collectedSamples.time[i] - rangeStart) * millisecondWidth;
+              // Add on half the stroke's line width so that it won't be cut off the edge
+              // of the graph.
+              const unitValue = _calculateUnitValue(
+                type,
+                minNumber,
+                maxNumber,
+                samples[i],
+                isPreScaled
+              );
+              const y =
+                innerDeviceHeight -
+                innerDeviceHeight * unitValue +
+                deviceLineHalfWidth;
+              const zero = innerDeviceHeight + deviceLineHalfWidth;
+              ctx.moveTo(x, zero);
+              ctx.lineTo(x, y);
+              ctx.stroke();
+            }
+            break;
+          default:
+            throw new Error('Unsupported type ' + type);
         }
-        // The samples range ends at the time of the last sample, plus the interval.
-        // Draw this last bit.
-        ctx.lineTo(x + intervalWidth, y);
-
-        // Don't do the fill yet, just stroke the top line. This will draw a line from
-        // point 1 to 2 in the diagram above.
-        ctx.stroke();
-
-        // After doing the stroke, continue the path to complete the fill to the bottom
-        // of the canvas. This continues the path to point 3 and then 4.
-
-        // Create a line from 2 to 3.
-        ctx.lineTo(x + intervalWidth, deviceHeight);
-
-        // Create a line from 3 to 4.
-        ctx.lineTo(firstX, deviceHeight);
-
-        // The line from 4 to 1 will be implicitly filled in.
-        ctx.fill();
       }
     }
   }
@@ -234,7 +305,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
     return (
       <InView onChange={this._observerCallback}>
         <canvas
-          className="timelineTrackMemoryCanvas"
+          className="timelineTrackCustomMarkerCanvas"
           ref={this._takeCanvasRef}
         />
       </InView>
@@ -361,10 +432,10 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(counterIndex: number): React.Node {
-    const { collectedSamples, rangeStart, rangeEnd } = this.props;
+    const { collectedSamples, rangeStart, rangeEnd, markerSchema } = this.props;
     const { mouseX, mouseY } = this.state;
     if (collectedSamples.length === 0) {
-      throw new Error('No samples for marker ' + marker);
+      throw new Error('No samples for marker ' + markerSchema.name);
     }
 
     const sampleTime = collectedSamples.time[counterIndex];
@@ -378,7 +449,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <div className="timelineTrackMemoryTooltip">
+        <div className="timelineTrackCustomMarkerTooltip">
           Place description for counter here
         </div>
       </Tooltip>
@@ -412,18 +483,37 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     const left = (width * (sampleTime - rangeStart)) / rangeLength;
 
-    const { minNumber, numberRange, numbersPerLine } = collectedSamples;
-    const unitSampleCount =
-      (Math.max(...numbersPerLine.map((l) => l[counterIndex])) - minNumber) /
-      numberRange;
-    const lineWidth = getMaximumMarkerTrackLineWidth(markerSchema);
-    const innerTrackHeight = graphHeight - lineWidth / 2;
-    const top =
-      innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
+    const { minNumber, maxNumber, numbersPerLine } = collectedSamples;
 
-    return (
-      <div style={{ left, top }} className="timelineTrackMemoryGraphDot" />
-    );
+    const dots = [];
+
+    for (
+      let lineIndex = 0;
+      lineIndex < getMarkerTrackConfig(markerSchema).lines.length;
+      lineIndex++
+    ) {
+      const type = getMarkerTrackConfigLineType(markerSchema, lineIndex);
+      const samples = numbersPerLine[lineIndex];
+      const unitValue = _calculateUnitValue(
+        type,
+        minNumber,
+        maxNumber,
+        samples[counterIndex],
+        isMarkerTrackLinePreScaled(markerSchema, lineIndex)
+      );
+      const lineWidth = getMarkerTrackLineWidth(markerSchema, lineIndex);
+      const innerTrackHeight = graphHeight - lineWidth / 2;
+      const top =
+        innerTrackHeight - unitValue * innerTrackHeight + lineWidth / 2;
+      dots.push(
+        <div
+          style={{ left, top }}
+          className="timelineTrackCustomMarkerGraphDot"
+        />
+      );
+    }
+
+    return <>{dots}</>;
   }
 
   render() {
@@ -443,7 +533,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <div
-        className="timelineTrackMemoryGraph"
+        className="timelineTrackCustomMarkerGraph"
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
       >
