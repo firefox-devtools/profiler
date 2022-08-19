@@ -162,6 +162,50 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
     <h4
       class="sidebar-title3 sidebar-title-label"
     >
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Self 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      <button
+        class="sidebar-toggle"
+        data-category="Layout"
+        type="button"
+      >
+        Layout
+      </button>
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
       <div>
         Implementation
       </div>
@@ -714,6 +758,44 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       class="sidebar-title3 sidebar-title-label"
     >
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Self 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Layout
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
       <div>
         Implementation
       </div>
@@ -880,6 +962,44 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         class="sidebar-title-label-right"
       >
         Running 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      JavaScript
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-yellow"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Self 
         sample count
       </div>
     </h4>

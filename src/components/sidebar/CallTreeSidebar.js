@@ -363,6 +363,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
     const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
     const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
     const totalTimeBreakdownByCategory = totalTime.breakdownByCategory;
+    const selfTimeBreakdownByCategory = selfTime.breakdownByCategory;
     const totalTimeBreakdownByImplementation =
       totalTime.breakdownByImplementation;
     const selfTimeBreakdownByImplementation =
@@ -432,6 +433,21 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
               </h4>
               <CategoryBreakdown
                 breakdown={totalTimeBreakdownByCategory}
+                categoryList={categoryList}
+                number={number}
+              />
+            </>
+          ) : null}
+          {selfTimeBreakdownByCategory ? (
+            <>
+              <h4 className="sidebar-title3 sidebar-title-label">
+                <div className="sidebar-title-label-left">Categories</div>
+                <div className="sidebar-title-label-right">
+                  Self {getWeightTypeLabel(weightType)}
+                </div>
+              </h4>
+              <CategoryBreakdown
+                breakdown={selfTimeBreakdownByCategory}
                 categoryList={categoryList}
                 number={number}
               />
