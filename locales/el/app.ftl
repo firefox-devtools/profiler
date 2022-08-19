@@ -378,6 +378,7 @@ MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
 MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
 MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτή τη στιγμή
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = Κύρια μνήμη:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -409,6 +410,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } λογικοί πυρήνες
     }
 MenuButtons--metaInfo--main-process-started = Έναρξη κύριας διεργασίας:
+MenuButtons--metaInfo--main-process-ended = Τέλος κύριας διεργασίας:
 MenuButtons--metaInfo--interval = Διάστημα:
 MenuButtons--metaInfo--buffer-capacity = Χωρητικότητα buffer:
 MenuButtons--metaInfo--buffer-duration = Διάρκεια buffer:
@@ -427,6 +429,7 @@ MenuButtons--metaInfo--name-and-version = Όνομα και έκδοση:
 MenuButtons--metaInfo--update-channel = Κανάλι ενημερώσεων:
 MenuButtons--metaInfo--build-id = ID δομής:
 MenuButtons--metaInfo--build-type = Τύπος δομής:
+MenuButtons--metaInfo--arguments = Ορίσματα:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
