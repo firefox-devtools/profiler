@@ -123,6 +123,7 @@ class LocalTrackComponent extends PureComponent<Props> {
           <TrackCustomMarker
             threadIndex={localTrack.threadIndex}
             markerSchema={localTrack.markerSchema}
+            markerIndex={localTrack.markerIndex}
           />
         );
       default:

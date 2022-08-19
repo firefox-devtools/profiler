@@ -24,6 +24,7 @@ import {
   isMarkerTrackLinePreScaled,
 } from 'firefox-profiler/profile-logic/tracks';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
@@ -37,6 +38,8 @@ import type {
   MarkerSchema,
   CollectedCustomMarkerSamples,
   MarkerTrackConfigLineType,
+  MarkerIndex,
+  Marker,
 } from 'firefox-profiler/types';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
@@ -316,6 +319,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +markerSchema: MarkerSchema,
+  +markerIndex: MarkerIndex,
   +graphHeight: CssPixels,
 |};
 
@@ -329,6 +333,8 @@ type StateProps = {|
   +markerSchema: MarkerSchema,
   +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +collectedSamples: CollectedCustomMarkerSamples,
+  +getMarker: (MarkerIndex) => Marker,
+  +markerIndex: MarkerIndex,
 |};
 
 type DispatchProps = {||};
@@ -432,7 +438,15 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(counterIndex: number): React.Node {
-    const { collectedSamples, rangeStart, rangeEnd, markerSchema } = this.props;
+    const {
+      collectedSamples,
+      rangeStart,
+      rangeEnd,
+      markerSchema,
+      threadIndex,
+      getMarker,
+      markerIndex,
+    } = this.props;
     const { mouseX, mouseY } = this.state;
     if (collectedSamples.length === 0) {
       throw new Error('No samples for marker ' + markerSchema.name);
@@ -449,9 +463,13 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <div className="timelineTrackCustomMarkerTooltip">
-          Place description for counter here
-        </div>
+        <TooltipMarker
+            className="tooltip"
+            markerIndex={markerIndex}
+            marker={getMarker(collectedSamples.indexes[counterIndex])}
+            threadsKey={threadIndex}
+            restrictHeightWidth={true}
+          />
       </Tooltip>
     );
   }
@@ -571,13 +589,12 @@ export const TrackCustomMarkerGraph = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
-    const { threadIndex, markerSchema } = ownProps;
-    const threadSelectors = getThreadSelectors(threadIndex);
-    const markerTrackSelectors = threadSelectors.getMarkerTrackSelectors(
-      markerSchema.name
-    );
+    const { threadIndex, markerSchema, markerIndex } = ownProps;
     const { start, end } = getCommittedRange(state);
     const selectors = getThreadSelectors(threadIndex);
+    const markerTrackSelectors = selectors.getMarkerTrackSelectors(
+      markerSchema.name
+    );
     return {
       threadIndex: threadIndex,
       markerSchema: markerSchema,
@@ -590,6 +607,8 @@ export const TrackCustomMarkerGraph = explicitConnect<
       interval: getProfileInterval(state),
       filteredThread: selectors.getFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
+      getMarker: selectors.getMarkerGetter(state),
+      markerIndex,
     };
   },
   component: withSize<Props>(TrackCustomMarkerGraphImpl),
