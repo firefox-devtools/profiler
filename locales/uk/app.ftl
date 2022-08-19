@@ -379,6 +379,7 @@ MenuButtons--metaInfo--symbolicate-profile = Символізувати проф
 MenuButtons--metaInfo--attempting-resymbolicate = Спроба повторно символізувати профіль
 MenuButtons--metaInfo--currently-symbolicating = Наразі профіль символізується
 MenuButtons--metaInfo--cpu = ЦП:
+MenuButtons--metaInfo--main-memory = Основна пам'ять:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -414,6 +415,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[many] { $logicalCPUs } логічних ядер
     }
 MenuButtons--metaInfo--main-process-started = Основний процес розпочато:
+MenuButtons--metaInfo--main-process-ended = Основний процес завершено:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--buffer-capacity = Обсяг буфера:
 MenuButtons--metaInfo--buffer-duration = Тривалість буфера:
@@ -433,6 +435,7 @@ MenuButtons--metaInfo--name-and-version = Назва та версія:
 MenuButtons--metaInfo--update-channel = Канал оновлень:
 MenuButtons--metaInfo--build-id = ID збірки:
 MenuButtons--metaInfo--build-type = Тип збірки:
+MenuButtons--metaInfo--arguments = Аргументи:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
