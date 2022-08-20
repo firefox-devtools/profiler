@@ -313,6 +313,7 @@ MenuButtons--metaInfo--symbolicate-profile = 符號化檢測檔
 MenuButtons--metaInfo--attempting-resymbolicate = 正在嘗試重新符號化檢測檔
 MenuButtons--metaInfo--currently-symbolicating = 目前符號化的檢測檔
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = 主要記憶體：
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -340,6 +341,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } 顆邏輯核心
     }
 MenuButtons--metaInfo--main-process-started = 主處理程序開始:
+MenuButtons--metaInfo--main-process-ended = 主要處理程序結束於：
 MenuButtons--metaInfo--interval = 間隔:
 MenuButtons--metaInfo--buffer-capacity = 緩衝容量:
 MenuButtons--metaInfo--buffer-duration = 緩衝間隔:
@@ -357,6 +359,7 @@ MenuButtons--metaInfo--name-and-version = 名稱與版本:
 MenuButtons--metaInfo--update-channel = 更新頻道:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build Type:
+MenuButtons--metaInfo--arguments = 參數：
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
