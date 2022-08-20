@@ -827,8 +827,8 @@ export function getLocalTrackName(
   }
 }
 
-// Consider threads whose sample score is 20% or less of the maximum sample score to be idle.
-const IDLE_THRESHOLD_FRACTION = 0.2;
+// Consider threads whose sample score is less than 5% of the maximum sample score to be idle.
+const IDLE_THRESHOLD_FRACTION = 0.05;
 
 // Return a non-empty set of threads that should be shown by default.
 export function computeDefaultVisibleThreads(
@@ -867,7 +867,7 @@ export function computeDefaultVisibleThreads(
 
   // As a last pass, cull very-idle threads, by comparing their activity
   // to the thread with the most "sampleScore" activity.
-  // We keep all threads whose sampleScore is at least 20% of the highest
+  // We keep all threads whose sampleScore is at least 5% of the highest
   // sampleScore, and also any threads which are otherwise essential.
   const highestSampleScore = Math.max(
     ...scores.map(({ score }) => score.sampleScore)
