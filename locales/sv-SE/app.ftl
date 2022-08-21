@@ -256,7 +256,7 @@ Home--profiler-motto = Spela in en prestandaprofil. Analysera den. Dela den. Gö
 Home--additional-content-title = Ladda befintliga profiler
 Home--additional-content-content = Du kan <strong>dra och släppa</strong> en profilfil här för att ladda den, eller:
 Home--compare-recordings-info = Du kan också jämföra inspelningar.<a>Öppna gränssnitt för att jämföra.</a>
-Home--recent-uploaded-recordings-title = Senast uppladdade inspelningar
+Home--your-recent-uploaded-recordings-title = Dina senaste uppladdade inspelningar
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -282,9 +282,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Ta bort
     .title = Den här profilen kan inte tas bort eftersom vi saknar behörighetsinformation.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ingen profil har laddats upp än!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Se och hantera alla dina inspelningar ({ $profilesRestCount } till)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -375,6 +375,7 @@ MenuButtons--metaInfo--symbolicate-profile = Symbolisera profil
 MenuButtons--metaInfo--attempting-resymbolicate = Försöker att symbolisera profilen på nytt
 MenuButtons--metaInfo--currently-symbolicating = Profilen symboliseras för närvarande
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = Huvudminne:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -406,6 +407,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } logiska kärnor
     }
 MenuButtons--metaInfo--main-process-started = Huvudprocessen startade:
+MenuButtons--metaInfo--main-process-ended = Huvudprocessen avslutad:
 MenuButtons--metaInfo--interval = Intervall:
 MenuButtons--metaInfo--buffer-capacity = Buffertkapacitet:
 MenuButtons--metaInfo--buffer-duration = Buffertlängd:
@@ -424,6 +426,7 @@ MenuButtons--metaInfo--name-and-version = Namn och version:
 MenuButtons--metaInfo--update-channel = Uppdateringskanal:
 MenuButtons--metaInfo--build-id = Bygg-ID:
 MenuButtons--metaInfo--build-type = Byggtyp:
+MenuButtons--metaInfo--arguments = Argument:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -660,6 +663,12 @@ TrackContextMenu--hide-all-matching-tracks = Dölj alla matchande spår
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Inga resultat hittades för “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Dölj spår
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Dölj process
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
