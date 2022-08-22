@@ -143,15 +143,6 @@ export type MarkerSchema = {|
         searchable?: boolean,
         // hidden in the side bar and tooltips?
         isHidden?: boolean,
-        // Show a summary for the passed keys
-        // idea:
-        //           | current | diff to previous |  avg/min/max in selection
-        // pauseTime | 20ms    | 200ms | 100%     | 205ms | 100ms | 300ms
-        //
-        // later: add this to every marker and other tracks like memory
-        // also: add the possibility to enable thin mean/max/min lines (and to zero) it (two buttons beside the normal track remove buttons)
-
-        showInSummaryTable?: boolean,
       |}
     | {|
         // This type is a static bit of text that will be displayed
