@@ -653,7 +653,6 @@ export function getMarkerSelectorsPerThread(
         threadSelectors.getStringTable,
         _getTrackKeys,
         (fullMarkerList, stringTable, trackKeys) => {
-          const nameIndex = stringTable.indexForString(name);
           const filteredIndexes = fullMarkerList
             .map((n, i) => [n, i])
             .filter((t) => t[0].name === name)
@@ -674,7 +673,7 @@ export function getMarkerSelectorsPerThread(
           const minNumber = Math.min(
             ...numbersPerLine.map((x) => Math.min(...x))
           );
-          const maxNumber = Math.min(
+          const maxNumber = Math.max(
             ...numbersPerLine.map((x) => Math.max(...x))
           );
           const length = numbersPerLine.length;

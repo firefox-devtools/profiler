@@ -226,6 +226,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 
             // The line from 4 to 1 will be implicitly filled in.
             ctx.fill();
+            ctx.closePath();
             break;
           case 'bar':
             for (let i = sampleStart; i < sampleEnd; i++) {
