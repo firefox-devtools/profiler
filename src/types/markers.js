@@ -90,8 +90,9 @@ export type MarkerTrackConfigLineType = 'bar' | 'line';
 export type MarkerTrackConfigLineHeight = 'small' | 'medium' | 'large';
 export type MarkerTrackConfig = {|
   label: string,
+  tooltip?: string,
   // height of the track in pixels
-  height?: number,
+  height?: MarkerTrackConfigLineHeight,
   lines: Array<{|
     key: string,
     fillColor?: string,

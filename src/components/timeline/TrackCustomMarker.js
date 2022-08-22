@@ -11,21 +11,16 @@ import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackCustomMarkerGraph } from './TrackCustomMarkerGraph';
 import { getMarkerTrackHeight } from 'firefox-profiler/profile-logic/tracks';
 
-import type {
-  ThreadIndex,
-  Milliseconds,
-  MarkerIndex,
-} from 'firefox-profiler/types';
+import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
 import type { MarkerSchema } from 'firefox-profiler/types/markers';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackMemory.css';
+import './TrackCustomMarker.css';
 
 type OwnProps = {|
   +markerSchema: MarkerSchema,
   +threadIndex: ThreadIndex,
-  +markerIndex: MarkerIndex,
 |};
 
 type StateProps = {|
@@ -44,11 +39,11 @@ type State = {||};
 
 export class TrackCustomMarkerImpl extends React.PureComponent<Props, State> {
   render() {
-    const { markerSchema, threadIndex, markerIndex } = this.props;
+    const { markerSchema, threadIndex } = this.props;
     const trackHeight = getMarkerTrackHeight(markerSchema);
     return (
       <div
-        className="timelineTrackMemory"
+        className="timelineTrackCustomMarker"
         style={{
           height: trackHeight,
           '--graph-height': `${trackHeight}px`,
@@ -59,7 +54,6 @@ export class TrackCustomMarkerImpl extends React.PureComponent<Props, State> {
           threadIndex={threadIndex}
           markerSchema={markerSchema}
           graphHeight={trackHeight}
-          markerIndex={markerIndex}
         />
       </div>
     );

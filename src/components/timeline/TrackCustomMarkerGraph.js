@@ -319,7 +319,6 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +markerSchema: MarkerSchema,
-  +markerIndex: MarkerIndex,
   +graphHeight: CssPixels,
 |};
 
@@ -334,7 +333,6 @@ type StateProps = {|
   +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +collectedSamples: CollectedCustomMarkerSamples,
   +getMarker: (MarkerIndex) => Marker,
-  +markerIndex: MarkerIndex,
 |};
 
 type DispatchProps = {||};
@@ -445,13 +443,11 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       markerSchema,
       threadIndex,
       getMarker,
-      markerIndex,
     } = this.props;
     const { mouseX, mouseY } = this.state;
     if (collectedSamples.length === 0) {
       throw new Error('No samples for marker ' + markerSchema.name);
     }
-
     const sampleTime = collectedSamples.time[counterIndex];
     if (sampleTime < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the tooltip if it will be rendered outside of the timeline.
@@ -464,12 +460,11 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
         <TooltipMarker
-            className="tooltip"
-            markerIndex={markerIndex}
-            marker={getMarker(collectedSamples.indexes[counterIndex])}
-            threadsKey={threadIndex}
-            restrictHeightWidth={true}
-          />
+          markerIndex={collectedSamples.indexes[counterIndex]}
+          marker={getMarker(collectedSamples.indexes[counterIndex])}
+          threadsKey={threadIndex}
+          restrictHeightWidth={true}
+        />
       </Tooltip>
     );
   }
@@ -526,6 +521,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       dots.push(
         <div
           style={{ left, top }}
+          key={lineIndex}
           className="timelineTrackCustomMarkerGraphDot"
         />
       );
@@ -589,7 +585,7 @@ export const TrackCustomMarkerGraph = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
-    const { threadIndex, markerSchema, markerIndex } = ownProps;
+    const { threadIndex, markerSchema } = ownProps;
     const { start, end } = getCommittedRange(state);
     const selectors = getThreadSelectors(threadIndex);
     const markerTrackSelectors = selectors.getMarkerTrackSelectors(
@@ -608,7 +604,6 @@ export const TrackCustomMarkerGraph = explicitConnect<
       filteredThread: selectors.getFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       getMarker: selectors.getMarkerGetter(state),
-      markerIndex,
     };
   },
   component: withSize<Props>(TrackCustomMarkerGraphImpl),

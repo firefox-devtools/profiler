@@ -299,7 +299,8 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                   height += TRACK_PROCESS_CPU_HEIGHT + border;
                   break;
                 case 'marker':
-                  height += getMarkerTrackHeight(localTrack.markerSchema);
+                  height +=
+                    getMarkerTrackHeight(localTrack.markerSchema) + 2;
                   break;
                 default:
                   throw assertExhaustiveCheck(localTrack);

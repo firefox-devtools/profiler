@@ -68,6 +68,10 @@ export const getMarkerTrackHeight = (schema: MarkerSchema) => {
   return (TRACK_MARKER_HEIGHTS[heightName]: number);
 };
 
+export const getMarkerTrackTooltip = (schema: MarkerSchema) => {
+  return getMarkerTrackConfig(schema).tooltip;
+};
+
 export const getMarkerTrackLineConfig = (
   schema: MarkerSchema,
   line: number
@@ -350,10 +354,6 @@ export function computeLocalTracksByPid(
         (schema) => schema.trackConfig !== undefined
       )
     : [];
-  const markerNamesToIndex = {};
-  profile.meta.markerSchema.forEach(
-    (schema, index) => (markerNamesToIndex[schema.name] = index)
-  );
 
   for (
     let threadIndex = 0;
@@ -405,7 +405,6 @@ export function computeLocalTracksByPid(
             type: 'marker',
             threadIndex,
             markerSchema: marker,
-            markerIndex: markerNamesToIndex[marker.name],
           });
         }
       }
@@ -992,8 +991,14 @@ export function getLocalTrackName(
   }
 }
 
-// Consider threads whose sample score is less than 5% of the maximum sample score to be idle.
-const IDLE_THRESHOLD_FRACTION = 0.05;
+export function getLocalTrackTooltip(localTrack: LocalTrack): ?string {
+  switch (localTrack.type) {
+    case 'marker':
+      return getMarkerTrackConfig(localTrack.markerSchema).tooltip;
+    default:
+      return undefined;
+  }
+}
 
 // Return a non-empty set of threads that should be shown by default.
 export function computeDefaultVisibleThreads(

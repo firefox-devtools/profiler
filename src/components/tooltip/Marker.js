@@ -240,8 +240,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           // Check for a schema that is looking up and formatting a value from
           // the payload.
           if (schemaData.value === undefined) {
-            const { key, label, format } = schemaData;
-            if (key in data) {
+            const { key, label, format, isHidden } = schemaData;
+            if (key in data && !isHidden) {
               const value = data[key];
 
               // Don't add undefined values, as values are optional.

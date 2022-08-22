@@ -319,11 +319,13 @@ export type CollectedCustomMarkerSamples = {|
   +minNumber: number,
   +maxNumber: number,
   // startTime
-  time: Milliseconds[],
+  markers: Marker[],
+  // needed to make this type more sample table like
+  time: number[],
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.
   +numbersPerLine: number[][],
-  +indexes: IndexIntoRawMarkerTable[],
+  +indexes: MarkerIndex[],
   length: number,
 |};
 
@@ -350,7 +352,6 @@ export type LocalTrack =
       +type: 'marker',
       +threadIndex: ThreadIndex,
       +markerSchema: MarkerSchema,
-      +markerIndex: MarkerIndex,
     |};
 
 export type Track = GlobalTrack | LocalTrack;

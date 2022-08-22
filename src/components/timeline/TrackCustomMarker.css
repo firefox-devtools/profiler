@@ -6,6 +6,7 @@
   position: relative;
   width: 100%;
   height: var(--graph-height);
+  margin-bottom: 2px;
 }
 
 .timelineTrackCustomMarkerCanvas {
