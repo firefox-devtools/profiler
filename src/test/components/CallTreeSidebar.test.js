@@ -181,7 +181,7 @@ describe('CallTreeSidebar', function () {
       funcNamesDict: { A, B, C },
     } = setup(getProfileWithSubCategories());
     selectNode([A, B, C]);
-    expect(queryByText('FakeSubCategoryC')).not.toBeInTheDocument();
+    expect(getByText('FakeSubCategoryC')).toBeInTheDocument();
 
     const layoutCategory = getAllByText('Layout')[0];
     fireFullClick(layoutCategory);

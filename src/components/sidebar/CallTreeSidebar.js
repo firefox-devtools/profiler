@@ -148,6 +148,7 @@ type CategoryBreakdownProps = {|
   +breakdown: BreakdownByCategory,
   +categoryList: CategoryList,
   +number: (number) => string,
+  +openAllCategories: boolean,
 |};
 
 type CategoryBreakdownState = {|
@@ -161,6 +162,16 @@ class CategoryBreakdown extends React.PureComponent<
   state = {
     openCategories: new Set(),
   };
+
+  constructor(props) {
+    super(props);
+    const { openAllCategories, categoryList } = this.props;
+    if (openAllCategories) {
+      categoryList.forEach((category) =>
+        this.state.openCategories.add(category.name)
+      );
+    }
+  }
 
   _toggleCategory = (event: SyntheticInputEvent<>) => {
     const { category } = event.target.dataset;
@@ -435,6 +446,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
                 breakdown={totalTimeBreakdownByCategory}
                 categoryList={categoryList}
                 number={number}
+                openAllCategories={true}
               />
             </>
           ) : null}
