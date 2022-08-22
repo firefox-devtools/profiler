@@ -382,6 +382,7 @@ MenuButtons--metaInfo--symbolicate-profile = Profyl symbolisearje
 MenuButtons--metaInfo--attempting-resymbolicate = Besykjen ta opnij symbolisearjen profyl
 MenuButtons--metaInfo--currently-symbolicating = Profyl wurdt symbolisearre
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = Haadûnthâld:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -413,6 +414,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } logyske kearnen
     }
 MenuButtons--metaInfo--main-process-started = Haadproses start:
+MenuButtons--metaInfo--main-process-ended = Haadproses stoppe:
 MenuButtons--metaInfo--interval = Ynterfal:
 MenuButtons--metaInfo--buffer-capacity = Bufferkapasiteit:
 MenuButtons--metaInfo--buffer-duration = Bufferdoer:
@@ -431,6 +433,7 @@ MenuButtons--metaInfo--name-and-version = Namme en ferzje:
 MenuButtons--metaInfo--update-channel = Fernijkanaal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Buildtype:
+MenuButtons--metaInfo--arguments = Arguminten:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
