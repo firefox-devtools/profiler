@@ -28,7 +28,8 @@ export type MarkerFormatType =
   // sanitized. Please be careful with including other types of PII here as well.
   // e.g. "Label: Some String"
   | 'string'
-
+  // limited HTML, allowed are <li>,<ul>,<ol>, <br>, <p>, <dd>, <dt>, <a>, <em>, <code>, <pre>, <table>, <tr>, <td>
+  | 'html'
   // ----------------------------------------------------
   // Numeric types
 

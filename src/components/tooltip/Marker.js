@@ -35,7 +35,7 @@ import {
 import { Backtrace } from 'firefox-profiler/components/shared/Backtrace';
 
 import {
-  formatFromMarkerSchema,
+  formatDOMFromMarkerSchema,
   getSchemaFromMarker,
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
@@ -245,7 +245,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                     key={schema.name + '-' + key}
                     label={label || key}
                   >
-                    {formatFromMarkerSchema(schema.name, format, value)}
+                    {formatDOMFromMarkerSchema(schema.name, format, value)}
                   </TooltipDetail>
                 );
               }

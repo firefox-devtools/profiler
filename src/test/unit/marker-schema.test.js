@@ -229,6 +229,7 @@ describe('marker schema formatting', function () {
       ['percentage', 0.123456789],
       ['percentage', 1234.56789],
       ['percentage', 0.000123456],
+      ['html', '<li><ul>Hello</ul></li>'],
     ];
 
     expect(
@@ -288,6 +289,7 @@ describe('marker schema formatting', function () {
         "percentage - 12%",
         "percentage - 123,457%",
         "percentage - 0.0%",
+        "html - <li><ul>Hello</ul></li>",
       ]
     `);
   });

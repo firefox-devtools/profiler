@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
+import React from 'react';
 import { oneLine } from 'common-tags';
 import {
   formatNumber,
@@ -14,6 +15,8 @@ import {
   formatNanoseconds,
 } from '../utils/format-numbers';
 import { ensureExists } from '../utils/flow';
+import sanitizeHtml from 'sanitize-html';
+
 import type {
   CategoryList,
   MarkerFormatType,
@@ -359,6 +362,7 @@ export function getLabelGetter(
   };
 }
 
+/** Return value might be HTML */
 export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
@@ -367,6 +371,7 @@ export function formatFromMarkerSchema(
   switch (format) {
     case 'url':
     case 'file-path':
+    case 'html':
     case 'string':
       // Make sure a non-empty string is returned here.
       if (value === undefined || value === null) {
@@ -398,4 +403,40 @@ export function formatFromMarkerSchema(
       );
       return value;
   }
+}
+
+export function formatDOMFromMarkerSchema(
+  markerType: string,
+  format: MarkerFormatType,
+  value: any
+) {
+  const formatted = formatFromMarkerSchema(markerType, format, value);
+  if (!formatted.includes('<')) {
+    return formatted;
+  }
+  /* eslint-disable react/no-danger */
+  return (
+    <div
+      dangerouslySetInnerHTML={{
+        __html: sanitizeHtml(formatted, {
+          allowedClasses: [
+            'li',
+            'ul',
+            'ol',
+            'br',
+            'p',
+            'dd',
+            'dt',
+            'a',
+            'em',
+            'code',
+            'pre',
+            'table',
+            'tr',
+            'td/td',
+          ],
+        }),
+      }}
+    />
+  );
 }
