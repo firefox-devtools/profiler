@@ -86,6 +86,10 @@ export const getMarkerTrackLineWidth = (schema: MarkerSchema, line: number) => {
   );
 };
 
+export const isMarkerTrackPreSelected = (schema: MarkerSchema) => {
+  return getMarkerTrackConfig(schema).isPreSelected === true;
+};
+
 export const getMaximumMarkerTrackLineWidth = (schema: MarkerSchema) => {
   return Math.max(
     ...getMarkerTrackConfig(schema).lines.map(
@@ -843,7 +847,9 @@ function _computeHiddenTracksForVisibleThreads(
     const hiddenLocalTracks = new Set(
       localTrackOrder.filter((localTrackIndex) => {
         const localTrack = localTracks[localTrackIndex];
-        if (localTrack.type !== 'thread') {
+        if (localTrack.type === 'marker') {
+          return !isMarkerTrackPreSelected(localTrack.markerSchema);
+        } else if (localTrack.type !== 'thread') {
           // Keep non-thread local tracks visible.
           return false;
         }
