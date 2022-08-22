@@ -68,10 +68,6 @@ export const getMarkerTrackHeight = (schema: MarkerSchema) => {
   return (TRACK_MARKER_HEIGHTS[heightName]: number);
 };
 
-export const isMarkerTrackShownByDefault = (schema: MarkerSchema) => {
-  return getMarkerTrackConfig(schema).showByDefault || false;
-};
-
 export const getMarkerTrackTooltip = (schema: MarkerSchema) => {
   return getMarkerTrackConfig(schema).tooltip;
 };
@@ -847,9 +843,7 @@ function _computeHiddenTracksForVisibleThreads(
     const hiddenLocalTracks = new Set(
       localTrackOrder.filter((localTrackIndex) => {
         const localTrack = localTracks[localTrackIndex];
-        if (localTrack.type === 'marker') {
-          return !isMarkerTrackShownByDefault(localTrack.markerSchema);
-        } else if (localTrack.type !== 'thread') {
+        if (localTrack.type !== 'thread') {
           // Keep non-thread local tracks visible.
           return false;
         }
@@ -1005,6 +999,9 @@ export function getLocalTrackTooltip(localTrack: LocalTrack): ?string {
       return undefined;
   }
 }
+
+// Consider threads whose sample score is less than 5% of the maximum sample score to be idle.
+const IDLE_THRESHOLD_FRACTION = 0.05;
 
 // Return a non-empty set of threads that should be shown by default.
 export function computeDefaultVisibleThreads(
