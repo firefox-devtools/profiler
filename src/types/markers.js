@@ -93,6 +93,7 @@ export type MarkerTrackConfig = {|
   tooltip?: string,
   // height of the track in pixels
   height?: MarkerTrackConfigLineHeight,
+  showByDefault?: boolean,
   lines: Array<{|
     key: string,
     fillColor?: string,

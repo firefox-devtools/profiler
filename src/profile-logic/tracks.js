@@ -68,6 +68,10 @@ export const getMarkerTrackHeight = (schema: MarkerSchema) => {
   return (TRACK_MARKER_HEIGHTS[heightName]: number);
 };
 
+export const isMarkerTrackShownByDefault = (schema: MarkerSchema) => {
+  return getMarkerTrackConfig(schema).showByDefault || false;
+};
+
 export const getMarkerTrackTooltip = (schema: MarkerSchema) => {
   return getMarkerTrackConfig(schema).tooltip;
 };
@@ -843,7 +847,9 @@ function _computeHiddenTracksForVisibleThreads(
     const hiddenLocalTracks = new Set(
       localTrackOrder.filter((localTrackIndex) => {
         const localTrack = localTracks[localTrackIndex];
-        if (localTrack.type !== 'thread') {
+        if (localTrack.type === 'marker') {
+          return !isMarkerTrackShownByDefault(localTrack.markerSchema);
+        } else if (localTrack.type !== 'thread') {
           // Keep non-thread local tracks visible.
           return false;
         }
