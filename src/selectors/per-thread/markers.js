@@ -32,7 +32,6 @@ import type {
   MarkerSchema,
   MarkerTrackConfig,
   CollectedCustomMarkerSamples,
-  Milliseconds,
   IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 

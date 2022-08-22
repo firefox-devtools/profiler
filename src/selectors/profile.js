@@ -518,23 +518,16 @@ export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
   );
 
 export const getLocalTrackTooltipsByPid: Selector<Map<Pid, (?string)[]>> =
-  createSelector(
-    getLocalTracksByPid,
-    getThreads,
-    getCounter,
-    (localTracksByPid, threads, counters) => {
-      const localTrackTooltipsByPid = new Map();
-      for (const [pid, localTracks] of localTracksByPid) {
-        localTrackTooltipsByPid.set(
-          pid,
-          localTracks.map((localTrack) =>
-            Tracks.getLocalTrackTooltip(localTrack)
-          )
-        );
-      }
-      return localTrackTooltipsByPid;
+  createSelector(getLocalTracksByPid, (localTracksByPid) => {
+    const localTrackTooltipsByPid = new Map();
+    for (const [pid, localTracks] of localTracksByPid) {
+      localTrackTooltipsByPid.set(
+        pid,
+        localTracks.map((localTrack) => Tracks.getLocalTrackTooltip(localTrack))
+      );
     }
-  );
+    return localTrackTooltipsByPid;
+  });
 
 export const getLocalTrackName = (
   state: State,
