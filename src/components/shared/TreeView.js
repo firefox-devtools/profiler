@@ -56,37 +56,97 @@ export type Column<DisplayData: Object> = {|
 type TreeViewHeaderProps<DisplayData: Object> = {|
   +fixedColumns: Column<DisplayData>[],
   +mainColumn: Column<DisplayData>,
+  +onSort: (number) => void,
+  +columnSortDirections?: Array<boolean | null>,
 |};
 
-const TreeViewHeader = <DisplayData: Object>({
-  fixedColumns,
-  mainColumn,
-}: TreeViewHeaderProps<DisplayData>) => {
-  if (fixedColumns.length === 0 && !mainColumn.titleL10nId) {
-    // If there is nothing to display in the header, do not render it.
-    return null;
+// columns start at 1
+export class ColumnSortState {
+  sortedColumns: number[];
+
+  // -column: sort descending, +column: sort ascending, start by sorting last column
+  constructor(sortedColumns: number[]) {
+    this.sortedColumns = sortedColumns;
   }
-  return (
-    <div className="treeViewHeader">
-      {fixedColumns.map((col) => (
+
+  _sortColumn(column: number) {
+    const sortedColumns = this.sortedColumns.filter(
+      (c) => c !== column && c !== -column
+    );
+    sortedColumns.push(column);
+    return new ColumnSortState(sortedColumns);
+  }
+
+  push(column: number) {
+    return this._sortColumn(-this._sortState(column));
+  }
+
+  _sortState(column: number) {
+    return this.sortedColumns
+      .filter((c) => c === column || c === -column)
+      .concat(-column)[0];
+  }
+
+  getSortStateArr(sortableColumns: Set<number>): Array<boolean | null> {
+    const arr = new Array(Math.max(...sortableColumns) + 1).fill(null);
+    for (const column of sortableColumns) {
+      arr[column] = this._sortState(column) < 0;
+    }
+    return arr;
+  }
+}
+
+class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
+  TreeViewHeaderProps<DisplayData>
+> {
+  _onSort = (e: Event) => {
+    const { onSort } = this.props;
+    onSort(Number(e.target.getAttribute('data-column')));
+  };
+
+  render() {
+    const { fixedColumns, mainColumn, columnSortDirections } = this.props;
+    if (fixedColumns.length === 0 && !mainColumn.titleL10nId) {
+      // If there is nothing to display in the header, do not render it.
+      return null;
+    }
+    return (
+      <div className="treeViewHeader">
+        {fixedColumns.map((col, i) => {
+          let sortClass = '';
+          if (columnSortDirections) {
+            if (columnSortDirections[i + 1] === true) {
+              sortClass = 'sortAscending';
+            } else if (columnSortDirections[i + 1] === false) {
+              sortClass = 'sortDescending';
+            }
+          }
+          return (
+            <PermissiveLocalized
+              id={col.titleL10nId}
+              attrs={{ title: true }}
+              key={col.propName}
+            >
+              <span
+                className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName} ${sortClass}`}
+                data-column={i}
+                onClick={this._onSort}
+              ></span>
+            </PermissiveLocalized>
+          );
+        })}
         <PermissiveLocalized
-          id={col.titleL10nId}
+          id={mainColumn.titleL10nId}
           attrs={{ title: true }}
-          key={col.propName}
         >
           <span
-            className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
+            className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
           ></span>
         </PermissiveLocalized>
-      ))}
-      <PermissiveLocalized id={mainColumn.titleL10nId} attrs={{ title: true }}>
-        <span
-          className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
-        ></span>
-      </PermissiveLocalized>
-    </div>
-  );
-};
+      </div>
+    );
+  }
+}
 
 function reactStringWithHighlightedSubstrings(
   string: string,
@@ -393,13 +453,31 @@ type TreeViewProps<DisplayData> = {|
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
+  // number: column number, -1: first larger, 0: same, 1: first smaller
+  +compareColumn?: (DisplayData, DisplayData, number) => number,
+  +initialSortedColumns?: ColumnSortState,
+  +onSort?: (ColumnSortState) => void,
+  +sortableColumns?: Set<number>,
+|};
+
+type TreeViewState = {|
+  sortedColumns: ColumnSortState,
 |};
 
 export class TreeView<DisplayData: Object> extends React.PureComponent<
-  TreeViewProps<DisplayData>
+  TreeViewProps<DisplayData>,
+  TreeViewState
 > {
   _list: VirtualList<NodeIndex> | null = null;
   _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
+  state = { sortedColumns: new ColumnSortState([]) };
+
+  constructor(props: TreeViewProps<DisplayData>) {
+    super(props);
+    if (props.initialSortedColumns) {
+      this.state.sortedColumns = props.initialSortedColumns;
+    }
+  }
 
   // The tuple `specialItems` always contains 2 elements: the first element is
   // the selected node id (if any), and the second element is the right clicked
@@ -422,19 +500,51 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
   );
 
   _computeAllVisibleRowsMemoized = memoize(
-    (tree: Tree<DisplayData>, expandedNodes: Set<NodeIndex | null>) => {
+    (
+      tree: Tree<DisplayData>,
+      expandedNodes: Set<NodeIndex | null>,
+      sortedColumns: ColumnSortState,
+      compareColumn: ?(DisplayData, DisplayData, number) => number
+    ) => {
+      function sortNodes(nodeIds: Array<NodeIndex>): Array<NodeIndex> {
+        if (!compareColumn) {
+          return nodeIds;
+        }
+        let sortedNodeIds = nodeIds;
+        for (let i = 0; i < sortedColumns.sortedColumns.length; i++) {
+          const column = sortedColumns.sortedColumns[i];
+          const absColumn = Math.abs(column);
+          const sign = column < 0 ? -1 : 1;
+          sortedNodeIds = sortedNodeIds.sort((a, b) => {
+            return (
+              sign *
+              ((compareColumn: any): (
+                DisplayData,
+                DisplayData,
+                number
+              ) => number)(
+                tree.getDisplayData(a),
+                tree.getDisplayData(b),
+                absColumn
+              )
+            );
+          });
+        }
+        return sortedNodeIds;
+      }
+
       function _addVisibleRowsFromNode(tree, expandedNodes, arr, nodeId) {
         arr.push(nodeId);
         if (!expandedNodes.has(nodeId)) {
           return;
         }
-        const children = tree.getChildren(nodeId);
+        const children = sortNodes(tree.getChildren(nodeId));
         for (let i = 0; i < children.length; i++) {
           _addVisibleRowsFromNode(tree, expandedNodes, arr, children[i]);
         }
       }
 
-      const roots = tree.getRoots();
+      const roots = sortNodes(tree.getRoots());
       const allRows = [];
       for (let i = 0; i < roots.length; i++) {
         _addVisibleRowsFromNode(tree, expandedNodes, allRows, roots[i]);
@@ -458,7 +568,6 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
 
   _renderRow = (nodeId: NodeIndex, index: number, columnIndex: number) => {
     const {
-      tree,
       fixedColumns,
       mainColumn,
       appendageColumn,
@@ -468,6 +577,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       rowHeight,
       indentWidth,
     } = this.props;
+    const { tree } = this.props;
     const displayData = tree.getDisplayData(nodeId);
     // React converts height into 'px' values, while lineHeight is valid in
     // non-'px' units.
@@ -518,8 +628,13 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
   }
 
   _getAllVisibleRows(): NodeIndex[] {
-    const { tree } = this.props;
-    return this._computeAllVisibleRowsMemoized(tree, this._getExpandedNodes());
+    const { tree, compareColumn } = this.props;
+    return this._computeAllVisibleRowsMemoized(
+      tree,
+      this._getExpandedNodes(),
+      this.state.sortedColumns,
+      compareColumn
+    );
   }
 
   _getSpecialItems(): [NodeIndex | void, NodeIndex | void] {
@@ -591,7 +706,8 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
 
   _onCopy = (event: ClipboardEvent) => {
     event.preventDefault();
-    const { tree, selectedNodeId, mainColumn } = this.props;
+    const { selectedNodeId, mainColumn } = this.props;
+    const { tree } = this.props;
     if (selectedNodeId) {
       const displayData = tree.getDisplayData(selectedNodeId);
       const clipboardData: DataTransfer = (event: any).clipboardData;
@@ -732,6 +848,22 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   }
 
+  _onSort = (column: number) => {
+    if (
+      !this.props.sortableColumns ||
+      !this.props.sortableColumns.has(column)
+    ) {
+      return;
+    }
+    const newSortedColumns = this.state.sortedColumns.push(column);
+    this.setState({
+      sortedColumns: newSortedColumns,
+    });
+    if (this.props.onSort) {
+      this.props.onSort(newSortedColumns);
+    }
+  };
+
   render() {
     const {
       fixedColumns,
@@ -742,10 +874,21 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       maxNodeDepth,
       rowHeight,
       selectedNodeId,
+      sortableColumns,
     } = this.props;
+    const { sortedColumns } = this.state;
+    const columnSortDirections =
+      sortableColumns && sortedColumns
+        ? sortedColumns.getSortStateArr(sortableColumns)
+        : undefined;
     return (
       <div className="treeView">
-        <TreeViewHeader fixedColumns={fixedColumns} mainColumn={mainColumn} />
+        <TreeViewHeader
+          fixedColumns={fixedColumns}
+          mainColumn={mainColumn}
+          onSort={this._onSort}
+          columnSortDirections={columnSortDirections}
+        />
         <ContextMenuTrigger
           id={contextMenuId ?? 'unknown'}
           disable={!contextMenuId}

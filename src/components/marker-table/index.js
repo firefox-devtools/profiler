@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
-import { TreeView } from '../shared/TreeView';
+import { TreeView, ColumnSortState } from '../shared/TreeView';
 import { MarkerTableEmptyReasons } from './MarkerTableEmptyReasons';
 import {
   getZeroAt,
@@ -42,7 +42,9 @@ const MAX_DESCRIPTION_CHARACTERS = 500;
 
 type MarkerDisplayData = {|
   start: string,
+  rawStart: Milliseconds,
   duration: string | null,
+  rawDuration: Milliseconds | null,
   name: string,
   type: string,
 |};
@@ -113,10 +115,13 @@ class MarkerTree {
       }
 
       let duration = null;
+      let rawDuration: number | null = null;
       if (marker.incomplete) {
         duration = 'unknown';
       } else if (marker.end !== null) {
         duration = formatTimestamp(marker.end - marker.start);
+        // $FlowFixMe
+        rawDuration = marker.end - marker.start;
       }
 
       displayData = {
@@ -124,6 +129,8 @@ class MarkerTree {
         duration,
         name,
         type: getMarkerSchemaName(this._markerSchemaByName, marker),
+        rawDuration: rawDuration,
+        rawStart: marker.start,
       };
       this._displayDataByIndex.set(markerIndex, displayData);
     }
@@ -165,6 +172,7 @@ class MarkerTableImpl extends PureComponent<Props> {
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;
   _takeTreeViewRef = (treeView) => (this._treeView = treeView);
+  _sortedColumns = new ColumnSortState([]);
 
   getMarkerTree = memoize((...args) => new MarkerTree(...args), { limit: 1 });
 
@@ -200,6 +208,32 @@ class MarkerTableImpl extends PureComponent<Props> {
     changeRightClickedMarker(threadsKey, selectedMarker);
   };
 
+  _compareColumn = (
+    first: MarkerDisplayData,
+    second: MarkerDisplayData,
+    column: number
+  ) => {
+    switch (column) {
+      case 1:
+        return second.rawStart - first.rawStart;
+      case 2:
+        if (first.rawDuration === null) {
+          return -1;
+        }
+        if (second.rawDuration === null) {
+          return 1;
+        }
+        return second.rawDuration - first.rawDuration;
+      case 3:
+        return first.type.localeCompare(second.type);
+      default:
+        throw new Error('Invalid column');
+    }
+  };
+
+  _onSort = (sortedColumns: ColumnSortState) =>
+    (this._sortedColumns = sortedColumns);
+
   render() {
     const {
       getMarker,
@@ -210,7 +244,7 @@ class MarkerTableImpl extends PureComponent<Props> {
       markerSchemaByName,
       getMarkerLabel,
     } = this.props;
-    const tree = this.getMarkerTree(
+    const tree: MarkerTree = this.getMarkerTree(
       getMarker,
       markerIndexes,
       zeroAt,
@@ -243,6 +277,10 @@ class MarkerTableImpl extends PureComponent<Props> {
             contextMenuId="MarkerContextMenu"
             rowHeight={16}
             indentWidth={10}
+            initialSortedColumns={this._sortedColumns}
+            onSort={this._onSort}
+            compareColumn={this._compareColumn}
+            sortableColumns={new Set([1, 2, 3])}
           />
         )}
       </div>

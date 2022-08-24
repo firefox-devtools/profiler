@@ -132,6 +132,13 @@
   align-items: center;
 }
 
+.treeViewHeaderColumn.sortAscending::before {
+  content: '▲ ';
+}
+.treeViewHeaderColumn.sortDescending::before {
+  content: '▼ ';
+}
+
 .treeViewRowColumn.total,
 .treeViewRowColumn.totalPercent,
 .treeViewRowColumn.self,
