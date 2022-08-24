@@ -87,17 +87,20 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn start"
+        class="treeViewHeaderColumn treeViewFixedColumn start sortAscending"
+        data-column="0"
       >
         Start
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn duration"
+        class="treeViewHeaderColumn treeViewFixedColumn duration sortAscending"
+        data-column="1"
       >
         Duration
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn type"
+        class="treeViewHeaderColumn treeViewFixedColumn type sortAscending"
+        data-column="2"
       >
         Type
       </span>

@@ -149,10 +149,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -161,7 +163,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -171,7 +174,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -820,10 +824,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -832,7 +838,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -842,7 +849,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -1491,10 +1499,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -1503,7 +1513,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -1513,7 +1524,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -2150,10 +2162,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -2162,7 +2176,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -2172,7 +2187,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -2809,10 +2825,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -2821,7 +2839,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -2831,7 +2850,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -3764,10 +3784,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -3776,7 +3798,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -3785,7 +3808,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -4390,10 +4414,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -4402,7 +4428,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -4411,7 +4438,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5016,10 +5044,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -5028,7 +5058,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -5037,7 +5068,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5465,10 +5497,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -5477,7 +5511,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -5486,7 +5521,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -6091,10 +6127,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -6103,7 +6141,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -6112,7 +6151,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -6658,10 +6698,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -6670,7 +6712,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -6679,7 +6722,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7225,10 +7269,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -7237,7 +7283,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -7246,7 +7293,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7675,10 +7723,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -7687,7 +7737,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -7696,7 +7747,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -8125,10 +8177,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="0"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total "
+        data-column="1"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -8137,7 +8191,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self "
+        data-column="2"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -8146,7 +8201,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"

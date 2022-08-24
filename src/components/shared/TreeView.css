@@ -102,6 +102,19 @@
   border-right: 1px solid var(--grey-30);
 }
 
+.treeViewHeaderColumn.sortInactive::after {
+  content: " ▲";
+  opacity: 0;
+}
+
+.treeViewHeaderColumn.sortDescending::after {
+  content: ' ▲';
+}
+
+.treeViewHeaderColumn.sortAscending::after {
+  content: ' ▼ ';
+}
+
 .treeBadge {
   display: inline-block;
   overflow: hidden;
