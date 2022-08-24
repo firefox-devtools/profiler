@@ -231,8 +231,9 @@ class MarkerTableImpl extends PureComponent<Props> {
     }
   };
 
-  _onSort = (sortedColumns: ColumnSortState) =>
-    (this._sortedColumns = sortedColumns);
+  _onSort = (sortedColumns: ColumnSortState) => {
+    this._sortedColumns = sortedColumns;
+  };
 
   render() {
     const {
