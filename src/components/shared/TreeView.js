@@ -99,10 +99,17 @@ export class ColumnSortState {
 class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
   TreeViewHeaderProps<DisplayData>
 > {
-  _onSort = (e: Event) => {
+  _onSort = (e: MouseEvent) => {
     const { onSort } = this.props;
+<<<<<<< HEAD
     // $FlowExpectError
     onSort(Number(e.currentTarget.dataset.column));
+=======
+    const target = e.target;
+    if (target instanceof HTMLElement) {
+      onSort(Number(target.getAttribute('data-column')));
+    }
+>>>>>>> 5f297e49 (Fix linter errors)
   };
 
   render() {
@@ -130,7 +137,7 @@ class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
             >
               <span
                 className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName} ${sortClass}`}
-                data-column={i}
+                data-column={i + 1}
                 onClick={this._onSort}
               ></span>
             </PermissiveLocalized>
