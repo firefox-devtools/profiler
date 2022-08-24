@@ -136,7 +136,6 @@ Home--profiler-motto = Ṭṭef amaɣnu n temlellit. Sleḍ-it. Bḍu-t. Err web
 Home--additional-content-title = Sali imuɣna yellan
 Home--additional-content-content = Tzemreḍ <strong>ad tzuɣreḍ syen sers</strong> afaylu n umaɣnu da i usali-ines, neɣ:
 Home--compare-recordings-info = Tzemreḍ daɣen ad tsenmehleḍ iseklasen. <a>Ldi agrudem n usnemhel.</a>
-Home--recent-uploaded-recordings-title = Iseklasen i d-ulin melmi kan
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -160,9 +159,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Kkes
     .title = Amaɣnu-a ur yezmir ara ad yettwakkes acku ur nesɛi ara talɣut n usireg.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ulac ameɣnu i d-yettwasulin akka ar tura!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Wali syen sefrek meṛṛa iseklasen-ik·im ({ $profilesRestCount } d wugar)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -228,6 +227,8 @@ MenuButtons--index--profile-info-uploaded-actions = Kkes
 MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-process-started = Asesfer agejdan yebda:
+MenuButtons--metaInfo--main-process-ended = Asesfer agejdan yekfa:
 MenuButtons--metaInfo--interval = Azilal:
 MenuButtons--metaInfo--buffer-capacity = Tazmert n uḥraz:
 MenuButtons--metaInfo--buffer-duration = Tanzgat n uḥraz:
@@ -246,6 +247,7 @@ MenuButtons--metaInfo--name-and-version = Isem akked lqem:
 MenuButtons--metaInfo--update-channel = Leqqem abadu:
 MenuButtons--metaInfo--build-id = Asulay n lebni:
 MenuButtons--metaInfo--build-type = Anaw n lebni:
+MenuButtons--metaInfo--arguments = Ifakulen:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -262,6 +264,7 @@ MenuButtons--metaInfo--os = Anagraw n wammud:
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--speed-index = Amatar arurad:
 MenuButtons--metaInfo-renderRowOfList-label-features = Timahilin:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Imsizdeg n usqerdec:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Isiɣzaf:
 
 ## Overhead refers to the additional resources used to run the profiler.
@@ -280,9 +283,15 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Azilal
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Seddu isefka seg waccaren-nniḍen
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Seddu inegzumen
+MenuButtons--publish--renderCheckbox-label-resource = Seddu URLs d yiberdan n tiɣbula
 MenuButtons--publish--renderCheckbox-label-extension = Seddu talɣut n usiɣzef
 MenuButtons--publish--renderCheckbox-label-preference = Seddu azalen n usmenyif
+MenuButtons--publish--renderCheckbox-label-private-browsing = Seddu isefka seg yisfuyla n tunigin tusligt
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Amaɣnu-a yegber isefka n tunigin tusligt
+MenuButtons--publish--reupload-performance-profile = Ales asali n umaɣnu n temlellit
 MenuButtons--publish--share-performance-profile = Bḍu amaɣnu n usmenyif
 MenuButtons--publish--info-description-default = S wudem amezwer, isefka-ik·im udmawanen ttwakksen.
 MenuButtons--publish--button-upload = Sali
@@ -316,6 +325,12 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Kkes
+    .title = Sit dagi i tukksa n umaɣnu { $smallProfileName }
 
 ## Profile Delete Panel
 ## This panel is displayed when the user clicks on the Profile Delete Button,
