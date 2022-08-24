@@ -292,6 +292,17 @@ describe('calltree/ProfileCallTreeView', function () {
     const { container } = setup(profile);
     expect(container.querySelector('.treeViewRow.isSelected')).toBeFalsy();
   });
+
+  it('sorts when the total column header is clicked', () => {
+    const { container, getByText } = setup();
+
+    expect(container.firstChild).toMatchSnapshot();
+
+    fireFullClick(getByText('Total (samples)'));
+    expect(container.firstChild).toMatchSnapshot();
+    fireFullClick(getByText('Total (samples)'));
+    expect(container.firstChild).toMatchSnapshot();
+  });
 });
 
 describe('calltree/ProfileCallTreeView EmptyReasons', function () {

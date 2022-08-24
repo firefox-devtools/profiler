@@ -353,6 +353,8 @@ export class CallTree {
         iconSrc,
         icon,
         ariaLabel,
+        rawTotal: total,
+        rawSelf: self,
       };
       this._displayDataByIndex.set(callNodeIndex, displayData);
     }

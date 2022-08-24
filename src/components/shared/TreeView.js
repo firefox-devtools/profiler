@@ -101,15 +101,10 @@ class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
 > {
   _onSort = (e: MouseEvent) => {
     const { onSort } = this.props;
-<<<<<<< HEAD
-    // $FlowExpectError
-    onSort(Number(e.currentTarget.dataset.column));
-=======
-    const target = e.target;
+    const target = e.currentTarget;
     if (target instanceof HTMLElement) {
-      onSort(Number(target.getAttribute('data-column')));
+      onSort(Number(target.dataset.column));
     }
->>>>>>> 5f297e49 (Fix linter errors)
   };
 
   render() {

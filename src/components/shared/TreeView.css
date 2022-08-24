@@ -103,7 +103,7 @@
 }
 
 .treeViewHeaderColumn.sortInactive::after {
-  content: " ▲";
+  content: ' ▲';
   opacity: 0;
 }
 
@@ -112,7 +112,7 @@
 }
 
 .treeViewHeaderColumn.sortAscending::after {
-  content: ' ▼ ';
+  content: ' ▼';
 }
 
 .treeBadge {
