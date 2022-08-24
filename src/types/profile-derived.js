@@ -219,6 +219,9 @@ export type CallNodeDisplayData = $Exact<
     badge?: ExtraBadgeInfo,
     icon: string | null,
     ariaLabel: string,
+    // just used for sorting
+    rawSelf: number,
+    rawTotal: number,
   }>
 >;
 

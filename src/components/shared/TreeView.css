@@ -135,6 +135,7 @@
 .treeViewHeaderColumn.sortAscending::before {
   content: '▲ ';
 }
+
 .treeViewHeaderColumn.sortDescending::before {
   content: '▼ ';
 }

@@ -103,6 +103,17 @@ describe('MarkerTable', function () {
     expect(scrolledRows()).toHaveLength(2);
   });
 
+  it('sorts when the start header and duration header is clicked', () => {
+    const { container, getByText } = setup();
+
+    fireFullClick(getByText('Start'));
+    expect(container).toMatchSnapshot();
+    fireFullClick(getByText('Start'));
+    expect(container).toMatchSnapshot();
+    fireFullClick(getByText('Duration'));
+    expect(container).toMatchSnapshot();
+  });
+
   it('selects a row when left clicking', () => {
     const { getByText, getRowElement } = setup();
 
