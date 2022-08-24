@@ -336,6 +336,13 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Tella-d tuccḍa lawan n tukksa n umaɣna-a <a>Ɛeddi ɣef useɣwen-a i wakken ad teẓreḍ ugar</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Kkes { $profileName }
 ProfileDeletePanel--dialog-cancel-button =
     .value = Sefsex
 ProfileDeletePanel--dialog-delete-button =
@@ -344,6 +351,8 @@ ProfileDeletePanel--dialog-delete-button =
 # progress indicator.
 ProfileDeletePanel--dialog-deleting-button =
     .value = Tukksa…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Isefka i d-yulin ttwakksen akken iwata
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -351,6 +360,13 @@ ProfileDeletePanel--dialog-deleting-button =
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Aktar n umaɣnu srid seg { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Taɣuri n ufaylu d usesfer n umaɣnu…
+ProfileLoaderAnimation--loading-local = Ur yettwasebded ara yakan.
+ProfileLoaderAnimation--loading-public = Asader d usesfer n umaɣnu…
+ProfileLoaderAnimation--loading-from-url = Asader d usesfer n umaɣnu…
+ProfileLoaderAnimation--loading-compare = Taquri d usesfer n yimuɣna…
+ProfileLoaderAnimation--loading-view-not-found = Ur tettwaf ara teskant
 
 ## ProfileRootMessage
 
@@ -361,8 +377,10 @@ ProfileRootMessage--additional = Uɣal ɣer ugejdan
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--applying-button = Asnas iteddu…
 ServiceWorkerManager--pending-button = Snes syen ales asali
 ServiceWorkerManager--installed-button = Ales asali n usnas
+ServiceWorkerManager--new-version-is-ready = Lqem amaynut n usnas yettwasader, yewjed i useqqdec
 ServiceWorkerManager--hide-notice-button =
     .title = Ffer alɣu-a d-yulin i tikkelt-nniḍen
     .aria-label = Ffer alɣu-a d-yulin i tikkelt-nniḍen
@@ -386,6 +404,7 @@ TabBar--network-tab = Aẓeṭṭa
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Sken kan asesfer-a
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -394,6 +413,14 @@ TrackContextMenu--only-show-track = Sken kan “{ $trackName }”
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Ffer “{ $trackName }”
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Ulac igmaḍ yettwafen i “<span>{ $searchFilter }</span>”
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Ffer asesfer
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
