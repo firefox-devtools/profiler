@@ -385,8 +385,8 @@ describe('actions/receive-profile', function () {
       const { profile } = getProfileFromTextSamples(
         // 2 samples of work
         `work  work`,
-        // 11 samples of work
-        `work  work  work  work  work  work  work  work  work  work  work`
+        // 41 samples of work (2 / 41 < 0.05)
+        Array(41).fill('work').join('  ')
       );
 
       profile.threads.forEach((thread, threadIndex) => {
@@ -403,53 +403,53 @@ describe('actions/receive-profile', function () {
     });
 
     describe('with threadCPUDelta', function () {
-      it('will show a thread when the relative CPU usage is above 20%', function () {
+      it('will show a thread when the relative CPU usage is above 10%', function () {
         const store = blankStore();
         // A profile with an accumulated value of 430 in the first thread. Therefore the
-        // 20% threshold for a non-idle thread's accumulated CPU usage is 86.
+        // 10% threshold for a non-idle thread's accumulated CPU usage is 43.
         const profile = getProfileWithThreadCPUDelta([
           [15, 20, 100, 50, 80, 40, 60, 20, 20, 25], // Thread with 430 sample score
-          [15, 6, 1, 11, 11, 7, 0, 12, 14, 9], // Thread with 86 sample score
+          [5, 6, 1, 11, 0, 7, 0, 12, 14, 0], // Thread with 56 sample score
         ]);
         profile.threads[0].name = 'Thread with 100% CPU';
-        profile.threads[1].name = 'Thread with 20% CPU';
+        profile.threads[1].name = 'Thread with 13% CPU';
         profile.threads[0].pid = 1;
         profile.threads[1].pid = 1;
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
           'show [process]',
-          '  - show [thread Thread with 20% CPU]', // <- Ensure this thread is not hidden.
+          '  - show [thread Thread with 13% CPU]', // <- Ensure this thread is not hidden.
           '  - show [thread Thread with 100% CPU] SELECTED',
         ]);
       });
 
-      it('will hide a thread when the relative CPU percentage is below 20%', function () {
+      it('will hide a thread when the relative CPU percentage is below 5%', function () {
         const store = blankStore();
-        // A profile with an accumulated value of 430 in the first thread. Therefore the
-        // 20% threshold for a non-idle thread's accumulated CPU usage is 86.
+        // A profile with an accumulated value of 519 in the first thread. Therefore the
+        // 5% threshold for a non-idle thread's accumulated CPU usage is 25.95.
         const profile = getProfileWithThreadCPUDelta([
-          [15, 20, 100, 50, 80, 40, 60, 20, 20, 25], // Thread with 430 sample score
-          [15, 6, 1, 31, 1, 7, 0, 2, 4, 9], // Thread with 76 sample score
+          [15, 20, 100, 50, 80, 40, 60, 72, 57, 25], // Thread with 519 sample score
+          [5, 3, 1, 4, 1, 4, 0, 2, 4, 1], // Thread with 25 sample score
         ]);
         profile.threads[0].name = 'Thread with 100% CPU';
-        profile.threads[1].name = 'Thread with 10% CPU';
+        profile.threads[1].name = 'Thread with 4% CPU';
         profile.threads[0].pid = 1;
         profile.threads[1].pid = 1;
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
           'show [process]',
-          '  - hide [thread Thread with 10% CPU]', // <- Ensure this thread is hidden.
+          '  - hide [thread Thread with 4% CPU]', // <- Ensure this thread is hidden.
           '  - show [thread Thread with 100% CPU] SELECTED',
         ]);
       });
 
-      it('will hide a thread when the relative CPU percentage is below 20% even if it has more samples with > 90% CPU delta', function () {
+      it('will hide a thread when the relative CPU percentage is below 5% even if it has more samples with > 90% CPU delta', function () {
         const store = blankStore();
         const profile = getProfileWithThreadCPUDelta([
-          [1, 2, 92, 93, 94, 1, 1, 1, 1], // Thread with 286 sample score (< 360 == 1800 * 0.2)
-          new Array(200).fill(9), // Thread with 200 * 9 = 1800 sample score
+          [1, 2, 92, 93, 94, 1, 1, 1, 1], // Thread with 286 sample score (< 315 == 6300 * 0.05)
+          new Array(700).fill(9), // Thread with 700 * 9 = 6300 sample score
         ]);
         profile.threads[0].name = 'Thread with a very short burst of > 90% CPU';
         profile.threads[1].name = 'Thread with sustained 9% CPU';
@@ -461,25 +461,6 @@ describe('actions/receive-profile', function () {
           'show [process]',
           '  - hide [thread Thread with a very short burst of > 90% CPU]', // <- Ensure this thread is hidden.
           '  - show [thread Thread with sustained 9% CPU] SELECTED',
-        ]);
-      });
-
-      it('will hide a thread when the relative CPU percentage is below 20% even if it has more samples with > 10% CPU delta', function () {
-        const store = blankStore();
-        const profile = getProfileWithThreadCPUDelta([
-          [15, 20, 100, 50, 80, 40, 60, 20, 20, 25], // Thread with 430 sample score
-          [15, 6, 1, 31, 1, 7, 0, 2, 4, 9], // Thread with 76 sample score
-        ]);
-        profile.threads[0].name = 'Thread with 100% CPU';
-        profile.threads[1].name = 'Thread with 10% CPU';
-        profile.threads[0].pid = 1;
-        profile.threads[1].pid = 1;
-
-        store.dispatch(viewProfile(profile));
-        expect(getHumanReadableTracks(store.getState())).toEqual([
-          'show [process]',
-          '  - hide [thread Thread with 10% CPU]', // <- Ensure this thread is hidden.
-          '  - show [thread Thread with 100% CPU] SELECTED',
         ]);
       });
 
