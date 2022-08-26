@@ -1,0 +1,268 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TrackCustomMarker draws a dot that matches the snapshot 1`] = `
+<div
+  class="timelineTrackCustomMarkerGraphDot"
+  style="left: 10px; top: 23.457142857142856px;"
+/>
+`;
+
+exports[`TrackCustomMarker has a tooltip that matches the snapshot 1`] = `
+<div
+  class="tooltipMarker"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        1ms
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        Marker
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
+  </div>
+</div>
+`;
+
+exports[`TrackCustomMarker matches the 2d canvas draw snapshot 1`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    25,
+  ],
+  Array [
+    "set lineWidth",
+    2,
+  ],
+  Array [
+    "set strokeStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    26,
+  ],
+  Array [
+    "lineTo",
+    10,
+    24.392857142857142,
+  ],
+  Array [
+    "lineTo",
+    20,
+    22.785714285714285,
+  ],
+  Array [
+    "lineTo",
+    30,
+    21.17857142857143,
+  ],
+  Array [
+    "lineTo",
+    40,
+    19.571428571428573,
+  ],
+  Array [
+    "lineTo",
+    50,
+    17.964285714285715,
+  ],
+  Array [
+    "lineTo",
+    60,
+    16.357142857142858,
+  ],
+  Array [
+    "lineTo",
+    70,
+    14.75,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "lineTo",
+    80,
+    25,
+  ],
+  Array [
+    "lineTo",
+    0,
+    25,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "set lineWidth",
+    2,
+  ],
+  Array [
+    "set strokeStyle",
+    "#30e60b",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "moveTo",
+    0,
+    26,
+  ],
+  Array [
+    "lineTo",
+    0,
+    26,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "moveTo",
+    10,
+    26,
+  ],
+  Array [
+    "lineTo",
+    10,
+    22.785714285714285,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "moveTo",
+    20,
+    26,
+  ],
+  Array [
+    "lineTo",
+    20,
+    19.571428571428573,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "moveTo",
+    30,
+    26,
+  ],
+  Array [
+    "lineTo",
+    30,
+    16.357142857142858,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "moveTo",
+    40,
+    26,
+  ],
+  Array [
+    "lineTo",
+    40,
+    13.142857142857144,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "moveTo",
+    50,
+    26,
+  ],
+  Array [
+    "lineTo",
+    50,
+    9.928571428571427,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "moveTo",
+    60,
+    26,
+  ],
+  Array [
+    "lineTo",
+    60,
+    6.714285714285715,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "moveTo",
+    70,
+    26,
+  ],
+  Array [
+    "lineTo",
+    70,
+    3.5,
+  ],
+  Array [
+    "stroke",
+  ],
+]
+`;
+
+exports[`TrackCustomMarker matches the component snapshot 1`] = `
+<div
+  class="timelineTrackCustomMarker"
+  style="height: 25px; --graph-height: 25px; --markers-height: 0px;"
+>
+  <div
+    class="timelineTrackCustomMarkerGraph"
+  >
+    <div>
+      <canvas
+        class="timelineTrackCustomMarkerCanvas"
+        height="25"
+        width="80"
+      />
+    </div>
+    <div
+      class="timelineEmptyThreadIndicator"
+    />
+  </div>
+</div>
+`;
