@@ -177,16 +177,16 @@ describe('CallTreeSidebar', function () {
       selectNode,
       container,
       queryByText,
-      getByText,
+      getAllByText,
       funcNamesDict: { A, B, C },
     } = setup(getProfileWithSubCategories());
     selectNode([A, B, C]);
     expect(queryByText('FakeSubCategoryC')).not.toBeInTheDocument();
 
-    const layoutCategory = getByText('Layout');
+    const layoutCategory = getAllByText('Layout')[0];
     fireFullClick(layoutCategory);
 
-    expect(getByText('FakeSubCategoryC')).toBeInTheDocument();
+    expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
 
     expect(container.firstChild).toMatchSnapshot();
   });
