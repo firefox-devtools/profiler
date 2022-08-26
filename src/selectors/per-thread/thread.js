@@ -75,12 +75,13 @@ export function getThreadSelectorsPerThread(
    * Either return the raw thread from the profile, or merge several raw threads
    * together.
    */
-  const getThread: Selector<Thread> = (state) =>
-    threadIndexes.size === 1
+  const getThread: Selector<Thread> = (state) => {
+    return threadIndexes.size === 1
       ? ProfileSelectors.getProfile(state).threads[
           ensureExists(getFirstItemFromSet(threadIndexes))
         ]
       : getMergedThread(state);
+  };
   const getStringTable: Selector<UniqueStringArray> = (state) =>
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = (state) =>

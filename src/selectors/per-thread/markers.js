@@ -52,8 +52,9 @@ export function getMarkerSelectorsPerThread(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
-  const _getRawMarkerTable: Selector<RawMarkerTable> = (state) =>
-    threadSelectors.getThread(state).markers;
+  const _getRawMarkerTable: Selector<RawMarkerTable> = (state) => {
+    return threadSelectors.getThread(state).markers;
+  };
 
   /**
    * Similar to thread filtering, the markers can be filtered as well, and it's
