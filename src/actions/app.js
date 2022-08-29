@@ -10,6 +10,7 @@ import {
   getIsActiveTabResourcesPanelOpen,
   getSelectedThreadIndexes,
   getLocalTrackOrderByPid,
+  getOpenCategories,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getTrackThreadHeights,
@@ -49,6 +50,7 @@ import type {
   ThunkAction,
   UrlState,
   UploadedProfileInformation,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -415,4 +417,21 @@ export function updateBrowserConnectionStatus(
   browserConnectionStatus: BrowserConnectionStatus
 ): Action {
   return { type: 'UPDATE_BROWSER_CONNECTION_STATUS', browserConnectionStatus };
+}
+
+export function toggleOpenCategory(
+  category: IndexIntoCategoryList
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    let openCategories = [...getOpenCategories(getState())];
+    if (category in openCategories) {
+      openCategories = openCategories.filter((c) => c !== category);
+    } else {
+      openCategories.push(category);
+    }
+    dispatch({
+      type: 'CHANGE_OPEN_CATEGORIES',
+      openCategories: openCategories,
+    });
+  };
 }

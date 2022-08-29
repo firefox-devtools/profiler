@@ -129,6 +129,10 @@ export const getFirstSelectedThreadIndex: Selector<ThreadIndex> = (state) =>
 export const getTimelineType: Selector<TimelineType> = (state) =>
   getProfileSpecificState(state).timelineType;
 
+/** Returns the indexes of categories that are opened in the sidebar */
+export const getOpenCategories: Selector<number[]> = (state) =>
+  getFullProfileSpecificState(state).openCategories;
+
 /**
  * Simple selectors for tracks and track order.
  */

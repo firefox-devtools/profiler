@@ -19,7 +19,13 @@ import type {
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange, CssPixels, Milliseconds } from './units';
-import type { Profile, ThreadIndex, Pid, TabID } from './profile';
+import type {
+  Profile,
+  ThreadIndex,
+  Pid,
+  TabID,
+  IndexIntoCategoryList,
+} from './profile';
 
 import type {
   CallNodePath,
@@ -287,6 +293,7 @@ export type FullProfileSpecificUrlState = {|
   showJsTracerSummary: boolean,
   legacyThreadOrder: ThreadIndex[] | null,
   legacyHiddenThreads: ThreadIndex[] | null,
+  openCategories: IndexIntoCategoryList[],
 |};
 
 /**

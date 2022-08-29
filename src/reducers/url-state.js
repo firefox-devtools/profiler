@@ -497,6 +497,18 @@ const localTrackOrderChangedPids: Reducer<Set<Pid>> = (
   }
 };
 
+/**
+ * Signals which categories are opened by default in the sidebar
+ */
+const openCategories: Reducer<number[]> = (state: number[] = [], action) => {
+  switch (action.type) {
+    case 'CHANGE_OPEN_CATEGORIES':
+      return action.openCategories;
+    default:
+      return state;
+  }
+};
+
 // If you update this reducer, please don't forget to update the profileName
 // reducer below as well.
 const pathInZipFile: Reducer<string | null> = (state = null, action) => {
@@ -629,6 +641,7 @@ const fullProfileSpecific = combineReducers({
   // process. These value are only set by the locationToState function.
   legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
   legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
+  openCategories,
 });
 
 /**

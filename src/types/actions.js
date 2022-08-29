@@ -6,7 +6,14 @@
 import { CallTree } from '../profile-logic/call-tree';
 import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
-import type { Profile, Thread, ThreadIndex, Pid, TabID } from './profile';
+import type {
+  Profile,
+  Thread,
+  ThreadIndex,
+  Pid,
+  TabID,
+  IndexIntoCategoryList,
+} from './profile';
 import type {
   CallNodePath,
   CallNodeTable,
@@ -496,6 +503,10 @@ type UrlStateAction =
     |}
   | {|
       +type: 'PROFILE_REMOTELY_DELETED',
+    |}
+  | {|
+      +type: 'CHANGE_OPEN_CATEGORIES',
+      +openCategories: IndexIntoCategoryList[],
     |};
 
 type IconsAction =

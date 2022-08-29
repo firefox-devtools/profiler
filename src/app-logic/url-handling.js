@@ -38,6 +38,7 @@ import type {
   ThreadIndex,
   TimelineType,
   SourceViewState,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -154,7 +155,8 @@ type FullProfileSpecificBaseQuery = {|
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
   threadOrder: string, // "3-2-0-1"
-  hiddenThreads: string, // "0-1"
+  hiddenThreads: string, // "0-1",
+  openCategories: string, // 0-1-2
 |};
 
 // Base query that only applies to active tab profile view.
@@ -323,7 +325,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.full.localTrackOrderByPid,
         urlState.profileSpecific.full.localTrackOrderChangedPids
       );
-
+      baseQuery.openCategories = convertOpenCategoriesToString(
+        urlState.profileSpecific.full.openCategories
+      );
       break;
     }
     case 'active-tab': {
@@ -390,7 +394,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       } else {
         query = (baseQuery: CallTreeQueryShape);
       }
-
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
         ? null
@@ -638,6 +641,9 @@ export function stateFromLocation(
         legacyHiddenThreads: query.hiddenThreads
           ? query.hiddenThreads.split('-').map((index) => Number(index))
           : null,
+        openCategories: query.openCategories
+          ? query.openCategories.split('-').map((x) => parseInt(x))
+          : [],
       },
       activeTab: {
         isResourcesPanelOpen: query.resources !== undefined,
@@ -773,6 +779,14 @@ function convertLocalTrackOrderByPidToString(
     }
   }
   return strings.join('~') || undefined;
+}
+
+function convertOpenCategoriesToString(
+  openCategories: IndexIntoCategoryList[]
+) {
+  return openCategories.length > 0
+    ? openCategories.map((x) => String(x)).join('-')
+    : undefined;
 }
 
 // This Error class is used in other codepaths to detect the specific error of
