@@ -182,7 +182,7 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
   };
 
   render() {
-    const { breakdown, categoryList, number } = this.props;
+    const { breakdown, categoryList, number, openCategories } = this.props;
 
     const data = breakdown
       .map((oneCategoryBreakdown, categoryIndex) => {
@@ -214,14 +214,12 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
       0
     );
 
-    const { openCategories } = this.props;
-
     return (
       <>
-        {data.map(({ category, value, subcategories }, index) => {
+        {data.map(({ category, value, subcategories, categoryIndex }) => {
           const hasSubcategory =
             shouldDisplaySubcategoryInfoForCategory(category);
-          const expanded = openCategories.includes(index);
+          const expanded = openCategories.includes(categoryIndex);
           return (
             <React.Fragment key={category.name}>
               <SidebarDetail
@@ -230,7 +228,7 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
                     <button
                       type="button"
                       data-category={category.name}
-                      data-category-index={index}
+                      data-category-index={categoryIndex}
                       onClick={this._toggleCategory}
                       className={classNames({
                         'sidebar-toggle': true,

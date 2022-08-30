@@ -424,7 +424,7 @@ export function toggleOpenCategory(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     let openCategories = [...getOpenCategories(getState())];
-    if (category in openCategories) {
+    if (openCategories.includes(category)) {
       openCategories = openCategories.filter((c) => c !== category);
     } else {
       openCategories.push(category);
