@@ -31,8 +31,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-type MEvent = SyntheticMouseEvent<> | TouchEvent;
-type MouseOrTouchHandler = (event: MouseEvent | TouchEvent) => void;
+type PointerHandler = (event: PointerEvent) => void;
 
 type OwnProps = {|
   +width: number,
@@ -59,8 +58,9 @@ type State = {|
 
 class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   _handlers: ?{|
-    mouseMoveHandler: MouseOrTouchHandler,
-    mouseClickHandler: MouseOrTouchHandler,
+    mouseStartHandler: PointerHandler,
+    mouseMoveHandler: PointerHandler,
+    mouseEndHandler: PointerHandler,
   |};
 
   _container: ?HTMLElement;
@@ -73,20 +73,13 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     this._container = element;
   };
 
-  _getPageX = (event: MEvent | MouseEvent): CssPixels => {
-    // $FlowExpectError - Flow doesn't know the touches property is only present in the TouchEvent
-    return event.touches === undefined ? event.pageX : event.touches[0].pageX;
-  };
-
-  _getPageY = (event: MEvent | MouseEvent): CssPixels => {
-    // $FlowExpectError - Flow doesn't know the touches property is only present in the TouchEvent
-    return event.touches === undefined ? event.pageY : event.touches[0].pageY;
-  };
-
-  _onMouseDown = (event: MEvent) => {
+  _onMouseDown = (event: PointerEvent) => {
+    if (!event.isPrimary) {
+      return;
+    }
     if (
       !this._container ||
-      (event.button !== 0 && event.button !== undefined) ||
+      event.button !== 0 ||
       event.altKey ||
       event.ctrlKey ||
       event.metaKey ||
@@ -100,10 +93,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     const rect = getContentRect(this._container);
     if (
-      this._getPageX(event) < rect.left ||
-      this._getPageX(event) >= rect.right ||
-      this._getPageY(event) < rect.top ||
-      this._getPageY(event) >= rect.bottom
+      event.pageX < rect.left ||
+      event.pageX >= rect.right ||
+      event.pageY < rect.top ||
+      event.pageY >= rect.bottom
     ) {
       return;
     }
@@ -115,7 +108,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     const { committedRange } = this.props;
     const minSelectionStartWidth: CssPixels = 3;
-    const mouseDownX = this._getPageX(event);
+    const mouseDownX = event.pageX;
     const mouseDownTime =
       ((mouseDownX - rect.left) / rect.width) *
         (committedRange.end - committedRange.start) +
@@ -123,8 +116,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     let isRangeSelecting = false;
 
-    const getSelectionFromEvent = (event: MouseEvent | TouchEvent) => {
-      const mouseMoveX = this._getPageX(event);
+    const getSelectionFromEvent = (event: PointerEvent) => {
+      const mouseMoveX = event.pageX;
       const mouseMoveTime =
         ((mouseMoveX - rect.left) / rect.width) *
           (committedRange.end - committedRange.start) +
@@ -142,7 +135,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       return { selectionStart, selectionEnd };
     };
 
-    const mouseMoveHandler = (event: MouseEvent | TouchEvent) => {
+    const mouseMoveHandler = (event: PointerEvent) => {
+      if (!event.isPrimary) {
+        return;
+      }
       const isLeftButtonUsed =
         // $FlowExpectError - Flow doesn't know the touches property is only present in the TouchEvent
         event.touches !== undefined || (event.buttons & 1) > 0;
@@ -170,7 +166,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
       if (
         isRangeSelecting ||
-        Math.abs(this._getPageX(event) - mouseDownX) >= minSelectionStartWidth
+        Math.abs(event.pageX - mouseDownX) >= minSelectionStartWidth
       ) {
         isRangeSelecting = true;
         const { selectionStart, selectionEnd } = getSelectionFromEvent(event);
@@ -183,7 +179,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       }
     };
 
-    const clickHandler = (event: MouseEvent | TouchEvent) => {
+    const mouseStartHandler = (event: PointerEvent) => {
+      if (!event.isPrimary) {
+        return;
+      }
       if (isRangeSelecting) {
         // This click ends the current selection gesture.
         const { selectionStart, selectionEnd } = getSelectionFromEvent(event);
@@ -208,7 +207,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         // There's a selection.
         // Dismiss it but only if the click is outside the current selection.
         const clickTime =
-          ((this._getPageX(event) - rect.left) / rect.width) *
+          ((event.pageX - rect.left) / rect.width) *
             (committedRange.end - committedRange.start) +
           committedRange.start;
         const { selectionStart, selectionEnd } = previewSelection;
@@ -230,36 +229,43 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       this._uninstallMoveAndClickHandlers();
     };
 
-    this._installMoveAndClickHandlers(mouseMoveHandler, clickHandler);
+    this._installMoveAndClickHandlers(
+      mouseStartHandler,
+      mouseMoveHandler,
+      mouseStartHandler
+    );
   };
 
   _installMoveAndClickHandlers(
-    mouseMoveHandler: MouseOrTouchHandler,
-    mouseClickHandler: MouseOrTouchHandler
+    mouseStartHandler: PointerHandler,
+    mouseMoveHandler: PointerHandler,
+    mouseEndHandler: PointerHandler
   ) {
     // Unregister any leftover old handlers, in case we didn't get a click for the previous
     // drag (e.g. when tab switching during a drag, or when ctrl+clicking on macOS).
     this._uninstallMoveAndClickHandlers();
 
-    this._handlers = { mouseMoveHandler, mouseClickHandler };
-    window.addEventListener('mousemove', mouseMoveHandler, true);
-    window.addEventListener('touchmove', mouseMoveHandler, true);
-    window.addEventListener('touchstart', mouseClickHandler, true);
-    window.addEventListener('click', mouseClickHandler, true);
+    this._handlers = { mouseStartHandler, mouseMoveHandler, mouseEndHandler };
+    window.addEventListener('pointerdown', mouseStartHandler, true);
+    window.addEventListener('pointermove', mouseMoveHandler, true);
+    window.addEventListener('pointerup', mouseEndHandler, true);
   }
 
   _uninstallMoveAndClickHandlers() {
     if (this._handlers) {
-      const { mouseMoveHandler, mouseClickHandler } = this._handlers;
-      window.removeEventListener('mousemove', mouseMoveHandler, true);
-      window.removeEventListener('touchmove', mouseMoveHandler, true);
-      window.removeEventListener('touchstart', mouseClickHandler, true);
-      window.removeEventListener('click', mouseClickHandler, true);
+      const { mouseStartHandler, mouseMoveHandler, mouseEndHandler } =
+        this._handlers;
+      window.addEventListener('pointerdown', mouseStartHandler, true);
+      window.addEventListener('pointermove', mouseMoveHandler, true);
+      window.addEventListener('pointerup', mouseEndHandler, true);
       this._handlers = null;
     }
   }
 
-  _onMouseMove = (event: SyntheticMouseEvent<>) => {
+  _onMouseMove = (event: SyntheticPointerEvent<>) => {
+    if (!event.isPrimary) {
+      return;
+    }
     if (!this._container) {
       return;
     }
@@ -410,9 +416,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       <div
         className={classNames('timelineSelection', className)}
         ref={this._containerCreated}
-        onMouseDown={this._onMouseDown}
-        onTouchStart={this._onMouseDown}
-        onMouseMove={this._onMouseMove}
+        onPointerDown={this._onMouseDown}
+        onPointerMove={this._onMouseMove}
       >
         {children}
         {previewSelection.hasSelection

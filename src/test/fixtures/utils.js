@@ -56,6 +56,11 @@ type FakeMouseEventInit = $Shape<{
   composed: boolean,
 }>;
 
+type FakePointerEventInit = $Shape<{
+  ...FakeMouseEventInit,
+  isPrimary: boolean,
+}>;
+
 class FakeMouseEvent extends MouseEvent {
   offsetX: number;
   offsetY: number;
@@ -75,6 +80,40 @@ class FakeMouseEvent extends MouseEvent {
       pageY: pageY || 0,
       x: x || 0,
       y: y || 0,
+    });
+  }
+}
+
+class FakePointerEvent extends MouseEvent {
+  offsetX: number;
+  offsetY: number;
+  pageX: number;
+  pageY: number;
+  x: number;
+  y: number;
+  isPrimary: boolean;
+
+  constructor(type: string, values: FakePointerEventInit) {
+    const {
+      pageX,
+      pageY,
+      offsetX,
+      offsetY,
+      x,
+      y,
+      isPrimary,
+      ...pointerValues
+    } = values;
+    super(type, (pointerValues: any));
+
+    Object.assign(this, {
+      offsetX: offsetX || 0,
+      offsetY: offsetY || 0,
+      pageX: pageX || 0,
+      pageY: pageY || 0,
+      x: x || 0,
+      y: y || 0,
+      isPrimary: isPrimary === undefined ? true : isPrimary,
     });
   }
 }
@@ -102,6 +141,32 @@ export function getMouseEvent(
     ...values,
   };
   return new FakeMouseEvent(type, values);
+}
+
+/**
+ * Use this function to retrieve a fake PointerEvent instance. This is really only
+ * necessary when we need to use some of the properties unsupported by jsdom,
+ * like `clientX` and `clientY` or `pageX` and `pageY`.
+ * This is to be used directly by `fireEvent`, not `fireEvent.pointerXXX`, eg:
+ *
+ *   fireEvent(target, getPointerEvent('pointermove', { pageX: 5 });
+ *
+ * For other cases it's not necessary to use `getPointerEvent`, eg:
+ *
+ *   fireEvent.pointerDown(target, { clientX: 5, isPrimary: true });
+ *
+ */
+export function getPointerEvent(
+  type: string,
+  values: FakePointerEventInit = {}
+): FakePointerEvent {
+  values = {
+    bubbles: true,
+    cancelable: true,
+    isPrimary: true,
+    ...values,
+  };
+  return new FakePointerEvent(type, values);
 }
 
 /**

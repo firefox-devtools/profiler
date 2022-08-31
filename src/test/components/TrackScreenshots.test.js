@@ -24,7 +24,7 @@ import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getMouseEvent,
+  getPointerEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
   fireFullClick,
@@ -107,7 +107,10 @@ describe('timeline/TrackScreenshots', function () {
     expect(selectionOverlay).toThrow();
 
     // Mousedown then Mousemove will do a selection.
-    fireEvent(track, getMouseEvent('mousedown', { pageX: LEFT, pageY: TOP }));
+    fireEvent(
+      track,
+      getPointerEvent('pointerdown', { pageX: LEFT, pageY: TOP })
+    );
     const screenShotSize = moveMouseAndGetImageSize(LEFT + 200);
 
     expect(selectionOverlay()).toBeTruthy();
@@ -119,9 +122,16 @@ describe('timeline/TrackScreenshots', function () {
     const previouslySelectedPreviewSelection = getPreviewSelection(getState());
     fireEvent(
       track,
-      getMouseEvent('mouseup', { pageX: LEFT + 200, pageY: TOP })
+      getPointerEvent('pointerup', { pageX: LEFT + 200, pageY: TOP })
     );
-    fireEvent(track, getMouseEvent('click', { pageX: LEFT + 200, pageY: TOP }));
+    fireEvent(
+      track,
+      getPointerEvent('pointerdown', { pageX: LEFT + 200, pageY: TOP })
+    );
+    fireEvent(
+      track,
+      getPointerEvent('pointerup', { pageX: LEFT + 200, pageY: TOP })
+    );
 
     expect(getPreviewSelection(getState())).toEqual({
       ...previouslySelectedPreviewSelection,
@@ -318,7 +328,7 @@ function setup(
   function moveMouse(pageX: number) {
     fireEvent(
       screenshotTrack(),
-      getMouseEvent('mousemove', { pageX, pageY: TOP, buttons: 1 })
+      getPointerEvent('pointermove', { pageX, pageY: TOP, buttons: 1 })
     );
   }
 
