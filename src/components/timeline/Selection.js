@@ -58,9 +58,9 @@ type State = {|
 
 class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   _handlers: ?{|
-    mouseStartHandler: PointerHandler,
-    mouseMoveHandler: PointerHandler,
-    mouseEndHandler: PointerHandler,
+    pointerStartHandler: PointerHandler,
+    pointerMoveHandler: PointerHandler,
+    pointerEndHandler: PointerHandler,
   |};
 
   _container: ?HTMLElement;
@@ -73,9 +73,9 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     this._container = element;
   };
 
-  _onMouseDown = (event: PointerEvent) => {
+  _onPointerDown = (event: SyntheticPointerEvent<>) => {
     if (!event.isPrimary) {
-      return;
+      return; // this is not the primary pointer (e.g. the second finger on a touch device)
     }
     if (
       !this._container ||
@@ -135,13 +135,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       return { selectionStart, selectionEnd };
     };
 
-    const mouseMoveHandler = (event: PointerEvent) => {
+    const pointerMoveHandler = (event: PointerEvent) => {
       if (!event.isPrimary) {
         return;
       }
-      const isLeftButtonUsed =
-        // $FlowExpectError - Flow doesn't know the touches property is only present in the TouchEvent
-        event.touches !== undefined || (event.buttons & 1) > 0;
+      // from MDN regarding event.buttons, it is 1 if: Left Mouse, Touch Contact, Pen contact
+      const isLeftButtonUsed = (event.buttons & 1) > 0;
       if (!isLeftButtonUsed) {
         // Oops, the mouseMove handler is still registered but the left button
         // isn't pressed, this means we missed the "click" event for some reason.
@@ -179,7 +178,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       }
     };
 
-    const mouseStartHandler = (event: PointerEvent) => {
+    const pointerEndHandler = (event: PointerEvent) => {
       if (!event.isPrimary) {
         return;
       }
@@ -230,41 +229,41 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     };
 
     this._installMoveAndClickHandlers(
-      mouseStartHandler,
-      mouseMoveHandler,
-      mouseStartHandler
+      pointerEndHandler,
+      pointerMoveHandler,
+      pointerEndHandler
     );
   };
 
   _installMoveAndClickHandlers(
-    mouseStartHandler: PointerHandler,
-    mouseMoveHandler: PointerHandler,
-    mouseEndHandler: PointerHandler
+    pointerStartHandler: PointerHandler,
+    pointerMoveHandler: PointerHandler,
+    pointerEndHandler: PointerHandler
   ) {
     // Unregister any leftover old handlers, in case we didn't get a click for the previous
     // drag (e.g. when tab switching during a drag, or when ctrl+clicking on macOS).
     this._uninstallMoveAndClickHandlers();
 
-    this._handlers = { mouseStartHandler, mouseMoveHandler, mouseEndHandler };
-    window.addEventListener('pointerdown', mouseStartHandler, true);
-    window.addEventListener('pointermove', mouseMoveHandler, true);
-    window.addEventListener('pointerup', mouseEndHandler, true);
+    this._handlers = { pointerStartHandler, pointerMoveHandler, pointerEndHandler };
+    window.addEventListener('pointerdown', pointerStartHandler, true);
+    window.addEventListener('pointermove', pointerMoveHandler, true);
+    window.addEventListener('pointerup', pointerEndHandler, true);
   }
 
   _uninstallMoveAndClickHandlers() {
     if (this._handlers) {
-      const { mouseStartHandler, mouseMoveHandler, mouseEndHandler } =
+      const { pointerStartHandler, pointerMoveHandler, pointerEndHandler } =
         this._handlers;
-      window.addEventListener('pointerdown', mouseStartHandler, true);
-      window.addEventListener('pointermove', mouseMoveHandler, true);
-      window.addEventListener('pointerup', mouseEndHandler, true);
+      window.removeEventListener('pointerdown', pointerStartHandler, true);
+      window.removeEventListener('pointermove', pointerMoveHandler, true);
+      window.removeEventListener('pointerup', pointerEndHandler, true);
       this._handlers = null;
     }
   }
 
-  _onMouseMove = (event: SyntheticPointerEvent<>) => {
+  _onPointerMove = (event: SyntheticPointerEvent<>) => {
     if (!event.isPrimary) {
-      return;
+      return; // this is not the primary pointer (e.g. the second finger on a touch device)
     }
     if (!this._container) {
       return;
@@ -326,11 +325,11 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     endDelta: delta,
   }));
 
-  _zoomButtonOnMouseDown = (e: SyntheticMouseEvent<>) => {
+  _zoomButtonOnPointerDown = (e: SyntheticPointerEvent<>) => {
     e.stopPropagation();
   };
 
-  _zoomButtonOnClick = (e: SyntheticMouseEvent<>) => {
+  _zoomButtonOnClick = (e: SyntheticPointerEvent<>) => {
     e.stopPropagation();
     const { previewSelection, zeroAt, commitRange } = this.props;
     if (previewSelection.hasSelection) {
@@ -398,7 +397,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
                 hidden: previewSelection.isModifying,
               })}
               type="button"
-              onMouseDown={this._zoomButtonOnMouseDown}
+              onPointerDown={this._zoomButtonOnPointerDown}
               onClick={this._zoomButtonOnClick}
             />
           </div>
@@ -416,8 +415,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       <div
         className={classNames('timelineSelection', className)}
         ref={this._containerCreated}
-        onPointerDown={this._onMouseDown}
-        onPointerMove={this._onMouseMove}
+        onPointerDown={this._onPointerDown}
+        onPointerMove={this._onPointerMove}
       >
         {children}
         {previewSelection.hasSelection
