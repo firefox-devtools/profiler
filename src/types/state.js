@@ -293,7 +293,6 @@ export type FullProfileSpecificUrlState = {|
   showJsTracerSummary: boolean,
   legacyThreadOrder: ThreadIndex[] | null,
   legacyHiddenThreads: ThreadIndex[] | null,
-  openCategories: IndexIntoCategoryList[],
 |};
 
 /**
@@ -320,6 +319,7 @@ export type ProfileSpecificUrlState = {|
   isBottomBoxOpenPerPanel: IsOpenPerPanelState,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
+  sidebarOpenCategories: Set<IndexIntoCategoryList>,
 |};
 
 /**

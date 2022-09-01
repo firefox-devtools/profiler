@@ -130,8 +130,8 @@ export const getTimelineType: Selector<TimelineType> = (state) =>
   getProfileSpecificState(state).timelineType;
 
 /** Returns the indexes of categories that are opened in the sidebar */
-export const getOpenCategories: Selector<number[]> = (state) =>
-  getFullProfileSpecificState(state).openCategories;
+export const getSidebarOpenCategories: Selector<Set<number>> = (state) =>
+  getProfileSpecificState(state).sidebarOpenCategories;
 
 /**
  * Simple selectors for tracks and track order.

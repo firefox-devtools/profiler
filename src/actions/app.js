@@ -10,7 +10,7 @@ import {
   getIsActiveTabResourcesPanelOpen,
   getSelectedThreadIndexes,
   getLocalTrackOrderByPid,
-  getOpenCategories,
+  getSidebarOpenCategories,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getTrackThreadHeights,
@@ -419,19 +419,21 @@ export function updateBrowserConnectionStatus(
   return { type: 'UPDATE_BROWSER_CONNECTION_STATUS', browserConnectionStatus };
 }
 
-export function toggleOpenCategory(
+export function toggleOpenCategoryInSidebar(
   category: IndexIntoCategoryList
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    let openCategories = [...getOpenCategories(getState())];
-    if (openCategories.includes(category)) {
-      openCategories = openCategories.filter((c) => c !== category);
+    const sidebarOpenCategories = new Set(getSidebarOpenCategories(getState()));
+    if (sidebarOpenCategories.has(category)) {
+      sidebarOpenCategories.delete(category);
     } else {
-      openCategories.push(category);
+      sidebarOpenCategories.add(category);
     }
-    dispatch({
-      type: 'CHANGE_OPEN_CATEGORIES',
-      openCategories: openCategories,
+    withHistoryReplaceStateSync(() => {
+      dispatch({
+        type: 'CHANGE_OPEN_CATEGORIES',
+        sidebarOpenCategories: sidebarOpenCategories,
+      });
     });
   };
 }

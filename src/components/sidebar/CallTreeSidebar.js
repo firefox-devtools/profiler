@@ -16,9 +16,9 @@ import {
 } from 'firefox-profiler/selectors/per-thread';
 import {
   getSelectedThreadsKey,
-  getOpenCategories,
+  getSidebarOpenCategories,
 } from 'firefox-profiler/selectors/url-state';
-import { toggleOpenCategory } from 'firefox-profiler/actions/app';
+import { toggleOpenCategoryInSidebar } from 'firefox-profiler/actions/app';
 import { getCategories } from 'firefox-profiler/selectors/profile';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 import {
@@ -149,40 +149,39 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
   }
 }
 
-type CategoryBreakdownProps = {|
+type CategoryBreakdownOwnProps = {|
   +breakdown: BreakdownByCategory,
   +categoryList: CategoryList,
   +number: (number) => string,
 |};
 
-type CategoryBreakdownState = {|
+type CategoryBreakdownStateProps = {|
   +breakdown: BreakdownByCategory,
   +categoryList: CategoryList,
   +number: (number) => string,
-  +openCategories: IndexIntoCategoryList[],
+  +sidebarOpenCategories: Set<IndexIntoCategoryList>,
 |};
 
 type CategoryBreakdownDispatchProps = {|
-  +toggleOpenCategory: typeof toggleOpenCategory,
+  +toggleOpenCategoryInSidebar: typeof toggleOpenCategoryInSidebar,
 |};
 
-type CategoryBreakdownAllProps = {|
-  ...ConnectedProps<
-    CategoryBreakdownProps,
-    CategoryBreakdownState,
-    CategoryBreakdownDispatchProps
-  >,
-|};
+type CategoryBreakdownAllProps = ConnectedProps<
+  CategoryBreakdownOwnProps,
+  CategoryBreakdownStateProps,
+  CategoryBreakdownDispatchProps
+>;
 
 class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProps> {
   _toggleCategory = (event: SyntheticInputEvent<>) => {
-    const { toggleOpenCategory } = this.props;
+    const { toggleOpenCategoryInSidebar } = this.props;
     const { categoryIndex } = event.target.dataset;
-    toggleOpenCategory(parseInt(categoryIndex));
+    toggleOpenCategoryInSidebar(parseInt(categoryIndex));
   };
 
   render() {
-    const { breakdown, categoryList, number, openCategories } = this.props;
+    const { breakdown, categoryList, number, sidebarOpenCategories } =
+      this.props;
 
     const data = breakdown
       .map((oneCategoryBreakdown, categoryIndex) => {
@@ -219,7 +218,7 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
         {data.map(({ category, value, subcategories, categoryIndex }) => {
           const hasSubcategory =
             shouldDisplaySubcategoryInfoForCategory(category);
-          const expanded = openCategories.includes(categoryIndex);
+          const expanded = sidebarOpenCategories.has(categoryIndex);
           return (
             <React.Fragment key={category.name}>
               <SidebarDetail
@@ -227,7 +226,6 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
                   hasSubcategory ? (
                     <button
                       type="button"
-                      data-category={category.name}
                       data-category-index={categoryIndex}
                       onClick={this._toggleCategory}
                       className={classNames({
@@ -273,20 +271,17 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
 }
 
 export const CategoryBreakdown = explicitConnect<
-  CategoryBreakdownProps,
-  CategoryBreakdownState,
+  CategoryBreakdownOwnProps,
+  CategoryBreakdownStateProps,
   CategoryBreakdownDispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
-    const { categoryList, number } = ownProps;
     return {
-      openCategories: getOpenCategories(state),
-      breakdown: ownProps.breakdown,
-      categoryList: categoryList,
-      number: number,
+      sidebarOpenCategories: getSidebarOpenCategories(state),
+      ...ownProps,
     };
   },
-  mapDispatchToProps: { toggleOpenCategory },
+  mapDispatchToProps: { toggleOpenCategoryInSidebar },
   component: CategoryBreakdownImpl,
 });
 

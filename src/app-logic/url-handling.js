@@ -38,11 +38,11 @@ import type {
   ThreadIndex,
   TimelineType,
   SourceViewState,
-  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
   encodeUintArrayForUrlComponent,
+  decodeUintSetFromUrlComponent,
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
@@ -156,7 +156,6 @@ type FullProfileSpecificBaseQuery = {|
   // must be fetched to compute the tracks.
   threadOrder: string, // "3-2-0-1"
   hiddenThreads: string, // "0-1",
-  openCategories: string, // 0-1-2
 |};
 
 // Base query that only applies to active tab profile view.
@@ -183,6 +182,7 @@ type BaseQuery = {|
   implementation: string,
   timelineType: string,
   sourceView: string,
+  sidebarOpenCategories: string, // 0-1-2
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -325,9 +325,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.full.localTrackOrderByPid,
         urlState.profileSpecific.full.localTrackOrderChangedPids
       );
-      baseQuery.openCategories = convertOpenCategoriesToString(
-        urlState.profileSpecific.full.openCategories
-      );
       break;
     }
     case 'active-tab': {
@@ -376,6 +373,14 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         ? undefined
         : urlState.profileSpecific.timelineType,
   }: BaseQueryShape);
+
+  const sidebarOpenCategories = urlState.profileSpecific.sidebarOpenCategories;
+  if (sidebarOpenCategories.size > 0) {
+    console.log(urlState.profileSpecific.sidebarOpenCategories);
+    baseQuery.sidebarOpenCategories = encodeUintSetForUrlComponent(
+      urlState.profileSpecific.sidebarOpenCategories
+    );
+  }
 
   // Depending on which panel is active, also show tab-specific query parameters.
   let query: QueryShape;
@@ -641,10 +646,12 @@ export function stateFromLocation(
         legacyHiddenThreads: query.hiddenThreads
           ? query.hiddenThreads.split('-').map((index) => Number(index))
           : null,
-        openCategories: query.openCategories
-          ? query.openCategories.split('-').map((x) => parseInt(x))
-          : [],
       },
+      sidebarOpenCategories: new Set(
+        query.sidebarOpenCategories
+          ? decodeUintArrayFromUrlComponent(query.sidebarOpenCategories)
+          : []
+      ),
       activeTab: {
         isResourcesPanelOpen: query.resources !== undefined,
       },
@@ -673,7 +680,7 @@ function convertHiddenGlobalTracksFromString(
     return new Set();
   }
 
-  return new Set(decodeUintArrayFromUrlComponent(rawString));
+  return decodeUintSetFromUrlComponent(rawString);
 }
 
 function convertHiddenGlobalTracksToString(
@@ -779,14 +786,6 @@ function convertLocalTrackOrderByPidToString(
     }
   }
   return strings.join('~') || undefined;
-}
-
-function convertOpenCategoriesToString(
-  openCategories: IndexIntoCategoryList[]
-) {
-  return openCategories.length > 0
-    ? openCategories.map((x) => String(x)).join('-')
-    : undefined;
 }
 
 // This Error class is used in other codepaths to detect the specific error of

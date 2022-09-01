@@ -506,7 +506,7 @@ type UrlStateAction =
     |}
   | {|
       +type: 'CHANGE_OPEN_CATEGORIES',
-      +openCategories: IndexIntoCategoryList[],
+      +sidebarOpenCategories: Set<IndexIntoCategoryList>,
     |};
 
 type IconsAction =

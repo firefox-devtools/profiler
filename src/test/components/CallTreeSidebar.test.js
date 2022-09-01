@@ -85,8 +85,17 @@ describe('CallTreeSidebar', function () {
         <CallTreeSidebar />
       </Provider>
     );
+
+    const rerenderContainer = () =>
+      renderResult.rerender(
+        <Provider store={store}>
+          <CallTreeSidebar />
+        </Provider>
+      );
+
     return {
       ...renderResult,
+      rerenderContainer,
       ...store,
       funcNamesDict: funcNamesDictPerThread[0],
       selectNode,
@@ -179,13 +188,24 @@ describe('CallTreeSidebar', function () {
       queryByText,
       getAllByText,
       funcNamesDict: { A, B, C },
+      getState,
+      rerenderContainer,
     } = setup(getProfileWithSubCategories());
     selectNode([A, B, C]);
     expect(queryByText('FakeSubCategoryC')).not.toBeInTheDocument();
     expect(container.firstChild).toMatchSnapshot();
+    expect(getState().urlState.profileSpecific.sidebarOpenCategories).toEqual(
+      new Set()
+    );
 
     const layoutCategory = getAllByText('Layout')[0];
+
     fireFullClick(layoutCategory);
+    rerenderContainer();
+
+    expect(getState().urlState.profileSpecific.sidebarOpenCategories).toEqual(
+      new Set([2])
+    );
 
     expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
 

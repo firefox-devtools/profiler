@@ -500,10 +500,13 @@ const localTrackOrderChangedPids: Reducer<Set<Pid>> = (
 /**
  * Signals which categories are opened by default in the sidebar
  */
-const openCategories: Reducer<number[]> = (state: number[] = [], action) => {
+const sidebarOpenCategories: Reducer<Set<number>> = (
+  state: Set<number> = new Set(),
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_OPEN_CATEGORIES':
-      return action.openCategories;
+      return action.sidebarOpenCategories;
     default:
       return state;
   }
@@ -641,7 +644,6 @@ const fullProfileSpecific = combineReducers({
   // process. These value are only set by the locationToState function.
   legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
   legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
-  openCategories,
 });
 
 /**
@@ -670,6 +672,7 @@ const profileSpecific = combineReducers({
   timelineType,
   full: fullProfileSpecific,
   activeTab: activeTabProfileSpecific,
+  sidebarOpenCategories,
 });
 
 /**
