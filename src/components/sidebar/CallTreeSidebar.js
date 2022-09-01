@@ -156,9 +156,6 @@ type CategoryBreakdownOwnProps = {|
 |};
 
 type CategoryBreakdownStateProps = {|
-  +breakdown: BreakdownByCategory,
-  +categoryList: CategoryList,
-  +number: (number) => string,
   +sidebarOpenCategories: Set<IndexIntoCategoryList>,
 |};
 
@@ -275,10 +272,9 @@ export const CategoryBreakdown = explicitConnect<
   CategoryBreakdownStateProps,
   CategoryBreakdownDispatchProps
 >({
-  mapStateToProps: (state, ownProps) => {
+  mapStateToProps: (state) => {
     return {
       sidebarOpenCategories: getSidebarOpenCategories(state),
-      ...ownProps,
     };
   },
   mapDispatchToProps: { toggleOpenCategoryInSidebar },

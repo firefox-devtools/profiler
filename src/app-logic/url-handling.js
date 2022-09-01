@@ -155,7 +155,7 @@ type FullProfileSpecificBaseQuery = {|
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
   threadOrder: string, // "3-2-0-1"
-  hiddenThreads: string, // "0-1",
+  hiddenThreads: string, // "0-1"
 |};
 
 // Base query that only applies to active tab profile view.
@@ -182,7 +182,7 @@ type BaseQuery = {|
   implementation: string,
   timelineType: string,
   sourceView: string,
-  sidebarOpenCategories: string, // 0-1-2
+  sidebarOpenCategories: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
