@@ -376,7 +376,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
 
   const sidebarOpenCategories = urlState.profileSpecific.sidebarOpenCategories;
   if (sidebarOpenCategories.size > 0) {
-    console.log(urlState.profileSpecific.sidebarOpenCategories);
     baseQuery.sidebarOpenCategories = encodeUintSetForUrlComponent(
       urlState.profileSpecific.sidebarOpenCategories
     );
