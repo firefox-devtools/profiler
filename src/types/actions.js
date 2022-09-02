@@ -505,8 +505,8 @@ type UrlStateAction =
       +type: 'PROFILE_REMOTELY_DELETED',
     |}
   | {|
-      +type: 'CHANGE_OPEN_CATEGORIES',
-      +sidebarOpenCategories: Set<IndexIntoCategoryList>,
+      +type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
+      +category: IndexIntoCategoryList,
     |};
 
 type IconsAction =

@@ -10,7 +10,6 @@ import {
   getIsActiveTabResourcesPanelOpen,
   getSelectedThreadIndexes,
   getLocalTrackOrderByPid,
-  getSidebarOpenCategories,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getTrackThreadHeights,
@@ -421,19 +420,9 @@ export function updateBrowserConnectionStatus(
 
 export function toggleOpenCategoryInSidebar(
   category: IndexIntoCategoryList
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const sidebarOpenCategories = new Set(getSidebarOpenCategories(getState()));
-    if (sidebarOpenCategories.has(category)) {
-      sidebarOpenCategories.delete(category);
-    } else {
-      sidebarOpenCategories.add(category);
-    }
-    withHistoryReplaceStateSync(() => {
-      dispatch({
-        type: 'CHANGE_OPEN_CATEGORIES',
-        sidebarOpenCategories: sidebarOpenCategories,
-      });
-    });
+): Action {
+  return {
+    type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
+    category,
   };
 }

@@ -18,6 +18,7 @@ import {
   getSelectedThreadsKey,
   getSidebarOpenCategories,
 } from 'firefox-profiler/selectors/url-state';
+import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { toggleOpenCategoryInSidebar } from 'firefox-profiler/actions/app';
 import { getCategories } from 'firefox-profiler/selectors/profile';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
@@ -173,7 +174,9 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
   _toggleCategory = (event: SyntheticInputEvent<>) => {
     const { toggleOpenCategoryInSidebar } = this.props;
     const { categoryIndex } = event.target.dataset;
-    toggleOpenCategoryInSidebar(parseInt(categoryIndex));
+    withHistoryReplaceStateSync(() => {
+      toggleOpenCategoryInSidebar(parseInt(categoryIndex, 10));
+    });
   };
 
   render() {

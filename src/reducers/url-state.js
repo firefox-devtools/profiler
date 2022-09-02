@@ -505,8 +505,15 @@ const sidebarOpenCategories: Reducer<Set<number>> = (
   action
 ) => {
   switch (action.type) {
-    case 'CHANGE_OPEN_CATEGORIES':
-      return action.sidebarOpenCategories;
+    case 'TOGGLE_SIDEBAR_OPEN_CATEGORY': {
+      const newState = new Set(state);
+      if (newState.has(action.category)) {
+        newState.delete(action.category);
+      } else {
+        newState.add(action.category);
+      }
+      return newState;
+    }
     default:
       return state;
   }
