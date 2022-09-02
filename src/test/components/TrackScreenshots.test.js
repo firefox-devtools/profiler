@@ -28,6 +28,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
   fireFullClick,
+  fireFullPointerClick,
 } from '../fixtures/utils';
 import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -315,7 +316,7 @@ function setup(
   }
 
   function screenshotClick(pageX: number) {
-    fireFullClick(screenshotTrack(), { pageX, pageY: TOP });
+    fireFullPointerClick(screenshotTrack(), { pageX, pageY: TOP });
   }
 
   function screenshotTrack() {

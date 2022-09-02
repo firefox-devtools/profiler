@@ -397,6 +397,15 @@ export function fireFullClick(
   fireEvent(element, getMouseEvent('click', options));
 }
 
+export function fireFullPointerClick(
+  element: HTMLElement,
+  options?: FakeMouseEventInit
+) {
+  fireEvent(element, getPointerEvent('pointerdown', options));
+  fireEvent(element, getPointerEvent('pointerup', options));
+  fireEvent(element, getMouseEvent('click', options));
+}
+
 /**
  * This utility will fire a full context menu event as a user would. The options
  * paramter is optional. It will always add the `button` and `buttons` value to
