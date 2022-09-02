@@ -498,7 +498,9 @@ const localTrackOrderChangedPids: Reducer<Set<Pid>> = (
 };
 
 /**
- * Signals which categories are opened by default in the sidebar
+ * Signals which categories are opened by default in the sidebar,
+ * if the index is negative then it is the index of the self time category -1,
+ * else the index of the total time category
  */
 const sidebarOpenCategories: Reducer<Set<number>> = (
   state: Set<number> = new Set(),

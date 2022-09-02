@@ -208,7 +208,22 @@ describe('CallTreeSidebar', function () {
     );
 
     expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
+    // only the 'Layout' category for the total running samples is expanded,
+    // not the other one too
+    expect(getAllByText('FakeSubCategoryC').length).toBe(1);
 
     expect(container.firstChild).toMatchSnapshot();
+
+    const layoutCategory2 = getAllByText('Layout')[1];
+
+    fireFullClick(layoutCategory2);
+    rerenderContainer();
+
+    expect(getState().urlState.profileSpecific.sidebarOpenCategories).toEqual(
+      new Set([2, -3])
+    );
+
+    expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
+    expect(getAllByText('FakeSubCategoryC')[1]).toBeInTheDocument();
   });
 });

@@ -423,7 +423,7 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
       class="sidebar-label"
     >
       <button
-        class="sidebar-toggle expanded"
+        class="sidebar-toggle"
         data-category-index="2"
         type="button"
       >
@@ -447,21 +447,6 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
         class="sidebar-histogram-bar-color category-color-purple"
         style="width: 100.0000%;"
       />
-    </div>
-    <div
-      class="sidebar-label sidebar-label-indent"
-    >
-      FakeSubCategoryC
-    </div>
-    <div
-      class="sidebar-percentage"
-    >
-      100%
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2
     </div>
     <h4
       class="sidebar-title3 sidebar-title-label"

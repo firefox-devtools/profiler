@@ -419,10 +419,11 @@ export function updateBrowserConnectionStatus(
 }
 
 export function toggleOpenCategoryInSidebar(
-  category: IndexIntoCategoryList
+  category: IndexIntoCategoryList,
+  isTotal: boolean
 ): Action {
   return {
     type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
-    category,
+    category: isTotal ? category : -category - 1,
   };
 }

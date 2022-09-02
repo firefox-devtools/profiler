@@ -151,6 +151,8 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
 }
 
 type CategoryBreakdownOwnProps = {|
+  /** for total or self breakdown */
+  +isTotal: boolean,
   +breakdown: BreakdownByCategory,
   +categoryList: CategoryList,
   +number: (number) => string,
@@ -172,10 +174,10 @@ type CategoryBreakdownAllProps = ConnectedProps<
 
 class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProps> {
   _toggleCategory = (event: SyntheticInputEvent<>) => {
-    const { toggleOpenCategoryInSidebar } = this.props;
+    const { toggleOpenCategoryInSidebar, isTotal } = this.props;
     const { categoryIndex } = event.target.dataset;
     withHistoryReplaceStateSync(() => {
-      toggleOpenCategoryInSidebar(parseInt(categoryIndex, 10));
+      toggleOpenCategoryInSidebar(parseInt(categoryIndex, 10), isTotal);
     });
   };
 
@@ -275,9 +277,12 @@ export const CategoryBreakdown = explicitConnect<
   CategoryBreakdownStateProps,
   CategoryBreakdownDispatchProps
 >({
-  mapStateToProps: (state) => {
+  mapStateToProps: (state, props) => {
+    const openCats = getSidebarOpenCategories(state);
     return {
-      sidebarOpenCategories: getSidebarOpenCategories(state),
+      sidebarOpenCategories: props.isTotal
+        ? openCats
+        : new Set([...openCats].filter((c) => c < 0).map((c) => -c - 1)),
     };
   },
   mapDispatchToProps: { toggleOpenCategoryInSidebar },
@@ -447,6 +452,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
                 </div>
               </h4>
               <CategoryBreakdown
+                isTotal={true}
                 breakdown={totalTimeBreakdownByCategory}
                 categoryList={categoryList}
                 number={number}
@@ -462,6 +468,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
                 </div>
               </h4>
               <CategoryBreakdown
+                isTotal={false}
                 breakdown={selfTimeBreakdownByCategory}
                 categoryList={categoryList}
                 number={number}

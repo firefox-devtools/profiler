@@ -47,7 +47,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 7;
+export const CURRENT_URL_VERSION = 8;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -376,9 +376,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
 
   const sidebarOpenCategories = urlState.profileSpecific.sidebarOpenCategories;
   if (sidebarOpenCategories.size > 0) {
-    baseQuery.sidebarOpenCategories = encodeUintSetForUrlComponent(
-      urlState.profileSpecific.sidebarOpenCategories
-    );
+    baseQuery.sidebarOpenCategories = [
+      ...urlState.profileSpecific.sidebarOpenCategories,
+    ].join('p');
   }
 
   // Depending on which panel is active, also show tab-specific query parameters.
@@ -648,7 +648,7 @@ export function stateFromLocation(
       },
       sidebarOpenCategories: new Set(
         query.sidebarOpenCategories
-          ? decodeUintArrayFromUrlComponent(query.sidebarOpenCategories)
+          ? query.sidebarOpenCategories.split('p').map((x) => parseInt(x, 10))
           : []
       ),
       activeTab: {
@@ -1119,6 +1119,7 @@ const _upgraders: {|
         break;
     }
   },
+  [8]: ({ _ }: ProcessedLocationBeforeUpgrade) => {},
 };
 
 for (let destVersion = 1; destVersion <= CURRENT_URL_VERSION; destVersion++) {

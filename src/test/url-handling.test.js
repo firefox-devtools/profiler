@@ -1625,14 +1625,14 @@ describe('URL persistence of open categories in sidebar', function () {
     expect(urlStateSelectors.getSidebarOpenCategories(getState())).toEqual(
       new Set()
     );
-    dispatch(toggleOpenCategoryInSidebar(0));
+    dispatch(toggleOpenCategoryInSidebar(0, true));
 
     let newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
     expect(
       urlStateSelectors.getSidebarOpenCategories(newStore.getState())
     ).toEqual(new Set([0]));
 
-    dispatch(toggleOpenCategoryInSidebar(0));
+    dispatch(toggleOpenCategoryInSidebar(0, true));
     newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
     expect(
       urlStateSelectors.getSidebarOpenCategories(newStore.getState())
