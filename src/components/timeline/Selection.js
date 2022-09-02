@@ -58,7 +58,6 @@ type State = {|
 
 class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   _handlers: ?{|
-    pointerStartHandler: PointerHandler,
     pointerMoveHandler: PointerHandler,
     pointerEndHandler: PointerHandler,
   |};
@@ -228,15 +227,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       this._uninstallMoveAndClickHandlers();
     };
 
-    this._installMoveAndClickHandlers(
-      pointerEndHandler,
-      pointerMoveHandler,
-      pointerEndHandler
-    );
+    this._installMoveAndClickHandlers(pointerMoveHandler, pointerEndHandler);
   };
 
   _installMoveAndClickHandlers(
-    pointerStartHandler: PointerHandler,
     pointerMoveHandler: PointerHandler,
     pointerEndHandler: PointerHandler
   ) {
@@ -244,17 +238,14 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     // drag (e.g. when tab switching during a drag, or when ctrl+clicking on macOS).
     this._uninstallMoveAndClickHandlers();
 
-    this._handlers = { pointerStartHandler, pointerMoveHandler, pointerEndHandler };
-    window.addEventListener('pointerdown', pointerStartHandler, true);
+    this._handlers = { pointerMoveHandler, pointerEndHandler };
     window.addEventListener('pointermove', pointerMoveHandler, true);
     window.addEventListener('pointerup', pointerEndHandler, true);
   }
 
   _uninstallMoveAndClickHandlers() {
     if (this._handlers) {
-      const { pointerStartHandler, pointerMoveHandler, pointerEndHandler } =
-        this._handlers;
-      window.removeEventListener('pointerdown', pointerStartHandler, true);
+      const { pointerMoveHandler, pointerEndHandler } = this._handlers;
       window.removeEventListener('pointermove', pointerMoveHandler, true);
       window.removeEventListener('pointerup', pointerEndHandler, true);
       this._handlers = null;
