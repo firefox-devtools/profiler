@@ -611,20 +611,46 @@ TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
 TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
 TrackMemoryGraph--operations-since-the-previous-sample = 自前一次取樣以來的操作次數
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
 
-# This is used in the tooltip when the power value uses the Watt unit.
+# This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-watt = 電源: <em>{ $value } W</em>
-# This is used in the tooltip when the power value uses the Milliwatt unit.
+TrackPower--tooltip-power-watt = { $value } W
+    .label = 功率
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-milliwatt = 電源: <em>{ $value } mW</em>
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = 功率
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+    .label = 可見範圍內消耗的能源
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+    .label = 可見範圍內消耗的能源
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
+    .label = 目前選擇範圍內消耗的能源
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = 目前選擇範圍內消耗的能源
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
