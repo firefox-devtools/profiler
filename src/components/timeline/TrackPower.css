@@ -24,14 +24,3 @@
   border-radius: 3px;
   pointer-events: none;
 }
-
-.timelineTrackPowerTooltipLine {
-  white-space: nowrap;
-}
-
-.timelineTrackPowerTooltipNumber {
-  display: inline-block;
-  min-width: 60px;
-  color: var(--grey-60);
-  font-weight: bold;
-}

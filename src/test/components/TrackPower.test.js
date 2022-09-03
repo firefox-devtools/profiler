@@ -11,6 +11,8 @@ import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackPower } from '../../components/timeline/TrackPower';
 import { ensureExists } from '../../utils/flow';
 
@@ -64,8 +66,8 @@ describe('TrackPower', function () {
         threadIndex,
         {
           time: thread.samples.time.slice(),
-          // Power usage numbers.
-          count: [100, 400, 500, 1000, 200, 500, 300, 100],
+          // Power usage numbers. They are pWh so they are pretty big.
+          count: [10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 10000],
           length: SAMPLE_COUNT,
         },
         'SystemPower',
@@ -148,6 +150,11 @@ describe('TrackPower', function () {
     const { moveMouseAtCounter, getTooltipContents } = setup();
     // We are hovering exactly between 4th and 5th counter. That's why it should
     // show the 5th counter.
+    // Here are the values we'll get in the tooltip:
+    // 5th counter value is 5000000 pWh, that is 5 µWh. Over 1ms, this means
+    // 18W (5 * 1000 * 3600 / 1000^2).
+    // Over the full range, we get 7.240 µWh, therefore we'll see in the tooltip
+    // 0.007 mWh.
     moveMouseAtCounter(4, 0.5);
     expect(getTooltipContents()).toMatchSnapshot();
   });
@@ -175,10 +182,29 @@ describe('TrackPower', function () {
   });
 
   it('shows a tooltip with a Power: line and a power unit', function () {
-    const { moveMouseAtCounter } = setup();
+    const { dispatch, moveMouseAtCounter } = setup();
+    dispatch(
+      updatePreviewSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 5,
+        selectionEnd: 6,
+      })
+    );
     moveMouseAtCounter(3, 0);
-    // 1000pWh spent over 1ms is 3.6mW
+    // 100000pWh spent over 1ms is 360mW
     // Note: Fluent adds isolation characters \u2068 and \u2069 around variables.
-    expect(screen.getByText(/Power:/)).toHaveTextContent('3.6\u2069 mW');
+    expect(screen.getByText(/Power:/).nextSibling).toHaveTextContent(
+      '360\u2069 mW'
+    );
+    // Over the full range, we get 7.240 µWh, therefore we'll see in the tooltip
+    // 0.007 mWh.
+    expect(screen.getByText(/visible range:/).nextSibling).toHaveTextContent(
+      '0.007\u2069 mWh'
+    );
+    // Over the preview selection, we get 5 µWh which shows up as 0.005 mWh.
+    expect(
+      screen.getByText(/current selection:/).nextSibling
+    ).toHaveTextContent('0.005\u2069 mWh');
   });
 });
