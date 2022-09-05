@@ -21,10 +21,8 @@ const availableStagingLocales = process.env.L10N
   : JSON.stringify(undefined);
 
 const config = {
-  entry: './src/index',
   output: {
-    path: path.join(__dirname, 'dist'),
-    filename: '[name].[hash].bundle.js',
+    filename: '[name].[contenthash].bundle.js',
     publicPath: '/',
   },
   mode: process.env.NODE_ENV,
@@ -40,17 +38,17 @@ const config = {
     rules: [
       {
         test: /\.js$/,
-        loaders: ['babel-loader'],
+        use: ['babel-loader'],
         include: includes.concat(es6modulePaths),
       },
       {
         test: /\.json$/,
-        loaders: ['json-loader'],
+        use: ['json-loader'],
         include: includes,
       },
       {
         test: /\.css?$/,
-        loaders: [
+        use: [
           'style-loader',
           { loader: 'css-loader', options: { importLoaders: 1 } },
           'postcss-loader',
@@ -63,20 +61,17 @@ const config = {
       },
       {
         test: /\.jpg$/,
-        loader: 'file-loader',
+        type: 'asset/resource',
       },
       {
         test: /\.png$/,
-        loader: 'file-loader',
+        type: 'asset/resource',
       },
       {
         test: /\.svg$/,
-        loader: 'file-loader',
+        type: 'asset/resource',
       },
     ],
-  },
-  node: {
-    process: false,
   },
   plugins: [
     new CircularDependencyPlugin({
@@ -111,6 +106,10 @@ const config = {
       ],
     }),
   ],
+  experiments: {
+    // Make WebAssembly work just like in webpack v4
+    syncWebAssembly: true,
+  },
 };
 
 if (config.mode === 'production') {
