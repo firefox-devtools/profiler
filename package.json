@@ -186,6 +186,10 @@
     "globals": {
       "AVAILABLE_STAGING_LOCALES": null
     },
+    "snapshotFormat": {
+      "escapeString": true,
+      "printBasicPrototype": true
+    },
     "testEnvironment": "jsdom",
     "verbose": false
   },
