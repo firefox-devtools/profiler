@@ -356,3 +356,10 @@ export const getTimelineMarginLeft: Selector<number> = createSelector(
     }
   }
 );
+
+/**
+ * Returns the indexes of categories that are opened in the sidebar,
+ * for every category
+ */
+export const getSidebarOpenCategories: Selector<Map<string, Set<number>>> =
+  createSelector(getApp, (app) => app.sidebarOpenCategories);

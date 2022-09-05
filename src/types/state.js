@@ -185,6 +185,7 @@ export type AppState = {|
   +urlSetupPhase: UrlSetupPhase,
   +hasZoomedViaMousewheel: boolean,
   +isSidebarOpenPerPanel: IsOpenPerPanelState,
+  +sidebarOpenCategories: Map<string, Set<number>>,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
   +trackThreadHeights: {
@@ -313,7 +314,6 @@ export type ProfileSpecificUrlState = {|
   isBottomBoxOpenPerPanel: IsOpenPerPanelState,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
-  sidebarOpenCategories: Set<number>,
 |};
 
 /**

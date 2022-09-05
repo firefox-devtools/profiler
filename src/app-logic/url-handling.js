@@ -42,12 +42,11 @@ import type {
 import {
   decodeUintArrayFromUrlComponent,
   encodeUintArrayForUrlComponent,
-  decodeUintSetFromUrlComponent,
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 8;
+export const CURRENT_URL_VERSION = 7;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -182,7 +181,6 @@ type BaseQuery = {|
   implementation: string,
   timelineType: string,
   sourceView: string,
-  sidebarOpenCategories: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -325,6 +323,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.full.localTrackOrderByPid,
         urlState.profileSpecific.full.localTrackOrderChangedPids
       );
+
       break;
     }
     case 'active-tab': {
@@ -374,13 +373,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         : urlState.profileSpecific.timelineType,
   }: BaseQueryShape);
 
-  const sidebarOpenCategories = urlState.profileSpecific.sidebarOpenCategories;
-  if (sidebarOpenCategories.size > 0) {
-    baseQuery.sidebarOpenCategories = [
-      ...urlState.profileSpecific.sidebarOpenCategories,
-    ].join('p');
-  }
-
   // Depending on which panel is active, also show tab-specific query parameters.
   let query: QueryShape;
   const selectedTab = urlState.selectedTab;
@@ -398,6 +390,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       } else {
         query = (baseQuery: CallTreeQueryShape);
       }
+
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
         ? null
@@ -646,11 +639,6 @@ export function stateFromLocation(
           ? query.hiddenThreads.split('-').map((index) => Number(index))
           : null,
       },
-      sidebarOpenCategories: new Set(
-        query.sidebarOpenCategories
-          ? query.sidebarOpenCategories.split('p').map((x) => parseInt(x, 10))
-          : []
-      ),
       activeTab: {
         isResourcesPanelOpen: query.resources !== undefined,
       },
@@ -679,7 +667,7 @@ function convertHiddenGlobalTracksFromString(
     return new Set();
   }
 
-  return decodeUintSetFromUrlComponent(rawString);
+  return new Set(decodeUintArrayFromUrlComponent(rawString));
 }
 
 function convertHiddenGlobalTracksToString(
@@ -1119,7 +1107,6 @@ const _upgraders: {|
         break;
     }
   },
-  [8]: ({ _ }: ProcessedLocationBeforeUpgrade) => {},
 };
 
 for (let destVersion = 1; destVersion <= CURRENT_URL_VERSION; destVersion++) {

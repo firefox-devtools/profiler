@@ -19,11 +19,7 @@ import {
   commitRange,
   setDataSource,
 } from '../actions/profile-view';
-import {
-  changeSelectedTab,
-  changeProfilesToCompare,
-  toggleOpenCategoryInSidebar,
-} from '../actions/app';
+import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
   stateFromLocation,
   getQueryStringFromUrlState,
@@ -1611,32 +1607,6 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
         funcIndex: 11,
       },
     ]);
-  });
-});
-
-describe('URL persistence of open categories in sidebar', function () {
-  function setup() {
-    return _getStoreWithURL();
-  }
-
-  it('persists the URL state after roundtrips and toggles', function () {
-    const { dispatch, getState } = setup();
-
-    expect(urlStateSelectors.getSidebarOpenCategories(getState())).toEqual(
-      new Set()
-    );
-    dispatch(toggleOpenCategoryInSidebar(0, true));
-
-    let newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
-    expect(
-      urlStateSelectors.getSidebarOpenCategories(newStore.getState())
-    ).toEqual(new Set([0]));
-
-    dispatch(toggleOpenCategoryInSidebar(0, true));
-    newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
-    expect(
-      urlStateSelectors.getSidebarOpenCategories(newStore.getState())
-    ).toEqual(new Set());
   });
 });
 

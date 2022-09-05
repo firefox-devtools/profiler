@@ -59,10 +59,6 @@ export function encodeUintSetForUrlComponent(numbers: Set<number>): string {
   return encodeUintArrayForUrlComponent(array);
 }
 
-export function decodeUintSetFromUrlComponent(s: string): Set<number> {
-  return new Set(decodeUintArrayFromUrlComponent(s));
-}
-
 export function encodeUintArrayForUrlComponent(numbers: number[]): string {
   let result = '';
   for (let i = 0; i < numbers.length; i++) {

@@ -188,24 +188,16 @@ describe('CallTreeSidebar', function () {
       queryByText,
       getAllByText,
       funcNamesDict: { A, B, C },
-      getState,
       rerenderContainer,
     } = setup(getProfileWithSubCategories());
     selectNode([A, B, C]);
     expect(queryByText('FakeSubCategoryC')).not.toBeInTheDocument();
     expect(container.firstChild).toMatchSnapshot();
-    expect(getState().urlState.profileSpecific.sidebarOpenCategories).toEqual(
-      new Set()
-    );
 
     const layoutCategory = getAllByText('Layout')[0];
 
     fireFullClick(layoutCategory);
     rerenderContainer();
-
-    expect(getState().urlState.profileSpecific.sidebarOpenCategories).toEqual(
-      new Set([2])
-    );
 
     expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
     // only the 'Layout' category for the total running samples is expanded,
@@ -218,10 +210,6 @@ describe('CallTreeSidebar', function () {
 
     fireFullClick(layoutCategory2);
     rerenderContainer();
-
-    expect(getState().urlState.profileSpecific.sidebarOpenCategories).toEqual(
-      new Set([2, -3])
-    );
 
     expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
     expect(getAllByText('FakeSubCategoryC')[1]).toBeInTheDocument();

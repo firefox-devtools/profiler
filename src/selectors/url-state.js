@@ -130,14 +130,6 @@ export const getTimelineType: Selector<TimelineType> = (state) =>
   getProfileSpecificState(state).timelineType;
 
 /**
- * Returns the indexes of categories that are opened in the sidebar,
- * if the index is negative then it is the index of the self time category -1,
- * else the index of the total time category
- */
-export const getSidebarOpenCategories: Selector<Set<number>> = (state) =>
-  getProfileSpecificState(state).sidebarOpenCategories;
-
-/**
  * Simple selectors for tracks and track order.
  */
 export const getLegacyThreadOrder: Selector<ThreadIndex[] | null> = (state) =>

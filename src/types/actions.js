@@ -506,6 +506,7 @@ type UrlStateAction =
     |}
   | {|
       +type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
+      +kind: string,
       +category: IndexIntoCategoryList,
     |};
 

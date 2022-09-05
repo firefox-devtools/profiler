@@ -497,30 +497,6 @@ const localTrackOrderChangedPids: Reducer<Set<Pid>> = (
   }
 };
 
-/**
- * Signals which categories are opened by default in the sidebar,
- * if the index is negative then it is the index of the self time category -1,
- * else the index of the total time category
- */
-const sidebarOpenCategories: Reducer<Set<number>> = (
-  state: Set<number> = new Set(),
-  action
-) => {
-  switch (action.type) {
-    case 'TOGGLE_SIDEBAR_OPEN_CATEGORY': {
-      const newState = new Set(state);
-      if (newState.has(action.category)) {
-        newState.delete(action.category);
-      } else {
-        newState.add(action.category);
-      }
-      return newState;
-    }
-    default:
-      return state;
-  }
-};
-
 // If you update this reducer, please don't forget to update the profileName
 // reducer below as well.
 const pathInZipFile: Reducer<string | null> = (state = null, action) => {
@@ -681,7 +657,6 @@ const profileSpecific = combineReducers({
   timelineType,
   full: fullProfileSpecific,
   activeTab: activeTabProfileSpecific,
-  sidebarOpenCategories,
 });
 
 /**
