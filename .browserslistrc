@@ -1,4 +1,12 @@
-current node
+[development]
 last 2 chrome versions
 last 2 firefox versions
 last 2 safari versions
+
+[production]
+last 2 chrome versions
+last 2 firefox versions
+last 2 safari versions
+
+[test]
+current node
