@@ -200,7 +200,7 @@ Home--profiler-motto = Capture um profile de desempenho. Analise. Compartilhe. T
 Home--additional-content-title = Carregar profiles existentes
 Home--additional-content-content = Você pode <strong>arrastar e soltar</strong> aqui um arquivo de profile para carregar, ou:
 Home--compare-recordings-info = Você também pode comparar gravações. <a>Abra a interface de comparação.</a>
-Home--recent-uploaded-recordings-title = Gravações enviadas recentemente
+Home--your-recent-uploaded-recordings-title = Suas gravações enviadas recentemente
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -226,9 +226,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Excluir
     .title = Este profile não pode ser excluído por falta de informações de autorização.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nenhum profile foi carregado ainda!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Veja e gerencie todas as suas gravações (mais { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -319,6 +319,7 @@ MenuButtons--metaInfo--symbolicate-profile = Criar simbólicos no profile
 MenuButtons--metaInfo--attempting-resymbolicate = Tentando recriar simbólicos no profile
 MenuButtons--metaInfo--currently-symbolicating = Criando simbólicos no profile
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = Memória principal:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -350,6 +351,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } cores lógicos
     }
 MenuButtons--metaInfo--main-process-started = Processo principal iniciado:
+MenuButtons--metaInfo--main-process-ended = Processo principal finalizado:
 MenuButtons--metaInfo--interval = Intervalo:
 MenuButtons--metaInfo--buffer-capacity = Capacidade do buffer:
 MenuButtons--metaInfo--buffer-duration = Duração do buffer:
@@ -368,6 +370,7 @@ MenuButtons--metaInfo--name-and-version = Nome e versão:
 MenuButtons--metaInfo--update-channel = Canal de atualização:
 MenuButtons--metaInfo--build-id = ID da compilação:
 MenuButtons--metaInfo--build-type = Tipo de compilação:
+MenuButtons--metaInfo--arguments = Argumentos:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -604,6 +607,12 @@ TrackContextMenu--hide-all-matching-tracks = Ocultar todas as faixas corresponde
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Nenhum resultado encontrado de “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Ocultar faixa
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Ocultar processo
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
@@ -614,20 +623,46 @@ TrackMemoryGraph--relative-memory-at-this-time = memória relativa neste momento
 TrackMemoryGraph--memory-range-in-graph = intervalo de memória no gráfico
 TrackMemoryGraph--operations-since-the-previous-sample = operações desde a amostra anterior
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
 
-# This is used in the tooltip when the power value uses the Watt unit.
+# This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-watt = Potência: <em>{ $value } W</em>
-# This is used in the tooltip when the power value uses the Milliwatt unit.
+TrackPower--tooltip-power-watt = { $value } W
+    .label = Potência
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-milliwatt = Potência: <em>{ $value } mW</em>
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Potência
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+    .label = Energia usada na escala visível
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+    .label = Energia usada na escala visível
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
+    .label = Energia usada na seleção atual
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = Energia usada na seleção atual
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

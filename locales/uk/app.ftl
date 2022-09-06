@@ -259,7 +259,7 @@ Home--profiler-motto = Отримайте профіль швидкодії. П�
 Home--additional-content-title = Завантажити наявні профілі
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
 Home--compare-recordings-info = Ви також можете порівняти записи. <a>Відкрити інтерфейс порівняння.</a>
-Home--recent-uploaded-recordings-title = Останні завантаження
+Home--your-recent-uploaded-recordings-title = Ваші недавно вивантажені записи
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -285,9 +285,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Видалити
     .title = Цей профіль не можна видалити оскільки ми не маємо інформації про авторизацію.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Жодного профілю ще не завантажено!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Переглянути всі свої записи та керувати ними (ще { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -379,6 +379,7 @@ MenuButtons--metaInfo--symbolicate-profile = Символізувати проф
 MenuButtons--metaInfo--attempting-resymbolicate = Спроба повторно символізувати профіль
 MenuButtons--metaInfo--currently-symbolicating = Наразі профіль символізується
 MenuButtons--metaInfo--cpu = ЦП:
+MenuButtons--metaInfo--main-memory = Основна пам'ять:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -414,6 +415,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[many] { $logicalCPUs } логічних ядер
     }
 MenuButtons--metaInfo--main-process-started = Основний процес розпочато:
+MenuButtons--metaInfo--main-process-ended = Основний процес завершено:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--buffer-capacity = Обсяг буфера:
 MenuButtons--metaInfo--buffer-duration = Тривалість буфера:
@@ -433,6 +435,7 @@ MenuButtons--metaInfo--name-and-version = Назва та версія:
 MenuButtons--metaInfo--update-channel = Канал оновлень:
 MenuButtons--metaInfo--build-id = ID збірки:
 MenuButtons--metaInfo--build-type = Тип збірки:
+MenuButtons--metaInfo--arguments = Аргументи:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -669,6 +672,12 @@ TrackContextMenu--hide-all-matching-tracks = Сховати всі відпов�
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Не знайдено результатів за запитом “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Сховати доріжку
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Сховати процес
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
@@ -679,20 +688,46 @@ TrackMemoryGraph--relative-memory-at-this-time = відносна пам'ять 
 TrackMemoryGraph--memory-range-in-graph = діапазон пам'яті в графіку
 TrackMemoryGraph--operations-since-the-previous-sample = операції, починаючи з попереднього зразка
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
 
-# This is used in the tooltip when the power value uses the Watt unit.
+# This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-watt = Потужність: <em>{ $value } Вт</em>
-# This is used in the tooltip when the power value uses the Milliwatt unit.
+TrackPower--tooltip-power-watt = { $value } Вт
+    .label = Потужність
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-milliwatt = Потужність: <em>{ $value } мВт</em>
+TrackPower--tooltip-power-milliwatt = { $value } мВт
+    .label = Потужність
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-watthour = { $value } Вт·год
+    .label = Використовувана у видимому діапазоні енергія
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } мВт·год
+    .label = Використовувана у видимому діапазоні енергія
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Вт·год
+    .label = Використовувана в поточному виборі енергія
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } Вт·год
+    .label = Використовувана в поточному виборі енергія
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
