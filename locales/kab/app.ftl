@@ -113,10 +113,6 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
-FullTimeline--graph-type = Anaw n udfil:
-FullTimeline--categories-with-cpu = taggayin s CPU
-FullTimeline--categories = Taggayin
-FullTimeline--stack-height = Teɣzi n tbursa
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
@@ -140,7 +136,6 @@ Home--profiler-motto = Ṭṭef amaɣnu n temlellit. Sleḍ-it. Bḍu-t. Err web
 Home--additional-content-title = Sali imuɣna yellan
 Home--additional-content-content = Tzemreḍ <strong>ad tzuɣreḍ syen sers</strong> afaylu n umaɣnu da i usali-ines, neɣ:
 Home--compare-recordings-info = Tzemreḍ daɣen ad tsenmehleḍ iseklasen. <a>Ldi agrudem n usnemhel.</a>
-Home--recent-uploaded-recordings-title = Iseklasen i d-ulin melmi kan
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -164,9 +159,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Kkes
     .title = Amaɣnu-a ur yezmir ara ad yettwakkes acku ur nesɛi ara talɣut n usireg.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ulac ameɣnu i d-yettwasulin akka ar tura!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Wali syen sefrek meṛṛa iseklasen-ik·im ({ $profilesRestCount } d wugar)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -232,7 +227,8 @@ MenuButtons--index--profile-info-uploaded-actions = Kkes
 MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
 MenuButtons--metaInfo--cpu = CPU:
-MenuButtons--metaInfo--recording-started = Asekles yebda:
+MenuButtons--metaInfo--main-process-started = Asesfer agejdan yebda:
+MenuButtons--metaInfo--main-process-ended = Asesfer agejdan yekfa:
 MenuButtons--metaInfo--interval = Azilal:
 MenuButtons--metaInfo--buffer-capacity = Tazmert n uḥraz:
 MenuButtons--metaInfo--buffer-duration = Tanzgat n uḥraz:
@@ -251,6 +247,7 @@ MenuButtons--metaInfo--name-and-version = Isem akked lqem:
 MenuButtons--metaInfo--update-channel = Leqqem abadu:
 MenuButtons--metaInfo--build-id = Asulay n lebni:
 MenuButtons--metaInfo--build-type = Anaw n lebni:
+MenuButtons--metaInfo--arguments = Ifakulen:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -267,6 +264,7 @@ MenuButtons--metaInfo--os = Anagraw n wammud:
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--speed-index = Amatar arurad:
 MenuButtons--metaInfo-renderRowOfList-label-features = Timahilin:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Imsizdeg n usqerdec:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Isiɣzaf:
 
 ## Overhead refers to the additional resources used to run the profiler.
@@ -285,9 +283,15 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Azilal
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Seddu isefka seg waccaren-nniḍen
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Seddu inegzumen
+MenuButtons--publish--renderCheckbox-label-resource = Seddu URLs d yiberdan n tiɣbula
 MenuButtons--publish--renderCheckbox-label-extension = Seddu talɣut n usiɣzef
 MenuButtons--publish--renderCheckbox-label-preference = Seddu azalen n usmenyif
+MenuButtons--publish--renderCheckbox-label-private-browsing = Seddu isefka seg yisfuyla n tunigin tusligt
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Amaɣnu-a yegber isefka n tunigin tusligt
+MenuButtons--publish--reupload-performance-profile = Ales asali n umaɣnu n temlellit
 MenuButtons--publish--share-performance-profile = Bḍu amaɣnu n usmenyif
 MenuButtons--publish--info-description-default = S wudem amezwer, isefka-ik·im udmawanen ttwakksen.
 MenuButtons--publish--button-upload = Sali
@@ -321,6 +325,34 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Kkes
+    .title = Sit dagi i tukksa n umaɣnu { $smallProfileName }
+
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Tella-d tuccḍa lawan n tukksa n umaɣna-a <a>Ɛeddi ɣef useɣwen-a i wakken ad teẓreḍ ugar</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Kkes { $profileName }
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Sefsex
+ProfileDeletePanel--dialog-delete-button =
+    .value = Kkes
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Tukksa…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Isefka i d-yulin ttwakksen akken iwata
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -328,6 +360,13 @@ NumberFormat--short-date = { SHORTDATE($date) }
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Aktar n umaɣnu srid seg { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Taɣuri n ufaylu d usesfer n umaɣnu…
+ProfileLoaderAnimation--loading-local = Ur yettwasebded ara yakan.
+ProfileLoaderAnimation--loading-public = Asader d usesfer n umaɣnu…
+ProfileLoaderAnimation--loading-from-url = Asader d usesfer n umaɣnu…
+ProfileLoaderAnimation--loading-compare = Taquri d usesfer n yimuɣna…
+ProfileLoaderAnimation--loading-view-not-found = Ur tettwaf ara teskant
 
 ## ProfileRootMessage
 
@@ -338,9 +377,10 @@ ProfileRootMessage--additional = Uɣal ɣer ugejdan
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--installing-button = Asebded…
+ServiceWorkerManager--applying-button = Asnas iteddu…
 ServiceWorkerManager--pending-button = Snes syen ales asali
 ServiceWorkerManager--installed-button = Ales asali n usnas
+ServiceWorkerManager--new-version-is-ready = Lqem amaynut n usnas yettwasader, yewjed i useqqdec
 ServiceWorkerManager--hide-notice-button =
     .title = Ffer alɣu-a d-yulin i tikkelt-nniḍen
     .aria-label = Ffer alɣu-a d-yulin i tikkelt-nniḍen
@@ -364,6 +404,7 @@ TabBar--network-tab = Aẓeṭṭa
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Sken kan asesfer-a
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
@@ -372,6 +413,14 @@ TrackContextMenu--only-show-track = Sken kan “{ $trackName }”
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Ffer “{ $trackName }”
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Ulac igmaḍ yettwafen i “<span>{ $searchFilter }</span>”
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Ffer asesfer
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
@@ -379,6 +428,13 @@ TrackContextMenu--hide-track = Ffer “{ $trackName }”
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
 TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
+
+## TrackPowerGraph
+## This is used to show the power used by the CPU and other chips in a computer,
+## graphed over time.
+## It's not displayed by default in the UI, but an example can be found at
+## https://share.firefox.dev/3a1fiT7.
+
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

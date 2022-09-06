@@ -742,6 +742,8 @@ export type ProfileMeta = {|
   interval: Milliseconds,
   // The number of milliseconds since midnight January 1, 1970 GMT.
   startTime: Milliseconds,
+  // The number of milliseconds since midnight January 1, 1970 GMT.
+  endTime?: Milliseconds,
   // The process type where the Gecko profiler was started. This is the raw enum
   // numeric value as defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#365
@@ -785,6 +787,8 @@ export type ProfileMeta = {|
   misc?: string,
   // The OS and CPU. e.g. "Intel Mac OS X"
   oscpu?: string,
+  // The size of the main memory in bytes
+  mainMemory?: Bytes,
   // The current platform, as taken from the user agent string.
   // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.cpp#992
   platform?:
@@ -805,6 +809,8 @@ export type ProfileMeta = {|
 
   // The build ID/date of the application.
   appBuildID?: string,
+  // Arguments to the program (currently only used for imported profiles)
+  arguments?: string,
   // The URL to the source revision for this build of the application.
   sourceURL?: string,
   // The physical number of CPU cores for the machine.
@@ -817,6 +823,9 @@ export type ProfileMeta = {|
   // "unknown" state.  For now we don't do much with it but we may want to
   // propose a manual symbolication in the future.
   symbolicated?: boolean,
+  // A boolean flag indicating that symbolication is not supported
+  // Used for imported profiles that cannot be symbolicated
+  symbolicationNotSupported?: boolean,
   // The Update channel for this build of the application.
   // This property is landed in Firefox 67, and is optional because older
   // processed profile versions may not have them. No upgrader was necessary.
@@ -855,6 +864,16 @@ export type ProfileMeta = {|
   // They also use the "product" field in the meta information, but this is somewhat
   // ambiguous. This field, if present, is unambiguous that it was imported.
   importedFrom?: string,
+
+  // The following are settings that are used to configure the views for
+  // imported profiles, as some features do not make sense for them
+
+  // Do not distinguish between different stack types?
+  usesOnlyOneStackType?: boolean,
+  // Hide the "implementation" information in the UI (see #3709)?
+  doesNotUseFrameImplementation?: boolean,
+  // Hide the "Look up the function name on Searchfox" menu entry?
+  sourceCodeIsNotOnSearchfox?: boolean,
 |};
 
 /**

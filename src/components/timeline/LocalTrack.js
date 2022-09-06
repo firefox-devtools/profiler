@@ -5,10 +5,12 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
 import classNames from 'classnames';
 import {
   changeRightClickedTrack,
   selectTrackWithModifiers,
+  hideLocalTrack,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
@@ -59,6 +61,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +selectTrackWithModifiers: typeof selectTrackWithModifiers,
+  +hideLocalTrack: typeof hideLocalTrack,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -82,6 +85,14 @@ class LocalTrackComponent extends PureComponent<Props> {
     const { pid, trackIndex } = this.props;
     return { type: 'local', pid, trackIndex };
   }
+
+  _hideCurrentTrack = (
+    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+  ) => {
+    const { pid, trackIndex, hideLocalTrack } = this.props;
+    hideLocalTrack(pid, trackIndex);
+    event.stopPropagation();
+  };
 
   renderTrack() {
     const { localTrack, trackName } = this.props;
@@ -150,6 +161,14 @@ class LocalTrackComponent extends PureComponent<Props> {
             <button type="button" className="timelineTrackNameButton">
               {trackName}
             </button>
+            <Localized id="TrackNameButton--hide-track" attrs={{ title: true }}>
+              <button
+                type="button"
+                className="timelineTrackCloseButton"
+                title="Hide track"
+                onClick={this._hideCurrentTrack}
+              />
+            </Localized>
           </ContextMenuTrigger>
           <div className="timelineTrackTrack">{this.renderTrack()}</div>
         </div>
@@ -235,6 +254,7 @@ export const TimelineLocalTrack = explicitConnect<
   mapDispatchToProps: {
     changeRightClickedTrack,
     selectTrackWithModifiers,
+    hideLocalTrack,
   },
   component: LocalTrackComponent,
 });

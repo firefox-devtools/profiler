@@ -50,7 +50,6 @@
   height: calc(100% - 8px);
   padding: 0 0 0 10px;
   border: none;
-  margin: auto;
   background: none;
   font: inherit;
   text-align: left;
@@ -61,6 +60,34 @@
 .timelineTrackNameButtonAdditionalDetails {
   color: var(--grey-90-a60);
   font-size: 10px;
+}
+
+.timelineTrackCloseButton {
+  overflow: hidden;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  padding: 1px;
+  border: 0;
+  background: url(../../../res/img/svg/close-dark.svg) no-repeat center;
+  background-origin: content-box;
+  background-size: contain;
+  border-radius: 2px;
+  color: transparent;
+  margin-inline-end: 2px;
+  -moz-user-focus: ignore;
+}
+
+.timelineTrackCloseButton:hover {
+  background-color: rgb(0 0 0 / 0.15);
+}
+
+.timelineTrackCloseButton:active:hover {
+  background-color: rgb(0 0 0 / 0.3);
+}
+
+.timelineTrackLabel:not(:hover) > .timelineTrackCloseButton {
+  display: none;
 }
 
 .timelineTrackTrack {

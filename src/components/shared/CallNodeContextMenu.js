@@ -32,6 +32,8 @@ import {
   assertExhaustiveCheck,
 } from 'firefox-profiler/utils/flow';
 
+import { getShouldDisplaySearchfox } from 'firefox-profiler/selectors/profile';
+
 import type {
   TransformType,
   ImplementationFilter,
@@ -54,6 +56,7 @@ type StateProps = {|
   +implementation: ImplementationFilter,
   +inverted: boolean,
   +selectedTab: TabSlug,
+  +displaySearchfox: boolean,
 |};
 
 type DispatchProps = {|
@@ -419,7 +422,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderContextMenuContents() {
-    const { inverted, selectedTab } = this.props;
+    const { inverted, selectedTab, displaySearchfox } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -440,7 +443,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();
     const showExpandAll = selectedTab === 'calltree';
-
+    const canCopyURL =
+      isJS && funcTable.fileName[callNodeTable.func[callNodeIndex]] !== null;
     return (
       <>
         {this.renderTransformMenuItem({
@@ -552,11 +556,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             <div className="react-contextmenu-separator" />
           </>
         ) : null}
-        <Localized id="CallNodeContextMenu--searchfox">
-          <MenuItem onClick={this._handleClick} data={{ type: 'searchfox' }}>
-            Look up the function name on Searchfox
-          </MenuItem>
-        </Localized>
+        {displaySearchfox ? (
+          <Localized id="CallNodeContextMenu--searchfox">
+            <MenuItem onClick={this._handleClick} data={{ type: 'searchfox' }}>
+              Look up the function name on Searchfox
+            </MenuItem>
+          </Localized>
+        ) : null}
         <Localized id="CallNodeContextMenu--copy-function-name">
           <MenuItem
             onClick={this._handleClick}
@@ -565,7 +571,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             Copy function name
           </MenuItem>
         </Localized>
-        {isJS ? (
+        {canCopyURL ? (
           <Localized id="CallNodeContextMenu--copy-script-url">
             <MenuItem onClick={this._handleClick} data={{ type: 'copy-url' }}>
               Copy script URL
@@ -685,6 +691,7 @@ export const CallNodeContextMenu = explicitConnect<
       implementation: getImplementationFilter(state),
       inverted: getInvertCallstack(state),
       selectedTab: getSelectedTab(state),
+      displaySearchfox: getShouldDisplaySearchfox(state),
     };
   },
   mapDispatchToProps: {

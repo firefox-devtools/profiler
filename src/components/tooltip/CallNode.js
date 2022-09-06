@@ -49,6 +49,7 @@ type Props = {|
   +callTree?: CallTree,
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +displayStackType: boolean,
 |};
 
 /**
@@ -175,6 +176,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
       callNodeInfo: { callNodeTable },
+      displayStackType,
     } = this.props;
     const categoryIndex = callNodeTable.category[callNodeIndex];
     const categoryColor = categories[categoryIndex].color;
@@ -338,8 +340,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           <div className="tooltipDetails tooltipCallNodeDetailsLeft">
             {/* Everything in this div needs to come in pairs of two in order to
                 respect the CSS grid. */}
-            <div className="tooltipLabel">Stack Type:</div>
-            <div>{stackTypeLabel}</div>
+            {displayStackType ? (
+              <>
+                <div className="tooltipLabel">Stack Type:</div>
+                <div>{stackTypeLabel}</div>
+              </>
+            ) : null}
             {/* --------------------------------------------------------------- */}
             <div className="tooltipLabel">Category:</div>
             <div>

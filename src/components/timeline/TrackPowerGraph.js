@@ -5,10 +5,8 @@
 // @flow
 
 import * as React from 'react';
-import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { formatNumber } from 'firefox-profiler/utils/format-numbers';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
@@ -18,6 +16,7 @@ import {
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { GREY_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
+import { TooltipTrackPower } from 'firefox-profiler/components/tooltip/TrackPower';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
 import type {
@@ -314,9 +313,10 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _renderTooltip(counterIndex: number): React.Node {
-    const { counter, interval, rangeStart, rangeEnd } = this.props;
+  _renderTooltip(counterSampleIndex: number): React.Node {
+    const { counter, rangeStart, rangeEnd } = this.props;
     const { mouseX, mouseY } = this.state;
+
     const samples = counter.sampleGroups[0].samples;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
@@ -324,7 +324,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       throw new Error('No sample found for power counter');
     }
 
-    const sampleTime = samples.time[counterIndex];
+    const sampleTime = samples.time[counterSampleIndex];
     if (sampleTime < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the tooltip if it will be rendered outside of the timeline.
       // This could happen when a sample time is outside of the time range.
@@ -333,42 +333,12 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const powerUsageInPwh = samples.count[counterIndex]; // picowatt-hour
-    const sampleTimeDeltaInMs =
-      counterIndex === 0
-        ? interval
-        : samples.time[counterIndex] - samples.time[counterIndex - 1];
-    const power =
-      ((powerUsageInPwh * 1e-12) /* pWh->Wh */ / sampleTimeDeltaInMs) *
-      1000 * // ms->s
-      3600; // s->h
-    let value;
-    let l10nId;
-    if (power > 1) {
-      value = formatNumber(power, 3);
-      l10nId = 'TrackPowerGraph--tooltip-power-watt';
-    } else if (power === 0) {
-      value = 0;
-      l10nId = 'TrackPowerGraph--tooltip-power-watt';
-    } else {
-      value = formatNumber(power * 1000);
-      l10nId = 'TrackPowerGraph--tooltip-power-milliwatt';
-    }
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <div className="timelineTrackPowerTooltip">
-          <Localized
-            id={l10nId}
-            vars={{ value }}
-            elems={{
-              em: <span className="timelineTrackPowerTooltipNumber"></span>,
-            }}
-          >
-            <div className="timelineTrackPowerTooltipLine">
-              Power: <em>{value}</em>
-            </div>
-          </Localized>
-        </div>
+        <TooltipTrackPower
+          counter={counter}
+          counterSampleIndex={counterSampleIndex}
+        />
       </Tooltip>
     );
   }
