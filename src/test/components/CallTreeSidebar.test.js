@@ -85,8 +85,17 @@ describe('CallTreeSidebar', function () {
         <CallTreeSidebar />
       </Provider>
     );
+
+    const rerenderContainer = () =>
+      renderResult.rerender(
+        <Provider store={store}>
+          <CallTreeSidebar />
+        </Provider>
+      );
+
     return {
       ...renderResult,
+      rerenderContainer,
       ...store,
       funcNamesDict: funcNamesDictPerThread[0],
       selectNode,
@@ -179,15 +188,30 @@ describe('CallTreeSidebar', function () {
       queryByText,
       getAllByText,
       funcNamesDict: { A, B, C },
+      rerenderContainer,
     } = setup(getProfileWithSubCategories());
     selectNode([A, B, C]);
     expect(queryByText('FakeSubCategoryC')).not.toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
 
     const layoutCategory = getAllByText('Layout')[0];
+
     fireFullClick(layoutCategory);
+    rerenderContainer();
 
     expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
+    // only the 'Layout' category for the total running samples is expanded,
+    // not the other one too
+    expect(getAllByText('FakeSubCategoryC').length).toBe(1);
 
     expect(container.firstChild).toMatchSnapshot();
+
+    const layoutCategory2 = getAllByText('Layout')[1];
+
+    fireFullClick(layoutCategory2);
+    rerenderContainer();
+
+    expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
+    expect(getAllByText('FakeSubCategoryC')[1]).toBeInTheDocument();
   });
 });
