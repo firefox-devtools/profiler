@@ -198,7 +198,7 @@ Home--profiler-motto = Capturez un profil de performances. Analysez-le. Partagez
 Home--additional-content-title = Charger des profils existants
 Home--additional-content-content = Vous pouvez <strong>glisser-déposer</strong> un fichier de profil ici pour le charger, ou :
 Home--compare-recordings-info = Vous pouvez également comparer des enregistrements. <a>Ouvrir l’interface de comparaison.</a>
-Home--recent-uploaded-recordings-title = Enregistrements récemment envoyés
+Home--your-recent-uploaded-recordings-title = Vos enregistrements récemment envoyés
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -224,9 +224,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Supprimer
     .title = Ce profil ne peut pas être supprimé, car les informations d’autorisation sont manquantes.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Aucun profil n’a encore été envoyé.
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Voir et gérer tous vos enregistrements ({ $profilesRestCount } de plus)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -317,6 +317,7 @@ MenuButtons--metaInfo--symbolicate-profile = Profil symbolique
 MenuButtons--metaInfo--attempting-resymbolicate = Tenter de re-symboliser le profil
 MenuButtons--metaInfo--currently-symbolicating = Re-symbolisation du profil en cours
 MenuButtons--metaInfo--cpu = Processeur :
+MenuButtons--metaInfo--main-memory = Mémoire principale :
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -348,6 +349,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } cœurs logiques
     }
 MenuButtons--metaInfo--main-process-started = Processus principal démarré :
+MenuButtons--metaInfo--main-process-ended = Processus principal terminé :
 MenuButtons--metaInfo--interval = Intervalle :
 MenuButtons--metaInfo--buffer-capacity = Capacité de la mémoire tampon :
 MenuButtons--metaInfo--buffer-duration = Durée de la mémoire tampon :
@@ -366,6 +368,7 @@ MenuButtons--metaInfo--name-and-version = Nom et version :
 MenuButtons--metaInfo--update-channel = Canal de mise à jour :
 MenuButtons--metaInfo--build-id = Identifiant de compilation :
 MenuButtons--metaInfo--build-type = Type de compilation :
+MenuButtons--metaInfo--arguments = Arguments :
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -598,6 +601,12 @@ TrackContextMenu--hide-all-matching-tracks = Masquer toutes les pistes correspon
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Aucun résultat pour « <span>{ $searchFilter }</span> »
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Masquer la piste
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Masquer le processus
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of

@@ -217,10 +217,6 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
-FullTimeline--graph-type = Grafiektype:
-FullTimeline--categories-with-cpu = Categorieën met CPU
-FullTimeline--categories = Categorieën
-FullTimeline--stack-height = Stackhoogte
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
@@ -267,7 +263,7 @@ Home--profiler-motto = Leg een prestatieprofiel vast. Analyseer het. Deel het. M
 Home--additional-content-title = Bestaande profielen laden
 Home--additional-content-content = U kunt een profielbestand hierheen <strong>verslepen</strong> om het te laden, of:
 Home--compare-recordings-info = U kunt ook opnamen vergelijken. <a>De vergelijkingsinterface openen.</a>
-Home--recent-uploaded-recordings-title = Onlangs geüploade opnamen
+Home--your-recent-uploaded-recordings-title = Uw onlangs geüploade opnamen
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -293,9 +289,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Verwijderen
     .title = Dit profiel kan niet worden verwijderd, omdat we geen autorisatiegegevens hebben.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Er is nog geen profiel geüpload!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Al uw opnamen bekijken en beheren (nog { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -386,6 +382,7 @@ MenuButtons--metaInfo--symbolicate-profile = Profiel symboliseren
 MenuButtons--metaInfo--attempting-resymbolicate = Poging tot hersymboliseren profiel
 MenuButtons--metaInfo--currently-symbolicating = Profiel wordt gesymboliseerd
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = Hoofdgeheugen:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -417,6 +414,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } logische kernen
     }
 MenuButtons--metaInfo--main-process-started = Hoofdproces gestart:
+MenuButtons--metaInfo--main-process-ended = Hoofdproces beëindigd:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Buffercapaciteit:
 MenuButtons--metaInfo--buffer-duration = Bufferduur:
@@ -435,6 +433,7 @@ MenuButtons--metaInfo--name-and-version = Naam en versie:
 MenuButtons--metaInfo--update-channel = Updatekanaal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Buildtype:
+MenuButtons--metaInfo--arguments = Argumenten:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -597,7 +596,7 @@ ProfileRootMessage--additional = Terug naar startpagina
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--installing-button = Installeren…
+ServiceWorkerManager--applying-button = Toepassen…
 ServiceWorkerManager--pending-button = Toepassen en opnieuw laden
 ServiceWorkerManager--installed-button = De toepassing opnieuw laden
 ServiceWorkerManager--updated-while-not-ready =
@@ -671,6 +670,12 @@ TrackContextMenu--hide-all-matching-tracks = Alle overeenkomende tracks verberge
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Geen resultaten gevonden voor ‘<span>{ $searchFilter }</span>’
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Track verbergen
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Proces verbergen
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
@@ -681,20 +686,46 @@ TrackMemoryGraph--relative-memory-at-this-time = relatief geheugen op dit moment
 TrackMemoryGraph--memory-range-in-graph = geheugenbereik in grafiek
 TrackMemoryGraph--operations-since-the-previous-sample = bewerkingen sinds de vorige weergave
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
 
-# This is used in the tooltip when the power value uses the Watt unit.
+# This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-watt = Vermogen: <em>{ $value } W</em>
-# This is used in the tooltip when the power value uses the Milliwatt unit.
+TrackPower--tooltip-power-watt = { $value } W
+    .label = Vermogen
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-milliwatt = Vermogen: <em>{ $value } mW</em>
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Vermogen
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+    .label = Verbruikte energie in het zichtbare bereik
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+    .label = Verbruikte energie in het zichtbare bereik
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
+    .label = Verbruikte energie in de huidige selectie
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = Verbruikte energie in de huidige selectie
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
