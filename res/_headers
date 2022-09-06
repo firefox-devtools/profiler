@@ -14,14 +14,7 @@
   Referrer-Policy: same-origin
 
   # 1. script-src
-  #   a. The first hash is for the addon's content.js file being injected
-  #      with WebExt's tabs.executeScript API.
-  #   b. The second hash is for the addon's content-home.js being injected from
-  #      the addon's manifest.json.
-  #   You can generate these hashes using the website
-  #   https://report-uri.io/home/hash after grabbing the script from the Inspector.
-  #   NOTE: you can't use the script file directly as the API modifies it before injecting.
-  #   c. We use Google Analytics to track the usage of the application.
+  #   a. We use Google Analytics to track the usage of the application.
   # 2. style-src
   #   a. `unsafe-inline` is necessary to support favicons.
   #   b. Google Fonts are used in the docs.
@@ -32,7 +25,7 @@
   # 7. `frame-ancestors` is the same purpose as `X-Frame-Options` above.
   # 8. `form-action`prevents forms, we don't need this.`
   # 9. `frame-src` allows the embedding of YouTube videos in the docs.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-vY1KJ1dyP9vvnuERKMiQAcoKKtMUXZUEWJ/dT1XqpKM=' https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src http: https: data:; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; frame-src www.youtube-nocookie.com
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src http: https: data:; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; frame-src www.youtube-nocookie.com
 
 # Set the correct MIME type for WebAssembly modules.
 /*.wasm
