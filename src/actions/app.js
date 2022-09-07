@@ -49,6 +49,7 @@ import type {
   ThunkAction,
   UrlState,
   UploadedProfileInformation,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -415,4 +416,15 @@ export function updateBrowserConnectionStatus(
   browserConnectionStatus: BrowserConnectionStatus
 ): Action {
   return { type: 'UPDATE_BROWSER_CONNECTION_STATUS', browserConnectionStatus };
+}
+
+export function toggleOpenCategoryInSidebar(
+  kind: string,
+  category: IndexIntoCategoryList
+): Action {
+  return {
+    type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
+    kind,
+    category,
+  };
 }

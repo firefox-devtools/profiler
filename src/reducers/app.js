@@ -327,6 +327,33 @@ const browserConnectionStatus: Reducer<BrowserConnectionStatus> = (
   }
 };
 
+/**
+ * Signals which categories are opened by default in the sidebar per type
+ */
+const sidebarOpenCategories: Reducer<Map<string, Set<number>>> = (
+  openCats: Map<string, Set<number>> = new Map(),
+  action
+) => {
+  switch (action.type) {
+    case 'TOGGLE_SIDEBAR_OPEN_CATEGORY': {
+      const newOpenCats = new Map(openCats);
+      let openCatSet = newOpenCats.get(action.kind);
+      if (openCatSet === undefined) {
+        openCatSet = new Set();
+      }
+      if (openCatSet.has(action.category)) {
+        openCatSet.delete(action.category);
+      } else {
+        openCatSet.add(action.category);
+      }
+      newOpenCats.set(action.kind, openCatSet);
+      return newOpenCats;
+    }
+    default:
+      return openCats;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   urlSetupPhase,
@@ -341,6 +368,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   experimental,
   currentProfileUploadedInformation,
   browserConnectionStatus,
+  sidebarOpenCategories,
 });
 
 export default appStateReducer;

@@ -104,8 +104,253 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
       class="sidebar-label"
     >
       <button
+        class="sidebar-toggle"
+        data-category-index="2"
+        type="button"
+      >
+        Layout
+      </button>
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Self 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      <button
+        class="sidebar-toggle"
+        data-category-index="2"
+        type="button"
+      >
+        Layout
+      </button>
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Native code
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div>
+        Implementation
+      </div>
+      <div>
+        Self 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Native code
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
+    </div>
+  </div>
+</aside>
+`;
+
+exports[`CallTreeSidebar can expand subcategories 2`] = `
+<aside
+  class="sidebar sidebar-calltree"
+>
+  <div
+    class="sidebar-contents-wrapper"
+  >
+    <header
+      class="sidebar-titlegroup"
+    >
+      <h2
+        class="sidebar-title can-select-content"
+        title="C
+(click to select)"
+      >
+        <input
+          class="can-select-content-input"
+          readonly=""
+          value="C"
+        />
+      </h2>
+    </header>
+    <h4
+      class="sidebar-title3"
+    >
+      <div>
+        Call node details
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      3.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      2.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      67%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Running 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      <button
         class="sidebar-toggle expanded"
-        data-category="Layout"
+        data-category-index="2"
         type="button"
       >
         Layout
@@ -179,7 +424,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
     >
       <button
         class="sidebar-toggle"
-        data-category="Layout"
+        data-category-index="2"
         type="button"
       >
         Layout
