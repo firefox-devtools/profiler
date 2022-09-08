@@ -41,7 +41,6 @@
 .treeViewRowColumn.totalPercent,
 .treeViewRowColumn.self,
 .treeViewRowColumn.timestamp {
-  padding-right: 5px;
   text-align: right;
 }
 

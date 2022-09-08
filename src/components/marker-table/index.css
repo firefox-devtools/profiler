@@ -12,18 +12,16 @@
 
 .treeViewFixedColumn.start {
   width: 80px;
-  padding-right: 5px;
   text-align: right;
 }
 
 .treeViewFixedColumn.duration {
   width: 80px;
-  padding-right: 5px;
   text-align: right;
 }
 
 .treeViewHeaderColumn.name {
-  padding-left: 20px;
+  padding: 0 20px;
 }
 
 .treeViewFixedColumn.type {
@@ -31,6 +29,5 @@
 }
 
 .treeViewRowColumn.type {
-  padding-left: 5px;
   text-align: left;
 }
