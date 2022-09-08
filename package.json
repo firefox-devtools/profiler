@@ -53,7 +53,7 @@
     "@codemirror/lang-rust": "^6.0.0",
     "@codemirror/language": "^6.2.1",
     "@codemirror/state": "^6.1.1",
-    "@codemirror/view": "^6.2.0",
+    "@codemirror/view": "^6.2.2",
     "@firefox-devtools/react-contextmenu": "^5.0.0",
     "@fluent/bundle": "^0.17.1",
     "@fluent/langneg": "^0.6.2",
