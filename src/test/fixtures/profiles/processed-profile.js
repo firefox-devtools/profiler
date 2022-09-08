@@ -502,6 +502,7 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
  *  - [line:*] - The line, affects frameTable.line
  *  - [address:*] - The frame address, affects frameTable.address
  *  - [inl:*] - The inline depth, affects frameTable.inlineDepth
+ *  - [sym:*] - The native symbol, affects frameTable.nativeSymbol
 
 ```js
 // Execute the code below in the web console in the profiler to get a stack that's
@@ -554,6 +555,7 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
   profile: Profile,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
+  nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
 } {
   let profile = getEmptyProfile();
   // Provide a useful marker schema, rather than an empty one.
@@ -565,6 +567,7 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
 
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];
+  const nativeSymbolsDictPerThread = [];
 
   const globalDataCollector = new GlobalDataCollector();
 
@@ -604,26 +607,39 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
       return result;
     }, {});
 
+    // Turn this into a real thread.
+    const thread = _buildThreadFromTextOnlyStacks(
+      textOnlyStacks,
+      funcNames,
+      categories,
+      globalDataCollector,
+      sampleTimes
+    );
+
+    const nativeSymbolsDict = {};
+    for (let i = 0; i < thread.nativeSymbols.length; i++) {
+      const name = thread.stringTable.getString(thread.nativeSymbols.name[i]);
+      nativeSymbolsDict[name] = i;
+    }
+
+    // Make sure all threads have a unique tid
+    thread.tid = i;
+
     funcNamesPerThread.push(funcNames);
     funcNamesDictPerThread.push(funcNamesDict);
+    nativeSymbolsDictPerThread.push(nativeSymbolsDict);
 
-    // Turn this into a real thread.
-    return {
-      ..._buildThreadFromTextOnlyStacks(
-        textOnlyStacks,
-        funcNames,
-        categories,
-        globalDataCollector,
-        sampleTimes
-      ),
-      // Make sure all threads have a unique tid
-      tid: i,
-    };
+    return thread;
   });
 
   profile = { ...profile, ...globalDataCollector.finish() };
 
-  return { profile, funcNamesPerThread, funcNamesDictPerThread };
+  return {
+    profile,
+    funcNamesPerThread,
+    funcNamesDictPerThread,
+    nativeSymbolsDictPerThread,
+  };
 }
 
 function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
@@ -806,6 +822,17 @@ function _findInlineDepthFromFuncName(
   return null;
 }
 
+function _findNativeSymbolNameFromFuncName(
+  funcNameWithModifier: string
+): string | null {
+  const findNativeSymbolResult = /\[sym:([^\]]+)\]/.exec(funcNameWithModifier);
+  if (findNativeSymbolResult) {
+    return findNativeSymbolResult[1];
+  }
+
+  return null;
+}
+
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
@@ -822,6 +849,7 @@ function _buildThreadFromTextOnlyStacks(
     stackTable,
     samples,
     resourceTable,
+    nativeSymbols,
   } = thread;
 
   // Create the FuncTable.
@@ -855,10 +883,11 @@ function _buildThreadFromTextOnlyStacks(
       // Find the library name from the function name and create an entry if needed.
       const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
       let resourceIndex = -1;
+      let libIndex = null;
       if (libraryName) {
         resourceIndex = resourceIndexCache[libraryName];
         if (resourceIndex === undefined) {
-          const libIndex = globalDataCollector.indexForLib({
+          libIndex = globalDataCollector.indexForLib({
             arch: '',
             name: libraryName,
             path: '/path/to/' + libraryName,
@@ -875,6 +904,8 @@ function _buildThreadFromTextOnlyStacks(
           resourceIndex = resourceTable.length++;
 
           resourceIndexCache[libraryName] = resourceIndex;
+        } else {
+          libIndex = resourceTable.lib[resourceIndex];
         }
       }
 
@@ -898,6 +929,29 @@ function _buildThreadFromTextOnlyStacks(
       const address =
         _findAddressFromFuncName(funcNameWithModifier) ??
         (funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1);
+
+      let nativeSymbol = null;
+      const nativeSymbolName =
+        _findNativeSymbolNameFromFuncName(funcNameWithModifier);
+      if (nativeSymbolName) {
+        const nativeSymbolNameStringIndex =
+          stringTable.indexForString(nativeSymbolName);
+        const nativeSymbolIndex = nativeSymbols.name.indexOf(
+          nativeSymbolNameStringIndex
+        );
+        if (nativeSymbolIndex !== -1) {
+          nativeSymbol = nativeSymbolIndex;
+        } else if (libIndex !== null) {
+          nativeSymbol = nativeSymbols.length++;
+          nativeSymbols.libIndex.push(libIndex);
+          nativeSymbols.address.push(0); // todo
+          nativeSymbols.name.push(nativeSymbolNameStringIndex);
+        } else {
+          throw new Error(
+            `[sym:] has to be used together with [lib:] - missing lib in "${funcNameWithModifier}"`
+          );
+        }
+      }
       const inlineDepth =
         _findInlineDepthFromFuncName(funcNameWithModifier) ?? 0;
 
@@ -911,7 +965,8 @@ function _buildThreadFromTextOnlyStacks(
           category === frameTable.category[i] &&
           lineNumber === frameTable.line[i] &&
           address === frameTable.address[i] &&
-          inlineDepth === frameTable.inlineDepth[i]
+          inlineDepth === frameTable.inlineDepth[i] &&
+          nativeSymbol === frameTable.nativeSymbol[i]
         ) {
           frameIndex = i;
           break;
@@ -925,7 +980,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.category.push(category);
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);
-        frameTable.nativeSymbol.push(null);
+        frameTable.nativeSymbol.push(nativeSymbol);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(lineNumber);
         frameTable.column.push(null);
