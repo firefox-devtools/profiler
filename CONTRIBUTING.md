@@ -33,7 +33,7 @@ We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.o
 
 You will need a recent enough version of [Yarn 1 (Classic)](https://classic.yarnpkg.com/),
 version 1.10 is known to work correctly.
-You can install it using `npm install -g yarn`.
+You can install it using `npm install -g yarn`. Please refer to [its documentation](https://classic.yarnpkg.com/en/docs/install) for other possible install procedures.
 
 To get started clone the repo and get the web application started.
 

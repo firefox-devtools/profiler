@@ -29,7 +29,7 @@ If you would like to help us test on other assistive technologies or improve the
 
 You will need a recent enough version of [Yarn 1 (Classic)](https://classic.yarnpkg.com/),
 version 1.10 is known to work correctly.
-You can install it using `npm install -g yarn`.
+You can install it using `npm install -g yarn`. Please refer to [its documentation](https://classic.yarnpkg.com/en/docs/install) for other possible install procedures.
 
 To download and build the Firefox Profiler web app run:
 
