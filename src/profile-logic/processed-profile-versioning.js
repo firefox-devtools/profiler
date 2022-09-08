@@ -2130,5 +2130,13 @@ const _upgraders = {
     }
     profile.libs = libs;
   },
+  [42]: (profile) => {
+    // The nativeSymbols table now has a new column: functionSize.
+    // Its values can be null.
+    for (const thread of profile.threads) {
+      const { nativeSymbols } = thread;
+      nativeSymbols.functionSize = Array(nativeSymbols.length).fill(null);
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

@@ -399,10 +399,8 @@ export type NativeSymbolTable = {|
   address: Array<Address>,
   // The symbol name, demangled.
   name: Array<IndexIntoStringTable>,
-
-  // This would be a good spot for a "size" field. But the symbolication API does
-  // not give us information about the size of a function.
-  // https://github.com/mstange/profiler-get-symbols/issues/17
+  // The size of the function's machine code (if known), in bytes.
+  functionSize: Array<Bytes | null>,
 
   length: number,
 |};
