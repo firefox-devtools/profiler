@@ -24,8 +24,8 @@
 }
 
 .treeViewHeader {
-  height: 17px;
-  padding: 1px 0;
+  height: 15px;
+  padding: 4px 0;
   border-bottom: 1px solid var(--grey-30);
   background: white;
 }
@@ -78,7 +78,7 @@
 .treeViewHeaderColumn {
   position: relative;
   box-sizing: border-box;
-  padding: 1px 5px;
+  padding: 0 5px;
   line-height: 15px;
   white-space: nowrap;
 }
@@ -88,14 +88,8 @@
   text-overflow: ellipsis;
 }
 
-.treeViewHeaderColumn.treeViewFixedColumn::after {
-  position: absolute;
-  top: 3px;
-  right: 0;
-  bottom: 3px;
-  width: 1px;
-  background: #e5e5e5;
-  content: '';
+.treeViewHeaderColumn.treeViewFixedColumn {
+  border-right: 1px solid #e2e2e2;
 }
 
 .treeViewRowColumn.treeViewFixedColumn {
