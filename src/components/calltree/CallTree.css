@@ -8,27 +8,29 @@
 }
 
 .treeViewFixedColumn.total {
-  left: 0;
   width: 70px;
 }
 
-.treeViewFixedColumn.totalPercent {
-  left: 70px;
-  width: 50px;
-  border-right: none;
-}
-
-.treeViewFixedColumn.self {
-  left: 120px;
-  width: 70px;
-}
-
+/* The header for the total column spans both totalPercent and total columns */
 .treeViewHeaderColumn.total {
   width: 120px;
 }
 
+.treeViewFixedColumn.totalPercent {
+  width: 50px;
+  border-right: none;
+}
+
+/* The header for the totalPercent column is not visible */
+.treeViewHeaderColumn.totalPercent {
+  display: none;
+}
+
+.treeViewFixedColumn.self {
+  width: 70px;
+}
+
 .treeViewFixedColumn.icon {
-  left: 190px;
   display: flex;
   width: 19px;
   flex-flow: column nowrap;

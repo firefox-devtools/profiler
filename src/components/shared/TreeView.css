@@ -11,9 +11,20 @@
   user-select: none;
 }
 
+.treeViewRow,
 .treeViewHeader {
-  position: relative;
-  height: 16px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  white-space: nowrap;
+}
+
+.treeViewRowScrolledColumns {
+  align-items: center;
+}
+
+.treeViewHeader {
+  height: 17px;
   padding: 1px 0;
   border-bottom: 1px solid var(--grey-30);
   background: white;
@@ -64,22 +75,17 @@
   background: white;
 }
 
-.treeViewRow {
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  justify-content: flex-start;
-  white-space: nowrap;
-}
-
 .treeViewHeaderColumn {
-  position: absolute;
-  top: 0;
-  bottom: 0;
+  position: relative;
   box-sizing: border-box;
   padding: 1px 5px;
   line-height: 15px;
   white-space: nowrap;
+}
+
+.treeViewFixedColumn {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .treeViewHeaderColumn.treeViewFixedColumn::after {
@@ -93,10 +99,8 @@
 }
 
 .treeViewRowColumn.treeViewFixedColumn {
-  overflow: hidden;
   box-sizing: border-box;
   border-right: 1px solid var(--grey-30);
-  text-overflow: ellipsis;
 }
 
 .treeBadge {
