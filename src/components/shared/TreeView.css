@@ -92,57 +92,11 @@
   content: '';
 }
 
-.treeViewHeaderColumn.total,
-.treeViewHeaderColumn.self {
-  text-align: right;
-}
-
 .treeViewRowColumn.treeViewFixedColumn {
   overflow: hidden;
   box-sizing: border-box;
   border-right: 1px solid var(--grey-30);
   text-overflow: ellipsis;
-}
-
-.treeViewFixedColumn.total {
-  left: 0;
-  width: 70px;
-}
-
-.treeViewFixedColumn.totalPercent {
-  left: 70px;
-  width: 50px;
-  border-right: none;
-}
-
-.treeViewFixedColumn.self {
-  left: 120px;
-  width: 70px;
-}
-
-.treeViewHeaderColumn.total {
-  width: 120px;
-}
-
-.treeViewFixedColumn.icon {
-  left: 190px;
-  display: flex;
-  width: 19px;
-  flex-flow: column nowrap;
-  align-items: center;
-}
-
-.treeViewRowColumn.total,
-.treeViewRowColumn.totalPercent,
-.treeViewRowColumn.self,
-.treeViewRowColumn.timestamp {
-  padding-right: 5px;
-  text-align: right;
-}
-
-.treeViewRowColumn.type {
-  padding-left: 5px;
-  text-align: left;
 }
 
 .treeBadge {
@@ -153,11 +107,6 @@
   margin-right: 2px;
   color: transparent;
   vertical-align: -2px;
-}
-
-.treeBadge.inlined,
-.treeBadge.divergent-inlining {
-  background: url(../../../res/img/svg/inlined-icon.svg);
 }
 
 .treeRowIndentSpacer {

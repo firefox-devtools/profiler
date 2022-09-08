@@ -30,6 +30,11 @@
   width: 80px;
 }
 
+.treeViewRowColumn.type {
+  padding-left: 5px;
+  text-align: left;
+}
+
 .treeViewMainColumn.name {
   left: 255px;
 }

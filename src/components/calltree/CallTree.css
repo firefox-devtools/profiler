@@ -1,0 +1,49 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.treeViewHeaderColumn.total,
+.treeViewHeaderColumn.self {
+  text-align: right;
+}
+
+.treeViewFixedColumn.total {
+  left: 0;
+  width: 70px;
+}
+
+.treeViewFixedColumn.totalPercent {
+  left: 70px;
+  width: 50px;
+  border-right: none;
+}
+
+.treeViewFixedColumn.self {
+  left: 120px;
+  width: 70px;
+}
+
+.treeViewHeaderColumn.total {
+  width: 120px;
+}
+
+.treeViewFixedColumn.icon {
+  left: 190px;
+  display: flex;
+  width: 19px;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+.treeViewRowColumn.total,
+.treeViewRowColumn.totalPercent,
+.treeViewRowColumn.self,
+.treeViewRowColumn.timestamp {
+  padding-right: 5px;
+  text-align: right;
+}
+
+.treeBadge.inlined,
+.treeBadge.divergent-inlining {
+  background: url(../../../res/img/svg/inlined-icon.svg);
+}
