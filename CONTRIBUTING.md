@@ -31,16 +31,9 @@ We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.o
 
 [profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including directly imported from Firefox, online storage, and from local files.
 
-You will need a recent enough version of [Yarn](http://yarnpkg.com/),
-version 1.0.1 is known to work correctly.
-You can install it into your home directory on Linux and probably OS X with:
-
-```bash
-cd /tmp
-wget https://yarnpkg.com/install.sh
-chmod a+x install.sh
-./install.sh
-```
+You will need a recent enough version of [Yarn 1 (Classic)](https://classic.yarnpkg.com/),
+version 1.10 is known to work correctly.
+You can install it using `npm install -g yarn`. Please refer to [its documentation](https://classic.yarnpkg.com/en/docs/install) for other possible install procedures.
 
 To get started clone the repo and get the web application started.
 

@@ -289,7 +289,7 @@ export function getStackLineInfoForCallNode(
  * The following stacks all "collapse into" ("map to") call node 3:
  * stack 3, 4, 6 and 7.
  * Stack 8 maps to call node 4, which is a child of call node 3.
- * All other stacks are outside the call path [A, B, C].
+ * Stacks 1, 2, 5, 9 and 10 are outside the call path [A, B, C].
  *
  * In this function, we only compute "line hits" that are contributed to
  * the given call node.
@@ -298,7 +298,7 @@ export function getStackLineInfoForCallNode(
  * and 70, respectively.
  * Stack 8 also hits call node 3 at line 70, but does not contribute to
  * call node 3's "self time", it only contributes to its "total time".
- * All other stacks don't contribute to call node 3's self or total time.
+ * Stacks 1, 2, 5, 9 and 10 don't contribute to call node 3's self or total time.
  *
  * All stacks can contribute no more than one line in the given call node.
  * This is different from the getStackLineInfo function above, where each
