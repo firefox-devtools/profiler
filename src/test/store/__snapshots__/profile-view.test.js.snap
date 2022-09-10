@@ -63,6 +63,13 @@ Object {
           "Other",
         ],
       },
+      Object {
+        "color": "blue",
+        "name": "Native",
+        "subcategories": Array [
+          "Other",
+        ],
+      },
     ],
     "configuration": Object {
       "activeTabID": 123123,
@@ -2165,6 +2172,12 @@ Object {
             0,
           ],
         },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
       ],
       "breakdownByImplementation": Object {
         "native": 2,
@@ -2184,6 +2197,12 @@ Object {
           "entireCategoryValue": 2,
           "subcategoryBreakdown": Array [
             2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
           ],
         },
         Object {
@@ -2487,6 +2506,13 @@ CallTree {
     Object {
       "color": "blue",
       "name": "DOM",
+      "subcategories": Array [
+        "Other",
+      ],
+    },
+    Object {
+      "color": "blue",
+      "name": "Native",
       "subcategories": Array [
         "Other",
       ],
