@@ -424,13 +424,13 @@ type FunctionInfo = {
 function makeFunctionInfoFinder(categories) {
   const jsCat = categories.findIndex((c) => c.name === 'JavaScript');
   const gcCat = categories.findIndex((c) => c.name === 'GC / CC');
-  const domCat = categories.findIndex((c) => c.name === 'DOM');
+  const nativeCat = categories.findIndex((c) => c.name === 'Native');
   const otherCat = categories.findIndex((c) => c.name === 'Other');
   const idleCat = categories.findIndex((c) => c.name === 'Idle');
   if (
     jsCat === -1 ||
     gcCat === -1 ||
-    domCat === -1 ||
+    nativeCat === -1 ||
     otherCat === -1 ||
     idleCat === -1
   ) {
@@ -460,7 +460,7 @@ function makeFunctionInfoFinder(categories) {
           functionName !== '<WASM UNNAMED>' &&
           functionName !== '(unresolved function)'
         ) {
-          return { category: domCat, isJS: false, relevantForJS: true };
+          return { category: nativeCat, isJS: false, relevantForJS: true };
         }
         return { category: jsCat, isJS: true, relevantForJS: false };
     }
