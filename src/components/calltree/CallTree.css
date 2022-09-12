@@ -1,0 +1,50 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.treeViewHeaderColumn.total,
+.treeViewHeaderColumn.self {
+  text-align: right;
+}
+
+.treeViewFixedColumn.total {
+  width: 70px;
+}
+
+/* The header for the total column spans both totalPercent and total columns */
+.treeViewHeaderColumn.total {
+  width: 120px;
+}
+
+.treeViewFixedColumn.totalPercent {
+  width: 50px;
+  border-right: none;
+}
+
+/* The header for the totalPercent column is not visible */
+.treeViewHeaderColumn.totalPercent {
+  display: none;
+}
+
+.treeViewFixedColumn.self {
+  width: 70px;
+}
+
+.treeViewFixedColumn.icon {
+  display: flex;
+  width: 19px;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+.treeViewRowColumn.total,
+.treeViewRowColumn.totalPercent,
+.treeViewRowColumn.self,
+.treeViewRowColumn.timestamp {
+  text-align: right;
+}
+
+.treeBadge.inlined,
+.treeBadge.divergent-inlining {
+  background: url(../../../res/img/svg/inlined-icon.svg);
+}
