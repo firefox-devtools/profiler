@@ -336,7 +336,6 @@ export function getDefaultCategories(): CategoryList {
     { name: 'Network', color: 'lightblue', subcategories: ['Other'] },
     { name: 'Graphics', color: 'green', subcategories: ['Other'] },
     { name: 'DOM', color: 'blue', subcategories: ['Other'] },
-    { name: 'Native', color: 'blue', subcategories: ['Other'] },
   ];
 }
 

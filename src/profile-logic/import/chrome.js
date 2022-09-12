@@ -471,6 +471,14 @@ async function processTracingEvents(
   eventsByName: Map<string, TracingEventUnion[]>
 ): Promise<Profile> {
   const profile = getEmptyProfile();
+  profile.meta.categories = [
+    { name: 'Other', color: 'grey', subcategories: ['Other'] },
+    { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+    { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
+    { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
+    { name: 'Graphics', color: 'green', subcategories: ['Other'] },
+    { name: 'Native', color: 'blue', subcategories: ['Other'] },
+  ];
   profile.meta.product = 'Chrome Trace';
   profile.meta.importedFrom = 'Chrome Trace';
 
