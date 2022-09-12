@@ -11,10 +11,21 @@
   user-select: none;
 }
 
+.treeViewRow,
 .treeViewHeader {
-  position: relative;
-  height: 16px;
-  padding: 1px 0;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  white-space: nowrap;
+}
+
+.treeViewRowScrolledColumns {
+  align-items: center;
+}
+
+.treeViewHeader {
+  height: 15px;
+  padding: 4px 0;
   border-bottom: 1px solid var(--grey-30);
   background: white;
 }
@@ -64,85 +75,31 @@
   background: white;
 }
 
-.treeViewRow {
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  justify-content: flex-start;
-  white-space: nowrap;
-}
-
 .treeViewHeaderColumn {
-  position: absolute;
-  top: 0;
-  bottom: 0;
+  position: relative;
   box-sizing: border-box;
-  padding: 1px 5px;
+  padding: 0 5px;
   line-height: 15px;
   white-space: nowrap;
 }
 
-.treeViewHeaderColumn.treeViewFixedColumn::after {
-  position: absolute;
-  top: 3px;
-  right: 0;
-  bottom: 3px;
-  width: 1px;
-  background: #e5e5e5;
-  content: '';
-}
-
-.treeViewHeaderColumn.total,
-.treeViewHeaderColumn.self {
-  text-align: right;
-}
-
-.treeViewRowColumn.treeViewFixedColumn {
+.treeViewFixedColumn {
   overflow: hidden;
-  box-sizing: border-box;
-  border-right: 1px solid var(--grey-30);
+  padding: 0 5px;
   text-overflow: ellipsis;
 }
 
-.treeViewFixedColumn.total {
-  left: 0;
-  width: 70px;
+.treeViewHeaderColumn.treeViewFixedColumn {
+  /* The fixed columns in the row don't shrink because they're positioning using
+   * position: sticky, therefore we prevent shrinking for the columns in the
+   * header too. */
+  flex: none;
+  border-right: 1px solid #e2e2e2;
 }
 
-.treeViewFixedColumn.totalPercent {
-  left: 70px;
-  width: 50px;
-  border-right: none;
-}
-
-.treeViewFixedColumn.self {
-  left: 120px;
-  width: 70px;
-}
-
-.treeViewHeaderColumn.total {
-  width: 120px;
-}
-
-.treeViewFixedColumn.icon {
-  left: 190px;
-  display: flex;
-  width: 19px;
-  flex-flow: column nowrap;
-  align-items: center;
-}
-
-.treeViewRowColumn.total,
-.treeViewRowColumn.totalPercent,
-.treeViewRowColumn.self,
-.treeViewRowColumn.timestamp {
-  padding-right: 5px;
-  text-align: right;
-}
-
-.treeViewRowColumn.type {
-  padding-left: 5px;
-  text-align: left;
+.treeViewRowColumn.treeViewFixedColumn {
+  box-sizing: border-box;
+  border-right: 1px solid var(--grey-30);
 }
 
 .treeBadge {
@@ -153,11 +110,6 @@
   margin-right: 2px;
   color: transparent;
   vertical-align: -2px;
-}
-
-.treeBadge.inlined,
-.treeBadge.divergent-inlining {
-  background: url(../../../res/img/svg/inlined-icon.svg);
 }
 
 .treeRowIndentSpacer {

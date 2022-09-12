@@ -11,25 +11,23 @@
 }
 
 .treeViewFixedColumn.start {
-  left: 0;
   width: 80px;
-  padding-right: 5px;
   text-align: right;
 }
 
 .treeViewFixedColumn.duration {
-  left: 80px;
   width: 80px;
-  padding-right: 5px;
-  border-right: none;
   text-align: right;
 }
 
-.treeViewFixedColumn.type {
-  left: 160px;
-  width: 80px;
+.treeViewHeaderColumn.name {
+  padding: 0 20px;
 }
 
-.treeViewMainColumn.name {
-  left: 255px;
+.treeViewFixedColumn.type {
+  width: 100px;
+}
+
+.treeViewRowColumn.type {
+  text-align: left;
 }
