@@ -194,7 +194,7 @@ Home--profiler-motto = 捕捉效能檢測檔。分析、分享、讓網站運作
 Home--additional-content-title = 載入現有檢測檔
 Home--additional-content-content = 您可以將效能檢測檔<strong>拖曳</strong>到此處，或:
 Home--compare-recordings-info = 您也可以比較紀錄內容。<a>開啟比較介面。</a>
-Home--recent-uploaded-recordings-title = 近期上傳的紀錄
+Home--your-recent-uploaded-recordings-title = 您近期上傳的紀錄
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -220,9 +220,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = 刪除
     .title = 由於缺少授權資訊，無法刪除此效能檢測檔。
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = 還沒有上傳任何檢測檔！
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = 檢視並管理您的所有紀錄檔（還有 { $profilesRestCount } 筆）
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -313,6 +313,7 @@ MenuButtons--metaInfo--symbolicate-profile = 符號化檢測檔
 MenuButtons--metaInfo--attempting-resymbolicate = 正在嘗試重新符號化檢測檔
 MenuButtons--metaInfo--currently-symbolicating = 目前符號化的檢測檔
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = 主要記憶體：
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -340,6 +341,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } 顆邏輯核心
     }
 MenuButtons--metaInfo--main-process-started = 主處理程序開始:
+MenuButtons--metaInfo--main-process-ended = 主要處理程序結束於：
 MenuButtons--metaInfo--interval = 間隔:
 MenuButtons--metaInfo--buffer-capacity = 緩衝容量:
 MenuButtons--metaInfo--buffer-duration = 緩衝間隔:
@@ -357,6 +359,7 @@ MenuButtons--metaInfo--name-and-version = 名稱與版本:
 MenuButtons--metaInfo--update-channel = 更新頻道:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build Type:
+MenuButtons--metaInfo--arguments = 參數：
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -592,6 +595,12 @@ TrackContextMenu--hide-all-matching-tracks = 隱藏所有符合的軌道
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = 找不到「<span>{ $searchFilter }</span>」的結果
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = 隱藏軌道
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = 隱藏處理程序
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
@@ -602,20 +611,46 @@ TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
 TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
 TrackMemoryGraph--operations-since-the-previous-sample = 自前一次取樣以來的操作次數
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
 
-# This is used in the tooltip when the power value uses the Watt unit.
+# This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-watt = 電源: <em>{ $value } W</em>
-# This is used in the tooltip when the power value uses the Milliwatt unit.
+TrackPower--tooltip-power-watt = { $value } W
+    .label = 功率
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-milliwatt = 電源: <em>{ $value } mW</em>
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = 功率
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+    .label = 可見範圍內消耗的能源
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+    .label = 可見範圍內消耗的能源
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
+    .label = 目前選擇範圍內消耗的能源
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = 目前選擇範圍內消耗的能源
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

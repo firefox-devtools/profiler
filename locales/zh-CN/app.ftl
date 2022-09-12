@@ -160,10 +160,6 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
-FullTimeline--graph-type = 图标类型：
-FullTimeline--categories-with-cpu = 含 CPU 的分类
-FullTimeline--categories = 分类
-FullTimeline--stack-height = 栈深度
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
@@ -198,7 +194,7 @@ Home--profiler-motto = 捕捉性能分析记录。剖析、分享、让网站速
 Home--additional-content-title = 加载现有分析记录
 Home--additional-content-content = 您可以将分析记录<strong>拖放</strong>至此处，或：
 Home--compare-recordings-info = 您也可以比较记录内容。<a>打开比较界面。</a>
-Home--recent-uploaded-recordings-title = 近期上传的记录
+Home--your-recent-uploaded-recordings-title = 您最近上传的记录
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -224,9 +220,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = 删除
     .title = 由于缺少授权信息，无法删除此 Profile。
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = 还未上传任何分析记录！
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = 查看并管理您的所有记录（还有 { $profilesRestCount } 条）
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -317,6 +313,7 @@ MenuButtons--metaInfo--symbolicate-profile = 符号化分析记录
 MenuButtons--metaInfo--attempting-resymbolicate = 正在尝试重新符号化分析记录
 MenuButtons--metaInfo--currently-symbolicating = 当前符号化的分析记录
 MenuButtons--metaInfo--cpu = CPU：
+MenuButtons--metaInfo--main-memory = 主内存：
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -344,6 +341,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] 逻辑核心 × { $logicalCPUs }
     }
 MenuButtons--metaInfo--main-process-started = 主进程开始：
+MenuButtons--metaInfo--main-process-ended = 主进程结束：
 MenuButtons--metaInfo--interval = 间隔：
 MenuButtons--metaInfo--buffer-capacity = 缓冲容量：
 MenuButtons--metaInfo--buffer-duration = 缓冲间隔：
@@ -361,6 +359,7 @@ MenuButtons--metaInfo--name-and-version = 名称和版本：
 MenuButtons--metaInfo--update-channel = 更新通道:
 MenuButtons--metaInfo--build-id = 构建 ID：
 MenuButtons--metaInfo--build-type = 构建类型：
+MenuButtons--metaInfo--arguments = 参数：
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -521,7 +520,7 @@ ProfileRootMessage--additional = 返回主页
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--installing-button = 正在安装…
+ServiceWorkerManager--applying-button = 正在应用…
 ServiceWorkerManager--pending-button = 应用并重新加载
 ServiceWorkerManager--installed-button = 重新加载应用程序
 ServiceWorkerManager--updated-while-not-ready =
@@ -596,6 +595,12 @@ TrackContextMenu--hide-all-matching-tracks = 隐藏所有匹配的轨道
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = 找不到“<span>{ $searchFilter }</span>”的结果
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = 隐藏轨道
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = 隐藏进程
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
@@ -606,20 +611,46 @@ TrackMemoryGraph--relative-memory-at-this-time = 此时的相对内存用量
 TrackMemoryGraph--memory-range-in-graph = 图表里的内存范围
 TrackMemoryGraph--operations-since-the-previous-sample = 自前一次采样以来的操作次数
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
 
-# This is used in the tooltip when the power value uses the Watt unit.
+# This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-watt = 功率：<em>{ $value } W</em>
-# This is used in the tooltip when the power value uses the Milliwatt unit.
+TrackPower--tooltip-power-watt = { $value } W
+    .label = 功率
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-milliwatt = 功率：<em>{ $value } mW</em>
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = 功率
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+    .label = 可见范围内的功耗
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+    .label = 可见范围内的功耗
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
+    .label = 当前选择范围内的功耗
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = 当前选择范围内的功耗
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

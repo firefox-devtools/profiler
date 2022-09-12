@@ -99,6 +99,31 @@ export type LineTimings = {|
   selfLineHits: Map<LineNumber, number>,
 |};
 
+// Stores, for all stacks of a thread and for one specific file, the addresses
+// in that file that are hit by each stack.
+// This can be computed once for a filtered thread, and then queried cheaply
+// as the preview selection changes.
+// The order of these arrays is the same as the order of thread.stackTable;
+// the array index is a stackIndex.
+export type StackAddressInfo = {|
+  // An array that contains, for each stack, the address that this stack
+  // spends its self time in, in this library, or null if the self time of the
+  // stack is in a different library or if the address is not known.
+  selfAddress: Array<Address | null>,
+  // An array that contains, for each stack, all the addresses that the frames
+  // in this stack hit in this library, or null if this stack does not hit any
+  // address in the given library.
+  stackAddresses: Array<Set<Address> | null>,
+|};
+
+// Stores, for all addresses of one specific library, how many times each
+// address is hit by samples in a thread. The maps only contain non-zero values.
+// So map.get(address) === undefined should be treated as zero.
+export type AddressTimings = {|
+  totalAddressHits: Map<Address, number>,
+  selfAddressHits: Map<Address, number>,
+|};
+
 // Stores the information that's needed to prove to the symbolication API that
 // we are authorized to request the source code for a specific file.
 // This "address proof" makes it easy for the browser (or local symbol server)

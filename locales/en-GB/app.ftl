@@ -263,7 +263,7 @@ Home--profiler-motto = Capture a performance profile. Analyse it. Share it. Make
 Home--additional-content-title = Load existing profiles
 Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
-Home--recent-uploaded-recordings-title = Recent uploaded recordings
+Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -289,9 +289,9 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Delete
     .title = This profile cannot be deleted because we lack the authorisation information.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = No profile has been uploaded yet!
-# This string is used below the 'Recent uploaded recordings' list section.
+# This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
-#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = See and manage all your recordings ({ $profilesRestCount } more)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -382,6 +382,7 @@ MenuButtons--metaInfo--symbolicate-profile = Symbolicate profile
 MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate profile
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
 MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--main-memory = Main memory:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -413,6 +414,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } logical cores
     }
 MenuButtons--metaInfo--main-process-started = Main process started:
+MenuButtons--metaInfo--main-process-ended = Main process ended:
 MenuButtons--metaInfo--interval = Interval:
 MenuButtons--metaInfo--buffer-capacity = Buffer Capacity:
 MenuButtons--metaInfo--buffer-duration = Buffer Duration:
@@ -431,6 +433,7 @@ MenuButtons--metaInfo--name-and-version = Name and version:
 MenuButtons--metaInfo--update-channel = Update Channel:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build Type:
+MenuButtons--metaInfo--arguments = Arguments:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -667,6 +670,12 @@ TrackContextMenu--hide-all-matching-tracks = Hide all matching tracks
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = No results found for “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Hide track
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Hide process
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
@@ -677,20 +686,46 @@ TrackMemoryGraph--relative-memory-at-this-time = relative memory at this time
 TrackMemoryGraph--memory-range-in-graph = memory range in graph
 TrackMemoryGraph--operations-since-the-previous-sample = operations since the previous sample
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
 
-# This is used in the tooltip when the power value uses the Watt unit.
+# This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-watt = Power: <em>{ $value } W</em>
-# This is used in the tooltip when the power value uses the Milliwatt unit.
+TrackPower--tooltip-power-watt = { $value } W
+    .label = Power
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPowerGraph--tooltip-power-milliwatt = Power: <em>{ $value } mW</em>
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Power
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+    .label = Energy used in the visible range
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+    .label = Energy used in the visible range
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
+    .label = Energy used in the current selection
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = Energy used in the current selection
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
