@@ -90,6 +90,10 @@
 }
 
 .treeViewHeaderColumn.treeViewFixedColumn {
+  /* The fixed columns in the row don't shrink because they're positioning using
+   * position: sticky, therefore we prevent shrinking for the columns in the
+   * header too. */
+  flex: none;
   border-right: 1px solid #e2e2e2;
 }
 
