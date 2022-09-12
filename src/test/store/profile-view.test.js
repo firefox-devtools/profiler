@@ -2022,7 +2022,6 @@ describe('getTimingsForSidebar', () => {
             0,
             0,
             0,
-            0,
           ]),
         },
       };
@@ -2062,7 +2061,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
           totalTime: {
@@ -2073,7 +2071,6 @@ describe('getTimingsForSidebar', () => {
               0, // Other
               0, // Layout
               2, // JavaScript
-              0,
               0,
               0,
               0,
@@ -2094,7 +2091,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
           totalTime: {
@@ -2105,7 +2101,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               3, // JavaScript
-              0,
               0,
               0,
               0,
@@ -2143,7 +2138,6 @@ describe('getTimingsForSidebar', () => {
             0,
             0,
             0,
-            0,
           ]),
         },
         totalTime: {
@@ -2154,7 +2148,6 @@ describe('getTimingsForSidebar', () => {
             0, // Other
             1, // Idle
             1, // Layout
-            0,
             0,
             0,
             0,
@@ -2200,7 +2193,6 @@ describe('getTimingsForSidebar', () => {
           1, // Idle
           0, // Layout
           1, // JavaScript
-          0,
           0,
           0,
           0,
@@ -2252,7 +2244,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
         };
@@ -2287,7 +2278,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
           totalTime: {
@@ -2303,7 +2293,6 @@ describe('getTimingsForSidebar', () => {
               0,
               1, // Layout
               3, // JavaScript
-              0,
               0,
               0,
               0,
@@ -2343,7 +2332,6 @@ describe('getTimingsForSidebar', () => {
             0,
             0,
             0,
-            0,
           ]),
         };
         expect(timings).toEqual({
@@ -2377,7 +2365,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
           totalTime: {
@@ -2391,7 +2378,6 @@ describe('getTimingsForSidebar', () => {
               0,
               1, // Layout
               1, // JavaScript
-              0,
               0,
               0,
               0,
@@ -2427,7 +2413,6 @@ describe('getTimingsForSidebar', () => {
             0,
             1, // Layout
             0, // JavaScript
-            0,
             0,
             0,
             0,
@@ -2482,7 +2467,6 @@ describe('getTimingsForSidebar', () => {
           0,
           0,
           0,
-          0,
         ]),
       };
       expect(timings).toEqual({
@@ -2522,7 +2506,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
         },
@@ -2540,7 +2523,6 @@ describe('getTimingsForSidebar', () => {
               1, // Idle
               1, // Layout
               3, // JavaScript
-              0,
               0,
               0,
               0,
@@ -2578,7 +2560,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
         },
@@ -2595,7 +2576,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
           totalTime: {
@@ -2605,7 +2585,6 @@ describe('getTimingsForSidebar', () => {
               0, // Other
               1, // Idle
               1, // Layout
-              0,
               0,
               0,
               0,
@@ -2634,7 +2613,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
         },
@@ -2651,7 +2629,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
           totalTime: {
@@ -2661,7 +2638,6 @@ describe('getTimingsForSidebar', () => {
               0,
               1, // Idle
               1, // Layout
-              0,
               0,
               0,
               0,
@@ -2695,7 +2671,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               0,
-              0,
             ]),
           },
         },
@@ -2709,7 +2684,6 @@ describe('getTimingsForSidebar', () => {
               1, // Idle
               1, // Layout
               3, // JavaScript
-              0,
               0,
               0,
               0,
@@ -2750,7 +2724,6 @@ describe('getTimingsForSidebar', () => {
           0, // Idle
           0, // Layout
           1, // JavaScript
-          0,
           0,
           0,
           0,
@@ -2803,7 +2776,6 @@ describe('getTimingsForSidebar', () => {
             0,
             0,
             0,
-            0,
           ]),
         };
         expect(timings).toEqual({
@@ -2843,7 +2815,6 @@ describe('getTimingsForSidebar', () => {
             0,
             0,
             1, // JavaScript
-            0,
             0,
             0,
             0,
@@ -2891,7 +2862,6 @@ describe('getTimingsForSidebar', () => {
                 0,
                 0,
                 0,
-                0,
               ]),
             },
           },
@@ -2904,7 +2874,6 @@ describe('getTimingsForSidebar', () => {
                 0,
                 0,
                 1, // JavaScript
-                0,
                 0,
                 0,
                 0,
@@ -2924,7 +2893,6 @@ describe('getTimingsForSidebar', () => {
                 0,
                 1, // Layout
                 3, // JavaScript
-                0,
                 0,
                 0,
                 0,
@@ -2977,9 +2945,7 @@ describe('getTimingsForSidebar', () => {
       expect(timings.forPath).toEqual({
         selfTime: EMPTY_TIMING,
         totalTime: {
-          breakdownByCategory: withSingleSubcategory([
-            0, 0, -1, 1, 0, 0, 0, 0, 0,
-          ]), // Other, Idle, Layout, JavaScript, etc.
+          breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Other, Idle, Layout, JavaScript, etc.
           breakdownByImplementation: {
             interpreter: 1,
             native: -1,
@@ -3030,9 +2996,7 @@ describe('getTimingsForSidebar', () => {
       expect(timings.forPath).toEqual({
         selfTime: EMPTY_TIMING,
         totalTime: {
-          breakdownByCategory: withSingleSubcategory([
-            0, 0, 7, 5, 0, 0, 0, 0, 0,
-          ]), // Other, Idle, Layout, JavaScript, etc
+          breakdownByCategory: withSingleSubcategory([0, 0, 7, 5, 0, 0, 0, 0]), // Other, Idle, Layout, JavaScript, etc
           breakdownByImplementation: {
             native: 7,
             interpreter: 5,
