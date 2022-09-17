@@ -9,7 +9,10 @@ import { Localized } from '@fluent/react';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { funcHasRecursiveCall } from 'firefox-profiler/profile-logic/transforms';
+import {
+  funcHasDirectRecursiveCall,
+  funcHasIndirectRecursiveCall,
+} from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 
 import copy from 'copy-to-clipboard';
@@ -368,7 +371,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   /**
    * Determine if this CallNode represent a recursive function call.
    */
-  isRecursiveCall(): boolean {
+  isRecursiveCall(funcHasRecursiveCall): boolean {
     const { implementation } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
@@ -527,16 +530,29 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             })
           : null}
 
-        {this.isRecursiveCall()
+        {this.isRecursiveCall(funcHasDirectRecursiveCall)
           ? this.renderTransformMenuItem({
               l10nId:
-                'CallNodeContextMenu--transform-collapse-direct-recursion',
+                'CallNodeContextMenu--transform-collapse-direct-recursion2',
               shortcut: 'r',
               icon: 'Collapse',
               onClick: this._handleClick,
               transform: 'collapse-direct-recursion',
               title: '',
               content: 'Collapse direct recursion',
+            })
+          : null}
+
+        {this.isRecursiveCall(funcHasIndirectRecursiveCall)
+          ? this.renderTransformMenuItem({
+              l10nId:
+                'CallNodeContextMenu--transform-collapse-indirect-recursion',
+              shortcut: 'R',
+              icon: 'Collapse',
+              onClick: this._handleClick,
+              transform: 'collapse-indirect-recursion',
+              title: '',
+              content: 'Collapse indirect recursion',
             })
           : null}
 

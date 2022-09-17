@@ -368,7 +368,7 @@ export function getTransformLabelL10nIds(
         return { l10nId: 'TransformNavigator--drop-function', item: funcName };
       case 'collapse-direct-recursion':
         return {
-          l10nId: 'TransformNavigator--collapse-direct-recursion',
+          l10nId: 'TransformNavigator--collapse-direct-recursion2',
           item: funcName,
         };
       case 'collapse-indirect-recursion':
@@ -1537,9 +1537,9 @@ export function filterCallNodeAndCategoryPathByImplementation(
 
 /**
  * Search through the entire call stack and see if there are any examples of
- * recursion.
+ * direct recursion.
  */
-export function funcHasRecursiveCall(
+export function funcHasDirectRecursiveCall(
   thread: Thread,
   implementation: ImplementationFilter,
   funcToCheck: IndexIntoFuncTable
@@ -1564,6 +1564,37 @@ export function funcHasRecursiveCall(
       if (recursivePrefix && !funcMatchesImplementation(thread, funcIndex)) {
         recursiveStacks.add(stackIndex);
       }
+    }
+  }
+  return false;
+}
+
+/**
+ * Search through the entire call stack and see if there are any examples of
+ * indirect recursion.
+ */
+export function funcHasIndirectRecursiveCall(
+  thread: Thread,
+  implementation: ImplementationFilter,
+  funcToCheck: IndexIntoFuncTable
+) {
+  const { stackTable, frameTable } = thread;
+  const recursiveStacks = new Set();
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const frameIndex = stackTable.frame[stackIndex];
+    const prefix = stackTable.prefix[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const recursivePrefix = recursiveStacks.has(prefix);
+
+    if (funcToCheck === funcIndex) {
+      if (recursivePrefix) {
+        // This function matches and so did its prefix of the same implementation.
+        return true;
+      }
+      recursiveStacks.add(stackIndex);
+    } else if (recursivePrefix) {
+      recursiveStacks.add(stackIndex);
     }
   }
   return false;
