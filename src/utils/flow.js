@@ -89,6 +89,7 @@ export function convertToTransformType(type: string): TransformType | null {
     case 'focus-function':
     case 'collapse-resource':
     case 'collapse-direct-recursion':
+    case 'collapse-indirect-recursion':
     case 'collapse-function-subtree':
     case 'drop-function':
       return coercedType;

@@ -56,6 +56,7 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
   'drop-function',
   'collapse-resource',
   'collapse-direct-recursion',
+  'collapse-indirect-recursion',
   'collapse-function-subtree',
 ].forEach((transform: TransformType) => {
   // This is kind of an awkward switch, but it ensures we've exhaustively checked that
@@ -82,6 +83,9 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
       break;
     case 'collapse-direct-recursion':
       shortKey = 'rec';
+      break;
+    case 'collapse-indirect-recursion':
+      shortKey = 'irec';
       break;
     case 'collapse-function-subtree':
       shortKey = 'cfs';
@@ -145,18 +149,32 @@ export function parseTransforms(transformString: string): TransformStack {
 
         break;
       }
-      case 'collapse-direct-recursion': {
+      case 'collapse-direct-recursion':
+      case 'collapse-indirect-recursion': {
         // e.g. "rec-js-325"
         const [, implementation, funcIndexRaw] = tuple;
         const funcIndex = parseInt(funcIndexRaw, 10);
         if (isNaN(funcIndex) || funcIndex < 0) {
           break;
         }
-        transforms.push({
-          type,
-          funcIndex,
-          implementation: toValidImplementationFilter(implementation),
-        });
+        switch (type) {
+          case 'collapse-direct-recursion':
+            transforms.push({
+              type: 'collapse-direct-recursion',
+              funcIndex,
+              implementation: toValidImplementationFilter(implementation),
+            });
+            break;
+          case 'collapse-indirect-recursion':
+            transforms.push({
+              type: 'collapse-indirect-recursion',
+              funcIndex,
+              implementation: toValidImplementationFilter(implementation),
+            });
+            break;
+          default:
+            throw new Error('Unmatched transform.');
+        }
         break;
       }
       case 'merge-function':
@@ -264,6 +282,7 @@ export function stringifyTransforms(transformStack: TransformStack): string {
         case 'collapse-resource':
           return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
         case 'collapse-direct-recursion':
+        case 'collapse-indirect-recursion':
           return `${shortKey}-${transform.implementation}-${transform.funcIndex}`;
         case 'focus-subtree':
         case 'merge-call-node': {
@@ -323,6 +342,7 @@ export function getTransformLabelL10nIds(
       case 'merge-function':
       case 'drop-function':
       case 'collapse-direct-recursion':
+      case 'collapse-indirect-recursion':
       case 'collapse-function-subtree':
         funcIndex = transform.funcIndex;
         break;
@@ -349,6 +369,11 @@ export function getTransformLabelL10nIds(
       case 'collapse-direct-recursion':
         return {
           l10nId: 'TransformNavigator--collapse-direct-recursion',
+          item: funcName,
+        };
+      case 'collapse-indirect-recursion':
+        return {
+          l10nId: 'TransformNavigator--collapse-indirect-recursion',
           item: funcName,
         };
       case 'collapse-function-subtree':
@@ -395,6 +420,11 @@ export function applyTransformToCallNodePath(
       );
     case 'collapse-direct-recursion':
       return _collapseDirectRecursionInCallNodePath(
+        transform.funcIndex,
+        callNodePath
+      );
+    case 'collapse-indirect-recursion':
+      return _collapseIndirectRecursionInCallNodePath(
         transform.funcIndex,
         callNodePath
       );
@@ -489,6 +519,20 @@ function _collapseDirectRecursionInCallNodePath(
     previousFunc = pathFunc;
   }
   return newPath;
+}
+
+function _collapseIndirectRecursionInCallNodePath(
+  funcIndex: IndexIntoFuncTable,
+  callNodePath: CallNodePath
+) {
+  const firstIndex = callNodePath.indexOf(funcIndex);
+  const lastIndex = callNodePath.lastIndexOf(funcIndex);
+  if (firstIndex === -1) {
+    return callNodePath;
+  }
+  return callNodePath
+    .slice(0, firstIndex)
+    .concat(callNodePath.slice(lastIndex));
 }
 
 function _collapseFunctionSubtreeInCallNodePath(
@@ -981,6 +1025,142 @@ export function collapseDirectRecursion(
   };
 }
 
+export function collapseIndirectRecursion(
+  thread: Thread,
+  funcToCollapse: IndexIntoFuncTable,
+  implementation: ImplementationFilter
+): Thread {
+  // Collapse recursion by reparenting stack nodes for all "inner" frames of a
+  // recursion to the same level as the outermost frame.
+  // "Intermediate" frames between indirect recursive calls of the collapsed function
+  // are changed to frames of the collapsed function to make them merge
+  // with the collapsed function at the outermost frame level.
+  //
+  // Example with recursion on B:
+  //  - A1                    - A1
+  //    - B1                    - B1
+  //      - C1                  - B2
+  //        - B2        ->        - D1
+  //          - D1              - B1
+  //        - D2                  - D2
+  //      - B3                  - B3
+  //        - D3                  - D3
+  //
+  // In the call tree, sibling stack nodes with the same function will be
+  // collapsed into one call node.
+  // We keep all the stack nodes and frames, we just rewire them such that the
+  // outer stack nodes of the recursion are skipped. We skip the outer nodes
+  // rather than the inner nodes, so that per-frame data such as line numbers and
+  // frame addresses are counted for the innermost frame in a stack. We prefer
+  // keeping this information for the innermost frame because the outer frames
+  // just have the line and instruction address of the recursive call, and the
+  // purpose of "collapsing recursion" is to ignore that recursive call.
+  //
+  // Applying the transform's implementation filter is done on a best effort
+  // basis and doesn't really have a clean solution. We want to make the
+  // following case work:
+  // Full:     Ajs -> Xcpp -> Bjs -> Ycpp -> Cjs -> Zcpp -> Bjs -> Wcpp
+  // JS-only:  Ajs -> Bjs -> Cjs -> Bjs
+  // Now collapse recursion on Bjs.
+  // Collapsed JS-only:  Ajs -> Bjs
+  // Now switch back to all stack types.
+  // Collapsed full:     Ajs -> Xcpp -> Bjs -> Wcpp
+
+  const { stackTable, frameTable } = thread;
+  const funcMatchesImplementation = FUNC_MATCHES[implementation];
+  const recursionChainParentStack = new Set();
+  const recursionChainPrefixForStack = new Map();
+  const recursionChainFrameForStack = new Map();
+  const newStackTablePrefixColumn = stackTable.prefix.slice();
+  const newStackTableFrameColumn = stackTable.frame.slice();
+
+  // Bottom-up (i.e. reverse) iteration to collect all stacks that
+  // contain the collapsed function in their subtree.
+  // This information helps identify stacks that are part of the recursion
+  // chain, including "intermediate" stacks.
+  for (let stackIndex = stackTable.length - 1; stackIndex >= 0; stackIndex--) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+
+    if (funcIndex === funcToCollapse) {
+      // This stack itself is the collapsed function.
+      recursionChainParentStack.add(stackIndex);
+    }
+    if (recursionChainParentStack.has(stackIndex) && prefix !== null) {
+      // Propagate being a parent of a recursion chain upwards, if possible.
+      recursionChainParentStack.add(prefix);
+    }
+  }
+
+  // Top-down (i.e. forward) iteration that does the actual collapsing
+  // similarly to collapseDirectRecursion.
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+
+    const recursionChainPrefix = recursionChainPrefixForStack.get(prefix);
+    const recursionChainFrame = recursionChainFrameForStack.get(prefix);
+    if (
+      recursionChainPrefix === undefined ||
+      recursionChainFrame === undefined // To make flow happy.
+    ) {
+      // Our prefix was not part of a recursion chain.
+      // If this stack frame matches the collapsed func, this stack node is the root
+      // of a recursion chain.
+      if (funcIndex === funcToCollapse) {
+        recursionChainPrefixForStack.set(stackIndex, prefix);
+        recursionChainFrameForStack.set(stackIndex, frameIndex);
+      }
+    } else {
+      // Our prefix is part of a recursion chain.
+      if (funcMatchesImplementation(thread, funcIndex)) {
+        const prefixInChain = recursionChainParentStack.has(prefix);
+        const thisInChain = recursionChainParentStack.has(stackIndex);
+        if (prefixInChain && thisInChain) {
+          // The recursion chain continues.
+          recursionChainPrefixForStack.set(stackIndex, recursionChainPrefix);
+          // Reparent this stack node to the recursion root's prefix.
+          newStackTablePrefixColumn[stackIndex] = recursionChainPrefix;
+
+          if (funcIndex === funcToCollapse) {
+            // This node is the new recursion chain frame.
+            recursionChainFrameForStack.set(stackIndex, frameIndex);
+          } else {
+            // The recursion chain frame continues.
+            recursionChainFrameForStack.set(stackIndex, recursionChainFrame);
+            // Change this "intermediate" stack node to the recursion chain frame.
+            newStackTableFrameColumn[stackIndex] = recursionChainFrame;
+          }
+        } else {
+          // The recursion chain ends here. Leave recursionChainPrefixForStack
+          // empty for stackIndex.
+        }
+      } else {
+        // This stack node doesn't match the transform's implementation filter.
+        // For example, this stack node could be Xcpp in the following recursive
+        // JS invocation: Ajs -> Xcpp -> Ajs
+        // Keep the recursion chain going.
+        recursionChainPrefixForStack.set(stackIndex, recursionChainPrefix);
+        recursionChainFrameForStack.set(stackIndex, recursionChainFrame);
+      }
+    }
+  }
+
+  // Since we're keeping all stack indexes unchanged, none of the other tables
+  // in the thread need to be updated. Only the stackTable's prefix and frame
+  // columns have changed.
+  return {
+    ...thread,
+    stackTable: {
+      ...stackTable,
+      prefix: newStackTablePrefixColumn,
+      frame: newStackTableFrameColumn,
+    },
+  };
+}
+
 const FUNC_MATCHES = {
   combined: (_thread: Thread, _funcIndex: IndexIntoFuncTable) => true,
   cpp: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {
@@ -1428,6 +1608,12 @@ export function applyTransform(
       );
     case 'collapse-direct-recursion':
       return collapseDirectRecursion(
+        thread,
+        transform.funcIndex,
+        transform.implementation
+      );
+    case 'collapse-indirect-recursion':
+      return collapseIndirectRecursion(
         thread,
         transform.funcIndex,
         transform.implementation

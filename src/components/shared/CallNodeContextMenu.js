@@ -295,6 +295,14 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         });
         break;
       }
+      case 'collapse-indirect-recursion': {
+        addTransformToStack(threadsKey, {
+          type: 'collapse-indirect-recursion',
+          funcIndex: selectedFunc,
+          implementation,
+        });
+        break;
+      }
       case 'collapse-function-subtree': {
         addTransformToStack(threadsKey, {
           type: 'collapse-function-subtree',
