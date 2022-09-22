@@ -109,7 +109,10 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
       case 'local':
         return 'local';
       case 'from-url':
-        return profileUrl.startsWith('http://127.0.0.1') ? 'local' : 'uploaded';
+        return profileUrl.startsWith('http://127.0.0.1') ||
+          profileUrl.startsWith('http://localhost')
+          ? 'local'
+          : 'uploaded';
       case 'none':
       case 'uploaded-recordings':
         throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
