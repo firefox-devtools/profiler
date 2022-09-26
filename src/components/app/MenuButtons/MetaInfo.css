@@ -27,7 +27,7 @@
 
 .metaInfoLargeContent {
   overflow: scroll;
-  height: 100px;
+  max-height: 100px;
   overflow-wrap: anywhere;
 }
 
@@ -66,4 +66,17 @@
   margin: 0;
   font-size: 1.2em;
   font-weight: 700;
+}
+
+.moreInfoButton {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.moreInfoPart {
+  margin-top: 15px;
+}
+
+.moreInfoValue {
+  overflow-x: scroll;
 }

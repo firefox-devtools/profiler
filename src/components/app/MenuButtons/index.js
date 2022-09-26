@@ -91,7 +91,9 @@ type State = $ReadOnly<{|
 |}>;
 
 class MenuButtonsImpl extends React.PureComponent<Props, State> {
-  state = { metaInfoPanelState: 'initial' };
+  state = {
+    metaInfoPanelState: 'initial',
+  };
 
   componentDidMount() {
     // Clear out the newly published notice from the URL.
@@ -228,7 +230,6 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         // we still have to pass jwtToken / profileToken, and we don't have
         // these values anymore when we're in this state.
         return <ProfileDeleteSuccess />;
-
       default:
         throw assertExhaustiveCheck(metaInfoPanelState);
     }
@@ -236,19 +237,21 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
 
   _renderMetaInfoButton() {
     return (
-      <Localized
-        id="MenuButtons--index--metaInfo-button"
-        attrs={{ label: true }}
-      >
-        <ButtonWithPanel
-          buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
-          // The empty string value for the label following will be replaced by the <Localized /> wrapper.
-          label=""
-          onPanelClose={this._resetMetaInfoState}
-          panelClassName="metaInfoPanel"
-          panelContent={this._renderMetaInfoPanel()}
-        />
-      </Localized>
+      <>
+        <Localized
+          id="MenuButtons--index--metaInfo-button"
+          attrs={{ label: true }}
+        >
+          <ButtonWithPanel
+            buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
+            // The empty string value for the label following will be replaced by the <Localized /> wrapper.
+            label=""
+            onPanelClose={this._resetMetaInfoState}
+            panelClassName="metaInfoPanel"
+            panelContent={this._renderMetaInfoPanel()}
+          />
+        </Localized>
+      </>
     );
   }
 
