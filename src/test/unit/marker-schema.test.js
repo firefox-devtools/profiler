@@ -4,7 +4,7 @@
 // @flow
 import {
   formatFromMarkerSchema,
-  formatDOMFromMarkerSchema,
+  formatMarkupFromMarkerSchema,
   parseLabel,
   markerSchemaFrontEndOnly,
 } from '../../profile-logic/marker-schema';
@@ -338,8 +338,7 @@ describe('marker schema formatting', function () {
       entries.map(([format, value]) => [
         format,
         value,
-        formatDOMFromMarkerSchema('none', format, value, false),
-        formatDOMFromMarkerSchema('none', format, value, true),
+        formatMarkupFromMarkerSchema('none', format, value),
       ])
     ).toMatchSnapshot();
   });

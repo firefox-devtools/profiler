@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import React from 'react';
+import * as React from 'react';
 import { oneLine } from 'common-tags';
 import {
   formatNumber,
@@ -365,23 +365,16 @@ export function formatFromMarkerSchema(
   format: MarkerFormatType,
   value: any
 ): string {
-  if (
-    (value === undefined || value === null) &&
-    format !== 'string' &&
-    format !== 'url' &&
-    format !== 'file-path'
-  ) {
-    throw new Error("Can't format undefined or null");
+  if (value === undefined || value === null) {
+    console.warn(`Formatting ${value} for ${markerType}`);
+    return '(empty)';
   }
-
   switch (format) {
     case 'url':
     case 'file-path':
     case 'string':
       // Make sure a non-empty string is returned here.
-      if (value === undefined || value === null) {
-        return '(empty)';
-      }
+
       return String(value) || '(empty)';
     case 'duration':
     case 'time':
@@ -416,15 +409,17 @@ export function isDOMRenderingFormat(format: MarkerFormatType): boolean {
   return format === 'url' || typeof format === 'object' || format === 'list';
 }
 
-function _formatDOMFromMarkerSchema(
+export function formatMarkupFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
-  value: any,
-  // add elements that allow interaction (like clickable urls)
-  supportsInteraction: boolean
-) {
+  value: any
+): React.Element<any> | string {
+  if (value === undefined || value === null) {
+    console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
+    return '(empty)';
+  }
   if (!isDOMRenderingFormat(format)) {
-    return <>{formatFromMarkerSchema(markerType, format, value)}</>;
+    return formatFromMarkerSchema(markerType, format, value);
   }
   if (typeof format === 'object') {
     switch (format.type) {
@@ -435,45 +430,48 @@ function _formatDOMFromMarkerSchema(
         }
         const hasHeader = columns.some((column) => column.label);
         return (
-          <table>
+          <table className="marker-value">
             {hasHeader ? (
-              <tr>
-                {columns.map((col, i) => (
-                  <th key={i}>{col.label || ''}</th>
-                ))}
-              </tr>
-            ) : null}
-            {value.map((row, i) => {
-              if (!(row instanceof Array)) {
-                throw new Error('Expected an array for table row');
-              }
-
-              if (row.length !== columns.length) {
-                throw new Error(
-                  "Row length doesn't match column count (row: " +
-                    row.length +
-                    ', cols: ' +
-                    columns.length +
-                    ')'
-                );
-              }
-              return (
-                <tr key={i}>
-                  {row.map((cell, i) => {
-                    return (
-                      <td key={i}>
-                        {_formatDOMFromMarkerSchema(
-                          markerType,
-                          columns[i].type || 'string',
-                          cell,
-                          supportsInteraction
-                        )}
-                      </td>
-                    );
-                  })}
+              <thead>
+                <tr>
+                  {columns.map((col, i) => (
+                    <th key={i}>{col.label || ''}</th>
+                  ))}
                 </tr>
-              );
-            })}
+              </thead>
+            ) : null}
+            <tbody>
+              {value.map((row, i) => {
+                if (!(row instanceof Array)) {
+                  throw new Error('Expected an array for table row');
+                }
+
+                if (row.length !== columns.length) {
+                  throw new Error(
+                    "Row length doesn't match column count (row: " +
+                      row.length +
+                      ', cols: ' +
+                      columns.length +
+                      ')'
+                  );
+                }
+                return (
+                  <tr key={i}>
+                    {row.map((cell, i) => {
+                      return (
+                        <td key={i}>
+                          {formatMarkupFromMarkerSchema(
+                            markerType,
+                            columns[i].type || 'string',
+                            cell
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
           </table>
         );
       }
@@ -486,36 +484,27 @@ function _formatDOMFromMarkerSchema(
       if (!(value instanceof Array)) {
         throw new Error('Expected an array for list format');
       }
-      return value.map((entry, i) => (
-        <li key={i}>
-          {formatFromMarkerSchema(markerType, 'string', value[i])}
-        </li>
-      ));
+      return (
+        <ul className="marker-value">
+          {value.map((entry, i) => (
+            <li key={i}>
+              {formatFromMarkerSchema(markerType, 'string', value[i])}
+            </li>
+          ))}
+        </ul>
+      );
     case 'url':
-      if (supportsInteraction) {
-        return (
-          <a href={value}>
-            {formatFromMarkerSchema(markerType, 'string', value)}
-          </a>
-        );
-      }
-      return <>value</>;
+      return (
+        <a
+          href={value}
+          target="_blank"
+          rel="noreferrer"
+          className="marker-value"
+        >
+          {formatFromMarkerSchema(markerType, 'string', value)}
+        </a>
+      );
     default:
       throw new Error(`Unknown format type ${JSON.stringify(format)}`);
   }
-}
-
-export function formatDOMFromMarkerSchema(
-  markerType: string,
-  format: MarkerFormatType,
-  value: any,
-  // add elements that allow interaction (like clickable urls)
-  supportsInteraction: boolean
-) {
-  return _formatDOMFromMarkerSchema(
-    markerType,
-    format,
-    value,
-    supportsInteraction
-  );
 }

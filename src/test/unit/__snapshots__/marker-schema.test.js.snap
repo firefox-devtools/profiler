@@ -5,11 +5,11 @@ Array [
   Array [
     "url",
     "http://example.com",
-    <React.Fragment>
-      value
-    </React.Fragment>,
     <a
+      className="marker-value"
       href="http://example.com"
+      rel="noreferrer"
+      target="_blank"
     >
       http://example.com
     </a>,
@@ -17,62 +17,32 @@ Array [
   Array [
     "file-path",
     "/Users/me/gecko",
-    <React.Fragment>
-      /Users/me/gecko
-    </React.Fragment>,
-    <React.Fragment>
-      /Users/me/gecko
-    </React.Fragment>,
+    "/Users/me/gecko",
   ],
   Array [
     "file-path",
     null,
-    <React.Fragment>
-      (empty)
-    </React.Fragment>,
-    <React.Fragment>
-      (empty)
-    </React.Fragment>,
+    "(empty)",
   ],
   Array [
     "file-path",
     undefined,
-    <React.Fragment>
-      (empty)
-    </React.Fragment>,
-    <React.Fragment>
-      (empty)
-    </React.Fragment>,
+    "(empty)",
   ],
   Array [
     "duration",
     0,
-    <React.Fragment>
-      0s
-    </React.Fragment>,
-    <React.Fragment>
-      0s
-    </React.Fragment>,
+    "0s",
   ],
   Array [
     "duration",
     10,
-    <React.Fragment>
-      10ms
-    </React.Fragment>,
-    <React.Fragment>
-      10ms
-    </React.Fragment>,
+    "10ms",
   ],
   Array [
     "duration",
     12.3456789,
-    <React.Fragment>
-      12.346ms
-    </React.Fragment>,
-    <React.Fragment>
-      12.346ms
-    </React.Fragment>,
+    "12.346ms",
   ],
   Array [
     Object {
@@ -96,57 +66,27 @@ Array [
         2,
       ],
     ],
-    <table>
-      <tr>
-        <td>
-          <React.Fragment>
+    <table
+      className="marker-value"
+    >
+      <tbody>
+        <tr>
+          <td>
             a
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
+          </td>
+          <td>
             1
-          </React.Fragment>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <React.Fragment>
+          </td>
+        </tr>
+        <tr>
+          <td>
             b
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
+          </td>
+          <td>
             2
-          </React.Fragment>
-        </td>
-      </tr>
-    </table>,
-    <table>
-      <tr>
-        <td>
-          <React.Fragment>
-            a
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
-            1
-          </React.Fragment>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <React.Fragment>
-            b
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
-            2
-          </React.Fragment>
-        </td>
-      </tr>
+          </td>
+        </tr>
+      </tbody>
     </table>,
   ],
   Array [
@@ -169,49 +109,29 @@ Array [
         2,
       ],
     ],
-    <table>
-      <tr>
-        <th>
-          a
-        </th>
-        <th>
-          b
-        </th>
-      </tr>
-      <tr>
-        <td>
-          <React.Fragment>
+    <table
+      className="marker-value"
+    >
+      <thead>
+        <tr>
+          <th>
+            a
+          </th>
+          <th>
             b
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
-            2
-          </React.Fragment>
-        </td>
-      </tr>
-    </table>,
-    <table>
-      <tr>
-        <th>
-          a
-        </th>
-        <th>
-          b
-        </th>
-      </tr>
-      <tr>
-        <td>
-          <React.Fragment>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
             b
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
+          </td>
+          <td>
             2
-          </React.Fragment>
-        </td>
-      </tr>
+          </td>
+        </tr>
+      </tbody>
     </table>,
   ],
   Array [
@@ -233,49 +153,29 @@ Array [
         2,
       ],
     ],
-    <table>
-      <tr>
-        <th>
-          a
-        </th>
-        <th>
-          
-        </th>
-      </tr>
-      <tr>
-        <td>
-          <React.Fragment>
+    <table
+      className="marker-value"
+    >
+      <thead>
+        <tr>
+          <th>
+            a
+          </th>
+          <th>
+            
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
             b
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
+          </td>
+          <td>
             2
-          </React.Fragment>
-        </td>
-      </tr>
-    </table>,
-    <table>
-      <tr>
-        <th>
-          a
-        </th>
-        <th>
-          
-        </th>
-      </tr>
-      <tr>
-        <td>
-          <React.Fragment>
-            b
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
-            2
-          </React.Fragment>
-        </td>
-      </tr>
+          </td>
+        </tr>
+      </tbody>
     </table>,
   ],
   Array [
@@ -295,56 +195,37 @@ Array [
         2,
       ],
     ],
-    <table>
-      <tr>
-        <th>
-          a
-        </th>
-        <th>
-          
-        </th>
-      </tr>
-      <tr>
-        <td>
-          <React.Fragment>
+    <table
+      className="marker-value"
+    >
+      <thead>
+        <tr>
+          <th>
+            a
+          </th>
+          <th>
+            
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
             b
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
+          </td>
+          <td>
             2
-          </React.Fragment>
-        </td>
-      </tr>
-    </table>,
-    <table>
-      <tr>
-        <th>
-          a
-        </th>
-        <th>
-          
-        </th>
-      </tr>
-      <tr>
-        <td>
-          <React.Fragment>
-            b
-          </React.Fragment>
-        </td>
-        <td>
-          <React.Fragment>
-            2
-          </React.Fragment>
-        </td>
-      </tr>
+          </td>
+        </tr>
+      </tbody>
     </table>,
   ],
   Array [
     "list",
     Array [],
-    Array [],
-    Array [],
+    <ul
+      className="marker-value"
+    />,
   ],
   Array [
     "list",
@@ -352,22 +233,16 @@ Array [
       "a",
       "b",
     ],
-    Array [
+    <ul
+      className="marker-value"
+    >
       <li>
         a
-      </li>,
+      </li>
       <li>
         b
-      </li>,
-    ],
-    Array [
-      <li>
-        a
-      </li>,
-      <li>
-        b
-      </li>,
-    ],
+      </li>
+    </ul>,
   ],
 ]
 `;
