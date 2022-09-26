@@ -405,10 +405,6 @@ export function formatFromMarkerSchema(
   }
 }
 
-export function isDOMRenderingFormat(format: MarkerFormatType): boolean {
-  return format === 'url' || typeof format === 'object' || format === 'list';
-}
-
 export function formatMarkupFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
@@ -418,7 +414,7 @@ export function formatMarkupFromMarkerSchema(
     console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
     return '(empty)';
   }
-  if (!isDOMRenderingFormat(format)) {
+  if (format !== 'url' && typeof format !== 'object' && format !== 'list') {
     return formatFromMarkerSchema(markerType, format, value);
   }
   if (typeof format === 'object') {
