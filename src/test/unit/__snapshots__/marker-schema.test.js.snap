@@ -1,5 +1,377 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`marker schema formatting supports complex formats 1`] = `
+Array [
+  Array [
+    "url",
+    "http://example.com",
+    <React.Fragment>
+      value
+    </React.Fragment>,
+    <a
+      href="http://example.com"
+    >
+      http://example.com
+    </a>,
+  ],
+  Array [
+    "file-path",
+    "/Users/me/gecko",
+    <React.Fragment>
+      /Users/me/gecko
+    </React.Fragment>,
+    <React.Fragment>
+      /Users/me/gecko
+    </React.Fragment>,
+  ],
+  Array [
+    "file-path",
+    null,
+    <React.Fragment>
+      (empty)
+    </React.Fragment>,
+    <React.Fragment>
+      (empty)
+    </React.Fragment>,
+  ],
+  Array [
+    "file-path",
+    undefined,
+    <React.Fragment>
+      (empty)
+    </React.Fragment>,
+    <React.Fragment>
+      (empty)
+    </React.Fragment>,
+  ],
+  Array [
+    "duration",
+    0,
+    <React.Fragment>
+      0s
+    </React.Fragment>,
+    <React.Fragment>
+      0s
+    </React.Fragment>,
+  ],
+  Array [
+    "duration",
+    10,
+    <React.Fragment>
+      10ms
+    </React.Fragment>,
+    <React.Fragment>
+      10ms
+    </React.Fragment>,
+  ],
+  Array [
+    "duration",
+    12.3456789,
+    <React.Fragment>
+      12.346ms
+    </React.Fragment>,
+    <React.Fragment>
+      12.346ms
+    </React.Fragment>,
+  ],
+  Array [
+    Object {
+      "columns": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "integer",
+        },
+      ],
+      "type": "table",
+    },
+    Array [
+      Array [
+        "a",
+        1,
+      ],
+      Array [
+        "b",
+        2,
+      ],
+    ],
+    <table>
+      <tr>
+        <td>
+          <React.Fragment>
+            a
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            1
+          </React.Fragment>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <React.Fragment>
+            b
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            2
+          </React.Fragment>
+        </td>
+      </tr>
+    </table>,
+    <table>
+      <tr>
+        <td>
+          <React.Fragment>
+            a
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            1
+          </React.Fragment>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <React.Fragment>
+            b
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            2
+          </React.Fragment>
+        </td>
+      </tr>
+    </table>,
+  ],
+  Array [
+    Object {
+      "columns": Array [
+        Object {
+          "label": "a",
+          "type": "string",
+        },
+        Object {
+          "label": "b",
+          "type": "integer",
+        },
+      ],
+      "type": "table",
+    },
+    Array [
+      Array [
+        "b",
+        2,
+      ],
+    ],
+    <table>
+      <tr>
+        <th>
+          a
+        </th>
+        <th>
+          b
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <React.Fragment>
+            b
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            2
+          </React.Fragment>
+        </td>
+      </tr>
+    </table>,
+    <table>
+      <tr>
+        <th>
+          a
+        </th>
+        <th>
+          b
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <React.Fragment>
+            b
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            2
+          </React.Fragment>
+        </td>
+      </tr>
+    </table>,
+  ],
+  Array [
+    Object {
+      "columns": Array [
+        Object {
+          "label": "a",
+          "type": "string",
+        },
+        Object {
+          "type": "integer",
+        },
+      ],
+      "type": "table",
+    },
+    Array [
+      Array [
+        "b",
+        2,
+      ],
+    ],
+    <table>
+      <tr>
+        <th>
+          a
+        </th>
+        <th>
+          
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <React.Fragment>
+            b
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            2
+          </React.Fragment>
+        </td>
+      </tr>
+    </table>,
+    <table>
+      <tr>
+        <th>
+          a
+        </th>
+        <th>
+          
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <React.Fragment>
+            b
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            2
+          </React.Fragment>
+        </td>
+      </tr>
+    </table>,
+  ],
+  Array [
+    Object {
+      "columns": Array [
+        Object {
+          "label": "a",
+          "type": "string",
+        },
+        Object {},
+      ],
+      "type": "table",
+    },
+    Array [
+      Array [
+        "b",
+        2,
+      ],
+    ],
+    <table>
+      <tr>
+        <th>
+          a
+        </th>
+        <th>
+          
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <React.Fragment>
+            b
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            2
+          </React.Fragment>
+        </td>
+      </tr>
+    </table>,
+    <table>
+      <tr>
+        <th>
+          a
+        </th>
+        <th>
+          
+        </th>
+      </tr>
+      <tr>
+        <td>
+          <React.Fragment>
+            b
+          </React.Fragment>
+        </td>
+        <td>
+          <React.Fragment>
+            2
+          </React.Fragment>
+        </td>
+      </tr>
+    </table>,
+  ],
+  Array [
+    "list",
+    Array [],
+    Array [],
+    Array [],
+  ],
+  Array [
+    "list",
+    Array [
+      "a",
+      "b",
+    ],
+    Array [
+      <li>
+        a
+      </li>,
+      <li>
+        b
+      </li>,
+    ],
+    Array [
+      <li>
+        a
+      </li>,
+      <li>
+        b
+      </li>,
+    ],
+  ],
+]
+`;
+
 exports[`marker schema labels parseErrors errors if looking up into a part of the marker that does not exist 1`] = `
 Array [
   Array [

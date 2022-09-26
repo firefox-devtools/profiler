@@ -47,6 +47,7 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
             marker={marker}
             threadsKey={selectedThreadsKey}
             restrictHeightWidth={false}
+            supportsInteraction={true}
           />
         </div>
       </aside>

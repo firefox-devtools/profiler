@@ -35,7 +35,7 @@ import {
 import { Backtrace } from 'firefox-profiler/components/shared/Backtrace';
 
 import {
-  formatFromMarkerSchema,
+  formatDOMFromMarkerSchema,
   getSchemaFromMarker,
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
@@ -81,6 +81,7 @@ type OwnProps = {|
   // the layout to be huge. This option when set to true will restrict the
   // height of things like stacks, and the width of long things like URLs.
   +restrictHeightWidth: boolean,
+  +supportsInteraction?: boolean,
 |};
 
 type StateProps = {|
@@ -94,6 +95,7 @@ type StateProps = {|
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,
   +categories: CategoryList,
+  +supportsInteraction: boolean,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
@@ -222,7 +224,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * properties that are difficult to represent with the Schema.
    */
   _renderMarkerDetails(): TooltipDetailComponent[] {
-    const { marker, markerSchemaByName, thread } = this.props;
+    const { marker, markerSchemaByName, thread, supportsInteraction } =
+      this.props;
     const data = marker.data;
     const details: TooltipDetailComponent[] = [];
 
@@ -245,7 +248,12 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                     key={schema.name + '-' + key}
                     label={label || key}
                   >
-                    {formatFromMarkerSchema(schema.name, format, value)}
+                    {formatDOMFromMarkerSchema(
+                      schema.name,
+                      format,
+                      value,
+                      supportsInteraction
+                    )}
                   </TooltipDetail>
                 );
               }
@@ -493,6 +501,7 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
       markerSchemaByName: getMarkerSchemaByName(state),
       getMarkerLabel: selectors.getMarkerTooltipLabelGetter(state),
       categories: getCategories(state),
+      supportsInteraction: props.supportsInteraction || false,
     };
   },
   component: MarkerTooltipContents,

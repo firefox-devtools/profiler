@@ -14,7 +14,9 @@ import type {
 import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
-export type MarkerFormatType =
+export type MarkerFormatType = BasicMarkerFormatType | ComplexMarkerFormatType;
+
+export type BasicMarkerFormatType =
   // ----------------------------------------------------
   // String types.
 
@@ -59,6 +61,17 @@ export type MarkerFormatType =
   // use it for time information.
   // "Label: 52.23, 0.0054, 123,456.78"
   | 'decimal';
+
+type ComplexMarkerFormatType =
+  | 'list'
+  | {| type: 'table', columns: TableColumnFormat[] |};
+
+type TableColumnFormat = {|
+  // type for formatting, default is string
+  type?: BasicMarkerFormatType,
+  // header column label
+  label?: string,
+|};
 
 // A list of all the valid locations to surface this marker.
 // We can be free to add more UI areas.
