@@ -10,8 +10,6 @@ import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import {
   getProfile,
   getSymbolicationStatus,
-  hasProfileExtraInfo,
-  getMarkerSchemaByName,
   getProfileExtraInfo,
 } from 'firefox-profiler/selectors/profile';
 import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
@@ -33,22 +31,19 @@ import type {
   Profile,
   SymbolicationStatus,
   ExtraProfileInfoSection,
-  MarkerSchemaByName,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './MetaInfo.css';
 
-type State = {|
+type StateProps = {|
   showsMoreInfo: boolean,
 |};
 
 type OwnProps = $ReadOnly<{|
   profile: Profile,
   symbolicationStatus: SymbolicationStatus,
-  hasProfileExtraInfo: boolean,
-  +profileExtraInfo: ExtraProfileInfoSection[],
-  +markerSchemaByName: MarkerSchemaByName,
+  profileExtraInfo: ExtraProfileInfoSection[],
 |}>;
 
 type DispatchProps = $ReadOnly<{|
@@ -60,7 +55,7 @@ type Props = ConnectedProps<{||}, OwnProps, DispatchProps>;
 /**
  * This component formats the profile's meta information into a dropdown panel.
  */
-class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
+class MetaInfoPanelImpl extends React.PureComponent<Props, StateProps> {
   state = { showsMoreInfo: false };
 
   /**
@@ -145,10 +140,8 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
   _renderMoreInfoSection(section: ExtraProfileInfoSection) {
     return (
       <div key={section.label}>
-        <h2 className="metaInfoSubTitle" key={'title ' + section.label}>
-          {section.label}
-        </h2>
-        <div className="metaInfoSection" key={'section ' + section.label}>
+        <h2 className="metaInfoSubTitle">{section.label}</h2>
+        <div className="metaInfoSection">
           {section.entries.map(({ label, format, value }) => {
             return (
               <div className="moreInfoRow" key={label}>
@@ -166,7 +159,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
 
   _renderMoreInfo() {
     return (
-      <div open={this.state.showsMoreInfo} className="moreInfoPart">
+      <div className="moreInfoPart">
         {this.props.profileExtraInfo.map(this._renderMoreInfoSection)}
       </div>
     );
@@ -455,26 +448,28 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
         {profilerOverhead ? (
           <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
         ) : null}
-        {this.props.hasProfileExtraInfo ? (
-          <div className="metaInfoRow">
-            <button
-              type="button"
-              className="moreInfoButton photon-button photon-button-default photon-button-micro"
-              onClick={this._handleMoreInfoButtonClick}
-            >
-              <Localized
-                id={`MenuButtons--index--${
-                  this.state.showsMoreInfo ? 'hide' : 'show'
-                }-moreInfo-button`}
+        {this.props.profileExtraInfo.length !== 0 ? (
+          <details className="metaInfoRow" open={this.state.showsMoreInfo}>
+            <summary className="moreInfoSummary">
+              <button
+                type="button"
+                className="moreInfoButton photon-button photon-button-default photon-button-micro"
+                onClick={this._handleMoreInfoButtonClick}
               >
-                {this.state.showsMoreInfo ? 'Show Less' : 'Show More'}
-              </Localized>
-            </button>
-          </div>
+                <Localized
+                  id={
+                    this.state.showsMoreInfo
+                      ? `MenuButtons--index--hide-moreInfo-button`
+                      : `MenuButtons--index--show-moreInfo-button`
+                  }
+                >
+                  {this.state.showsMoreInfo ? 'Show Less' : 'Show More'}
+                </Localized>
+              </button>
+            </summary>
+            {this._renderMoreInfo()}
+          </details>
         ) : null}
-        {this.props.hasProfileExtraInfo && this.state.showsMoreInfo
-          ? this._renderMoreInfo()
-          : null}
       </>
     );
   }
@@ -516,9 +511,7 @@ export const MetaInfoPanel = explicitConnect<{||}, OwnProps, DispatchProps>({
   mapStateToProps: (state) => ({
     profile: getProfile(state),
     symbolicationStatus: getSymbolicationStatus(state),
-    hasProfileExtraInfo: hasProfileExtraInfo(state),
     profileExtraInfo: getProfileExtraInfo(state),
-    markerSchemaByName: getMarkerSchemaByName(state),
   }),
   mapDispatchToProps: {
     resymbolicateProfile,

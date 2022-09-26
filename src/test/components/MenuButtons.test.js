@@ -72,6 +72,7 @@ import { shortenUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
 import { symbolicateProfile } from 'firefox-profiler/profile-logic/symbolication';
+
 jest.mock('firefox-profiler/profile-logic/symbolication');
 
 // Mock hash

@@ -926,12 +926,5 @@ export const getProfileUsesMultipleStackTypes: Selector<boolean> = (state) => {
   return profile.meta.usesOnlyOneStackType !== true;
 };
 
-export const getProfileExtraInfo: Selector<ExtraProfileInfoSection[]> = (
-  state
-) => {
-  return getProfile(state).meta.extra || [];
-};
-
-export const hasProfileExtraInfo: Selector<boolean> = (state) => {
-  return getProfileExtraInfo(state).length > 0;
-};
+export const getProfileExtraInfo: Selector<ExtraProfileInfoSection[]> =
+  createSelector(getProfile, (profile) => profile.meta.extra || []);

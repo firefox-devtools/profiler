@@ -1,0 +1,393 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/MetaInfo More Info section doesn't show the more info button if there isn't any extra info 1`] = `
+<div>
+  <div
+    class="metaInfoSection"
+  >
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Interval:
+      </span>
+      1ms
+    </div>
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Symbols:
+      </span>
+      Profile is symbolicated
+    </div>
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      />
+      <button
+        class="photon-button photon-button-micro"
+        type="button"
+      >
+        Re-symbolicate profile
+      </button>
+    </div>
+  </div>
+  <h2
+    class="metaInfoSubTitle"
+  >
+    Application
+  </h2>
+  <div
+    class="metaInfoSection"
+  >
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Name and version:
+      </span>
+      Firefox
+    </div>
+  </div>
+  <h2
+    class="metaInfoSubTitle"
+  >
+    Platform
+  </h2>
+  <div
+    class="metaInfoSection"
+  />
+</div>
+`;
+
+exports[`app/MetaInfo More Info section opens more info section if clicked 1`] = `
+<div>
+  <div
+    class="metaInfoSection"
+  >
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Interval:
+      </span>
+      1ms
+    </div>
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Symbols:
+      </span>
+      Profile is symbolicated
+    </div>
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      />
+      <button
+        class="photon-button photon-button-micro"
+        type="button"
+      >
+        Re-symbolicate profile
+      </button>
+    </div>
+  </div>
+  <h2
+    class="metaInfoSubTitle"
+  >
+    Application
+  </h2>
+  <div
+    class="metaInfoSection"
+  >
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Name and version:
+      </span>
+      Firefox
+    </div>
+  </div>
+  <h2
+    class="metaInfoSubTitle"
+  >
+    Platform
+  </h2>
+  <div
+    class="metaInfoSection"
+  />
+  <details
+    class="metaInfoRow"
+  >
+    <summary
+      class="moreInfoSummary"
+    >
+      <button
+        class="moreInfoButton photon-button photon-button-default photon-button-micro"
+        type="button"
+      >
+        Show More
+      </button>
+    </summary>
+    <div
+      class="moreInfoPart"
+    >
+      <div>
+        <h2
+          class="metaInfoSubTitle"
+        >
+          CPU
+        </h2>
+        <div
+          class="metaInfoSection"
+        >
+          <div
+            class="moreInfoRow"
+          >
+            <span
+              class="metaInfoWideLabel"
+            >
+              CPU 1
+            </span>
+            <div
+              class="moreInfoValue"
+            >
+              Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2
+          class="metaInfoSubTitle"
+        >
+          Memory
+        </h2>
+        <div
+          class="metaInfoSection"
+        />
+      </div>
+      <div>
+        <h2
+          class="metaInfoSubTitle"
+        >
+          Hard Drives
+        </h2>
+        <div
+          class="metaInfoSection"
+        >
+          <div
+            class="moreInfoRow"
+          >
+            <span
+              class="metaInfoWideLabel"
+            >
+              SSD
+            </span>
+            <div
+              class="moreInfoValue"
+            >
+              Samsung SSD 850 EVO 500GB
+            </div>
+          </div>
+          <div
+            class="moreInfoRow"
+          >
+            <span
+              class="metaInfoWideLabel"
+            >
+              HDD
+            </span>
+            <div
+              class="moreInfoValue"
+            >
+              Seagate ST1000LM035-1RK172
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
+</div>
+`;
+
+exports[`app/MetaInfo More Info section opens more info section if clicked 2`] = `
+<div>
+  <div
+    class="metaInfoSection"
+  >
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Interval:
+      </span>
+      1ms
+    </div>
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Symbols:
+      </span>
+      Profile is symbolicated
+    </div>
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      />
+      <button
+        class="photon-button photon-button-micro"
+        type="button"
+      >
+        Re-symbolicate profile
+      </button>
+    </div>
+  </div>
+  <h2
+    class="metaInfoSubTitle"
+  >
+    Application
+  </h2>
+  <div
+    class="metaInfoSection"
+  >
+    <div
+      class="metaInfoRow"
+    >
+      <span
+        class="metaInfoLabel"
+      >
+        Name and version:
+      </span>
+      Firefox
+    </div>
+  </div>
+  <h2
+    class="metaInfoSubTitle"
+  >
+    Platform
+  </h2>
+  <div
+    class="metaInfoSection"
+  />
+  <details
+    class="metaInfoRow"
+    open=""
+  >
+    <summary
+      class="moreInfoSummary"
+    >
+      <button
+        class="moreInfoButton photon-button photon-button-default photon-button-micro"
+        type="button"
+      >
+        Show More
+      </button>
+    </summary>
+    <div
+      class="moreInfoPart"
+    >
+      <div>
+        <h2
+          class="metaInfoSubTitle"
+        >
+          CPU
+        </h2>
+        <div
+          class="metaInfoSection"
+        >
+          <div
+            class="moreInfoRow"
+          >
+            <span
+              class="metaInfoWideLabel"
+            >
+              CPU 1
+            </span>
+            <div
+              class="moreInfoValue"
+            >
+              Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2
+          class="metaInfoSubTitle"
+        >
+          Memory
+        </h2>
+        <div
+          class="metaInfoSection"
+        />
+      </div>
+      <div>
+        <h2
+          class="metaInfoSubTitle"
+        >
+          Hard Drives
+        </h2>
+        <div
+          class="metaInfoSection"
+        >
+          <div
+            class="moreInfoRow"
+          >
+            <span
+              class="metaInfoWideLabel"
+            >
+              SSD
+            </span>
+            <div
+              class="moreInfoValue"
+            >
+              Samsung SSD 850 EVO 500GB
+            </div>
+          </div>
+          <div
+            class="moreInfoRow"
+          >
+            <span
+              class="metaInfoWideLabel"
+            >
+              HDD
+            </span>
+            <div
+              class="moreInfoValue"
+            >
+              Seagate ST1000LM035-1RK172
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
+</div>
+`;

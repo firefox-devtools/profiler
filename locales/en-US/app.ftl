@@ -413,8 +413,6 @@ MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate p
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = Main memory:
-MenuButtons--moreInfo-button = More
-MenuButtons--moreInfo-title = Additional Profile Information
 MenuButtons--index--show-moreInfo-button = Show More
 MenuButtons--index--hide-moreInfo-button = Show Less
 

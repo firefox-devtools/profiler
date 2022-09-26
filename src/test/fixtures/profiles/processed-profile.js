@@ -1871,6 +1871,41 @@ export function addActiveTabInformationToProfile(
   };
 }
 
+export function addExtraInfoToProfile(profile: Profile): Profile {
+  profile.meta.extra = [
+    {
+      label: 'CPU',
+      entries: [
+        {
+          label: 'CPU 1',
+          format: 'string',
+          value: 'Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz',
+        },
+      ],
+    },
+    {
+      label: 'Memory',
+      entries: [],
+    },
+    {
+      label: 'Hard Drives',
+      entries: [
+        {
+          label: 'SSD',
+          format: 'string',
+          value: 'Samsung SSD 850 EVO 500GB',
+        },
+        {
+          label: 'HDD',
+          format: 'string',
+          value: 'Seagate ST1000LM035-1RK172',
+        },
+      ],
+    },
+  ];
+  return profile;
+}
+
 /**
  * Use this function to create a profile that has private browsing data.
  * This profile should first be run through addActiveTabInformationToProfile to

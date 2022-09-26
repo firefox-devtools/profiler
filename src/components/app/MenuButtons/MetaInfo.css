@@ -68,6 +68,10 @@
   font-weight: 700;
 }
 
+.moreInfoSummary::marker {
+  content: '';
+}
+
 .moreInfoButton {
   width: 100%;
   margin-top: 15px;
