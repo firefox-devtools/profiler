@@ -13,9 +13,11 @@ Array [
     >
       http://example.com
     </a>,
+    "http://example.com",
   ],
   Array [
     "file-path",
+    "/Users/me/gecko",
     "/Users/me/gecko",
     "/Users/me/gecko",
   ],
@@ -23,25 +25,30 @@ Array [
     "file-path",
     null,
     "(empty)",
+    "(empty)",
   ],
   Array [
     "file-path",
     undefined,
+    "(empty)",
     "(empty)",
   ],
   Array [
     "duration",
     0,
     "0s",
+    "0s",
   ],
   Array [
     "duration",
     10,
     "10ms",
+    "10ms",
   ],
   Array [
     "duration",
     12.3456789,
+    "12.346ms",
     "12.346ms",
   ],
   Array [
@@ -88,6 +95,7 @@ Array [
         </tr>
       </tbody>
     </table>,
+    "(a, 1),(b, 2)",
   ],
   Array [
     Object {
@@ -133,6 +141,7 @@ Array [
         </tr>
       </tbody>
     </table>,
+    "(a, b),(b, 2)",
   ],
   Array [
     Object {
@@ -177,6 +186,7 @@ Array [
         </tr>
       </tbody>
     </table>,
+    "(a, (empty)),(b, 2)",
   ],
   Array [
     Object {
@@ -219,6 +229,7 @@ Array [
         </tr>
       </tbody>
     </table>,
+    "(a, (empty)),(b, 2)",
   ],
   Array [
     "list",
@@ -226,6 +237,7 @@ Array [
     <ul
       className="marker-value"
     />,
+    "",
   ],
   Array [
     "list",
@@ -243,6 +255,7 @@ Array [
         b
       </li>
     </ul>,
+    "a, b",
   ],
 ]
 `;

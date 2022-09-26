@@ -178,6 +178,10 @@ describe('marker schema labels', function () {
 });
 
 describe('marker schema formatting', function () {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
   it('can apply a variety of formats', function () {
     const entries = [
       ['url', 'http://example.com'],
@@ -333,12 +337,12 @@ describe('marker schema formatting', function () {
       ['list', []],
       ['list', ['a', 'b']],
     ];
-
     expect(
       entries.map(([format, value]) => [
         format,
         value,
         formatMarkupFromMarkerSchema('none', format, value),
+        formatFromMarkerSchema('none', format, value),
       ])
     ).toMatchSnapshot();
   });

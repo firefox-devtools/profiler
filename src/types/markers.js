@@ -14,9 +14,8 @@ import type {
 import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
-export type MarkerFormatType = BasicMarkerFormatType | ComplexMarkerFormatType;
 
-export type BasicMarkerFormatType =
+export type MarkerFormatType =
   // ----------------------------------------------------
   // String types.
 
@@ -60,15 +59,13 @@ export type BasicMarkerFormatType =
   // The decimal should be used for generic representations of numbers. Do not
   // use it for time information.
   // "Label: 52.23, 0.0054, 123,456.78"
-  | 'decimal';
-
-type ComplexMarkerFormatType =
+  | 'decimal'
   | 'list'
   | {| type: 'table', columns: TableColumnFormat[] |};
 
 type TableColumnFormat = {|
   // type for formatting, default is string
-  type?: BasicMarkerFormatType,
+  type?: MarkerFormatType,
   // header column label
   label?: string,
 |};

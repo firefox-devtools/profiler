@@ -366,15 +366,55 @@ export function formatFromMarkerSchema(
   value: any
 ): string {
   if (value === undefined || value === null) {
-    console.warn(`Formatting ${value} for ${markerType}`);
+    console.warn(
+      `Formatting ${value} for ${markerType} with format ${JSON.stringify(
+        format
+      )}`
+    );
     return '(empty)';
+  }
+  if (typeof format === 'object') {
+    switch (format.type) {
+      case 'table': {
+        const { columns } = format;
+        if (!(value instanceof Array)) {
+          throw new Error('Expected an array for table type');
+        }
+        const hasHeader = columns.some((column) => column.label);
+        const headerRows = hasHeader
+          ? [columns.map((x) => x.label || '(empty)')]
+          : [];
+        const cellRows = value.map((row) => {
+          if (!(row instanceof Array)) {
+            throw new Error('Expected an array for table row');
+          }
+
+          if (row.length !== columns.length) {
+            throw new Error(
+              "Row length doesn't match column count (row: " +
+                row.length +
+                ', cols: ' +
+                columns.length +
+                ')'
+            );
+          }
+          return row.map((cell, j) => {
+            const { format } = columns[j];
+            return formatFromMarkerSchema(markerType, format || 'string', cell);
+          });
+        });
+        const rows = headerRows.concat(cellRows);
+        return rows.map((r) => `(${r.join(', ')})`).join(',');
+      }
+      default:
+        throw new Error(`Unknown format type ${JSON.stringify(format)}`);
+    }
   }
   switch (format) {
     case 'url':
     case 'file-path':
     case 'string':
       // Make sure a non-empty string is returned here.
-
       return String(value) || '(empty)';
     case 'duration':
     case 'time':
@@ -395,8 +435,15 @@ export function formatFromMarkerSchema(
       return formatNumber(value);
     case 'percentage':
       return formatPercent(value);
+    case 'list':
+      if (!(value instanceof Array)) {
+        throw new Error('Expected an array for list format');
+      }
+      return value
+        .map((v) => formatFromMarkerSchema(markerType, 'string', v))
+        .join(', ');
     default:
-      console.error(
+      console.warn(
         `A marker schema of type "${markerType}" had an unknown format ${JSON.stringify(
           format
         )}`
