@@ -63,6 +63,7 @@ function _languageExtForPath(
     path.endsWith('.js') ||
     path.endsWith('.jsm') ||
     path.endsWith('.jsx') ||
+    path.endsWith('.mjs') ||
     path.endsWith('.ts') ||
     path.endsWith('.tsx')
   ) {
