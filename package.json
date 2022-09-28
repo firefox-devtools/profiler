@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.1",
-    "@codemirror/lang-javascript": "^6.0.2",
+    "@codemirror/lang-javascript": "^6.1.0",
     "@codemirror/lang-rust": "^6.0.0",
     "@codemirror/language": "^6.2.1",
     "@codemirror/state": "^6.1.1",
@@ -58,7 +58,7 @@
     "@fluent/bundle": "^0.17.1",
     "@fluent/langneg": "^0.6.2",
     "@fluent/react": "^0.14.1",
-    "@lezer/highlight": "^1.0.0",
+    "@lezer/highlight": "^1.1.1",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
     "clamp": "^1.0.1",
