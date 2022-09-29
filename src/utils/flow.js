@@ -85,6 +85,7 @@ export function convertToTransformType(type: string): TransformType | null {
     // we have been exhaustive.
     case 'merge-call-node':
     case 'merge-function':
+    case 'merge-function-set':
     case 'focus-subtree':
     case 'focus-function':
     case 'collapse-resource':

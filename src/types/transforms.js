@@ -192,6 +192,16 @@ export type TransformDefinitions = {
   |},
 
   /**
+   * Similar to merge-function, this transform allows for multiple functions to be grouped
+   * into a single transform. Adding multiple merged functions is commutatitive, as they
+   * do not rely on call nodes.
+   */
+  'merge-function-set': {|
+    +type: 'merge-function-set',
+    +funcIndexes: Set<IndexIntoFuncTable>,
+  |},
+
+  /**
    * The DropFunction transform removes samples from the thread that have a function
    * somewhere in its stack.
    *

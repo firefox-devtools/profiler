@@ -1431,7 +1431,8 @@ describe('url upgrading', function () {
 describe('URL serialization of the transform stack', function () {
   const transformString =
     'f-combined-0w2~mcn-combined-2w4~f-js-3w5-i~mf-6~ff-7~cr-combined-8-9~' +
-    'rec-combined-10~df-11~cfs-12';
+    'rec-combined-10~df-11~cfs-12~mfs-dwf';
+
   const { getState } = _getStoreWithURL({
     search: '?transforms=' + transformString,
   });
@@ -1486,6 +1487,10 @@ describe('URL serialization of the transform stack', function () {
       {
         type: 'collapse-function-subtree',
         funcIndex: 12,
+      },
+      {
+        type: 'merge-function-set',
+        funcIndexes: new Set([13, 14, 15]),
       },
     ]);
   });
