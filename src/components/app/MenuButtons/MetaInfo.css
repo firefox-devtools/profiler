@@ -68,13 +68,16 @@
   font-weight: 700;
 }
 
-.moreInfoSummary::marker {
-  content: '';
+.moreInfoSummary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  user-select: none;
 }
 
-.moreInfoButton {
-  width: 100%;
-  margin-top: 15px;
+.moreInfoSummary::marker {
+  content: '';
 }
 
 .moreInfoPart {

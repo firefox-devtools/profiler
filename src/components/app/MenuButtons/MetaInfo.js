@@ -36,11 +36,11 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './MetaInfo.css';
 
-type StateProps = {|
+type State = {|
   showsMoreInfo: boolean,
 |};
 
-type OwnProps = $ReadOnly<{|
+type StateProps = $ReadOnly<{|
   profile: Profile,
   symbolicationStatus: SymbolicationStatus,
   profileExtraInfo: ExtraProfileInfoSection[],
@@ -50,12 +50,12 @@ type DispatchProps = $ReadOnly<{|
   resymbolicateProfile: typeof resymbolicateProfile,
 |}>;
 
-type Props = ConnectedProps<{||}, OwnProps, DispatchProps>;
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 /**
  * This component formats the profile's meta information into a dropdown panel.
  */
-class MetaInfoPanelImpl extends React.PureComponent<Props, StateProps> {
+class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
   state = { showsMoreInfo: false };
 
   /**
@@ -133,7 +133,8 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, StateProps> {
     }
   }
 
-  _handleMoreInfoButtonClick = () => {
+  _handleMoreInfoButtonClick = (event: SyntheticMouseEvent<>) => {
+    event.preventDefault();
     this.setState((state) => ({ showsMoreInfo: !state.showsMoreInfo }));
   };
 
@@ -159,9 +160,25 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, StateProps> {
 
   _renderMoreInfo() {
     return (
-      <div className="moreInfoPart">
-        {this.props.profileExtraInfo.map(this._renderMoreInfoSection)}
-      </div>
+      <details className="metaInfoRow" open={this.state.showsMoreInfo}>
+        <summary
+          className="moreInfoSummary photon-button photon-button-default photon-button-micro"
+          onClick={this._handleMoreInfoButtonClick}
+        >
+          <Localized
+            id={
+              this.state.showsMoreInfo
+                ? `MenuButtons--index--hide-moreInfo-button`
+                : `MenuButtons--index--show-moreInfo-button`
+            }
+          >
+            {this.state.showsMoreInfo ? 'Show Less' : 'Show More'}
+          </Localized>
+        </summary>
+        <div className="moreInfoPart">
+          {this.props.profileExtraInfo.map(this._renderMoreInfoSection)}
+        </div>
+      </details>
     );
   }
 
@@ -448,28 +465,9 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, StateProps> {
         {profilerOverhead ? (
           <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
         ) : null}
-        {this.props.profileExtraInfo.length !== 0 ? (
-          <details className="metaInfoRow" open={this.state.showsMoreInfo}>
-            <summary className="moreInfoSummary">
-              <button
-                type="button"
-                className="moreInfoButton photon-button photon-button-default photon-button-micro"
-                onClick={this._handleMoreInfoButtonClick}
-              >
-                <Localized
-                  id={
-                    this.state.showsMoreInfo
-                      ? `MenuButtons--index--hide-moreInfo-button`
-                      : `MenuButtons--index--show-moreInfo-button`
-                  }
-                >
-                  {this.state.showsMoreInfo ? 'Show Less' : 'Show More'}
-                </Localized>
-              </button>
-            </summary>
-            {this._renderMoreInfo()}
-          </details>
-        ) : null}
+        {this.props.profileExtraInfo.length !== 0
+          ? this._renderMoreInfo()
+          : null}
       </>
     );
   }
@@ -507,7 +505,7 @@ function _formatDate(timestamp: number): string {
   return timestampDate;
 }
 
-export const MetaInfoPanel = explicitConnect<{||}, OwnProps, DispatchProps>({
+export const MetaInfoPanel = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     profile: getProfile(state),
     symbolicationStatus: getSymbolicationStatus(state),

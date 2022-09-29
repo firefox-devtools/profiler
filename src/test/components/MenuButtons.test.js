@@ -522,7 +522,7 @@ describe('app/MenuButtons', function () {
       const { displayMetaInfoPanel } = await setupForMetaInfoPanel(profile);
       await displayMetaInfoPanel();
 
-      expect(screen.queryByText('Show More')).not.toBeInTheDocument();
+      expect(screen.queryByText('Show more')).not.toBeInTheDocument();
     });
 
     it('with more extra info, opens more info section if clicked', async () => {
@@ -562,7 +562,7 @@ describe('app/MenuButtons', function () {
       const { displayMetaInfoPanel } = await setupForMetaInfoPanel(profile);
       await displayMetaInfoPanel();
 
-      const summary = screen.getByText('Show More');
+      const summary = screen.getByText('Show more');
       fireFullClick(summary);
       const moreInfoPart = document.querySelector('.moreInfoPart');
       expect(moreInfoPart).toMatchSnapshot();
