@@ -303,13 +303,13 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
-MarkerContextMenu--set-selection-from-duration = Установіть вибір на основі тривалості маркера
-MarkerContextMenu--start-selection-here = Почати вибір тут
-MarkerContextMenu--end-selection-here = Завершити вибір тут
-MarkerContextMenu--start-selection-at-marker-start = Почати вибір на <strong>початку</strong> маркера
-MarkerContextMenu--start-selection-at-marker-end = Почати вибір у <strong>кінці</strong> маркера
-MarkerContextMenu--end-selection-at-marker-start = Завершити вибір на <strong>початку</strong> маркера
-MarkerContextMenu--end-selection-at-marker-end = Завершити вибір у <strong>кінці</strong> маркера
+MarkerContextMenu--set-selection-from-duration = Налаштуйте вибірку на основі тривалості маркера
+MarkerContextMenu--start-selection-here = Почати вибірку звідси
+MarkerContextMenu--end-selection-here = Завершити вибірку тут
+MarkerContextMenu--start-selection-at-marker-start = Почати вибірку від <strong>початку</strong> маркера
+MarkerContextMenu--start-selection-at-marker-end = Почати вибірку в <strong>кінці</strong> маркера
+MarkerContextMenu--end-selection-at-marker-start = Завершити вибірку на <strong>початку</strong> маркера
+MarkerContextMenu--end-selection-at-marker-end = Завершити вибірку в <strong>кінці</strong> маркера
 MarkerContextMenu--copy-description = Скопіювати опис
 MarkerContextMenu--copy-call-stack = Скопіювати стек викликів
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
