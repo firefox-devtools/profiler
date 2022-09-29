@@ -21,7 +21,7 @@ body {
     Oxygen-Sans, Ubuntu, 'Noto Sans', 'Liberation Sans', Cantarell,
     'Helvetica Neue', sans-serif;
   font-size: 11px;
-  
+
   /* equal size all numbers, so that longer numbers are larger */
   font-variant-numeric: tabular-nums;
 
