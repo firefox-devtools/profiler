@@ -360,6 +360,11 @@ export function getLabelGetter(
   };
 }
 
+/**
+ * This function formats a string from a marker type and a value.
+ * If you wish to get markup instead, have a look at
+ * formatMarkupFromMarkerSchema below.
+ */
 export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
@@ -381,21 +386,17 @@ export function formatFromMarkerSchema(
           throw new Error('Expected an array for table type');
         }
         const hasHeader = columns.some((column) => column.label);
-        const headerRows = hasHeader
+        const rows = hasHeader
           ? [columns.map((x) => x.label || '(empty)')]
           : [];
-        const cellRows = value.map((row) => {
+        const cellRows = value.map((row, i) => {
           if (!(row instanceof Array)) {
             throw new Error('Expected an array for table row');
           }
 
           if (row.length !== columns.length) {
             throw new Error(
-              "Row length doesn't match column count (row: " +
-                row.length +
-                ', cols: ' +
-                columns.length +
-                ')'
+              `Row ${i} length doesn't match column count (row: ${row.length}, cols: ${columns.length})`
             );
           }
           return row.map((cell, j) => {
@@ -403,11 +404,13 @@ export function formatFromMarkerSchema(
             return formatFromMarkerSchema(markerType, format || 'string', cell);
           });
         });
-        const rows = headerRows.concat(cellRows);
-        return rows.map((r) => `(${r.join(', ')})`).join(',');
+        rows.push(...cellRows);
+        return rows.map((row) => `(${row.join(', ')})`).join(',');
       }
       default:
-        throw new Error(`Unknown format type ${JSON.stringify(format)}`);
+        throw new Error(
+          `Unknown format type ${JSON.stringify((format.type: empty))}`
+        );
     }
   }
   switch (format) {
@@ -445,13 +448,18 @@ export function formatFromMarkerSchema(
     default:
       console.warn(
         `A marker schema of type "${markerType}" had an unknown format ${JSON.stringify(
-          format
+          (format: empty)
         )}`
       );
       return value;
   }
 }
 
+/**
+ * This function may return structured markup for some types suchs as table,
+ * list, or urls. For other types this falls back to formatFromMarkerSchema
+ * above.
+ */
 export function formatMarkupFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
@@ -491,11 +499,7 @@ export function formatMarkupFromMarkerSchema(
 
                 if (row.length !== columns.length) {
                   throw new Error(
-                    "Row length doesn't match column count (row: " +
-                      row.length +
-                      ', cols: ' +
-                      columns.length +
-                      ')'
+                    `Row ${i} length doesn't match column count (row: ${row.length}, cols: ${columns.length})`
                   );
                 }
                 return (
@@ -519,7 +523,9 @@ export function formatMarkupFromMarkerSchema(
         );
       }
       default:
-        throw new Error(`Unknown format type ${JSON.stringify(format)}`);
+        throw new Error(
+          `Unknown format type ${JSON.stringify((format: empty))}`
+        );
     }
   }
   switch (format) {
@@ -537,6 +543,9 @@ export function formatMarkupFromMarkerSchema(
         </ul>
       );
     case 'url':
+      if (!value.startsWith('http:') && !value.startsWith('https:')) {
+        return value;
+      }
       return (
         <a
           href={value}
@@ -544,10 +553,10 @@ export function formatMarkupFromMarkerSchema(
           rel="noreferrer"
           className="marker-value"
         >
-          {formatFromMarkerSchema(markerType, 'string', value)}
+          {value}
         </a>
       );
     default:
-      throw new Error(`Unknown format type ${JSON.stringify(format)}`);
+      throw new Error(`Unknown format type ${JSON.stringify((format: empty))}`);
   }
 }
