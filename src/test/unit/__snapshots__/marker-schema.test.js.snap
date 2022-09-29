@@ -6,7 +6,7 @@ Array [
     "url",
     "http://example.com",
     <a
-      className="marker-value"
+      className="marker-link-value"
       href="http://example.com"
       rel="noreferrer"
       target="_blank"
@@ -74,7 +74,7 @@ Array [
       ],
     ],
     <table
-      className="marker-value"
+      className="marker-table-value"
     >
       <tbody>
         <tr>
@@ -118,7 +118,7 @@ Array [
       ],
     ],
     <table
-      className="marker-value"
+      className="marker-table-value"
     >
       <thead>
         <tr>
@@ -163,7 +163,7 @@ Array [
       ],
     ],
     <table
-      className="marker-value"
+      className="marker-table-value"
     >
       <thead>
         <tr>
@@ -206,7 +206,7 @@ Array [
       ],
     ],
     <table
-      className="marker-value"
+      className="marker-table-value"
     >
       <thead>
         <tr>
@@ -235,7 +235,7 @@ Array [
     "list",
     Array [],
     <ul
-      className="marker-value"
+      className="marker-list-value"
     />,
     "",
   ],
@@ -246,7 +246,7 @@ Array [
       "b",
     ],
     <ul
-      className="marker-value"
+      className="marker-list-value"
     >
       <li>
         a

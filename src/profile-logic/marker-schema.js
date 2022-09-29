@@ -481,7 +481,7 @@ export function formatMarkupFromMarkerSchema(
         }
         const hasHeader = columns.some((column) => column.label);
         return (
-          <table className="marker-value">
+          <table className="marker-table-value">
             {hasHeader ? (
               <thead>
                 <tr>
@@ -534,7 +534,7 @@ export function formatMarkupFromMarkerSchema(
         throw new Error('Expected an array for list format');
       }
       return (
-        <ul className="marker-value">
+        <ul className="marker-list-value">
           {value.map((entry, i) => (
             <li key={i}>
               {formatFromMarkerSchema(markerType, 'string', value[i])}
@@ -551,7 +551,7 @@ export function formatMarkupFromMarkerSchema(
           href={value}
           target="_blank"
           rel="noreferrer"
-          className="marker-value"
+          className="marker-link-value"
         >
           {value}
         </a>

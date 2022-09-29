@@ -62,6 +62,8 @@ import {
   getGCSliceDetails,
 } from './GCMarker';
 
+import './Marker.css';
+
 function _maybeFormatDuration(
   start: number | void,
   end: number | void
