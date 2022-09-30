@@ -455,6 +455,9 @@ export function formatFromMarkerSchema(
   }
 }
 
+// This regexp is used to test for URLs and remove their scheme for display.
+const URL_SCHEME_REGEXP = /^http(s?):\/\//;
+
 /**
  * This function may return structured markup for some types suchs as table,
  * list, or urls. For other types this falls back to formatFromMarkerSchema
@@ -542,8 +545,8 @@ export function formatMarkupFromMarkerSchema(
           ))}
         </ul>
       );
-    case 'url':
-      if (!value.startsWith('http:') && !value.startsWith('https:')) {
+    case 'url': {
+      if (!URL_SCHEME_REGEXP.test(value)) {
         return value;
       }
       return (
@@ -553,9 +556,10 @@ export function formatMarkupFromMarkerSchema(
           rel="noreferrer"
           className="marker-link-value"
         >
-          {value}
+          {value.replace(URL_SCHEME_REGEXP, '')}
         </a>
       );
+    }
     default:
       throw new Error(`Unknown format type ${JSON.stringify((format: empty))}`);
   }
