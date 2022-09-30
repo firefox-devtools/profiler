@@ -102,6 +102,7 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class FlameGraphImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
+  _isShiftKeyPressed: boolean = false;
 
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
@@ -128,11 +129,11 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       return;
     }
     const { callTree, openSourceView } = this.props;
-    const file = callTree.getRawFileNameForCallNode(callNodeIndex);
-    if (file === null) {
-      return;
-    }
-    openSourceView(file, 'flame-graph');
+    callTree.handleOpenSourceView(
+      callNodeIndex,
+      (file) => openSourceView(file, 'flame-graph'),
+      this._isShiftKeyPressed
+    );
   };
 
   _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
@@ -217,14 +218,19 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       openSourceView,
     } = this.props;
 
+    this._isShiftKeyPressed = false;
+
     if (event.key === 'Enter') {
       if (selectedCallNodeIndex !== null) {
-        const file = callTree.getRawFileNameForCallNode(selectedCallNodeIndex);
-        if (file !== null) {
-          openSourceView(file, 'flame-graph');
-        }
+        callTree.handleOpenSourceView(selectedCallNodeIndex, (file) =>
+          openSourceView(file, 'flame-graph')
+        );
       }
       return;
+    }
+
+    if (event.key === 'Shift') {
+      this._isShiftKeyPressed = true;
     }
 
     if (
@@ -301,6 +307,10 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     }
   };
 
+  _handleKeyUp = (_) => {
+    this._isShiftKeyPressed = false;
+  };
+
   render() {
     const {
       thread,
@@ -332,7 +342,11 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
-      <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
+      <div
+        className="flameGraphContent"
+        onKeyDown={this._handleKeyDown}
+        onKeyUp={this._handleKeyUp}
+      >
         <ContextMenuTrigger
           id="CallNodeContextMenu"
           attributes={{

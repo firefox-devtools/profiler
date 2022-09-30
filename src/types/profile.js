@@ -379,6 +379,15 @@ export type FuncTable = {|
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,
 
+  // This is the optional information on the url of the source file
+  // that this function can be seen in specifically.
+  // Prefixing the URL with `post|` signifies that the URL should
+  // be called with a POST request and the response discarded (the request
+  // includes `name`, `file`, `line` and `column` information if present).
+  // The response of the request (and any error) is ignored.
+  // These POST requests are used by imported profiles to trigger events
+  // outside of the profiler.
+  sourceUrl?: Array<IndexIntoStringTable | null>,
   length: number,
 |};
 

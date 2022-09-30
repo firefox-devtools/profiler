@@ -368,15 +368,94 @@ export class CallTree {
     );
   }
 
-  getRawFileNameForCallNode(
+  getRawFileNameAndMethodInfoForCallNode(
     callNodeIndex: IndexIntoCallNodeTable
-  ): string | null {
+  ): {
+    file: string,
+    line: number | null,
+    method: string,
+    column: number | null,
+    sourceUrl: string | null,
+  } | null {
     const funcIndex = this._callNodeTable.func[callNodeIndex];
     const fileName = this._funcTable.fileName[funcIndex];
     if (fileName === null) {
       return null;
     }
-    return this._stringTable.getString(fileName);
+    const line = this._funcTable.lineNumber[funcIndex];
+    const method = this._stringTable.getString(this._funcTable.name[funcIndex]);
+    const column = this._funcTable.columnNumber[funcIndex];
+    let sourceUrl = null;
+    if (
+      this._funcTable.sourceUrl &&
+      this._funcTable.sourceUrl[funcIndex] !== null
+    ) {
+      sourceUrl = this._stringTable.getString(
+        this._funcTable.sourceUrl[funcIndex]
+      );
+    }
+    return {
+      file: this._stringTable.getString(fileName),
+      line,
+      method,
+      column,
+      sourceUrl,
+    };
+  }
+
+  handleOpenSourceView(
+    callNodeIndex: IndexIntoCallNodeTable,
+    openSourceView: (file: string) => any,
+    forceLoadSource: boolean = false
+  ) {
+    const info = this.getRawFileNameAndMethodInfoForCallNode(callNodeIndex);
+    if (info === null) {
+      return;
+    }
+    const { file, method, line, column, sourceUrl } = info;
+    if (sourceUrl === null) {
+      // the simplest case, we don't have an additional source url
+      // the file includes it already
+      openSourceView(file);
+      return;
+    }
+    const rawSourceUrl = sourceUrl.replace(/^post|/, '');
+    if (sourceUrl.startsWith('post|') && !forceLoadSource) {
+      this._triggerSourceViewEventOnRemote(
+        file,
+        line,
+        method,
+        column,
+        rawSourceUrl
+      );
+    } else {
+      openSourceView(sourceUrl);
+    }
+  }
+
+  _triggerSourceViewEventOnRemote(
+    file: string,
+    line: number | null,
+    method: string,
+    column: number | null,
+    remoteUrl: string
+  ) {
+    const requestInit = {
+      body: JSON.stringify({
+        file,
+        line,
+        method,
+        column,
+      }),
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    };
+    fetch(remoteUrl, requestInit);
   }
 }
 
