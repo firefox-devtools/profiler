@@ -35,7 +35,7 @@ import {
 import { Backtrace } from 'firefox-profiler/components/shared/Backtrace';
 
 import {
-  formatFromMarkerSchema,
+  formatMarkupFromMarkerSchema,
   getSchemaFromMarker,
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
@@ -61,6 +61,8 @@ import {
   getGCMajorDetails,
   getGCSliceDetails,
 } from './GCMarker';
+
+import './Marker.css';
 
 function _maybeFormatDuration(
   start: number | void,
@@ -245,7 +247,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                     key={schema.name + '-' + key}
                     label={label || key}
                   >
-                    {formatFromMarkerSchema(schema.name, format, value)}
+                    {formatMarkupFromMarkerSchema(schema.name, format, value)}
                   </TooltipDetail>
                 );
               }
