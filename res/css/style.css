@@ -22,6 +22,9 @@ body {
     'Helvetica Neue', sans-serif;
   font-size: 11px;
 
+  /* equal size all numbers, so that longer numbers are larger */
+  font-variant-numeric: tabular-nums;
+
   /* Disable the "rubberband" overscrolling effect in Chrome. This happens when
    * using the charts and the scroll wheel. */
   overscroll-behavior: none;

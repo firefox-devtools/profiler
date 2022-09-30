@@ -198,13 +198,13 @@ describe('TrackPower', function () {
       '360\u2069 mW'
     );
     // Over the full range, we get 7.240 µWh, therefore we'll see in the tooltip
-    // 0.007 mWh.
+    // 7.2 µWh.
     expect(screen.getByText(/visible range:/).nextSibling).toHaveTextContent(
-      '0.007\u2069 mWh'
+      '7.2\u2069 µWh'
     );
-    // Over the preview selection, we get 5 µWh which shows up as 0.005 mWh.
+    // Over the preview selection, we get 5 µWh which shows up as 5.0 µWh.
     expect(
       screen.getByText(/current selection:/).nextSibling
-    ).toHaveTextContent('0.005\u2069 mWh');
+    ).toHaveTextContent('5.0\u2069 µWh');
   });
 });
