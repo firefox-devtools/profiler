@@ -4,6 +4,7 @@
 // @flow
 import {
   formatFromMarkerSchema,
+  formatMarkupFromMarkerSchema,
   parseLabel,
   markerSchemaFrontEndOnly,
 } from '../../profile-logic/marker-schema';
@@ -177,6 +178,10 @@ describe('marker schema labels', function () {
 });
 
 describe('marker schema formatting', function () {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
   it('can apply a variety of formats', function () {
     const entries = [
       ['url', 'http://example.com'],
@@ -290,6 +295,56 @@ describe('marker schema formatting', function () {
         "percentage - 0.0%",
       ]
     `);
+  });
+
+  it('supports complex formats', function () {
+    const entries = [
+      ['url', 'http://example.com'],
+      ['file-path', '/Users/me/gecko'],
+      ['file-path', null],
+      ['file-path', undefined],
+      ['duration', 0],
+      ['duration', 10],
+      ['duration', 12.3456789],
+      [
+        { type: 'table', columns: [{ type: 'string' }, { type: 'integer' }] },
+        [
+          ['a', 1],
+          ['b', 2],
+        ],
+      ],
+      [
+        {
+          type: 'table',
+          columns: [
+            { type: 'string', label: 'a' },
+            { type: 'integer', label: 'b' },
+          ],
+        },
+        [['b', 2]],
+      ],
+      [
+        {
+          type: 'table',
+          columns: [{ type: 'string', label: 'a' }, { type: 'integer' }],
+        },
+        [['b', 2]],
+      ],
+      [
+        { type: 'table', columns: [{ type: 'string', label: 'a' }, {}] },
+        [['b', 2]],
+      ],
+      ['list', []],
+      ['list', ['a', 'b']],
+    ];
+    expect(
+      entries.map(([format, value]) => [
+        format,
+        value,
+        formatMarkupFromMarkerSchema('none', format, value),
+        formatFromMarkerSchema('none', format, value),
+      ])
+    ).toMatchSnapshot();
   });
 });
 
