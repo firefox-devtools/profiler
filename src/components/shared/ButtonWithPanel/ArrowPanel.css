@@ -19,8 +19,8 @@
   top: var(--internal-offset-from-top);
   right: calc(var(--internal-offset-from-right) * -1);
   min-width: var(--internal-width);
-  background: hsl(0deg 0% 97% / 0.95);
   border-radius: 5px;
+  background: hsl(0deg 0% 97% / 0.95);
   color: black;
   filter: drop-shadow(0 0 0.5px rgb(0 0 0 / 0.4))
     drop-shadow(0 4px 5px rgb(0 0 0 / 0.4));

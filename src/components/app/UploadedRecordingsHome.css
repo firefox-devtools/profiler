@@ -9,11 +9,11 @@
   box-sizing: border-box;
   padding: 3em 1em;
   border: 1px solid #ccc;
+  border-radius: 3px;
   margin: auto;
 
   /* Other */
   background: #fff;
-  border-radius: 3px;
   box-shadow: 0 5px 25px #0b1f50;
   font-size: 13px;
   line-height: 1.5;

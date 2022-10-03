@@ -54,11 +54,11 @@
   display: inline-block;
   overflow: hidden; /* This clips this element's children using its border-radius */
   height: 14px;
+  border-radius: 2px;
   margin: 1px 0; /* Because the line's height is 16px, this margin vertically centers the bar */
 
   /* styling properties */
   background-color: var(--grey-20);
-  border-radius: 2px;
   box-shadow: 0 0 0 1px inset var(--marker-color);
   opacity: 0.7;
 }
