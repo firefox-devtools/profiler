@@ -4,10 +4,10 @@
 
 .photon-radio {
   border: 1px solid var(--grey-90-a30);
+  border-radius: 8px;
   appearance: none;
   background: none;
   background-color: var(--grey-90-a10);
-  border-radius: 8px;
 }
 
 /* Use this class with the photon-radio for the canonical photon styling. */

@@ -6,6 +6,7 @@
 .photon-button {
   padding: 0 8px;
   border: none;
+  border-radius: 2px;
   margin: 0;
 
   /* reset default styles */
@@ -13,7 +14,6 @@
 
   /* photon styles */
   background-color: var(--grey-90-a10);
-  border-radius: 2px;
   color: var(--grey-90);
   font: inherit;
 }
