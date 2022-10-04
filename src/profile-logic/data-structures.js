@@ -157,6 +157,7 @@ export function shallowCloneFuncTable(funcTable: FuncTable): FuncTable {
     fileName: funcTable.fileName.slice(),
     lineNumber: funcTable.lineNumber.slice(),
     columnNumber: funcTable.columnNumber.slice(),
+    sourceUrl: funcTable.sourceUrl !== undefined ? funcTable.sourceUrl.slice() : undefined,
     length: funcTable.length,
   };
 }

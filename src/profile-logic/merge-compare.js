@@ -654,6 +654,12 @@ function combineFuncTables(
       );
       newFuncTable.lineNumber.push(lineNumber);
       newFuncTable.columnNumber.push(funcTable.columnNumber[i]);
+      if (funcTable.sourceUrl !== undefined) {
+        if (newFuncTable.sourceUrl === undefined) {
+          newFuncTable.sourceUrl = [];
+        }
+        newFuncTable.sourceUrl.push(funcTable.sourceUrl[i]);
+      }
 
       newFuncTable.length++;
     }

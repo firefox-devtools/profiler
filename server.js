@@ -15,7 +15,7 @@ const localConfigExists = fs.existsSync(
 );
 
 const serverConfig = {
-  allowedHosts: ['localhost', '.gitpod.io'],
+  allowedHosts: ['localhost', '.gitpod.io', 'github.com'],
   host,
   port,
   // We disable hot reloading because this takes lot of CPU and memory in the

@@ -210,6 +210,14 @@ export function getDownloadRecipeForSourceFile(
       };
     }
     case 'normal': {
+      const ALLOWED_URLS = ["https://raw.githubusercontent.com/"];
+      if (ALLOWED_URLS.some((url) => parsedFile.path.startsWith(url))) {
+        // maybe we could remove this check later
+        return {
+          type: 'CORS_ENABLED_SINGLE_FILE',
+          url: parsedFile.path,
+        };
+      }
       return { type: 'NO_KNOWN_CORS_URL' };
     }
     default:

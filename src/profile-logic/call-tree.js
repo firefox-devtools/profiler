@@ -371,7 +371,7 @@ export class CallTree {
   getRawFileNameAndMethodInfoForCallNode(
     callNodeIndex: IndexIntoCallNodeTable
   ): {
-    file: string,
+    file: string | null,
     line: number | null,
     method: string,
     column: number | null,
@@ -379,9 +379,6 @@ export class CallTree {
   } | null {
     const funcIndex = this._callNodeTable.func[callNodeIndex];
     const fileName = this._funcTable.fileName[funcIndex];
-    if (fileName === null) {
-      return null;
-    }
     const line = this._funcTable.lineNumber[funcIndex];
     const method = this._stringTable.getString(this._funcTable.name[funcIndex]);
     const column = this._funcTable.columnNumber[funcIndex];
@@ -395,7 +392,7 @@ export class CallTree {
       );
     }
     return {
-      file: this._stringTable.getString(fileName),
+      file: fileName !== null ? this._stringTable.getString(fileName) : sourceUrl,
       line,
       method,
       column,
@@ -413,9 +410,14 @@ export class CallTree {
       return;
     }
     const { file, method, line, column, sourceUrl } = info;
+    if (file === null && sourceUrl === null) {
+      // we have no indication where the file resides
+      return;
+    }
     if (sourceUrl === null) {
       // the simplest case, we don't have an additional source url
       // the file includes it already
+      // $FlowExpectError
       openSourceView(file);
       return;
     }
@@ -434,7 +436,7 @@ export class CallTree {
   }
 
   _triggerSourceViewEventOnRemote(
-    file: string,
+    file: string | null,
     line: number | null,
     method: string,
     column: number | null,

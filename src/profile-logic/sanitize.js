@@ -512,6 +512,9 @@ function sanitizeThreadPII(
           newFuncTable.fileName.push(null);
           newFuncTable.lineNumber.push(null);
           newFuncTable.columnNumber.push(null);
+          if (funcTable.sourceUrl && newFuncTable.sourceUrl) {
+            newFuncTable.sourceUrl.push(null);
+          }
           newFuncTable.length++;
 
           frameIndexes.forEach(
@@ -531,6 +534,9 @@ function sanitizeThreadPII(
           newFuncTable.resource[funcIndex] = -1;
           newFuncTable.lineNumber[funcIndex] = null;
           newFuncTable.columnNumber[funcIndex] = null;
+          if (funcTable.sourceUrl && newFuncTable.sourceUrl) {
+            newFuncTable.sourceUrl.push(null);
+          }
         }
 
         // In both cases, nullify some information in all frames.
