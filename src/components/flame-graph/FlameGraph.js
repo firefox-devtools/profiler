@@ -102,7 +102,6 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class FlameGraphImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
-  _isShiftKeyPressed: boolean = false;
 
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
@@ -124,7 +123,10 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     );
   };
 
-  _onCallNodeDoubleClick = (callNodeIndex: IndexIntoCallNodeTable | null) => {
+  _onCallNodeDoubleClick = (
+    callNodeIndex: IndexIntoCallNodeTable | null,
+    event: SyntheticMouseEvent<>
+  ) => {
     if (callNodeIndex === null) {
       return;
     }
@@ -132,7 +134,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     callTree.handleOpenSourceView(
       callNodeIndex,
       (file) => openSourceView(file, 'flame-graph'),
-      this._isShiftKeyPressed
+      event.shiftKey
     );
   };
 
@@ -218,8 +220,6 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       openSourceView,
     } = this.props;
 
-    this._isShiftKeyPressed = false;
-
     if (event.key === 'Enter') {
       if (selectedCallNodeIndex !== null) {
         callTree.handleOpenSourceView(selectedCallNodeIndex, (file) =>
@@ -227,10 +227,6 @@ class FlameGraphImpl extends React.PureComponent<Props> {
         );
       }
       return;
-    }
-
-    if (event.key === 'Shift') {
-      this._isShiftKeyPressed = true;
     }
 
     if (
@@ -307,10 +303,6 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     }
   };
 
-  _handleKeyUp = (_) => {
-    this._isShiftKeyPressed = false;
-  };
-
   render() {
     const {
       thread,
@@ -342,11 +334,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
-      <div
-        className="flameGraphContent"
-        onKeyDown={this._handleKeyDown}
-        onKeyUp={this._handleKeyUp}
-      >
+      <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
         <ContextMenuTrigger
           id="CallNodeContextMenu"
           attributes={{

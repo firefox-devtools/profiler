@@ -87,7 +87,6 @@ class CallTreeImpl extends PureComponent<Props> {
   };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = (treeView) => (this._treeView = treeView);
-  _isShiftKeyPressed: boolean = false;
 
   /**
    * Call Trees can have different types of "weights" for the data. Choose the
@@ -211,11 +210,6 @@ class CallTreeImpl extends PureComponent<Props> {
       threadsKey,
     } = this.props;
 
-    this._isShiftKeyPressed = false;
-    if (event.key === 'Shift') {
-      this._isShiftKeyPressed = true;
-    }
-
     const nodeIndex =
       rightClickedCallNodeIndex !== null
         ? rightClickedCallNodeIndex
@@ -226,16 +220,24 @@ class CallTreeImpl extends PureComponent<Props> {
     handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
   };
 
-  _onKeyUp = (_) => {
-    this._isShiftKeyPressed = false;
-  };
-
-  _onEnterOrDoubleClick = (nodeId: IndexIntoCallNodeTable) => {
+  _onEnter = (nodeId: IndexIntoCallNodeTable) => {
     const { tree, openSourceView } = this.props;
     tree.handleOpenSourceView(
       nodeId,
       (file) => openSourceView(file, 'calltree'),
-      this._isShiftKeyPressed
+      false
+    );
+  };
+
+  _onDoubleClick = (
+    nodeId: IndexIntoCallNodeTable,
+    event: SyntheticMouseEvent<>
+  ) => {
+    const { tree, openSourceView } = this.props;
+    tree.handleOpenSourceView(
+      nodeId,
+      (file) => openSourceView(file, 'calltree'),
+      event.shiftKey
     );
   };
 
@@ -305,9 +307,8 @@ class CallTreeImpl extends PureComponent<Props> {
         rowHeight={16}
         indentWidth={10}
         onKeyDown={this._onKeyDown}
-        onKeyUp={this._onKeyUp}
-        onEnterKey={this._onEnterOrDoubleClick}
-        onDoubleClick={this._onEnterOrDoubleClick}
+        onEnterKey={this._onEnter}
+        onDoubleClick={this._onDoubleClick}
       />
     );
   }

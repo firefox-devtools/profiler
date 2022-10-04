@@ -15,8 +15,11 @@ type Props<HoveredItem> = {|
   +containerHeight: CssPixels,
   +className: string,
   +onSelectItem?: (HoveredItem | null) => void,
-  +onRightClick?: (HoveredItem | null) => void,
-  +onDoubleClickItem: (HoveredItem | null) => void,
+  +onRightClick?: (HoveredItem | null, event: SyntheticMouseEvent<>) => void,
+  +onDoubleClickItem: (
+    HoveredItem | null,
+    event: SyntheticMouseEvent<>
+  ) => void,
   +getHoveredItemInfo: (HoveredItem) => React.Node,
   +drawCanvas: (
     CanvasRenderingContext2D,
@@ -188,7 +191,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
       // It is important that we call the right click callback at mousedown so
       // that the state is updated and the context menus are rendered before the
       // contextmenu events.
-      this.props.onRightClick(this.state.hoveredItem);
+      this.props.onRightClick(this.state.hoveredItem, e);
     }
   };
 
@@ -262,8 +265,8 @@ export class ChartCanvas<HoveredItem> extends React.Component<
     }
   };
 
-  _onDoubleClick = () => {
-    this.props.onDoubleClickItem(this.state.hoveredItem);
+  _onDoubleClick = (event: SyntheticMouseEvent<Element>) => {
+    this.props.onDoubleClickItem(this.state.hoveredItem, event);
   };
 
   _getHoveredItemInfo = (): React.Node => {

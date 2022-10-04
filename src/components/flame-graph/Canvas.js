@@ -58,8 +58,11 @@ export type OwnProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
-  +onRightClick: (IndexIntoCallNodeTable | null) => void,
-  +onDoubleClick: (IndexIntoCallNodeTable | null) => void,
+  +onRightClick: (IndexIntoCallNodeTable | null, SyntheticMouseEvent<>) => void,
+  +onDoubleClick: (
+    IndexIntoCallNodeTable | null,
+    SyntheticMouseEvent<>
+  ) => void,
   +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
@@ -378,16 +381,22 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     this.props.onSelectionChange(callNodeIndex);
   };
 
-  _onRightClick = (hoveredItem: HoveredStackTiming | null) => {
+  _onRightClick = (
+    hoveredItem: HoveredStackTiming | null,
+    event: SyntheticMouseEvent<>
+  ) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
     const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
-    this.props.onRightClick(callNodeIndex);
+    this.props.onRightClick(callNodeIndex, event);
   };
 
-  _onDoubleClick = (hoveredItem: HoveredStackTiming | null) => {
+  _onDoubleClick = (
+    hoveredItem: HoveredStackTiming | null,
+    event: SyntheticMouseEvent<>
+  ): void => {
     const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
-    this.props.onDoubleClick(callNodeIndex);
+    this.props.onDoubleClick(callNodeIndex, event);
   };
 
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
