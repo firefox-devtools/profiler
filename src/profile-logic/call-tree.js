@@ -422,8 +422,26 @@ export class CallTree {
       openSourceView(file);
       return;
     }
-    const rawSourceUrl = sourceUrl.replace(/^post|/, '');
-    if (sourceUrl.startsWith('post|') && !forceLoadSource) {
+    let rawSourceUrl = sourceUrl.replace(/^post|/, '');
+    let reallyForceLoadSource = forceLoadSource;
+    if (rawSourceUrl.includes('|')) {
+      // rawSourceUrl = sourceUrl | alternative
+      const [first, alternative] = rawSourceUrl.split('|');
+      if (first.startsWith(window.location.origin)) {
+        // we're serving the file from the same origin, therefore the first URL
+        rawSourceUrl = first;
+      } else {
+        // we're not serving the file from the same origin, like from profiler.firefox.com
+        // so use the public alternative
+        // if present
+        rawSourceUrl = alternative;
+        reallyForceLoadSource = true;
+      }
+    }
+    if (rawSourceUrl.length === 0) {
+      return;
+    }
+    if (sourceUrl.startsWith('post|') && !reallyForceLoadSource) {
       this._triggerSourceViewEventOnRemote(
         file,
         line,
@@ -432,7 +450,7 @@ export class CallTree {
         rawSourceUrl
       );
     } else {
-      openSourceView(sourceUrl);
+      openSourceView(rawSourceUrl);
     }
   }
 
