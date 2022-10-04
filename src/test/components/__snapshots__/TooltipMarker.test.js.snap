@@ -1874,6 +1874,60 @@ exports[`TooltipMarker renders properly redirect network markers without additio
 </div>
 `;
 
+exports[`TooltipMarker renders the tooltip of CompositorScreenshotWindowDestroyed 1`] = `
+<body>
+  <div>
+    <div
+      class="tooltipMarker propClass"
+    >
+      <div
+        class="tooltipHeader"
+      >
+        <div
+          class="tooltipOneLine"
+        >
+          <div
+            class="tooltipTiming"
+          >
+            1ms
+          </div>
+          <div
+            class="tooltipTitle"
+          >
+            CompositorScreenshotWindowDestroyed
+          </div>
+        </div>
+      </div>
+      <div
+        class="tooltipDetails"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Description
+          :
+        </div>
+        This marker shows the moment a window has been destroyed.
+        <div
+          class="tooltipLabel"
+        >
+          Window ID
+          :
+        </div>
+        XXX
+        <div
+          class="tooltipLabel"
+        >
+          Thread
+          :
+        </div>
+        Empty
+      </div>
+    </div>
+  </div>
+</body>
+`;
+
 exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662-10 1`] = `
 <div
   class="tooltipMarker propClass"

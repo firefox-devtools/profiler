@@ -11,9 +11,12 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { fireEvent } from '@testing-library/react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  fireEvent,
+  screen,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { commitRange } from '../../actions/profile-view';
 import { TimelineTrackScreenshots } from '../../components/timeline/TrackScreenshots';
 import { Timeline } from '../../components/timeline';
@@ -243,12 +246,30 @@ describe('timeline/TrackScreenshots', function () {
   });
 
   it('is created in the <Timeline /> with a profile with screenshots', function () {
-    const { getAllByText } = setup(getScreenshotTrackProfile(), <Timeline />);
+    setup(getScreenshotTrackProfile(), <Timeline />);
 
     // The function `getAllByText` throws already if none are found, with a useful Error,
     // if it can't find any elements. But we still use `expect` to keep a "test-like"
     // assertion, even if it's useless.
-    expect(getAllByText('Screenshots').length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: 'Screenshots' })).toHaveLength(
+      3
+    );
+
+    const screenshotTracks = document.querySelectorAll(
+      '.timelineTrackScreenshot'
+    );
+    expect(screenshotTracks).toHaveLength(3);
+
+    // Tracks 1 and 3 are rendered in the full length because these windows are
+    // not closed. They should have the same number of elements.
+    expect(screenshotTracks[0].childElementCount).toBe(
+      screenshotTracks[2].childElementCount
+    );
+
+    // Track 2 is closed before the end and therefore should have less DOM elements.
+    expect(screenshotTracks[1].childElementCount).toBeLessThan(
+      screenshotTracks[0].childElementCount
+    );
   });
 
   it('is not created in the <Timeline /> with a profile with no screenshots', function () {
