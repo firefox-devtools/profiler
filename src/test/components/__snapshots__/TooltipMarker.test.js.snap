@@ -4735,6 +4735,13 @@ exports[`TooltipMarker shows image of CompositorScreenshot markers 1`] = `
     <div
       class="tooltipLabel"
     >
+      Window ID
+      :
+    </div>
+    XXX
+    <div
+      class="tooltipLabel"
+    >
       Thread
       :
     </div>

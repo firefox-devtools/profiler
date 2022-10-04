@@ -608,18 +608,30 @@ type VsyncTimestampPayload = {|
   type: 'VsyncTimestamp',
 |};
 
-export type ScreenshotPayload = {|
-  type: 'CompositorScreenshot',
-  // This field represents the data url of the image. It is saved in the string table.
-  url: IndexIntoStringTable,
-  // A memory address that can uniquely identify a window. It has no meaning other than
-  // a way to identify a window.
-  windowID: string,
-  // The original dimensions of the window that was captured. The actual image that is
-  // stored in the string table will be scaled down from the original size.
-  windowWidth: number,
-  windowHeight: number,
-|};
+export type ScreenshotPayload =
+  | {|
+      type: 'CompositorScreenshot',
+      // This field represents the data url of the image. It is saved in the string table.
+      url: IndexIntoStringTable,
+      // A memory address that can uniquely identify a window. It has no meaning other than
+      // a way to identify a window.
+      windowID: string,
+      // The original dimensions of the window that was captured. The actual image that is
+      // stored in the string table will be scaled down from the original size.
+      windowWidth: number,
+      windowHeight: number,
+    |}
+  // Markers that represent the closing of a window (name === 'CompositorScreenshotWindowDestroyed')
+  // only have a windowID data.
+  | {|
+      type: 'CompositorScreenshot',
+      // A memory address that can uniquely identify a window. It has no meaning other than
+      // a way to identify a window.
+      windowID: string,
+      // Having the property present but void makes it easier to deal with Flow in
+      // our flow version.
+      url: void,
+    |};
 
 export type StyleMarkerPayload = {|
   type: 'Styles',

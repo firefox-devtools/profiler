@@ -334,7 +334,9 @@ function sanitizeThreadPII(
         // We are mutating the stringArray here but it's okay to mutate since
         // we copied them at the beginning while converting the string table
         // to string array.
-        stringArray[urlIndex] = '';
+        if (urlIndex !== undefined) {
+          stringArray[urlIndex] = '';
+        }
         markersToDelete.add(i);
       }
 
