@@ -99,7 +99,9 @@ export function getStackLineInfoNonInverted(
     const frame = stackTable.frame[stackIndex];
     const prefixStack = stackTable.prefix[stackIndex];
     const func = frameTable.func[frame];
-    const fileNameStringIndexOfThisStack = funcTable.fileName[func];
+    const fileNameStringIndexOfThisStack =
+      funcTable.fileName[func] ||
+      (funcTable.sourceUrl ? funcTable.sourceUrl[func] : null);
 
     let selfLine: LineNumber | null = null;
     let totalLines: Set<LineNumber> | null =
@@ -176,7 +178,9 @@ export function getStackLineInfoInverted(
     const frame = stackTable.frame[stackIndex];
     const prefixStack = stackTable.prefix[stackIndex];
     const func = frameTable.func[frame];
-    const fileNameStringIndexOfThisStack = funcTable.fileName[func];
+    const fileNameStringIndexOfThisStack =
+      funcTable.fileName[func] ||
+      (funcTable.sourceUrl ? funcTable.sourceUrl[func] : null);
 
     let selfLine: LineNumber | null = null;
     let totalLines: Set<LineNumber> | null = null;

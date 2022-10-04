@@ -210,7 +210,11 @@ export function getDownloadRecipeForSourceFile(
       };
     }
     case 'normal': {
-      const ALLOWED_URLS = ["https://raw.githubusercontent.com/"];
+      const ALLOWED_URLS = [
+        'https://raw.githubusercontent.com/',
+        'http://localhost:',
+        'http://localhost/',
+      ];
       if (ALLOWED_URLS.some((url) => parsedFile.path.startsWith(url))) {
         // maybe we could remove this check later
         return {

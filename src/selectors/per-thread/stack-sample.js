@@ -245,7 +245,9 @@ export function getStackAndSampleSelectorsPerThread(
   const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
     getSourceViewStackLineInfo,
     threadSelectors.getPreviewFilteredSamplesForCallTree,
-    getLineTimings
+    (x, y) => {
+      return getLineTimings(x, y);
+    }
   );
 
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(

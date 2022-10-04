@@ -271,7 +271,9 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
         }
         const selectedFunc =
           callNodeInfo.callNodeTable.func[selectedCallNodeIndex];
-        const selectedFuncFile = funcTable.fileName[selectedFunc];
+        const selectedFuncFile =
+          funcTable.fileName[selectedFunc] ||
+          (funcTable.sourceUrl ? funcTable.sourceUrl[selectedFunc] : null);
         if (
           selectedFuncFile === null ||
           stringTable.getString(selectedFuncFile) !== sourceViewFile

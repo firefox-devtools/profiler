@@ -392,7 +392,8 @@ export class CallTree {
       );
     }
     return {
-      file: fileName !== null ? this._stringTable.getString(fileName) : sourceUrl,
+      file:
+        fileName !== null ? this._stringTable.getString(fileName) : sourceUrl,
       line,
       method,
       column,
