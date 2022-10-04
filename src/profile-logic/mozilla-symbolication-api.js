@@ -61,6 +61,9 @@ type APIFrameInfoV5 = {
   // The hex offset between the requested address and the start of the function,
   // e.g. "0x3c".
   function_offset?: string,
+  // An optional size, in bytes, of the machine code of the outer function that
+  // this address belongs to, as a hex string, e.g. "0x270".
+  function_size?: string,
   // The path of the file that contains the function this frame was in, optional.
   // As of June 2021, this is only supported on the staging symbolication server
   // ("Eliot") but not on the implementation that's currently in production ("Tecken").
@@ -140,6 +143,22 @@ function _ensureIsAPIResultV5(result: MixedObject): APIResultV5 {
         if ('line' in frameInfo && typeof frameInfo.line !== 'number') {
           throw new Error('Expected frameInfo.line to be a number, if present');
         }
+        if (
+          'function_offset' in frameInfo &&
+          typeof frameInfo.function_offset !== 'string'
+        ) {
+          throw new Error(
+            'Expected frameInfo.function_offset to be a string, if present'
+          );
+        }
+        if (
+          'function_size' in frameInfo &&
+          typeof frameInfo.function_size !== 'string'
+        ) {
+          throw new Error(
+            'Expected frameInfo.function_size to be a string, if present'
+          );
+        }
         if ('inlines' in frameInfo) {
           const inlines = frameInfo.inlines;
           if (!Array.isArray(inlines)) {
@@ -206,12 +225,18 @@ function getV5ResultForLibRequest(
         });
       }
 
+      let functionSize;
+      if (info.function_size !== undefined) {
+        functionSize = parseInt(info.function_size.substr(2), 16);
+      }
+
       addressResult = {
         name,
         symbolAddress: address - functionOffset,
         file: info.file,
         line: info.line,
         inlines,
+        functionSize,
       };
     } else {
       // This can happen if the address is between functions, or before the first

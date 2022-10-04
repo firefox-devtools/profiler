@@ -90,10 +90,12 @@ describe('SymbolStore', function () {
     expect(secondAndThirdSymbol.get(0xf01)).toEqual({
       name: 'second symbol',
       symbolAddress: 0xf00,
+      functionSize: 0xb00,
     });
     expect(secondAndThirdSymbol.get(0x1a50)).toEqual({
       name: 'third symbol',
       symbolAddress: 0x1a00,
+      functionSize: 0x600,
     });
 
     const lib2 = { debugName: 'firefox2', breakpadId: 'dont-care2' };
@@ -113,6 +115,7 @@ describe('SymbolStore', function () {
     expect(firstAndLastSymbol.get(0x33)).toEqual({
       name: 'first symbol',
       symbolAddress: 0,
+      functionSize: 0xf00,
     });
     expect(firstAndLastSymbol.get(0x2000)).toEqual({
       name: 'last symbol',
@@ -289,6 +292,7 @@ describe('SymbolStore', function () {
     expect(lib2Symbols.get(0x33)).toEqual({
       name: 'first symbol',
       symbolAddress: 0,
+      functionSize: 0xf00,
     });
     expect(lib2Symbols.get(0x2000)).toEqual({
       name: 'last symbol',
