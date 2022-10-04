@@ -26,10 +26,10 @@
 
   /* appKeyboardShortcuts margin top + bottom = 40px */
   max-height: calc(100% - 40px);
+  border-radius: 5px;
   margin: 0 auto;
   animation: arrowPanelAppear 0.2s cubic-bezier(0.07, 0.95, 0, 1);
   background: #fff;
-  border-radius: 5px;
   filter: drop-shadow(0 0 0.5px rgb(0 0 0 / 0.4))
     drop-shadow(0 4px 5px rgb(0 0 0 / 0.4));
 }
@@ -54,8 +54,8 @@
   display: inline-flex;
   align-items: center;
   padding: 0 5px;
-  background: rgb(222 222 227 / 0.79);
   border-radius: 3px;
+  background: rgb(222 222 227 / 0.79);
   box-shadow: 1px 1px rgb(0 0 0 / 0.27);
   color: #000;
   margin-inline-start: 6px;
@@ -91,12 +91,12 @@
 .appKeyboardShortcutsHeaderClose {
   padding: 6px 6px 6px 30px;
   border: 0;
+  border-radius: 3px;
 
   /* Allow for the photon focus ring to fit in the space by using a 4px margin. */
   margin: 4px;
   background: url(../../../res/img/svg/searchfield-cancel.svg) 10px center
     no-repeat;
-  border-radius: 3px;
   cursor: pointer;
   font-size: inherit;
 }

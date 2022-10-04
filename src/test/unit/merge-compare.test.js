@@ -190,6 +190,7 @@ describe('mergeProfilesForDiffing function', function () {
       ],
       address: [0x20, 0x50],
       libIndex: [0, 0],
+      functionSize: [null, null],
     };
 
     threadB.nativeSymbols = {
@@ -200,6 +201,7 @@ describe('mergeProfilesForDiffing function', function () {
       ],
       address: [0x25, 0x45],
       libIndex: [0, 0],
+      functionSize: [null, null],
     };
 
     const profileState = stateFromLocation({

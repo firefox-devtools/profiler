@@ -15,9 +15,9 @@
 .homeSpecialMessage {
   padding: 8px 16px;
   border: 1px solid #000;
+  border-radius: 3px;
   margin: 17px 0;
   background-color: #798fc8;
-  border-radius: 3px;
   color: #fff;
 }
 
@@ -29,8 +29,8 @@
   box-sizing: border-box;
   padding: 4em 8em;
   border: 1px solid #ccc;
-  background-color: #fff;
   border-radius: 3px;
+  background-color: #fff;
   box-shadow: 0 5px 25px #0b1f50;
   font-size: 130%;
 }
@@ -39,9 +39,9 @@
   display: inline-block;
   padding: 0 0.5em;
   border: 1px solid #ccc;
+  border-radius: 0.2em;
   margin: 0 0.2em;
   background-color: #f6f6f6;
-  border-radius: 0.2em;
   box-shadow: 0.1em 0.1em 0 #bbb;
 }
 

@@ -151,14 +151,14 @@
     "raw-loader": "^4.0.2",
     "rimraf": "^3.0.2",
     "style-loader": "^3.3.1",
-    "stylelint": "^14.11.0",
-    "stylelint-config-idiomatic-order": "^8.1.0",
+    "stylelint": "^14.12.1",
+    "stylelint-config-idiomatic-order": "^9.0.0",
     "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-standard": "^28.0.0",
     "stylelint-prettier": "^2.0.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.10.1",
+    "webpack-dev-server": "^4.11.1",
     "workbox-webpack-plugin": "^6.5.4"
   },
   "jest": {

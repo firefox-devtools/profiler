@@ -561,6 +561,7 @@ function combineNativeSymbolTables(
       const nameIndex = nativeSymbols.name[i];
       const newName = stringTable.getString(nameIndex);
       const address = nativeSymbols.address[i];
+      const functionSize = nativeSymbols.functionSize[i];
 
       // Duplicate search.
       const nativeSymbolKey = [newName, address].join('#');
@@ -577,6 +578,7 @@ function combineNativeSymbolTables(
       newNativeSymbols.libIndex.push(libIndex);
       newNativeSymbols.name.push(newStringTable.indexForString(newName));
       newNativeSymbols.address.push(address);
+      newNativeSymbols.functionSize.push(functionSize);
 
       newNativeSymbols.length++;
     }
