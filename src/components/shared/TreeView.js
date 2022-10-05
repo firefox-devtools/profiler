@@ -53,46 +53,57 @@ export type Column<DisplayData: Object> = {|
   |}>,
 |};
 
+type SingleColumnSortState = {|
+  column: string,
+  ascending: boolean,
+|};
+
 type TreeViewHeaderProps<DisplayData: Object> = {|
   +fixedColumns: Column<DisplayData>[],
   +mainColumn: Column<DisplayData>,
-  +onSort: (number) => void,
-  +columnSortDirections: Array<boolean | null> | null,
+  +onSort: (string) => void,
+  +currentSortedColumn: SingleColumnSortState | null,
 |};
 
-// columns start at 1
 export class ColumnSortState {
-  sortedColumns: number[];
+  sortedColumns: SingleColumnSortState[];
 
-  // -column: sort descending, +column: sort ascending, start by sorting last column
-  constructor(sortedColumns: number[]) {
+  // start by sorting last column
+  constructor(sortedColumns: SingleColumnSortState[]) {
     this.sortedColumns = sortedColumns;
   }
 
-  _sortColumn(column: number) {
-    const sortedColumns = this.sortedColumns.filter(
-      (c) => c !== column && c !== -column
-    );
-    sortedColumns.push(column);
+  sortColumn(column: string, ascending: boolean | null = null) {
+    const current = this.getStateForColumn(column);
+    const sortedColumns = this.sortedColumns.filter((c) => c.column !== column);
+    if (ascending === true || current === null) {
+      sortedColumns.push({ column, ascending: true });
+    } else {
+      sortedColumns.push(this._invertSortState(current));
+    }
     return new ColumnSortState(sortedColumns);
   }
 
-  push(column: number) {
-    return this._sortColumn(-this._sortState(column));
+  _invertSortState(state: SingleColumnSortState): SingleColumnSortState {
+    return { column: state.column, ascending: !state.ascending };
   }
 
-  _sortState(column: number) {
+  getStateForColumn(column: string): SingleColumnSortState | null {
     return this.sortedColumns
-      .filter((c) => c === column || c === -column)
-      .concat(-column)[0];
+      .filter((c) => c.column === column)
+      .concat(null)[0];
   }
 
-  getSortStateArr(sortableColumns: Set<number>): Array<boolean | null> {
-    const arr = new Array(Math.max(...sortableColumns) + 1).fill(null);
-    for (const column of sortableColumns) {
-      arr[column] = this._sortState(column) < 0;
-    }
-    return arr;
+  getStateForColumnOrDefault(column: string): SingleColumnSortState {
+    return this.sortedColumns
+      .filter((c) => c.column === column)
+      .concat({ column: column, ascending: true })[0];
+  }
+
+  current(): SingleColumnSortState | null {
+    return this.sortedColumns.length > 0
+      ? this.sortedColumns[this.sortedColumns.length - 1]
+      : null;
   }
 }
 
@@ -108,21 +119,26 @@ class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
   };
 
   render() {
-    const { fixedColumns, mainColumn, columnSortDirections } = this.props;
+    const { fixedColumns, mainColumn, currentSortedColumn } = this.props;
     if (fixedColumns.length === 0 && !mainColumn.titleL10nId) {
       // If there is nothing to display in the header, do not render it.
       return null;
     }
     return (
       <div className="treeViewHeader">
-        {fixedColumns.map((col, i) => {
+        {fixedColumns.map((col) => {
           let sortClass = '';
-          if (columnSortDirections) {
-            if (columnSortDirections[i + 1] === true) {
-              sortClass = 'sortAscending';
-            } else if (columnSortDirections[i + 1] === false) {
+          if (
+            currentSortedColumn &&
+            currentSortedColumn.column === col.propName
+          ) {
+            if (currentSortedColumn.ascending) {
               sortClass = 'sortDescending';
+            } else {
+              sortClass = 'sortAscending';
             }
+          } else {
+            sortClass = 'sortInactive';
           }
           return (
             <PermissiveLocalized
@@ -132,7 +148,7 @@ class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
             >
               <span
                 className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName} ${sortClass}`}
-                data-column={i + 1}
+                data-column={col.propName}
                 onClick={this._onSort}
               ></span>
             </PermissiveLocalized>
@@ -457,10 +473,10 @@ type TreeViewProps<DisplayData> = {|
   +indentWidth: CssPixels,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
   // number: column number, -1: first larger, 0: same, 1: first smaller
-  +compareColumn?: (DisplayData, DisplayData, number) => number,
+  +compareColumn?: (DisplayData, DisplayData, string) => number,
   +initialSortedColumns?: ColumnSortState,
   +onSort?: (ColumnSortState) => void,
-  +sortableColumns?: Set<number>,
+  +sortableColumns?: Set<string>,
 |};
 
 type TreeViewState = {|
@@ -507,28 +523,26 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       tree: Tree<DisplayData>,
       expandedNodes: Set<NodeIndex | null>,
       sortedColumns: ColumnSortState,
-      compareColumn: ?(DisplayData, DisplayData, number) => number
+      compareColumn: ?(DisplayData, DisplayData, string) => number
     ) => {
       function sortNodes(nodeIds: Array<NodeIndex>): Array<NodeIndex> {
         if (!compareColumn) {
           return nodeIds;
         }
         let sortedNodeIds = nodeIds;
-        for (let i = 0; i < sortedColumns.sortedColumns.length; i++) {
-          const column = sortedColumns.sortedColumns[i];
-          const absColumn = Math.abs(column);
-          const sign = column < 0 ? -1 : 1;
+        for (const { column, ascending } of sortedColumns.sortedColumns) {
+          const sign = ascending ? 1 : -1;
           sortedNodeIds = sortedNodeIds.sort((a, b) => {
             return (
               sign *
               ((compareColumn: any): (
                 DisplayData,
                 DisplayData,
-                number
+                string
               ) => number)(
                 tree.getDisplayData(a),
                 tree.getDisplayData(b),
-                absColumn
+                column
               )
             );
           });
@@ -541,12 +555,12 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
         if (!expandedNodes.has(nodeId)) {
           return;
         }
-        const children = sortNodes(tree.getChildren(nodeId));
+        const children = tree.getChildren(nodeId);
         for (let i = 0; i < children.length; i++) {
           _addVisibleRowsFromNode(tree, expandedNodes, arr, children[i]);
         }
       }
-
+      // we only sort the root nodes for now
       const roots = sortNodes(tree.getRoots());
       const allRows = [];
       for (let i = 0; i < roots.length; i++) {
@@ -855,15 +869,15 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   }
 
-  _onSort = (column: number) => {
+  _onSort = (column: string) => {
     if (
       !this.props.sortableColumns ||
       !this.props.sortableColumns.has(column)
     ) {
       return;
     }
-    this.setState((state) => {
-      const newSortedColumns = state.sortedColumns.push(column);
+    this.setState((x) => {
+      const newSortedColumns = x.sortedColumns.sortColumn(column);
       if (this.props.onSort) {
         this.props.onSort(newSortedColumns);
       }
@@ -883,20 +897,16 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       maxNodeDepth,
       rowHeight,
       selectedNodeId,
-      sortableColumns,
     } = this.props;
     const { sortedColumns } = this.state;
-    const columnSortDirections =
-      sortableColumns && sortedColumns
-        ? sortedColumns.getSortStateArr(sortableColumns)
-        : null;
+    const currentSortedColumn = sortedColumns.current();
     return (
       <div className="treeView">
         <TreeViewHeader
           fixedColumns={fixedColumns}
           mainColumn={mainColumn}
           onSort={this._onSort}
-          columnSortDirections={columnSortDirections}
+          currentSortedColumn={currentSortedColumn}
         />
         <ContextMenuTrigger
           id={contextMenuId ?? 'unknown'}
