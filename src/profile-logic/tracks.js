@@ -115,11 +115,18 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
 
     // If the tracks are both threads, sort them by thread name, and then by
     // creation time if they have the same name.
-    if (tracks[a].type === 'thread' && tracks[b].type === 'thread' && profile) {
+    if (
+      (tracks[a].type === 'thread' || tracks[a].type === 'marker') &&
+      (tracks[b].type === 'thread' || tracks[b].type === 'marker') &&
+      profile
+    ) {
       const idxA = tracks[a].threadIndex;
       const idxB = tracks[b].threadIndex;
       if (idxA === undefined || idxB === undefined) {
         return -1;
+      }
+      if (profile && profile.meta.disableThreadOrdering) {
+        return idxA - idxB;
       }
       const nameA = profile.threads[idxA].name;
       const nameB = profile.threads[idxB].name;
@@ -555,6 +562,12 @@ function getDefaultSelectedThreadIndexes(
   visibleThreadIndexes: ThreadIndex[],
   profile: Profile
 ): Set<ThreadIndex> {
+  if (profile.meta.initialSelectedThreads !== undefined) {
+    profile.meta.initialSelectedThreads.forEach((index) =>
+      ensureExists(profile.threads[index])
+    );
+    return new Set(profile.meta.initialSelectedThreads);
+  }
   const visibleThreads = visibleThreadIndexes.map(
     (threadIndex) => profile.threads[threadIndex]
   );
@@ -837,6 +850,14 @@ export function computeDefaultVisibleThreads(
   const threads = profile.threads;
   if (threads.length === 0) {
     throw new Error('No threads');
+  }
+
+  // check whether the visible threads are preconfigured
+  if (profile.meta.initialVisibleThreads !== undefined) {
+    profile.meta.initialVisibleThreads.forEach((index) =>
+      ensureExists(profile.threads[index])
+    );
+    return new Set(profile.meta.initialVisibleThreads);
   }
 
   // First, compute a score for every thread.
