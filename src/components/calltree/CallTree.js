@@ -91,7 +91,7 @@ class CallTreeImpl extends PureComponent<Props> {
   _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = (treeView) => (this._treeView = treeView);
   _sortableColumns = new Set(['self', 'total']);
-  _sortedColumns = new ColumnSortState([]);
+  _sortedColumns = new ColumnSortState([{ column: 'total', ascending: false }]);
 
   _compareColumn = (
     first: CallNodeDisplayData,

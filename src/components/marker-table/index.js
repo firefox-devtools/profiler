@@ -177,7 +177,7 @@ class MarkerTableImpl extends PureComponent<Props> {
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;
   _takeTreeViewRef = (treeView) => (this._treeView = treeView);
-  _sortedColumns = new ColumnSortState([]);
+  _sortedColumns = new ColumnSortState([{ column: 'start', ascending: true }]);
 
   getMarkerTree = memoize((...args) => new MarkerTree(...args), { limit: 1 });
 

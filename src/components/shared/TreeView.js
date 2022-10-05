@@ -489,7 +489,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
 > {
   _list: VirtualList<NodeIndex> | null = null;
   _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
-  state = { sortedColumns: new ColumnSortState([]) };
+  state = { sortedColumns: new ColumnSortState([], '') };
 
   constructor(props: TreeViewProps<DisplayData>) {
     super(props);
@@ -531,7 +531,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
         }
         let sortedNodeIds = nodeIds;
         for (const { column, ascending } of sortedColumns.sortedColumns) {
-          const sign = ascending ? 1 : -1;
+          const sign = ascending ? -1 : 1;
           sortedNodeIds = sortedNodeIds.sort((a, b) => {
             return (
               sign *

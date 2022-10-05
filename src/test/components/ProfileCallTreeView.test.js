@@ -303,6 +303,17 @@ describe('calltree/ProfileCallTreeView', function () {
     fireFullClick(getByText('Total (samples)'));
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('sorts when the total header and self header is clicked', () => {
+    const { container, getByText } = setup();
+
+    fireFullClick(getByText('Total (samples)'));
+    expect(container).toMatchSnapshot();
+    fireFullClick(getByText('Total (samples)'));
+    expect(container).toMatchSnapshot();
+    fireFullClick(getByText('Self'));
+    expect(container).toMatchSnapshot();
+  });
 });
 
 describe('calltree/ProfileCallTreeView EmptyReasons', function () {
