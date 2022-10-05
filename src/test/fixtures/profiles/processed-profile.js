@@ -1432,7 +1432,8 @@ export function getProfileWithJsTracerEvents(
  */
 export function getCounterForThread(
   thread: Thread,
-  mainThreadIndex: ThreadIndex
+  mainThreadIndex: ThreadIndex,
+  config: { countNumber?: number } = {}
 ): Counter {
   const counter: Counter = {
     name: 'My Counter',
@@ -1447,7 +1448,9 @@ export function getCounterForThread(
           time: thread.samples.time.slice(),
           // Create some arbitrary (positive integer) values for the number.
           number: thread.samples.time.map((_, i) =>
-            Math.floor(50 * Math.sin(i) + 50)
+            config.countNumber !== undefined
+              ? config.countNumber
+              : Math.floor(50 * Math.sin(i) + 50)
           ),
           // Create some arbitrary values for the count.
           count: thread.samples.time.map((_, i) => Math.sin(i)),

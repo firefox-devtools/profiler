@@ -391,14 +391,16 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
         <div className="timelineTrackMemoryTooltip">
-          <div className="timelineTrackMemoryTooltipLine">
-            <span className="timelineTrackMemoryTooltipNumber">
-              {formatNumber(operations, 2, 0)}
-            </span>
-            <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
-              operations since the previous sample
-            </Localized>
-          </div>
+          {operations > 0 ? (
+            <div className="timelineTrackMemoryTooltipLine">
+              <span className="timelineTrackMemoryTooltipNumber">
+                {formatNumber(operations, 2, 0)}
+              </span>
+              <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
+                operations since the previous sample
+              </Localized>
+            </div>
+          ) : null}
 
           <div className="timelineTrackMemoryTooltipLine">
             <span className="timelineTrackMemoryTooltipNumber">
@@ -463,7 +465,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     }
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
     const unitSampleCount =
-      (accumulatedCounts[counterIndex] - minCount) / countRange;
+      (accumulatedCounts[counterIndex] - minCount) / Math.max(1, countRange);
     const innerTrackHeight = graphHeight - lineWidth / 2;
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
