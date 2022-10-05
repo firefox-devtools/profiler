@@ -133,7 +133,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     const { callTree, openSourceView } = this.props;
     callTree.handleOpenSourceView(
       callNodeIndex,
-      (file) => openSourceView(file, 'flame-graph'),
+      (file, name) => openSourceView(file, name, 'flame-graph'),
       event.shiftKey
     );
   };
@@ -222,8 +222,8 @@ class FlameGraphImpl extends React.PureComponent<Props> {
 
     if (event.key === 'Enter') {
       if (selectedCallNodeIndex !== null) {
-        callTree.handleOpenSourceView(selectedCallNodeIndex, (file) =>
-          openSourceView(file, 'flame-graph')
+        callTree.handleOpenSourceView(selectedCallNodeIndex, (file, name) =>
+          openSourceView(file, name, 'flame-graph')
         );
       }
       return;

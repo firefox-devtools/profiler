@@ -577,6 +577,7 @@ export function stateFromLocation(
   const sourceView: SourceViewState = {
     activationGeneration: 0,
     file: null,
+    name: null,
   };
   const isBottomBoxOpenPerPanel = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));

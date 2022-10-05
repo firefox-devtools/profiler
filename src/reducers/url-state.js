@@ -554,7 +554,7 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
 };
 
 const sourceView: Reducer<SourceViewState> = (
-  state = { activationGeneration: 0, file: null },
+  state = { activationGeneration: 0, file: null, name: null },
   action
 ) => {
   switch (action.type) {
@@ -562,6 +562,7 @@ const sourceView: Reducer<SourceViewState> = (
       return {
         activationGeneration: state.activationGeneration + 1,
         file: action.file,
+        name: action.name,
       };
     }
     default:

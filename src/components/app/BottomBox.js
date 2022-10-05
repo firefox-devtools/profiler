@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import { SourceView } from '../shared/SourceView';
 import {
   getSourceViewFile,
+  getSourceViewFileName,
   getSourceViewActivationGeneration,
 } from 'firefox-profiler/selectors/url-state';
 import {
@@ -31,6 +32,7 @@ import './BottomBox.css';
 
 type StateProps = {|
   +sourceViewFile: string | null,
+  +sourceViewFileName: string | null,
   +sourceViewSource: FileSourceStatus | void,
   +globalLineTimings: LineTimings,
   +selectedCallNodeLineTimings: LineTimings,
@@ -215,6 +217,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   render() {
     const {
       sourceViewFile,
+      sourceViewFileName,
       sourceViewSource,
       globalLineTimings,
       disableOverscan,
@@ -228,7 +231,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     const path =
       sourceViewFile !== null
         ? parseFileNameFromSymbolication(sourceViewFile).path
-        : null;
+        : sourceViewFileName;
     return (
       <div className="bottom-box">
         <div className="bottom-box-bar">
@@ -271,6 +274,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
 export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
+    sourceViewFileName: getSourceViewFileName(state),
     sourceViewSource: getSourceViewSource(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
     selectedCallNodeLineTimings:

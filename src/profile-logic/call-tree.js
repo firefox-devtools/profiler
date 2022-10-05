@@ -403,7 +403,7 @@ export class CallTree {
 
   handleOpenSourceView(
     callNodeIndex: IndexIntoCallNodeTable,
-    openSourceView: (file: string) => any,
+    openSourceView: (file: string, name: string | null) => any,
     forceLoadSource: boolean = false
   ) {
     const info = this.getRawFileNameAndMethodInfoForCallNode(callNodeIndex);
@@ -419,17 +419,21 @@ export class CallTree {
       // the simplest case, we don't have an additional source url
       // the file includes it already
       // $FlowExpectError
-      openSourceView(file);
+      openSourceView(file, null);
       return;
     }
     let rawSourceUrl = sourceUrl.replace(/^post|/, '');
     let reallyForceLoadSource = forceLoadSource;
+    let name = file;
     if (rawSourceUrl.includes('|')) {
       // rawSourceUrl = sourceUrl | alternative
       const [first, alternative] = rawSourceUrl.split('|');
       if (first.startsWith(window.location.origin)) {
         // we're serving the file from the same origin, therefore the first URL
         rawSourceUrl = first;
+        if (name === null) {
+          name = alternative;
+        }
       } else {
         // we're not serving the file from the same origin, like from profiler.firefox.com
         // so use the public alternative
@@ -450,7 +454,7 @@ export class CallTree {
         rawSourceUrl
       );
     } else {
-      openSourceView(rawSourceUrl);
+      openSourceView(rawSourceUrl, name);
     }
   }
 

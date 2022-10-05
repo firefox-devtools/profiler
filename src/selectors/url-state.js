@@ -78,6 +78,8 @@ export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
 export const getSourceViewFile: Selector<string | null> = (state) =>
   getProfileSpecificState(state).sourceView.file;
+export const getSourceViewFileName: Selector<string | null> = (state) =>
+  getProfileSpecificState(state).sourceView.name || getSourceViewFile(state);
 export const getSourceViewActivationGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).sourceView.activationGeneration;
 export const getisBottomBoxOpenPerPanel: Selector<IsOpenPerPanelState> = (

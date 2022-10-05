@@ -224,7 +224,7 @@ class CallTreeImpl extends PureComponent<Props> {
     const { tree, openSourceView } = this.props;
     tree.handleOpenSourceView(
       nodeId,
-      (file) => openSourceView(file, 'calltree'),
+      (file, name) => openSourceView(file, name, 'calltree'),
       false
     );
   };
@@ -236,7 +236,7 @@ class CallTreeImpl extends PureComponent<Props> {
     const { tree, openSourceView } = this.props;
     tree.handleOpenSourceView(
       nodeId,
-      (file) => openSourceView(file, 'calltree'),
+      (file, name) => openSourceView(file, name, 'calltree'),
       event.shiftKey
     );
   };

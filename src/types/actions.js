@@ -338,6 +338,7 @@ type ProfileAction =
   | {|
       +type: 'OPEN_SOURCE_VIEW',
       +file: string,
+      +name: string | null,
       +currentTab: TabSlug,
     |}
   | {|

@@ -234,6 +234,7 @@ export type ZippedProfilesState = {
 export type SourceViewState = {|
   activationGeneration: number,
   file: string | null,
+  name: string | null,
 |};
 
 export type FileSourceStatus =
