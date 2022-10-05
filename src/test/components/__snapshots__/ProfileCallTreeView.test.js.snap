@@ -149,10 +149,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -161,7 +163,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -171,7 +174,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -820,10 +824,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -832,7 +838,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -842,7 +849,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -1491,10 +1499,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -1503,7 +1513,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -1513,7 +1524,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -2150,10 +2162,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -2162,7 +2176,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -2172,7 +2187,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -2809,10 +2825,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -2821,7 +2839,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -2831,7 +2850,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -3764,10 +3784,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -3776,7 +3798,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -3785,7 +3808,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -4390,10 +4414,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -4402,7 +4428,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -4411,7 +4438,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5016,10 +5044,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -5028,7 +5058,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -5037,7 +5068,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5465,10 +5497,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -5477,7 +5511,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -5486,7 +5521,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -6091,10 +6127,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -6103,7 +6141,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -6112,7 +6151,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -6658,10 +6698,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -6670,7 +6712,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -6679,7 +6722,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7225,10 +7269,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -7237,7 +7283,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -7246,7 +7293,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7675,10 +7723,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -7687,7 +7737,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -7696,7 +7747,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -8125,10 +8177,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn total"
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -8137,7 +8191,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn self"
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -8146,7 +8201,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -8538,6 +8594,1896 @@ for understanding where time was actually spent in a program."
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-5"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  F
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`calltree/ProfileCallTreeView sorts when the total column header is clicked 1`] = `
+<div
+  aria-labelledby="calltree-tab-button"
+  class="treeAndSidebarWrapper"
+  id="calltree-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Sort by the time spent in a call node, ignoring its children."
+          >
+            Invert call stack
+          </span>
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete “⁨Empty⁩”
+      </span>
+    </li>
+  </ol>
+  <div
+    class="treeView"
+  >
+    <div
+      class="treeViewHeader"
+    >
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
+      >
+        Total (samples)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
+      >
+        Self
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewMainColumn name"
+      />
+    </div>
+    <div
+      class="react-contextmenu-wrapper treeViewContextMenu"
+    >
+      <div
+        aria-activedescendant="treeViewRow-4"
+        aria-label="Call tree"
+        class="treeViewBody"
+        role="tree"
+        tabindex="0"
+      >
+        <div
+          class="treeViewBodyInnerWrapper"
+        >
+          <div
+            class="treeViewBodyInner treeViewBodyInner0"
+            style="height: 128px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="67%"
+                >
+                  67%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="2"
+                >
+                  2
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="treeViewBodyInner treeViewBodyInner1"
+            style="height: 128px; min-width: 3000px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                aria-expanded="true"
+                aria-label="A, running count is 3 samples (100%), self count is 0 samples"
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-0"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  A
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="B, running count is 3 samples (100%), self count is 0 samples"
+                aria-level="2"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-1"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 10px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  B
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="C, running count is 2 samples (67%), self count is 0 samples"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="D, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-3"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  D
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="E, running count is 1 sample (33%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="true"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
+                id="treeViewRow-4"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  E
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="F, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-5"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  F
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="H, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-7"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  H
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  libH.so
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`calltree/ProfileCallTreeView sorts when the total column header is clicked 2`] = `
+<div
+  aria-labelledby="calltree-tab-button"
+  class="treeAndSidebarWrapper"
+  id="calltree-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Sort by the time spent in a call node, ignoring its children."
+          >
+            Invert call stack
+          </span>
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete “⁨Empty⁩”
+      </span>
+    </li>
+  </ol>
+  <div
+    class="treeView"
+  >
+    <div
+      class="treeViewHeader"
+    >
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn total sortDescending"
+        data-column="2"
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
+      >
+        Total (samples)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
+      >
+        Self
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewMainColumn name"
+      />
+    </div>
+    <div
+      class="react-contextmenu-wrapper treeViewContextMenu"
+    >
+      <div
+        aria-activedescendant="treeViewRow-4"
+        aria-label="Call tree"
+        class="treeViewBody"
+        role="tree"
+        tabindex="0"
+      >
+        <div
+          class="treeViewBodyInnerWrapper"
+        >
+          <div
+            class="treeViewBodyInner treeViewBodyInner0"
+            style="height: 128px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="67%"
+                >
+                  67%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="2"
+                >
+                  2
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="treeViewBodyInner treeViewBodyInner1"
+            style="height: 128px; min-width: 3000px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                aria-expanded="true"
+                aria-label="A, running count is 3 samples (100%), self count is 0 samples"
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-0"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  A
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="B, running count is 3 samples (100%), self count is 0 samples"
+                aria-level="2"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-1"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 10px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  B
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="C, running count is 2 samples (67%), self count is 0 samples"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="D, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-3"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  D
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="E, running count is 1 sample (33%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="true"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
+                id="treeViewRow-4"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  E
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="F, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-5"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  F
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="H, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-7"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  H
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  libH.so
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`calltree/ProfileCallTreeView sorts when the total column header is clicked 3`] = `
+<div
+  aria-labelledby="calltree-tab-button"
+  class="treeAndSidebarWrapper"
+  id="calltree-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Sort by the time spent in a call node, ignoring its children."
+          >
+            Invert call stack
+          </span>
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete “⁨Empty⁩”
+      </span>
+    </li>
+  </ol>
+  <div
+    class="treeView"
+  >
+    <div
+      class="treeViewHeader"
+    >
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent "
+        data-column="1"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn total sortAscending"
+        data-column="2"
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
+      >
+        Total (samples)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn self sortAscending"
+        data-column="3"
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
+      >
+        Self
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn icon "
+        data-column="4"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewMainColumn name"
+      />
+    </div>
+    <div
+      class="react-contextmenu-wrapper treeViewContextMenu"
+    >
+      <div
+        aria-activedescendant="treeViewRow-4"
+        aria-label="Call tree"
+        class="treeViewBody"
+        role="tree"
+        tabindex="0"
+      >
+        <div
+          class="treeViewBodyInnerWrapper"
+        >
+          <div
+            class="treeViewBodyInner treeViewBodyInner0"
+            style="height: 128px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="67%"
+                >
+                  67%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="2"
+                >
+                  2
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd isSelected"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="treeViewBodyInner treeViewBodyInner1"
+            style="height: 128px; min-width: 3000px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                aria-expanded="true"
+                aria-label="A, running count is 3 samples (100%), self count is 0 samples"
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-0"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  A
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="B, running count is 3 samples (100%), self count is 0 samples"
+                aria-level="2"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-1"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 10px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  B
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="H, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-7"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  H
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  libH.so
+                </span>
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="C, running count is 2 samples (67%), self count is 0 samples"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="D, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-3"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  D
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="E, running count is 1 sample (33%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="true"
+                class="treeViewRow treeViewRowScrolledColumns odd isSelected"
+                id="treeViewRow-4"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  E
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="F, running count is 1 sample (33%), self count is 0 samples"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"

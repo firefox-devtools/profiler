@@ -48,6 +48,8 @@ describe('actions/icons', function () {
       icon,
       iconSrc: 'https://edition.cnn.com/favicon.ico',
       ariaLabel: 'fake aria label',
+      rawTotal: 0,
+      rawSelf: 0,
     };
   }
 
