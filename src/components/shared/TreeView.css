@@ -102,12 +102,17 @@
   border-right: 1px solid var(--grey-30);
 }
 
+.treeViewHeaderColumn.sortInactive::after {
+  content: " ▲";
+  opacity: 0;
+}
+
 .treeViewHeaderColumn.sortAscending::after {
-  content: '▲ ';
+  content: ' ▲';
 }
 
 .treeViewHeaderColumn.sortDescending::after {
-  content: '▼ ';
+  content: ' ▼ ';
 }
 
 .treeBadge {

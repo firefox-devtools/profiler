@@ -116,12 +116,12 @@ class MarkerTree {
 
       let duration = null;
       let rawDuration: number | null = null;
+      const markerEnd = marker.end;
       if (marker.incomplete) {
         duration = 'unknown';
-      } else if (marker.end !== null) {
-        duration = formatTimestamp(marker.end - marker.start);
-        // $FlowFixMe
-        rawDuration = marker.end - marker.start;
+      } else if (markerEnd !== null) {
+        duration = formatTimestamp(markerEnd - marker.start);
+        rawDuration = markerEnd - marker.start;
       }
 
       displayData = {
@@ -167,6 +167,7 @@ class MarkerTableImpl extends PureComponent<Props> {
     { propName: 'duration', titleL10nId: 'MarkerTable--duration' },
     { propName: 'type', titleL10nId: 'MarkerTable--type' },
   ];
+  _sortableColumns = new Set(['start', 'duration', 'type', 'name']);
   _mainColumn = { propName: 'name', titleL10nId: 'MarkerTable--description' };
   _expandedNodeIds: Array<MarkerIndex | null> = [];
   _onExpandedNodeIdsChange = () => {};
@@ -211,12 +212,12 @@ class MarkerTableImpl extends PureComponent<Props> {
   _compareColumn = (
     first: MarkerDisplayData,
     second: MarkerDisplayData,
-    column: number
+    column: string
   ) => {
     switch (column) {
-      case 1:
+      case 'start':
         return second.rawStart - first.rawStart;
-      case 2:
+      case 'duration':
         if (first.rawDuration === null) {
           return -1;
         }
@@ -224,10 +225,10 @@ class MarkerTableImpl extends PureComponent<Props> {
           return 1;
         }
         return second.rawDuration - first.rawDuration;
-      case 3:
+      case 'type':
         return first.type.localeCompare(second.type);
       default:
-        throw new Error('Invalid column');
+        throw new Error('Invalid column ' + column);
     }
   };
 
@@ -281,7 +282,7 @@ class MarkerTableImpl extends PureComponent<Props> {
             initialSortedColumns={this._sortedColumns}
             onSort={this._onSort}
             compareColumn={this._compareColumn}
-            sortableColumns={new Set([1, 2, 3])}
+            sortableColumns={this._sortableColumns}
           />
         )}
       </div>

@@ -87,20 +87,20 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn start sortAscending"
-        data-column="1"
+        class="treeViewHeaderColumn treeViewFixedColumn start sortInactive"
+        data-column="start"
       >
         Start
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn duration sortAscending"
-        data-column="2"
+        class="treeViewHeaderColumn treeViewFixedColumn duration sortInactive"
+        data-column="duration"
       >
         Duration
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn type sortAscending"
-        data-column="3"
+        class="treeViewHeaderColumn treeViewFixedColumn type sortInactive"
+        data-column="type"
       >
         Type
       </span>
@@ -515,19 +515,19 @@ exports[`MarkerTable sorts when the start header and duration header is clicked 
       >
         <span
           class="treeViewHeaderColumn treeViewFixedColumn start sortDescending"
-          data-column="1"
+          data-column="start"
         >
           Start
         </span>
         <span
-          class="treeViewHeaderColumn treeViewFixedColumn duration sortAscending"
-          data-column="2"
+          class="treeViewHeaderColumn treeViewFixedColumn duration sortInactive"
+          data-column="duration"
         >
           Duration
         </span>
         <span
-          class="treeViewHeaderColumn treeViewFixedColumn type sortAscending"
-          data-column="3"
+          class="treeViewHeaderColumn treeViewFixedColumn type sortInactive"
+          data-column="type"
         >
           Type
         </span>
@@ -943,19 +943,19 @@ exports[`MarkerTable sorts when the start header and duration header is clicked 
       >
         <span
           class="treeViewHeaderColumn treeViewFixedColumn start sortAscending"
-          data-column="1"
+          data-column="start"
         >
           Start
         </span>
         <span
-          class="treeViewHeaderColumn treeViewFixedColumn duration sortAscending"
-          data-column="2"
+          class="treeViewHeaderColumn treeViewFixedColumn duration sortInactive"
+          data-column="duration"
         >
           Duration
         </span>
         <span
-          class="treeViewHeaderColumn treeViewFixedColumn type sortAscending"
-          data-column="3"
+          class="treeViewHeaderColumn treeViewFixedColumn type sortInactive"
+          data-column="type"
         >
           Type
         </span>
@@ -1370,20 +1370,20 @@ exports[`MarkerTable sorts when the start header and duration header is clicked 
         class="treeViewHeader"
       >
         <span
-          class="treeViewHeaderColumn treeViewFixedColumn start sortAscending"
-          data-column="1"
+          class="treeViewHeaderColumn treeViewFixedColumn start sortInactive"
+          data-column="start"
         >
           Start
         </span>
         <span
           class="treeViewHeaderColumn treeViewFixedColumn duration sortDescending"
-          data-column="2"
+          data-column="duration"
         >
           Duration
         </span>
         <span
-          class="treeViewHeaderColumn treeViewFixedColumn type sortAscending"
-          data-column="3"
+          class="treeViewHeaderColumn treeViewFixedColumn type sortInactive"
+          data-column="type"
         >
           Type
         </span>

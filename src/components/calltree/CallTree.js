@@ -90,20 +90,21 @@ class CallTreeImpl extends PureComponent<Props> {
   };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = (treeView) => (this._treeView = treeView);
+  _sortableColumns = new Set(['self', 'total']);
   _sortedColumns = new ColumnSortState([]);
 
   _compareColumn = (
     first: CallNodeDisplayData,
     second: CallNodeDisplayData,
-    column: number
+    column: string
   ) => {
     switch (column) {
-      case 2:
+      case 'total':
         return second.rawTotal - first.rawTotal;
-      case 3:
+      case 'self':
         return second.rawSelf - first.rawSelf;
       default:
-        throw new Error('Invalid column');
+        throw new Error('Invalid column ' + column);
     }
   };
 
@@ -322,7 +323,7 @@ class CallTreeImpl extends PureComponent<Props> {
         initialSortedColumns={this._sortedColumns}
         onSort={this._onSort}
         compareColumn={this._compareColumn}
-        sortableColumns={new Set([2, 3])}
+        sortableColumns={this._sortableColumns}
       />
     );
   }
