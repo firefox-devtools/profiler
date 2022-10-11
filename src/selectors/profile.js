@@ -74,6 +74,7 @@ import type {
   MarkerSchemaByName,
   SampleUnits,
   IndexIntoSamplesTable,
+  ExtraProfileInfoSection,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
@@ -924,3 +925,6 @@ export const getProfileUsesMultipleStackTypes: Selector<boolean> = (state) => {
   }
   return profile.meta.usesOnlyOneStackType !== true;
 };
+
+export const getProfileExtraInfo: Selector<ExtraProfileInfoSection[]> =
+  createSelector(getProfile, (profile) => profile.meta.extra || []);
