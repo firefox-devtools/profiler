@@ -318,6 +318,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = Tentativo di risimbolizzare il
 MenuButtons--metaInfo--currently-symbolicating = Profilo attualmente in fase di simbolizzazione
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = Memoria principale:
+MenuButtons--index--show-moreInfo-button = Mostra dettagli
+MenuButtons--index--hide-moreInfo-button = Nascondi dettagli
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
