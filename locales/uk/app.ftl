@@ -380,6 +380,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = Спроба повторно 
 MenuButtons--metaInfo--currently-symbolicating = Наразі профіль символізується
 MenuButtons--metaInfo--cpu = ЦП:
 MenuButtons--metaInfo--main-memory = Основна пам'ять:
+MenuButtons--index--show-moreInfo-button = Показати більше
+MenuButtons--index--hide-moreInfo-button = Показати менше
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
