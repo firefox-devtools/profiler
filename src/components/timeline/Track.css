@@ -69,10 +69,10 @@
   flex-shrink: 0;
   padding: 1px;
   border: 0;
+  border-radius: 2px;
   background: url(../../../res/img/svg/close-dark.svg) no-repeat center;
   background-origin: content-box;
   background-size: contain;
-  border-radius: 2px;
   color: transparent;
   margin-inline-end: 2px;
   -moz-user-focus: ignore;

@@ -6,9 +6,9 @@
   position: relative;
   padding: 0;
   border: 1px solid var(--grey-90-a30);
+  border-radius: 2px;
   appearance: none;
   background-color: var(--grey-90-a10);
-  border-radius: 2px;
 }
 
 /* Remove the border, as it compets with box-shadow styles applied with focus.css */

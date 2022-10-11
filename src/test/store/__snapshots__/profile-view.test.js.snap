@@ -402,7 +402,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 41,
+    "preprocessedProfileVersion": 42,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -638,6 +638,7 @@ Object {
       "name": "Thread with samples",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -1048,6 +1049,7 @@ Object {
       "name": "Thread with markers",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -1328,6 +1330,7 @@ Array [
     "name": "Thread with samples",
     "nativeSymbols": Object {
       "address": Array [],
+      "functionSize": Array [],
       "length": 0,
       "libIndex": Array [],
       "name": Array [],
@@ -1738,6 +1741,7 @@ Array [
     "name": "Thread with markers",
     "nativeSymbols": Object {
       "address": Array [],
+      "functionSize": Array [],
       "length": 0,
       "libIndex": Array [],
       "name": Array [],
@@ -2579,6 +2583,7 @@ CallTree {
   "_jsOnly": false,
   "_nativeSymbols": Object {
     "address": Array [],
+    "functionSize": Array [],
     "length": 0,
     "libIndex": Array [],
     "name": Array [],
@@ -2838,6 +2843,7 @@ Object {
   "name": "Thread with samples",
   "nativeSymbols": Object {
     "address": Array [],
+    "functionSize": Array [],
     "length": 0,
     "libIndex": Array [],
     "name": Array [],
@@ -3248,6 +3254,7 @@ Object {
   "name": "Thread with samples",
   "nativeSymbols": Object {
     "address": Array [],
+    "functionSize": Array [],
     "length": 0,
     "libIndex": Array [],
     "name": Array [],
@@ -3572,6 +3579,7 @@ Object {
   "name": "Thread with samples",
   "nativeSymbols": Object {
     "address": Array [],
+    "functionSize": Array [],
     "length": 0,
     "libIndex": Array [],
     "name": Array [],
@@ -3902,6 +3910,7 @@ Object {
   "name": "Thread with samples",
   "nativeSymbols": Object {
     "address": Array [],
+    "functionSize": Array [],
     "length": 0,
     "libIndex": Array [],
     "name": Array [],
@@ -4236,6 +4245,7 @@ Object {
   "name": "Thread with samples",
   "nativeSymbols": Object {
     "address": Array [],
+    "functionSize": Array [],
     "length": 0,
     "libIndex": Array [],
     "name": Array [],

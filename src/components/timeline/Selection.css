@@ -78,9 +78,9 @@
   width: 0;
   padding: 3px;
   border: 1px solid white;
+  border-radius: 5px;
   margin: 0 -4px;
   background: #aaa;
-  border-radius: 5px;
   cursor: ew-resize;
 }
 
@@ -113,8 +113,8 @@
   position: absolute;
   top: 20px;
   padding: 4px 8px;
-  background-color: var(--blue-50);
   border-radius: 0 0 4px 4px;
+  background-color: var(--blue-50);
   box-shadow: 0 2px 2px rgb(0 0 0 / 0.2);
   color: #fff;
   opacity: 1;
@@ -132,10 +132,10 @@
   height: 30px;
   box-sizing: border-box;
   border: 1px solid rgb(0 0 0 / 0.2);
+  border-radius: 100%;
   margin: -15px;
   background: url(../../../res/img/svg/zoom-icon.svg) center center no-repeat
     rgb(255 255 255 / 0.6);
-  border-radius: 100%;
   opacity: 0.5;
   pointer-events: auto;
   transition: opacity 200ms ease-in-out;

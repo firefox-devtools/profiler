@@ -62,9 +62,9 @@
   flex-flow: row;
   align-items: center;
   padding: 15px;
+  border-radius: 10px;
   margin: auto;
   background-color: rgb(240 240 240 / 0.8);
-  border-radius: 10px;
   gap: 15px;
   word-break: break-word;
 }

@@ -546,7 +546,7 @@ export function applySymbolicationStep(
     allNativeSymbolsForThisLib
   );
   const frameToSymbolAddressMap: Map<IndexIntoFrameTable, Address> = new Map();
-  const symbolAddressToNameMap: Map<Address, string> = new Map();
+  const symbolAddressToInfoMap: Map<Address, AddressResult> = new Map();
   const symbolAddressToCanonicalSymbolIndexMap: Map<
     Address,
     IndexIntoNativeSymbolTable
@@ -607,7 +607,7 @@ export function applySymbolicationStep(
     // offset.
     const symbolAddress = addressResult.symbolAddress;
     frameToSymbolAddressMap.set(frameIndex, symbolAddress);
-    symbolAddressToNameMap.set(symbolAddress, addressResult.name);
+    symbolAddressToInfoMap.set(symbolAddress, addressResult);
 
     if (oldFrameSymbol !== null) {
       // Opportunistically match up symbolAddress with oldFrameSymbol.
@@ -653,8 +653,8 @@ export function applySymbolicationStep(
   // and give the canonical symbol the right address and symbol.
   const availableNativeSymbolIterator = availableNativeSymbols.values();
   const nativeSymbols = shallowCloneNativeSymbolTable(oldNativeSymbols);
-  for (const [symbolAddress, symbolName] of symbolAddressToNameMap) {
-    const symbolStringIndex = stringTable.indexForString(symbolName);
+  for (const [symbolAddress, addressResult] of symbolAddressToInfoMap) {
+    const symbolStringIndex = stringTable.indexForString(addressResult.name);
     let symbolIndex = symbolAddressToCanonicalSymbolIndexMap.get(symbolAddress);
     if (symbolIndex === undefined) {
       // Repurpose a symbol from availableNativeSymbols as the canonical symbol for this
@@ -672,6 +672,8 @@ export function applySymbolicationStep(
     // Update the symbol properties.
     nativeSymbols.address[symbolIndex] = symbolAddress;
     nativeSymbols.name[symbolIndex] = symbolStringIndex;
+    nativeSymbols.functionSize[symbolIndex] =
+      addressResult.functionSize ?? null;
   }
 
   // Now we have a canonical symbol for every symbolAddress.
