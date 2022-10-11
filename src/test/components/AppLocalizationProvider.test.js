@@ -188,9 +188,12 @@ describe('AppLocalizationProvider', () => {
 
     expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    expect(window.fetch).toBeCalledWith('/locales/de/app.ftl', undefined);
-    expect(window.fetch).toBeCalledWith('/locales/en-US/app.ftl', undefined);
-    expect(window.fetch).toBeCalledTimes(2);
+    expect(window.fetch).toHaveBeenCalledWith('/locales/de/app.ftl', undefined);
+    expect(window.fetch).toHaveBeenCalledWith(
+      '/locales/en-US/app.ftl',
+      undefined
+    );
+    expect(window.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('falls back properly on en-US if the primary locale lacks a string', async () => {
@@ -214,8 +217,11 @@ describe('AppLocalizationProvider', () => {
       await screen.findByText(translatedText('en-US'))
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    expect(window.fetch).toBeCalledWith('/locales/de/app.ftl', undefined);
-    expect(window.fetch).toBeCalledWith('/locales/en-US/app.ftl', undefined);
-    expect(window.fetch).toBeCalledTimes(2);
+    expect(window.fetch).toHaveBeenCalledWith('/locales/de/app.ftl', undefined);
+    expect(window.fetch).toHaveBeenCalledWith(
+      '/locales/en-US/app.ftl',
+      undefined
+    );
+    expect(window.fetch).toHaveBeenCalledTimes(2);
   });
 });

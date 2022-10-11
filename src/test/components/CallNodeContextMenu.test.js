@@ -121,7 +121,7 @@ describe('calltree/CallNodeContextMenu', function () {
       const { getByText } = setup();
       jest.spyOn(window, 'open').mockImplementation(() => {});
       fireFullClick(getByText(/Searchfox/));
-      expect(window.open).toBeCalledWith(
+      expect(window.open).toHaveBeenCalledWith(
         'https://searchfox.org/mozilla-central/search?q=B',
         '_blank'
       );
@@ -131,7 +131,7 @@ describe('calltree/CallNodeContextMenu', function () {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy function name'));
-      expect(copy).toBeCalledWith('B');
+      expect(copy).toHaveBeenCalledWith('B');
     });
 
     it('can copy a script URL', function () {
@@ -154,14 +154,14 @@ describe('calltree/CallNodeContextMenu', function () {
 
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy script URL'));
-      expect(copy).toBeCalledWith('https://example.com/script.js');
+      expect(copy).toHaveBeenCalledWith('https://example.com/script.js');
     });
 
     it('can copy a stack', function () {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy stack'));
-      expect(copy).toBeCalledWith(`B\nA\n`);
+      expect(copy).toHaveBeenCalledWith(`B\nA\n`);
     });
   });
 });

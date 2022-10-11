@@ -142,7 +142,7 @@ describe('ordering and hiding', function () {
       const { getState, dispatch, tabTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(hideGlobalTrack(tabTrackIndex));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'hide global track',
           eventCategory: 'timeline',
           hitType: 'event',
@@ -173,7 +173,7 @@ describe('ordering and hiding', function () {
       dispatch(hideGlobalTrack(tabTrackIndex));
       withAnalyticsMock(() => {
         dispatch(showGlobalTrack(tabTrackIndex));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'show global track',
           eventCategory: 'timeline',
           hitType: 'event',
@@ -191,7 +191,7 @@ describe('ordering and hiding', function () {
       const { getState, dispatch, parentTrackIndex, tabTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(changeGlobalTrackOrder([tabTrackIndex, parentTrackIndex]));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'change global track order',
           eventCategory: 'timeline',
           hitType: 'event',
@@ -210,7 +210,7 @@ describe('ordering and hiding', function () {
       const { getState, dispatch, parentTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(isolateProcess(parentTrackIndex));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'isolate process',
           eventCategory: 'timeline',
           hitType: 'event',
@@ -240,7 +240,7 @@ describe('ordering and hiding', function () {
       const { getState, dispatch, tabTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(isolateProcessMainThread(tabTrackIndex));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'isolate process main thread',
           eventCategory: 'timeline',
           hitType: 'event',
@@ -366,7 +366,7 @@ describe('ordering and hiding', function () {
       const { getState, dispatch, workerTrackIndex, tabPid } = init();
       withAnalyticsMock(() => {
         dispatch(hideLocalTrack(tabPid, workerTrackIndex));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'hide local track',
           eventCategory: 'timeline',
           hitType: 'event',
@@ -521,7 +521,7 @@ describe('ordering and hiding', function () {
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       withAnalyticsMock(() => {
         dispatch(showLocalTrack(tabPid, workerTrackIndex));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'show local track',
           eventCategory: 'timeline',
           hitType: 'event',
@@ -553,7 +553,7 @@ describe('ordering and hiding', function () {
       const { getState, dispatch, tabPid, workerTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(isolateLocalTrack(tabPid, workerTrackIndex));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'isolate local track',
           eventCategory: 'timeline',
           hitType: 'event',
