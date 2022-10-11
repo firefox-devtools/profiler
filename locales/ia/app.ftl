@@ -376,6 +376,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = { $logicalCPUs } nucleos logic
 MenuButtons--metaInfo--currently-symbolicating = Actualmente symbolisante le profilo
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = Memoria principal:
+MenuButtons--index--show-moreInfo-button = Monstrar plus
+MenuButtons--index--hide-moreInfo-button = Monstrar minus
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
