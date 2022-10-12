@@ -10,7 +10,7 @@ module.exports = {
     rules: [
       {
         test: /\.css?$/,
-        loaders: ['style-loader', 'css-loader'],
+        use: ['style-loader', 'css-loader'],
         include: [
           path.join(projectRoot, 'src'),
           path.join(projectRoot, 'res'),
@@ -19,7 +19,7 @@ module.exports = {
       },
       {
         test: /\.(svg|png|jpg)$/,
-        loader: 'file-loader',
+        type: 'asset/resource',
       },
     ],
   },
@@ -35,8 +35,7 @@ module.exports = {
   entry: './res/photon/index.js',
   output: {
     path: path.join(projectRoot, 'dist/photon'),
-    filename: '[hash].bundle.js',
-    chunkFilename: '[id].[hash].bundle.js',
+    filename: '[name].[contenthash].bundle.js',
     publicPath: '/photon/',
   },
 };

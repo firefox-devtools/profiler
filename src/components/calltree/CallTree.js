@@ -46,6 +46,8 @@ import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/ca
 import type { Column } from 'firefox-profiler/components/shared/TreeView';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
+import './CallTree.css';
+
 type StateProps = {|
   +threadsKey: ThreadsKey,
   +scrollToSelectionGeneration: number,

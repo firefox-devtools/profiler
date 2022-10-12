@@ -20,8 +20,8 @@
   box-sizing: border-box;
   padding: 3em;
   border: 1px solid #ccc;
-  background-color: #fff;
   border-radius: 3px;
+  background-color: #fff;
   box-shadow: 0 5px 25px #0b1f50;
   font-size: 130%;
 }
@@ -52,10 +52,10 @@
 .loading-div {
   position: absolute;
   height: 8px;
+  border-radius: 2px;
   animation-duration: 4000ms;
   animation-iteration-count: infinite;
   animation-name: loadingdiv;
-  border-radius: 2px;
 }
 
 .loading-row-1 {

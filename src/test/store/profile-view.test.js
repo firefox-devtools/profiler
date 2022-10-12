@@ -724,7 +724,7 @@ describe('actions/ProfileView', function () {
           'foobar'
         );
 
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'call tree search string',
           eventCategory: 'profile',
           hitType: 'event',
@@ -1240,7 +1240,7 @@ describe('actions/ProfileView', function () {
       );
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeImplementationFilter('js'));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'change implementation filter',
           eventCategory: 'profile',
           eventLabel: 'js',
@@ -1261,7 +1261,7 @@ describe('actions/ProfileView', function () {
       expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeInvertCallstack(true));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'change invert callstack',
           eventCategory: 'profile',
           hitType: 'event',
@@ -1456,7 +1456,7 @@ describe('actions/ProfileView', function () {
             funcIndex: 1,
           })
         );
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'add transform',
           eventCategory: 'profile',
           eventLabel: 'merge-function',

@@ -33,11 +33,11 @@
 
 .callNodeContextMenuShortcut {
   padding: 0 5px;
+  border-radius: 3px;
 
   /* This color is based off of photon grey, but adjusted to have a nice visual look
      when hovering. */
   background: #dedee3c9;
-  border-radius: 3px;
   box-shadow: 1px 1px #0004;
 
   /* Override the hover color. */

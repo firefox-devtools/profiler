@@ -79,7 +79,12 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     }): number => this._computePowerSumForRange(selectionStart, selectionEnd)
   );
 
-  _formatPowerValue(power: number, l10nIdUnit, l10nIdMilliUnit): Localized {
+  _formatPowerValue(
+    power: number,
+    l10nIdUnit,
+    l10nIdMilliUnit,
+    l10nIdMicroUnit
+  ): Localized {
     let value, l10nId;
     if (power > 1) {
       value = formatNumber(power, 3);
@@ -87,6 +92,9 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     } else if (power === 0) {
       value = 0;
       l10nId = l10nIdUnit;
+    } else if (power < 0.001 && l10nIdMicroUnit) {
+      value = formatNumber(power * 1000000);
+      l10nId = l10nIdMicroUnit;
     } else {
       value = formatNumber(power * 1000);
       l10nId = l10nIdMilliUnit;
@@ -132,13 +140,15 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             ? this._formatPowerValue(
                 this._computePowerSumForPreviewRange(previewSelection),
                 'TrackPower--tooltip-energy-used-in-preview-watthour',
-                'TrackPower--tooltip-energy-used-in-preview-milliwatthour'
+                'TrackPower--tooltip-energy-used-in-preview-milliwatthour',
+                'TrackPower--tooltip-energy-used-in-preview-microwatthour'
               )
             : null}
           {this._formatPowerValue(
             this._computePowerSumForCommittedRange(committedRange),
             'TrackPower--tooltip-energy-used-in-range-watthour',
-            'TrackPower--tooltip-energy-used-in-range-milliwatthour'
+            'TrackPower--tooltip-energy-used-in-range-milliwatthour',
+            'TrackPower--tooltip-energy-used-in-range-microwatthour'
           )}
         </TooltipDetails>
       </div>

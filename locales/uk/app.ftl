@@ -303,13 +303,13 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
-MarkerContextMenu--set-selection-from-duration = Установіть вибір на основі тривалості маркера
-MarkerContextMenu--start-selection-here = Почати вибір тут
-MarkerContextMenu--end-selection-here = Завершити вибір тут
-MarkerContextMenu--start-selection-at-marker-start = Почати вибір на <strong>початку</strong> маркера
-MarkerContextMenu--start-selection-at-marker-end = Почати вибір у <strong>кінці</strong> маркера
-MarkerContextMenu--end-selection-at-marker-start = Завершити вибір на <strong>початку</strong> маркера
-MarkerContextMenu--end-selection-at-marker-end = Завершити вибір у <strong>кінці</strong> маркера
+MarkerContextMenu--set-selection-from-duration = Налаштуйте вибірку на основі тривалості маркера
+MarkerContextMenu--start-selection-here = Почати вибірку звідси
+MarkerContextMenu--end-selection-here = Завершити вибірку тут
+MarkerContextMenu--start-selection-at-marker-start = Почати вибірку від <strong>початку</strong> маркера
+MarkerContextMenu--start-selection-at-marker-end = Почати вибірку в <strong>кінці</strong> маркера
+MarkerContextMenu--end-selection-at-marker-start = Завершити вибірку на <strong>початку</strong> маркера
+MarkerContextMenu--end-selection-at-marker-end = Завершити вибірку в <strong>кінці</strong> маркера
 MarkerContextMenu--copy-description = Скопіювати опис
 MarkerContextMenu--copy-call-stack = Скопіювати стек викликів
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
@@ -380,6 +380,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = Спроба повторно 
 MenuButtons--metaInfo--currently-symbolicating = Наразі профіль символізується
 MenuButtons--metaInfo--cpu = ЦП:
 MenuButtons--metaInfo--main-memory = Основна пам'ять:
+MenuButtons--index--show-moreInfo-button = Показати більше
+MenuButtons--index--hide-moreInfo-button = Показати менше
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -716,6 +718,12 @@ TrackPower--tooltip-energy-used-in-range-watthour = { $value } Вт·год
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } мВт·год
     .label = Використовувана у видимому діапазоні енергія
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µВт·год
+    .label = Використовувана енергія у видимому діапазоні
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -728,6 +736,12 @@ TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Вт·год
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } Вт·год
     .label = Використовувана в поточному виборі енергія
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µВт·год
+    .label = Використана в поточній вибірці енергія
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

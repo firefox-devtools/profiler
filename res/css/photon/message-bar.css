@@ -13,13 +13,13 @@
    * for the icon) + 16px (icon width) + 4px (right padding for the icon) + 4px
    * (space between icon and text) */
   padding: 4px 4px 4px 32px;
+  border-radius: 4px;
 
   /* Note: 8px is: 4px (left padding for the message bar) + 4px (left padding
    * for the icon). And same for the top positioning, because we want the icon
    * to stick at the top when the text is multiline */
   background: url(../../img/svg/info-icon.svg) no-repeat 8px 8px / 16px 16px
     var(--grey-20);
-  border-radius: 4px;
   color: var(--grey-90);
   font-size: 13px;
   font-weight: 400;

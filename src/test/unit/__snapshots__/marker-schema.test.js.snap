@@ -1,5 +1,265 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`marker schema formatting supports complex formats 1`] = `
+Array [
+  Array [
+    "url",
+    "http://example.com",
+    <a
+      className="marker-link-value"
+      href="http://example.com"
+      rel="noreferrer"
+      target="_blank"
+    >
+      example.com
+    </a>,
+    "http://example.com",
+  ],
+  Array [
+    "file-path",
+    "/Users/me/gecko",
+    "/Users/me/gecko",
+    "/Users/me/gecko",
+  ],
+  Array [
+    "file-path",
+    null,
+    "(empty)",
+    "(empty)",
+  ],
+  Array [
+    "file-path",
+    undefined,
+    "(empty)",
+    "(empty)",
+  ],
+  Array [
+    "duration",
+    0,
+    "0s",
+    "0s",
+  ],
+  Array [
+    "duration",
+    10,
+    "10ms",
+    "10ms",
+  ],
+  Array [
+    "duration",
+    12.3456789,
+    "12.346ms",
+    "12.346ms",
+  ],
+  Array [
+    Object {
+      "columns": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "integer",
+        },
+      ],
+      "type": "table",
+    },
+    Array [
+      Array [
+        "a",
+        1,
+      ],
+      Array [
+        "b",
+        2,
+      ],
+    ],
+    <table
+      className="marker-table-value"
+    >
+      <tbody>
+        <tr>
+          <td>
+            a
+          </td>
+          <td>
+            1
+          </td>
+        </tr>
+        <tr>
+          <td>
+            b
+          </td>
+          <td>
+            2
+          </td>
+        </tr>
+      </tbody>
+    </table>,
+    "(a, 1),(b, 2)",
+  ],
+  Array [
+    Object {
+      "columns": Array [
+        Object {
+          "label": "a",
+          "type": "string",
+        },
+        Object {
+          "label": "b",
+          "type": "integer",
+        },
+      ],
+      "type": "table",
+    },
+    Array [
+      Array [
+        "b",
+        2,
+      ],
+    ],
+    <table
+      className="marker-table-value"
+    >
+      <thead>
+        <tr>
+          <th>
+            a
+          </th>
+          <th>
+            b
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            b
+          </td>
+          <td>
+            2
+          </td>
+        </tr>
+      </tbody>
+    </table>,
+    "(a, b),(b, 2)",
+  ],
+  Array [
+    Object {
+      "columns": Array [
+        Object {
+          "label": "a",
+          "type": "string",
+        },
+        Object {
+          "type": "integer",
+        },
+      ],
+      "type": "table",
+    },
+    Array [
+      Array [
+        "b",
+        2,
+      ],
+    ],
+    <table
+      className="marker-table-value"
+    >
+      <thead>
+        <tr>
+          <th>
+            a
+          </th>
+          <th>
+            
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            b
+          </td>
+          <td>
+            2
+          </td>
+        </tr>
+      </tbody>
+    </table>,
+    "(a, (empty)),(b, 2)",
+  ],
+  Array [
+    Object {
+      "columns": Array [
+        Object {
+          "label": "a",
+          "type": "string",
+        },
+        Object {},
+      ],
+      "type": "table",
+    },
+    Array [
+      Array [
+        "b",
+        2,
+      ],
+    ],
+    <table
+      className="marker-table-value"
+    >
+      <thead>
+        <tr>
+          <th>
+            a
+          </th>
+          <th>
+            
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            b
+          </td>
+          <td>
+            2
+          </td>
+        </tr>
+      </tbody>
+    </table>,
+    "(a, (empty)),(b, 2)",
+  ],
+  Array [
+    "list",
+    Array [],
+    <ul
+      className="marker-list-value"
+    />,
+    "",
+  ],
+  Array [
+    "list",
+    Array [
+      "a",
+      "b",
+    ],
+    <ul
+      className="marker-list-value"
+    >
+      <li>
+        a
+      </li>
+      <li>
+        b
+      </li>
+    </ul>,
+    "a, b",
+  ],
+]
+`;
+
 exports[`marker schema labels parseErrors errors if looking up into a part of the marker that does not exist 1`] = `
 Array [
   Array [

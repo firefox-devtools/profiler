@@ -517,6 +517,57 @@ describe('app/MenuButtons', function () {
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
+    it('with no extra info there is no more info button', async () => {
+      const { profile } = getProfileFromTextSamples('A');
+      const { displayMetaInfoPanel } = await setupForMetaInfoPanel(profile);
+      await displayMetaInfoPanel();
+
+      expect(screen.queryByText('Show more')).not.toBeInTheDocument();
+    });
+
+    it('with more extra info, opens more info section if clicked', async () => {
+      const { profile } = getProfileFromTextSamples('A');
+      profile.meta.extra = [
+        {
+          label: 'CPU',
+          entries: [
+            {
+              label: 'CPU 1',
+              format: 'string',
+              value: 'Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz',
+            },
+          ],
+        },
+        {
+          label: 'Memory',
+          entries: [],
+        },
+        {
+          label: 'Hard Drives',
+          entries: [
+            {
+              label: 'SSD',
+              format: 'string',
+              value: 'Samsung SSD 850 EVO 500GB',
+            },
+            {
+              label: 'HDD',
+              format: 'string',
+              value: 'Seagate ST1000LM035-1RK172',
+            },
+          ],
+        },
+      ];
+
+      const { displayMetaInfoPanel } = await setupForMetaInfoPanel(profile);
+      await displayMetaInfoPanel();
+
+      const summary = screen.getByText('Show more');
+      fireFullClick(summary);
+      const moreInfoPart = document.querySelector('.moreInfoPart');
+      expect(moreInfoPart).toMatchSnapshot();
+    });
+
     describe('deleting a profile', () => {
       const FAKE_HASH = 'FAKE_HASH';
       const FAKE_PROFILE_DATA = {

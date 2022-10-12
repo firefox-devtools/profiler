@@ -76,12 +76,12 @@
   flex: none;
   padding: 0;
   border: 1px solid var(--green-60);
+  border-radius: 3px;
   margin: 3px 0 3px 3px;
 
   /* Other */
   background: var(--green-50) url(../../../res/img/svg/back-arrow.svg) center
     center no-repeat;
-  border-radius: 3px;
   color: #000;
 }
 
