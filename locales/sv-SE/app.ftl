@@ -376,6 +376,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = Försöker att symbolisera pro
 MenuButtons--metaInfo--currently-symbolicating = Profilen symboliseras för närvarande
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = Huvudminne:
+MenuButtons--index--show-moreInfo-button = Visa mer
+MenuButtons--index--hide-moreInfo-button = Visa mindre
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:

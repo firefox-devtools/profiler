@@ -314,6 +314,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = 正在嘗試重新符號化檢
 MenuButtons--metaInfo--currently-symbolicating = 目前符號化的檢測檔
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = 主要記憶體：
+MenuButtons--index--show-moreInfo-button = 顯示更多
+MenuButtons--index--hide-moreInfo-button = 顯示更少
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
