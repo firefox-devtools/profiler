@@ -61,12 +61,15 @@
 
 .tooltipDetails {
   display: grid;
-  padding-top: 5px;
   grid-gap: 2px 5px;
 
   /* Make the right column "definitely" sized (ignore its intrinsic size) by setting a min-width of 0.
    * This stops long contents from overflowing the tooltip. */
   grid-template-columns: min-content minmax(0, 1fr);
+}
+
+.tooltipHeader + .tooltipDetails {
+  padding-top: 5px;
 }
 
 .tooltipDetailSeparator {
