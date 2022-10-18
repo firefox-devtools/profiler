@@ -73,6 +73,7 @@ describe('ActiveTab', function () {
       expect(getHumanReadableActiveTabTracks(getState())).toEqual([
         'screenshots',
         'screenshots',
+        'screenshots',
         'main track [tab] SELECTED',
       ]);
     });
