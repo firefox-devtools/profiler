@@ -41,9 +41,9 @@ The same settings are available in the devtools panel.
 ![A screenshot of the Devtools performance panel](images/getting-started-devtools-panel.png)
 
 !> As explained above, when opening the Devtools toolbox there's an
-overhead due to the other panels. We try that it stays minimal but you need to
-keep this into account when looking at profiles that were captured from this
-panel.
+overhead, due to additional open panels. We try to maintain a minimal overhead,
+but you need to keep this into account when looking at profiles that were
+captured from this panel.
 
 ## Capture a profile
 
