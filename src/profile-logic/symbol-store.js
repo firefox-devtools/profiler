@@ -49,6 +49,9 @@ export type AddressResult = {|
   // addressResult.name calls addressResult.inlines[inlines.length - 1].function, which
   // calls addressResult.inlines[inlines.length - 2].function etc.
   inlines?: Array<AddressInlineFrame>,
+  // An optional size, in bytes, of the machine code of the outer function that
+  // this address belongs to.
+  functionSize?: number,
 |};
 
 export type AddressInlineFrame = {|
@@ -106,6 +109,7 @@ export function readSymbolsFromSymbolTable(
   const results = new Map();
   let currentSymbolIndex = undefined;
   let currentSymbol = '';
+  let currentSymbolFunctionSize = undefined;
   for (let i = 0; i < addressArray.length; i++) {
     const address = addressArray[i];
 
@@ -131,11 +135,16 @@ export function readSymbolsFromSymbolTable(
         // C++ or rust symbols in the symbol table may have mangled names.
         // Demangle them here.
         currentSymbol = demangleCallback(decoder.decode(subarray));
+        currentSymbolFunctionSize =
+          symbolIndex < symbolTableAddrs.length - 1
+            ? symbolTableAddrs[symbolIndex + 1] - symbolTableAddrs[symbolIndex]
+            : undefined;
         currentSymbolIndex = symbolIndex;
       }
       results.set(address, {
         symbolAddress: symbolTableAddrs[symbolIndex],
         name: currentSymbol,
+        functionSize: currentSymbolFunctionSize,
       });
     } else {
       results.set(address, {

@@ -172,6 +172,7 @@ export function shallowCloneNativeSymbolTable(
     libIndex: nativeSymbols.libIndex.slice(),
     address: nativeSymbols.address.slice(),
     name: nativeSymbols.name.slice(),
+    functionSize: nativeSymbols.functionSize.slice(),
     length: nativeSymbols.length,
   };
 }
@@ -199,6 +200,7 @@ export function getEmptyNativeSymbolTable(): NativeSymbolTable {
     libIndex: [],
     address: [],
     name: [],
+    functionSize: [],
     length: 0,
   };
 }

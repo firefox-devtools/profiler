@@ -383,6 +383,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = Poging tot hersymboliseren pro
 MenuButtons--metaInfo--currently-symbolicating = Profiel wordt gesymboliseerd
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = Hoofdgeheugen:
+MenuButtons--index--show-moreInfo-button = Meer tonen
+MenuButtons--index--hide-moreInfo-button = Minder tonen
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -714,6 +716,12 @@ TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
     .label = Verbruikte energie in het zichtbare bereik
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
+    .label = Verbruikte energie in het zichtbare bereik
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -725,6 +733,12 @@ TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
 # Variables:
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = Verbruikte energie in de huidige selectie
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
     .label = Verbruikte energie in de huidige selectie
 
 ## TrackSearchField

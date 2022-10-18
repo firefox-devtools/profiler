@@ -376,6 +376,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = Försöker att symbolisera pro
 MenuButtons--metaInfo--currently-symbolicating = Profilen symboliseras för närvarande
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = Huvudminne:
+MenuButtons--index--show-moreInfo-button = Visa mer
+MenuButtons--index--hide-moreInfo-button = Visa mindre
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -707,6 +709,12 @@ TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
     .label = Energi som används i det synliga området
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
+    .label = Energi som används i det synliga området
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -718,6 +726,12 @@ TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
 # Variables:
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = Energi som används i det aktuella urvalet
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
     .label = Energi som används i det aktuella urvalet
 
 ## TrackSearchField

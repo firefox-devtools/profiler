@@ -6,7 +6,7 @@
 
 import type { Milliseconds, Address, Microseconds, Bytes } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
-import type { MarkerPayload, MarkerSchema } from './markers';
+import type { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
 import type { MarkerPhase, ProfilingLog } from './gecko-profile';
 
 export type IndexIntoStackTable = number;
@@ -399,10 +399,8 @@ export type NativeSymbolTable = {|
   address: Array<Address>,
   // The symbol name, demangled.
   name: Array<IndexIntoStringTable>,
-
-  // This would be a good spot for a "size" field. But the symbolication API does
-  // not give us information about the size of a function.
-  // https://github.com/mstange/profiler-get-symbols/issues/17
+  // The size of the function's machine code (if known), in bytes.
+  functionSize: Array<Bytes | null>,
 
   length: number,
 |};
@@ -734,6 +732,17 @@ export type SampleUnits = {|
   +threadCPUDelta: ThreadCPUDeltaUnit,
 |};
 
+export type ExtraProfileInfoSection = {|
+  // section label
+  label: string,
+  entries: Array<{|
+    label: string,
+    format: MarkerFormatType,
+    // any value valid for the formatter
+    value: any,
+  |}>,
+|};
+
 /**
  * Meta information associated for the entire profile.
  */
@@ -874,6 +883,9 @@ export type ProfileMeta = {|
   doesNotUseFrameImplementation?: boolean,
   // Hide the "Look up the function name on Searchfox" menu entry?
   sourceCodeIsNotOnSearchfox?: boolean,
+  // Extra information about the profile, not shown in the "Profile Info" panel,
+  // but in the more info panel
+  extra?: ExtraProfileInfoSection[],
 |};
 
 /**

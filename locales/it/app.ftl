@@ -318,6 +318,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = Tentativo di risimbolizzare il
 MenuButtons--metaInfo--currently-symbolicating = Profilo attualmente in fase di simbolizzazione
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = Memoria principale:
+MenuButtons--index--show-moreInfo-button = Mostra dettagli
+MenuButtons--index--hide-moreInfo-button = Nascondi dettagli
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -625,36 +627,48 @@ TrackMemoryGraph--operations-since-the-previous-sample = operazioni dal campione
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPower--tooltip-power-watt = { $value } W
+TrackPower--tooltip-power-watt = { $value } W
     .label = Consumo
 # This is used in the tooltip when the instant power value uses the milliwatt unit.
 # Variables:
 #   $value (String) - the power value at this location
-TrackPower--tooltip-power-milliwatt = { $value } mW
+TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Consumo
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
     .label = Energia utilizzata nell’intervallo visualizzato
 # This is used in the tooltip when the energy used in the current range uses the
 # milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+    .label = Energia utilizzata nell’intervallo visualizzato
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
     .label = Energia utilizzata nell’intervallo visualizzato
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
+TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
     .label = Energia utilizzata nella selezione corrente
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = Energia utilizzata nella selezione corrente
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
     .label = Energia utilizzata nella selezione corrente
 
 ## TrackSearchField

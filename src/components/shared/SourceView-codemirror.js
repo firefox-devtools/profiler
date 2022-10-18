@@ -226,6 +226,15 @@ const timingsExtension = [
   nonZeroLineDecorationHighlighter,
 ];
 
+// Adjustments to make a CodeMirror editor work as a non-editable code viewer.
+const codeViewerExtension = [
+  // Make the editor non-editable.
+  EditorView.editable.of(false),
+  // Allow tabbing to the view (to an element *inside* the scroller so that the
+  // up / down keys trigger scrolling), and take focus on mousedown.
+  EditorView.contentAttributes.of({ tabindex: '0' }),
+];
+
 export class SourceViewEditor {
   _view: EditorView;
 
@@ -243,8 +252,7 @@ export class SourceViewEditor {
         lineNumbers(),
         languageConf.of(_languageExtForPath(path)),
         syntaxHighlighting(classHighlighter),
-        EditorState.readOnly.of(true),
-        EditorView.editable.of(false),
+        codeViewerExtension,
       ],
     });
     state = state.update({

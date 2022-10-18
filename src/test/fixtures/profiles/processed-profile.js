@@ -946,6 +946,7 @@ function _buildThreadFromTextOnlyStacks(
           nativeSymbols.libIndex.push(libIndex);
           nativeSymbols.address.push(0); // todo
           nativeSymbols.name.push(nativeSymbolNameStringIndex);
+          nativeSymbols.functionSize.push(null);
         } else {
           throw new Error(
             `[sym:] has to be used together with [lib:] - missing lib in "${funcNameWithModifier}"`

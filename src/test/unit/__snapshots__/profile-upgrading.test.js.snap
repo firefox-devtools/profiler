@@ -39,7 +39,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 41,
+    "preprocessedProfileVersion": 42,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -257,6 +257,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -546,6 +547,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -763,6 +765,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -1178,6 +1181,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -1526,6 +1530,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -1831,6 +1836,7 @@ Object {
       "name": "gdbus",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -2093,6 +2099,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -2296,6 +2303,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -2511,6 +2519,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -2730,6 +2739,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -2963,6 +2973,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -3742,6 +3753,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -4731,6 +4743,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -5720,6 +5733,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -6713,6 +6727,7 @@ Object {
       "name": "firefox",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -7490,6 +7505,7 @@ Object {
       "name": "FS Broker 5906",
       "nativeSymbols": Object {
         "address": Array [],
+        "functionSize": Array [],
         "length": 0,
         "libIndex": Array [],
         "name": Array [],
@@ -11126,7 +11142,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 41,
+    "preprocessedProfileVersion": 42,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -11393,6 +11409,10 @@ Object {
         "address": Array [
           3972,
           6725,
+        ],
+        "functionSize": Array [
+          null,
+          null,
         ],
         "length": 2,
         "libIndex": Array [
@@ -11801,6 +11821,10 @@ Object {
           3972,
           6725,
         ],
+        "functionSize": Array [
+          null,
+          null,
+        ],
         "length": 2,
         "libIndex": Array [
           0,
@@ -12207,6 +12231,10 @@ Object {
         "address": Array [
           3972,
           6725,
+        ],
+        "functionSize": Array [
+          null,
+          null,
         ],
         "length": 2,
         "libIndex": Array [
@@ -12773,7 +12801,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 41,
+    "preprocessedProfileVersion": 42,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -13064,6 +13092,10 @@ Object {
         "address": Array [
           3972,
           6725,
+        ],
+        "functionSize": Array [
+          null,
+          null,
         ],
         "length": 2,
         "libIndex": Array [
@@ -13474,6 +13506,10 @@ Object {
         "address": Array [
           3972,
           6725,
+        ],
+        "functionSize": Array [
+          null,
+          null,
         ],
         "length": 2,
         "libIndex": Array [
@@ -13942,6 +13978,10 @@ Object {
         "address": Array [
           3972,
           6725,
+        ],
+        "functionSize": Array [
+          null,
+          null,
         ],
         "length": 2,
         "libIndex": Array [
@@ -14570,7 +14610,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 41,
+    "preprocessedProfileVersion": 42,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -14899,6 +14939,10 @@ Object {
         "address": Array [
           3972,
           6725,
+        ],
+        "functionSize": Array [
+          null,
+          null,
         ],
         "length": 2,
         "libIndex": Array [
@@ -15312,6 +15356,10 @@ Object {
         "address": Array [
           3972,
           6725,
+        ],
+        "functionSize": Array [
+          null,
+          null,
         ],
         "length": 2,
         "libIndex": Array [
@@ -15782,6 +15830,10 @@ Object {
         "address": Array [
           3972,
           6725,
+        ],
+        "functionSize": Array [
+          null,
+          null,
         ],
         "length": 2,
         "libIndex": Array [
