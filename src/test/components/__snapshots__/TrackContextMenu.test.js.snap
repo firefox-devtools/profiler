@@ -57,6 +57,14 @@ exports[`timeline/TrackContextMenu when a global track is right clicked matches 
     role="menuitem"
     tabindex="-1"
   >
+    Show all tracks in this process
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
     Only show “⁨Content Process⁩”
   </div>
   <div
@@ -134,8 +142,19 @@ exports[`timeline/TrackContextMenu when a global track is right clicked network 
     role="menuitem"
     tabindex="-1"
   >
+    Show all tracks in this process
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
     Hide “⁨Process 0⁩”
   </div>
+  <div
+    class="react-contextmenu-separator"
+  />
   <div
     aria-checked="true"
     aria-disabled="false"
@@ -186,6 +205,14 @@ exports[`timeline/TrackContextMenu when a local track is right clicked matches t
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
 >
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Show all tracks in this process
+  </div>
   <div
     aria-disabled="false"
     class="react-contextmenu-item"

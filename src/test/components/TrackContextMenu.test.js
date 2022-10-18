@@ -23,6 +23,7 @@ import {
 } from '../../selectors/url-state';
 import {
   getProfileWithNiceTracks,
+  getProfileWithMoreNiceTracks,
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
 import {
@@ -722,8 +723,8 @@ describe('timeline/TrackContextMenu', function () {
   });
 
   describe('when a local track is right clicked', function () {
-    function setupLocalTrack() {
-      const results = setup();
+    function setupLocalTrack(profile) {
+      const results = setup(profile);
       const { dispatch, getState } = results;
 
       // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
@@ -824,6 +825,84 @@ describe('timeline/TrackContextMenu', function () {
     it.todo(
       'can isolate a non-thread track, as long as there process has a thread index'
     );
+  });
+
+  describe('show all local tracks in a process', function () {
+    function setupMoreTracks() {
+      const profile = getProfileWithMoreNiceTracks();
+      const store = storeWithProfile(profile);
+
+      render(
+        <Provider store={store}>
+          <TimelineTrackContextMenu />
+        </Provider>
+      );
+
+      function clickAllThreadPoolTracks() {
+        const threadPoolTracks = screen.getAllByText(/^ThreadPool#\d$/);
+        for (const track of threadPoolTracks) {
+          fireFullClick(track);
+        }
+      }
+
+      return {
+        ...store,
+        clickAllThreadPoolTracks,
+        profile,
+      };
+    }
+
+    // This runs 2 tests: the first right clicks a global track, the second
+    // right clicks the local track.
+    it.each([
+      { type: 'global', trackIndex: 0 },
+      {
+        type: 'local',
+        pid: 1000,
+        trackIndex: 0,
+      },
+    ])(`from the $type track's context menu`, (rightClickedTrackReference) => {
+      const { getState, dispatch, clickAllThreadPoolTracks } =
+        setupMoreTracks();
+
+      dispatch(changeRightClickedTrack(rightClickedTrackReference));
+      clickAllThreadPoolTracks();
+
+      // First, check that the initial state is what we expect.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain default]',
+        '  - hide [thread ThreadPool#1]',
+        '  - hide [thread ThreadPool#2]',
+        '  - hide [thread ThreadPool#3]',
+        '  - hide [thread ThreadPool#4]',
+        '  - hide [thread ThreadPool#5]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread AudioPool#1]',
+        '  - show [thread AudioPool#2]',
+        '  - show [thread Renderer]',
+      ]);
+
+      // Carry on the test
+      fireFullClick(screen.getByText('Show all tracks in this process'));
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain default]',
+        '  - show [thread ThreadPool#1]',
+        '  - show [thread ThreadPool#2]',
+        '  - show [thread ThreadPool#3]',
+        '  - show [thread ThreadPool#4]',
+        '  - show [thread ThreadPool#5]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread AudioPool#1]',
+        '  - show [thread AudioPool#2]',
+        '  - show [thread Renderer]',
+      ]);
+    });
   });
 
   describe('global / local track visibility interplay', function () {
