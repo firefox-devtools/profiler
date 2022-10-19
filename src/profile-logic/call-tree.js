@@ -171,13 +171,13 @@ export class CallTree {
           switch (column) {
             case 'total':
               return (
-                this._callNodeSummary.total[first] -
-                this._callNodeSummary.total[second]
+                this._callNodeSummary.total[second] -
+                this._callNodeSummary.total[first]
               );
             case 'self':
               return (
-                this._callNodeSummary.self[first] -
-                this._callNodeSummary.self[second]
+                this._callNodeSummary.self[second] -
+                this._callNodeSummary.self[first]
               );
             default:
               throw new Error('Invalid column ' + column);
