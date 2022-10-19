@@ -74,7 +74,7 @@ export class ColumnSortState {
   }
 
   sortColumn(column: string, ascending: boolean | null = null) {
-    const current = this.getStateForColumn(column);
+    const current = this._isLastSortedColumn(column) ? this.getStateForColumn(column) : null;
     const sortedColumns = this.sortedColumns.filter((c) => c.column !== column);
     if (ascending === true || current === null) {
       sortedColumns.push({ column, ascending: true });
@@ -82,6 +82,11 @@ export class ColumnSortState {
       sortedColumns.push(this._invertSortState(current));
     }
     return new ColumnSortState(sortedColumns);
+  }
+
+  _isLastSortedColumn(column: string) {
+    const cur = this.current();
+    return cur !== null && cur.column === column;
   }
 
   _invertSortState(state: SingleColumnSortState): SingleColumnSortState {
@@ -95,9 +100,7 @@ export class ColumnSortState {
   }
 
   getStateForColumnOrDefault(column: string): SingleColumnSortState {
-    return this.sortedColumns
-      .filter((c) => c.column === column)
-      .concat({ column: column, ascending: true })[0];
+    return this.getStateForColumn(column) || { column: column, ascending: true };
   }
 
   current(): SingleColumnSortState | null {
@@ -489,7 +492,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
 > {
   _list: VirtualList<NodeIndex> | null = null;
   _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
-  state = { sortedColumns: new ColumnSortState([], '') };
+  state = { sortedColumns: new ColumnSortState([]) };
 
   constructor(props: TreeViewProps<DisplayData>) {
     super(props);
