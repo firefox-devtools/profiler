@@ -105,6 +105,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   TimelineTrackContextMenuState
 > {
   state = { searchFilter: '' };
+  _globalTrackClickTimeout: TimeoutID | null = null;
   _trackSearchFieldElem: {| current: TrackSearchField | null |} =
     React.createRef();
 
@@ -248,6 +249,10 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     if (e.detail === 2) {
       // This is a double click.
+      // Cancel the click timeout
+      clearTimeout(this._globalTrackClickTimeout);
+      this._globalTrackClickTimeout = null;
+
       const track = globalTracks[trackIndex];
       if (track.type === 'process') {
         this._showLocalTracksInProcess(e, { trackIndex, pid: track.pid });
@@ -255,11 +260,16 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       }
     }
 
-    if (hiddenGlobalTracks.has(trackIndex)) {
-      showGlobalTrack(trackIndex);
-    } else {
-      hideGlobalTrack(trackIndex);
-    }
+    // This is a simple click. Let's defer a few milliseconds before carrying
+    // the action, in case the user wants to do a double click.
+
+    this._globalTrackClickTimeout = setTimeout(() => {
+      if (hiddenGlobalTracks.has(trackIndex)) {
+        showGlobalTrack(trackIndex);
+      } else {
+        hideGlobalTrack(trackIndex);
+      }
+    }, 80);
   };
 
   _toggleLocalTrackVisibility = (
