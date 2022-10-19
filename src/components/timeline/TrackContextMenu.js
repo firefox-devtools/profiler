@@ -230,11 +230,31 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   };
 
   _toggleGlobalTrackVisibility = (
-    _,
+    e: SyntheticMouseEvent<>,
     data: { trackIndex: TrackIndex }
   ): void => {
     const { trackIndex } = data;
-    const { hiddenGlobalTracks, hideGlobalTrack, showGlobalTrack } = this.props;
+    const {
+      hiddenGlobalTracks,
+      hideGlobalTrack,
+      showGlobalTrack,
+      globalTracks,
+    } = this.props;
+
+    if (e.detail > 2) {
+      // Ignore triple (and more) clicks
+      return;
+    }
+
+    if (e.detail === 2) {
+      // This is a double click.
+      const track = globalTracks[trackIndex];
+      if (track.type === 'process') {
+        this._showLocalTracksInProcess(e, { trackIndex, pid: track.pid });
+        return;
+      }
+    }
+
     if (hiddenGlobalTracks.has(trackIndex)) {
       showGlobalTrack(trackIndex);
     } else {

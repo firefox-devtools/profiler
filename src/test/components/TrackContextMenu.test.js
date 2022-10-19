@@ -885,8 +885,57 @@ describe('timeline/TrackContextMenu', function () {
         '  - show [thread Renderer]',
       ]);
 
+      // This ensures that the displayed tracks are only from the first process.
+      // Please make sure the test here is the same than in the next test.
+      expect(screen.queryByText('DOM Worker')).not.toBeInTheDocument();
+
       // Carry on the test
       fireFullClick(screen.getByText('Show all tracks in this process'));
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain default]',
+        '  - show [thread ThreadPool#1]',
+        '  - show [thread ThreadPool#2]',
+        '  - show [thread ThreadPool#3]',
+        '  - show [thread ThreadPool#4]',
+        '  - show [thread ThreadPool#5]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread AudioPool#1]',
+        '  - show [thread AudioPool#2]',
+        '  - show [thread Renderer]',
+      ]);
+    });
+
+    it('by double clicking the global process item', () => {
+      const { getState, clickAllThreadPoolTracks } = setupMoreTracks();
+      clickAllThreadPoolTracks();
+      // First, check that the initial state is what we expect.
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain default]',
+        '  - hide [thread ThreadPool#1]',
+        '  - hide [thread ThreadPool#2]',
+        '  - hide [thread ThreadPool#3]',
+        '  - hide [thread ThreadPool#4]',
+        '  - hide [thread ThreadPool#5]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread AudioPool#1]',
+        '  - show [thread AudioPool#2]',
+        '  - show [thread Renderer]',
+      ]);
+
+      // This ensures that the displayed tracks are for the whole profile.
+      // Please make sure the test here is the same than in the previous test.
+      expect(screen.getByText('DOM Worker')).toBeInTheDocument();
+
+      // Then carry one with the test.
+      const globalTrack = screen.getByText('Parent Process');
+      fireFullClick(globalTrack, { detail: 1 });
+      fireFullClick(globalTrack, { detail: 2 });
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain default]',
         '  - show [thread ThreadPool#1]',
