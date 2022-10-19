@@ -57,7 +57,11 @@ function getSamplesPixelPosition(
  * This test verifies that the memory track can draw a graph of the memory.
  */
 describe('TrackMemory', function () {
-  function setup(counterConfig = {}) {
+  function setup(
+    counterConfig: $Shape<{| hasCountNumber: boolean |}> = {
+      hasCountNumber: true,
+    }
+  ) {
     const { profile } = getProfileFromTextSamples(
       Array(SAMPLE_COUNT).fill('A').join('  ')
     );
@@ -146,7 +150,7 @@ describe('TrackMemory', function () {
 
   it('has a tooltip that matches the snapshot for counts equalling zero', function () {
     const { moveMouseAtCounter, getTooltipContents } = setup({
-      countNumber: 0,
+      hasCountNumber: false,
     });
     moveMouseAtCounter(5, 0.5);
     expect(getTooltipContents()).toMatchSnapshot();

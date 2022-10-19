@@ -509,7 +509,7 @@ export type JsTracerTable = {|
 export type CounterSamplesTable = {|
   time: Milliseconds[],
   // The number of times the Counter's "number" was changed since the previous sample.
-  number: number[],
+  number?: number[],
   // The count of the data, for instance for memory this would be bytes.
   count: number[],
   length: number,
