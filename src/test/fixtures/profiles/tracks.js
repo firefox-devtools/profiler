@@ -32,7 +32,7 @@ import { INSTANT } from 'firefox-profiler/app-logic/constants';
  * Usage:
  *
  * expect(getHumanReadableTracks(getState())).toEqual([
- *  'show [thread GeckoMain process]',
+ *  'show [thread GeckoMain default]',
  *  'show [thread GeckoMain tab] SELECTED',
  *  '  - show [thread DOM Worker]',
  *  '  - show [thread Style]',
@@ -139,7 +139,7 @@ export function getHumanReadableTracks(state: State): string[] {
 /**
  * Produces a profile with the following tracks, (as displayed by getHumanReadableTracks.)
  *  [
- *    'show [thread GeckoMain process]',
+ *    'show [thread GeckoMain default]',
  *    'show [thread GeckoMain tab]',
  *    '  - show [thread DOM Worker]',
  *    '  - show [thread Style]',
@@ -149,7 +149,6 @@ export function getProfileWithNiceTracks(): Profile {
   const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
   const [thread1, thread2, thread3, thread4] = profile.threads;
   thread1.name = 'GeckoMain';
-  thread1.processType = 'process';
   thread1.pid = 111;
   thread1.tid = 11;
 
@@ -173,12 +172,10 @@ export function getProfileWithNiceTracks(): Profile {
   thread2.markers.length++;
 
   thread3.name = 'DOM Worker';
-  thread3.processType = 'tab';
   thread3.pid = 222;
   thread3.tid = 33;
 
   thread4.name = 'Style';
-  thread4.processType = 'tab';
   thread4.pid = 222;
   thread4.tid = 44;
   return profile;
@@ -187,7 +184,7 @@ export function getProfileWithNiceTracks(): Profile {
 /** This function produces a profile that will have several global tracks and
  * local tracks, that look like this as displayed by getHumanReadableTracks:
  *  [
- *    'show [thread GeckoMain process]',
+ *    'show [thread GeckoMain default]',
  *    '  - show [thread ThreadPool#1]',
  *    '  - show [thread ThreadPool#2]',
  *    '  - show [thread ThreadPool#3]',
@@ -213,13 +210,11 @@ export function getProfileWithMoreNiceTracks() {
 
   // Global thread 1
   threads[0].name = 'GeckoMain';
-  threads[0].processType = 'process';
   threads[0].pid = pid;
   threads[0].tid = tid++;
 
   for (let i = 1; i <= 5; i++) {
     threads[i].name = `ThreadPool#${i}`;
-    threads[i].processType = 'tab';
     threads[i].pid = pid;
     threads[i].tid = tid++;
   }
@@ -231,12 +226,10 @@ export function getProfileWithMoreNiceTracks() {
   threads[6].tid = tid++;
 
   threads[7].name = 'DOM Worker';
-  threads[7].processType = 'tab';
   threads[7].pid = pid;
   threads[7].tid = tid++;
 
   threads[8].name = 'Style';
-  threads[8].processType = 'tab';
   threads[8].pid = pid;
   threads[8].tid = tid++;
 
@@ -247,17 +240,14 @@ export function getProfileWithMoreNiceTracks() {
   threads[9].tid = tid++;
 
   threads[10].name = 'AudioPool#1';
-  threads[10].processType = 'tab';
   threads[10].pid = pid;
   threads[10].tid = tid++;
 
   threads[11].name = 'AudioPool#2';
-  threads[11].processType = 'tab';
   threads[11].pid = pid;
   threads[11].tid = tid++;
 
   threads[12].name = 'Renderer';
-  threads[12].processType = 'tab';
   threads[12].pid = pid;
   threads[12].tid = tid++;
 
@@ -275,20 +265,16 @@ export function getProfileWithFakeGlobalTrack(): Profile {
 
   // First group of threads
   thread1.name = 'Thread <0>';
-  thread1.processType = 'default';
   thread1.pid = 111;
 
   thread2.name = 'Thread <1>';
-  thread2.processType = 'default';
   thread2.pid = 111;
 
   // Second group of threads
   thread3.name = 'Thread <2>';
-  thread3.processType = 'default';
   thread3.pid = 222;
 
   thread4.name = 'Thread <3>';
-  thread4.processType = 'default';
   thread4.pid = 222;
 
   return profile;
@@ -307,7 +293,6 @@ export function getStoreWithMemoryTrack(pid: number = 222) {
     // Modify the thread to include the counter.
     const thread = profile.threads[threadIndex];
     thread.name = 'GeckoMain';
-    thread.processType = 'default';
     thread.pid = pid;
     const counter = getCounterForThread(thread, threadIndex);
     counter.category = 'Memory';

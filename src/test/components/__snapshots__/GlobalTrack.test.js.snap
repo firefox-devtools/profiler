@@ -142,7 +142,7 @@ Process: \\"tab\\" (222)"
           class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="DOM Worker
 Thread: \\"DOM Worker\\" (33)
-Process: \\"tab\\" (222)"
+Process: \\"default\\" (222)"
         >
           <button
             class="timelineTrackNameButton"
@@ -233,7 +233,7 @@ Process: \\"tab\\" (222)"
           class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="Style
 Thread: \\"Style\\" (44)
-Process: \\"tab\\" (222)"
+Process: \\"default\\" (222)"
         >
           <button
             class="timelineTrackNameButton"

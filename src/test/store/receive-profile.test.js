@@ -200,10 +200,8 @@ describe('actions/receive-profile', function () {
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
-      idleThread.processType = 'default';
       idleThread.pid = 0;
       workThread.name = 'GeckoMain';
-      workThread.processType = 'default';
       idleThread.pid = 1;
 
       store.dispatch(viewProfile(profile));
@@ -218,10 +216,8 @@ describe('actions/receive-profile', function () {
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
-      idleThread.processType = 'default';
       idleThread.pid = 0;
       workThread.name = 'GeckoMain';
-      workThread.processType = 'default';
       workThread.pid = 1;
 
       store.dispatch(viewProfile(profile));
@@ -242,7 +238,6 @@ describe('actions/receive-profile', function () {
       threadA.processType = 'tab';
       threadA.pid = 111;
       threadB.name = 'Other';
-      threadB.processType = 'default';
       threadB.pid = 111;
 
       store.dispatch(viewProfile(profile));
