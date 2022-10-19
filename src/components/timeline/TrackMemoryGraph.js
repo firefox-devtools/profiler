@@ -465,7 +465,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     }
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
     const unitSampleCount =
-      (accumulatedCounts[counterIndex] - minCount) / Math.max(1, countRange);
+      (accumulatedCounts[counterIndex] - minCount) / countRange;
     const innerTrackHeight = graphHeight - lineWidth / 2;
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
