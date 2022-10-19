@@ -94,7 +94,7 @@ describe('timeline/TrackContextMenu', function () {
     };
   }
 
-  describe('showed all tracks', function () {
+  describe('the "show all tracks" menu item', function () {
     function setupAllTracks() {
       const results = setup();
       const selectAllTracksItem = () => screen.getByText('Show all tracks');
@@ -558,7 +558,7 @@ describe('timeline/TrackContextMenu', function () {
     });
   });
 
-  describe('selected global track', function () {
+  describe('when a global track is right clicked', function () {
     function setupGlobalTrack(profile, trackIndex = 1) {
       const results = setup(profile);
       const { dispatch, getState } = results;
@@ -720,7 +720,7 @@ describe('timeline/TrackContextMenu', function () {
     });
   });
 
-  describe('selected local track', function () {
+  describe('when a local track is right clicked', function () {
     function setupLocalTrack() {
       const results = setup();
       const { dispatch, getState } = results;
