@@ -38,6 +38,7 @@ import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
+import { ColumnSortState } from '../components/shared/TreeView';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeSummary = {
@@ -119,11 +120,14 @@ export class CallTree {
     this._weightType = weightType;
   }
 
-  getRoots() {
-    return this.getChildren(-1);
+  getRoots(sort: ColumnSortState | null = null) {
+    return this.getChildren(-1, sort);
   }
 
-  getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
+  getChildren(
+    callNodeIndex: IndexIntoCallNodeTable,
+    sort: ColumnSortState | null = null
+  ): CallNodeChildren {
     let children = this._children[callNodeIndex];
     if (children === undefined) {
       const childCount =
@@ -155,6 +159,31 @@ export class CallTree {
           Math.abs(this._callNodeSummary.total[a])
       );
       this._children[callNodeIndex] = children;
+    }
+    if (sort && Array.isArray(children)) {
+      return sort.sortItemsHelper(
+        children.slice(),
+        (
+          first: IndexIntoCallNodeTable,
+          second: IndexIntoCallNodeTable,
+          column: string
+        ) => {
+          switch (column) {
+            case 'total':
+              return (
+                this._callNodeSummary.total[first] -
+                this._callNodeSummary.total[second]
+              );
+            case 'self':
+              return (
+                this._callNodeSummary.self[first] -
+                this._callNodeSummary.self[second]
+              );
+            default:
+              throw new Error('Invalid column ' + column);
+          }
+        }
+      );
     }
     return children;
   }

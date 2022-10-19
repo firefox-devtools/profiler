@@ -93,21 +93,6 @@ class CallTreeImpl extends PureComponent<Props> {
   _sortableColumns = new Set(['self', 'total']);
   _sortedColumns = new ColumnSortState([{ column: 'total', ascending: false }]);
 
-  _compareColumn = (
-    first: CallNodeDisplayData,
-    second: CallNodeDisplayData,
-    column: string
-  ) => {
-    switch (column) {
-      case 'total':
-        return second.rawTotal - first.rawTotal;
-      case 'self':
-        return second.rawSelf - first.rawSelf;
-      default:
-        throw new Error('Invalid column ' + column);
-    }
-  };
-
   /**
    * Call Trees can have different types of "weights" for the data. Choose the
    * appropriate labels for the call tree based on this weight.
@@ -322,7 +307,6 @@ class CallTreeImpl extends PureComponent<Props> {
         onDoubleClick={this._onEnterOrDoubleClick}
         initialSortedColumns={this._sortedColumns}
         onSort={this._onSort}
-        compareColumn={this._compareColumn}
         sortableColumns={this._sortableColumns}
       />
     );

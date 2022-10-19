@@ -72,12 +72,40 @@ class MarkerTree {
     this._getMarkerLabel = getMarkerLabel;
   }
 
-  getRoots(): MarkerIndex[] {
+  getRoots(sort: ColumnSortState | null = null): MarkerIndex[] {
+    if (sort !== null) {
+      return sort.sortItemsHelper(
+        this._markerIndexes,
+        (first: MarkerIndex, second: MarkerIndex, column: string) => {
+          const firstData = this.getDisplayData(first);
+          const secondData = this.getDisplayData(second);
+          switch (column) {
+            case 'start':
+              return secondData.rawStart - firstData.rawStart;
+            case 'duration':
+              if (firstData.rawDuration === null) {
+                return -1;
+              }
+              if (secondData.rawDuration === null) {
+                return 1;
+              }
+              return secondData.rawDuration - firstData.rawDuration;
+            case 'type':
+              return firstData.type.localeCompare(secondData.type);
+            default:
+              throw new Error('Invalid column ' + column);
+          }
+        }
+      );
+    }
     return this._markerIndexes;
   }
 
-  getChildren(markerIndex: MarkerIndex): MarkerIndex[] {
-    return markerIndex === -1 ? this.getRoots() : [];
+  getChildren(
+    markerIndex: MarkerIndex,
+    sort: ColumnSortState | null = null
+  ): MarkerIndex[] {
+    return markerIndex === -1 ? this.getRoots(sort) : [];
   }
 
   hasChildren(_markerIndex: MarkerIndex): boolean {
@@ -213,29 +241,6 @@ class MarkerTableImpl extends PureComponent<Props> {
     changeRightClickedMarker(threadsKey, selectedMarker);
   };
 
-  _compareColumn = (
-    first: MarkerDisplayData,
-    second: MarkerDisplayData,
-    column: string
-  ) => {
-    switch (column) {
-      case 'start':
-        return second.rawStart - first.rawStart;
-      case 'duration':
-        if (first.rawDuration === null) {
-          return -1;
-        }
-        if (second.rawDuration === null) {
-          return 1;
-        }
-        return second.rawDuration - first.rawDuration;
-      case 'type':
-        return first.type.localeCompare(second.type);
-      default:
-        throw new Error('Invalid column ' + column);
-    }
-  };
-
   _onSort = (sortedColumns: ColumnSortState) => {
     this._sortedColumns = sortedColumns;
   };
@@ -285,7 +290,6 @@ class MarkerTableImpl extends PureComponent<Props> {
             indentWidth={10}
             initialSortedColumns={this._sortedColumns}
             onSort={this._onSort}
-            compareColumn={this._compareColumn}
             sortableColumns={this._sortableColumns}
           />
         )}

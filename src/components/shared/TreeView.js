@@ -74,7 +74,9 @@ export class ColumnSortState {
   }
 
   sortColumn(column: string, ascending: boolean | null = null) {
-    const current = this._isLastSortedColumn(column) ? this.getStateForColumn(column) : null;
+    const current = this._isLastSortedColumn(column)
+      ? this.getStateForColumn(column)
+      : null;
     const sortedColumns = this.sortedColumns.filter((c) => c.column !== column);
     if (ascending === true || current === null) {
       sortedColumns.push({ column, ascending: true });
@@ -100,13 +102,27 @@ export class ColumnSortState {
   }
 
   getStateForColumnOrDefault(column: string): SingleColumnSortState {
-    return this.getStateForColumn(column) || { column: column, ascending: true };
+    return (
+      this.getStateForColumn(column) || { column: column, ascending: true }
+    );
   }
 
   current(): SingleColumnSortState | null {
     return this.sortedColumns.length > 0
       ? this.sortedColumns[this.sortedColumns.length - 1]
       : null;
+  }
+
+  sortItemsHelper<T>(items: T[], compareColumn: (T, T, string) => number): T[] {
+    let sorted = items;
+    for (const { column, ascending } of this.sortedColumns) {
+      const sign = ascending ? -1 : 1;
+
+      sorted = sorted.sort((a, b) => {
+        return sign * compareColumn(a, b, column);
+      });
+    }
+    return sorted;
   }
 }
 
@@ -446,10 +462,10 @@ class TreeViewRowScrolledColumns<
 
 interface Tree<DisplayData: Object> {
   getDepth(NodeIndex): number;
-  getRoots(): NodeIndex[];
+  getRoots(ColumnSortState | null): NodeIndex[];
   getDisplayData(NodeIndex): DisplayData;
   getParent(NodeIndex): NodeIndex;
-  getChildren(NodeIndex): NodeIndex[];
+  getChildren(NodeIndex, ColumnSortState | null): NodeIndex[];
   hasChildren(NodeIndex): boolean;
   getAllDescendants(NodeIndex): Set<NodeIndex>;
 }
@@ -475,8 +491,6 @@ type TreeViewProps<DisplayData> = {|
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
-  // number: column number, -1: first larger, 0: same, 1: first smaller
-  +compareColumn?: (DisplayData, DisplayData, string) => number,
   +initialSortedColumns?: ColumnSortState,
   +onSort?: (ColumnSortState) => void,
   +sortableColumns?: Set<string>,
@@ -525,46 +539,20 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     (
       tree: Tree<DisplayData>,
       expandedNodes: Set<NodeIndex | null>,
-      sortedColumns: ColumnSortState,
-      compareColumn: ?(DisplayData, DisplayData, string) => number
+      sortedColumns: ColumnSortState
     ) => {
-      function sortNodes(nodeIds: Array<NodeIndex>): Array<NodeIndex> {
-        if (!compareColumn) {
-          return nodeIds;
-        }
-        let sortedNodeIds = nodeIds;
-        for (const { column, ascending } of sortedColumns.sortedColumns) {
-          const sign = ascending ? -1 : 1;
-          sortedNodeIds = sortedNodeIds.sort((a, b) => {
-            return (
-              sign *
-              ((compareColumn: any): (
-                DisplayData,
-                DisplayData,
-                string
-              ) => number)(
-                tree.getDisplayData(a),
-                tree.getDisplayData(b),
-                column
-              )
-            );
-          });
-        }
-        return sortedNodeIds;
-      }
-
       function _addVisibleRowsFromNode(tree, expandedNodes, arr, nodeId) {
         arr.push(nodeId);
         if (!expandedNodes.has(nodeId)) {
           return;
         }
-        const children = tree.getChildren(nodeId);
+        const children = tree.getChildren(nodeId, sortedColumns);
         for (let i = 0; i < children.length; i++) {
           _addVisibleRowsFromNode(tree, expandedNodes, arr, children[i]);
         }
       }
       // we only sort the root nodes for now
-      const roots = sortNodes(tree.getRoots());
+      const roots = tree.getRoots(sortedColumns);
       const allRows = [];
       for (let i = 0; i < roots.length; i++) {
         _addVisibleRowsFromNode(tree, expandedNodes, allRows, roots[i]);
@@ -652,12 +640,11 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
   }
 
   _getAllVisibleRows(): NodeIndex[] {
-    const { tree, compareColumn } = this.props;
+    const { tree } = this.props;
     return this._computeAllVisibleRowsMemoized(
       tree,
       this._getExpandedNodes(),
-      this.state.sortedColumns,
-      compareColumn
+      this.state.sortedColumns
     );
   }
 
@@ -842,7 +829,12 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
           } else {
             // Do KEY_DOWN only if the next element is a child
             if (this.props.tree.hasChildren(selected)) {
-              this._select(this.props.tree.getChildren(selected)[0]);
+              this._select(
+                this.props.tree.getChildren(
+                  selected,
+                  this.state.sortedColumns
+                )[0]
+              );
             }
           }
           break;
