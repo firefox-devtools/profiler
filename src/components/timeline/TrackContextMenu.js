@@ -213,6 +213,20 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     );
   };
 
+  _hideRightClickedTrack = (): void => {
+    const { rightClickedTrack, hideLocalTrack, hideGlobalTrack } = this.props;
+    if (rightClickedTrack === null) {
+      return;
+    }
+
+    if (rightClickedTrack.type === 'global') {
+      hideGlobalTrack(rightClickedTrack.trackIndex);
+      return;
+    }
+
+    hideLocalTrack(rightClickedTrack.pid, rightClickedTrack.trackIndex);
+  };
+
   _toggleGlobalTrackVisibility = (
     _,
     data: { trackIndex: TrackIndex }
@@ -731,29 +745,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     const rightClickedTrackName =
       this.getRightClickedTrackName(rightClickedTrack);
 
-    if (rightClickedTrack.type === 'global') {
-      return (
-        <MenuItem
-          key={trackIndex}
-          preventClose={false}
-          data={rightClickedTrack}
-          onClick={this._toggleGlobalTrackVisibility}
-        >
-          <Localized
-            id="TrackContextMenu--hide-track"
-            vars={{ trackName: rightClickedTrackName }}
-          >
-            <>Hide {`“${rightClickedTrackName}”`}</>
-          </Localized>
-        </MenuItem>
-      );
-    }
     return (
       <MenuItem
         key={trackIndex}
         preventClose={false}
-        data={rightClickedTrack}
-        onClick={this._toggleLocalTrackVisibility}
+        onClick={this._hideRightClickedTrack}
       >
         <Localized
           id="TrackContextMenu--hide-track"
