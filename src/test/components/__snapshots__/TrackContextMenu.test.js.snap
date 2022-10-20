@@ -27,9 +27,10 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     class="react-contextmenu-separator"
   />
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
     title="Screenshots"
   >
@@ -78,9 +79,10 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     class="react-contextmenu-separator"
   />
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
     title="Content Process (Process ID: 222)"
   >
@@ -99,17 +101,19 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     </span>
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     DOM Worker
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     Style
@@ -133,9 +137,10 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
     Hide “⁨Process 0⁩”
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
     title="Process 0 (Process ID: 0)"
   >
@@ -154,17 +159,19 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
     </span>
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     Network
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     Empty
@@ -199,9 +206,10 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     class="react-contextmenu-separator"
   />
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
     title="Content Process (Process ID: 222)"
   >
@@ -220,17 +228,19 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     </span>
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     DOM Worker
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     Style

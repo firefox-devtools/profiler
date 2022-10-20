@@ -392,12 +392,14 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           preventClose={true}
           data={{ trackIndex }}
           onClick={this._toggleGlobalTrackVisibility}
+          role="menuitemcheckbox"
           attributes={{
             className: classNames('timelineTrackContextMenuItem', {
               checkable: true,
               checked: !isHidden,
             }),
             title,
+            'aria-checked': isHidden ? 'false' : 'true',
           }}
         >
           <span>{globalTrackNames[trackIndex]}</span>
@@ -470,17 +472,21 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         continue;
       }
 
+      const isChecked =
+        !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden;
+
       localTrackMenuItems.push(
         <MenuItem
           key={trackIndex}
           preventClose={true}
           data={{ pid, trackIndex, globalTrackIndex }}
           onClick={this._toggleLocalTrackVisibility}
+          role="menuitemcheckbox"
           attributes={{
             className: classNames('checkable indented', {
-              checked:
-                !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
+              checked: isChecked,
             }),
+            'aria-checked': isChecked ? 'true' : 'false',
           }}
         >
           {localTrackNames[trackIndex]}
