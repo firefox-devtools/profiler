@@ -225,7 +225,7 @@ FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $tot
 
 ## Home page
 
-Home--upload-from-file-input-button = Cargar un profilo ex un file
+Home--upload-from-file-input-button = Cargar un profilo de un file
 Home--upload-from-url-button = Cargar un profilo de un URL
 Home--load-from-url-submit-button =
     .value = Cargar
@@ -256,7 +256,7 @@ Home--profiler-motto = Capturar un profilo de prestation. Analysar lo. Compartir
 Home--additional-content-title = Cargar profilos existente
 Home--additional-content-content = Tu pote <strong>traher e deponer</strong> hic un file profilo pro cargar lo, o:
 Home--compare-recordings-info = Tu pote alsi comparar registrationes. <a>Aperir le interfacie de comparation.</a>
-Home--your-recent-uploaded-recordings-title = Tu registrationes cargate recentemente
+Home--your-recent-uploaded-recordings-title = Tu registrationes incargate recentemente
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -281,7 +281,7 @@ ListOfPublishedProfiles--published-profiles-link =
     .title = Clicca hic pro cargar le profilo { $smallProfileName }
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Deler
     .title = Iste profilo non pote esser delite perque nos care de informationes de autorisation.
-ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nulle profilo ha essite cargate ancora!
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nulle profilo ha essite incargate ancora!
 # This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
 #   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
@@ -348,13 +348,13 @@ MarkerTable--description = Description
 MenuButtons--index--metaInfo-button =
     .label = Informationes de profilo
 MenuButtons--index--full-view = Vista complete
-MenuButtons--index--cancel-upload = Cancellar le cargamento
+MenuButtons--index--cancel-upload = Cancellar le incargamento
 MenuButtons--index--share-upload =
-    .label = Cargar profilo local
+    .label = Incargar profilo local
 MenuButtons--index--share-re-upload =
-    .label = Recargar
+    .label = Reincargar
 MenuButtons--index--share-error-uploading =
-    .label = Error al cargar
+    .label = Error durante le incargamento
 MenuButtons--index--revert = Reverter al profilo original
 MenuButtons--index--docs = Documentos
 MenuButtons--permalink--button =
@@ -364,7 +364,7 @@ MenuButtons--permalink--button =
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
-MenuButtons--index--profile-info-uploaded-label = Cargate:
+MenuButtons--index--profile-info-uploaded-label = Incargate:
 MenuButtons--index--profile-info-uploaded-actions = Deler
 MenuButtons--index--metaInfo-subtitle = Informationes de profilo
 MenuButtons--metaInfo--symbols = Symbolos:
@@ -487,16 +487,16 @@ MenuButtons--publish--renderCheckbox-label-preference = Includer valores de pref
 MenuButtons--publish--renderCheckbox-label-private-browsing = Includer le datos ab le fenestra de navigation private
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Iste profilo contine datos de navigation private
-MenuButtons--publish--reupload-performance-profile = Re-cargar profilo de prestation
+MenuButtons--publish--reupload-performance-profile = Reincargar profilo de rendimento
 MenuButtons--publish--share-performance-profile = Compartir profilo de prestation
-MenuButtons--publish--info-description = Carga tu profilo e lo rende accessibile a totes con le ligamine.
+MenuButtons--publish--info-description = Incarga tu profilo e rende lo accessibile a totes con le ligamine.
 MenuButtons--publish--info-description-default = De ordinario, tu datos personal es removite.
 MenuButtons--publish--info-description-firefox-nightly2 = Iste profilo es de { -firefox-nightly-brand-name }, assi de ordinario plure informationes es includite.
 MenuButtons--publish--include-additional-data = Includer altere datos que pote esser identificabile
-MenuButtons--publish--button-upload = Cargar
-MenuButtons--publish--upload-title = Cargamento del profilo…
-MenuButtons--publish--cancel-upload = Cancellar le cargamento
-MenuButtons--publish--message-something-went-wrong = Oh oh, alco errate eveniva durante le cargamento del profilo.
+MenuButtons--publish--button-upload = Incargar
+MenuButtons--publish--upload-title = Incargamento del profilo…
+MenuButtons--publish--cancel-upload = Cancellar incargamento
+MenuButtons--publish--message-something-went-wrong = Guai, un error se ha producite durante le incargamento del profilo.
 MenuButtons--publish--message-try-again = Retentar
 MenuButtons--publish--download = Discargar
 MenuButtons--publish--compressing = Comprimente…
@@ -547,7 +547,7 @@ ProfileDeletePanel--delete-error = Un error eveniva durante le deletion de iste 
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
 ProfileDeletePanel--dialog-title = Deler { $profileName }
-ProfileDeletePanel--dialog-confirmation-question = Desira tu vermente deler le datos cargate pro iste profilo? Le ligamines que era previemente compartite non plus functionara.
+ProfileDeletePanel--dialog-confirmation-question = Es tu secur de voler deler le datos incargate pro iste profilo? Le ligamines compartite anteriormente non functionara plus.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Cancellar
 ProfileDeletePanel--dialog-delete-button =
@@ -557,7 +557,7 @@ ProfileDeletePanel--dialog-delete-button =
 ProfileDeletePanel--dialog-deleting-button =
     .value = Deletion…
 # This message is displayed when a profile has been successfully deleted.
-ProfileDeletePanel--message-success = Le datos cargate ha essite delite con successo.
+ProfileDeletePanel--message-success = Le datos incargate ha essite delite con successo.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -858,4 +858,4 @@ SourceView--close-button =
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
-UploadedRecordingsHome--title = Registrationes cargate
+UploadedRecordingsHome--title = Registrationes incargate
