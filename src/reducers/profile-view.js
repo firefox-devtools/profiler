@@ -24,17 +24,20 @@ import type {
   SymbolicationStatus,
   ThreadViewOptions,
   ThreadViewOptionsPerThreads,
+  TableViewOptionsPerTab,
   RightClickedCallNode,
   MarkerReference,
   ActiveTabTimeline,
   CallNodePath,
   ThreadsKey,
   Milliseconds,
+  TableViewOptions,
 } from 'firefox-profiler/types';
 import {
   applyFuncSubstitutionToCallPath,
   applyFuncSubstitutionToPathSetAndIncludeNewAncestors,
 } from '../profile-logic/symbolication';
+import type { TabSlug } from '../app-logic/tabs-handling';
 
 import { objectMap } from '../utils/flow';
 
@@ -405,6 +408,48 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
   }
 };
 
+export const defaultTableViewOptions: TableViewOptions = {
+  fixedColumnWidths: null,
+};
+
+function _getTableViewOptions(state: TableViewOptionsPerTab, tab: TabSlug) {
+  const options = state[tab];
+  if (options) {
+    return options;
+  }
+  return defaultThreadViewOptions;
+}
+
+function _updateTableViewOptions(
+  state: TableViewOptionsPerTab,
+  tab: TabSlug,
+  updates: $Shape<TableViewOptions>
+): TableViewOptionsPerTab {
+  const newState = { ...state };
+  newState[tab] = {
+    ..._getTableViewOptions(state, tab),
+    ...updates,
+  };
+  return newState;
+}
+
+const tableViewOptionsPerTab: Reducer<TableViewOptionsPerTab> = (
+  state = ({}: TableViewOptionsPerTab),
+  action
+): TableViewOptionsPerTab => {
+  console.log(action);
+  switch (action.type) {
+    case 'CHANGE_TABLE_VIEW_OPTIONS':
+      return _updateTableViewOptions(
+        state,
+        action.tab,
+        action.tableViewOptions
+      );
+    default:
+      return state;
+  }
+};
+
 const waitingForLibs: Reducer<Set<RequestedLib>> = (
   state = new Set(),
   action
@@ -721,6 +766,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rightClickedMarker,
       hoveredMarker,
       mouseTimePosition,
+      perTable: tableViewOptionsPerTab,
     }),
     profile,
     full: combineReducers({

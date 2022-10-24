@@ -57,6 +57,12 @@ export type ThreadViewOptions = {|
 
 export type ThreadViewOptionsPerThreads = { [ThreadsKey]: ThreadViewOptions };
 
+export type TableViewOptions = {|
+  +fixedColumnWidths: Array<CssPixels> | null,
+|};
+
+export type TableViewOptionsPerTab = { [TabSlug]: TableViewOptions };
+
 export type RightClickedCallNode = {|
   +threadsKey: ThreadsKey,
   +callNodePath: CallNodePath,
@@ -108,6 +114,7 @@ export type ProfileViewState = {
     rightClickedMarker: MarkerReference | null,
     hoveredMarker: MarkerReference | null,
     mouseTimePosition: Milliseconds | null,
+    perTable: TableViewOptionsPerTab,
   |},
   +profile: Profile | null,
   +full: FullProfileViewState,

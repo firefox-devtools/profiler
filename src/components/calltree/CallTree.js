@@ -21,6 +21,7 @@ import {
   getFocusCallTreeGeneration,
   getPreviewSelection,
   getCategories,
+  getCurrentTableViewOptions,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -30,6 +31,7 @@ import {
   addTransformToStack,
   handleCallNodeTransformShortcut,
   openSourceView,
+  changeTableViewOptions,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -42,6 +44,7 @@ import type {
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   WeightType,
+  TableViewOptions,
 } from 'firefox-profiler/types';
 import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
 
@@ -66,6 +69,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +callNodeMaxDepth: number,
   +weightType: WeightType,
+  +tableViewOptions: TableViewOptions,
 |};
 
 type DispatchProps = {|
@@ -75,6 +79,7 @@ type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
   +openSourceView: typeof openSourceView,
+  +onTableViewOptionsChange: (TableViewOptions) => any,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -100,40 +105,81 @@ class CallTreeImpl extends PureComponent<Props> {
       switch (weightType) {
         case 'tracing-ms':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--tracing-ms-total',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--tracing-ms-self',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
             },
             { propName: 'icon', titleL10nId: '', component: Icon },
           ];
         case 'samples':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--samples-total',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--samples-self',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
             },
-            { propName: 'icon', titleL10nId: '', component: Icon },
+            {
+              propName: 'icon',
+              titleL10nId: '',
+              component: Icon,
+              initialWidth: 10,
+            },
           ];
         case 'bytes':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--bytes-total',
+              minWidth: 30,
+              initialWidth: 140,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--bytes-self',
+              minWidth: 30,
+              initialWidth: 90,
+              resizable: true,
             },
             { propName: 'icon', titleL10nId: '', component: Icon },
           ];
@@ -326,6 +372,8 @@ class CallTreeImpl extends PureComponent<Props> {
         onKeyDown={this._onKeyDown}
         onEnterKey={this._onEnterOrDoubleClick}
         onDoubleClick={this._onEnterOrDoubleClick}
+        viewOptions={this.props.tableViewOptions}
+        onViewOptionsChange={this.props.onTableViewOptionsChange}
       />
     );
   }
@@ -355,6 +403,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     callNodeMaxDepth:
       selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
+    tableViewOptions: getCurrentTableViewOptions(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
@@ -363,6 +412,8 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     addTransformToStack,
     handleCallNodeTransformShortcut,
     openSourceView,
+    onTableViewOptionsChange: (options: TableViewOptions) =>
+      changeTableViewOptions('calltree', options),
   },
   component: CallTreeImpl,
 });

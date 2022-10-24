@@ -21,6 +21,8 @@ import {
 } from '../profile-logic/marker-data';
 import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
+import { defaultTableViewOptions } from '../reducers/profile-view';
+import type { TabSlug } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
@@ -75,6 +77,7 @@ import type {
   SampleUnits,
   IndexIntoSamplesTable,
   ExtraProfileInfoSection,
+  TableViewOptions,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
@@ -93,6 +96,9 @@ export const getOriginsProfileView: Selector<OriginsViewState> = (state) =>
 export const getProfileViewOptions: Selector<
   $PropertyType<ProfileViewState, 'viewOptions'>
 > = (state) => getProfileView(state).viewOptions;
+export const getCurrentTableViewOptions: Selector<TableViewOptions> = (state) =>
+  getProfileViewOptions(state).perTable[UrlState.getSelectedTab(state)] ||
+  defaultTableViewOptions;
 export const getProfileRootRange: Selector<StartEndRange> = (state) =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus: Selector<SymbolicationStatus> = (state) =>
@@ -121,6 +127,12 @@ export const getCommittedRange: Selector<StartEndRange> = createSelector(
 
 export const getMouseTimePosition: Selector<Milliseconds | null> = (state) =>
   getProfileViewOptions(state).mouseTimePosition;
+
+export const getTableViewOptionSelectors: (TabSlug) => Selector<TableViewOptions> =
+  (tab) => (state) => {
+    const options = getProfileViewOptions(state).perTable[tab];
+    return options || defaultTableViewOptions;
+  };
 
 export const getPreviewSelection: Selector<PreviewSelection> = (state) =>
   getProfileViewOptions(state).previewSelection;

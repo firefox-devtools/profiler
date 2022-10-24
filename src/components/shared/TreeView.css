@@ -77,16 +77,30 @@
 
 .treeViewHeaderColumn {
   position: relative;
-  box-sizing: border-box;
-  padding: 0 5px;
   line-height: 15px;
   white-space: nowrap;
 }
 
 .treeViewFixedColumn {
   overflow: hidden;
-  padding: 0 5px;
   text-overflow: ellipsis;
+}
+
+.treeViewColumnDivider {
+  width: 20px;
+  text-align: center;
+  display: inline-block;
+  flex: none;
+  margin-left: -5px;
+  margin-right: -5px;
+}
+.treeViewColumnDivider[resize=true]:hover {
+  cursor: col-resize;
+}
+
+.treeViewColumnDivider span {
+  border-right: 1px solid var(--grey-30);
+  box-sizing: border-box;
 }
 
 .treeViewHeaderColumn.treeViewFixedColumn {
@@ -94,12 +108,6 @@
    * position: sticky, therefore we prevent shrinking for the columns in the
    * header too. */
   flex: none;
-  border-right: 1px solid #e2e2e2;
-}
-
-.treeViewRowColumn.treeViewFixedColumn {
-  box-sizing: border-box;
-  border-right: 1px solid var(--grey-30);
 }
 
 .treeBadge {

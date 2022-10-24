@@ -14,12 +14,14 @@ import {
   getZeroAt,
   getScrollToSelectionGeneration,
   getMarkerSchemaByName,
+  getCurrentTableViewOptions,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadsKey } from '../../selectors/url-state';
 import {
   changeSelectedMarker,
   changeRightClickedMarker,
+  changeTableViewOptions,
 } from '../../actions/profile-view';
 import { MarkerSettings } from '../shared/MarkerSettings';
 import { formatSeconds, formatTimestamp } from '../../utils/format-numbers';
@@ -32,6 +34,7 @@ import type {
   MarkerIndex,
   Milliseconds,
   MarkerSchemaByName,
+  TableViewOptions,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -149,20 +152,40 @@ type StateProps = {|
   +scrollToSelectionGeneration: number,
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,
+  +tableViewOptions: TableViewOptions,
 |};
 
 type DispatchProps = {|
   +changeSelectedMarker: typeof changeSelectedMarker,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
+  +onTableViewOptionsChange: (TableViewOptions) => any,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerTableImpl extends PureComponent<Props> {
   _fixedColumns = [
-    { propName: 'start', titleL10nId: 'MarkerTable--start' },
-    { propName: 'duration', titleL10nId: 'MarkerTable--duration' },
-    { propName: 'type', titleL10nId: 'MarkerTable--type' },
+    {
+      propName: 'start',
+      titleL10nId: 'MarkerTable--start',
+      minWidth: 30,
+      initialWidth: 90,
+      resizable: true,
+    },
+    {
+      propName: 'duration',
+      titleL10nId: 'MarkerTable--duration',
+      minWidth: 30,
+      initialWidth: 80,
+      resizable: true,
+    },
+    {
+      propName: 'type',
+      titleL10nId: 'MarkerTable--type',
+      minWidth: 30,
+      initialWidth: 150,
+      resizable: true,
+    },
   ];
   _mainColumn = { propName: 'name', titleL10nId: 'MarkerTable--description' };
   _expandedNodeIds: Array<MarkerIndex | null> = [];
@@ -247,6 +270,8 @@ class MarkerTableImpl extends PureComponent<Props> {
             contextMenuId="MarkerContextMenu"
             rowHeight={16}
             indentWidth={10}
+            viewOptions={this.props.tableViewOptions}
+            onViewOptionsChange={this.props.onTableViewOptionsChange}
           />
         )}
       </div>
@@ -266,7 +291,13 @@ export const MarkerTable = explicitConnect<{||}, StateProps, DispatchProps>({
     zeroAt: getZeroAt(state),
     markerSchemaByName: getMarkerSchemaByName(state),
     getMarkerLabel: selectedThreadSelectors.getMarkerTableLabelGetter(state),
+    tableViewOptions: getCurrentTableViewOptions(state),
   }),
-  mapDispatchToProps: { changeSelectedMarker, changeRightClickedMarker },
+  mapDispatchToProps: {
+    changeSelectedMarker,
+    changeRightClickedMarker,
+    onTableViewOptionsChange: (tableViewOptions) =>
+      changeTableViewOptions('marker-table', tableViewOptions),
+  },
   component: MarkerTableImpl,
 });
