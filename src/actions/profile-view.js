@@ -1036,9 +1036,8 @@ export function showProvidedTracks(
     // visible too. Let's iterate over the global tracks and include them if
     // their children are going to be made visible.
     const globalTracks = getGlobalTracks(getState());
-    const pidsToShow = new Set(localTracksByPidToShow.keys());
     for (const [globalTrackIndex, globalTrack] of globalTracks.entries()) {
-      if (globalTrack.pid && pidsToShow.has(globalTrack.pid)) {
+      if (globalTrack.pid && localTracksByPidToShow.has(globalTrack.pid)) {
         globalTracksToShow.add(globalTrackIndex);
       }
     }
