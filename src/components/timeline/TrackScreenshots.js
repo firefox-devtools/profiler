@@ -254,6 +254,11 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     if (offsetX === null || pageX === null) {
       return null;
     }
+
+    if (payload.url === undefined) {
+      return null;
+    }
+
     const { url } = payload;
 
     const maximumHoverSize = isMakingPreviewSelection
@@ -359,6 +364,9 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
       // Coerce the payload into a screenshot one.
       const payload: ScreenshotPayload = (screenshots[screenshotIndex]
         .data: any);
+      if (payload.url === undefined) {
+        continue;
+      }
       const { url: urlStringIndex, windowWidth, windowHeight } = payload;
       const scaledImageWidth = (trackHeight * windowWidth) / windowHeight;
       images.push(
@@ -382,6 +390,6 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
         </div>
       );
     }
-    return images;
+    return images.length > 0 ? images : null;
   }
 }

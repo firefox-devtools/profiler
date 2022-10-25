@@ -17,5 +17,6 @@
     "keyframes-name-pattern": null,
     "length-zero-no-unit": null,
     "selector-class-pattern": null,
+    "import-notation": null,
   }
 }

@@ -40,7 +40,6 @@ import type {
   MarkerSchemaByName,
   MarkerDisplayLocation,
   Tid,
-  ScreenshotPayload,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -684,9 +683,15 @@ export function deriveMarkersFromRawMarkerTable(
             });
           }
           if (
-            stringTable.getString(name) !==
+            stringTable.getString(name) ===
             'CompositorScreenshotWindowDestroyed'
           ) {
+            // This marker is added when a window is destroyed. In this case we
+            // don't want to store it as the start of the next compositor
+            // marker. But we do want to keep it, so we break out of the
+            // switch/case so that the standard processing happens.
+            break;
+          } else {
             previousScreenshotMarkers.set(windowID, rawMarkerIndex);
           }
 
@@ -1394,7 +1399,7 @@ export function filterMarkerByDisplayLocation(
  * Compute the Screenshot image's thumbnail size.
  */
 export function computeScreenshotSize(
-  payload: ScreenshotPayload,
+  payload: { windowWidth: number, windowHeight: number },
   maximumSize: number
 ): {| +width: number, +height: number |} {
   const { windowWidth, windowHeight } = payload;
