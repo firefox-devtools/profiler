@@ -28,6 +28,7 @@ import type {
   FuncTable,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
+  IndexIntoFrameTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
   CallNodePath,
@@ -974,7 +975,13 @@ export function collapseDirectRecursion(
   // Collapsed full:     Ajs -> Xcpp -> Bjs -> Wcpp
 
   const { stackTable, frameTable } = thread;
-  const recursionChainPrefixForStack = new Map();
+  // Map stack indices that are funcToCheck or have a funcToCheck parent, ignoring other implementations,
+  // to the parent stack index of the outermost recursive funcToCheck.
+  // E.g. B3 -> A1 in the example.
+  const recursionChainPrefixForStack = new Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  >();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
   const newStackTablePrefixColumn = stackTable.prefix.slice();
 
@@ -983,7 +990,8 @@ export function collapseDirectRecursion(
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
-    const recursionChainPrefix = recursionChainPrefixForStack.get(prefix);
+    const recursionChainPrefix =
+      prefix !== null ? recursionChainPrefixForStack.get(prefix) : undefined;
     if (recursionChainPrefix === undefined) {
       // Our prefix was not part of a recursion chain.
       // If this stack frame matches the collapsed func, this stack node is the root
@@ -1068,9 +1076,23 @@ export function collapseIndirectRecursion(
 
   const { stackTable, frameTable } = thread;
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
-  const recursionChainParentStack = new Set();
-  const recursionChainPrefixForStack = new Map();
-  const recursionChainFrameForStack = new Map();
+  // Set of stack indices that are funcToCheck or have a funcToCheck descendant.
+  // E.g. B1, C1, B2 and B3 in the example.
+  const recursionChainParentStack = new Set<IndexIntoStackTable>();
+  // Map stack indices that are funcToCheck or have a funcToCheck ancestor
+  // to the parent stack index of the outermost recursive funcToCheck.
+  // E.g. B2 -> A1 or D3 -> A1 in the example.
+  const recursionChainPrefixForStack = new Map<
+    IndexIntoStackTable,
+    IndexIntoStackTable | null
+  >();
+  // Map stack indices that are funcToCheck or have a funcToCheck ancestor
+  // to the frame index of the innermost recursive funcToCheck.
+  // E.g. B3 -> B3, D1 -> B2 or D2 -> B1 in the example.
+  const recursionChainFrameForStack = new Map<
+    IndexIntoStackTable,
+    IndexIntoFrameTable
+  >();
   const newStackTablePrefixColumn = stackTable.prefix.slice();
   const newStackTableFrameColumn = stackTable.frame.slice();
 
@@ -1100,8 +1122,10 @@ export function collapseIndirectRecursion(
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
-    const recursionChainPrefix = recursionChainPrefixForStack.get(prefix);
-    const recursionChainFrame = recursionChainFrameForStack.get(prefix);
+    const recursionChainPrefix =
+      prefix !== null ? recursionChainPrefixForStack.get(prefix) : undefined;
+    const recursionChainFrame =
+      prefix !== null ? recursionChainFrameForStack.get(prefix) : undefined;
     if (
       recursionChainPrefix === undefined ||
       recursionChainFrame === undefined // To make flow happy.
@@ -1116,7 +1140,8 @@ export function collapseIndirectRecursion(
     } else {
       // Our prefix is part of a recursion chain.
       if (funcMatchesImplementation(thread, funcIndex)) {
-        const prefixInChain = recursionChainParentStack.has(prefix);
+        const prefixInChain =
+          prefix !== null && recursionChainParentStack.has(prefix);
         const thisInChain = recursionChainParentStack.has(stackIndex);
         if (prefixInChain && thisInChain) {
           // The recursion chain continues.
@@ -1545,14 +1570,15 @@ export function funcHasDirectRecursiveCall(
   funcToCheck: IndexIntoFuncTable
 ) {
   const { stackTable, frameTable } = thread;
-  const recursiveStacks = new Set();
+  // Set of stack indices that are funcToCheck or have a funcToCheck parent, ignoring other implementations.
+  const recursiveStacks = new Set<IndexIntoStackTable>();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const frameIndex = stackTable.frame[stackIndex];
     const prefix = stackTable.prefix[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    const recursivePrefix = recursiveStacks.has(prefix);
+    const recursivePrefix = prefix !== null && recursiveStacks.has(prefix);
 
     if (funcToCheck === funcIndex) {
       if (recursivePrefix) {
@@ -1579,13 +1605,14 @@ export function funcHasIndirectRecursiveCall(
   funcToCheck: IndexIntoFuncTable
 ) {
   const { stackTable, frameTable } = thread;
-  const recursiveStacks = new Set();
+  // Set of stack indices that are funcToCheck or have a funcToCheck ancestor.
+  const recursiveStacks = new Set<IndexIntoStackTable>();
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const frameIndex = stackTable.frame[stackIndex];
     const prefix = stackTable.prefix[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    const recursivePrefix = recursiveStacks.has(prefix);
+    const recursivePrefix = prefix !== null && recursiveStacks.has(prefix);
 
     if (funcToCheck === funcIndex) {
       if (recursivePrefix) {
