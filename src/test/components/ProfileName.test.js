@@ -97,7 +97,7 @@ describe('ProfileName', function () {
       fireEvent.change(input, { target: { value: 'Custom name' } });
       fireEvent.blur(input);
 
-      expect(self.ga).toBeCalledWith('send', {
+      expect(self.ga).toHaveBeenCalledWith('send', {
         eventAction: 'change profile name',
         eventCategory: 'profile',
         hitType: 'event',

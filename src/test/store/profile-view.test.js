@@ -724,7 +724,7 @@ describe('actions/ProfileView', function () {
           'foobar'
         );
 
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'call tree search string',
           eventCategory: 'profile',
           hitType: 'event',
@@ -1240,7 +1240,7 @@ describe('actions/ProfileView', function () {
       );
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeImplementationFilter('js'));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'change implementation filter',
           eventCategory: 'profile',
           eventLabel: 'js',
@@ -1261,7 +1261,7 @@ describe('actions/ProfileView', function () {
       expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeInvertCallstack(true));
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'change invert callstack',
           eventCategory: 'profile',
           hitType: 'event',
@@ -1456,7 +1456,7 @@ describe('actions/ProfileView', function () {
             funcIndex: 1,
           })
         );
-        expect(self.ga).toBeCalledWith('send', {
+        expect(self.ga).toHaveBeenCalledWith('send', {
           eventAction: 'add transform',
           eventCategory: 'profile',
           eventLabel: 'merge-function',
@@ -1514,50 +1514,41 @@ describe('actions/ProfileView', function () {
   });
 
   describe('getRangeFilteredScreenshotsById', function () {
-    it('can extract some network markers and match the snapshot', function () {
+    it('can extract some screenshot markers', function () {
       const profile = getScreenshotTrackProfile();
       const { getState } = storeWithProfile(profile);
       const screenshotMarkersById =
         selectedThreadSelectors.getRangeFilteredScreenshotsById(getState());
       const keys = [...screenshotMarkersById.keys()];
-      expect(keys.length).toEqual(2);
+      expect(keys.length).toEqual(3);
 
-      const [screenshots] = [...screenshotMarkersById.values()];
-      if (!screenshots) {
-        throw new Error('No screenshots found.');
-      }
-      // The profile contains the same markers twice, but with different window ids.
-      // `screenshots` contains the screenshots for only one window id.
-      // That's why we need to halve the markers length when comparing the 2 lengths.
-      expect(screenshots.length).toEqual(profile.threads[0].markers.length / 2);
-      for (const screenshot of screenshots) {
+      const screenshots = screenshotMarkersById.get('0');
+      expect(screenshots?.length).toEqual(5);
+      for (const screenshot of screenshots ?? []) {
         expect(screenshot.name).toEqual('CompositorScreenshot');
       }
+      expect(screenshotMarkersById.get('1')?.length).toEqual(6);
+      expect(screenshotMarkersById.get('2')?.length).toEqual(10);
     });
 
-    it('only deliveres screenshots within a range selection', function () {
+    it('filters screenshots within a range selection', function () {
       const profile = getScreenshotTrackProfile();
       const [{ markers }] = profile.threads;
       const { dispatch, getState } = storeWithProfile(profile);
 
-      // Double check that there are 10 markers in the test data, and commit a
+      // Double check that there are 21 markers in the test data, and commit a
       // subsection of that range.
-      expect(markers.length).toBe(20);
-      const startIndex = 3;
-      const endIndex = 8;
-      const startTime = ensureExists(markers.startTime[startIndex]);
-      const endTime = ensureExists(markers.startTime[endIndex]) - 0.1;
-      dispatch(ProfileView.commitRange(startTime, endTime));
+      expect(markers.length).toBe(21);
+      dispatch(ProfileView.commitRange(3.1, 7.5));
 
       // Get out the markers.
       const screenshotMarkersById =
         selectedThreadSelectors.getRangeFilteredScreenshotsById(getState());
-      const [key] = [...screenshotMarkersById.keys()];
-      const screenshots = screenshotMarkersById.get(key);
+      const screenshots = screenshotMarkersById.get('2');
       if (!screenshots) {
         throw new Error('No screenshots found.');
       }
-      expect(screenshots.length).toEqual(endIndex - startIndex + 1);
+      expect(screenshots.length).toEqual(5);
     });
   });
 });

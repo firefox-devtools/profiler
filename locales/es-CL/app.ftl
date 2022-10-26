@@ -649,6 +649,12 @@ TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
     .label = Energía usada en el rango visible
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
+    .label = Energía utilizada en el rango visible
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -661,6 +667,12 @@ TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
     .label = Energía usada en la selección actual
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
+    .label = Energía utilizada en la selección actual
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

@@ -64,7 +64,7 @@ describe('marker schema labels', function () {
         payload: {},
       })
     ).toEqual('Just text');
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).toHaveBeenCalledTimes(0);
   });
 
   it('can parse a label with just a lookup value', function () {
@@ -75,7 +75,7 @@ describe('marker schema labels', function () {
         payload: { duration: 12345 },
       })
     ).toEqual('12.345s');
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).toHaveBeenCalledTimes(0);
   });
 
   it('can parse a label with surrounding text', function () {
@@ -86,7 +86,7 @@ describe('marker schema labels', function () {
         payload: { duration: 12345 },
       })
     ).toEqual('It took 12.345s for this test.');
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).toHaveBeenCalledTimes(0);
   });
 
   it('can mix and match lookups', function () {
@@ -103,7 +103,7 @@ describe('marker schema labels', function () {
         },
       })
     ).toEqual('It took 12.345s, which is 12%');
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).toHaveBeenCalledTimes(0);
   });
 
   it('is empty if there is no information in a payload', function () {
@@ -114,7 +114,7 @@ describe('marker schema labels', function () {
         payload: { duration: 12345 },
       })
     ).toEqual('This will be nothing: ""');
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).toHaveBeenCalledTimes(0);
   });
 
   it('can look up various parts of the marker', function () {
@@ -137,7 +137,7 @@ describe('marker schema labels', function () {
       'Name: TestDefinedMarker',
       'Category: Other',
     ]);
-    expect(console.error).toBeCalledTimes(0);
+    expect(console.error).toHaveBeenCalledTimes(0);
   });
 
   describe('parseErrors', function () {
@@ -151,7 +151,7 @@ describe('marker schema labels', function () {
           payload: { duration: 12345 },
         })
       ).toEqual('Parse error: ""');
-      expect(console.error).toBeCalledTimes(1);
+      expect(console.error).toHaveBeenCalledTimes(1);
       expect(console.error.mock.calls).toMatchSnapshot();
     }
 

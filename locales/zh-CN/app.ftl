@@ -314,6 +314,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = 正在尝试重新符号化分
 MenuButtons--metaInfo--currently-symbolicating = 当前符号化的分析记录
 MenuButtons--metaInfo--cpu = CPU：
 MenuButtons--metaInfo--main-memory = 主内存：
+MenuButtons--index--show-moreInfo-button = 显示更多
+MenuButtons--index--hide-moreInfo-button = 显示更少
 # This string is used when we have the information about both physical and
 # logical CPU cores.
 # Variable:
@@ -639,6 +641,12 @@ TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
     .label = 可见范围内的功耗
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
+    .label = 可见范围内的功耗
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -650,6 +658,12 @@ TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
 # Variables:
 #   $value (String) - the energy value for this range
 TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+    .label = 当前选择范围内的功耗
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
     .label = 当前选择范围内的功耗
 
 ## TrackSearchField
