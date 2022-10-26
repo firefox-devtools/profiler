@@ -1157,12 +1157,12 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@firefox-devtools/react-contextmenu@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@firefox-devtools/react-contextmenu/-/react-contextmenu-5.0.0.tgz#2b0bca3153a90b6f94f1872e70e3fa4f76a50766"
-  integrity sha512-lHn3DA8HQ2a7Anef3Anqhpv7yTx8x1fQCnp9sJU0SfbuSSSsCmqJZ2fkFRTqVXsSlZftoR5p15gMbm53HJ40mw==
+"@firefox-devtools/react-contextmenu@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@firefox-devtools/react-contextmenu/-/react-contextmenu-5.1.0.tgz#0eb8e687d29a9857fa7763320002bb1af4997c76"
+  integrity sha512-gtGBNEQ8fI2sb7xP/cKC2fyv851QZe22vSKBVq39zztxRpQ7dqMzgDCTizG5YkVk058xD/Db3Hej9xxGPBfT4w==
   dependencies:
-    classnames "^2.3.1"
+    classnames "^2.3.2"
     object-assign "^4.1.0"
 
 "@fluent/bundle@^0.17.1":
@@ -1491,10 +1491,10 @@
     "@lezer/highlight" "^1.0.0"
     "@lezer/lr" "^1.0.0"
 
-"@lezer/highlight@^1.0.0", "@lezer/highlight@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@lezer/highlight/-/highlight-1.1.1.tgz#1f4f12f21320d7de102b46a5416eff49fdf3c695"
-  integrity sha512-duv9D23O9ghEDnnUDmxu+L8pJy4nYo4AbCOHIudUhscrLSazqeJeK1V50EU6ZufWF1zv0KJwu/frFRyZWXxHBQ==
+"@lezer/highlight@^1.0.0", "@lezer/highlight@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@lezer/highlight/-/highlight-1.1.2.tgz#60cd6c2a0a2cf753b8a026b04feeb0ea8df326ea"
+  integrity sha512-CAun1WR1glxG9ZdOokTZwXbcwB7PXkIEyZRUMFBVwSrhTcogWq634/ByNImrkUnQhjju6xsIaOBIxvcRJtplXQ==
   dependencies:
     "@lezer/common" "^1.0.0"
 
@@ -3398,7 +3398,7 @@ clamp@^1.0.1:
   resolved "https://registry.yarnpkg.com/clamp/-/clamp-1.0.1.tgz#66a0e64011816e37196828fdc8c8c147312c8634"
   integrity sha1-ZqDmQBGBbjcZaCj9yMjBRzEshjQ=
 
-classnames@^2.3.1, classnames@^2.3.2:
+classnames@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.3.2.tgz#351d813bf0137fcc6a76a16b88208d2560a0d924"
   integrity sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==
