@@ -115,11 +115,7 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
 
     // If the tracks are both threads, sort them by thread name, and then by
     // creation time if they have the same name.
-    if (
-      (tracks[a].type === 'thread' || tracks[a].type === 'marker') &&
-      (tracks[b].type === 'thread' || tracks[b].type === 'marker') &&
-      profile
-    ) {
+    if (tracks[a].type === 'thread' && tracks[b].type === 'thread' && profile) {
       const idxA = tracks[a].threadIndex;
       const idxB = tracks[b].threadIndex;
       if (idxA === undefined || idxB === undefined) {
@@ -563,10 +559,20 @@ function getDefaultSelectedThreadIndexes(
   profile: Profile
 ): Set<ThreadIndex> {
   if (profile.meta.initialSelectedThreads !== undefined) {
-    profile.meta.initialSelectedThreads.forEach((index) =>
-      ensureExists(profile.threads[index])
+    return new Set(
+      profile.meta.initialSelectedThreads.filter((threadIndex) => {
+        if (threadIndex < profile.threads.length) {
+          return true;
+        }
+
+        console.warn(
+          `The specified thread index ${threadIndex} is higher than the maximum thread index ${
+            profile.threads.length - 1
+          }.`
+        );
+        return false;
+      })
     );
-    return new Set(profile.meta.initialSelectedThreads);
   }
   const visibleThreads = visibleThreadIndexes.map(
     (threadIndex) => profile.threads[threadIndex]
