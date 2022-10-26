@@ -1436,7 +1436,8 @@ export function processCounter(counter: Counter): Counter {
   const processedGroups = counter.sampleGroups.map((sampleGroup) => {
     const { samples } = sampleGroup;
     const count = samples.count.slice();
-    const number = samples.number.slice();
+    const number =
+      samples.number !== undefined ? samples.number.slice() : undefined;
 
     // These lines zero out the first values of the counters, as they are unreliable. In
     // addition, there are probably some missed counts in the memory counters, so the
@@ -1447,7 +1448,9 @@ export function processCounter(counter: Counter): Counter {
     // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
     count[0] = 0;
-    number[0] = 0;
+    if (number !== undefined) {
+      number[0] = 0;
+    }
 
     return {
       ...sampleGroup,

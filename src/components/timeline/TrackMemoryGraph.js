@@ -386,19 +386,21 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
 
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
     const bytes = accumulatedCounts[counterIndex] - minCount;
-    const operationsCounters = samples.number;
-    const operations = operationsCounters[counterIndex];
+    const operations =
+      samples.number !== undefined ? samples.number[counterIndex] : null;
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
         <div className="timelineTrackMemoryTooltip">
-          <div className="timelineTrackMemoryTooltipLine">
-            <span className="timelineTrackMemoryTooltipNumber">
-              {formatNumber(operations, 2, 0)}
-            </span>
-            <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
-              operations since the previous sample
-            </Localized>
-          </div>
+          {operations !== null ? (
+            <div className="timelineTrackMemoryTooltipLine">
+              <span className="timelineTrackMemoryTooltipNumber">
+                {formatNumber(operations, 2, 0)}
+              </span>
+              <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
+                operations since the previous sample
+              </Localized>
+            </div>
+          ) : null}
 
           <div className="timelineTrackMemoryTooltipLine">
             <span className="timelineTrackMemoryTooltipNumber">
