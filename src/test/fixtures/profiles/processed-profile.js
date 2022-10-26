@@ -1250,8 +1250,8 @@ export function getIPCTrackProfile() {
 }
 
 export function getScreenshotTrackProfile() {
-  const screenshotMarkersForWindowId = (windowID) =>
-    Array(10)
+  const screenshotMarkersForWindowId = (windowID, count) =>
+    Array(count)
       .fill()
       .map((_, i) => [
         'CompositorScreenshot',
@@ -1266,8 +1266,19 @@ export function getScreenshotTrackProfile() {
         },
       ]);
   return getProfileWithMarkers([
-    ...screenshotMarkersForWindowId('0'),
-    ...screenshotMarkersForWindowId('1'),
+    ...screenshotMarkersForWindowId('0', 5), // This window isn't closed, so we should repeat the last screenshot
+    ...screenshotMarkersForWindowId('1', 5), // This window is closed after screenshot 6.
+    ...screenshotMarkersForWindowId('2', 10), // This window isn't closed and define the profile length
+    [
+      'CompositorScreenshotWindowDestroyed',
+      6,
+      null,
+      {
+        type: 'CompositorScreenshot',
+        windowID: '1',
+        url: undefined,
+      },
+    ],
   ]);
 }
 
@@ -1432,7 +1443,8 @@ export function getProfileWithJsTracerEvents(
  */
 export function getCounterForThread(
   thread: Thread,
-  mainThreadIndex: ThreadIndex
+  mainThreadIndex: ThreadIndex,
+  config: { hasCountNumber: boolean } = {}
 ): Counter {
   const counter: Counter = {
     name: 'My Counter',
@@ -1446,9 +1458,11 @@ export function getCounterForThread(
         samples: {
           time: thread.samples.time.slice(),
           // Create some arbitrary (positive integer) values for the number.
-          number: thread.samples.time.map((_, i) =>
-            Math.floor(50 * Math.sin(i) + 50)
-          ),
+          number: config.hasCountNumber
+            ? thread.samples.time.map((_, i) =>
+                Math.floor(50 * Math.sin(i) + 50)
+              )
+            : undefined,
           // Create some arbitrary values for the count.
           count: thread.samples.time.map((_, i) => Math.sin(i)),
           length: thread.samples.length,

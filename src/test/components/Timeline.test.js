@@ -483,7 +483,9 @@ describe('Timeline multiple thread selection', function () {
 
     // And hide a local track in the first process
     fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
-    fireFullClick(screen.getByRole('menuitem', { name: 'ThreadPool#1' }));
+    fireFullClick(
+      screen.getByRole('menuitemcheckbox', { name: 'ThreadPool#1' })
+    );
 
     expect(getHumanReadableTracks(getState())).toEqual([
       'show [thread GeckoMain default] SELECTED',
@@ -898,7 +900,9 @@ describe('Timeline multiple thread selection', function () {
 
     // Then hides its global track
     fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
-    fireFullClick(screen.getByRole('menuitem', { name: 'ThreadPool#2' }));
+    fireFullClick(
+      screen.getByRole('menuitemcheckbox', { name: 'ThreadPool#2' })
+    );
 
     // Another thread has been selected because the currently selected one has
     // been hidden.

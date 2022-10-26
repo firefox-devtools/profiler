@@ -402,7 +402,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 42,
+    "preprocessedProfileVersion": 43,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",

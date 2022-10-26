@@ -676,6 +676,7 @@ describe('timeline/TrackContextMenu', function () {
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [screenshots]',
         'hide [screenshots]',
+        'hide [screenshots]',
         'show [process]',
         '  - show [thread Empty] SELECTED',
       ]);
