@@ -689,7 +689,7 @@ describe('"collapse-resource" transform', function () {
       ]);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(
@@ -797,7 +797,7 @@ describe('"collapse-resource" transform', function () {
       ]);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
 
@@ -881,7 +881,7 @@ describe('"collapse-function-subtree" transform', function () {
     );
   });
 
-  it('can update apply the transform to the selected CallNodePaths', function () {
+  it('can apply the transform to the selected CallNodePaths', function () {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(
       changeSelectedCallNode(
@@ -904,7 +904,7 @@ describe('"collapse-function-subtree" transform', function () {
 
   // assertSetContainsOnly is an assertion.
   // eslint-disable-next-line jest/expect-expect
-  it('can update apply the transform to the expanded CallNodePaths', function () {
+  it('can apply the transform to the expanded CallNodePaths', function () {
     const { dispatch, getState } = storeWithProfile(profile);
     const toIds = (paths: Array<string[]>) =>
       paths.map((path) => path.map((name) => funcNames.indexOf(name)));
@@ -1042,7 +1042,7 @@ describe('"collapse-direct-recursion" transform', function () {
       expect(lineTimings.selfLineHits.size).toBe(0);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(
@@ -1227,7 +1227,7 @@ describe('"collapse-indirect-recursion" transform', function () {
       expect(lineTimings.selfLineHits.size).toBe(0);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(
@@ -1340,7 +1340,7 @@ describe('"collapse-indirect-recursion" transform', function () {
       expect(lineTimings.selfLineHits.size).toBe(0);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(
@@ -1475,7 +1475,7 @@ describe('"collapse-indirect-recursion" transform', function () {
       expect(lineTimings.selfLineHits.size).toBe(0);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(
