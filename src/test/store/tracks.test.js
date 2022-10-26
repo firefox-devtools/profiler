@@ -37,7 +37,7 @@ describe('ordering and hiding', function () {
     // Find all of the indexes.
     const parentThreadIndex = profile.threads.findIndex(
       (thread) =>
-        thread.name === 'GeckoMain' && thread.processType === 'process'
+        thread.name === 'GeckoMain' && thread.processType === 'default'
     );
     const tabThreadIndex = profile.threads.findIndex(
       (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
@@ -113,7 +113,7 @@ describe('ordering and hiding', function () {
    *
    *  getHumanReadableTracks produces:
    *  [
-   *    'show [thread GeckoMain process] SELECTED',
+   *    'show [thread GeckoMain default] SELECTED',
    *    'show [process]',                             // <- No main thread
    *    '  - show [thread DOM Worker]',
    *    '  - show [thread Style]'
@@ -131,7 +131,7 @@ describe('ordering and hiding', function () {
     it('starts out with the initial sorting', function () {
       const { getState } = init();
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -149,7 +149,7 @@ describe('ordering and hiding', function () {
         });
       });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'hide [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -161,7 +161,7 @@ describe('ordering and hiding', function () {
       dispatch(hideGlobalTrack(parentTrackIndex));
       dispatch(hideGlobalTrack(tabTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -180,7 +180,7 @@ describe('ordering and hiding', function () {
         });
       });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -202,7 +202,7 @@ describe('ordering and hiding', function () {
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
       ]);
     });
 
@@ -217,7 +217,7 @@ describe('ordering and hiding', function () {
         });
       });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'hide [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -229,7 +229,7 @@ describe('ordering and hiding', function () {
       dispatch(changeSelectedThreads(new Set([styleThreadIndex])));
       dispatch(isolateProcess(tabTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style] SELECTED',
@@ -247,7 +247,7 @@ describe('ordering and hiding', function () {
         });
       });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - hide [thread DOM Worker]',
         '  - hide [thread Style]',
@@ -295,7 +295,7 @@ describe('ordering and hiding', function () {
       dispatch(changeSelectedThreads(new Set([parentThreadIndex])));
       dispatch(hideGlobalTrack(parentTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [process]',
         '  - show [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
@@ -338,7 +338,6 @@ describe('ordering and hiding', function () {
         threadA.name = 'GeckoMain';
         threadB.name = 'GeckoMain';
         threadA.processType = 'tab';
-        threadB.processType = 'process';
         threadA.pid = 1;
         threadA.pid = 2;
         const { getState } = storeWithProfile(profile);
@@ -376,7 +375,7 @@ describe('ordering and hiding', function () {
         });
       });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - hide [thread DOM Worker]',
         '  - show [thread Style]',
@@ -408,7 +407,7 @@ describe('ordering and hiding', function () {
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       dispatch(hideLocalTrack(tabPid, styleTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'hide [process]',
         '  - hide [thread DOM Worker]',
         '  - show [thread Style]',
@@ -419,7 +418,7 @@ describe('ordering and hiding', function () {
       const { getState, dispatch, workerThreadIndex } = init();
       dispatch(changeSelectedThreads(new Set([workerThreadIndex])));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
@@ -437,7 +436,7 @@ describe('ordering and hiding', function () {
       dispatch(changeSelectedThreads(new Set([workerThreadIndex])));
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab]',
         '  - hide [thread DOM Worker]',
         '  - show [thread Style] SELECTED',
@@ -450,7 +449,7 @@ describe('ordering and hiding', function () {
       dispatch(changeSelectedThreads(new Set([styleThreadIndex])));
       dispatch(hideLocalTrack(tabPid, styleTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker] SELECTED',
         '  - hide [thread Style]',
@@ -470,7 +469,7 @@ describe('ordering and hiding', function () {
       dispatch(changeSelectedThreads(new Set([workerThreadIndex])));
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - hide [thread DOM Worker]',
         '  - hide [thread Style]',
@@ -491,7 +490,7 @@ describe('ordering and hiding', function () {
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       dispatch(hideLocalTrack(tabPid, styleTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [process]',
         '  - hide [thread DOM Worker]',
         '  - show [thread Style] SELECTED',
@@ -512,7 +511,7 @@ describe('ordering and hiding', function () {
       dispatch(hideLocalTrack(tabPid, styleTrackIndex));
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [process]',
         '  - show [thread DOM Worker] SELECTED',
         '  - hide [thread Style]',
@@ -531,7 +530,7 @@ describe('ordering and hiding', function () {
         });
       });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -545,7 +544,7 @@ describe('ordering and hiding', function () {
         changeLocalTrackOrder(tabPid, [styleTrackIndex, workerTrackIndex])
       );
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread Style]',
         '  - show [thread DOM Worker]',
@@ -563,7 +562,7 @@ describe('ordering and hiding', function () {
         });
       });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker] SELECTED',
         '  - hide [thread Style]',
@@ -580,14 +579,14 @@ describe('ordering and hiding', function () {
       } = init();
       dispatch(changeSelectedThreads(new Set([parentThreadIndex])));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
       ]);
       dispatch(isolateLocalTrack(tabPid, workerTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker] SELECTED',
         '  - hide [thread Style]',
@@ -667,7 +666,7 @@ describe('ordering and hiding', function () {
       ).toEqual(['ipc', 'thread', 'ipc', 'thread']);
 
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         // Belongs to the global tab track.
         '  - show [ipc GeckoMain] SELECTED',

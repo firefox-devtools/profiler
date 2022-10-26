@@ -196,7 +196,7 @@ function setup(
 
 /**
  *  getProfileWithNiceTracks() looks like: [
- *    'show [thread GeckoMain process]',
+ *    'show [thread GeckoMain default]',
  *    'show [thread GeckoMain tab]',
  *    '  - show [thread DOM Worker]',         <- use this local track.
  *    '  - show [thread Style]',

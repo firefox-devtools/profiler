@@ -161,12 +161,10 @@ describe('selectedThread', function () {
     const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
     Object.assign(profile.threads[0], {
       name: 'GeckoMain',
-      processType: 'default',
       pid: 123,
     });
     Object.assign(profile.threads[1], {
       name: 'Compositor',
-      processType: 'default',
       pid: 123,
     });
     Object.assign(profile.threads[2], {
@@ -218,7 +216,7 @@ describe('url handling tracks', function () {
     it('creates tracks without any set search parameters', function () {
       const { getState } = initWithSearchParams('');
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -231,14 +229,14 @@ describe('url handling tracks', function () {
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
       ]);
     });
 
     it('can hide tracks', function () {
       const { getState } = initWithSearchParams('?hiddenGlobalTracks=1');
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'hide [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -296,7 +294,7 @@ describe('url handling tracks', function () {
     it('can reorder local tracks', function () {
       const { dispatch, getState } = initWithSearchParams('');
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -310,7 +308,7 @@ describe('url handling tracks', function () {
       // Change the order of Style and DOM Worker
       dispatch(changeLocalTrackOrder(222, [1, 0]));
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread Style]',
         '  - show [thread DOM Worker]',
@@ -331,7 +329,7 @@ describe('url handling tracks', function () {
       ).toEqual(previousOrder);
 
       expect(getHumanReadableTracks(storeAfterReload.getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread Style]',
         '  - show [thread DOM Worker]',
@@ -343,7 +341,7 @@ describe('url handling tracks', function () {
         '?hiddenLocalTracksByPid=222-1'
       );
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - hide [thread Style]',
@@ -359,7 +357,6 @@ describe('url handling tracks', function () {
       const { profile } = getProfileFromTextSamples('A', 'B', 'C');
       const [thread1, thread2, thread3] = profile.threads;
       thread1.name = 'GeckoMain';
-      thread1.processType = 'process';
       thread1.pid = 111;
 
       thread2.name = 'DOM Worker';
@@ -382,7 +379,7 @@ describe('url handling tracks', function () {
       );
 
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         '  - show [thread DOM Worker] SELECTED',
         '  - hide [thread Style]',
       ]);
@@ -397,7 +394,7 @@ describe('url handling tracks', function () {
         'show [thread GeckoMain tab]',
         '  - show [thread Style]',
         '  - show [thread DOM Worker]',
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
       ]);
     });
 
@@ -405,7 +402,7 @@ describe('url handling tracks', function () {
       // Flip the threads around
       const { getState } = initWithSearchParams('?hiddenThreads=0-2');
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - hide [thread DOM Worker]',
         '  - show [thread Style]',
