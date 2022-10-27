@@ -88,6 +88,10 @@ describe('calltree/CallNodeContextMenu', function () {
         matcher: /Collapse direct recursion/,
         type: 'collapse-direct-recursion',
       },
+      {
+        matcher: /Collapse indirect recursion/,
+        type: 'collapse-indirect-recursion',
+      },
       { matcher: /Drop samples/, type: 'drop-function' },
     ];
 
