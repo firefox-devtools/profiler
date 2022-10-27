@@ -816,6 +816,7 @@ export type ProfileMeta = {|
   // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
   // in Firefox 62, and are optional because older processed profile
   // versions may not have them. No upgrader was written for this change.
+  // The CPUName property landed in Firefox 108.
 
   // The build ID/date of the application.
   appBuildID?: string,
@@ -827,6 +828,8 @@ export type ProfileMeta = {|
   physicalCPUs?: number,
   // The amount of logically available CPU cores for the program.
   logicalCPUs?: number,
+  // The name of the CPU (typically a string of up to 48 characters).
+  CPUName?: string,
   // A boolean flag indicating whether we symbolicated this profile. If this is
   // false we'll start a symbolication process when the profile is loaded.
   // A missing property means that it's an older profile, it stands for an

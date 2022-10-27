@@ -360,6 +360,7 @@ export type GeckoProfileFullMeta = {|
   // -- system info -- This can be absent in some very rare situations.
   physicalCPUs?: number,
   logicalCPUs?: number,
+  CPUName?: string,
   // -- extensions --
   // The extensions property landed in Firefox 60, and is only optional because
   // older profile versions may not have it. No upgrader was written for this change.
