@@ -41,6 +41,7 @@ import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
+  IndexIntoFuncTable,
   CallNodeInfo,
   CallNodePath,
   Thread,
@@ -371,7 +372,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   /**
    * Determine if this CallNode represent a recursive function call.
    */
-  isRecursiveCall(funcHasRecursiveCall): boolean {
+  isRecursiveCall(
+    funcHasRecursiveCall: (
+      Thread,
+      ImplementationFilter,
+      IndexIntoFuncTable
+    ) => boolean
+  ): boolean {
     const { implementation } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
