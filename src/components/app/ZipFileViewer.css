@@ -29,10 +29,10 @@
   box-sizing: border-box;
   flex-direction: column;
   border: 1px solid #ccc;
+  border-radius: 3px;
 
   /* Other */
   background-color: #fff;
-  border-radius: 3px;
   box-shadow: 0 5px 25px #0b1f50;
 }
 
@@ -72,8 +72,8 @@
    */
   max-width: 70%;
   padding: 0 5px;
-  background-color: var(--grey-30);
   border-radius: 3px;
+  background-color: var(--grey-30);
   font-family: monospace;
   text-overflow: ellipsis;
 }

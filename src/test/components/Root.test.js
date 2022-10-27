@@ -103,7 +103,7 @@ describe('app/AppViewRouter', function () {
 
     navigateToStoreLoadingPage();
     expect(container.firstChild).toMatchSnapshot();
-    expect(retrieveProfileFromStore).not.toBeCalled();
+    expect(retrieveProfileFromStore).not.toHaveBeenCalled();
   });
 
   it('renders the profile view', function () {
@@ -112,7 +112,7 @@ describe('app/AppViewRouter', function () {
     navigateToStoreLoadingPage();
     dispatch(waitingForProfileFromStore());
     expect(container.firstChild).toMatchSnapshot();
-    expect(retrieveProfileFromStore).toBeCalledWith('ThisIsAFakeHash');
+    expect(retrieveProfileFromStore).toHaveBeenCalledWith('ThisIsAFakeHash');
 
     const { profile } = getProfileFromTextSamples(`A`);
     dispatch(viewProfile(profile));

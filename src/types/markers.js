@@ -14,6 +14,7 @@ import type {
 import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
+
 export type MarkerFormatType =
   // ----------------------------------------------------
   // String types.
@@ -58,7 +59,16 @@ export type MarkerFormatType =
   // The decimal should be used for generic representations of numbers. Do not
   // use it for time information.
   // "Label: 52.23, 0.0054, 123,456.78"
-  | 'decimal';
+  | 'decimal'
+  | 'list'
+  | {| type: 'table', columns: TableColumnFormat[] |};
+
+type TableColumnFormat = {|
+  // type for formatting, default is string
+  type?: MarkerFormatType,
+  // header column label
+  label?: string,
+|};
 
 // A list of all the valid locations to surface this marker.
 // We can be free to add more UI areas.
@@ -598,18 +608,30 @@ type VsyncTimestampPayload = {|
   type: 'VsyncTimestamp',
 |};
 
-export type ScreenshotPayload = {|
-  type: 'CompositorScreenshot',
-  // This field represents the data url of the image. It is saved in the string table.
-  url: IndexIntoStringTable,
-  // A memory address that can uniquely identify a window. It has no meaning other than
-  // a way to identify a window.
-  windowID: string,
-  // The original dimensions of the window that was captured. The actual image that is
-  // stored in the string table will be scaled down from the original size.
-  windowWidth: number,
-  windowHeight: number,
-|};
+export type ScreenshotPayload =
+  | {|
+      type: 'CompositorScreenshot',
+      // This field represents the data url of the image. It is saved in the string table.
+      url: IndexIntoStringTable,
+      // A memory address that can uniquely identify a window. It has no meaning other than
+      // a way to identify a window.
+      windowID: string,
+      // The original dimensions of the window that was captured. The actual image that is
+      // stored in the string table will be scaled down from the original size.
+      windowWidth: number,
+      windowHeight: number,
+    |}
+  // Markers that represent the closing of a window (name === 'CompositorScreenshotWindowDestroyed')
+  // only have a windowID data.
+  | {|
+      type: 'CompositorScreenshot',
+      // A memory address that can uniquely identify a window. It has no meaning other than
+      // a way to identify a window.
+      windowID: string,
+      // Having the property present but void makes it easier to deal with Flow in
+      // our flow version.
+      url: void,
+    |};
 
 export type StyleMarkerPayload = {|
   type: 'Styles',

@@ -561,6 +561,7 @@ function combineNativeSymbolTables(
       const nameIndex = nativeSymbols.name[i];
       const newName = stringTable.getString(nameIndex);
       const address = nativeSymbols.address[i];
+      const functionSize = nativeSymbols.functionSize[i];
 
       // Duplicate search.
       const nativeSymbolKey = [newName, address].join('#');
@@ -577,6 +578,7 @@ function combineNativeSymbolTables(
       newNativeSymbols.libIndex.push(libIndex);
       newNativeSymbols.name.push(newStringTable.indexForString(newName));
       newNativeSymbols.address.push(address);
+      newNativeSymbols.functionSize.push(functionSize);
 
       newNativeSymbols.length++;
     }
@@ -1252,12 +1254,17 @@ function mergeMarkers(
           },
         });
       } else if (oldData && oldData.type === 'CompositorScreenshot') {
-        const oldUrlIndex = oldData.url;
-        const urlString = stringTable.getString(oldUrlIndex);
+        const urlString =
+          oldData.url === undefined
+            ? undefined
+            : stringTable.getString(oldData.url);
 
         newMarkerTable.data.push({
           ...oldData,
-          url: newStringTable.indexForString(urlString),
+          url:
+            urlString === undefined
+              ? undefined
+              : newStringTable.indexForString(urlString),
         });
       } else {
         newMarkerTable.data.push(oldData);
@@ -1313,17 +1320,19 @@ function mergeScreenshotMarkers(
             nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
 
           // We need to move the url string to the new string table if doesn't exist.
-          const urlIndex = data.url;
-          const newUrl = urlIndex >= 0 ? stringTable.getString(urlIndex) : null;
+          const urlString =
+            data.url === undefined
+              ? undefined
+              : stringTable.getString(data.url);
 
           // Move compositor screenshot marker data to the new marker table.
           const compositorScreenshotMarkerData = {
             ...data,
+            url:
+              urlString === undefined
+                ? undefined
+                : targetThread.stringTable.indexForString(urlString),
           };
-          compositorScreenshotMarkerData.url =
-            newUrl === null
-              ? -1
-              : targetThread.stringTable.indexForString(newUrl);
 
           targetMarkerTable.data.push(compositorScreenshotMarkerData);
           targetMarkerTable.name.push(

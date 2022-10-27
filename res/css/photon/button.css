@@ -6,6 +6,7 @@
 .photon-button {
   padding: 0 8px;
   border: none;
+  border-radius: 2px;
   margin: 0;
 
   /* reset default styles */
@@ -13,7 +14,6 @@
 
   /* photon styles */
   background-color: var(--grey-90-a10);
-  border-radius: 2px;
   color: var(--grey-90);
   font: inherit;
 }
@@ -28,11 +28,13 @@
   opacity: 0.4;
 }
 
-.photon-button:hover:enabled {
+/* Note: we're using :not(:disabled) instead of :enabled so that this can apply
+ * to non-input elements too. */
+.photon-button:hover:not(:disabled) {
   background-color: var(--grey-90-a20);
 }
 
-.photon-button:hover:active:enabled {
+.photon-button:hover:active:not(:disabled) {
   background-color: var(--grey-90-a30);
 }
 
@@ -50,11 +52,11 @@
   color: #fff;
 }
 
-.photon-button-primary:hover:enabled {
+.photon-button-primary:hover:not(:disabled) {
   background-color: var(--blue-70);
 }
 
-.photon-button-primary:hover:active:enabled {
+.photon-button-primary:hover:active:not(:disabled) {
   background-color: var(--blue-80);
 }
 
@@ -64,11 +66,11 @@
   color: #fff;
 }
 
-.photon-button-destructive:hover:enabled {
+.photon-button-destructive:hover:not(:disabled) {
   background-color: var(--red-70);
 }
 
-.photon-button-destructive:hover:active:enabled {
+.photon-button-destructive:hover:active:not(:disabled) {
   background-color: var(--red-80);
 }
 
@@ -78,11 +80,11 @@
   background-color: transparent;
 }
 
-.photon-button-ghost:hover:enabled {
+.photon-button-ghost:hover:not(:disabled) {
   background-color: var(--grey-90-a10);
 }
 
-.photon-button-ghost:hover:active:enabled {
+.photon-button-ghost:hover:active:not(:disabled) {
   background-color: var(--grey-90-a20);
 }
 

@@ -5,11 +5,11 @@
   /* Box */
   padding: 8em;
   border: 1px solid #ccc;
+  border-radius: 3px;
   margin: auto;
 
   /* Other */
   background: #fff;
-  border-radius: 3px;
   box-shadow: 0 5px 25px #0b1f50;
   font-size: 130%;
 }

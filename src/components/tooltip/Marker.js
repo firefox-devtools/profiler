@@ -35,7 +35,7 @@ import {
 import { Backtrace } from 'firefox-profiler/components/shared/Backtrace';
 
 import {
-  formatFromMarkerSchema,
+  formatMarkupFromMarkerSchema,
   getSchemaFromMarker,
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
@@ -61,6 +61,8 @@ import {
   getGCMajorDetails,
   getGCSliceDetails,
 } from './GCMarker';
+
+import './Marker.css';
 
 function _maybeFormatDuration(
   start: number | void,
@@ -245,7 +247,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                     key={schema.name + '-' + key}
                     label={label || key}
                   >
-                    {formatFromMarkerSchema(schema.name, format, value)}
+                    {formatMarkupFromMarkerSchema(schema.name, format, value)}
                   </TooltipDetail>
                 );
               }
@@ -319,37 +321,60 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           break;
         }
         case 'CompositorScreenshot': {
-          const { width, height } = computeScreenshotSize(
-            data,
-            MAXIMUM_IMAGE_SIZE
-          );
-          details.push(
-            <TooltipDetail label="Image" key="CompositorScreenshot-image">
-              <img
-                className="tooltipScreenshotImg"
-                src={thread.stringTable.getString(data.url)}
-                style={{
-                  width,
-                  height,
-                }}
-              />
-            </TooltipDetail>,
-            <TooltipDetail
-              label="Window Size"
-              key="CompositorScreenshot-window size"
-            >
-              <>
-                {data.windowWidth}px × {data.windowHeight}px
-              </>
-            </TooltipDetail>,
-            <TooltipDetail
-              label="Description"
-              key="CompositorScreenshot-description"
-            >
-              This marker spans the time between each composite of a window and
-              shows the window contents during that time.
-            </TooltipDetail>
-          );
+          if (data.url !== undefined) {
+            const { width, height } = computeScreenshotSize(
+              data,
+              MAXIMUM_IMAGE_SIZE
+            );
+            details.push(
+              <TooltipDetail label="Image" key="CompositorScreenshot-image">
+                <img
+                  className="tooltipScreenshotImg"
+                  src={thread.stringTable.getString(data.url)}
+                  style={{
+                    width,
+                    height,
+                  }}
+                />
+              </TooltipDetail>,
+              <TooltipDetail
+                label="Window Size"
+                key="CompositorScreenshot-window size"
+              >
+                <>
+                  {data.windowWidth}px × {data.windowHeight}px
+                </>
+              </TooltipDetail>,
+              <TooltipDetail
+                label="Description"
+                key="CompositorScreenshot-description"
+              >
+                This marker spans the time between each composite of a window
+                and shows the window contents during that time.
+              </TooltipDetail>,
+              <TooltipDetail
+                label="Window ID"
+                key="CompositorScreenshot-window id"
+              >
+                {data.windowID}
+              </TooltipDetail>
+            );
+          } else if (marker.name === 'CompositorScreenshotWindowDestroyed') {
+            details.push(
+              <TooltipDetail
+                label="Description"
+                key="CompositorScreenshot-description"
+              >
+                This marker shows the moment a window has been destroyed.
+              </TooltipDetail>,
+              <TooltipDetail
+                label="Window ID"
+                key="CompositorScreenshot-window id"
+              >
+                {data.windowID}
+              </TooltipDetail>
+            );
+          }
           break;
         }
         default:

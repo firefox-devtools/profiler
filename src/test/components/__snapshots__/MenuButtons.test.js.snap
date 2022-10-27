@@ -1132,6 +1132,87 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
 </div>
 `;
 
+exports[`app/MenuButtons <MetaInfoPanel> with more extra info, opens more info section if clicked 1`] = `
+<div
+  class="moreInfoPart"
+>
+  <div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      CPU
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="moreInfoRow"
+      >
+        <span
+          class="metaInfoWideLabel"
+        >
+          CPU 1
+        </span>
+        <div
+          class="moreInfoValue"
+        >
+          Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Memory
+    </h2>
+    <div
+      class="metaInfoSection"
+    />
+  </div>
+  <div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Hard Drives
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="moreInfoRow"
+      >
+        <span
+          class="metaInfoWideLabel"
+        >
+          SSD
+        </span>
+        <div
+          class="moreInfoValue"
+        >
+          Samsung SSD 850 EVO 500GB
+        </div>
+      </div>
+      <div
+        class="moreInfoRow"
+      >
+        <span
+          class="metaInfoWideLabel"
+        >
+          HDD
+        </span>
+        <div
+          class="moreInfoValue"
+        >
+          Seagate ST1000LM035-1RK172
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not make the app crash 1`] = `
 <div
   class="arrowPanel open metaInfoPanel"

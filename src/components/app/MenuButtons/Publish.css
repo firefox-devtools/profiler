@@ -141,14 +141,15 @@
 .menuButtonsPublishUploadBar {
   overflow: hidden;
   height: 5px;
-  background-color: var(--grey-40);
   border-radius: 2px;
+  background-color: var(--grey-40);
 }
 
 .menuButtonsPublishUploadBarInner {
   position: absolute;
   top: 0;
   height: 3px;
+  border-radius: 0 2px 2px 0;
   animation: animate-stripes 1s linear infinite;
   background-color: var(--blue-50);
   background-image: linear-gradient(
@@ -163,7 +164,6 @@
     transparent 80%
   );
   background-size: 21px 20px, 100% 100%, 100% 100%;
-  border-radius: 0 2px 2px 0;
 }
 
 @keyframes animate-stripes {
