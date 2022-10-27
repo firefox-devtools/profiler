@@ -75,6 +75,9 @@ import type {
   Address,
   AddressProof,
   TimelineType,
+  SampleLikeMarkerConfig,
+  RawMarkerTable,
+  WeightType,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -982,22 +985,10 @@ export function toValidImplementationFilter(
 export function toValidCallTreeSummaryStrategy(
   strategy: mixed
 ): CallTreeSummaryStrategy {
-  switch (strategy) {
-    case 'timing':
-    case 'js-allocations':
-    case 'native-retained-allocations':
-    case 'native-allocations':
-    case 'native-deallocations-sites':
-    case 'native-deallocations-memory':
-      return strategy;
-    default:
-      // Default to "timing" if the strategy is not recognized. This value can come
-      // from a user-generated URL.
-      // e.g. `profiler.firefox.com/public/hash/ctSummary=tiiming` (note the typo.)
-      // This default branch will ensure we don't send values we don't understand to
-      // the store.
-      return 'timing';
+  if (typeof strategy !== 'string') {
+    return 'timing';
   }
+  return strategy;
 }
 
 export function filterThreadByImplementation(
@@ -3356,4 +3347,73 @@ export function determineTimelineType(profile: Profile): TimelineType {
 
   // Have both category and CPU usage information. Use 'cpu-category'.
   return 'cpu-category';
+}
+
+export const getAdditionalStrategiesForThread = memoize((thread: Thread) => {
+  const ret = [];
+  (thread.sampleLikeMarkersConfig || []).forEach((config) => {
+    ret.push({ name: config.name, label: config.label });
+  });
+  return ret;
+});
+
+export const applyAdditionalStrategy: (
+  thread: Thread,
+  additionalStrategy: string
+) => SamplesLikeTable = memoize(
+  (thread: Thread, additionalStrategy: string) => {
+    if (thread.sampleLikeMarkersConfig === undefined) {
+      throw new Error("Thread doesn't have sampleLikeMarkersConfig");
+    }
+    const config = thread.sampleLikeMarkersConfig.find(
+      (config) => config.name === additionalStrategy
+    );
+
+    if (config === undefined) {
+      throw new Error(
+        `Thread doesn't have sampleLikeMarkersConfig for ${additionalStrategy}`
+      );
+    }
+
+    return applyAdditionalStrategyOnMarkers(thread.markers, config, thread);
+  }
+);
+
+function applyAdditionalStrategyOnMarkers(
+  rawTable: RawMarkerTable,
+  config: SampleLikeMarkerConfig,
+  { stringTable }: Thread
+): SamplesLikeTable {
+  const stack: (IndexIntoStackTable | null)[] = [];
+  const time: Milliseconds[] = [];
+  const weight: number[] = [];
+  const weightType: WeightType = config.weightType || 'samples';
+  let length = 0;
+  const configNameId = stringTable.indexForString(config.marker);
+  const stackField = config.stackField || 'cause';
+  rawTable.data.forEach((data, i) => {
+    if (rawTable.name[i] !== configNameId) {
+      return;
+    }
+    time[length] = rawTable.startTime[i] || rawTable.endTime[i] || -1;
+    const rawData = rawTable.data[i] || {};
+    if (config.weightField !== undefined) {
+      const rawVal = rawData[config.weightField];
+      weight[length] = rawVal !== undefined ? rawVal || 0.000001 : -1;
+    } else {
+      weight[length] = 1;
+    }
+    // $FlowExpectError - This is a dynamic field.
+    stack[length] = rawData[stackField]
+      ? rawData[stackField].stack || null
+      : null;
+    length++;
+  });
+  return {
+    stack,
+    time,
+    weight,
+    weightType,
+    length,
+  };
 }

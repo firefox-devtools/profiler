@@ -147,7 +147,8 @@ export type CallTreeSummaryStrategy =
   | 'native-retained-allocations'
   | 'native-allocations'
   | 'native-deallocations-memory'
-  | 'native-deallocations-sites';
+  | 'native-deallocations-sites'
+  | string;
 
 /**
  * This type determines what kind of information gets sanitized from published profiles.

@@ -1734,15 +1734,6 @@ describe('last requested call tree summary strategy', function () {
       'native-allocations'
     );
   });
-
-  it('will use the default "timing" when an unknown value is received', function () {
-    const { getState } = _getStoreWithURL({
-      search: '?ctSummary=unknown-value',
-    });
-    expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(
-      'timing'
-    );
-  });
 });
 
 describe('symbolServerUrl', function () {

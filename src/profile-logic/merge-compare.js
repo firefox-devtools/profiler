@@ -1072,6 +1072,8 @@ export function mergeThreads(threads: Thread[]): Thread {
   let processShutdownTime = -Infinity;
   let registerTime = Infinity;
   let unregisterTime = -Infinity;
+  const sampleLikeMarkersConfig = [];
+  const sampleLikeMarkersConfigNameSet = new Set();
   for (const thread of threads) {
     processStartupTime = Math.min(
       thread.processStartupTime,
@@ -1086,6 +1088,12 @@ export function mergeThreads(threads: Thread[]): Thread {
       thread.unregisterTime || Infinity,
       unregisterTime
     );
+    for (const marker of thread.sampleLikeMarkersConfig || []) {
+      if (!sampleLikeMarkersConfigNameSet.has(marker.name)) {
+        sampleLikeMarkersConfig.push(marker);
+        sampleLikeMarkersConfigNameSet.add(marker.name);
+      }
+    }
   }
 
   const mergedThread = {
@@ -1107,6 +1115,7 @@ export function mergeThreads(threads: Thread[]): Thread {
     funcTable: newFuncTable,
     nativeSymbols: newNativeSymbols,
     resourceTable: newResourceTable,
+    sampleLikeMarkersConfig,
   };
 
   return mergedThread;
