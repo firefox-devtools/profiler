@@ -1880,15 +1880,17 @@ export function addTransformToStack(
   transform: Transform
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const transformedThread = getThreadSelectorsFromThreadsKey(
-      threadsKey
-    ).getRangeAndTransformFilteredThread(getState());
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const transformedThread =
+      threadSelectors.getRangeAndTransformFilteredThread(getState());
 
+    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
     dispatch({
       type: 'ADD_TRANSFORM_TO_STACK',
       threadsKey,
       transform,
       transformedThread,
+      callNodeTable,
     });
     sendAnalytics({
       hitType: 'event',
@@ -1991,6 +1993,7 @@ export function handleCallNodeTransformShortcut(
     const inverted = getInvertCallstack(getState());
     const callNodePath = getCallNodePathFromIndex(callNodeIndex, callNodeTable);
     const funcIndex = callNodeTable.func[callNodeIndex];
+    const category = callNodeTable.category[callNodeIndex];
 
     switch (event.key) {
       case 'F':
@@ -2097,6 +2100,14 @@ export function handleCallNodeTransformShortcut(
         );
         break;
       }
+      case 'g':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-category',
+            category,
+          })
+        );
+        break;
       default:
       // This did not match a call tree transform.
     }

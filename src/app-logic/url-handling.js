@@ -46,7 +46,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 7;
+export const CURRENT_URL_VERSION = 8;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -1106,6 +1106,9 @@ const _upgraders: {|
         query.timelineType = 'category';
         break;
     }
+  },
+  [8]: (_) => {
+    // just added the focus-category transform
   },
 };
 

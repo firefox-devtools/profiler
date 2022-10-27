@@ -621,6 +621,194 @@ describe('"focus-function" transform', function () {
   });
 });
 
+describe('"focus-category" transform', function () {
+  describe('on a tiny call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]
+      B[cat:Layout]
+      C[cat:Graphics]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    it('starts as an unfiltered call tree', function () {
+      expect(formatTree(originalCallTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: 1)',
+      ]);
+    });
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - C (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  describe('on a slightly larger call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]
+      B[cat:Layout]
+      D[cat:Layout]
+      C[cat:Graphics]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - C (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  describe('on a tinier call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]
+      B[cat:Layout]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual(['- A (total: 1, self: 1)']);
+    });
+  });
+
+  describe('on a small call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]  A[cat:Graphics]
+      B[cat:Layout]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual(['- A (total: 2, self: 2)']);
+    });
+  });
+
+  describe('on a small call tree 2', function () {
+    const { profile } = getProfileFromTextSamples(`
+      B[cat:Layout]  A[cat:Graphics]  
+      A[cat:Graphics]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual(['- A (total: 2, self: 2)']);
+    });
+  });
+
+  describe('on a longer larger call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]
+      B[cat:Layout]
+      D[cat:Layout]
+      A[cat:Graphics]
+      D[cat:Layout]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - A (total: 1, self: 1)',
+      ]);
+    });
+  });
+});
+
 describe('"collapse-resource" transform', function () {
   describe('combined implementation', function () {
     /**

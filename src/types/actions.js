@@ -440,6 +440,7 @@ type UrlStateAction =
       +threadsKey: ThreadsKey,
       +transform: Transform,
       +transformedThread: Thread,
+      +callNodeTable: CallNodeTable,
     |}
   | {|
       +type: 'POP_TRANSFORMS_FROM_STACK',
