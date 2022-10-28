@@ -737,6 +737,11 @@ TransformNavigator--drop-function = Descartar: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-direct-recursion2 = Recolher recursão direta: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Recolher recursão indireta: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
