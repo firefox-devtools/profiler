@@ -67,8 +67,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = Recolher função
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Recolher <strong>{ $nameForResource }</strong>
     .title = Recolher um recurso achata todas as chamadas àquele recurso em um único node de chamadas recolhido.
-CallNodeContextMenu--transform-collapse-direct-recursion = Recolher recursão direta
-    .title = Recolher recursão direta remove chamadas repetidamente recursivas para a mesma função.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Recolher recursão direta
+    .title = Recolher recursão direta remove chamadas que recorrem repetidamente para a mesma função sem funções intermediárias na pilha.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Recolher recursão indireta
+    .title = Recolher recursão indireta remove chamadas que recorrem repetidamente para a mesma função, mesmo com funções intermediárias na pilha.
 CallNodeContextMenu--transform-drop-function = Descartar amostras com esta função
     .title = Descartar amostras remove o tempo delas do profile. Útil para eliminar informação de tempo que não é relevante para a análise.
 CallNodeContextMenu--expand-all = Expandir tudo
@@ -734,7 +736,7 @@ TransformNavigator--drop-function = Descartar: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Recolher recursão: { $item }
+TransformNavigator--collapse-direct-recursion2 = Recolher recursão direta: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
