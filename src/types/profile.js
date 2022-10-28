@@ -890,6 +890,16 @@ export type ProfileMeta = {|
   // Extra information about the profile, not shown in the "Profile Info" panel,
   // but in the more info panel
   extra?: ExtraProfileInfoSection[],
+  // Indexes of the threads that are initially visible in the UI.
+  // This is useful for imported profiles for which the internal visibility score
+  // ranking does not make sense.
+  initialVisibleThreads?: ThreadIndex[],
+  // Indexes of the threads that are initially selected in the UI.
+  // This is also most useful for imported profiles where just using the first thread
+  // of each process might not make sense.
+  initialSelectedThreads?: ThreadIndex[],
+  // Keep the defined thread order
+  keepProfileThreadOrder?: boolean,
 |};
 
 /**
