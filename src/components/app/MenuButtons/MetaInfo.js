@@ -360,7 +360,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
           {meta.extensions
             ? _renderRowOfList(
                 'MenuButtons--metaInfo-renderRowOfList-label-extensions',
-                meta.extensions.name
+                Array.from(meta.extensions.name).sort() // copy the array because sort is in-place.
               )
             : null}
           {meta.arguments ? (
