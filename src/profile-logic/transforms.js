@@ -1545,22 +1545,18 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
 
     // fill the new stack table with the kept frames
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-      if (stackTable.category[stackIndex] !== category) {
-        const prefix = stackTable.prefix[stackIndex];
-        if (prefix !== null && oldStackToNewStack.has(prefix)) {
-          // $FlowExpectError
-          oldStackToNewStack.set(stackIndex, oldStackToNewStack.get(prefix));
-        } else {
-          oldStackToNewStack.set(stackIndex, null);
-        }
-        continue;
-      }
-      const newStackIndex = newStackTable.length++;
       const prefix = stackTable.prefix[stackIndex];
-      const newPrefix: number | null | void = oldStackToNewStack.get(prefix);
+      const newPrefix = oldStackToNewStack.get(prefix);
       if (newPrefix === undefined) {
         throw new Error('The prefix should not map to an undefined value');
       }
+
+      if (stackTable.category[stackIndex] !== category) {
+        oldStackToNewStack.set(stackIndex, newPrefix);
+        continue;
+      }
+
+      const newStackIndex = newStackTable.length++;
       newStackTable.prefix[newStackIndex] = newPrefix;
       newStackTable.frame[newStackIndex] = stackTable.frame[stackIndex];
       newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
