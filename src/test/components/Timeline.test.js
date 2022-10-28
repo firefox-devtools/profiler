@@ -1316,7 +1316,7 @@ describe('Timeline', function () {
     it('displays the initially visible threads if setting is present', () => {
       const { getState } = setup({ initialVisibleThreads: [1, 2] });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
         '  - hide [thread Style]',
@@ -1326,7 +1326,7 @@ describe('Timeline', function () {
     it('displays the normal visible threads and orders them alphabetically if setting is not present', () => {
       const { getState } = setup({ swapDOMWorkerAndStyleThread: true });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
         '  - show [thread Style]',
@@ -1336,7 +1336,7 @@ describe('Timeline', function () {
     it('selects the set threads if setting is present', () => {
       const { getState } = setup({ initialSelectedThreads: [1, 2] });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
@@ -1350,7 +1350,7 @@ describe('Timeline', function () {
         swapDOMWorkerAndStyleThread: true,
       });
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread Style]',
         '  - show [thread DOM Worker]',
