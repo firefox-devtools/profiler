@@ -404,10 +404,22 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
               {meta.abi}
             </div>
           ) : null}
+          {meta.CPUName ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--cpu-model">
+                  CPU model:
+                </Localized>
+              </span>
+              {meta.CPUName}
+            </div>
+          ) : null}
           {cpuCount ? (
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--cpu">CPU:</Localized>
+                <Localized id="MenuButtons--metaInfo--cpu-cores">
+                  CPU cores:
+                </Localized>
               </span>
               {cpuCount}
             </div>
