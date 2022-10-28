@@ -86,10 +86,8 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         Wenn eine Ressource eingeklappt wird, werden alle Aufrufe dieser 
         Ressource in einen einzigen eingeklappten Aufrufknoten umgewandelt.
-CallNodeContextMenu--transform-collapse-direct-recursion = Direkte Rekursion einklappen
-    .title =
-        Einklappen der direkten Rekursion entfernt Aufrufe, die wiederholt
-        in dieselbe Funktion rekurrieren.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Direkte Rekursion einklappen
+    .title = { "" }
 CallNodeContextMenu--transform-drop-function = Teilmengen mit dieser Funktion verwerfen
     .title =
         Wenn Teilmengen verworfen werden, wird ihre Zeit aus dem Profil entfernt. Dies ist hilfreich,
@@ -778,11 +776,6 @@ TransformNavigator--merge-function = Zusammenführen: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Verwerfen: { $item }
-# "Collapse direct recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Rekursion einklappen: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
