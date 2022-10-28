@@ -67,8 +67,6 @@ CallNodeContextMenu--transform-collapse-function-subtree = 摺疊函數
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = 摺疊<strong>{ $nameForResource }</strong>
     .title = 摺疊資源可將所有對該資源的呼叫，壓平成已摺疊的單一呼叫節點。
-CallNodeContextMenu--transform-collapse-direct-recursion = 摺疊直接遞迴
-    .title = 摺疊直接遞迴可移除對相同函數的重複遞迴呼叫。
 CallNodeContextMenu--transform-drop-function = 丟棄與此函數的相關檢測樣本
     .title = 丟棄樣本後將會從檢測檔移除該樣本所執行的時間。需要清除與分析無關的計時資訊時，此功能相當有用。
 CallNodeContextMenu--expand-all = 全部展開
@@ -722,7 +720,12 @@ TransformNavigator--drop-function = 丟棄: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = 摺疊遞迴: { $item }
+TransformNavigator--collapse-direct-recursion2 = 摺疊直接遞迴: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = 摺疊不直接遞迴: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
