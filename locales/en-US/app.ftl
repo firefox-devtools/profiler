@@ -92,10 +92,14 @@ CallNodeContextMenu--transform-collapse-resource =
     .title =
         Collapsing a resource will flatten out all the calls to that
         resource into a single collapsed call node.
-CallNodeContextMenu--transform-collapse-direct-recursion = Collapse direct recursion
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Collapse direct recursion
     .title =
         Collapsing direct recursion removes calls that repeatedly recurse into
-        the same function.
+        the same function with no intermediate functions on the stack.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Collapse indirect recursion
+    .title =
+        Collapsing indirect recursion removes calls that repeatedly recurse into
+        the same function, even with intermediate functions on the stack.
 CallNodeContextMenu--transform-drop-function = Drop samples with this function
     .title =
         Dropping samples removes their time from the profile. This is useful to
@@ -864,7 +868,13 @@ TransformNavigator--drop-function = Drop: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Collapse recursion: { $item }
+TransformNavigator--collapse-direct-recursion2 = Collapse direct recursion: { $item }
+
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Collapse indirect recursion: { $item }
 
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse

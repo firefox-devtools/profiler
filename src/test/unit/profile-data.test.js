@@ -39,7 +39,10 @@ import {
   getProfileFromTextSamples,
   getJsTracerTable,
 } from '../fixtures/profiles/processed-profile';
-import { funcHasRecursiveCall } from '../../profile-logic/transforms';
+import {
+  funcHasDirectRecursiveCall,
+  funcHasIndirectRecursiveCall,
+} from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from 'firefox-profiler/types';
 
@@ -789,7 +792,7 @@ describe('get-sample-index-closest-to-time', function () {
   });
 });
 
-describe('funcHasRecursiveCall', function () {
+describe('funcHasDirectRecursiveCall', function () {
   const {
     profile,
     funcNamesPerThread: [funcNames],
@@ -802,12 +805,67 @@ describe('funcHasRecursiveCall', function () {
   `);
   const [thread] = profile.threads;
 
-  it('correctly identifies recursive functions based taking into account implementation', function () {
+  it('correctly identifies directly recursive functions based taking into account implementation', function () {
     expect([
-      funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('A.js')),
-      funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
-      funcHasRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
+      funcHasDirectRecursiveCall(thread, 'combined', funcNames.indexOf('A.js')),
+      funcHasDirectRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
+      funcHasDirectRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
     ]).toEqual([false, false, true]);
+  });
+});
+
+describe('funcHasIndirectRecursiveCall', function () {
+  it('correctly identifies directly recursive functions based taking into account implementation', function () {
+    // Same test case as funcHasDirectRecursiveCall
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A.js
+      B.js
+      C.cpp
+      B.js
+      D.js
+    `);
+    const [thread] = profile.threads;
+
+    expect([
+      funcHasIndirectRecursiveCall(
+        thread,
+        'combined',
+        funcNames.indexOf('A.js')
+      ),
+      funcHasIndirectRecursiveCall(
+        thread,
+        'combined',
+        funcNames.indexOf('B.js')
+      ),
+      funcHasIndirectRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
+    ]).toEqual([false, true, true]);
+  });
+
+  it('correctly identifies indirectly recursive functions based taking into account implementation', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A.js
+      B.js
+      C.cpp
+      B.js
+      D.js
+      B.js
+    `);
+    const [thread] = profile.threads;
+
+    expect([
+      funcHasIndirectRecursiveCall(
+        thread,
+        'combined',
+        funcNames.indexOf('B.js')
+      ),
+      funcHasIndirectRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
+    ]).toEqual([true, true]);
   });
 });
 

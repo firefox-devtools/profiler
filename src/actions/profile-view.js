@@ -79,7 +79,10 @@ import type {
   GlobalTrack,
   KeyboardModifiers,
 } from 'firefox-profiler/types';
-import { funcHasRecursiveCall } from '../profile-logic/transforms';
+import {
+  funcHasDirectRecursiveCall,
+  funcHasIndirectRecursiveCall,
+} from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import { intersectSets } from 'firefox-profiler/utils/set';
@@ -2050,10 +2053,34 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'r': {
-        if (funcHasRecursiveCall(unfilteredThread, implementation, funcIndex)) {
+        if (
+          funcHasDirectRecursiveCall(
+            unfilteredThread,
+            implementation,
+            funcIndex
+          )
+        ) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-direct-recursion',
+              funcIndex,
+              implementation,
+            })
+          );
+        }
+        break;
+      }
+      case 'R': {
+        if (
+          funcHasIndirectRecursiveCall(
+            unfilteredThread,
+            implementation,
+            funcIndex
+          )
+        ) {
+          dispatch(
+            addTransformToStack(threadsKey, {
+              type: 'collapse-indirect-recursion',
               funcIndex,
               implementation,
             })
