@@ -895,7 +895,7 @@ export type ProfileMeta = {|
   // of each process might not make sense.
   initialSelectedThreads?: ThreadIndex[],
   // Keep the defined thread order
-  disableThreadOrdering?: boolean,
+  keepProfileThreadOrder?: boolean,
 |};
 
 /**

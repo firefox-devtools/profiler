@@ -1358,13 +1358,13 @@ describe('Timeline', function () {
     function setup(config: {
       initialVisibleThreads?: ThreadIndex[],
       initialSelectedThreads?: ThreadIndex[],
-      disableThreadOrdering?: boolean,
+      keepProfileThreadOrder?: boolean,
       swapDOMWorkerAndStyleThread?: boolean,
     }) {
       const profile = getProfileWithNiceTracks();
       profile.meta.initialSelectedThreads = config.initialSelectedThreads;
       profile.meta.initialVisibleThreads = config.initialVisibleThreads;
-      profile.meta.disableThreadOrdering = config.disableThreadOrdering;
+      profile.meta.keepProfileThreadOrder = config.keepProfileThreadOrder;
       if (config.swapDOMWorkerAndStyleThread) {
         const styleThread = profile.threads[3];
         profile.threads[3] = profile.threads[1];
@@ -1417,7 +1417,7 @@ describe('Timeline', function () {
 
     it('disables thread ordering if setting is present', () => {
       const { getState } = setup({
-        disableThreadOrdering: true,
+        keepProfileThreadOrder: true,
         initialVisibleThreads: [1, 2, 3],
         swapDOMWorkerAndStyleThread: true,
       });
