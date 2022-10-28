@@ -4,6 +4,7 @@ exports[`snapshots of selectors/profile matches the last stored run of getProfil
 Object {
   "libs": Array [],
   "meta": Object {
+    "CPUName": "",
     "abi": "",
     "appBuildID": "",
     "categories": Array [
@@ -402,7 +403,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 42,
+    "preprocessedProfileVersion": 43,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",

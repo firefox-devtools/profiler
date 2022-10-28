@@ -103,6 +103,15 @@ function testTransformKeyboardShortcuts(setup: () => TestSetup) {
     });
   });
 
+  it('handles collapse indirect recursion', () => {
+    const { pressKey, getTransform, expectedFuncIndex } = setup();
+    pressKey({ key: 'R' });
+    expect(getTransform()).toMatchObject({
+      type: 'collapse-indirect-recursion',
+      funcIndex: expectedFuncIndex,
+    });
+  });
+
   it('handles collapse function subtree', () => {
     const { pressKey, getTransform, expectedFuncIndex } = setup();
     pressKey({ key: 'c' });

@@ -34,7 +34,7 @@ describe('timeline/GlobalTrack', function () {
 
   /**
    *  getProfileWithNiceTracks() looks like: [
-   *    'show [thread GeckoMain process]',   // Track index 0
+   *    'show [thread GeckoMain default]',   // Track index 0
    *    'show [thread GeckoMain tab]',       // Track index 1 (default)
    *    '  - show [thread DOM Worker]',
    *    '  - show [thread Style]',
