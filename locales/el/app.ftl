@@ -90,10 +90,6 @@ CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $n
     .title =
         Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
         τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
-CallNodeContextMenu--transform-collapse-direct-recursion = Σύμπτυξη άμεσης επανάληψης
-    .title =
-        Η σύμπτυξη άμεσης επανάληψης αφαιρεί τις κλήσεις που επαναλαμβάνονται συνεχώς στην
-        ίδια συνάρτηση.
 CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
     .title =
         Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
@@ -793,7 +789,12 @@ TransformNavigator--drop-function = Απόρριψη: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Σύμπτυξη αναδρομής: { $item }
+TransformNavigator--collapse-direct-recursion2 = Σύμπτυξη άμεσης αναδρομής: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Σύμπτυξη έμμεσης αναδρομής: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
