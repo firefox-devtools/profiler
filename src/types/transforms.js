@@ -258,6 +258,28 @@ export type TransformDefinitions = {
   |},
 
   /**
+   * Collapse indirect recursion takes a function that calls itself recursively and collapses
+   * it into a single stack.
+   *
+   *      A                                 A
+   *      ↓   Collapse indirect recursion   ↓
+   *      B          function B             B
+   *      ↓              ->                 ↓
+   *      C                                 D
+   *      ↓
+   *      B
+   *      ↓
+   *      B
+   *      ↓
+   *      D
+   */
+  'collapse-indirect-recursion': {|
+    +type: 'collapse-indirect-recursion',
+    +funcIndex: IndexIntoFuncTable,
+    +implementation: ImplementationFilter,
+  |},
+
+  /**
    * Collapse the subtree of a function into that function across the entire tree.
    *
    *                  A:4,0                             A:4,0
