@@ -405,6 +405,7 @@ export function getEmptyProfile(): Profile {
       sourceURL: '',
       physicalCPUs: 0,
       logicalCPUs: 0,
+      CPUName: '',
       symbolicated: true,
       markerSchema: [],
     },
