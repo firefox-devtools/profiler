@@ -585,12 +585,12 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <li
             class="metaInfoListItem"
           >
-            Form Autofill
+            Firefox Screenshots
           </li>
           <li
             class="metaInfoListItem"
           >
-            Firefox Screenshots
+            Form Autofill
           </li>
           <li
             class="metaInfoListItem"
@@ -927,12 +927,12 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <li
             class="metaInfoListItem"
           >
-            Form Autofill
+            Firefox Screenshots
           </li>
           <li
             class="metaInfoListItem"
           >
-            Firefox Screenshots
+            Form Autofill
           </li>
           <li
             class="metaInfoListItem"
@@ -1360,12 +1360,12 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
           <li
             class="metaInfoListItem"
           >
-            Form Autofill
+            Firefox Screenshots
           </li>
           <li
             class="metaInfoListItem"
           >
-            Firefox Screenshots
+            Form Autofill
           </li>
           <li
             class="metaInfoListItem"
