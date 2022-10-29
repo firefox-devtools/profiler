@@ -5,6 +5,7 @@ Object {
   "counters": Array [],
   "libs": Array [],
   "meta": Object {
+    "CPUName": undefined,
     "abi": undefined,
     "appBuildID": undefined,
     "categories": Array [

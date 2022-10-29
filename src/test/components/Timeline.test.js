@@ -39,7 +39,7 @@ import {
 } from '../fixtures/profiles/tracks';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
-import type { Profile } from 'firefox-profiler/types';
+import type { Profile, ThreadIndex } from 'firefox-profiler/types';
 
 describe('Timeline multiple thread selection', function () {
   autoMockDomRect();
@@ -1279,6 +1279,82 @@ describe('Timeline', function () {
       // these `.` in the regexp, that will match these extra characters.
       fireFullClick(screen.getByRole('button', { name: /.4. \/ .4. tracks/ }));
       expect(getRightClickedTrack(store.getState())).toEqual(null);
+    });
+  });
+
+  describe('TimelineInitialSettings', () => {
+    function setup(config: {
+      initialVisibleThreads?: ThreadIndex[],
+      initialSelectedThreads?: ThreadIndex[],
+      keepProfileThreadOrder?: boolean,
+      swapDOMWorkerAndStyleThread?: boolean,
+    }) {
+      const profile = getProfileWithNiceTracks();
+      profile.meta.initialSelectedThreads = config.initialSelectedThreads;
+      profile.meta.initialVisibleThreads = config.initialVisibleThreads;
+      profile.meta.keepProfileThreadOrder = config.keepProfileThreadOrder;
+      if (config.swapDOMWorkerAndStyleThread) {
+        const styleThread = profile.threads[3];
+        profile.threads[3] = profile.threads[1];
+        profile.threads[1] = styleThread;
+      }
+      const store = storeWithProfile(profile);
+
+      // We need a properly laid out ActivityGraph for some of the operations in
+      // tests.
+      const flushRafCalls = mockRaf();
+      const renderResult = render(
+        <Provider store={store}>
+          <Timeline />
+        </Provider>
+      );
+      flushRafCalls();
+
+      return { ...renderResult, ...store };
+    }
+
+    it('displays the initially visible threads if setting is present', () => {
+      const { getState } = setup({ initialVisibleThreads: [1, 2] });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    it('displays the normal visible threads and orders them alphabetically if setting is not present', () => {
+      const { getState } = setup({ swapDOMWorkerAndStyleThread: true });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('selects the set threads if setting is present', () => {
+      const { getState } = setup({ initialSelectedThreads: [1, 2] });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker] SELECTED',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('disables thread ordering if setting is present', () => {
+      const { getState } = setup({
+        keepProfileThreadOrder: true,
+        initialVisibleThreads: [1, 2, 3],
+        swapDOMWorkerAndStyleThread: true,
+      });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread Style]',
+        '  - show [thread DOM Worker]',
+      ]);
     });
   });
 });

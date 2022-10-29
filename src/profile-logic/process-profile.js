@@ -1481,6 +1481,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     sourceURL: geckoProfile.meta.sourceURL,
     physicalCPUs: geckoProfile.meta.physicalCPUs,
     logicalCPUs: geckoProfile.meta.logicalCPUs,
+    CPUName: geckoProfile.meta.CPUName,
     // `presymbolicated` indicates whether this gecko profile includes already
     // symbolicated frames. This will be missing for profiles coming from Gecko
     // but may be specified for profiles imported from other formats (eg: linux
