@@ -88,10 +88,14 @@ CallNodeContextMenu--transform-collapse-function-subtree = Collaber function
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Collaber <strong>{ $nameForResource }</strong>
     .title = Collaber un ressource applattara tote le appellos a ille ressource in un singule nodo de appello collabite.
-CallNodeContextMenu--transform-collapse-direct-recursion = Collaber directe recursion
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Collaber le recursion directe
     .title =
-        Collaber directe recursion remove appellos que recurre repetitemente in
-        le mesme function.
+        Collaber le recursion directe remove appellos que recurre repetitemente in
+        le mesme function sin functiones intermedie sur le pila.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Collaber recursion indirecte
+    .title =
+        Collaber le recursion indirecte remove appellos que repetitemente se recurre in
+        le mesme function, mesmo con functiones intermedie sur le pila
 CallNodeContextMenu--transform-drop-function = Lassar cader specimens con iste function
     .title =
         Lassar cader specimens remove lor tempore ab le profilo. Isto es utile pro
@@ -374,7 +378,7 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolisar le profilo
 MenuButtons--metaInfo--symbolicate-profile = { $logicalCPUs } nucleo logic
 MenuButtons--metaInfo--attempting-resymbolicate = { $logicalCPUs } nucleos logic
 MenuButtons--metaInfo--currently-symbolicating = Actualmente symbolisante le profilo
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = Modello de CPU:
 MenuButtons--metaInfo--main-memory = Memoria principal:
 MenuButtons--index--show-moreInfo-button = Monstrar plus
 MenuButtons--index--hide-moreInfo-button = Monstrar minus
@@ -784,11 +788,6 @@ TransformNavigator--merge-function = Miscer: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Lassar cader: { $item }
-# "Collapse direct recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Collaber recursion: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
