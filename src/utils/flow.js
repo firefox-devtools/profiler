@@ -87,6 +87,7 @@ export function convertToTransformType(type: string): TransformType | null {
     case 'merge-function':
     case 'focus-subtree':
     case 'focus-function':
+    case 'focus-category':
     case 'collapse-resource':
     case 'collapse-direct-recursion':
     case 'collapse-indirect-recursion':

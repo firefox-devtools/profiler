@@ -98,6 +98,30 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     tabindex="-1"
   >
     <span
+      class="react-contextmenu-icon callNodeContextMenuIconFocus"
+    />
+    <div
+      class="react-contextmenu-item-content"
+      title="Focusing on the nodes that belong to the same category as the selected node, thereby merging all nodes that belong to another category."
+    >
+      Focus on category 
+      <strong>
+        ⁨Other⁩
+      </strong>
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      g
+    </kbd>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
       class="react-contextmenu-icon callNodeContextMenuIconCollapse"
     />
     <div
