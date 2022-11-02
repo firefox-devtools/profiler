@@ -7,6 +7,7 @@ exports[`SourceView should show the source view when double clicking on a line i
   autocorrect="off"
   class="cm-content"
   contenteditable="false"
+  data-language="cpp"
   role="textbox"
   spellcheck="false"
   style="tab-size: 4;"
