@@ -379,6 +379,7 @@ MenuButtons--metaInfo--symbolicate-profile = { $logicalCPUs } nucleo logic
 MenuButtons--metaInfo--attempting-resymbolicate = { $logicalCPUs } nucleos logic
 MenuButtons--metaInfo--currently-symbolicating = Actualmente symbolisante le profilo
 MenuButtons--metaInfo--cpu-model = Modello de CPU:
+MenuButtons--metaInfo--cpu-cores = Cordes del CPU:
 MenuButtons--metaInfo--main-memory = Memoria principal:
 MenuButtons--index--show-moreInfo-button = Monstrar plus
 MenuButtons--index--hide-moreInfo-button = Monstrar minus
@@ -788,6 +789,16 @@ TransformNavigator--merge-function = Miscer: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Lassar cader: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion2 = Collaber le recursion directe: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Collaber le recursion indirecte: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
