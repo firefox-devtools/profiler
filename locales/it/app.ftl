@@ -60,6 +60,11 @@ CallNodeContextMenu--transform-focus-function-inverted = Focus sulla funzione (i
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Focus solo sul sottoalbero
     .title = Il focus sul sottoalbero rimuoverà tutti i campioni che non includono quella specifica parte dell’albero delle chiamate. Estrae un ramo dell’albero, ma solo per quel singolo nodo di chiamata. Tutte le altre chiamate a quella funzione vengono ignorate.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Focus sulla categoria <strong>{ $categoryName }</strong>
+    .title = Il focus verrà applicato ai nodi che appartengono alla stessa categoria del nodo selezionato. Tutti gli altri nodi che appartengono ad altre categorie verranno uniti.
 CallNodeContextMenu--transform-collapse-function-subtree = Comprimi funzione
     .title = Comprimendo una funzione verrà rimosso tutto ciò che ha chiamato e il tempo di esecuzione verrà assegnato alla funzione stessa. Questo permette di semplificare un profilo con chiamate a codice che non deve essere analizzato.
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -711,6 +716,11 @@ TransformNavigator--focus-subtree = Focus sul nodo: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Focus sulla categoria: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
