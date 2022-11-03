@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Alleen focussen op substructuur
         van de aanroepboom niet bevat verwijderd. Het selecteert een tak van de aanroepboom,
         echter dit gebeurt alleen voor die enkele aanroepnode. Alle andere aanroepen
         van de functie worden genegeerd.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Focussen op categorie <strong>{ $categoryName }</strong>
+    .title =
+        Focussen op de nodes in dezelfde categorie als de geselecteerde node,
+        waardoor alle nodes die in een andere categorie horen worden samengevoegd.
 CallNodeContextMenu--transform-collapse-function-subtree = Functie samenvouwen
     .title =
         Als u een functie samenvouwt, wordt alles dat deze heeft aangeroepen verwijderd en alle
@@ -90,10 +97,10 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         Als u een bron samenvouwt, worden alle aanroepen van die bron
         afgevlakt tot een enkele samengevouwen aanroepnode.
-CallNodeContextMenu--transform-collapse-direct-recursion = Directe recursie samenvouwen
-    .title =
-        Als u directe recursie samenvouwt, worden alle aanroepen die herhaaldelijk naar
-        dezelfde functie terugvallen verwijderd.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Directe recursie samenvouwen
+    .title = Als directe recursie wordt samengevouwen, worden aanroepen die bij herhaling recursie hebben naar dezelfde functie zonder tussentijdse functies in de stack.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Indirecte recursie samenvouwen
+    .title = Het samenvouwen van indirecte recursie verwijdert aanroepen die bij herhaling recursie hebben naar dezelfde functie, zelfs met tussentijdse functie in de stack.
 CallNodeContextMenu--transform-drop-function = Monsters met deze functie weglaten
     .title =
         Als u monsters weglaat, wordt hun tijd uit het profiel verwijderd. Dit is nuttig om
@@ -381,7 +388,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Profiel opnieuw symboliseren
 MenuButtons--metaInfo--symbolicate-profile = Profiel symboliseren
 MenuButtons--metaInfo--attempting-resymbolicate = Poging tot hersymboliseren profiel
 MenuButtons--metaInfo--currently-symbolicating = Profiel wordt gesymboliseerd
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = CPU-model:
+MenuButtons--metaInfo--cpu-cores = CPU-kernen:
 MenuButtons--metaInfo--main-memory = Hoofdgeheugen:
 MenuButtons--index--show-moreInfo-button = Meer tonen
 MenuButtons--index--hide-moreInfo-button = Minder tonen
@@ -778,6 +786,11 @@ TransformNavigator--focus-subtree = Node focussen: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focussen: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Focuscategorie: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -797,7 +810,12 @@ TransformNavigator--drop-function = Droppen: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Recursie samenvouwen: { $item }
+TransformNavigator--collapse-direct-recursion2 = Directe recursie samenvouwen: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Indirecte recursie samenvouwen: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
