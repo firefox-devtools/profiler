@@ -74,6 +74,13 @@ CallNodeContextMenu--transform-focus-subtree = Nur auf Unterbaum konzentrieren
         Der Fokus auf einen Unterbaum entfernt jede Teilmenge, die diesen
         Teil des Aufrufbaums nicht enthält. Es wird ein Ast aus dem Aufrufbaum gezogen, jedoch nur für diesen einen Aufrufknoten. Alle
         anderen Aufrufe der Funktion werden ignoriert.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Fokus auf Kategorie <strong>{ $categoryName }{ $categoryName }
+    .title =
+        Fokus auf die Knoten, die zur selben Kategorie wie der ausgewählte Knoten haben,
+        wodurch alle Knoten, die zu anderen Kategorien gehören, zusammengeführt werden.
 CallNodeContextMenu--transform-collapse-function-subtree = Funktion einklappen
     .title =
         Wenn eine Funktion eingeklappt wird, werden alle Aufrufe durch diese Funktion entfernt
@@ -764,6 +771,11 @@ TransformNavigator--focus-subtree = Knoten fokussieren: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Fokussieren: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Kategorie fokussieren: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
