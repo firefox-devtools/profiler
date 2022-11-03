@@ -60,6 +60,11 @@ CallNodeContextMenu--transform-focus-function-inverted = 聚焦於函數（反�
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = 只聚焦於子樹
     .title = 聚焦於子樹，將從呼叫樹中拉出分支，並移除不屬於該分支的內容。然而此功能只對單一呼叫節點有效，將忽略其他呼叫該函數的部分。
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = 聚焦於分類 <strong>{ $categoryName }</strong>
+    .title = 聚焦於與選擇的節點相同的分類，因此會將屬於其他分類的節點合併起來。
 CallNodeContextMenu--transform-collapse-function-subtree = 摺疊函數
     .title = 將函數摺疊後，將移除所有呼叫內容，並將所有執行時間併入該函數中。這樣做可簡化檢測檔內容，將不需要分析的程式合併為單一呼叫。
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -706,6 +711,11 @@ TransformNavigator--focus-subtree = 聚焦節點: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = 聚焦: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = 聚焦於分類: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
