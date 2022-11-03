@@ -74,6 +74,10 @@ Merging takes a call node and removes it from the call tree. Any self time for t
 
 Focusing on a function or call node removes all of the ancestor call nodes—the children call nodes remain. If a stack does not contain that function or node, then it is removed. This effectively focuses on a subtree or a set of subtrees on the call tree.
 
+### Focus on Category
+
+Focusing on the nodes that belong to the same category as the selected node, thereby merging all nodes that belong to another category.
+
 ### Collapse
 
 Collapsing functions is an operation that takes multiple call nodes and combines them all together into a new single call node. This can be done for an entire subtree, in order to reduce the amount of nodes in the tree. This can also be done for contiguous call nodes. For example, it can be useful to collapse functions that are all part of some library or call nodes that are recursing.

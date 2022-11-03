@@ -12,6 +12,7 @@ import {
   getCallNodeIndexFromPath,
   updateThreadStacks,
   getMapStackUpdater,
+  getCallNodeIndexFromParentAndFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
@@ -39,6 +40,7 @@ import type {
   Transform,
   TransformType,
   TransformStack,
+  ProfileMeta,
 } from 'firefox-profiler/types';
 
 /**
@@ -52,6 +54,7 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
 [
   'focus-subtree',
   'focus-function',
+  'focus-category',
   'merge-call-node',
   'merge-function',
   'drop-function',
@@ -69,6 +72,9 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
       break;
     case 'focus-function':
       shortKey = 'ff';
+      break;
+    case 'focus-category':
+      shortKey = 'fg';
       break;
     case 'merge-call-node':
       shortKey = 'mcn';
@@ -218,6 +224,19 @@ export function parseTransforms(transformString: string): TransformStack {
         }
         break;
       }
+      case 'focus-category': {
+        // e.g. "fg-3"
+        const [, categoryRaw] = tuple;
+        const category = parseInt(categoryRaw, 10);
+        // Validate that the category makes sense.
+        if (!isNaN(category) && category >= 0) {
+          transforms.push({
+            type: 'focus-category',
+            category,
+          });
+        }
+        break;
+      }
       case 'focus-subtree':
       case 'merge-call-node': {
         // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
@@ -280,6 +299,8 @@ export function stringifyTransforms(transformStack: TransformStack): string {
         case 'collapse-function-subtree':
         case 'focus-function':
           return `${shortKey}-${transform.funcIndex}`;
+        case 'focus-category':
+          return `${shortKey}-${transform.category}`;
         case 'collapse-resource':
           return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
         case 'collapse-direct-recursion':
@@ -316,11 +337,13 @@ export type TransformLabeL10nIds = {|
  * transform strings as desired.
  */
 export function getTransformLabelL10nIds(
+  meta: ProfileMeta,
   thread: Thread,
   threadName: string,
   transforms: Transform[]
 ): Array<TransformLabeL10nIds> {
   const { funcTable, stringTable, resourceTable } = thread;
+  const { categories } = meta;
   const labels: TransformLabeL10nIds[] = transforms.map((transform) => {
     // Lookup library information.
     if (transform.type === 'collapse-resource') {
@@ -329,6 +352,16 @@ export function getTransformLabelL10nIds(
       return {
         l10nId: 'TransformNavigator--collapse-resource',
         item: resourceName,
+      };
+    }
+
+    if (transform.type === 'focus-category') {
+      if (categories === undefined) {
+        throw new Error('Expected categories to be defined.');
+      }
+      return {
+        l10nId: 'TransformNavigator--focus-category',
+        item: categories[transform.category].name,
       };
     }
 
@@ -396,7 +429,8 @@ export function getTransformLabelL10nIds(
 export function applyTransformToCallNodePath(
   callNodePath: CallNodePath,
   transform: Transform,
-  transformedThread: Thread
+  transformedThread: Thread,
+  callNodeTable: CallNodeTable
 ): CallNodePath {
   switch (transform.type) {
     case 'focus-subtree':
@@ -406,6 +440,13 @@ export function applyTransformToCallNodePath(
       );
     case 'focus-function':
       return _startCallNodePathWithFunction(transform.funcIndex, callNodePath);
+    case 'focus-category':
+      return _removeOtherCategoryFunctionsInNodePathWithFunction(
+        transformedThread,
+        transform.category,
+        callNodePath,
+        callNodeTable
+      );
     case 'merge-call-node':
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
     case 'merge-function':
@@ -478,6 +519,38 @@ function _dropFunctionInCallNodePath(
 ): CallNodePath {
   // If the CallNodePath contains the function, return an empty path.
   return callNodePath.includes(funcIndex) ? [] : callNodePath;
+}
+
+// removes all functions that are not in the category from the callNodePath
+function _removeOtherCategoryFunctionsInNodePathWithFunction(
+  thread: Thread,
+  category: IndexIntoCategoryList,
+  callNodePath: CallNodePath,
+  callNodeTable: CallNodeTable
+): CallNodePath {
+  const newCallNodePath = [];
+
+  let prefix = -1;
+  for (const funcIndex of callNodePath) {
+    const callNodeIndex = getCallNodeIndexFromParentAndFunc(
+      prefix,
+      funcIndex,
+      callNodeTable
+    );
+    if (callNodeIndex === null) {
+      throw new Error(
+        `We couldn't find a node with prefix ${prefix} and func ${funcIndex}, this shouldn't happen.`
+      );
+    }
+
+    if (callNodeTable.category[callNodeIndex] === category) {
+      newCallNodePath.push(funcIndex);
+    }
+
+    prefix = callNodeIndex;
+  }
+
+  return newCallNodePath;
 }
 
 function _collapseResourceInCallNodePath(
@@ -1459,6 +1532,47 @@ export function focusFunction(
   });
 }
 
+export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
+  return timeCode('focusCategory', () => {
+    const { stackTable } = thread;
+    const oldStackToNewStack: Map<
+      IndexIntoStackTable | null,
+      IndexIntoStackTable | null
+    > = new Map();
+    oldStackToNewStack.set(null, null);
+
+    const newStackTable = getEmptyStackTable();
+
+    // fill the new stack table with the kept frames
+    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+      const prefix = stackTable.prefix[stackIndex];
+      const newPrefix = oldStackToNewStack.get(prefix);
+      if (newPrefix === undefined) {
+        throw new Error('The prefix should not map to an undefined value');
+      }
+
+      if (stackTable.category[stackIndex] !== category) {
+        oldStackToNewStack.set(stackIndex, newPrefix);
+        continue;
+      }
+
+      const newStackIndex = newStackTable.length++;
+      newStackTable.prefix[newStackIndex] = newPrefix;
+      newStackTable.frame[newStackIndex] = stackTable.frame[stackIndex];
+      newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
+      newStackTable.subcategory[newStackIndex] =
+        stackTable.subcategory[stackIndex];
+      oldStackToNewStack.set(stackIndex, newStackIndex);
+    }
+    const updated = updateThreadStacks(
+      thread,
+      newStackTable,
+      getMapStackUpdater(oldStackToNewStack)
+    );
+    return updated;
+  });
+}
+
 /**
  * When restoring function in a CallNodePath there can be multiple correct CallNodePaths
  * that could be restored. The best approach would probably be to restore to the
@@ -1657,6 +1771,8 @@ export function applyTransform(
       return dropFunction(thread, transform.funcIndex);
     case 'focus-function':
       return focusFunction(thread, transform.funcIndex);
+    case 'focus-category':
+      return focusCategory(thread, transform.category);
     case 'collapse-resource':
       return collapseResource(
         thread,

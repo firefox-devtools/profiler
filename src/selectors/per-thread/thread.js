@@ -184,13 +184,14 @@ export function getThreadSelectorsPerThread(
     getRangeFilteredThread,
     getTransformStack,
     ProfileSelectors.getDefaultCategory,
-    (startingThread, transforms, defaultCategory) =>
-      transforms.reduce(
+    (startingThread, transforms, defaultCategory) => {
+      return transforms.reduce(
         // Apply the reducer using an arrow function to ensure correct memoization.
         (thread, transform) =>
           _applyTransformMemoized(thread, transform, defaultCategory),
         startingThread
-      )
+      );
+    }
   );
 
   const _getImplementationFilteredThread: Selector<Thread> = createSelector(
@@ -361,6 +362,7 @@ export function getThreadSelectorsPerThread(
 
   const getTransformLabelL10nIds: Selector<TransformLabeL10nIds[]> =
     createSelector(
+      ProfileSelectors.getMeta,
       getRangeAndTransformFilteredThread,
       getFriendlyThreadName,
       getTransformStack,

@@ -1787,7 +1787,7 @@ function _getCallNodeIndexFromPathWithCache(
     // Resolving the index for subpath `callNodePath.slice(0, i+1)` given we
     // know the index for the subpath `callNodePath.slice(0, i)` (its parent).
     const func = callNodePath[i];
-    const nextNodeIndex = _getCallNodeIndexFromParentAndFunc(
+    const nextNodeIndex = getCallNodeIndexFromParentAndFunc(
       index,
       func,
       callNodeTable
@@ -1812,7 +1812,7 @@ function _getCallNodeIndexFromPathWithCache(
 
 // Returns the CallNodeIndex that matches the function `func` and whose parent's
 // CallNodeIndex is `parent`.
-function _getCallNodeIndexFromParentAndFunc(
+export function getCallNodeIndexFromParentAndFunc(
   parent: IndexIntoCallNodeTable,
   func: IndexIntoFuncTable,
   callNodeTable: CallNodeTable
