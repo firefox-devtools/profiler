@@ -71,8 +71,6 @@ CallNodeContextMenu--transform-collapse-function-subtree = Contraer función.
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Contraer <strong>{ $nameForResource }</strong>
     .title = Contraer un recurso aplanará todas las llamadas a ese recurso a un solo nodo de llamada contraído.
-CallNodeContextMenu--transform-collapse-direct-recursion = Contraer recursión directa
-    .title = Contraer una recursión directa remueve las llamadas con recursión repetida pasándolas a una misma función.
 CallNodeContextMenu--transform-drop-function = Descartar muestras con esta función
     .title = Descartar muestras elimina su tiempo del perfilador. Esto es útil para eliminar información de tiempos que no es relevante para el análisis.
 CallNodeContextMenu--expand-all = Expandir todo
@@ -320,7 +318,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Volver a simbolizar el perfil
 MenuButtons--metaInfo--symbolicate-profile = Simbolizar perfil
 MenuButtons--metaInfo--attempting-resymbolicate = Intentando volver a simbolizar el perfil
 MenuButtons--metaInfo--currently-symbolicating = Perfil actualmente simbolizado
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = Modelo de CPU:
+MenuButtons--metaInfo--cpu-cores = Núcleos de CPU:
 MenuButtons--metaInfo--main-memory = Memoria principal:
 MenuButtons--index--show-moreInfo-button = Mostrar más
 MenuButtons--index--hide-moreInfo-button = Mostrar menos
@@ -728,11 +727,6 @@ TransformNavigator--merge-function = Fusionar: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Descartar: { $item }
-# "Collapse direct recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Contraer recursión: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
