@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Фокус лише на підд
         конкретну частину дерева викликів. Це витягує гілку дерева викликів,
         однак робить це лише для того єдиного вузла виклику. Усі інші виклики
         функції ігноруються.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Фокус на категорії <strong>{ $categoryName }</strong>
+    .title =
+        Фокусування на вузлах, які належать тій самій категорії що й вибраний вузол,
+        об'єднуючи таким чином усі вузли, які належать іншій категорії.
 CallNodeContextMenu--transform-collapse-function-subtree = Згорнути функцію
     .title =
         Згортання функції вилучить усе, що вона викликала, і призначить
@@ -781,6 +788,11 @@ TransformNavigator--focus-subtree = Вузол фокусування: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Сфокусуватися: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Категорія в фокусі: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
