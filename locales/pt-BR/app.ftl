@@ -60,6 +60,11 @@ CallNodeContextMenu--transform-focus-function-inverted = Foco na função (inver
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Foco em subárvore apenas
     .title = Focar em uma subárvore remove amostras que não incluem aquela parte específica da árvore de chamadas. É retirado um ramo da árvore de chamadas, mas o faz somente naquele único node de chamadas. Todas as outras chamadas da função são ignoradas.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Foco na categoria <strong>{ $categoryName }</strong>
+    .title = Foco nos nodes que pertencem à mesma categoria do node selecionado, juntando assim todos os nodes de outras categorias.
 CallNodeContextMenu--transform-collapse-function-subtree = Recolher função
     .title = Recolher uma função remove tudo o que ela chamou e atribui todo esse tempo para a função. Pode ajudar a simplificar um profile que faz chamada para código que não precisa ser analisado.
 # This is used as the context menu item to apply the "Collapse resource" transform.
