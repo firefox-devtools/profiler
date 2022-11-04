@@ -77,7 +77,7 @@ CallNodeContextMenu--transform-focus-subtree = Nur auf Unterbaum konzentrieren
 # This is used as the context menu item to apply the "Focus on category" transform.
 # Variables:
 #   $categoryName (String) - Name of the category to focus on.
-CallNodeContextMenu--transform-focus-category = Fokus auf Kategorie <strong>{ $categoryName }{ $categoryName }
+CallNodeContextMenu--transform-focus-category = Fokus auf Kategorie <strong>{ $categoryName }</strong>
     .title =
         Fokus auf die Knoten, die zur selben Kategorie wie der ausgewählte Knoten haben,
         wodurch alle Knoten, die zu anderen Kategorien gehören, zusammengeführt werden.
