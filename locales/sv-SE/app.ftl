@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Fokusera endast på underträd
         innehåller den specifika delen av anropsträdet. Den tar ut en gren av
         anropsträdet, men det gör det endast för den anropsnoden. Alla andra
         anrop från funktionen ignoreras.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Fokus på kategori <strong>{ $categoryName }</strong>
+    .title =
+        Fokusera på noderna som tillhör samma kategori som den valda noden och
+        därmed slå samman alla noder som tillhör en annan kategori.
 CallNodeContextMenu--transform-collapse-function-subtree = Fäll ihop funktion
     .title =
         Att fälla ihop en funktion kommer ta bort allt som anropas, och tilldela
