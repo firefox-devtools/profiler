@@ -97,6 +97,8 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         As jo in boarne ynklappe, wurde alle oanroppen fan dy boarne
         ôfflakke ta ien inkelde ynklappe oanropnode.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Yndirekte rekursy ynklappe
+    .title = It ynklappen fan yndirekte rekursy smyt oanroppen dy’t by werhelling rekursy hawwe nei deselde funksje, sels mei tuskentiidske funksje yn de stack.
 CallNodeContextMenu--transform-drop-function = Meunsters mei dizze funksje weilitte
     .title =
         As jo meunsters weilitte, wurdt harren tiid út it profyl fuortsmiten. Dit is nuttich om
@@ -384,6 +386,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Profyl opnij symbolisearje
 MenuButtons--metaInfo--symbolicate-profile = Profyl symbolisearje
 MenuButtons--metaInfo--attempting-resymbolicate = Besykjen ta opnij symbolisearjen profyl
 MenuButtons--metaInfo--currently-symbolicating = Profyl wurdt symbolisearre
+MenuButtons--metaInfo--cpu-model = CPU-model:
+MenuButtons--metaInfo--cpu-cores = CPU-kearnen:
 MenuButtons--metaInfo--main-memory = Haadûnthâld:
 MenuButtons--index--show-moreInfo-button = Mear toane
 MenuButtons--index--hide-moreInfo-button = Minder toane
@@ -780,6 +784,11 @@ TransformNavigator--focus-subtree = Node fokusje: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Fokusje: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Fokuskategory: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -795,6 +804,16 @@ TransformNavigator--merge-function = Gearfoegje: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Droppe: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion2 = Direkte rekursy ynklappe: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Yndirekte rekursy ynklappe: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
