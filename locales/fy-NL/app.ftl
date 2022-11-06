@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Allinnich fokus op substruktuer
         fan de oanropbeam net befettet fuortsmiten. It selektearret in tûke fan de oanropbeam,
         echter dit bart allinnich foar dy inkelde oanropnode. Alle oare oanroppen
         fan de funksje wurde negearre.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Fokussen op kategory <strong>{ $categoryName }</strong>
+    .title =
+        Fokussen op de nodes yn deselde kategory as de selektearre node,
+        wêrtroch alle nodes dy’t yn in oare kategory hearre gearfoege wurde.
 CallNodeContextMenu--transform-collapse-function-subtree = Funksje ynklappe
     .title =
         As jo in funksje ynklappe, wurdt alles dat dizze oanroppen hat fuortsmiten en alle
@@ -90,10 +97,6 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         As jo in boarne ynklappe, wurde alle oanroppen fan dy boarne
         ôfflakke ta ien inkelde ynklappe oanropnode.
-CallNodeContextMenu--transform-collapse-direct-recursion = Direkte rekursy ynklappe
-    .title =
-        As jo direkte rekursy ynklappe, wurde alle oanroppen dy’t hieltyd wer nei
-        deselde funksje tebekfalle fuortsmiten.
 CallNodeContextMenu--transform-drop-function = Meunsters mei dizze funksje weilitte
     .title =
         As jo meunsters weilitte, wurdt harren tiid út it profyl fuortsmiten. Dit is nuttich om
@@ -381,7 +384,6 @@ MenuButtons--metaInfo--resymbolicate-profile = Profyl opnij symbolisearje
 MenuButtons--metaInfo--symbolicate-profile = Profyl symbolisearje
 MenuButtons--metaInfo--attempting-resymbolicate = Besykjen ta opnij symbolisearjen profyl
 MenuButtons--metaInfo--currently-symbolicating = Profyl wurdt symbolisearre
-MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--main-memory = Haadûnthâld:
 MenuButtons--index--show-moreInfo-button = Mear toane
 MenuButtons--index--hide-moreInfo-button = Minder toane
@@ -793,11 +795,6 @@ TransformNavigator--merge-function = Gearfoegje: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Droppe: { $item }
-# "Collapse direct recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Rekursy ynklappe: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
