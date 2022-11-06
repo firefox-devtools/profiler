@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Focus on subtree only
         specific part of the call tree. It pulls out a branch of the call tree,
         however it only does it for that single call node. All other calls
         of the function are ignored.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Focus on category <strong>{ $categoryName }</strong>
+    .title =
+        Focusing on the nodes that belong to the same category as the selected node,
+        thereby merging all nodes that belong to another category.
 CallNodeContextMenu--transform-collapse-function-subtree = Collapse function
     .title =
         Collapsing a function will remove everything it called, and assign
@@ -783,6 +790,11 @@ TransformNavigator--focus-subtree = Focus Node: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Focus category: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
