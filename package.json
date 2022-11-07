@@ -88,7 +88,8 @@
     "reselect": "^4.1.6",
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0",
-    "workbox-window": "^6.5.4"
+    "workbox-window": "^6.5.4",
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@babel/cli": "^7.19.3",

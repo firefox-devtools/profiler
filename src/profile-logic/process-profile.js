@@ -910,8 +910,8 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
   const samples: SamplesTable = {
     stack: geckoSamples.stack,
     time: geckoSamples.time,
-    weightType: 'samples',
-    weight: null,
+    weightType: geckoSamples.weightType[0] || 'samples',
+    weight: geckoSamples.weight || null,
     length: geckoSamples.length,
   };
 
