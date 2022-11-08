@@ -64,6 +64,13 @@ CallNodeContextMenu--transform-focus-function-inverted = Enfocarse en la funció
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Enfocarse solo en el subárbol
     .title = Enfocarse en el subárbol removerá cualquier muestra que no incluya esa parte específica del árbol de llamados. Retira una rama del árbol de llamados, no obstante solo lo hace para un único nodo de llamada. Todo el resto de las llamadas de la función son ignoradas.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Centrarse en la categoría <strong>{ $categoryName }</strong>
+    .title =
+        Enfocándose en los nodos que pertenecen a la misma categoría que el nodo seleccionado,
+        por ende fusionando todos los nodos que pertenecen a otra categorñia,
 CallNodeContextMenu--transform-collapse-function-subtree = Contraer función.
     .title = Contraer una función removerá todo lo que llamó, y asignará todo el tiempo a la función. Esto puede ayudar a simplificar un perfil que llama a código que no necesita ser analizado.
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -71,6 +78,14 @@ CallNodeContextMenu--transform-collapse-function-subtree = Contraer función.
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Contraer <strong>{ $nameForResource }</strong>
     .title = Contraer un recurso aplanará todas las llamadas a ese recurso a un solo nodo de llamada contraído.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Contraer recursión directa
+    .title =
+        Contraer recursiones directas elimina las llamadas que recurren repetidamente en
+        la misma función sin funciones intermedias en la pila.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Contraer recursión indirecta
+    .title =
+        Contraer recursiones indirectas elimina las llamadas que recurren repetidamente en
+        la misma función, incluso con funciones intermedias en la pila.
 CallNodeContextMenu--transform-drop-function = Descartar muestras con esta función
     .title = Descartar muestras elimina su tiempo del perfilador. Esto es útil para eliminar información de tiempos que no es relevante para el análisis.
 CallNodeContextMenu--expand-all = Expandir todo
@@ -706,12 +721,17 @@ TransformNavigator--collapse-resource = Contraer: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--focus-subtree = Enfocar nodo: { $item }
+TransformNavigator--focus-subtree = Nodo enfocado: { $item }
 # "Focus function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Enfocar: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Categoría enfocada: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -727,6 +747,16 @@ TransformNavigator--merge-function = Fusionar: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Descartar: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion2 = Contraer recursión directa: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Contraer recursión indirecta: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
