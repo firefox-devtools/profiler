@@ -7,8 +7,7 @@ import { SymbolStore } from '../../profile-logic/symbol-store';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 import { TextDecoder } from 'util';
 import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
-import fakeIndexedDB from 'fake-indexeddb';
-import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
+import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { ensureExists } from '../../utils/flow';
 
@@ -17,7 +16,7 @@ describe('SymbolStore', function () {
 
   function deleteDatabase() {
     return new Promise((resolve, reject) => {
-      const req = fakeIndexedDB.deleteDatabase(
+      const req = indexedDB.deleteDatabase(
         'profiler-async-storage-symbol-tables'
       );
       req.onsuccess = () => resolve();
@@ -27,8 +26,8 @@ describe('SymbolStore', function () {
 
   beforeAll(function () {
     // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
-    window.indexedDB = fakeIndexedDB;
-    window.IDBKeyRange = FDBKeyRange;
+    window.indexedDB = indexedDB;
+    window.IDBKeyRange = IDBKeyRange;
     window.TextDecoder = TextDecoder;
   });
 

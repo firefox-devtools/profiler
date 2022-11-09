@@ -35,7 +35,7 @@ import {
   changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
-import fakeIndexedDB from 'fake-indexeddb';
+import { indexedDB } from 'fake-indexeddb';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
@@ -99,7 +99,7 @@ describe('actions/receive-profile', function () {
   beforeEach(() => {
     // The SymbolStore requires the use of IndexedDB, ensure that it exists so that
     // symbolication can happen.
-    window.indexedDB = fakeIndexedDB;
+    window.indexedDB = indexedDB;
   });
 
   afterEach(() => {

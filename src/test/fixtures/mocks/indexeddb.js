@@ -7,14 +7,14 @@
 // This file implements a fake indexeddb database using the fake-indexeddb
 // library.
 
-import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
+import { IDBFactory } from 'fake-indexeddb';
 
 function resetIndexedDb() {
   // This is the recommended way to reset the IDB state between test runs, but
   // neither flow nor eslint like that we assign to indexedDB directly, for
   // different reasons.
   /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
-  indexedDB = new FDBFactory();
+  indexedDB = new IDBFactory();
 }
 
 export function autoMockIndexedDB() {
