@@ -737,7 +737,12 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   }
 
   renderShowLocalTracksInThisProcess() {
-    const { rightClickedTrack, globalTracks } = this.props;
+    const {
+      rightClickedTrack,
+      globalTracks,
+      localTracksByPid,
+      hiddenLocalTracksByPid,
+    } = this.props;
     if (rightClickedTrack === null) {
       return null;
     }
@@ -754,9 +759,18 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       pid = rightClickedTrack.pid;
     }
 
+    const localTracks = localTracksByPid.get(pid);
+    if (!localTracks || !localTracks.length) {
+      return null;
+    }
+
+    const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
+    const isDisabled = !hiddenLocalTracks || hiddenLocalTracks.size === 0;
+
     return (
       <MenuItem
         onClick={this._showLocalTracksInProcess}
+        disabled={isDisabled}
         data={{ trackIndex, pid }}
       >
         <Localized id="TrackContextMenu--show-local-tracks-in-process">

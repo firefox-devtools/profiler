@@ -79,8 +79,8 @@ exports[`timeline/TrackContextMenu when a global track is right clicked matches 
     class="react-contextmenu-separator"
   />
   <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
     role="menuitem"
     tabindex="-1"
   >
@@ -151,8 +151,8 @@ exports[`timeline/TrackContextMenu when a global track is right clicked network 
     class="react-contextmenu-separator"
   />
   <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
     role="menuitem"
     tabindex="-1"
   >
@@ -231,8 +231,8 @@ exports[`timeline/TrackContextMenu when a local track is right clicked matches t
     class="react-contextmenu-separator"
   />
   <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
     role="menuitem"
     tabindex="-1"
   >
