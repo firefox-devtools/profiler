@@ -97,14 +97,14 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             className="tooltipCallNodeGraphRunning"
             style={{
               width: (GRAPH_WIDTH * totalTime) / overallTotalTime,
-              'background-color': `var(--category-color-${color})`,
+              backgroundColor: `var(--category-color-${color})`,
             }}
           />
           <div
             className="tooltipCallNodeGraphSelf"
             style={{
               width: (GRAPH_WIDTH * selfTime) / overallTotalTime,
-              'background-color': `var(--category-color-${color})`,
+              backgroundColor: `var(--category-color-${color})`,
             }}
           />
         </div>
@@ -134,18 +134,18 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     );
   }
 
-  _renderOneCategoryLine(
+  _maybeRenderOneCategoryGroup(
     { selfTime, totalTime }: ItemTimings,
     category: IndexIntoCategoryList,
     isHighPrecision: boolean
-  ): Array<React.Node> {
+  ): React.Node {
     if (totalTime.breakdownByCategory === null) {
-      return [];
+      return null;
     }
     const { entireCategoryValue, subcategoryBreakdown }: OneCategoryBreakdown =
       totalTime.breakdownByCategory[category];
     if (entireCategoryValue === 0) {
-      return [];
+      return null;
     }
     const { categories } = this.props;
     const selfTimeValue = selfTime.breakdownByCategory
@@ -179,12 +179,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       this._renderOneSubCategoryLine(
         categoryName,
         category,
-        -1,
+        -1 /* Any number different from a subcategory index */,
         selfTimeValue,
         entireCategoryValue,
         entireCategoryValue,
         isHighPrecision,
-        true
+        true /* isCategoryHeader */
       )
     );
 
@@ -209,7 +209,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           subCategoryValue,
           entireCategoryValue,
           isHighPrecision,
-          false
+          false /* isCategoryHeader */
         )
       );
     };
@@ -244,17 +244,6 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
     // JS Tracer threads have data relevant to the microsecond level.
     const isHighPrecision: boolean = Boolean(thread.isJsTracer);
-
-    const rows: Array<React.Node> = [];
-    totalBreakdownByCategory.forEach((_, category) => {
-      rows.push(
-        ...this._renderOneCategoryLine(
-          { totalTime, selfTime },
-          category,
-          isHighPrecision
-        )
-      );
-    });
 
     return (
       <div className="tooltipCallNodeCategory">
@@ -303,7 +292,13 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                 selfTime.value
               )}
         </div>
-        {rows}
+        {totalBreakdownByCategory.map((_, categoryIndex) =>
+          this._maybeRenderOneCategoryGroup(
+            { totalTime, selfTime },
+            categoryIndex,
+            isHighPrecision
+          )
+        )}
       </div>
     );
   }
