@@ -1152,12 +1152,15 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {rightClickedTrack === null ? (
           <div className="react-contextmenu-separator" />
         ) : null}
-        {showLocalTracksInProcess}
         {isolateProcessMainThread}
         {isolateProcess}
         {isolateLocalTrack}
         {isolateScreenshot}
         {hideTrack}
+        {showLocalTracksInProcess ? (
+          <div className="react-contextmenu-separator" />
+        ) : null}
+        {showLocalTracksInProcess}
         {separator}
         {isTrackListEmpty ? (
           <Localized
