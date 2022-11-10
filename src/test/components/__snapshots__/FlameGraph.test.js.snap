@@ -79,11 +79,11 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipCallNodeGraph"
         >
           <div
-            class="tooltipCallNodeImplementationGraphRunning"
+            class="tooltipCallNodeGraphRunning"
             style="width: 150px;"
           />
           <div
-            class="tooltipCallNodeImplementationGraphSelf"
+            class="tooltipCallNodeGraphSelf"
             style="width: 0px;"
           />
         </div>
@@ -225,11 +225,11 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipCallNodeGraph"
         >
           <div
-            class="tooltipCallNodeImplementationGraphRunning"
+            class="tooltipCallNodeGraphRunning"
             style="width: 150px;"
           />
           <div
-            class="tooltipCallNodeImplementationGraphSelf"
+            class="tooltipCallNodeGraphSelf"
             style="width: 0px;"
           />
         </div>
@@ -901,11 +901,11 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           class="tooltipCallNodeGraph"
         >
           <div
-            class="tooltipCallNodeImplementationGraphRunning"
+            class="tooltipCallNodeGraphRunning"
             style="width: 150px;"
           />
           <div
-            class="tooltipCallNodeImplementationGraphSelf"
+            class="tooltipCallNodeGraphSelf"
             style="width: 150px;"
           />
         </div>
@@ -1053,11 +1053,11 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
           class="tooltipCallNodeGraph"
         >
           <div
-            class="tooltipCallNodeImplementationGraphRunning"
+            class="tooltipCallNodeGraphRunning"
             style="width: 150px;"
           />
           <div
-            class="tooltipCallNodeImplementationGraphSelf"
+            class="tooltipCallNodeGraphSelf"
             style="width: 150px;"
           />
         </div>

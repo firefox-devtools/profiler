@@ -350,13 +350,13 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         <div className="tooltipLabel">Overall</div>
         <div className="tooltipCallNodeGraph">
           <div
-            className="tooltipCallNodeImplementationGraphRunning"
+            className="tooltipCallNodeGraphRunning"
             style={{
               width: GRAPH_WIDTH,
             }}
           />
           <div
-            className="tooltipCallNodeImplementationGraphSelf"
+            className="tooltipCallNodeGraphSelf"
             style={{
               width: (GRAPH_WIDTH * selfTime.value) / totalTime.value,
             }}
