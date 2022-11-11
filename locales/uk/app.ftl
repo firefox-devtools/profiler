@@ -671,6 +671,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Сховати доріжки 
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Сховати “{ $trackName }”
 TrackContextMenu--show-all-tracks = Показати всі доріжки
+TrackContextMenu--show-local-tracks-in-process = Показати всі доріжки в цьому процесі
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Показати всі відповідні доріжки
