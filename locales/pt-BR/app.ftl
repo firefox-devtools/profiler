@@ -606,6 +606,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Ocultar outras faixas de captu
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Ocultar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Mostrar todas as faixas
+TrackContextMenu--show-local-tracks-in-process = Mostrar todas as faixas deste processo
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Mostrar todas as faixas correspondentes
