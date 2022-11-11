@@ -594,6 +594,7 @@ TrackContextMenu--hide-other-screenshots-tracks = 隱藏其他畫面擷圖軌
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = 隱藏「{ $trackName }」
 TrackContextMenu--show-all-tracks = 顯示所有軌道
+TrackContextMenu--show-local-tracks-in-process = 顯示此處理程序當中的所有軌道
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = 顯示所有符合的軌道
