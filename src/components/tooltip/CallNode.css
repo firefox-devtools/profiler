@@ -2,7 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.tooltipCallNodeImplementation {
+.tooltipCallNodeImplementation,
+.tooltipCallNodeCategory {
   display: grid;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--grey-30);
@@ -10,7 +11,7 @@
   grid-template-columns: repeat(4, min-content);
 }
 
-.tooltipCallNodeImplementationHeader {
+.tooltipCallNodeHeader {
   padding: 0 5px;
   border-right: 1px solid var(--grey-30);
   margin-top: 5px;
@@ -18,42 +19,48 @@
   white-space: nowrap;
 }
 
-.tooltipCallNodeImplementationName {
+.tooltipCallNodeName {
   white-space: nowrap;
 }
 
-.tooltipCallNodeImplementationGraph {
+.tooltipCallNodeGraph {
   position: relative;
   width: var(--graph-width);
   height: var(--graph-height);
   border-radius: 2px;
-  margin-top: 2px;
+  margin-top: 3px;
   background-color: var(--grey-30);
 }
 
-.tooltipCallNodeImplementationGraphRunning {
-  height: var(--graph-height);
+.tooltipCallNodeGraphRunning {
+  height: calc(var(--graph-height) / 2 - 1px);
   border-radius: 2px;
   background-color: var(--blue-40);
 }
 
-.tooltipCallNodeImplementationGraphSelf {
+.tooltipCallNodeGraphSelf {
   position: absolute;
   top: 0;
   left: 0;
-  height: var(--graph-height);
+  height: calc(var(--graph-height) / 2 - 1px);
   border-radius: 2px;
+  margin-top: calc(var(--graph-height) / 2);
   background-color: var(--blue-60);
 }
 
-.tooltipCallNodeImplementationTiming {
+.tooltipCallNodeCategory .tooltipCategoryRowHeader {
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+.tooltipCallNodeTiming {
   padding: 0 5px;
   text-align: right;
   white-space: nowrap;
 }
 
-.tooltipCallNodeImplementationHeaderSwatchRunning,
-.tooltipCallNodeImplementationHeaderSwatchSelf {
+.tooltipCallNodeHeaderSwatchRunning,
+.tooltipCallNodeHeaderSwatchSelf {
   display: inline-block;
   width: 9px;
   height: 9px;
@@ -62,16 +69,30 @@
   margin-right: 3px;
 }
 
-.tooltipCallNodeImplementationHeaderSwatchRunning {
+.tooltipCallNodeHeaderSwatchRunning {
   background-color: var(--blue-40);
 }
 
-.tooltipCallNodeImplementationHeaderSwatchSelf {
+.tooltipCallNodeHeaderSwatchSelf {
   background-color: var(--blue-60);
+}
+
+.tooltipCallNodeCategory .tooltipCallNodeHeaderSwatchSelf,
+.tooltipCallNodeCategory .tooltipCallNodeHeaderSwatchRunning {
+  display: none;
 }
 
 .tooltipCallNodeDetailsLeft {
   min-width: 150px;
   padding: 10px;
   padding-bottom: 5px;
+}
+
+.tooltipCategoryRowHeader.tooltipCallNodeGraph {
+  /* we have to add 3px to the 8px of category row to realign the callnode graph propertly */
+  margin-top: 11px;
+}
+
+.tooltipCategoryRowHeader.tooltipCategoryName {
+  padding-right: 4px;
 }

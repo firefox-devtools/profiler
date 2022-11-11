@@ -2,6 +2,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+:root {
+  --category-color-transparent: #fff;
+  --category-color-purple: var(--purple-70);
+  --category-color-green: var(--green-60);
+  --category-color-orange: var(--orange-60);
+  --category-color-lightblue: var(--blue-40);
+  --category-color-blue: var(--blue-60);
+  --category-color-brown: var(--yellow-70);
+
+  /* it is hard to create a lighter version of the following colors  */
+  --category-color-grey: var(--grey-30);
+  --category-color-yellow: var(--yellow-50);
+  --category-color-red: var(--red-60);
+  --category-color-lightred: var(--red-70);
+  --category-color-darkgray: var(--grey-40);
+}
+
 /**
  * These classes should be used to create a small color swatch to describe a
  * category. They should be used with the class `colored-square` that's defined
@@ -10,49 +27,49 @@
  */
 .category-color-transparent {
   border-color: rgb(0 0 0 / 0.4);
-  background-color: #fff;
+  background-color: var(--category-color-transparent);
 }
 
 .category-color-purple {
-  background-color: var(--purple-70);
+  background-color: var(--category-color-purple);
 }
 
 .category-color-green {
-  background-color: var(--green-60);
+  background-color: var(--category-color-green);
 }
 
 .category-color-orange {
-  background-color: var(--orange-50);
+  background-color: var(--category-color-orange);
 }
 
 .category-color-yellow {
-  background-color: var(--yellow-50);
+  background-color: var(--category-color-yellow);
 }
 
 .category-color-lightblue {
-  background-color: var(--blue-40);
+  background-color: var(--category-color-lightblue);
 }
 
 .category-color-grey {
-  background-color: var(--grey-30);
+  background-color: var(--category-color-grey);
 }
 
 .category-color-blue {
-  background-color: var(--blue-60);
+  background-color: var(--category-color-blue);
 }
 
 .category-color-red {
-  background-color: var(--red-60);
+  background-color: var(--category-color-red);
 }
 
 .category-color-lightred {
-  background-color: var(--red-70);
+  background-color: var(--category-color-lightred);
 }
 
 .category-color-darkgray {
-  background-color: var(--grey-40);
+  background-color: var(--category-color-darkgray);
 }
 
 .category-color-brown {
-  background-color: var(--magenta-60);
+  background-color: var(--category-color-brown);
 }

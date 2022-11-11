@@ -1174,6 +1174,28 @@ export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
 }
 
 /**
+ * This action shows a specific global track and its local tracks.
+ */
+export function showGlobalTrackIncludingLocalTracks(
+  trackIndex: TrackIndex,
+  pid: Pid
+): ThunkAction<void> {
+  return (dispatch) => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'show global track including local tracks',
+    });
+
+    dispatch({
+      type: 'SHOW_GLOBAL_TRACK_INCLUDING_LOCAL_TRACKS',
+      trackIndex,
+      pid,
+    });
+  };
+}
+
+/**
  * This function isolates a process global track, and leaves its local tracks visible.
  */
 export function isolateProcess(

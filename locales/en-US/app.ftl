@@ -722,6 +722,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Hide “{ $trackName }”
 TrackContextMenu--show-all-tracks = Show all tracks
+TrackContextMenu--show-local-tracks-in-process = Show all tracks in this process
 
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
