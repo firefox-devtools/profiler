@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Foco solo sur sub-arbore.
         specific parte del arbore de appello. Illo extrahe un ramo del arbore de appello,
          totevia solo lo face pro iste singule nodo de appello. Tote le altere appellos
         del function es ignorate.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Examinar categoria <strong>{ $categoryName }</strong>
+    .title =
+        Concentrar se sur le nodos que pertine al mesme categoria que le nodo seligite,
+        assi miscer tote le nodos que pertine a un altere categoria.
 CallNodeContextMenu--transform-collapse-function-subtree = Collaber function
     .title =
         Collaber un function removera toto lo appellate, e assignara
@@ -657,6 +664,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Celar altere tracias de instan
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Celar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Monstrar tote le tracias
+TrackContextMenu--show-local-tracks-in-process = Monstrar tote le tracias in iste processo
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Monstrar tote le tracias concordante
@@ -774,6 +782,11 @@ TransformNavigator--focus-subtree = Foco sur nodo: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Foco sur: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Categoria Foco: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
