@@ -32,20 +32,17 @@
 }
 
 .timelineTrackRow.selected {
+  /* We replace the padding by some margin. Indeed the box-shadow used to draw
+   * the blue selected left border is drawn outside of the border box, so the
+   * 3px margin makes this space available. */
+  padding-left: 0;
+  margin-left: var(--selected-left-border-width);
   background-color: #edf6ff;
 
   /* We use a box-shadow on the track row instead of using border, so
    * that when we select adjacent tracks, we see just one line, without any
    * border on top of it. */
   box-shadow: calc(-1 * var(--selected-left-border-width)) 0 var(--blue-60);
-}
-
-.timelineTrackGlobalRow.selected {
-  /* We replace the padding by some margin. Indeed the box-shadow used to draw
-   * the blue selected left border is drawn outside of the border box, so the
-   * 3px margin makes this space available. */
-  padding-left: 0;
-  margin-left: var(--selected-left-border-width);
 }
 
 /* In the active tab view, we don't want any margin or padding, because
@@ -62,13 +59,9 @@
 
 .timelineTrackLocalRow.selected {
   /* By removing the left border, it looks like the blue border is on top of it.
-   * But we need to account for the missing 1px, that's why we add this
-   * margin-left.
-   * Note that we don't need to replace the padding with some margin for the
-   * local rows because we already have some space besides. The border looks
-   * like it's alongside the label, instead of inside like for global rows. */
-  border-left: none;
-  margin-left: 1px;
+   * By using the transparent color instead of removing it altogether, we keep
+   * the 1px space. */
+  border-left-color: transparent;
 }
 
 .timelineTrackHidden {
