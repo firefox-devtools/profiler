@@ -121,7 +121,7 @@ The repeated calls to `set fillStyle` are unnecessary for the bunny, as there ar
 
 ### The code change for `set fillStyle`
 
-The fix for this would be straightforward, of only setting the color when it's been changed.
+The fix for this would be of only setting the color when it's been changed.
 
 ```js
 worker.addEventListener('message', message => {
