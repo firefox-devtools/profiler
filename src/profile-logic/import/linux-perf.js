@@ -296,9 +296,9 @@ export function convertPerfScriptProfile(
       continue;
     }
 
-    const threadName = threadNamePidAndTidMatch[1].trim();
     const pid = Number(threadNamePidAndTidMatch[2] || 0);
     const tid = Number(threadNamePidAndTidMatch[3] || 0);
+    const threadName = `${threadNamePidAndTidMatch[1].trim()} tid: ${tid}`;
 
     // Assume start time is the time of the first sample
     startTime = Math.min(startTime, timeStamp);
