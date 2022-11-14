@@ -18,7 +18,7 @@ type MarkerStyle = {|
 const defaultStyle = {
   top: 0,
   height: 6,
-  background: 'black',
+  background: 'rgb(0, 0, 0)',
   squareCorners: false,
   borderLeft: null,
   borderRight: null,

@@ -228,7 +228,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "rgb(255, 255, 255)",
   ],
   Array [
     "fillText",
@@ -620,7 +620,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "rgb(0, 0, 0)",
   ],
   Array [
     "fillText",
@@ -746,7 +746,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "rgb(0, 0, 0)",
   ],
   Array [
     "fillText",
@@ -1067,7 +1067,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "rgb(0, 0, 0)",
   ],
   Array [
     "fillText",
@@ -1151,7 +1151,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "rgb(255, 255, 255)",
   ],
   Array [
     "fillText",
@@ -1420,7 +1420,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "rgb(0, 0, 0)",
   ],
   Array [
     "fillText",

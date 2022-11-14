@@ -330,7 +330,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       if (w2 > textMeasurement.minWidth) {
         const fittedText = textMeasurement.getFittedText(text, w2);
         if (fittedText) {
-          ctx.fillStyle = isHighlighted ? 'white' : 'black';
+          ctx.fillStyle = isHighlighted ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)';
           ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
         }
       }
