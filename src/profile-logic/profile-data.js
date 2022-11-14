@@ -386,7 +386,7 @@ export type OneCategoryBreakdown = {|
   subcategoryBreakdown: Milliseconds[], // { [IndexIntoSubcategoryList]: Milliseconds }
 |};
 export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
-type ItemTimings = {|
+export type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
     value: Milliseconds,
@@ -2593,6 +2593,7 @@ export function shouldDisplaySubcategoryInfoForCategory(
   return category.subcategories.length > 1;
 }
 
+/** Interprets sub category 0 as the category itself */
 export function getCategoryPairLabel(
   categories: CategoryList,
   categoryIndex: number,

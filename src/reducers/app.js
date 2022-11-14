@@ -131,6 +131,7 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     case 'SHOW_PROVIDED_TRACKS':
     case 'HIDE_PROVIDED_TRACKS':
     case 'SHOW_GLOBAL_TRACK':
+    case 'SHOW_GLOBAL_TRACK_INCLUDING_LOCAL_TRACKS':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_LOCAL_TRACK':

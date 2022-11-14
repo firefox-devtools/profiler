@@ -79,6 +79,17 @@ exports[`timeline/TrackContextMenu when a global track is right clicked matches 
     class="react-contextmenu-separator"
   />
   <div
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Show all tracks in this process
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
     aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
@@ -136,6 +147,20 @@ exports[`timeline/TrackContextMenu when a global track is right clicked network 
   >
     Hide “⁨Process 0⁩”
   </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Show all tracks in this process
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
   <div
     aria-checked="true"
     aria-disabled="false"
@@ -201,6 +226,17 @@ exports[`timeline/TrackContextMenu when a local track is right clicked matches t
     tabindex="-1"
   >
     Hide “⁨DOM Worker⁩”
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Show all tracks in this process
   </div>
   <div
     class="react-contextmenu-separator"
