@@ -5,8 +5,7 @@
 
 import SymbolStoreDB from '../../profile-logic/symbol-store-db';
 import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
-import fakeIndexedDB from 'fake-indexeddb';
-import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
+import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 
 describe('SymbolStoreDB', function () {
   const libs = Array.from({ length: 10 }).map((_, i) => ({
@@ -16,8 +15,8 @@ describe('SymbolStoreDB', function () {
 
   beforeAll(function () {
     // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
-    window.indexedDB = fakeIndexedDB;
-    window.IDBKeyRange = FDBKeyRange;
+    window.indexedDB = indexedDB;
+    window.IDBKeyRange = IDBKeyRange;
   });
 
   afterAll(function () {

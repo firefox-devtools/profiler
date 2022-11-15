@@ -21,8 +21,7 @@ import {
 import { formatTree } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
-import fakeIndexedDB from 'fake-indexeddb';
-import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
+import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { TextDecoder } from 'util';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
@@ -34,8 +33,8 @@ describe('doSymbolicateProfile', function () {
   const symbolStoreName = 'test-db';
   beforeAll(function () {
     // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
-    window.indexedDB = fakeIndexedDB;
-    window.IDBKeyRange = FDBKeyRange;
+    window.indexedDB = indexedDB;
+    window.IDBKeyRange = IDBKeyRange;
     window.TextDecoder = TextDecoder;
   });
 
@@ -548,7 +547,7 @@ function _createUnsymbolicatedProfile() {
 
 function _deleteDatabase(dbName: string) {
   return new Promise((resolve, reject) => {
-    const req = fakeIndexedDB.deleteDatabase(dbName);
+    const req = indexedDB.deleteDatabase(dbName);
     req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
