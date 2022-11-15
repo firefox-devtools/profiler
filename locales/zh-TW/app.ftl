@@ -60,6 +60,11 @@ CallNodeContextMenu--transform-focus-function-inverted = 聚焦於函數（反�
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = 只聚焦於子樹
     .title = 聚焦於子樹，將從呼叫樹中拉出分支，並移除不屬於該分支的內容。然而此功能只對單一呼叫節點有效，將忽略其他呼叫該函數的部分。
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = 聚焦於分類 <strong>{ $categoryName }</strong>
+    .title = 聚焦於與選擇的節點相同的分類，因此會將屬於其他分類的節點合併起來。
 CallNodeContextMenu--transform-collapse-function-subtree = 摺疊函數
     .title = 將函數摺疊後，將移除所有呼叫內容，並將所有執行時間併入該函數中。這樣做可簡化檢測檔內容，將不需要分析的程式合併為單一呼叫。
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -67,8 +72,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = 摺疊函數
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = 摺疊<strong>{ $nameForResource }</strong>
     .title = 摺疊資源可將所有對該資源的呼叫，壓平成已摺疊的單一呼叫節點。
-CallNodeContextMenu--transform-collapse-direct-recursion = 摺疊直接遞迴
-    .title = 摺疊直接遞迴可移除對相同函數的重複遞迴呼叫。
+CallNodeContextMenu--transform-collapse-direct-recursion2 = 摺疊直接遞迴
+    .title = 「摺疊直接遞迴」會移除重複遞迴同一函數，而在堆疊中沒有中介函數的呼叫。
+CallNodeContextMenu--transform-collapse-indirect-recursion = 摺疊間接遞迴
+    .title = 「摺疊間接遞迴」會移除重複遞迴同一函數，就算在堆疊中有中介函數的呼叫也將移除。
 CallNodeContextMenu--transform-drop-function = 丟棄與此函數的相關檢測樣本
     .title = 丟棄樣本後將會從檢測檔移除該樣本所執行的時間。需要清除與分析無關的計時資訊時，此功能相當有用。
 CallNodeContextMenu--expand-all = 全部展開
@@ -312,7 +319,8 @@ MenuButtons--metaInfo--resymbolicate-profile = 重新將檢測檔符號化
 MenuButtons--metaInfo--symbolicate-profile = 符號化檢測檔
 MenuButtons--metaInfo--attempting-resymbolicate = 正在嘗試重新符號化檢測檔
 MenuButtons--metaInfo--currently-symbolicating = 目前符號化的檢測檔
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = CPU 型號:
+MenuButtons--metaInfo--cpu-cores = CPU 核心數:
 MenuButtons--metaInfo--main-memory = 主要記憶體：
 MenuButtons--index--show-moreInfo-button = 顯示更多
 MenuButtons--index--hide-moreInfo-button = 顯示更少
@@ -586,6 +594,7 @@ TrackContextMenu--hide-other-screenshots-tracks = 隱藏其他畫面擷圖軌
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = 隱藏「{ $trackName }」
 TrackContextMenu--show-all-tracks = 顯示所有軌道
+TrackContextMenu--show-local-tracks-in-process = 顯示此處理程序當中的所有軌道
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = 顯示所有符合的軌道
@@ -703,6 +712,11 @@ TransformNavigator--focus-subtree = 聚焦節點: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = 聚焦: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = 聚焦於分類: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -722,7 +736,12 @@ TransformNavigator--drop-function = 丟棄: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = 摺疊遞迴: { $item }
+TransformNavigator--collapse-direct-recursion2 = 摺疊直接遞迴: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = 摺疊不直接遞迴: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

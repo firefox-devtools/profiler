@@ -60,6 +60,11 @@ CallNodeContextMenu--transform-focus-function-inverted = Focus sulla funzione (i
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Focus solo sul sottoalbero
     .title = Il focus sul sottoalbero rimuoverà tutti i campioni che non includono quella specifica parte dell’albero delle chiamate. Estrae un ramo dell’albero, ma solo per quel singolo nodo di chiamata. Tutte le altre chiamate a quella funzione vengono ignorate.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Focus sulla categoria <strong>{ $categoryName }</strong>
+    .title = Il focus verrà applicato ai nodi che appartengono alla stessa categoria del nodo selezionato. Tutti gli altri nodi che appartengono ad altre categorie verranno uniti.
 CallNodeContextMenu--transform-collapse-function-subtree = Comprimi funzione
     .title = Comprimendo una funzione verrà rimosso tutto ciò che ha chiamato e il tempo di esecuzione verrà assegnato alla funzione stessa. Questo permette di semplificare un profilo con chiamate a codice che non deve essere analizzato.
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -67,8 +72,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = Comprimi funzione
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Comprimi <strong>{ $nameForResource }</strong>
     .title = Comprimendo una risorsa, tutte le chiamate a quella risorsa verranno compresse in un singolo nodo di chiamata.
-CallNodeContextMenu--transform-collapse-direct-recursion = Comprimi ricorsione diretta
-    .title = Comprimendo la ricorsione diretta, verranno rimosse tutte le chiamate ricorsive a quella stessa funzione.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Comprimi ricorsione diretta
+    .title = Comprimendo la ricorsione diretta verranno rimosse tutte le chiamate ricorsive a quella stessa funzione senza funzioni intermedie nello stack.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Comprimi ricorsione indiretta
+    .title = Comprimendo la ricorsione indiretta verranno rimosse tutte le chiamate ricorsive a quella stessa funzione, anche con funzioni intermedie nello stack.
 CallNodeContextMenu--transform-drop-function = Scarta campioni con questa funzione
     .title = Rimuovendo i campioni, i tempi di esecuzione associati verranno rimossi dal profilo. Questo è utile per eliminare informazioni sui tempi che non sono rilevanti per l’analisi.
 CallNodeContextMenu--expand-all = Espandi tutto
@@ -316,7 +323,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Risimbolizza il profilo
 MenuButtons--metaInfo--symbolicate-profile = Simbolizza il profilo
 MenuButtons--metaInfo--attempting-resymbolicate = Tentativo di risimbolizzare il profilo
 MenuButtons--metaInfo--currently-symbolicating = Profilo attualmente in fase di simbolizzazione
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = Modello CPU:
+MenuButtons--metaInfo--cpu-cores = Core della CPU:
 MenuButtons--metaInfo--main-memory = Memoria principale:
 MenuButtons--index--show-moreInfo-button = Mostra dettagli
 MenuButtons--index--hide-moreInfo-button = Nascondi dettagli
@@ -591,6 +599,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Nascondi altre tracce Screensh
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Nascondi “{ $trackName } ”
 TrackContextMenu--show-all-tracks = Mostra tutte le tracce
+TrackContextMenu--show-local-tracks-in-process = Mostra tutte le tracce in questo processo
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Mostra tutte le tracce corrispondenti
@@ -708,6 +717,11 @@ TransformNavigator--focus-subtree = Focus sul nodo: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Focus sulla categoria: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -727,7 +741,12 @@ TransformNavigator--drop-function = Scarta: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Comprimi ricorsione: { $item }
+TransformNavigator--collapse-direct-recursion2 = Comprimi ricorsione diretta: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Comprimi ricorsione indiretta: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
