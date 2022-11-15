@@ -269,7 +269,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
       } else {
         hideGlobalTrack(trackIndex);
       }
-    }, 80);
+    }, 150);
   };
 
   _toggleLocalTrackVisibility = (
