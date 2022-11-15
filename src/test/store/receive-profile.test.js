@@ -35,7 +35,7 @@ import {
   changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
-import fakeIndexedDB from 'fake-indexeddb';
+import { indexedDB } from 'fake-indexeddb';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
@@ -99,7 +99,7 @@ describe('actions/receive-profile', function () {
   beforeEach(() => {
     // The SymbolStore requires the use of IndexedDB, ensure that it exists so that
     // symbolication can happen.
-    window.indexedDB = fakeIndexedDB;
+    window.indexedDB = indexedDB;
   });
 
   afterEach(() => {
@@ -200,10 +200,8 @@ describe('actions/receive-profile', function () {
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
-      idleThread.processType = 'default';
       idleThread.pid = 0;
       workThread.name = 'GeckoMain';
-      workThread.processType = 'default';
       idleThread.pid = 1;
 
       store.dispatch(viewProfile(profile));
@@ -218,10 +216,8 @@ describe('actions/receive-profile', function () {
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
-      idleThread.processType = 'default';
       idleThread.pid = 0;
       workThread.name = 'GeckoMain';
-      workThread.processType = 'default';
       workThread.pid = 1;
 
       store.dispatch(viewProfile(profile));
@@ -242,7 +238,6 @@ describe('actions/receive-profile', function () {
       threadA.processType = 'tab';
       threadA.pid = 111;
       threadB.name = 'Other';
-      threadB.processType = 'default';
       threadB.pid = 111;
 
       store.dispatch(viewProfile(profile));

@@ -74,6 +74,13 @@ CallNodeContextMenu--transform-focus-subtree = Nur auf Unterbaum konzentrieren
         Der Fokus auf einen Unterbaum entfernt jede Teilmenge, die diesen
         Teil des Aufrufbaums nicht enthält. Es wird ein Ast aus dem Aufrufbaum gezogen, jedoch nur für diesen einen Aufrufknoten. Alle
         anderen Aufrufe der Funktion werden ignoriert.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Fokus auf Kategorie <strong>{ $categoryName }</strong>
+    .title =
+        Fokus auf die Knoten, die zur selben Kategorie wie der ausgewählte Knoten haben,
+        wodurch alle Knoten, die zu anderen Kategorien gehören, zusammengeführt werden.
 CallNodeContextMenu--transform-collapse-function-subtree = Funktion einklappen
     .title =
         Wenn eine Funktion eingeklappt wird, werden alle Aufrufe durch diese Funktion entfernt
@@ -86,10 +93,10 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         Wenn eine Ressource eingeklappt wird, werden alle Aufrufe dieser 
         Ressource in einen einzigen eingeklappten Aufrufknoten umgewandelt.
-CallNodeContextMenu--transform-collapse-direct-recursion = Direkte Rekursion einklappen
-    .title =
-        Einklappen der direkten Rekursion entfernt Aufrufe, die wiederholt
-        in dieselbe Funktion rekurrieren.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Direkte Rekursion einklappen
+    .title = Wenn Sie die direkte Rekursion einklappen, werden Aufrufe entfernt, die wiederholt in die selbe Funktion rekurrieren, ohne dass es im Stapel Funktionen dazwischen gibt.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Indirekte Rekursion einklappen
+    .title = Wenn Sie die direkte Rekursion einklappen, werden Aufrufe entfernt, die wiederholt in die selbe Funktion rekurrieren, auch wenn es im Stapel Funktionen dazwischen gibt.
 CallNodeContextMenu--transform-drop-function = Teilmengen mit dieser Funktion verwerfen
     .title =
         Wenn Teilmengen verworfen werden, wird ihre Zeit aus dem Profil entfernt. Dies ist hilfreich,
@@ -366,7 +373,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Profil erneut symbolisieren
 MenuButtons--metaInfo--symbolicate-profile = Profil symbolisieren
 MenuButtons--metaInfo--attempting-resymbolicate = Versuch, das Profil erneut zu symbolisieren
 MenuButtons--metaInfo--currently-symbolicating = Profil wird aktuell symbolisiert
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = Prozessormodell
+MenuButtons--metaInfo--cpu-cores = Prozessorkerne:
 MenuButtons--metaInfo--main-memory = Hauptspeicher:
 MenuButtons--index--show-moreInfo-button = Mehr anzeigen
 MenuButtons--index--hide-moreInfo-button = Weniger anzeigen
@@ -646,6 +654,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Andere Screenshots-Tracks ausb
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = „{ $trackName }“ verbergen
 TrackContextMenu--show-all-tracks = Alle Tracks anzeigen
+TrackContextMenu--show-local-tracks-in-process = Alle Tracks in diesem Prozess anzeigen
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Alle passenden Tracks anzeigen
@@ -763,6 +772,11 @@ TransformNavigator--focus-subtree = Knoten fokussieren: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Fokussieren: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Kategorie fokussieren: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -782,7 +796,12 @@ TransformNavigator--drop-function = Verwerfen: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Rekursion einklappen: { $item }
+TransformNavigator--collapse-direct-recursion2 = Direkte Rekursion einklappen: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Indirekte Rekursion einklappen: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

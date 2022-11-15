@@ -386,7 +386,7 @@ export type OneCategoryBreakdown = {|
   subcategoryBreakdown: Milliseconds[], // { [IndexIntoSubcategoryList]: Milliseconds }
 |};
 export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
-type ItemTimings = {|
+export type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
     value: Milliseconds,
@@ -1436,7 +1436,8 @@ export function processCounter(counter: Counter): Counter {
   const processedGroups = counter.sampleGroups.map((sampleGroup) => {
     const { samples } = sampleGroup;
     const count = samples.count.slice();
-    const number = samples.number.slice();
+    const number =
+      samples.number !== undefined ? samples.number.slice() : undefined;
 
     // These lines zero out the first values of the counters, as they are unreliable. In
     // addition, there are probably some missed counts in the memory counters, so the
@@ -1447,7 +1448,9 @@ export function processCounter(counter: Counter): Counter {
     // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
     count[0] = 0;
-    number[0] = 0;
+    if (number !== undefined) {
+      number[0] = 0;
+    }
 
     return {
       ...sampleGroup,
@@ -1784,7 +1787,7 @@ function _getCallNodeIndexFromPathWithCache(
     // Resolving the index for subpath `callNodePath.slice(0, i+1)` given we
     // know the index for the subpath `callNodePath.slice(0, i)` (its parent).
     const func = callNodePath[i];
-    const nextNodeIndex = _getCallNodeIndexFromParentAndFunc(
+    const nextNodeIndex = getCallNodeIndexFromParentAndFunc(
       index,
       func,
       callNodeTable
@@ -1809,7 +1812,7 @@ function _getCallNodeIndexFromPathWithCache(
 
 // Returns the CallNodeIndex that matches the function `func` and whose parent's
 // CallNodeIndex is `parent`.
-function _getCallNodeIndexFromParentAndFunc(
+export function getCallNodeIndexFromParentAndFunc(
   parent: IndexIntoCallNodeTable,
   func: IndexIntoFuncTable,
   callNodeTable: CallNodeTable
@@ -2590,6 +2593,7 @@ export function shouldDisplaySubcategoryInfoForCategory(
   return category.subcategories.length > 1;
 }
 
+/** Interprets sub category 0 as the category itself */
 export function getCategoryPairLabel(
   categories: CategoryList,
   categoryIndex: number,

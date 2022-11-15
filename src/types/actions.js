@@ -265,6 +265,11 @@ type ProfileAction =
       +trackIndex: TrackIndex,
     |}
   | {|
+      +type: 'SHOW_GLOBAL_TRACK_INCLUDING_LOCAL_TRACKS',
+      +trackIndex: TrackIndex,
+      +pid: Pid,
+    |}
+  | {|
       // Isolate only the process track, and not the local tracks.
       +type: 'ISOLATE_PROCESS',
       +hiddenGlobalTracks: Set<TrackIndex>,
@@ -440,6 +445,7 @@ type UrlStateAction =
       +threadsKey: ThreadsKey,
       +transform: Transform,
       +transformedThread: Thread,
+      +callNodeTable: CallNodeTable,
     |}
   | {|
       +type: 'POP_TRANSFORMS_FROM_STACK',

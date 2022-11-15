@@ -79,7 +79,10 @@ import type {
   GlobalTrack,
   KeyboardModifiers,
 } from 'firefox-profiler/types';
-import { funcHasRecursiveCall } from '../profile-logic/transforms';
+import {
+  funcHasDirectRecursiveCall,
+  funcHasIndirectRecursiveCall,
+} from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import { intersectSets } from 'firefox-profiler/utils/set';
@@ -1036,9 +1039,8 @@ export function showProvidedTracks(
     // visible too. Let's iterate over the global tracks and include them if
     // their children are going to be made visible.
     const globalTracks = getGlobalTracks(getState());
-    const pidsToShow = new Set(localTracksByPidToShow.keys());
     for (const [globalTrackIndex, globalTrack] of globalTracks.entries()) {
-      if (globalTrack.pid && pidsToShow.has(globalTrack.pid)) {
+      if (globalTrack.pid && localTracksByPidToShow.has(globalTrack.pid)) {
         globalTracksToShow.add(globalTrackIndex);
       }
     }
@@ -1167,6 +1169,28 @@ export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
     dispatch({
       type: 'SHOW_GLOBAL_TRACK',
       trackIndex,
+    });
+  };
+}
+
+/**
+ * This action shows a specific global track and its local tracks.
+ */
+export function showGlobalTrackIncludingLocalTracks(
+  trackIndex: TrackIndex,
+  pid: Pid
+): ThunkAction<void> {
+  return (dispatch) => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'show global track including local tracks',
+    });
+
+    dispatch({
+      type: 'SHOW_GLOBAL_TRACK_INCLUDING_LOCAL_TRACKS',
+      trackIndex,
+      pid,
     });
   };
 }
@@ -1878,15 +1902,17 @@ export function addTransformToStack(
   transform: Transform
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const transformedThread = getThreadSelectorsFromThreadsKey(
-      threadsKey
-    ).getRangeAndTransformFilteredThread(getState());
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const transformedThread =
+      threadSelectors.getRangeAndTransformFilteredThread(getState());
 
+    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
     dispatch({
       type: 'ADD_TRANSFORM_TO_STACK',
       threadsKey,
       transform,
       transformedThread,
+      callNodeTable,
     });
     sendAnalytics({
       hitType: 'event',
@@ -1989,6 +2015,7 @@ export function handleCallNodeTransformShortcut(
     const inverted = getInvertCallstack(getState());
     const callNodePath = getCallNodePathFromIndex(callNodeIndex, callNodeTable);
     const funcIndex = callNodeTable.func[callNodeIndex];
+    const category = callNodeTable.category[callNodeIndex];
 
     switch (event.key) {
       case 'F':
@@ -2051,10 +2078,34 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'r': {
-        if (funcHasRecursiveCall(unfilteredThread, implementation, funcIndex)) {
+        if (
+          funcHasDirectRecursiveCall(
+            unfilteredThread,
+            implementation,
+            funcIndex
+          )
+        ) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-direct-recursion',
+              funcIndex,
+              implementation,
+            })
+          );
+        }
+        break;
+      }
+      case 'R': {
+        if (
+          funcHasIndirectRecursiveCall(
+            unfilteredThread,
+            implementation,
+            funcIndex
+          )
+        ) {
+          dispatch(
+            addTransformToStack(threadsKey, {
+              type: 'collapse-indirect-recursion',
               funcIndex,
               implementation,
             })
@@ -2071,6 +2122,14 @@ export function handleCallNodeTransformShortcut(
         );
         break;
       }
+      case 'g':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-category',
+            category,
+          })
+        );
+        break;
       default:
       // This did not match a call tree transform.
     }

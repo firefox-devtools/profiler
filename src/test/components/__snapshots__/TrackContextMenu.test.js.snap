@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global non-process track 1`] = `
+exports[`timeline/TrackContextMenu when a global track is right clicked matches the snapshot of a global non-process track 1`] = `
 <nav
   class="react-contextmenu timelineTrackContextMenu"
   role="menu"
@@ -27,9 +27,10 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     class="react-contextmenu-separator"
   />
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
     title="Screenshots"
   >
@@ -43,7 +44,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 </nav>
 `;
 
-exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global track 1`] = `
+exports[`timeline/TrackContextMenu when a global track is right clicked matches the snapshot of a global track 1`] = `
 <nav
   class="react-contextmenu timelineTrackContextMenu"
   role="menu"
@@ -78,9 +79,21 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     class="react-contextmenu-separator"
   />
   <div
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Show all tracks in this process
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
     title="Content Process (Process ID: 222)"
   >
@@ -99,17 +112,19 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     </span>
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     DOM Worker
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     Style
@@ -117,7 +132,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 </nav>
 `;
 
-exports[`timeline/TrackContextMenu selected global track network track will be displayed when a number is not set for ctxId 1`] = `
+exports[`timeline/TrackContextMenu when a global track is right clicked network track will be displayed when a number is not set for ctxId 1`] = `
 <nav
   class="react-contextmenu timelineTrackContextMenu"
   role="menu"
@@ -133,9 +148,24 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
     Hide “⁨Process 0⁩”
   </div>
   <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Show all tracks in this process
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
     title="Process 0 (Process ID: 0)"
   >
@@ -154,17 +184,19 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
     </span>
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     Network
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     Empty
@@ -172,7 +204,7 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
 </nav>
 `;
 
-exports[`timeline/TrackContextMenu selected local track matches the snapshot of a local track 1`] = `
+exports[`timeline/TrackContextMenu when a local track is right clicked matches the snapshot of a local track 1`] = `
 <nav
   class="react-contextmenu timelineTrackContextMenu"
   role="menu"
@@ -199,9 +231,21 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     class="react-contextmenu-separator"
   />
   <div
+    aria-disabled="true"
+    class="react-contextmenu-item react-contextmenu-item--disabled"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Show all tracks in this process
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
     title="Content Process (Process ID: 222)"
   >
@@ -220,17 +264,19 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     </span>
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     DOM Worker
   </div>
   <div
+    aria-checked="true"
     aria-disabled="false"
     class="react-contextmenu-item checkable indented checked"
-    role="menuitem"
+    role="menuitemcheckbox"
     tabindex="-1"
   >
     Style

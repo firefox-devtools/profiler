@@ -56,7 +56,7 @@ export function isPerfScriptFormat(profile: string): boolean {
   //          |        |      |          +- [CPU] (optional, present in SimplePerf output)
   //          |        |      |          |          +- timestamp
   //       vvvvv   vvvvvvvvv vvv   vvvvvvvvvvvvvv vvvvvv
-  return /^\S.+?\s+(?:\d+\/)?\d+\s+(?:\[\d+\]\s+)?[\d.]+:/.test(firstLine);
+  return /^\S.*?\s+(?:\d+\/)?\d+\s+(?:\[\d+\]\s+)?[\d.]+:/.test(firstLine);
 }
 
 // Don't try and type this more specifically.

@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Фокус лише на підд
         конкретну частину дерева викликів. Це витягує гілку дерева викликів,
         однак робить це лише для того єдиного вузла виклику. Усі інші виклики
         функції ігноруються.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Фокус на категорії <strong>{ $categoryName }</strong>
+    .title =
+        Фокусування на вузлах, які належать тій самій категорії що й вибраний вузол,
+        об'єднуючи таким чином усі вузли, які належать іншій категорії.
 CallNodeContextMenu--transform-collapse-function-subtree = Згорнути функцію
     .title =
         Згортання функції вилучить усе, що вона викликала, і призначить
@@ -90,10 +97,10 @@ CallNodeContextMenu--transform-collapse-resource = Згорнути <strong>{ $n
     .title =
         Згортання ресурсу згладить усі виклики до того
         ресурсу в єдиний згорнутий вузол виклику.
-CallNodeContextMenu--transform-collapse-direct-recursion = Згорнути пряму рекурсію
-    .title =
-        Згортання прямої рекурсії вилучає виклики, рекурсія яких повторюється
-        в ту саму функцію.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Згорнути пряму рекурсію
+    .title = Згортання прямої рекурсії вилучає виклики, які постійно рекурсуються в ту саму функцію без посередницьких функцій у стеку.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Згорнути непряму рекурсію
+    .title = Згортання непрямої рекурсії вилучає виклики, які постійно рекурсуються в ту саму функцію, навіть із посередницькими функціями у стеку.
 CallNodeContextMenu--transform-drop-function = Покинути зразки з цією функцією
     .title =
         Якщо покинути зразки, їх час вилучається з профілю. Це корисно для
@@ -378,7 +385,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Повторно символіз
 MenuButtons--metaInfo--symbolicate-profile = Символізувати профіль
 MenuButtons--metaInfo--attempting-resymbolicate = Спроба повторно символізувати профіль
 MenuButtons--metaInfo--currently-symbolicating = Наразі профіль символізується
-MenuButtons--metaInfo--cpu = ЦП:
+MenuButtons--metaInfo--cpu-model = Модель ЦП:
+MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
 MenuButtons--metaInfo--main-memory = Основна пам'ять:
 MenuButtons--index--show-moreInfo-button = Показати більше
 MenuButtons--index--hide-moreInfo-button = Показати менше
@@ -663,6 +671,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Сховати доріжки 
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Сховати “{ $trackName }”
 TrackContextMenu--show-all-tracks = Показати всі доріжки
+TrackContextMenu--show-local-tracks-in-process = Показати всі доріжки в цьому процесі
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Показати всі відповідні доріжки
@@ -780,6 +789,11 @@ TransformNavigator--focus-subtree = Вузол фокусування: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Сфокусуватися: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Категорія в фокусі: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -799,7 +813,12 @@ TransformNavigator--drop-function = Відкинуто: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Згорнути рекурсію: { $item }
+TransformNavigator--collapse-direct-recursion2 = Згорнути пряму рекурсію: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Згорнути непряму рекурсію: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

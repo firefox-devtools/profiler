@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Foco solo sur sub-arbore.
         specific parte del arbore de appello. Illo extrahe un ramo del arbore de appello,
          totevia solo lo face pro iste singule nodo de appello. Tote le altere appellos
         del function es ignorate.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Examinar categoria <strong>{ $categoryName }</strong>
+    .title =
+        Concentrar se sur le nodos que pertine al mesme categoria que le nodo seligite,
+        assi miscer tote le nodos que pertine a un altere categoria.
 CallNodeContextMenu--transform-collapse-function-subtree = Collaber function
     .title =
         Collaber un function removera toto lo appellate, e assignara
@@ -88,10 +95,14 @@ CallNodeContextMenu--transform-collapse-function-subtree = Collaber function
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Collaber <strong>{ $nameForResource }</strong>
     .title = Collaber un ressource applattara tote le appellos a ille ressource in un singule nodo de appello collabite.
-CallNodeContextMenu--transform-collapse-direct-recursion = Collaber directe recursion
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Collaber le recursion directe
     .title =
-        Collaber directe recursion remove appellos que recurre repetitemente in
-        le mesme function.
+        Collaber le recursion directe remove appellos que recurre repetitemente in
+        le mesme function sin functiones intermedie sur le pila.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Collaber recursion indirecte
+    .title =
+        Collaber le recursion indirecte remove appellos que repetitemente se recurre in
+        le mesme function, mesmo con functiones intermedie sur le pila
 CallNodeContextMenu--transform-drop-function = Lassar cader specimens con iste function
     .title =
         Lassar cader specimens remove lor tempore ab le profilo. Isto es utile pro
@@ -225,7 +236,7 @@ FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $tot
 
 ## Home page
 
-Home--upload-from-file-input-button = Cargar un profilo ex un file
+Home--upload-from-file-input-button = Cargar un profilo de un file
 Home--upload-from-url-button = Cargar un profilo de un URL
 Home--load-from-url-submit-button =
     .value = Cargar
@@ -256,7 +267,7 @@ Home--profiler-motto = Capturar un profilo de prestation. Analysar lo. Compartir
 Home--additional-content-title = Cargar profilos existente
 Home--additional-content-content = Tu pote <strong>traher e deponer</strong> hic un file profilo pro cargar lo, o:
 Home--compare-recordings-info = Tu pote alsi comparar registrationes. <a>Aperir le interfacie de comparation.</a>
-Home--your-recent-uploaded-recordings-title = Tu registrationes cargate recentemente
+Home--your-recent-uploaded-recordings-title = Tu registrationes incargate recentemente
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -281,7 +292,7 @@ ListOfPublishedProfiles--published-profiles-link =
     .title = Clicca hic pro cargar le profilo { $smallProfileName }
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Deler
     .title = Iste profilo non pote esser delite perque nos care de informationes de autorisation.
-ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nulle profilo ha essite cargate ancora!
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nulle profilo ha essite incargate ancora!
 # This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
 #   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
@@ -348,13 +359,13 @@ MarkerTable--description = Description
 MenuButtons--index--metaInfo-button =
     .label = Informationes de profilo
 MenuButtons--index--full-view = Vista complete
-MenuButtons--index--cancel-upload = Cancellar le cargamento
+MenuButtons--index--cancel-upload = Cancellar le incargamento
 MenuButtons--index--share-upload =
-    .label = Cargar profilo local
+    .label = Incargar profilo local
 MenuButtons--index--share-re-upload =
-    .label = Recargar
+    .label = Reincargar
 MenuButtons--index--share-error-uploading =
-    .label = Error al cargar
+    .label = Error durante le incargamento
 MenuButtons--index--revert = Reverter al profilo original
 MenuButtons--index--docs = Documentos
 MenuButtons--permalink--button =
@@ -364,7 +375,7 @@ MenuButtons--permalink--button =
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
-MenuButtons--index--profile-info-uploaded-label = Cargate:
+MenuButtons--index--profile-info-uploaded-label = Incargate:
 MenuButtons--index--profile-info-uploaded-actions = Deler
 MenuButtons--index--metaInfo-subtitle = Informationes de profilo
 MenuButtons--metaInfo--symbols = Symbolos:
@@ -374,7 +385,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolisar le profilo
 MenuButtons--metaInfo--symbolicate-profile = { $logicalCPUs } nucleo logic
 MenuButtons--metaInfo--attempting-resymbolicate = { $logicalCPUs } nucleos logic
 MenuButtons--metaInfo--currently-symbolicating = Actualmente symbolisante le profilo
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = Modello de CPU:
+MenuButtons--metaInfo--cpu-cores = Cordes del CPU:
 MenuButtons--metaInfo--main-memory = Memoria principal:
 MenuButtons--index--show-moreInfo-button = Monstrar plus
 MenuButtons--index--hide-moreInfo-button = Monstrar minus
@@ -487,16 +499,16 @@ MenuButtons--publish--renderCheckbox-label-preference = Includer valores de pref
 MenuButtons--publish--renderCheckbox-label-private-browsing = Includer le datos ab le fenestra de navigation private
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Iste profilo contine datos de navigation private
-MenuButtons--publish--reupload-performance-profile = Re-cargar profilo de prestation
+MenuButtons--publish--reupload-performance-profile = Reincargar profilo de rendimento
 MenuButtons--publish--share-performance-profile = Compartir profilo de prestation
-MenuButtons--publish--info-description = Carga tu profilo e lo rende accessibile a totes con le ligamine.
+MenuButtons--publish--info-description = Incarga tu profilo e rende lo accessibile a totes con le ligamine.
 MenuButtons--publish--info-description-default = De ordinario, tu datos personal es removite.
 MenuButtons--publish--info-description-firefox-nightly2 = Iste profilo es de { -firefox-nightly-brand-name }, assi de ordinario plure informationes es includite.
 MenuButtons--publish--include-additional-data = Includer altere datos que pote esser identificabile
-MenuButtons--publish--button-upload = Cargar
-MenuButtons--publish--upload-title = Cargamento del profilo…
-MenuButtons--publish--cancel-upload = Cancellar le cargamento
-MenuButtons--publish--message-something-went-wrong = Oh oh, alco errate eveniva durante le cargamento del profilo.
+MenuButtons--publish--button-upload = Incargar
+MenuButtons--publish--upload-title = Incargamento del profilo…
+MenuButtons--publish--cancel-upload = Cancellar incargamento
+MenuButtons--publish--message-something-went-wrong = Guai, un error se ha producite durante le incargamento del profilo.
 MenuButtons--publish--message-try-again = Retentar
 MenuButtons--publish--download = Discargar
 MenuButtons--publish--compressing = Comprimente…
@@ -547,7 +559,7 @@ ProfileDeletePanel--delete-error = Un error eveniva durante le deletion de iste 
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
 ProfileDeletePanel--dialog-title = Deler { $profileName }
-ProfileDeletePanel--dialog-confirmation-question = Desira tu vermente deler le datos cargate pro iste profilo? Le ligamines que era previemente compartite non plus functionara.
+ProfileDeletePanel--dialog-confirmation-question = Es tu secur de voler deler le datos incargate pro iste profilo? Le ligamines compartite anteriormente non functionara plus.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Cancellar
 ProfileDeletePanel--dialog-delete-button =
@@ -557,7 +569,7 @@ ProfileDeletePanel--dialog-delete-button =
 ProfileDeletePanel--dialog-deleting-button =
     .value = Deletion…
 # This message is displayed when a profile has been successfully deleted.
-ProfileDeletePanel--message-success = Le datos cargate ha essite delite con successo.
+ProfileDeletePanel--message-success = Le datos incargate ha essite delite con successo.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -652,6 +664,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Celar altere tracias de instan
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Celar “{ $trackName }”
 TrackContextMenu--show-all-tracks = Monstrar tote le tracias
+TrackContextMenu--show-local-tracks-in-process = Monstrar tote le tracias in iste processo
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Monstrar tote le tracias concordante
@@ -769,6 +782,11 @@ TransformNavigator--focus-subtree = Foco sur nodo: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Foco sur: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Categoria Foco: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -788,7 +806,12 @@ TransformNavigator--drop-function = Lassar cader: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Collaber recursion: { $item }
+TransformNavigator--collapse-direct-recursion2 = Collaber le recursion directe: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Collaber le recursion indirecte: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
@@ -858,4 +881,4 @@ SourceView--close-button =
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
-UploadedRecordingsHome--title = Registrationes cargate
+UploadedRecordingsHome--title = Registrationes incargate

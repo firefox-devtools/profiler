@@ -9,8 +9,12 @@ import { Localized } from '@fluent/react';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { funcHasRecursiveCall } from 'firefox-profiler/profile-logic/transforms';
+import {
+  funcHasDirectRecursiveCall,
+  funcHasIndirectRecursiveCall,
+} from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
+import { getCategories } from 'firefox-profiler/selectors';
 
 import copy from 'copy-to-clipboard';
 import {
@@ -38,10 +42,12 @@ import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
+  IndexIntoFuncTable,
   CallNodeInfo,
   CallNodePath,
   Thread,
   ThreadsKey,
+  CategoryList,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
@@ -50,6 +56,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 type StateProps = {|
   +thread: Thread | null,
   +threadsKey: ThreadsKey | null,
+  +categories: CategoryList,
   +callNodeInfo: CallNodeInfo | null,
   +rightClickedCallNodePath: CallNodePath | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -236,9 +243,15 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const { threadsKey, callNodePath, thread } = rightClickedCallNodeInfo;
+    const {
+      threadsKey,
+      callNodePath,
+      thread,
+      callNodeIndex,
+      callNodeInfo: { callNodeTable },
+    } = rightClickedCallNodeInfo;
     const selectedFunc = callNodePath[callNodePath.length - 1];
-
+    const category = callNodeTable.category[callNodeIndex];
     switch (type) {
       case 'focus-subtree':
         addTransformToStack(threadsKey, {
@@ -295,10 +308,25 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         });
         break;
       }
+      case 'collapse-indirect-recursion': {
+        addTransformToStack(threadsKey, {
+          type: 'collapse-indirect-recursion',
+          funcIndex: selectedFunc,
+          implementation,
+        });
+        break;
+      }
       case 'collapse-function-subtree': {
         addTransformToStack(threadsKey, {
           type: 'collapse-function-subtree',
           funcIndex: selectedFunc,
+        });
+        break;
+      }
+      case 'focus-category': {
+        addTransformToStack(threadsKey, {
+          type: 'focus-category',
+          category,
         });
         break;
       }
@@ -360,7 +388,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   /**
    * Determine if this CallNode represent a recursive function call.
    */
-  isRecursiveCall(): boolean {
+  isRecursiveCall(
+    funcHasRecursiveCall: (
+      Thread,
+      ImplementationFilter,
+      IndexIntoFuncTable
+    ) => boolean
+  ): boolean {
     const { implementation } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
@@ -422,7 +456,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   renderContextMenuContents() {
-    const { inverted, selectedTab, displaySearchfox } = this.props;
+    const { inverted, selectedTab, displaySearchfox, categories } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -438,10 +472,15 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
+    const categoryIndex = callNodeTable.category[callNodeIndex];
     const funcIndex = callNodeTable.func[callNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
+    const hasCategory = categoryIndex !== -1;
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();
+    const categoryName: string = hasCategory
+      ? categories[categoryIndex].name
+      : '';
     const showExpandAll = selectedTab === 'calltree';
     const canCopyURL =
       isJS && funcTable.fileName[callNodeTable.func[callNodeIndex]] !== null;
@@ -493,6 +532,22 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           content: 'Focus on subtree only',
         })}
 
+        {hasCategory
+          ? this.renderTransformMenuItem({
+              l10nId: 'CallNodeContextMenu--transform-focus-category',
+              l10nProps: {
+                vars: { categoryName },
+                elems: { strong: <strong /> },
+              },
+              shortcut: 'g',
+              icon: 'Focus',
+              onClick: this._handleClick,
+              transform: 'focus-category',
+              title: '',
+              content: 'Focus on category',
+            })
+          : null}
+
         {this.renderTransformMenuItem({
           l10nId: 'CallNodeContextMenu--transform-collapse-function-subtree',
           shortcut: 'c',
@@ -519,16 +574,29 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             })
           : null}
 
-        {this.isRecursiveCall()
+        {this.isRecursiveCall(funcHasDirectRecursiveCall)
           ? this.renderTransformMenuItem({
               l10nId:
-                'CallNodeContextMenu--transform-collapse-direct-recursion',
+                'CallNodeContextMenu--transform-collapse-direct-recursion2',
               shortcut: 'r',
               icon: 'Collapse',
               onClick: this._handleClick,
               transform: 'collapse-direct-recursion',
               title: '',
               content: 'Collapse direct recursion',
+            })
+          : null}
+
+        {this.isRecursiveCall(funcHasIndirectRecursiveCall)
+          ? this.renderTransformMenuItem({
+              l10nId:
+                'CallNodeContextMenu--transform-collapse-indirect-recursion',
+              shortcut: 'R',
+              icon: 'Collapse',
+              onClick: this._handleClick,
+              transform: 'collapse-indirect-recursion',
+              title: '',
+              content: 'Collapse indirect recursion',
             })
           : null}
 
@@ -685,6 +753,7 @@ export const CallNodeContextMenu = explicitConnect<
     return {
       thread,
       threadsKey,
+      categories: getCategories(state),
       callNodeInfo,
       rightClickedCallNodePath,
       rightClickedCallNodeIndex,

@@ -57,13 +57,19 @@ function getSamplesPixelPosition(
  * This test verifies that the memory track can draw a graph of the memory.
  */
 describe('TrackMemory', function () {
-  function setup() {
+  function setup(
+    counterConfig: $Shape<{| hasCountNumber: boolean |}> = {
+      hasCountNumber: true,
+    }
+  ) {
     const { profile } = getProfileFromTextSamples(
       Array(SAMPLE_COUNT).fill('A').join('  ')
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    profile.counters = [getCounterForThread(thread, threadIndex)];
+    profile.counters = [
+      getCounterForThread(thread, threadIndex, counterConfig),
+    ];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
@@ -138,6 +144,14 @@ describe('TrackMemory', function () {
 
   it('has a tooltip that matches the snapshot', function () {
     const { moveMouseAtCounter, getTooltipContents } = setup();
+    moveMouseAtCounter(5, 0.5);
+    expect(getTooltipContents()).toMatchSnapshot();
+  });
+
+  it('has a tooltip that matches the snapshot for counts equalling zero', function () {
+    const { moveMouseAtCounter, getTooltipContents } = setup({
+      hasCountNumber: false,
+    });
     moveMouseAtCounter(5, 0.5);
     expect(getTooltipContents()).toMatchSnapshot();
   });

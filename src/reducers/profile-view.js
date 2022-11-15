@@ -312,7 +312,8 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       });
     }
     case 'ADD_TRANSFORM_TO_STACK': {
-      const { threadsKey, transform, transformedThread } = action;
+      const { threadsKey, transform, transformedThread, callNodeTable } =
+        action;
       const threadViewOptions = _getThreadViewOptions(state, threadsKey);
       const expandedCallNodePaths = new PathSet(
         Array.from(threadViewOptions.expandedCallNodePaths)
@@ -320,7 +321,8 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
             Transforms.applyTransformToCallNodePath(
               path,
               transform,
-              transformedThread
+              transformedThread,
+              callNodeTable
             )
           )
           .filter((path) => path.length > 0)
@@ -329,7 +331,8 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       const selectedCallNodePath = Transforms.applyTransformToCallNodePath(
         threadViewOptions.selectedCallNodePath,
         transform,
-        transformedThread
+        transformedThread,
+        callNodeTable
       );
 
       return _updateThreadViewOptions(state, threadsKey, {

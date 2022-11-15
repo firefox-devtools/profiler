@@ -12,6 +12,7 @@ import {
   hideGlobalTrack,
   showAllTracks,
   showGlobalTrack,
+  showGlobalTrackIncludingLocalTracks,
   isolateProcess,
   isolateLocalTrack,
   isolateProcessMainThread,
@@ -78,6 +79,7 @@ type DispatchProps = {|
   +hideGlobalTrack: typeof hideGlobalTrack,
   +showAllTracks: typeof showAllTracks,
   +showGlobalTrack: typeof showGlobalTrack,
+  +showGlobalTrackIncludingLocalTracks: typeof showGlobalTrackIncludingLocalTracks,
   +isolateProcess: typeof isolateProcess,
   +hideLocalTrack: typeof hideLocalTrack,
   +showLocalTrack: typeof showLocalTrack,
@@ -103,6 +105,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
   TimelineTrackContextMenuState
 > {
   state = { searchFilter: '' };
+  _globalTrackClickTimeout: TimeoutID | null = null;
   _trackSearchFieldElem: {| current: TrackSearchField | null |} =
     React.createRef();
 
@@ -213,17 +216,60 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     );
   };
 
+  _hideRightClickedTrack = (): void => {
+    const { rightClickedTrack, hideLocalTrack, hideGlobalTrack } = this.props;
+    if (rightClickedTrack === null) {
+      return;
+    }
+
+    if (rightClickedTrack.type === 'global') {
+      hideGlobalTrack(rightClickedTrack.trackIndex);
+      return;
+    }
+
+    hideLocalTrack(rightClickedTrack.pid, rightClickedTrack.trackIndex);
+  };
+
   _toggleGlobalTrackVisibility = (
-    _,
+    e: SyntheticMouseEvent<>,
     data: { trackIndex: TrackIndex }
   ): void => {
     const { trackIndex } = data;
-    const { hiddenGlobalTracks, hideGlobalTrack, showGlobalTrack } = this.props;
-    if (hiddenGlobalTracks.has(trackIndex)) {
-      showGlobalTrack(trackIndex);
-    } else {
-      hideGlobalTrack(trackIndex);
+    const {
+      hiddenGlobalTracks,
+      hideGlobalTrack,
+      showGlobalTrack,
+      globalTracks,
+    } = this.props;
+
+    if (e.detail > 2) {
+      // Ignore triple (and more) clicks
+      return;
     }
+
+    if (e.detail === 2) {
+      // This is a double click.
+      // Cancel the click timeout
+      clearTimeout(this._globalTrackClickTimeout);
+      this._globalTrackClickTimeout = null;
+
+      const track = globalTracks[trackIndex];
+      if (track.type === 'process') {
+        this._showLocalTracksInProcess(e, { trackIndex, pid: track.pid });
+        return;
+      }
+    }
+
+    // This is a simple click. Let's defer a few milliseconds before carrying
+    // the action, in case the user wants to do a double click.
+
+    this._globalTrackClickTimeout = setTimeout(() => {
+      if (hiddenGlobalTracks.has(trackIndex)) {
+        showGlobalTrack(trackIndex);
+      } else {
+        hideGlobalTrack(trackIndex);
+      }
+    }, 80);
   };
 
   _toggleLocalTrackVisibility = (
@@ -334,6 +380,15 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     isolateLocalTrack(pid, trackIndex);
   };
 
+  _showLocalTracksInProcess = (
+    _,
+    data: { trackIndex: TrackIndex, pid: Pid }
+  ) => {
+    const { trackIndex, pid } = data;
+    const { showGlobalTrackIncludingLocalTracks } = this.props;
+    showGlobalTrackIncludingLocalTracks(trackIndex, pid);
+  };
+
   // Check if the global track has a local track that also matches the filter.
   // We should still show the global tracks that have them.
   _globalTrackHasSearchFilterMatchedChildren(
@@ -392,12 +447,14 @@ class TimelineTrackContextMenuImpl extends PureComponent<
           preventClose={true}
           data={{ trackIndex }}
           onClick={this._toggleGlobalTrackVisibility}
+          role="menuitemcheckbox"
           attributes={{
             className: classNames('timelineTrackContextMenuItem', {
               checkable: true,
               checked: !isHidden,
             }),
             title,
+            'aria-checked': isHidden ? 'false' : 'true',
           }}
         >
           <span>{globalTrackNames[trackIndex]}</span>
@@ -470,17 +527,21 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         continue;
       }
 
+      const isChecked =
+        !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden;
+
       localTrackMenuItems.push(
         <MenuItem
           key={trackIndex}
           preventClose={true}
           data={{ pid, trackIndex, globalTrackIndex }}
           onClick={this._toggleLocalTrackVisibility}
+          role="menuitemcheckbox"
           attributes={{
             className: classNames('checkable indented', {
-              checked:
-                !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
+              checked: isChecked,
             }),
+            'aria-checked': isChecked ? 'true' : 'false',
           }}
         >
           {localTrackNames[trackIndex]}
@@ -675,6 +736,50 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     );
   }
 
+  renderShowLocalTracksInThisProcess() {
+    const {
+      rightClickedTrack,
+      globalTracks,
+      localTracksByPid,
+      hiddenLocalTracksByPid,
+    } = this.props;
+    if (rightClickedTrack === null) {
+      return null;
+    }
+    const { trackIndex } = rightClickedTrack;
+
+    let pid;
+    if (rightClickedTrack.type === 'global') {
+      const globalTrack = globalTracks[trackIndex];
+      if (!globalTrack || globalTrack.type !== 'process') {
+        return null;
+      }
+      pid = globalTrack.pid;
+    } else {
+      pid = rightClickedTrack.pid;
+    }
+
+    const localTracks = localTracksByPid.get(pid);
+    if (!localTracks || !localTracks.length) {
+      return null;
+    }
+
+    const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
+    const isDisabled = !hiddenLocalTracks || hiddenLocalTracks.size === 0;
+
+    return (
+      <MenuItem
+        onClick={this._showLocalTracksInProcess}
+        disabled={isDisabled}
+        data={{ trackIndex, pid }}
+      >
+        <Localized id="TrackContextMenu--show-local-tracks-in-process">
+          Show all tracks in this process
+        </Localized>
+      </MenuItem>
+    );
+  }
+
   getVisibleScreenshotTracks(): GlobalTrack[] {
     const { globalTracks, hiddenGlobalTracks } = this.props;
     const visibleScreenshotTracks = globalTracks.filter(
@@ -725,29 +830,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     const rightClickedTrackName =
       this.getRightClickedTrackName(rightClickedTrack);
 
-    if (rightClickedTrack.type === 'global') {
-      return (
-        <MenuItem
-          key={trackIndex}
-          preventClose={false}
-          data={rightClickedTrack}
-          onClick={this._toggleGlobalTrackVisibility}
-        >
-          <Localized
-            id="TrackContextMenu--hide-track"
-            vars={{ trackName: rightClickedTrackName }}
-          >
-            <>Hide {`“${rightClickedTrackName}”`}</>
-          </Localized>
-        </MenuItem>
-      );
-    }
     return (
       <MenuItem
         key={trackIndex}
         preventClose={false}
-        data={rightClickedTrack}
-        onClick={this._toggleLocalTrackVisibility}
+        onClick={this._hideRightClickedTrack}
       >
         <Localized
           id="TrackContextMenu--hide-track"
@@ -991,12 +1078,15 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
     const isolateScreenshot = this.renderIsolateScreenshot();
+    const showLocalTracksInProcess = this.renderShowLocalTracksInThisProcess();
     const hideTrack = this.renderHideTrack();
     const separator =
       isolateProcessMainThread ||
       isolateProcess ||
       isolateLocalTrack ||
-      isolateScreenshot ? (
+      isolateScreenshot ||
+      showLocalTracksInProcess ||
+      hideTrack ? (
         <div className="react-contextmenu-separator" />
       ) : null;
     const searchFilteredGlobalTracks = getSearchFilteredGlobalTracks(
@@ -1081,6 +1171,10 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {isolateLocalTrack}
         {isolateScreenshot}
         {hideTrack}
+        {showLocalTracksInProcess ? (
+          <div className="react-contextmenu-separator" />
+        ) : null}
+        {showLocalTracksInProcess}
         {separator}
         {isTrackListEmpty ? (
           <Localized
@@ -1128,6 +1222,7 @@ export const TimelineTrackContextMenu = explicitConnect<
     hideGlobalTrack,
     showAllTracks,
     showGlobalTrack,
+    showGlobalTrackIncludingLocalTracks,
     isolateProcess,
     isolateLocalTrack,
     isolateProcessMainThread,

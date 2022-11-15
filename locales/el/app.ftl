@@ -90,10 +90,6 @@ CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $n
     .title =
         Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
         τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
-CallNodeContextMenu--transform-collapse-direct-recursion = Σύμπτυξη άμεσης επανάληψης
-    .title =
-        Η σύμπτυξη άμεσης επανάληψης αφαιρεί τις κλήσεις που επαναλαμβάνονται συνεχώς στην
-        ίδια συνάρτηση.
 CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
     .title =
         Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
@@ -377,7 +373,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Επανασυμβολισμός 
 MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
 MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
 MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτή τη στιγμή
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = Μοντέλο CPU:
+MenuButtons--metaInfo--cpu-cores = Πυρήνες CPU:
 MenuButtons--metaInfo--main-memory = Κύρια μνήμη:
 MenuButtons--index--show-moreInfo-button = Εμφάνιση περισσότερων
 MenuButtons--index--hide-moreInfo-button = Εμφάνιση λιγότερων
@@ -774,6 +771,11 @@ TransformNavigator--focus-subtree = Εστίαση κόμβου: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Εστίαση: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Κατηγορία εστίασης: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -793,7 +795,12 @@ TransformNavigator--drop-function = Απόρριψη: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Σύμπτυξη αναδρομής: { $item }
+TransformNavigator--collapse-direct-recursion2 = Σύμπτυξη άμεσης αναδρομής: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Σύμπτυξη έμμεσης αναδρομής: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

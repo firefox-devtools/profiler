@@ -67,8 +67,6 @@ CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = 折叠 <strong>{ $nameForResource }</strong>
     .title = 折叠资源可将所有对该资源的调用，扁平化为已折叠的单个调用节点。
-CallNodeContextMenu--transform-collapse-direct-recursion = 折叠直接递归
-    .title = 折叠直接递归可移除对相同函数的重复递归调用。
 CallNodeContextMenu--transform-drop-function = 丢弃与此函数相关的样本
     .title = 将样本丢弃后，会从分析记录移除这些样本的时间。在需要清除与分析无关的计时信息时，十分有用。
 CallNodeContextMenu--expand-all = 全部展开
@@ -312,7 +310,8 @@ MenuButtons--metaInfo--resymbolicate-profile = 重新符号化分析记录
 MenuButtons--metaInfo--symbolicate-profile = 符号化分析记录
 MenuButtons--metaInfo--attempting-resymbolicate = 正在尝试重新符号化分析记录
 MenuButtons--metaInfo--currently-symbolicating = 当前符号化的分析记录
-MenuButtons--metaInfo--cpu = CPU：
+MenuButtons--metaInfo--cpu-model = CPU 型号：
+MenuButtons--metaInfo--cpu-cores = CPU 核心：
 MenuButtons--metaInfo--main-memory = 主内存：
 MenuButtons--index--show-moreInfo-button = 显示更多
 MenuButtons--index--hide-moreInfo-button = 显示更少
@@ -722,7 +721,12 @@ TransformNavigator--drop-function = 丢弃：{ $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = 折叠递归：{ $item }
+TransformNavigator--collapse-direct-recursion2 = 折叠直接递归：{ $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = 折叠间接递归：{ $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

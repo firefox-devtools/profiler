@@ -621,6 +621,194 @@ describe('"focus-function" transform', function () {
   });
 });
 
+describe('"focus-category" transform', function () {
+  describe('on a tiny call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]
+      B[cat:Layout]
+      C[cat:Graphics]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    it('starts as an unfiltered call tree', function () {
+      expect(formatTree(originalCallTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: 1)',
+      ]);
+    });
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - C (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  describe('on a slightly larger call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]
+      B[cat:Layout]
+      D[cat:Layout]
+      C[cat:Graphics]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - C (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  describe('on a tinier call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]
+      B[cat:Layout]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual(['- A (total: 1, self: 1)']);
+    });
+  });
+
+  describe('on a small call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]  A[cat:Graphics]
+      B[cat:Layout]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual(['- A (total: 2, self: 2)']);
+    });
+  });
+
+  describe('on a small call tree 2', function () {
+    const { profile } = getProfileFromTextSamples(`
+      B[cat:Layout]  A[cat:Graphics]  
+      A[cat:Graphics]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual(['- A (total: 2, self: 2)']);
+    });
+  });
+
+  describe('on a longer larger call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:Graphics]
+      B[cat:Layout]
+      D[cat:Layout]
+      A[cat:Graphics]
+      D[cat:Layout]
+    `);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('category Graphics can be focused', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - A (total: 1, self: 1)',
+      ]);
+    });
+  });
+});
+
 describe('"collapse-resource" transform', function () {
   describe('combined implementation', function () {
     /**
@@ -689,7 +877,7 @@ describe('"collapse-resource" transform', function () {
       ]);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(
@@ -797,7 +985,7 @@ describe('"collapse-resource" transform', function () {
       ]);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
 
@@ -881,7 +1069,7 @@ describe('"collapse-function-subtree" transform', function () {
     );
   });
 
-  it('can update apply the transform to the selected CallNodePaths', function () {
+  it('can apply the transform to the selected CallNodePaths', function () {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(
       changeSelectedCallNode(
@@ -904,7 +1092,7 @@ describe('"collapse-function-subtree" transform', function () {
 
   // assertSetContainsOnly is an assertion.
   // eslint-disable-next-line jest/expect-expect
-  it('can update apply the transform to the expanded CallNodePaths', function () {
+  it('can apply the transform to the expanded CallNodePaths', function () {
     const { dispatch, getState } = storeWithProfile(profile);
     const toIds = (paths: Array<string[]>) =>
       paths.map((path) => path.map((name) => funcNames.indexOf(name)));
@@ -1042,7 +1230,7 @@ describe('"collapse-direct-recursion" transform', function () {
       expect(lineTimings.selfLineHits.size).toBe(0);
     });
 
-    it('can update apply the transform to the selected CallNodePaths', function () {
+    it('can apply the transform to the selected CallNodePaths', function () {
       // This transform requires a valid thread, unlike many of the others.
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(
@@ -1124,6 +1312,513 @@ describe('"collapse-direct-recursion" transform', function () {
         '    - D.js (total: 1, self: 1)',
         '    - F.js (total: 1, self: 1)',
         '  - G.js (total: 1, self: 1)',
+      ]);
+    });
+  });
+});
+
+describe('"collapse-indirect-recursion" transform', function () {
+  describe('direct combined implementation', function () {
+    // Same test case as collapse-direct-recursion combined implementation.
+    /**
+     *              A    Collapse indirect recursion   A
+     *            ↙   ↘            Func B            ↙   ↘
+     *          B       F            ->             B     F
+     *        ↙   ↘                              ↙  ↓  ↘
+     *       B     E                            C   D   E
+     *     ↙   ↘
+     *    B     D
+     *    ↓
+     *    C
+     */
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A[file:a][line:5]   A[file:a][line:5]   A[file:a][line:5]   A[file:a][line:8]
+      B[file:b][line:10]  B[file:b][line:10]  B[file:b][line:18]  F[file:f][line:50]
+      B[file:b][line:10]  B[file:b][line:17]  E[file:e][line:40]
+      B[file:b][line:15]  D[file:d][line:30]
+      C[file:c][line:20]
+    `);
+    const B = funcNames.indexOf('B');
+    const threadIndex = 0;
+    const collapseIndirectRecursion = {
+      type: 'collapse-indirect-recursion',
+      funcIndex: B,
+      implementation: 'combined',
+    };
+
+    it('starts as an unfiltered call tree', function () {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A (total: 4, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - B (total: 2, self: —)',
+        '      - B (total: 1, self: —)',
+        '        - C (total: 1, self: 1)',
+        '      - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+        '  - F (total: 1, self: 1)',
+      ]);
+    });
+
+    it('can collapse the B function', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A (total: 4, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 1, self: 1)',
+        '    - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+        '  - F (total: 1, self: 1)',
+      ]);
+    });
+
+    it('keeps the line number and address of the innermost frame', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      const filteredThread = selectedThreadSelectors.getFilteredThread(
+        getState()
+      );
+      const { stackTable, frameTable, funcTable, samples, stringTable } =
+        filteredThread;
+      const fileStringIndex = stringTable.indexForString('b');
+      const stackLineInfo = getStackLineInfo(
+        stackTable,
+        frameTable,
+        funcTable,
+        fileStringIndex,
+        false
+      );
+      const lineTimings = getLineTimings(stackLineInfo, samples);
+
+      // The hits in function B should be counted on the lines 15, 17 and 18,
+      // because the lines of the outer calls of the recursion are not interesting:
+      // They're just the line of the recursive call.
+      // In the example, B calls itself recursively on line 10, so we don't want
+      // to see line 10 after we collapse recursion.
+      expect(lineTimings.totalLineHits).toEqual(
+        new Map([
+          [15, 1],
+          [17, 1],
+          [18, 1],
+        ])
+      );
+
+      // There are no self line hits because no sample has B as the leaf.
+      expect(lineTimings.selfLineHits.size).toBe(0);
+    });
+
+    it('can apply the transform to the selected CallNodePaths', function () {
+      // This transform requires a valid thread, unlike many of the others.
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        changeSelectedCallNode(
+          threadIndex,
+          ['A', 'B', 'B', 'B', 'C'].map((name) => funcNames.indexOf(name))
+        )
+      );
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      expect(
+        selectedThreadSelectors.getSelectedCallNodePath(getState())
+      ).toEqual(['A', 'B', 'C'].map((name) => funcNames.indexOf(name)));
+    });
+  });
+
+  describe('small indirect combined implementation', function () {
+    // Like direct combined implementation, but with one indirect recursive call.
+    /**
+     *              A    Collapse indirect recursion   A
+     *            ↙   ↘            Func B            ↙   ↘
+     *          B       G            ->             B     G
+     *        ↙   ↘                              ↙  ↓  ↘
+     *       C     F                            D   E   F
+     *     ↙   ↘
+     *    B     E
+     *    ↓
+     *    D
+     */
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A[file:a][line:5]   A[file:a][line:5]   A[file:a][line:5]   A[file:a][line:8]
+      B[file:b][line:10]  B[file:b][line:10]  B[file:b][line:18]  G[file:g][line:50]
+      C[file:c][line:17]  C[file:c][line:17]  F[file:f][line:40]
+      B[file:b][line:15]  E[file:e][line:30]
+      D[file:d][line:20]
+    `);
+    const B = funcNames.indexOf('B');
+    const threadIndex = 0;
+    const collapseIndirectRecursion = {
+      type: 'collapse-indirect-recursion',
+      funcIndex: B,
+      implementation: 'combined',
+    };
+
+    it('starts as an unfiltered call tree', function () {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A (total: 4, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 2, self: —)',
+        '      - B (total: 1, self: —)',
+        '        - D (total: 1, self: 1)',
+        '      - E (total: 1, self: 1)',
+        '    - F (total: 1, self: 1)',
+        '  - G (total: 1, self: 1)',
+      ]);
+    });
+
+    it('can collapse the B function', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A (total: 4, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+        '    - F (total: 1, self: 1)',
+        '  - G (total: 1, self: 1)',
+      ]);
+    });
+
+    it('keeps the line number and address of the innermost frame', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      const filteredThread = selectedThreadSelectors.getFilteredThread(
+        getState()
+      );
+      const { stackTable, frameTable, funcTable, samples, stringTable } =
+        filteredThread;
+      const fileStringIndex = stringTable.indexForString('b');
+      const stackLineInfo = getStackLineInfo(
+        stackTable,
+        frameTable,
+        funcTable,
+        fileStringIndex,
+        false
+      );
+      const lineTimings = getLineTimings(stackLineInfo, samples);
+
+      // The hits in function B should be counted on the lines 15, 10 and 18,
+      // because the lines of the outer calls of the recursion are not interesting:
+      // They're just the line of the recursive call.
+      // In the example, the intermediate function C calls E, so E is changed
+      // to be called by the collapsed function B on line 10.
+      expect(lineTimings.totalLineHits).toEqual(
+        new Map([
+          [10, 1],
+          [15, 1],
+          [18, 1],
+        ])
+      );
+
+      // There are no self line hits because no sample has B as the leaf.
+      expect(lineTimings.selfLineHits.size).toBe(0);
+    });
+
+    it('can apply the transform to the selected CallNodePaths', function () {
+      // This transform requires a valid thread, unlike many of the others.
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        changeSelectedCallNode(
+          threadIndex,
+          ['A', 'B', 'C', 'B', 'D'].map((name) => funcNames.indexOf(name))
+        )
+      );
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      expect(
+        selectedThreadSelectors.getSelectedCallNodePath(getState())
+      ).toEqual(['A', 'B', 'D'].map((name) => funcNames.indexOf(name)));
+    });
+  });
+
+  describe('big indirect combined implementation', function () {
+    // Extension of small indirect combined implementation with
+    // multiple indirect calls, multiple intermediate functions and direct calls.
+    /**
+     *                    A    Collapse indirect recursion      A
+     *                  ↙   ↘            Func B              ↙    ↘
+     *                B       K            ->             B         K
+     *              ↙   ↘                           ↙  ↙  ↓  ↘  ↘
+     *             C     J                         F  G   H   I  J
+     *           ↙   ↘
+     *          B     I
+     *          ↓
+     *          D
+     *        ↙   ↘
+     *       E     H
+     *     ↙   ↘
+     *    B     G
+     *    ↓
+     *    B
+     *    ↓
+     *    F
+     */
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A[file:a][line:5]  A[file:a][line:5]  A[file:a][line:5]   A[file:a][line:5]   A[file:a][line:5]   A[file:a][line:8]
+      B[file:b][line:10] B[file:b][line:10] B[file:b][line:10]  B[file:b][line:10]  B[file:b][line:18]  K[file:k][line:50]
+      C[file:c][line:17] C[file:c][line:17] C[file:c][line:17]  C[file:c][line:17]  J[file:j][line:40]
+      B[file:b][line:12] B[file:b][line:12] B[file:b][line:12]  I[file:i][line:30]
+      D[file:d][line:60] D[file:d][line:60] D[file:d][line:60]
+      E[file:e][line:70] E[file:e][line:70] H[file:h][line:80]
+      B[file:b][line:15] G[file:g][line:90]
+      B[file:b][line:15]
+      F[file:f][line:20]
+    `);
+    const B = funcNames.indexOf('B');
+    const threadIndex = 0;
+    const collapseIndirectRecursion = {
+      type: 'collapse-indirect-recursion',
+      funcIndex: B,
+      implementation: 'combined',
+    };
+
+    it('starts as an unfiltered call tree', function () {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A (total: 6, self: —)',
+        '  - B (total: 5, self: —)',
+        '    - C (total: 4, self: —)',
+        '      - B (total: 3, self: —)',
+        '        - D (total: 3, self: —)',
+        '          - E (total: 2, self: —)',
+        '            - B (total: 1, self: —)',
+        '              - B (total: 1, self: —)',
+        '                - F (total: 1, self: 1)',
+        '            - G (total: 1, self: 1)',
+        '          - H (total: 1, self: 1)',
+        '      - I (total: 1, self: 1)',
+        '    - J (total: 1, self: 1)',
+        '  - K (total: 1, self: 1)',
+      ]);
+    });
+
+    it('can collapse the B function', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A (total: 6, self: —)',
+        '  - B (total: 5, self: —)',
+        '    - F (total: 1, self: 1)',
+        '    - G (total: 1, self: 1)',
+        '    - H (total: 1, self: 1)',
+        '    - I (total: 1, self: 1)',
+        '    - J (total: 1, self: 1)',
+        '  - K (total: 1, self: 1)',
+      ]);
+    });
+
+    it('keeps the line number and address of the innermost frame', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      const filteredThread = selectedThreadSelectors.getFilteredThread(
+        getState()
+      );
+      const { stackTable, frameTable, funcTable, samples, stringTable } =
+        filteredThread;
+      const fileStringIndex = stringTable.indexForString('b');
+      const stackLineInfo = getStackLineInfo(
+        stackTable,
+        frameTable,
+        funcTable,
+        fileStringIndex,
+        false
+      );
+      const lineTimings = getLineTimings(stackLineInfo, samples);
+
+      // The hits in function B should be counted on the lines 15, 12, 12, 10 and 18,
+      // because the lines of the outer calls of the recursion are not interesting:
+      // They're just the line of the recursive call.
+      // In the example, the intermediate function E calls G, so G is changed
+      // to be called by the collapsed function B on line 12.
+      expect(lineTimings.totalLineHits).toEqual(
+        new Map([
+          [10, 1],
+          [12, 2],
+          [15, 1],
+          [18, 1],
+        ])
+      );
+
+      // There are no self line hits because no sample has B as the leaf.
+      expect(lineTimings.selfLineHits.size).toBe(0);
+    });
+
+    it('can apply the transform to the selected CallNodePaths', function () {
+      // This transform requires a valid thread, unlike many of the others.
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        changeSelectedCallNode(
+          threadIndex,
+          ['A', 'B', 'C', 'B', 'D', 'E', 'B', 'B', 'F'].map((name) =>
+            funcNames.indexOf(name)
+          )
+        )
+      );
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      expect(
+        selectedThreadSelectors.getSelectedCallNodePath(getState())
+      ).toEqual(['A', 'B', 'F'].map((name) => funcNames.indexOf(name)));
+    });
+  });
+
+  describe('direct filtered implementation', function () {
+    // Same test case as collapse-direct-recursion filtered implementation.
+    /**
+     *                   A.js      Collapse indirect recursion      A.js
+     *                 ↙     ↘             Func B.js              ↙     ↘
+     *               B.js     G.js            ->               B.js      G.js
+     *             ↙    ↘                                    ↙   ↓   ↘
+     *         B.js      F.js                            D.js   E.js   F.js
+     *          ↓
+     *        C.cpp
+     *        ↙     ↘
+     *    B.js       E.js
+     *     ↓
+     *    D.js
+     */
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A.js   A.js   A.js   A.js   A.js
+      B.js   B.js   B.js   B.js   G.js
+      B.js   B.js   B.js   F.js
+      C.cpp  C.cpp  C.cpp
+      B.js   E.js
+      D.js
+    `);
+    // Notice in the above fixture how `C.cpp` is actually a leaf stack for the third
+    // sample. This stack still gets collapsed, along with any stack that follows
+    // a recursion collapse.
+    const B = funcNames.indexOf('B.js');
+    const threadIndex = 0;
+    const collapseIndirectRecursion = {
+      type: 'collapse-indirect-recursion',
+      funcIndex: B,
+      implementation: 'js',
+    };
+
+    it('starts as an unfiltered call tree', function () {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A.js (total: 5, self: —)',
+        '  - B.js (total: 4, self: —)',
+        '    - B.js (total: 3, self: —)',
+        '      - C.cpp (total: 3, self: 1)',
+        '        - B.js (total: 1, self: —)',
+        '          - D.js (total: 1, self: 1)',
+        '        - E.js (total: 1, self: 1)',
+        '    - F.js (total: 1, self: 1)',
+        '  - G.js (total: 1, self: 1)',
+      ]);
+    });
+
+    it('can collapse the B function', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A.js (total: 5, self: —)',
+        '  - B.js (total: 4, self: —)',
+        '    - C.cpp (total: 2, self: 1)',
+        '      - E.js (total: 1, self: 1)',
+        '    - D.js (total: 1, self: 1)',
+        '    - F.js (total: 1, self: 1)',
+        '  - G.js (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  describe('indirect filtered implementation', function () {
+    // Like direct filtered implementation, but with one indirect recursive call.
+    /**
+     *                   A.js      Collapse indirect recursion      A.js
+     *                 ↙     ↘             Func B.js              ↙     ↘
+     *               B.js     H.js            ->               B.js      H.js
+     *             ↙    ↘                                    ↙   ↓   ↘
+     *         C.js      G.js                            E.js   F.js   G.js
+     *          ↓
+     *        D.cpp
+     *        ↙     ↘
+     *    B.js       F.js
+     *     ↓
+     *    E.js
+     */
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A.js   A.js   A.js   A.js   A.js
+      B.js   B.js   B.js   B.js   H.js
+      C.js   C.js   C.js   G.js
+      D.cpp  D.cpp  D.cpp
+      B.js   F.js
+      E.js
+    `);
+    // Notice in the above fixture how `D.cpp` is actually a leaf stack for the third
+    // sample. This stack still gets collapsed, along with any stack that follows
+    // a recursion collapse.
+    const B = funcNames.indexOf('B.js');
+    const threadIndex = 0;
+    const collapseIndirectRecursion = {
+      type: 'collapse-indirect-recursion',
+      funcIndex: B,
+      implementation: 'js',
+    };
+
+    it('starts as an unfiltered call tree', function () {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A.js (total: 5, self: —)',
+        '  - B.js (total: 4, self: —)',
+        '    - C.js (total: 3, self: —)',
+        '      - D.cpp (total: 3, self: 1)',
+        '        - B.js (total: 1, self: —)',
+        '          - E.js (total: 1, self: 1)',
+        '        - F.js (total: 1, self: 1)',
+        '    - G.js (total: 1, self: 1)',
+        '  - H.js (total: 1, self: 1)',
+      ]);
+    });
+
+    it('can collapse the B function', function () {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual([
+        '- A.js (total: 5, self: —)',
+        '  - B.js (total: 4, self: —)',
+        '    - D.cpp (total: 2, self: 1)',
+        '      - F.js (total: 1, self: 1)',
+        '    - E.js (total: 1, self: 1)',
+        '    - G.js (total: 1, self: 1)',
+        '  - H.js (total: 1, self: 1)',
       ]);
     });
   });

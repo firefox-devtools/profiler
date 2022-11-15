@@ -82,11 +82,16 @@ describe('calltree/CallNodeContextMenu', function () {
       { matcher: /Merge node only/, type: 'merge-call-node' },
       { matcher: /Focus on subtree only/, type: 'focus-subtree' },
       { matcher: /Focus on function/, type: 'focus-function' },
+      { matcher: /Other/, type: 'focus-category' },
       { matcher: /Collapse function/, type: 'collapse-function-subtree' },
       { matcher: /XUL/, type: 'collapse-resource' },
       {
         matcher: /Collapse direct recursion/,
         type: 'collapse-direct-recursion',
+      },
+      {
+        matcher: /Collapse indirect recursion/,
+        type: 'collapse-indirect-recursion',
       },
       { matcher: /Drop samples/, type: 'drop-function' },
     ];

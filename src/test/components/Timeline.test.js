@@ -34,97 +34,18 @@ import {
 import ReactDOM from 'react-dom';
 import {
   getProfileWithNiceTracks,
+  getProfileWithMoreNiceTracks,
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
-import type { Profile } from 'firefox-profiler/types';
+import type { Profile, ThreadIndex } from 'firefox-profiler/types';
 
 describe('Timeline multiple thread selection', function () {
   autoMockDomRect();
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
   autoMockIntersectionObserver();
-
-  /** This function produces a profile that will have several global tracks and
-   * local tracks, that look like this as displayed by getHumanReadableTracks:
-   *  [
-   *    'show [thread GeckoMain process]',
-   *    '  - show [thread ThreadPool#1]',
-   *    '  - show [thread ThreadPool#2]',
-   *    '  - show [thread ThreadPool#3]',
-   *    '  - show [thread ThreadPool#4]',
-   *    '  - show [thread ThreadPool#5]',
-   *    'show [thread GeckoMain tab]',
-   *    '  - show [thread DOM Worker]',
-   *    '  - show [thread Style]',
-   *    'show [thread GeckoMain tab]',
-   *    '  - show [thread AudioPool#1]',
-   *    '  - show [thread AudioPool#2]',
-   *    '  - show [thread Renderer]',
-   *  ]
-   */
-  function getProfileWithMoreNiceTracks() {
-    const { profile } = getProfileFromTextSamples(
-      ...Array.from({ length: 13 }, () => 'A')
-    );
-
-    const { threads } = profile;
-    let tid = 1000;
-    let pid = 1000;
-
-    // Global thread 1
-    threads[0].name = 'GeckoMain';
-    threads[0].processType = 'process';
-    threads[0].pid = pid;
-    threads[0].tid = tid++;
-
-    for (let i = 1; i <= 5; i++) {
-      threads[i].name = `ThreadPool#${i}`;
-      threads[i].processType = 'tab';
-      threads[i].pid = pid;
-      threads[i].tid = tid++;
-    }
-
-    // Global thread 2
-    threads[6].name = 'GeckoMain';
-    threads[6].processType = 'tab';
-    threads[6].pid = ++pid;
-    threads[6].tid = tid++;
-
-    threads[7].name = 'DOM Worker';
-    threads[7].processType = 'tab';
-    threads[7].pid = pid;
-    threads[7].tid = tid++;
-
-    threads[8].name = 'Style';
-    threads[8].processType = 'tab';
-    threads[8].pid = pid;
-    threads[8].tid = tid++;
-
-    // Global thread 3
-    threads[9].name = 'GeckoMain';
-    threads[9].processType = 'tab';
-    threads[9].pid = ++pid;
-    threads[9].tid = tid++;
-
-    threads[10].name = 'AudioPool#1';
-    threads[10].processType = 'tab';
-    threads[10].pid = pid;
-    threads[10].tid = tid++;
-
-    threads[11].name = 'AudioPool#2';
-    threads[11].processType = 'tab';
-    threads[11].pid = pid;
-    threads[11].tid = tid++;
-
-    threads[12].name = 'Renderer';
-    threads[12].processType = 'tab';
-    threads[12].pid = pid;
-    threads[12].tid = tid++;
-
-    return profile;
-  }
 
   function setup(profile = getProfileWithNiceTracks()) {
     const store = storeWithProfile(profile);
@@ -146,7 +67,7 @@ describe('Timeline multiple thread selection', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
@@ -157,7 +78,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(domWorker, { metaKey: true });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -170,7 +91,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(contentProcess, { metaKey: true });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab]',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -181,7 +102,7 @@ describe('Timeline multiple thread selection', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
@@ -194,7 +115,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(contentProcess, { metaKey: true });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
@@ -209,7 +130,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(domWorker, { metaKey: true });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -218,7 +139,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(domWorker);
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab]',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -233,7 +154,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(domWorker, { metaKey: true });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -251,7 +172,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(activityGraph, { offsetX: 50, offsetY: 50 });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -266,7 +187,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(domWorker, { metaKey: true });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -288,7 +209,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style] SELECTED',
@@ -303,7 +224,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(domWorker, { metaKey: true });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -312,7 +233,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullContextMenu(domWorker);
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -323,18 +244,18 @@ describe('Timeline multiple thread selection', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
     ]);
 
-    fireFullKeyPress(getByRole('button', { name: 'GeckoMain PID: 111' }), {
+    fireFullKeyPress(getByRole('button', { name: 'Parent Process PID: 111' }), {
       key: ' ',
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       'show [thread GeckoMain tab]',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
@@ -348,7 +269,7 @@ describe('Timeline multiple thread selection', function () {
     );
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
@@ -359,7 +280,7 @@ describe('Timeline multiple thread selection', function () {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker]',
       '  - show [thread Style]',
@@ -370,7 +291,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab]',
       '  - show [thread DOM Worker] SELECTED',
       '  - show [thread Style]',
@@ -381,7 +302,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       'show [thread GeckoMain tab]',
       '  - show [thread DOM Worker]',
       '  - show [thread Style] SELECTED',
@@ -391,7 +312,7 @@ describe('Timeline multiple thread selection', function () {
   it('unselects a selected local track whose global process is hidden', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -409,7 +330,7 @@ describe('Timeline multiple thread selection', function () {
     // First click on on a local track
     fireFullClick(screen.getByRole('button', { name: 'ThreadPool#2' }));
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3]',
@@ -429,7 +350,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(screen.getByText(/Hide/));
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'hide [thread GeckoMain process]',
+      'hide [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -448,7 +369,7 @@ describe('Timeline multiple thread selection', function () {
   it('can select a range of tracks with shift clicking', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -471,7 +392,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -493,7 +414,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -515,7 +436,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1] SELECTED',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -537,7 +458,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - show [thread ThreadPool#1] SELECTED',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -562,10 +483,12 @@ describe('Timeline multiple thread selection', function () {
 
     // And hide a local track in the first process
     fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
-    fireFullClick(screen.getByRole('menuitem', { name: 'ThreadPool#1' }));
+    fireFullClick(
+      screen.getByRole('menuitemcheckbox', { name: 'ThreadPool#1' })
+    );
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - hide [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -590,7 +513,7 @@ describe('Timeline multiple thread selection', function () {
     // Notice that the tracks in the hidden process aren't selected, nor the
     // hidden local track in the first process.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - hide [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -609,7 +532,7 @@ describe('Timeline multiple thread selection', function () {
   it('can select a range of tracks with shift clicking starting at the selected track', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -630,7 +553,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -649,7 +572,7 @@ describe('Timeline multiple thread selection', function () {
   it('can select a range of tracks with shift clicking in the reverse order too', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -672,7 +595,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -694,7 +617,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1] SELECTED',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -716,7 +639,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - show [thread ThreadPool#1] SELECTED',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -735,7 +658,7 @@ describe('Timeline multiple thread selection', function () {
   it('is possible to mix both ctrl and shift modifiers', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -763,7 +686,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -788,7 +711,7 @@ describe('Timeline multiple thread selection', function () {
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -810,7 +733,7 @@ describe('Timeline multiple thread selection', function () {
       shiftKey: true,
     });
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -829,7 +752,7 @@ describe('Timeline multiple thread selection', function () {
   it('forgets a local clicked track whose process is hidden later', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -859,7 +782,7 @@ describe('Timeline multiple thread selection', function () {
     // The selected tracks are between the track that's been selected after the
     // hiding operation and the newly clicked track.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'hide [thread GeckoMain process]',
+      'hide [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -878,7 +801,7 @@ describe('Timeline multiple thread selection', function () {
   it('forgets a global clicked track whose process is hidden later', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -896,7 +819,7 @@ describe('Timeline multiple thread selection', function () {
     // First click on a global track
     fireFullClick(screen.getByRole('button', { name: /PID: 1002/ }));
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -915,7 +838,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullContextMenu(screen.getByRole('button', { name: /PID: 1002/ }));
     fireFullClick(screen.getByText(/Hide/));
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -938,7 +861,7 @@ describe('Timeline multiple thread selection', function () {
     // The selected tracks are between the track that's been selected after the
     // hiding operation and the newly clicked track.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain default] SELECTED',
       '  - show [thread ThreadPool#1] SELECTED',
       '  - show [thread ThreadPool#2] SELECTED',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -957,7 +880,7 @@ describe('Timeline multiple thread selection', function () {
   it('forgets a local clicked track that is hidden later', function () {
     const { getState } = setup(getProfileWithMoreNiceTracks());
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -977,14 +900,16 @@ describe('Timeline multiple thread selection', function () {
 
     // Then hides its global track
     fireFullContextMenu(screen.getByRole('button', { name: /PID: 1000/ }));
-    fireFullClick(screen.getByRole('menuitem', { name: 'ThreadPool#2' }));
+    fireFullClick(
+      screen.getByRole('menuitemcheckbox', { name: 'ThreadPool#2' })
+    );
 
     // Another thread has been selected because the currently selected one has
     // been hidden.
     // Note because the newly selected thread is a local track, this also tests
     // the path of finding the local track from a thread index.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1] SELECTED',
       '  - hide [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3]',
@@ -1007,7 +932,7 @@ describe('Timeline multiple thread selection', function () {
     // The selected tracks are between the track that's been selected after the
     // hiding operation and the newly clicked track.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [thread ThreadPool#1] SELECTED',
       '  - hide [thread ThreadPool#2]',
       '  - show [thread ThreadPool#3] SELECTED',
@@ -1049,7 +974,7 @@ describe('Timeline multiple thread selection', function () {
 
     const { getState } = setup(profile);
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [ipc GeckoMain]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
@@ -1074,7 +999,7 @@ describe('Timeline multiple thread selection', function () {
 
     // No change is expected because this track was already selected.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [ipc GeckoMain]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
@@ -1100,7 +1025,7 @@ describe('Timeline multiple thread selection', function () {
     // The DOM Worker thread is selected, but also the main thread in this
     // process, despite that it was outside of the range.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [ipc GeckoMain]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
@@ -1147,7 +1072,7 @@ describe('Timeline multiple thread selection', function () {
 
     const { getState } = setup(profile);
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [ipc GeckoMain]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
@@ -1169,7 +1094,7 @@ describe('Timeline multiple thread selection', function () {
     fireFullClick(screen.getByRole('button', { name: 'IPC — DOM Worker' }));
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [ipc GeckoMain]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
@@ -1196,7 +1121,7 @@ describe('Timeline multiple thread selection', function () {
     // The DOM Worker thread is selected, but also the main thread in this
     // process, despite that it was outside of the range.
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process]',
+      'show [thread GeckoMain default]',
       '  - show [ipc GeckoMain]',
       '  - show [thread ThreadPool#1]',
       '  - show [thread ThreadPool#2]',
@@ -1290,10 +1215,10 @@ describe('Timeline', function () {
       </Provider>
     );
 
-    fireFullContextMenu(screen.getByRole('button', { name: /GeckoMain/ }));
+    fireFullContextMenu(screen.getByRole('button', { name: /Parent Process/ }));
     // Note that Fluent inserts isolation characters between variables.
     expect(screen.getByText(/Only show “/)).toHaveTextContent(
-      'Only show “\u2068GeckoMain\u2069”'
+      'Only show “\u2068Parent Process\u2069”'
     );
     fireFullContextMenu(screen.getByRole('button', { name: /Style/ }));
     expect(screen.getByText(/Only show “/)).toHaveTextContent(
@@ -1311,13 +1236,16 @@ describe('Timeline', function () {
       </Provider>
     );
 
-    fireFullContextMenu(screen.getByRole('button', { name: /GeckoMain/ }), {
-      ctrlKey: true,
-    });
+    fireFullContextMenu(
+      screen.getByRole('button', { name: /Parent Process/ }),
+      {
+        ctrlKey: true,
+      }
+    );
 
     // Note that Fluent inserts isolation characters between variables.
     expect(screen.getByText(/Only show “/)).toHaveTextContent(
-      'Only show “\u2068GeckoMain\u2069”'
+      'Only show “\u2068Parent Process\u2069”'
     );
 
     fireFullContextMenu(screen.getByRole('button', { name: /Style/ }), {
@@ -1351,6 +1279,82 @@ describe('Timeline', function () {
       // these `.` in the regexp, that will match these extra characters.
       fireFullClick(screen.getByRole('button', { name: /.4. \/ .4. tracks/ }));
       expect(getRightClickedTrack(store.getState())).toEqual(null);
+    });
+  });
+
+  describe('TimelineInitialSettings', () => {
+    function setup(config: {
+      initialVisibleThreads?: ThreadIndex[],
+      initialSelectedThreads?: ThreadIndex[],
+      keepProfileThreadOrder?: boolean,
+      swapDOMWorkerAndStyleThread?: boolean,
+    }) {
+      const profile = getProfileWithNiceTracks();
+      profile.meta.initialSelectedThreads = config.initialSelectedThreads;
+      profile.meta.initialVisibleThreads = config.initialVisibleThreads;
+      profile.meta.keepProfileThreadOrder = config.keepProfileThreadOrder;
+      if (config.swapDOMWorkerAndStyleThread) {
+        const styleThread = profile.threads[3];
+        profile.threads[3] = profile.threads[1];
+        profile.threads[1] = styleThread;
+      }
+      const store = storeWithProfile(profile);
+
+      // We need a properly laid out ActivityGraph for some of the operations in
+      // tests.
+      const flushRafCalls = mockRaf();
+      const renderResult = render(
+        <Provider store={store}>
+          <Timeline />
+        </Provider>
+      );
+      flushRafCalls();
+
+      return { ...renderResult, ...store };
+    }
+
+    it('displays the initially visible threads if setting is present', () => {
+      const { getState } = setup({ initialVisibleThreads: [1, 2] });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    it('displays the normal visible threads and orders them alphabetically if setting is not present', () => {
+      const { getState } = setup({ swapDOMWorkerAndStyleThread: true });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('selects the set threads if setting is present', () => {
+      const { getState } = setup({ initialSelectedThreads: [1, 2] });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker] SELECTED',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('disables thread ordering if setting is present', () => {
+      const { getState } = setup({
+        keepProfileThreadOrder: true,
+        initialVisibleThreads: [1, 2, 3],
+        swapDOMWorkerAndStyleThread: true,
+      });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread Style]',
+        '  - show [thread DOM Worker]',
+      ]);
     });
   });
 });

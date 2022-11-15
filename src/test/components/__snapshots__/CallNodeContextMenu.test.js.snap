@@ -98,6 +98,30 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     tabindex="-1"
   >
     <span
+      class="react-contextmenu-icon callNodeContextMenuIconFocus"
+    />
+    <div
+      class="react-contextmenu-item-content"
+      title="Focusing on the nodes that belong to the same category as the selected node, thereby merging all nodes that belong to another category."
+    >
+      Focus on category 
+      <strong>
+        ⁨Other⁩
+      </strong>
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      g
+    </kbd>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
       class="react-contextmenu-icon callNodeContextMenuIconCollapse"
     />
     <div
@@ -147,7 +171,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     />
     <div
       class="react-contextmenu-item-content"
-      title="Collapsing direct recursion removes calls that repeatedly recurse into the same function."
+      title="Collapsing direct recursion removes calls that repeatedly recurse into the same function with no intermediate functions on the stack."
     >
       Collapse direct recursion
     </div>
@@ -155,6 +179,27 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
       class="callNodeContextMenuShortcut"
     >
       r
+    </kbd>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon callNodeContextMenuIconCollapse"
+    />
+    <div
+      class="react-contextmenu-item-content"
+      title="Collapsing indirect recursion removes calls that repeatedly recurse into the same function, even with intermediate functions on the stack."
+    >
+      Collapse indirect recursion
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      R
     </kbd>
   </div>
   <div

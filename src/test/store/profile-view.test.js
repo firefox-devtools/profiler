@@ -322,7 +322,7 @@ describe('actions/ProfileView', function () {
     /**
      * Using the following tracks:
      *  [
-     *    'show [thread GeckoMain process]',
+     *    'show [thread GeckoMain default]',
      *    'show [thread GeckoMain tab]',
      *    '  - show [thread DOM Worker]',
      *    '  - show [thread Style]',
@@ -476,7 +476,7 @@ describe('actions/ProfileView', function () {
           // Modify the profile to add a memory track.
           const parentThreadIndex = profile.threads.findIndex(
             (thread) =>
-              thread.name === 'GeckoMain' && thread.processType === 'process'
+              thread.name === 'GeckoMain' && thread.processType === 'default'
           );
           if (parentThreadIndex === -1) {
             throw new Error('Could not find the parent process main thread.');

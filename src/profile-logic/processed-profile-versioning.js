@@ -2138,5 +2138,8 @@ const _upgraders = {
       nativeSymbols.functionSize = Array(nativeSymbols.length).fill(null);
     }
   },
+  [43]: (_) => {
+    // The number property in counters is now optional.
+  },
 };
 /* eslint-enable no-useless-computed-key */

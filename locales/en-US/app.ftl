@@ -78,6 +78,14 @@ CallNodeContextMenu--transform-focus-subtree = Focus on subtree only
         specific part of the call tree. It pulls out a branch of the call tree,
         however it only does it for that single call node. All other calls
         of the function are ignored.
+
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Focus on category <strong>{ $categoryName }</strong>
+    .title =
+        Focusing on the nodes that belong to the same category as the selected node,
+        thereby merging all nodes that belong to another category.
 CallNodeContextMenu--transform-collapse-function-subtree = Collapse function
     .title =
         Collapsing a function will remove everything it called, and assign
@@ -92,10 +100,14 @@ CallNodeContextMenu--transform-collapse-resource =
     .title =
         Collapsing a resource will flatten out all the calls to that
         resource into a single collapsed call node.
-CallNodeContextMenu--transform-collapse-direct-recursion = Collapse direct recursion
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Collapse direct recursion
     .title =
         Collapsing direct recursion removes calls that repeatedly recurse into
-        the same function.
+        the same function with no intermediate functions on the stack.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Collapse indirect recursion
+    .title =
+        Collapsing indirect recursion removes calls that repeatedly recurse into
+        the same function, even with intermediate functions on the stack.
 CallNodeContextMenu--transform-drop-function = Drop samples with this function
     .title =
         Dropping samples removes their time from the profile. This is useful to
@@ -411,7 +423,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolicate profile
 MenuButtons--metaInfo--symbolicate-profile = Symbolicate profile
 MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate profile
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--cpu-model = CPU model:
+MenuButtons--metaInfo--cpu-cores = CPU cores:
 MenuButtons--metaInfo--main-memory = Main memory:
 MenuButtons--index--show-moreInfo-button = Show more
 MenuButtons--index--hide-moreInfo-button = Show less
@@ -709,6 +722,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Hide “{ $trackName }”
 TrackContextMenu--show-all-tracks = Show all tracks
+TrackContextMenu--show-local-tracks-in-process = Show all tracks in this process
 
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
@@ -841,6 +855,12 @@ TransformNavigator--focus-subtree = Focus Node: { $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus: { $item }
 
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Focus category: { $item }
+
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -863,7 +883,13 @@ TransformNavigator--drop-function = Drop: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Collapse recursion: { $item }
+TransformNavigator--collapse-direct-recursion2 = Collapse direct recursion: { $item }
+
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Collapse indirect recursion: { $item }
 
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse

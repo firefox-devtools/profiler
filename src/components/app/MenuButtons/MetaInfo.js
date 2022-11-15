@@ -360,7 +360,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
           {meta.extensions
             ? _renderRowOfList(
                 'MenuButtons--metaInfo-renderRowOfList-label-extensions',
-                meta.extensions.name
+                Array.from(meta.extensions.name).sort() // copy the array because sort is in-place.
               )
             : null}
           {meta.arguments ? (
@@ -404,10 +404,22 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
               {meta.abi}
             </div>
           ) : null}
+          {meta.CPUName ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--cpu-model">
+                  CPU model:
+                </Localized>
+              </span>
+              {meta.CPUName}
+            </div>
+          ) : null}
           {cpuCount ? (
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--cpu">CPU:</Localized>
+                <Localized id="MenuButtons--metaInfo--cpu-cores">
+                  CPU cores:
+                </Localized>
               </span>
               {cpuCount}
             </div>

@@ -240,7 +240,7 @@ describe('MarkerTable', function () {
     /**
      * Using the following tracks:
      *  [
-     *    'show [thread GeckoMain process]',
+     *    'show [thread GeckoMain default]',
      *    'show [thread GeckoMain tab]',
      *    '  - show [thread DOM Worker]',
      *    '  - show [thread Style]',
@@ -317,7 +317,7 @@ describe('MarkerTable', function () {
       dispatch(hideGlobalTrack(parentTrackReference.trackIndex));
       // Make sure that it's hidden.
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'hide [thread GeckoMain default]',
         '  - show [ipc GeckoMain]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [ipc GeckoMain] SELECTED',
@@ -335,7 +335,7 @@ describe('MarkerTable', function () {
       );
       // Make sure that it's not hidden anymore.
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         '  - show [ipc GeckoMain] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [ipc GeckoMain]',
@@ -375,7 +375,7 @@ describe('MarkerTable', function () {
       dispatch(hideGlobalTrack(tabTrackReference.trackIndex));
       // Make sure that they are hidden.
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain default] SELECTED',
         '  - show [ipc GeckoMain] SELECTED',
         'hide [thread GeckoMain tab]',
         '  - show [ipc GeckoMain]',
@@ -393,7 +393,7 @@ describe('MarkerTable', function () {
       );
       // Make sure that they are not hidden anymore.
       expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
+        'show [thread GeckoMain default]',
         '  - show [ipc GeckoMain]',
         'show [thread GeckoMain tab]',
         '  - show [ipc GeckoMain]',
