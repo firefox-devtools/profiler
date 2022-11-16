@@ -346,8 +346,6 @@ export class VirtualList<Item> extends React.PureComponent<
    * Scroll the minimum amount so that the requested item is fully visible
    * in the viewport. If the item is not already visible, this means that
    * it'll be shown at one of the edges of the viewport.
-   * This is different from scrollToItem, which always makes the item visible
-   * at the top of the viewport.
    */
   /* This method is used by users of this component. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
@@ -380,23 +378,6 @@ export class VirtualList<Item> extends React.PureComponent<
         itemRight - container.clientWidth
       );
     }
-  }
-
-  /**
-   * Scroll such that the item is visible at the top left of the viewport.
-   */
-  /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
-  scrollToItem(itemIndex: number, offsetX: CssPixels) {
-    const container = this._container.current;
-    if (!container) {
-      return;
-    }
-    const itemTop = itemIndex * this.props.itemHeight;
-    container.scrollTop = itemTop;
-
-    const itemLeft = offsetX;
-    container.scrollLeft = itemLeft;
   }
 
   /* This method is used by users of this component. */
