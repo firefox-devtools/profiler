@@ -98,7 +98,7 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
         Als u een bron samenvouwt, worden alle aanroepen van die bron
         afgevlakt tot een enkele samengevouwen aanroepnode.
 CallNodeContextMenu--transform-collapse-direct-recursion2 = Directe recursie samenvouwen
-    .title = Als directe recursie wordt samengevouwen, worden aanroepen die bij herhaling recursie hebben naar dezelfde functie zonder tussentijdse functies in de stack.
+    .title = Als directe recursie wordt samengevouwen, worden aanroepen die bij herhaling recursie hebben naar dezelfde functie zonder tussentijdse functies in de stack verwijderd.
 CallNodeContextMenu--transform-collapse-indirect-recursion = Indirecte recursie samenvouwen
     .title = Het samenvouwen van indirecte recursie verwijdert aanroepen die bij herhaling recursie hebben naar dezelfde functie, zelfs met tussentijdse functie in de stack.
 CallNodeContextMenu--transform-drop-function = Monsters met deze functie weglaten
