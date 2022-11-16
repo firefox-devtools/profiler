@@ -345,7 +345,9 @@ export class VirtualList<Item> extends React.PureComponent<
   /**
    * Scroll the minimum amount so that the requested item is fully visible
    * in the viewport. If the item is not already visible, this means that
-   * it'll be shown at one of the edges of the viewport.
+   * it'll be shown near one of the edges of the viewport.
+   * We're keeping a margin of a few items after and before the intended item,
+   * if there are any.
    */
   /* This method is used by users of this component. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
@@ -354,15 +356,34 @@ export class VirtualList<Item> extends React.PureComponent<
     if (!container) {
       return;
     }
-    const itemTop = itemIndex * this.props.itemHeight;
-    const itemBottom = itemTop + this.props.itemHeight;
 
-    if (container.scrollTop > itemTop) {
-      container.scrollTop = itemTop;
-    } else if (container.scrollTop + container.clientHeight < itemBottom) {
+    let scrollMargin = 3 * this.props.itemHeight;
+    if (container.clientHeight < 2 * scrollMargin) {
+      // The container is too small to use a margin.
+      scrollMargin = 0;
+    }
+
+    const itemTop = itemIndex * this.props.itemHeight;
+    const itemTopWithMargin = itemTop - scrollMargin;
+    const itemBottom = itemTop + this.props.itemHeight;
+    const itemBottomWithMargin = itemBottom + scrollMargin;
+
+    if (itemTopWithMargin < container.scrollTop) {
+      // The item is above (either above the current visible items or in the margin).
+      container.scrollTop = itemTopWithMargin;
+    } else if (
+      itemBottomWithMargin >
+      container.scrollTop + container.clientHeight
+    ) {
+      // The item is below (either below the current visible items or in the
+      // bottom margin).
+
+      // This Math.min operation handles the unlikely case where clientHeight is
+      // smaller than itemHeight. In that case we make sure that the top of the
+      // container is aligned with the top of the item.
       container.scrollTop = Math.min(
-        itemTop,
-        itemBottom - container.clientHeight
+        itemTopWithMargin,
+        itemBottomWithMargin - container.clientHeight
       );
     }
 
