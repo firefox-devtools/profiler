@@ -321,8 +321,12 @@ export function convertPerfScriptProfile(
 
         // Linux 4.8 included symbol offsets in perf script output by default, eg:
         // 7fffb84c9afc cpu_startup_entry+0x800047c022ec ([kernel.kallsyms])
-        // strip these off:
-        rawFunc = rawFunc.replace(/\+0x[\da-f]+$/, '');
+        // move it to the front of symbol
+        const offsetMatcher = /\+0x[\da-f]+$/
+        const maybeOffset = offsetMatcher.exec(rawFunc);
+        if (maybeOffset) {
+          rawFunc = `${maybeOffset[0]}@${rawFunc.replace(offsetMatcher, '')}()`;
+        }
 
         if (rawFunc.startsWith('(')) {
           continue; // skip process names
