@@ -386,7 +386,20 @@ export class VirtualList<Item> extends React.PureComponent<
     const itemBottom = itemTop + this.props.itemHeight;
     const itemBottomWithMargin = itemBottom + scrollMargin;
 
-    if (itemTopWithMargin < container.scrollTop) {
+    const bigJump = 16 * this.props.itemHeight;
+    if (
+      itemTop + bigJump < container.scrollTop ||
+      itemBottom - bigJump > container.scrollTop + container.clientHeight
+    ) {
+      // The item we want to scroll to is located more than 16 lines away from
+      // one of the edges. This is a "big jump", and in this case we put the
+      // scrolled item at the center of the panel.
+      const scrollTopToCenterItem =
+        itemTop - (container.clientHeight - this.props.itemHeight) / 2;
+      // This Math.min operation handles the unlikely case where clientHeight is
+      // smaller than itemHeight.
+      container.scrollTop = Math.min(itemTopWithMargin, scrollTopToCenterItem);
+    } else if (itemTopWithMargin < container.scrollTop) {
       // The item is above (either above the current visible items or in the margin).
       container.scrollTop = itemTopWithMargin;
     } else if (
