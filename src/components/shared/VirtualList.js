@@ -343,6 +343,24 @@ export class VirtualList<Item> extends React.PureComponent<
   }
 
   /**
+   * Scroll the container horizontally if necessary
+   */
+  _scrollContainerHorizontally(container: HTMLDivElement, offsetX: CssPixels) {
+    const interestingWidth = 400;
+    const itemLeft = offsetX;
+    const itemRight = itemLeft + interestingWidth;
+
+    if (container.scrollLeft > itemLeft) {
+      container.scrollLeft = itemLeft;
+    } else if (container.scrollLeft + container.clientWidth < itemRight) {
+      container.scrollLeft = Math.min(
+        itemLeft,
+        itemRight - container.clientWidth
+      );
+    }
+  }
+
+  /**
    * Scroll the minimum amount so that the requested item is fully visible
    * in the viewport. If the item is not already visible, this means that
    * it'll be shown near one of the edges of the viewport.
@@ -387,18 +405,7 @@ export class VirtualList<Item> extends React.PureComponent<
       );
     }
 
-    const interestingWidth = 400;
-    const itemLeft = offsetX;
-    const itemRight = itemLeft + interestingWidth;
-
-    if (container.scrollLeft > itemLeft) {
-      container.scrollLeft = itemLeft;
-    } else if (container.scrollLeft + container.clientWidth < itemRight) {
-      container.scrollLeft = Math.min(
-        itemLeft,
-        itemRight - container.clientWidth
-      );
-    }
+    this._scrollContainerHorizontally(container, offsetX);
   }
 
   /* This method is used by users of this component. */
