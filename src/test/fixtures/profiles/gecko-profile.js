@@ -21,6 +21,7 @@ import type {
   MarkerPayload_Gecko,
   IPCMarkerPayload_Gecko,
   GeckoMarkerTuple,
+  VisualMetrics,
 } from 'firefox-profiler/types';
 
 import {
@@ -1114,5 +1115,44 @@ export function createGeckoProfilerOverhead(
       data: data,
     },
     statistics: statistics,
+  };
+}
+
+export function getVisualMetrics(): VisualMetrics {
+  return {
+    SpeedIndex: 2942,
+    FirstVisualChange: 960,
+    LastVisualChange: 10480,
+    VisualProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 17 },
+      { timestamp: 5511.321044921875, percent: 17 },
+      { timestamp: 5591.321044921875, percent: 22 },
+      { timestamp: 5631.321044921875, percent: 42 },
+      { timestamp: 5751.321044921875, percent: 70 },
+      { timestamp: 5911.321044921875, percent: 76 },
+    ],
+    ContentfulSpeedIndex: 2303,
+    ContentfulSpeedIndexProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 41 },
+      { timestamp: 5511.321044921875, percent: 46 },
+      { timestamp: 5591.321044921875, percent: 48 },
+      { timestamp: 5631.321044921875, percent: 49 },
+      { timestamp: 5751.321044921875, percent: 49 },
+    ],
+    PerceptualSpeedIndex: 8314,
+    PerceptualSpeedIndexProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 11 },
+      { timestamp: 5511.321044921875, percent: 12 },
+      { timestamp: 5591.321044921875, percent: 13 },
+      { timestamp: 5631.321044921875, percent: 13 },
+      { timestamp: 5751.321044921875, percent: 15 },
+    ],
+    VisualReadiness: 9520,
+    VisualComplete85: 6480,
+    VisualComplete95: 10200,
+    VisualComplete99: 10200,
   };
 }
