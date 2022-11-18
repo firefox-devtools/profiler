@@ -16,6 +16,7 @@ import {
   createGeckoCounter,
   createGeckoMarkerStack,
   createGeckoProfilerOverhead,
+  getVisualMetrics,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/flow';
 import type {
@@ -24,6 +25,7 @@ import type {
   GeckoThread,
   IndexIntoGeckoStackTable,
   Milliseconds,
+  Thread,
 } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function () {
@@ -658,5 +660,80 @@ describe('profile meta processing', function () {
 
     // Checking if it keeps the sampleUnits object.
     expect(processedMeta.sampleUnits).toEqual(geckoMeta.sampleUnits);
+  });
+});
+
+describe('visualMetrics processing', function () {
+  function checkVisualMetricsForThread(thread: Thread) {
+    const metrics = [
+      { name: 'Visual', changeMarkerLength: 7 },
+      { name: 'ContentfulSpeedIndex', changeMarkerLength: 6 },
+      { name: 'PerceptualSpeedIndex', changeMarkerLength: 6 },
+    ];
+
+    for (const { name, changeMarkerLength } of metrics) {
+      // Check the visual metric progress markers.
+      const metricProgressMarkerIndex = thread.stringTable.indexForString(
+        `${name} Progress`
+      );
+      const metricProgressMarker = thread.markers.name.find(
+        (name) => name === metricProgressMarkerIndex
+      );
+      expect(metricProgressMarker).toBeTruthy();
+
+      // Check the visual metric change markers.
+      const metricChangeMarkerIndex = thread.stringTable.indexForString(
+        `${name} Change`
+      );
+      const metricChangeMarkers = thread.markers.name.filter(
+        (name) => name === metricChangeMarkerIndex
+      );
+      expect(metricChangeMarkers).toHaveLength(changeMarkerLength);
+    }
+  }
+
+  it('adds markers to the parent process', function () {
+    const geckoProfile = createGeckoProfile();
+    const visualMetrics = getVisualMetrics();
+    geckoProfile.meta.visualMetrics = visualMetrics;
+    // Make sure that the visual metrics are not changed.
+    expect(visualMetrics.VisualProgress).toHaveLength(7);
+    expect(visualMetrics.ContentfulSpeedIndexProgress).toHaveLength(6);
+    expect(visualMetrics.PerceptualSpeedIndexProgress).toHaveLength(6);
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const parentProcessMainThread = processedProfile.threads.find(
+      (thread) =>
+        thread.name === 'GeckoMain' && thread.processType === 'default'
+    );
+
+    if (!parentProcessMainThread) {
+      throw new Error('Could not find the parent process main thread.');
+    }
+
+    checkVisualMetricsForThread(parentProcessMainThread);
+  });
+
+  it('adds markers to the tab process', function () {
+    const geckoProfile = createGeckoProfile();
+    const visualMetrics = getVisualMetrics();
+    geckoProfile.meta.visualMetrics = visualMetrics;
+    // Make sure that the visual metrics are not changed.
+    expect(visualMetrics.VisualProgress).toHaveLength(7);
+    expect(visualMetrics.ContentfulSpeedIndexProgress).toHaveLength(6);
+    expect(visualMetrics.PerceptualSpeedIndexProgress).toHaveLength(6);
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const tabProcessMainThread = processedProfile.threads.find(
+      (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
+    );
+
+    if (!tabProcessMainThread) {
+      throw new Error('Could not find the tab process main thread.');
+    }
+
+    checkVisualMetricsForThread(tabProcessMainThread);
   });
 });
