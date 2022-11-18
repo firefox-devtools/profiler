@@ -547,6 +547,7 @@ export type TextMarkerPayload = {|
   type: 'Text',
   name: string,
   cause?: CauseBacktrace,
+  innerWindowID?: number,
 |};
 
 // ph: 'X' in the Trace Event Format

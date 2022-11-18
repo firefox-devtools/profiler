@@ -843,6 +843,19 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           },
         ],
 
+        [
+          21, // RefreshDriverTick
+          27, // Start time
+          28, // End time
+          INTERVAL,
+          0, // Other
+          {
+            type: 'Text',
+            name: 'Tick reasons: HasObservers (1x Style flush observer)',
+            innerWindowID: 1, // https://github.com/rustwasm/wasm-bindgen/issues/5
+          },
+        ],
+
         // INSERT NEW MARKERS HERE
         // Please make sure that the marker below always have a time
         // larger than the previous ones.
@@ -888,6 +901,7 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
       'IPC', // 18
       '0x100001bcd', // 19
       '0x100001bce', // 20
+      'RefreshDriverTick', // 21
     ],
   };
 }

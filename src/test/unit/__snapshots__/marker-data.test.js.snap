@@ -206,6 +206,18 @@ Array [
   Object {
     "category": 0,
     "data": Object {
+      "innerWindowID": 1,
+      "name": "Tick reasons: HasObservers (1x Style flush observer)",
+      "type": "Text",
+    },
+    "end": 28,
+    "name": "RefreshDriverTick",
+    "start": 27,
+    "threadId": null,
+  },
+  Object {
+    "category": 0,
+    "data": Object {
       "direction": "sending",
       "endTime": 1031,
       "messageSeqno": 1,
