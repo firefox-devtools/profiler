@@ -456,8 +456,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       displayData = callTree.getDisplayData(callNodeIndex);
     }
 
+    // Ported from src/profile-logic/profile-data.js' getOriginAnnotationForFunc()
     let fileName = null;
-
     const fileNameIndex = thread.funcTable.fileName[funcIndex];
     if (fileNameIndex !== null) {
       let fileNameURL = thread.stringTable.getString(fileNameIndex);

@@ -270,5 +270,13 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
   >
     Copy stack
   </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Copy call stack
+  </div>
 </nav>
 `;

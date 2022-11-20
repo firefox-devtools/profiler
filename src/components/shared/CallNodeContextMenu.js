@@ -37,6 +37,7 @@ import {
   convertToTransformType,
   assertExhaustiveCheck,
 } from 'firefox-profiler/utils/flow';
+import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 
 import { getShouldDisplaySearchfox } from 'firefox-profiler/selectors/profile';
 
@@ -193,7 +194,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     }
   }
 
-  copyStack(): void {
+  copyStack({ withFileLineColumnInfo = false } = {}): void {
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -214,7 +215,27 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     do {
       const funcIndex = callNodeTable.func[curCallNodeIndex];
       const stringIndex = funcTable.name[funcIndex];
-      stack += stringTable.getString(stringIndex) + '\n';
+      stack += stringTable.getString(stringIndex);
+      if (withFileLineColumnInfo) {
+        // Ported from src/profile-logic/profile-data.js' getOriginAnnotationForFunc()
+        let fileNameURL;
+        const fileNameIndex = funcTable.fileName[funcIndex];
+        if (fileNameIndex !== null) {
+          fileNameURL = stringTable.getString(fileNameIndex);
+          // Strip off any filename decorations from symbolication.
+          fileNameURL = parseFileNameFromSymbolication(fileNameURL).path;
+          const lineNumber = funcTable.lineNumber[funcIndex];
+          if (lineNumber !== null) {
+            fileNameURL += ':' + lineNumber;
+            const columnNumber = funcTable.columnNumber[funcIndex];
+            if (columnNumber !== null) {
+              fileNameURL += ':' + columnNumber;
+            }
+          }
+          stack += ` [${fileNameURL}]`;
+        }
+      }
+      stack += '\n';
       curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
     } while (curCallNodeIndex !== -1);
 
@@ -245,6 +266,9 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         break;
       case 'copy-stack':
         this.copyStack();
+        break;
+      case 'copy-call-stack':
+        this.copyStack({ withFileLineColumnInfo: true });
         break;
       case 'expand-all':
         this.expandAll();
@@ -690,6 +714,14 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         <Localized id="CallNodeContextMenu--copy-stack">
           <MenuItem onClick={this._handleClick} data={{ type: 'copy-stack' }}>
             Copy stack
+          </MenuItem>
+        </Localized>
+        <Localized id="CallNodeContextMenu--copy-call-stack">
+          <MenuItem
+            onClick={this._handleClick}
+            data={{ type: 'copy-call-stack' }}
+          >
+            Copy call stack
           </MenuItem>
         </Localized>
       </>

@@ -126,6 +126,7 @@ CallNodeContextMenu--searchfox = Look up the function name on Searchfox
 CallNodeContextMenu--copy-function-name = Copy function name
 CallNodeContextMenu--copy-script-url = Copy script URL
 CallNodeContextMenu--copy-stack = Copy stack
+CallNodeContextMenu--copy-call-stack = Copy call stack
 
 ## CallTree
 ## This is the component for Call Tree panel.
