@@ -16,9 +16,12 @@ import {
   changeInvertCallstack,
   changeSelectedCallNode,
 } from '../../actions/profile-view';
+import { changeSelectedTab } from '../../actions/app';
 import { TimelineTrackThread } from '../../components/timeline/TrackThread';
 import { getPreviewSelection } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedTab } from '../../selectors/url-state';
+import { getLastVisibleThreadTabSlug } from '../../selectors/app';
 import { ensureExists } from '../../utils/flow';
 
 import {
@@ -186,6 +189,19 @@ describe('timeline/TrackThread', function () {
 
     fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 3));
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
+  });
+
+  it('when clicking a stack, this selects the call tree panel', function () {
+    const { dispatch, getState, stackGraphCanvas, getFillRectCenterByIndex } =
+      setup(getSamplesProfile());
+
+    dispatch(changeSelectedTab('marker-chart'));
+
+    const log = flushDrawLog();
+
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
+    expect(getSelectedTab(getState())).toBe('calltree');
+    expect(getLastVisibleThreadTabSlug(getState())).toBe('calltree');
   });
 
   it('can click a stack in the stack graph in inverted call trees', function () {
