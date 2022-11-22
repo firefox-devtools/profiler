@@ -318,6 +318,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symboliser le profil
 MenuButtons--metaInfo--symbolicate-profile = Profil symbolique
 MenuButtons--metaInfo--attempting-resymbolicate = Tenter de re-symboliser le profil
 MenuButtons--metaInfo--currently-symbolicating = Re-symbolisation du profil en cours
+MenuButtons--metaInfo--cpu-model = Modèle de processeur :
+MenuButtons--metaInfo--cpu-cores = Cœurs de processeur :
 MenuButtons--metaInfo--main-memory = Mémoire principale :
 MenuButtons--index--show-moreInfo-button = Afficher plus
 MenuButtons--index--hide-moreInfo-button = Afficher moins
@@ -593,6 +595,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Masquer les autres pistes de c
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Masquer « { $trackName } »
 TrackContextMenu--show-all-tracks = Afficher toutes les pistes
+TrackContextMenu--show-local-tracks-in-process = Afficher toutes les pistes de ce processus
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Afficher toutes les pistes correspondantes
@@ -710,6 +713,11 @@ TransformNavigator--focus-subtree = Focus sur le nœud : { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus : { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Focus sur la catégorie : { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -725,6 +733,16 @@ TransformNavigator--merge-function = Fusion : { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Ignorer : { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion2 = Réduction de la récursivité directe : { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Réduction de la récursivité indirecte : { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
