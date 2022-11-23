@@ -170,6 +170,8 @@ const lastVisibleThreadTabSlug: Reducer<TabSlug> = (
         return action.selectedTab;
       }
       return state;
+    case 'FOCUS_CALL_TREE':
+      return 'calltree';
     default:
       return state;
   }
