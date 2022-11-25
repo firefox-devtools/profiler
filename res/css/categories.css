@@ -15,7 +15,7 @@
   --category-color-grey: var(--grey-30);
   --category-color-yellow: var(--yellow-50);
   --category-color-red: var(--red-60);
-  --category-color-lightred: var(--red-70);
+  --category-color-lightred: #a4000f9a; /* red-70 with 60 alpha */
   --category-color-darkgray: var(--grey-40);
 }
 
