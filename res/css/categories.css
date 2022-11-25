@@ -6,10 +6,10 @@
   --category-color-transparent: #fff;
   --category-color-purple: var(--purple-70);
   --category-color-green: var(--green-60);
-  --category-color-orange: var(--orange-60);
+  --category-color-orange: var(--orange-50);
   --category-color-lightblue: var(--blue-40);
   --category-color-blue: var(--blue-60);
-  --category-color-brown: var(--yellow-70);
+  --category-color-brown: var(--magenta-60);
 
   /* it is hard to create a lighter version of the following colors  */
   --category-color-grey: var(--grey-30);
