@@ -21,6 +21,7 @@ import type {
   MarkerPayload_Gecko,
   IPCMarkerPayload_Gecko,
   GeckoMarkerTuple,
+  VisualMetrics,
 } from 'firefox-profiler/types';
 
 import {
@@ -842,6 +843,31 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           },
         ],
 
+        [
+          21, // RefreshDriverTick
+          27, // Start time
+          28, // End time
+          INTERVAL,
+          0, // Other
+          {
+            type: 'Text',
+            name: 'Tick reasons: HasObservers (1x Style flush observer)',
+            innerWindowID: 1, // https://github.com/rustwasm/wasm-bindgen/issues/5
+          },
+        ],
+
+        [
+          22, // Navigation::Start
+          28, // Start time
+          29, // End time
+          INTERVAL,
+          0, // Other
+          {
+            type: 'NoPayloadUserData',
+            innerWindowID: 1, // https://github.com/rustwasm/wasm-bindgen/issues/5
+          },
+        ],
+
         // INSERT NEW MARKERS HERE
         // Please make sure that the marker below always have a time
         // larger than the previous ones.
@@ -887,6 +913,8 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
       'IPC', // 18
       '0x100001bcd', // 19
       '0x100001bce', // 20
+      'RefreshDriverTick', // 21
+      'Navigation::Start', // 22
     ],
   };
 }
@@ -1114,5 +1142,44 @@ export function createGeckoProfilerOverhead(
       data: data,
     },
     statistics: statistics,
+  };
+}
+
+export function getVisualMetrics(): VisualMetrics {
+  return {
+    SpeedIndex: 2942,
+    FirstVisualChange: 960,
+    LastVisualChange: 10480,
+    VisualProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 17 },
+      { timestamp: 5511.321044921875, percent: 17 },
+      { timestamp: 5591.321044921875, percent: 22 },
+      { timestamp: 5631.321044921875, percent: 42 },
+      { timestamp: 5751.321044921875, percent: 70 },
+      { timestamp: 5911.321044921875, percent: 76 },
+    ],
+    ContentfulSpeedIndex: 2303,
+    ContentfulSpeedIndexProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 41 },
+      { timestamp: 5511.321044921875, percent: 46 },
+      { timestamp: 5591.321044921875, percent: 48 },
+      { timestamp: 5631.321044921875, percent: 49 },
+      { timestamp: 5751.321044921875, percent: 49 },
+    ],
+    PerceptualSpeedIndex: 8314,
+    PerceptualSpeedIndexProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 11 },
+      { timestamp: 5511.321044921875, percent: 12 },
+      { timestamp: 5591.321044921875, percent: 13 },
+      { timestamp: 5631.321044921875, percent: 13 },
+      { timestamp: 5751.321044921875, percent: 15 },
+    ],
+    VisualReadiness: 9520,
+    VisualComplete85: 6480,
+    VisualComplete95: 10200,
+    VisualComplete99: 10200,
   };
 }
