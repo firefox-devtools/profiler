@@ -126,6 +126,10 @@ room directly.
 
 You can also leave a message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
 
+## Updating locales
+
+You can look at the [dedicated README file](./locales/README.md) in the locales directory.
+
 ## Submitting changes with a pull request (PR)
 
 If you haven't sent in pull requests before, [here is GitHub's documentation](https://help.github.com/articles/creating-a-pull-request/) on how to do that. Generally it's a good idea to send in PRs early and often. It's better to get 5 minutes of feedback from an existing team member or contributor than spending an hour trying to fix something. Contributing is a collaborative process and we are friendly!
