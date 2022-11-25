@@ -1748,16 +1748,19 @@ export function processVisualMetrics(
 
   // Find the navigation start time in the tab thread for specifying the marker
   // start times.
-  const navigationStartStrIdx =
-    tabThread.stringTable.indexForString('Navigation::Start');
-  const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
-    (m) => m === navigationStartStrIdx
-  );
   let navigationStartTime = null;
-  if (navigationStartMarkerIdx === -1) {
-    console.error('Failed to find the navigation start marker.');
-  } else {
-    navigationStartTime = tabThread.markers.startTime[navigationStartMarkerIdx];
+  if (tabThread.stringTable.hasString('Navigation::Start')) {
+    const navigationStartStrIdx =
+      tabThread.stringTable.indexForString('Navigation::Start');
+    const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
+      (m) => m === navigationStartStrIdx
+    );
+    if (navigationStartMarkerIdx === -1) {
+      console.error('Failed to find the navigation start marker.');
+    } else {
+      navigationStartTime =
+        tabThread.markers.startTime[navigationStartMarkerIdx];
+    }
   }
 
   // Add the visual metrics markers to the parent process and tab process main threads.
