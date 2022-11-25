@@ -724,6 +724,16 @@ export type MediaSampleMarkerPayload = {|
  */
 export type JankPayload = {| type: 'Jank' |};
 
+export type BrowsertimeMarkerPayload = {|
+  type: 'VisualMetricProgress',
+  percentage: number,
+|};
+
+export type NoPayloadUserData = {|
+  type: 'NoPayloadUserData',
+  innerWindowID?: number,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -755,6 +765,8 @@ export type MarkerPayload =
   | ChromeInstantTraceEventPayload
   | MediaSampleMarkerPayload
   | JankPayload
+  | BrowsertimeMarkerPayload
+  | NoPayloadUserData
   | null;
 
 export type MarkerPayload_Gecko =
@@ -776,6 +788,7 @@ export type MarkerPayload_Gecko =
   | PrefMarkerPayload
   | IPCMarkerPayload_Gecko
   | MediaSampleMarkerPayload
+  | NoPayloadUserData
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.

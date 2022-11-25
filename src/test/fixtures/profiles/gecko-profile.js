@@ -856,6 +856,18 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           },
         ],
 
+        [
+          22, // Navigation::Start
+          28, // Start time
+          29, // End time
+          INTERVAL,
+          0, // Other
+          {
+            type: 'NoPayloadUserData',
+            innerWindowID: 1, // https://github.com/rustwasm/wasm-bindgen/issues/5
+          },
+        ],
+
         // INSERT NEW MARKERS HERE
         // Please make sure that the marker below always have a time
         // larger than the previous ones.
@@ -902,6 +914,7 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
       '0x100001bcd', // 19
       '0x100001bce', // 20
       'RefreshDriverTick', // 21
+      'Navigation::Start', // 22
     ],
   };
 }

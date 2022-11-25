@@ -218,6 +218,17 @@ Array [
   Object {
     "category": 0,
     "data": Object {
+      "innerWindowID": 1,
+      "type": "NoPayloadUserData",
+    },
+    "end": 29,
+    "name": "Navigation::Start",
+    "start": 28,
+    "threadId": null,
+  },
+  Object {
+    "category": 0,
+    "data": Object {
       "direction": "sending",
       "endTime": 1031,
       "messageSeqno": 1,

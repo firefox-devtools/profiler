@@ -85,6 +85,8 @@ import type {
   MarkerSchema,
   ProfileMeta,
   PageList,
+  ThreadIndex,
+  BrowsertimeMarkerPayload,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -1732,7 +1734,7 @@ export function processVisualMetrics(
     name: string,
     startTime: number,
     endTime?: number,
-    payload?: any
+    payload?: BrowsertimeMarkerPayload
   ) {
     // Add the marker to the given thread.
     thread.markers.name.push(thread.stringTable.indexForString(name));
@@ -1744,6 +1746,21 @@ export function processVisualMetrics(
     thread.markers.length++;
   }
 
+  // Find the navigation start time in the tab thread for specifying the marker
+  // start times.
+  const navigationStartStrIdx =
+    tabThread.stringTable.indexForString('Navigation::Start');
+  const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
+    (m) => m === navigationStartStrIdx
+  );
+  let navigationStartTime = null;
+  if (navigationStartMarkerIdx === -1) {
+    console.error('Failed to find the navigation start marker.');
+  } else {
+    navigationStartTime = tabThread.markers.startTime[navigationStartMarkerIdx];
+  }
+
+  // Add the visual metrics markers to the parent process and tab process main threads.
   for (const metricName of metrics) {
     const metric = visualMetrics[`${metricName}Progress`];
     if (!metric) {
@@ -1751,7 +1768,7 @@ export function processVisualMetrics(
       continue;
     }
 
-    const startTime = metric[0].timestamp;
+    const startTime = navigationStartTime ?? metric[0].timestamp;
     const endTime = metric[metric.length - 1].timestamp;
 
     // Add the progress marker to the parent process main thread.
@@ -1764,10 +1781,10 @@ export function processVisualMetrics(
     const progressMarkerSchema = {
       name: 'VisualMetricProgress',
       tableLabel: '{marker.name} — {marker.data.percentage}',
-      display: ['marker-chart', 'marker-table', 'timeline-overview'],
+      display: ['marker-chart', 'marker-table'],
       data: [{ key: 'percentage', label: 'Percentage', format: 'percentage' }],
     };
-    meta.markerSchema = [...meta.markerSchema, progressMarkerSchema];
+    meta.markerSchema.push(progressMarkerSchema);
 
     const changeMarkerName = `${metricName} Change`;
     for (const { timestamp, percent } of metric) {
@@ -1810,7 +1827,7 @@ export function processVisualMetrics(
 function findTabMainThreadForVisualMetrics(
   threads: Thread[],
   pages: PageList
-): number | null {
+): ThreadIndex | null {
   for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
     const thread = threads[threadIdx];
 
@@ -1833,13 +1850,13 @@ function findTabMainThreadForVisualMetrics(
       // No RefreshDriver tick marker, skip the thread.
       continue;
     }
-    const markerNameIndex =
+    const refreshDriverTickStrIndex =
       thread.stringTable.indexForString('RefreshDriverTick');
 
     const { markers } = thread;
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
       if (
-        markers.name[markerIndex] === markerNameIndex &&
+        markers.name[markerIndex] === refreshDriverTickStrIndex &&
         markers.data[markerIndex] &&
         markers.data[markerIndex].innerWindowID &&
         topLevelPagesSet.has(markers.data[markerIndex].innerWindowID)
