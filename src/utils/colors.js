@@ -156,6 +156,13 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedTextColor: '#fff',
         gravity: 7,
       };
+    case 'magenta':
+      return {
+        selectedFillStyle: MAGENTA_60,
+        unselectedFillStyle: MAGENTA_60 + '60',
+        selectedTextColor: '#fff',
+        gravity: 7,
+      };
     case 'lightgreen':
       return {
         selectedFillStyle: GREEN_50,
