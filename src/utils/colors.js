@@ -158,8 +158,8 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
       };
     case 'brown':
       return {
-        selectedFillStyle: MAGENTA_60,
-        unselectedFillStyle: MAGENTA_60 + '60',
+        selectedFillStyle: ORANGE_70,
+        unselectedFillStyle: ORANGE_70 + '60',
         selectedTextColor: '#fff',
         gravity: 7,
       };
