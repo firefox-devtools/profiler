@@ -178,12 +178,14 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         gravity: 8,
       };
     case 'grey':
+    case 'gray':
       return {
         selectedFillStyle: GREY_30,
         unselectedFillStyle: GREY_30 + '60',
         selectedTextColor: '#000',
         gravity: 9,
       };
+    case 'darkgrey':
     case 'darkgray':
       return {
         selectedFillStyle: GREY_40,
