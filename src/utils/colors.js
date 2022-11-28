@@ -151,8 +151,8 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
       };
     case 'yellow':
       return {
-        selectedFillStyle: YELLOW_50,
-        unselectedFillStyle: YELLOW_50 + '60',
+        selectedFillStyle: '#ffe129', // This yellow has more contrast than YELLOW_50.
+        unselectedFillStyle: YELLOW_50 + '70',
         selectedTextColor: '#000',
         gravity: 6,
       };
@@ -180,17 +180,17 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
     case 'grey':
     case 'gray':
       return {
-        selectedFillStyle: GREY_30,
-        unselectedFillStyle: GREY_30 + '60',
+        selectedFillStyle: GREY_40,
+        unselectedFillStyle: GREY_40 + '60',
         selectedTextColor: '#000',
         gravity: 9,
       };
     case 'darkgrey':
     case 'darkgray':
       return {
-        selectedFillStyle: GREY_40,
-        unselectedFillStyle: GREY_40 + '60',
-        selectedTextColor: '#000',
+        selectedFillStyle: GREY_50,
+        unselectedFillStyle: GREY_50 + '60',
+        selectedTextColor: '#fff',
         gravity: 10,
       };
     default:
@@ -198,9 +198,9 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
       );
       return {
-        selectedFillStyle: GREY_30,
-        unselectedFillStyle: GREY_30 + '60',
-        selectedTextColor: '#000',
+        selectedFillStyle: GREY_40,
+        unselectedFillStyle: GREY_40 + '60',
+        selectedTextColor: '#fff',
         gravity: 9,
       };
   }
@@ -216,7 +216,7 @@ export function mapCategoryColorNameToStackChartStyles(
   if (colorName === 'transparent') {
     return {
       selectedFillStyle: GREY_30,
-      unselectedFillStyle: GREY_20 + '60',
+      unselectedFillStyle: GREY_30 + '60',
       selectedTextColor: '#000',
       gravity: 8,
     };

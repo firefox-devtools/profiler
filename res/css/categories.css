@@ -13,13 +13,13 @@
   --category-color-magenta: var(--magenta-60);
 
   /* it is hard to create a lighter version of the following colors  */
-  --category-color-gray: var(--grey-30);
-  --category-color-grey: var(--grey-30);
-  --category-color-yellow: var(--yellow-50);
+  --category-color-gray: var(--grey-40);
+  --category-color-grey: var(--grey-40);
+  --category-color-yellow: #ffe129; /* this yellow has more contrast than yellow-50 */
   --category-color-red: var(--red-60);
   --category-color-lightred: #a4000f9a; /* red-70 with 60 alpha */
-  --category-color-darkgray: var(--grey-40);
-  --category-color-darkgrey: var(--grey-40);
+  --category-color-darkgray: var(--grey-50);
+  --category-color-darkgrey: var(--grey-50);
 }
 
 /**
