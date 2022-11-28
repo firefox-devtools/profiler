@@ -39,9 +39,12 @@ jobs:
 
   tests:
     executor: node
+    resource_class: large
     steps:
       - checkout-and-dependencies
-      - run: yarn test --coverage --runInBand
+      # We use workerIdleMemoryLimit to work around a memory issue with node.
+      # See https://github.com/facebook/jest/issues/11956
+      - run: yarn test --coverage --logHeapUsage -w=4 --workerIdleMemoryLimit=1.5G
       - run: yarn codecov
 
   build-prod:
