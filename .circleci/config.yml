@@ -33,6 +33,7 @@ commands:
 jobs:
   lint:
     executor: node
+    resource_class: large
     steps:
       - checkout-and-dependencies
       - run: yarn lint
@@ -49,6 +50,7 @@ jobs:
 
   build-prod:
     executor: node
+    resource_class: large
     steps:
       - checkout-and-dependencies
       - run: yarn build-prod:quiet
@@ -61,6 +63,7 @@ jobs:
 
   flow:
     executor: node
+    resource_class: large
     steps:
       - checkout-and-dependencies
       - run: yarn flow:ci
