@@ -343,31 +343,9 @@ export class VirtualList<Item> extends React.PureComponent<
   }
 
   /**
-   * Scroll the minimum amount so that the requested item is fully visible
-   * in the viewport. If the item is not already visible, this means that
-   * it'll be shown at one of the edges of the viewport.
-   * This is different from scrollToItem, which always makes the item visible
-   * at the top of the viewport.
+   * Scroll the container horizontally if necessary
    */
-  /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
-  scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
-    const container = this._container.current;
-    if (!container) {
-      return;
-    }
-    const itemTop = itemIndex * this.props.itemHeight;
-    const itemBottom = itemTop + this.props.itemHeight;
-
-    if (container.scrollTop > itemTop) {
-      container.scrollTop = itemTop;
-    } else if (container.scrollTop + container.clientHeight < itemBottom) {
-      container.scrollTop = Math.min(
-        itemTop,
-        itemBottom - container.clientHeight
-      );
-    }
-
+  _scrollContainerHorizontally(container: HTMLDivElement, offsetX: CssPixels) {
     const interestingWidth = 400;
     const itemLeft = offsetX;
     const itemRight = itemLeft + interestingWidth;
@@ -383,20 +361,64 @@ export class VirtualList<Item> extends React.PureComponent<
   }
 
   /**
-   * Scroll such that the item is visible at the top left of the viewport.
+   * Scroll the minimum amount so that the requested item is fully visible
+   * in the viewport. If the item is not already visible, this means that
+   * it'll be shown near one of the edges of the viewport.
+   * We're keeping a margin of a few items after and before the intended item,
+   * if there are any.
    */
   /* This method is used by users of this component. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
-  scrollToItem(itemIndex: number, offsetX: CssPixels) {
+  scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
     const container = this._container.current;
     if (!container) {
       return;
     }
-    const itemTop = itemIndex * this.props.itemHeight;
-    container.scrollTop = itemTop;
 
-    const itemLeft = offsetX;
-    container.scrollLeft = itemLeft;
+    let scrollMargin = 3 * this.props.itemHeight;
+    if (container.clientHeight < 2 * scrollMargin) {
+      // The container is too small to use a margin.
+      scrollMargin = 0;
+    }
+
+    const itemTop = itemIndex * this.props.itemHeight;
+    const itemTopWithMargin = itemTop - scrollMargin;
+    const itemBottom = itemTop + this.props.itemHeight;
+    const itemBottomWithMargin = itemBottom + scrollMargin;
+
+    const bigJump = 16 * this.props.itemHeight;
+    if (
+      itemTop + bigJump < container.scrollTop ||
+      itemBottom - bigJump > container.scrollTop + container.clientHeight
+    ) {
+      // The item we want to scroll to is located more than 16 lines away from
+      // one of the edges. This is a "big jump", and in this case we put the
+      // scrolled item at the center of the panel.
+      const scrollTopToCenterItem =
+        itemTop - (container.clientHeight - this.props.itemHeight) / 2;
+      // This Math.min operation handles the unlikely case where clientHeight is
+      // smaller than itemHeight.
+      container.scrollTop = Math.min(itemTopWithMargin, scrollTopToCenterItem);
+    } else if (itemTopWithMargin < container.scrollTop) {
+      // The item is above (either above the current visible items or in the margin).
+      container.scrollTop = itemTopWithMargin;
+    } else if (
+      itemBottomWithMargin >
+      container.scrollTop + container.clientHeight
+    ) {
+      // The item is below (either below the current visible items or in the
+      // bottom margin).
+
+      // This Math.min operation handles the unlikely case where clientHeight is
+      // smaller than itemHeight. In that case we make sure that the top of the
+      // container is aligned with the top of the item.
+      container.scrollTop = Math.min(
+        itemTopWithMargin,
+        itemBottomWithMargin - container.clientHeight
+      );
+    }
+
+    this._scrollContainerHorizontally(container, offsetX);
   }
 
   /* This method is used by users of this component. */

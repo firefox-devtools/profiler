@@ -250,16 +250,19 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
   // main locale we edit. For example:
   // ALLOWED: locales/it/app.ftl
   // DISALLOWED: locales/en-US/app.ftl
+  // DISALLOWED: src/README.md
   // DISALLOWED: src/index.js
-  const vendoredLocalesPath = /^locales[\\/](?!en-US[\\/])/;
+  const vendoredLocalesPath = /^locales[\\/](?!en-US[\\/]|README.md)/;
 
   // RegExp for matching anything but the vendored locales.
   // It matches the files that are not in the `locales` directory EXCEPT the
   // `locales/en-US/` directory which is the main locale we edit. For example:
   // ALLOWED: locales/en-US/app.ftl
+  // ALLOWED: locales/README.md
   // ALLOWED: src/index.js
   // DISALLOWED: locales/it/app.ftl
-  const nonVendoredLocalesPath = /^(?:locales[\\/]en-US[\\/]|(?!locales[\\/]))/;
+  const nonVendoredLocalesPath =
+    /^(?:locales[\\/](?:en-US[\\/]|README.md)|(?!locales[\\/]))/;
 
   // We have a total try count to re-try to sync a few more time if the previous
   // try fails. This can occur when someone else commits to l10n branch while we

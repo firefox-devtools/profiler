@@ -25,7 +25,11 @@ import {
   convertPerfScriptProfile,
 } from './import/linux-perf';
 import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
-import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
+import {
+  PROCESSED_PROFILE_VERSION,
+  INTERVAL,
+  INSTANT,
+} from '../app-logic/constants';
 import {
   getFriendlyThreadName,
   getOrCreateURIResource,
@@ -79,6 +83,10 @@ import type {
   PhaseTimes,
   SerializableProfile,
   MarkerSchema,
+  ProfileMeta,
+  PageList,
+  ThreadIndex,
+  BrowsertimeMarkerPayload,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -1539,6 +1547,11 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     }
   }
 
+  if (meta.visualMetrics) {
+    // Process the visual metrics to add markers for them.
+    processVisualMetrics(threads, meta, pages);
+  }
+
   const { libs } = globalDataCollector.finish();
 
   const result = {
@@ -1674,4 +1687,189 @@ export async function unserializeProfileOfArbitraryFormat(
     console.error('UnserializationError:', e);
     throw new Error(`Unserializing the profile failed: ${e}`);
   }
+}
+
+/**
+ * Processes the visual metrics data if the profile has it and adds some markers
+ * to the parent process and tab process main threads to show the visual progress.
+ * Mutates the markers inside parent process and tab process main threads.
+ */
+export function processVisualMetrics(
+  threads: Thread[],
+  meta: ProfileMeta,
+  pages: PageList
+) {
+  const { visualMetrics } = meta;
+  if (pages.length === 0 || !visualMetrics) {
+    // No pages or visualMetrics were found in the profile. Skip this step.
+    return;
+  }
+
+  // Find the parent process and the tab process main threads.
+  const mainThreadIdx = threads.findIndex(
+    (thread) => thread.name === 'GeckoMain' && thread.processType === 'default'
+  );
+  const tabThreadIdx = findTabMainThreadForVisualMetrics(threads, pages);
+
+  if (mainThreadIdx === -1 || !tabThreadIdx) {
+    // Failed to find the parent process or tab process main threads. Return early.
+    return;
+  }
+  const mainThread = threads[mainThreadIdx];
+  const tabThread = threads[tabThreadIdx];
+
+  // These metrics are currently present inside profile.meta.visualMetrics.
+  const metrics = ['Visual', 'ContentfulSpeedIndex', 'PerceptualSpeedIndex'];
+  // Find the Test category so we can add the visual metrics markers with it.
+  if (meta.categories === undefined) {
+    // Making Flow happy. This means that this is a very old profile.
+    return;
+  }
+  const testingCategoryIdx = meta.categories.findIndex(
+    (cat) => cat.name === 'Test'
+  );
+
+  function addMetricMarker(
+    thread: Thread,
+    name: string,
+    startTime: number,
+    endTime?: number,
+    payload?: BrowsertimeMarkerPayload
+  ) {
+    // Add the marker to the given thread.
+    thread.markers.name.push(thread.stringTable.indexForString(name));
+    thread.markers.startTime.push(startTime);
+    thread.markers.endTime.push(endTime ? endTime : 0);
+    thread.markers.phase.push(endTime ? INTERVAL : INSTANT);
+    thread.markers.category.push(testingCategoryIdx);
+    thread.markers.data.push(payload ?? null);
+    thread.markers.length++;
+  }
+
+  // Find the navigation start time in the tab thread for specifying the marker
+  // start times.
+  let navigationStartTime = null;
+  if (tabThread.stringTable.hasString('Navigation::Start')) {
+    const navigationStartStrIdx =
+      tabThread.stringTable.indexForString('Navigation::Start');
+    const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
+      (m) => m === navigationStartStrIdx
+    );
+    if (navigationStartMarkerIdx === -1) {
+      console.error('Failed to find the navigation start marker.');
+    } else {
+      navigationStartTime =
+        tabThread.markers.startTime[navigationStartMarkerIdx];
+    }
+  }
+
+  // Add the visual metrics markers to the parent process and tab process main threads.
+  for (const metricName of metrics) {
+    const metric = visualMetrics[`${metricName}Progress`];
+    if (!metric) {
+      // Skip it if we don't have this metric.
+      continue;
+    }
+
+    const startTime = navigationStartTime ?? metric[0].timestamp;
+    const endTime = metric[metric.length - 1].timestamp;
+
+    // Add the progress marker to the parent process main thread.
+    const markerName = `${metricName} Progress`;
+    addMetricMarker(mainThread, markerName, startTime, endTime);
+    // Add the progress marker to the tab process main thread.
+    addMetricMarker(tabThread, markerName, startTime, endTime);
+
+    // Add progress markers for every visual progress change for more fine grained information.
+    const progressMarkerSchema = {
+      name: 'VisualMetricProgress',
+      tableLabel: '{marker.name} — {marker.data.percentage}',
+      display: ['marker-chart', 'marker-table'],
+      data: [{ key: 'percentage', label: 'Percentage', format: 'percentage' }],
+    };
+    meta.markerSchema.push(progressMarkerSchema);
+
+    const changeMarkerName = `${metricName} Change`;
+    for (const { timestamp, percent } of metric) {
+      const payload = {
+        type: 'VisualMetricProgress',
+        // 'percentage' type expects a value between 0 and 1.
+        percentage: percent / 100,
+      };
+
+      // Add it to the parent process main thread.
+      addMetricMarker(
+        mainThread,
+        changeMarkerName,
+        timestamp,
+        undefined, // endTime
+        payload
+      );
+      // Add it to the tab process main thread.
+      addMetricMarker(
+        tabThread,
+        changeMarkerName,
+        timestamp,
+        undefined, // endTime
+        payload
+      );
+    }
+  }
+}
+
+/**
+ * This function finds the main thread of the tab that is responsible of the visual metrics.
+ * It finds the tab main thread by looking at the RefreshDriverTick markers.
+ * These markers have innerWindowID fields inside their payloads that indicate
+ * which window they are coming from. If they are coming from a window with
+ * embedderInnerWindowID == 0, then it means that this is the top level window.
+ * We find the first tab main thread with this marker and return it.
+ *
+ * DO NOT use it for any other purpose than visual metrics as it's not going to be accurate.
+ */
+function findTabMainThreadForVisualMetrics(
+  threads: Thread[],
+  pages: PageList
+): ThreadIndex | null {
+  for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
+    const thread = threads[threadIdx];
+
+    if (thread.name !== 'GeckoMain' || thread.processType !== 'tab') {
+      // It isn't a tab process main thread, skip it.
+      continue;
+    }
+
+    // Find the top level pages that are not an iframe.
+    // We could map `embedderInnerWindowID` to also find the main page here but
+    // we don't really need to do that since all browsertime profiles most likely
+    // to include refresh driver ticks in their tab process thread.
+    const topLevelPagesSet = new Set(
+      pages
+        .filter((page) => page.embedderInnerWindowID === 0)
+        .map((page) => page.innerWindowID)
+    );
+
+    if (!thread.stringTable.hasString('RefreshDriverTick')) {
+      // No RefreshDriver tick marker, skip the thread.
+      continue;
+    }
+    const refreshDriverTickStrIndex =
+      thread.stringTable.indexForString('RefreshDriverTick');
+
+    const { markers } = thread;
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      if (
+        markers.name[markerIndex] === refreshDriverTickStrIndex &&
+        markers.data[markerIndex] &&
+        markers.data[markerIndex].innerWindowID &&
+        topLevelPagesSet.has(markers.data[markerIndex].innerWindowID)
+      ) {
+        // Found a RefreshDriverTick marker that is coming from a top level page.
+        // This is the tab process main thread we are looking for.
+        return threadIdx;
+      }
+    }
+  }
+
+  return null;
 }
