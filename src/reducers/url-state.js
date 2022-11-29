@@ -95,6 +95,8 @@ const selectedTab: Reducer<TabSlug> = (state = 'calltree', action) => {
     case 'CHANGE_SELECTED_TAB':
     case 'SELECT_TRACK':
       return action.selectedTab;
+    case 'FOCUS_CALL_TREE':
+      return 'calltree';
     default:
       return state;
   }

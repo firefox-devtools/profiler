@@ -97,6 +97,8 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         As jo in boarne ynklappe, wurde alle oanroppen fan dy boarne
         ôfflakke ta ien inkelde ynklappe oanropnode.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Direkte rekursy ynklappe
+    .title = As direkte rekursy ynklapt wurdt, wurde oanroppen dy’t by werhelling rekursy hawwe nei deselde funksje sûnder tuskentiidske funksjes yn de stack fuortsmiten.
 CallNodeContextMenu--transform-collapse-indirect-recursion = Yndirekte rekursy ynklappe
     .title = It ynklappen fan yndirekte rekursy smyt oanroppen dy’t by werhelling rekursy hawwe nei deselde funksje, sels mei tuskentiidske funksje yn de stack.
 CallNodeContextMenu--transform-drop-function = Meunsters mei dizze funksje weilitte
@@ -667,6 +669,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Oare skermôfdruktracks fersto
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = ‘{ $trackName }’ ferstopje
 TrackContextMenu--show-all-tracks = Alle tracks toane
+TrackContextMenu--show-local-tracks-in-process = Alle tracks yn dit proses toane
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Alle oerienkommende tracks toane
