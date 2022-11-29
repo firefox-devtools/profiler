@@ -60,6 +60,11 @@ CallNodeContextMenu--transform-focus-function-inverted = Focus sur la fonction (
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Focus sur le sous-arbre uniquement
     .title = Mettre le focus sur un sous-arbre supprime tout échantillon qui n’inclut pas cette partie spécifique de l’arbre d’appels. Il extrait une branche de l’arborescence des appels, mais il ne le fait que pour ce seul nœud d’appel. Tous les autres appels de la fonction sont ignorés.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Focus sur la catégorie <strong>{ $categoryName }</strong>
+    .title = Mettre le focus sur les nœuds qui appartiennent à la même catégorie que le nœud sélectionné, fusionnant ainsi tous les nœuds appartenant à une autre catégorie.
 CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
     .title = Réduire une fonction supprimera tout ce qu’elle appelait et attribuera tout le temps d’exécution à la fonction. Cela peut aider à simplifier un profil qui appelle du code qui n’a pas besoin d’être analysé.
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -71,6 +76,8 @@ CallNodeContextMenu--transform-collapse-direct-recursion2 = Réduire la récursi
     .title =
         La réduction de la récursivité directe supprime les appels qui reviennent à plusieurs reprises dans
         la même fonction sans fonctions intermédiaires sur la pile.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Réduire la récursivité indirecte
+    .title = La réduction de la récursivité indirecte supprime les appels qui reviennent à plusieurs reprises dans la même fonction, même en présence de fonctions intermédiaires sur la pile.
 CallNodeContextMenu--transform-drop-function = Ignorer les échantillons avec cette fonction
     .title = Ignorer des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
