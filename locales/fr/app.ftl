@@ -60,6 +60,11 @@ CallNodeContextMenu--transform-focus-function-inverted = Focus sur la fonction (
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Focus sur le sous-arbre uniquement
     .title = Mettre le focus sur un sous-arbre supprime tout échantillon qui n’inclut pas cette partie spécifique de l’arbre d’appels. Il extrait une branche de l’arborescence des appels, mais il ne le fait que pour ce seul nœud d’appel. Tous les autres appels de la fonction sont ignorés.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Focus sur la catégorie <strong>{ $categoryName }</strong>
+    .title = Mettre le focus sur les nœuds qui appartiennent à la même catégorie que le nœud sélectionné, fusionnant ainsi tous les nœuds appartenant à une autre catégorie.
 CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
     .title = Réduire une fonction supprimera tout ce qu’elle appelait et attribuera tout le temps d’exécution à la fonction. Cela peut aider à simplifier un profil qui appelle du code qui n’a pas besoin d’être analysé.
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -71,6 +76,8 @@ CallNodeContextMenu--transform-collapse-direct-recursion2 = Réduire la récursi
     .title =
         La réduction de la récursivité directe supprime les appels qui reviennent à plusieurs reprises dans
         la même fonction sans fonctions intermédiaires sur la pile.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Réduire la récursivité indirecte
+    .title = La réduction de la récursivité indirecte supprime les appels qui reviennent à plusieurs reprises dans la même fonction, même en présence de fonctions intermédiaires sur la pile.
 CallNodeContextMenu--transform-drop-function = Ignorer les échantillons avec cette fonction
     .title = Ignorer des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
@@ -318,6 +325,8 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symboliser le profil
 MenuButtons--metaInfo--symbolicate-profile = Profil symbolique
 MenuButtons--metaInfo--attempting-resymbolicate = Tenter de re-symboliser le profil
 MenuButtons--metaInfo--currently-symbolicating = Re-symbolisation du profil en cours
+MenuButtons--metaInfo--cpu-model = Modèle de processeur :
+MenuButtons--metaInfo--cpu-cores = Cœurs de processeur :
 MenuButtons--metaInfo--main-memory = Mémoire principale :
 MenuButtons--index--show-moreInfo-button = Afficher plus
 MenuButtons--index--hide-moreInfo-button = Afficher moins
@@ -593,6 +602,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Masquer les autres pistes de c
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Masquer « { $trackName } »
 TrackContextMenu--show-all-tracks = Afficher toutes les pistes
+TrackContextMenu--show-local-tracks-in-process = Afficher toutes les pistes de ce processus
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Afficher toutes les pistes correspondantes
@@ -710,6 +720,11 @@ TransformNavigator--focus-subtree = Focus sur le nœud : { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus : { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Focus sur la catégorie : { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -725,6 +740,16 @@ TransformNavigator--merge-function = Fusion : { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Ignorer : { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion2 = Réduction de la récursivité directe : { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Réduction de la récursivité indirecte : { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
