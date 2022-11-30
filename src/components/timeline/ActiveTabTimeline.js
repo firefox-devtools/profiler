@@ -33,6 +33,11 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
+type OwnProps = {|
+  // This ref will be added to the inner container.
+  +innerElementRef?: React.Ref<any>,
+|};
+
 type StateProps = {|
   +committedRange: StartEndRange,
   +globalTracks: ActiveTabGlobalTrack[],
@@ -43,7 +48,7 @@ type StateProps = {|
 
 type Props = {|
   ...SizeProps,
-  ...ConnectedProps<{||}, StateProps, {||}>,
+  ...ConnectedProps<OwnProps, StateProps, {||}>,
 |};
 
 type State = {|
@@ -85,6 +90,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
       panelLayoutGeneration,
       globalTracks,
       globalTrackReferences,
+      innerElementRef,
     } = this.props;
 
     return (
@@ -102,7 +108,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
             initialSelected={this.state.initialSelected}
             forceLayoutGeneration={this.state.forceLayoutGeneration}
           >
-            <ol className="timelineThreadList">
+            <ol className="timelineThreadList" ref={innerElementRef}>
               {globalTracks.map((globalTrack, trackIndex) => (
                 <TimelineActiveTabGlobalTrack
                   key={trackIndex}
@@ -119,7 +125,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const ActiveTabTimeline = explicitConnect<{||}, StateProps, {||}>({
+export const ActiveTabTimeline = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state) => ({
     globalTracks: getActiveTabGlobalTracks(state),
     globalTrackReferences: getActiveTabGlobalTrackReferences(state),
