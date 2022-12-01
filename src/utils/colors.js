@@ -168,14 +168,14 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedFillStyle: MAGENTA_60,
         unselectedFillStyle: MAGENTA_60 + '60',
         selectedTextColor: '#fff',
-        gravity: 7,
+        gravity: 8,
       };
     case 'lightgreen':
       return {
         selectedFillStyle: GREEN_50,
         unselectedFillStyle: GREEN_50 + '60',
         selectedTextColor: '#fff',
-        gravity: 8,
+        gravity: 9,
       };
     case 'grey':
     case 'gray':
@@ -183,7 +183,7 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedFillStyle: GREY_40,
         unselectedFillStyle: GREY_40 + '60',
         selectedTextColor: '#000',
-        gravity: 9,
+        gravity: 10,
       };
     case 'darkgrey':
     case 'darkgray':
@@ -191,7 +191,7 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedFillStyle: GREY_50,
         unselectedFillStyle: GREY_50 + '60',
         selectedTextColor: '#fff',
-        gravity: 10,
+        gravity: 11,
       };
     default:
       console.error(
@@ -201,7 +201,7 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedFillStyle: GREY_40,
         unselectedFillStyle: GREY_40 + '60',
         selectedTextColor: '#fff',
-        gravity: 9,
+        gravity: 10,
       };
   }
 }
