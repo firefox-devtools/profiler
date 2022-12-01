@@ -6,17 +6,18 @@
   --category-color-transparent: #fff;
   --category-color-purple: var(--purple-70);
   --category-color-green: var(--green-60);
-  --category-color-orange: var(--orange-60);
+  --category-color-orange: var(--orange-50);
+  --category-color-yellow: #ffe129; /* this yellow has more contrast than yellow-50 */
   --category-color-lightblue: var(--blue-40);
   --category-color-blue: var(--blue-60);
-  --category-color-brown: var(--yellow-70);
-
-  /* it is hard to create a lighter version of the following colors  */
-  --category-color-grey: var(--grey-30);
-  --category-color-yellow: var(--yellow-50);
+  --category-color-brown: var(--orange-70);
+  --category-color-magenta: var(--magenta-60);
   --category-color-red: var(--red-60);
-  --category-color-lightred: var(--red-70);
-  --category-color-darkgray: var(--grey-40);
+  --category-color-lightred: #a4000f9a; /* red-70 with 60 alpha */
+  --category-color-gray: var(--grey-40);
+  --category-color-grey: var(--grey-40);
+  --category-color-darkgray: var(--grey-50);
+  --category-color-darkgrey: var(--grey-50);
 }
 
 /**
@@ -50,12 +51,16 @@
   background-color: var(--category-color-lightblue);
 }
 
-.category-color-grey {
-  background-color: var(--category-color-grey);
-}
-
 .category-color-blue {
   background-color: var(--category-color-blue);
+}
+
+.category-color-brown {
+  background-color: var(--category-color-brown);
+}
+
+.category-color-magenta {
+  background-color: var(--category-color-magenta);
 }
 
 .category-color-red {
@@ -66,10 +71,12 @@
   background-color: var(--category-color-lightred);
 }
 
-.category-color-darkgray {
-  background-color: var(--category-color-darkgray);
+.category-color-gray,
+.category-color-grey {
+  background-color: var(--category-color-grey);
 }
 
-.category-color-brown {
-  background-color: var(--category-color-brown);
+.category-color-darkgray,
+.category-color-darkgrey {
+  background-color: var(--category-color-darkgrey);
 }
