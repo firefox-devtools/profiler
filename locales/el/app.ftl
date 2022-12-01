@@ -78,6 +78,13 @@ CallNodeContextMenu--transform-focus-subtree = Εστίαση στο υπόδε�
         συγκεκριμένο μέρος του δέντρου κλήσεων. Αποσύρει έναν κλάδο του δέντρου κλήσεων,
         ωστόσο το κάνει μόνο για αυτόν τον κόμβο κλήσεων. Όλες οι άλλες κλήσεις
         της συνάρτησης παραβλέπονται.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Εστίαση στην κατηγορία <strong>{ $categoryName }</strong>
+    .title =
+        Εστίαση στους κόμβους που ανήκουν στην ίδια κατηγορία με τον επιλεγμένο κόμβο,
+        συγχωνεύοντας έτσι όλους τους κόμβους που ανήκουν σε άλλη κατηγορία.
 CallNodeContextMenu--transform-collapse-function-subtree = Σύμπτυξη συνάρτησης
     .title =
         Η σύμπτυξη συνάρτησης θα αφαιρέσει ό,τι έχει καλέσει αυτή και θα αναθέσει
@@ -90,6 +97,14 @@ CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $n
     .title =
         Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
         τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Σύμπτυξη άμεσης επανάληψης
+    .title =
+        Η σύμπτυξη άμεσης επανάληψης αφαιρεί τις κλήσεις που συνεχώς επαναλαμβάνονται στην
+        ίδια συνάρτηση, χωρίς ενδιάμεσες συναρτήσεις στη στοίβα.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Σύμπτυξη έμμεσης επανάληψης
+    .title =
+        Η σύμπτυξη έμμεσης επανάληψης αφαιρεί τις κλήσεις που συνεχώς επαναλαμβάνονται στην
+        ίδια συνάρτηση, ακόμη και με ενδιάμεσες συναρτήσεις στη στοίβα.
 CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
     .title =
         Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
@@ -654,6 +669,7 @@ TrackContextMenu--hide-other-screenshots-tracks = Απόκρυψη άλλων κ
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
 TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομματιών
+TrackContextMenu--show-local-tracks-in-process = Εμφάνιση όλων των κομματιών σε αυτήν τη διεργασία
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = Εμφάνιση όλων των αντίστοιχων κομματιών
