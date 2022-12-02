@@ -56,10 +56,16 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     chartLabel: '{marker.data.messageType}',
     display: ['marker-chart', 'marker-table', 'timeline-ipc'],
     data: [
-      { key: 'messageType', label: 'Type', format: 'string' },
+      { key: 'messageType', label: 'Type', format: 'string', searchable: true },
       { key: 'sync', label: 'Sync', format: 'string' },
       { key: 'sendThreadName', label: 'From', format: 'string' },
       { key: 'recvThreadName', label: 'To', format: 'string' },
+      {
+        key: 'otherPid',
+        label: 'Other Pid',
+        format: 'string',
+        searchable: true,
+      },
     ],
   },
   {
@@ -563,4 +569,34 @@ export function formatMarkupFromMarkerSchema(
     default:
       throw new Error(`Unknown format type ${JSON.stringify((format: empty))}`);
   }
+}
+
+/**
+ * Takes a marker and a RegExp and checks if any of its `searchable` marker
+ * payload fields match the search regular expression.
+ */
+export function markerPayloadMatchesSearch(
+  markerSchema: MarkerSchema,
+  marker: Marker,
+  searchRegExp: RegExp
+): boolean {
+  const { data } = marker;
+  if (!data) {
+    return false;
+  }
+  // Check if searchable fields match the search regular expression.
+  for (const payloadField of markerSchema.data) {
+    if (payloadField.searchable) {
+      const value = data[payloadField.key];
+      if (value === undefined || value === null || value === '') {
+        continue;
+      }
+
+      if (searchRegExp.test(value)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
