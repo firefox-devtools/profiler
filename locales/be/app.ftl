@@ -91,7 +91,19 @@ AppViewRouter--route-not-found--home =
 
 ## Home page
 
-Home--profiler-motto = Атрымайце профіль прадукцыйнасці. Прааналізуйце яго. Падзяліся ім. Зрабіце Інтэрнэт хутчэйшым.
+Home--upload-from-file-input-button = Загрузіць профіль з файла
+Home--upload-from-url-button = Загрузіце профіль з URL
+Home--load-from-url-submit-button =
+    .value = Загрузіць
+Home--documentation-button = Дакументацыя
+Home--menu-button = Уключыць кнопку меню { -profiler-brand-name }
+Home--menu-button-instructions =
+    Уключыце кнопку меню прафайлера, каб пачаць запіс профілю прадукцыйнасці
+    у { -firefox-brand-name }, затым прааналізуйце яго і падзяліцеся з profiler.firefox.com.
+Home--record-instructions-capture-load = Захапіць і загрузіць профіль
+Home--profiler-motto = Захапіце профіль прадукцыйнасці. Прааналізуйце яго. Падзяліцеся ім. Зрабіце Інтэрнэт хутчэйшым.
+Home--additional-content-title = Загрузіць існуючыя профілі
+Home--additional-content-content = Вы можаце <strong>перацягнуць</strong> файл профілю сюды, каб загрузіць яго, або:
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
