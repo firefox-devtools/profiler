@@ -109,6 +109,9 @@ FooterLinks--Privacy = Прыватнасць
 FooterLinks--Cookies = Кукі
 FooterLinks--languageSwitcher--select =
     .title = Змяніць мову
+FooterLinks--hide-button =
+    .title = Схаваць спасылкі ў ніжнім калонтытуле
+    .aria-label = Схаваць спасылкі ў ніжнім калонтытуле
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -126,11 +129,16 @@ Home--menu-button = Уключыць кнопку меню { -profiler-brand-nam
 Home--menu-button-instructions =
     Уключыце кнопку меню прафайлера, каб пачаць запіс профілю прадукцыйнасці
     у { -firefox-brand-name }, затым прааналізуйце яго і падзяліцеся з profiler.firefox.com.
+Home--instructions-title = Як праглядаць і запісваць профілі
+Home--instructions-content =
+    Для запісу профіляў прадукцыйнасці патрабуецца <a>{ -firefox-brand-name }</a>.
+    Аднак існуючыя профілі можна праглядаць у любым сучасным браўзеры.
 Home--record-instructions-start-stop = Спыніцца і пачаць прафіляванне
 Home--record-instructions-capture-load = Захапіць і загрузіць профіль
 Home--profiler-motto = Захапіце профіль прадукцыйнасці. Прааналізуйце яго. Падзяліцеся ім. Зрабіце Інтэрнэт хутчэйшым.
 Home--additional-content-title = Загрузіць існуючыя профілі
 Home--additional-content-content = Вы можаце <strong>перацягнуць</strong> файл профілю сюды, каб загрузіць яго, або:
+Home--compare-recordings-info = Вы таксама можаце параўнаць запісы. <a>Адкрыць інтэрфейс параўнання.</a>
 Home--your-recent-uploaded-recordings-title = Вашы нядаўна запампаваныя запісы
 
 ## IdleSearchField
@@ -150,11 +158,18 @@ Home--your-recent-uploaded-recordings-title = Вашы нядаўна запам
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
     .title = Націсніце тут, каб загрузіць профіль { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Выдаліць
+    .title = Гэты профіль не можа быць выдалены, таму што мы не маем інфармацыі пра аўтарызацыю.
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--copy-description = Капіяваць апісанне
+MarkerContextMenu--copy-call-stack = Капіяваць стэк выклікаў
+MarkerContextMenu--copy-url = Капіяваць URL
+MarkerContextMenu--copy-page-url = Капіяваць URL-адрас старонкі
+MarkerContextMenu--copy-as-json = Капіяваць як JSON
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -270,6 +285,9 @@ ListOfPublishedProfiles--published-profiles-link =
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Зыходны код недаступны
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Для гэтага файла няма вядомага cross-origin-accessible URL-адраса.
 SourceView--close-button =
     .title = Закрыць акно з кодам
 
