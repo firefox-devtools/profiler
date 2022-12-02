@@ -892,6 +892,13 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
       <div
         class="tooltipLabel"
       >
+        Name
+        :
+      </div>
+      componentB
+      <div
+        class="tooltipLabel"
+      >
         Marker
         :
       </div>

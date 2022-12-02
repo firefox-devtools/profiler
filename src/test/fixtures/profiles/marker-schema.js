@@ -86,7 +86,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
     name: 'PreferenceRead',
     display: ['marker-chart', 'marker-table'],
     data: [
-      { key: 'prefName', label: 'Name', format: 'string' },
+      { key: 'prefName', label: 'Name', format: 'string', searchable: true },
       { key: 'prefKind', label: 'Kind', format: 'string' },
       { key: 'prefType', label: 'Type', format: 'string' },
       { key: 'prefValue', label: 'Value', format: 'string' },
@@ -99,7 +99,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
     tableLabel: '{marker.data.name}',
     display: ['marker-chart', 'marker-table'],
     data: [
-      // name
+      { key: 'name', label: 'Name', format: 'string', searchable: true },
       { label: 'Marker', value: 'UserTiming' },
       { key: 'entryType', label: 'Entry Type', format: 'string' },
       {
@@ -114,15 +114,17 @@ export const markerSchemaForTests: MarkerSchema[] = [
     tableLabel: '{marker.name} — {marker.data.name}',
     chartLabel: '{marker.name} — {marker.data.name}',
     display: ['marker-chart', 'marker-table'],
-    data: [{ key: 'name', label: 'Details', format: 'string' }],
+    data: [
+      { key: 'name', label: 'Details', format: 'string', searchable: true },
+    ],
   },
   {
     name: 'Log',
     display: ['marker-table'],
     tableLabel: '({marker.data.module}) {marker.data.name}',
     data: [
-      { key: 'module', label: 'Module', format: 'string' },
-      { key: 'name', label: 'Name', format: 'string' },
+      { key: 'module', label: 'Module', format: 'string', searchable: true },
+      { key: 'name', label: 'Name', format: 'string', searchable: true },
     ],
   },
   {
@@ -133,7 +135,12 @@ export const markerSchemaForTests: MarkerSchema[] = [
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [
       { key: 'latency', label: 'Latency', format: 'duration' },
-      // eventType is in the payload as well.
+      {
+        key: 'eventType',
+        label: 'Event Type',
+        format: 'string',
+        searchable: true,
+      },
     ],
   },
   {
@@ -141,21 +148,27 @@ export const markerSchemaForTests: MarkerSchema[] = [
     // See issue #2749
     name: 'Paint',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [{ key: 'category', label: 'Type', format: 'string' }],
+    data: [
+      { key: 'category', label: 'Type', format: 'string', searchable: true },
+    ],
   },
   {
     // TODO - Note that this marker is a "tracing" marker currently.
     // See issue #2749
     name: 'Navigation',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [{ key: 'category', label: 'Type', format: 'string' }],
+    data: [
+      { key: 'category', label: 'Type', format: 'string', searchable: true },
+    ],
   },
   {
     // TODO - Note that this marker is a "tracing" marker currently.
     // See issue #2749
     name: 'Layout',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [{ key: 'category', label: 'Type', format: 'string' }],
+    data: [
+      { key: 'category', label: 'Type', format: 'string', searchable: true },
+    ],
   },
   {
     name: 'IPC',
@@ -174,6 +187,13 @@ export const markerSchemaForTests: MarkerSchema[] = [
   {
     name: 'RefreshDriverTick',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
-    data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
+    data: [
+      {
+        key: 'name',
+        label: 'Tick Reasons',
+        format: 'string',
+        searchable: true,
+      },
+    ],
   },
 ];
