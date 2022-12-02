@@ -101,6 +101,8 @@ Details--open-sidebar-button =
     .title = Адкрыць бакавую панэль
 Details--close-sidebar-button =
     .title = Закрыць бакавую панэль
+Details--error-boundary-message =
+    .message = Ой, на гэтай панэлі адбылася невядомая памылка.
 
 ## Footer Links
 
