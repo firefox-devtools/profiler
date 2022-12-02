@@ -35,6 +35,16 @@ AppViewRouter--error-local = Яшчэ не рэалізавана.
 AppViewRouter--error-public = Не атрымалася спампаваць профіль.
 AppViewRouter--error-from-url = Не атрымалася спампаваць профіль.
 AppViewRouter--error-compare = Не ўдалося атрымаць профілі.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Праз <a>абмежаванні ў Safari</a> { -profiler-brand-name } не можа
+    імпартаваць профілі з лакальнай машыны ў гэты браўзер. Замест гэтага
+    адкройце гэту старонку ў { -firefox-brand-name } або Chrome.
+    .title = Safari не можа імпартаваць лакальныя профілі
+AppViewRouter--route-not-found--home =
+    .specialMessage = URL-адрас, да якога вы намагаецеся атрымаць доступ, не распазнаны.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -81,6 +91,7 @@ AppViewRouter--error-compare = Не ўдалося атрымаць профіл
 
 ## Home page
 
+Home--profiler-motto = Атрымайце профіль прадукцыйнасці. Прааналізуйце яго. Падзяліся ім. Зрабіце Інтэрнэт хутчэйшым.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
