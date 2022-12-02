@@ -1365,5 +1365,62 @@ const _upgraders = {
     // capturing this data and no new mandatory values are present in this
     // version.
   },
+  [26]: (profile) => {
+    // `searchable` property in the marker schema wasn't implemented before and
+    // we had some manual checks for the marker fields below. With this version,
+    // we removed this manual check and started to use the `searchable` property
+    // of the marker schema.
+    function convertToVersion26Recursive(p) {
+      for (const schema of p.meta.markerSchema) {
+        let searchableFieldKeys;
+        switch (schema.name) {
+          case 'FileIO': {
+            searchableFieldKeys = [
+              'filename',
+              'operation',
+              'source',
+              'threadId',
+            ];
+            break;
+          }
+          case 'Log': {
+            searchableFieldKeys = ['name', 'module'];
+            break;
+          }
+          case 'DOMEvent': {
+            // In the earlier versions of Firefox, DOMEvent doesn't include
+            // eventType in the backend.
+            schema.data.push({
+              key: 'eventType',
+              label: 'Event Type',
+              format: 'string',
+              searchable: true,
+            });
+            // 'target' wasn't included in our code before. But I thought this
+            // would be a useful addition.
+            searchableFieldKeys = ['target'];
+            break;
+          }
+          default: {
+            searchableFieldKeys = ['name', 'category'];
+            break;
+          }
+        }
+
+        const searchableFields = schema.data.filter((field) =>
+          searchableFieldKeys.includes(field.key)
+        );
+        for (const field of searchableFields) {
+          field.searchable = true;
+        }
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion26Recursive(subprocessProfile);
+      }
+    }
+
+    convertToVersion26Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */
