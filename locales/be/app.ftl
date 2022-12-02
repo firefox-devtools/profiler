@@ -61,6 +61,12 @@ CallNodeContextMenu--copy-stack = Капіяваць стэк
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Час працы (мс)
+    .title =
+        «Агульны» час працы ўключае суму ўсяго часу,
+        на працягу якога гэта функцыя знаходзілася ў стэку. Сюды ўваходзіць час,
+        на працягу якога функцыя фактычна выконвалася, а таксама час выканання
+        функцый, якія вызвала гэта функцыі.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -98,6 +104,11 @@ Details--close-sidebar-button =
 
 ## Footer Links
 
+FooterLinks--legal = Прававыя звесткі
+FooterLinks--Privacy = Прыватнасць
+FooterLinks--Cookies = Кукі
+FooterLinks--languageSwitcher--select =
+    .title = Змяніць мову
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
