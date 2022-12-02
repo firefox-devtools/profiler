@@ -70,6 +70,10 @@ AppViewRouter--route-not-found--home =
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--form-label-profile1 = Профіль 1:
+CompareHome--form-label-profile2 = Профіль 2:
+CompareHome--submit-button =
+    .value = Атрымаць профілі
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -80,6 +84,10 @@ AppViewRouter--route-not-found--home =
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = Адкрыць бакавую панэль
+Details--close-sidebar-button =
+    .title = Закрыць бакавую панэль
 
 ## Footer Links
 
@@ -100,10 +108,12 @@ Home--menu-button = Уключыць кнопку меню { -profiler-brand-nam
 Home--menu-button-instructions =
     Уключыце кнопку меню прафайлера, каб пачаць запіс профілю прадукцыйнасці
     у { -firefox-brand-name }, затым прааналізуйце яго і падзяліцеся з profiler.firefox.com.
+Home--record-instructions-start-stop = Спыніцца і пачаць прафіляванне
 Home--record-instructions-capture-load = Захапіць і загрузіць профіль
 Home--profiler-motto = Захапіце профіль прадукцыйнасці. Прааналізуйце яго. Падзяліцеся ім. Зрабіце Інтэрнэт хутчэйшым.
 Home--additional-content-title = Загрузіць існуючыя профілі
 Home--additional-content-content = Вы можаце <strong>перацягнуць</strong> файл профілю сюды, каб загрузіць яго, або:
+Home--your-recent-uploaded-recordings-title = Вашы нядаўна запампаваныя запісы
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -117,6 +127,11 @@ Home--additional-content-content = Вы можаце <strong>перацягну�
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Націсніце тут, каб загрузіць профіль { $smallProfileName }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
@@ -234,8 +249,14 @@ Home--additional-content-content = Вы можаце <strong>перацягну�
 
 ## Source code view in a box at the bottom of the UI.
 
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+SourceView--source-not-available-title = Зыходны код недаступны
+SourceView--close-button =
+    .title = Закрыць акно з кодам
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Запампаваныя запісы
