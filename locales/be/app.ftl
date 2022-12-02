@@ -22,10 +22,19 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Вэб-праграма для аналізу прадукцыйнасці { -firefox-brand-name }</subheader>
+AppHeader--github-icon =
+    .title = Перайдзіце да нашага Git рэпазіторыя (адкрыецца ў новым акне)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-unpublished = Не ўдалося атрымаць профіль з { -firefox-brand-name }.
+AppViewRouter--error-from-file = Не ўдалося прачытаць файл або разабраць профіль у ім.
+AppViewRouter--error-local = Яшчэ не рэалізавана.
+AppViewRouter--error-public = Не атрымалася спампаваць профіль.
+AppViewRouter--error-from-url = Не атрымалася спампаваць профіль.
+AppViewRouter--error-compare = Не ўдалося атрымаць профілі.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
