@@ -98,70 +98,14 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedTextColor: '#000',
         gravity: 0,
       };
-    case 'purple':
-      return {
-        selectedFillStyle: PURPLE_70,
-        // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
-        // the end defines the transparency #RRGGBBAA.
-        unselectedFillStyle: PURPLE_70 + '60',
-        selectedTextColor: '#fff',
-        gravity: 5,
-      };
-    case 'green':
-      return {
-        selectedFillStyle: GREEN_60,
-        unselectedFillStyle: GREEN_60 + '60',
-        selectedTextColor: '#fff',
-        gravity: 4,
-      };
-    case 'orange':
-      return {
-        selectedFillStyle: ORANGE_50,
-        unselectedFillStyle: ORANGE_50 + '60',
-        selectedTextColor: '#fff',
-        gravity: 2,
-      };
-    case 'yellow':
-      return {
-        selectedFillStyle: YELLOW_50,
-        unselectedFillStyle: YELLOW_50 + '60',
-        selectedTextColor: '#000',
-        gravity: 6,
-      };
     case 'lightblue':
       return {
         selectedFillStyle: BLUE_40,
+        // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
+        // the end defines the transparency #RRGGBBAA.
         unselectedFillStyle: BLUE_40 + '60',
         selectedTextColor: '#000',
         gravity: 1,
-      };
-    case 'grey':
-      return {
-        selectedFillStyle: GREY_30,
-        unselectedFillStyle: GREY_30 + '60',
-        selectedTextColor: '#000',
-        gravity: 9,
-      };
-    case 'blue':
-      return {
-        selectedFillStyle: BLUE_60,
-        unselectedFillStyle: BLUE_60 + '60',
-        selectedTextColor: '#fff',
-        gravity: 3,
-      };
-    case 'brown':
-      return {
-        selectedFillStyle: MAGENTA_60,
-        unselectedFillStyle: MAGENTA_60 + '60',
-        selectedTextColor: '#fff',
-        gravity: 7,
-      };
-    case 'lightgreen':
-      return {
-        selectedFillStyle: GREEN_50,
-        unselectedFillStyle: GREEN_50 + '60',
-        selectedTextColor: '#fff',
-        gravity: 8,
       };
     case 'red':
       return {
@@ -177,22 +121,87 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedTextColor: '#000',
         gravity: 1,
       };
-    case 'darkgray':
+    case 'orange':
+      return {
+        selectedFillStyle: ORANGE_50,
+        unselectedFillStyle: ORANGE_50 + '60',
+        selectedTextColor: '#fff',
+        gravity: 2,
+      };
+    case 'blue':
+      return {
+        selectedFillStyle: BLUE_60,
+        unselectedFillStyle: BLUE_60 + '60',
+        selectedTextColor: '#fff',
+        gravity: 3,
+      };
+    case 'green':
+      return {
+        selectedFillStyle: GREEN_60,
+        unselectedFillStyle: GREEN_60 + '60',
+        selectedTextColor: '#fff',
+        gravity: 4,
+      };
+    case 'purple':
+      return {
+        selectedFillStyle: PURPLE_70,
+        unselectedFillStyle: PURPLE_70 + '60',
+        selectedTextColor: '#fff',
+        gravity: 5,
+      };
+    case 'yellow':
+      return {
+        selectedFillStyle: '#ffe129', // This yellow has more contrast than YELLOW_50.
+        unselectedFillStyle: YELLOW_50 + '70',
+        selectedTextColor: '#000',
+        gravity: 6,
+      };
+    case 'brown':
+      return {
+        selectedFillStyle: ORANGE_70,
+        unselectedFillStyle: ORANGE_70 + '60',
+        selectedTextColor: '#fff',
+        gravity: 7,
+      };
+    case 'magenta':
+      return {
+        selectedFillStyle: MAGENTA_60,
+        unselectedFillStyle: MAGENTA_60 + '60',
+        selectedTextColor: '#fff',
+        gravity: 8,
+      };
+    case 'lightgreen':
+      return {
+        selectedFillStyle: GREEN_50,
+        unselectedFillStyle: GREEN_50 + '60',
+        selectedTextColor: '#fff',
+        gravity: 9,
+      };
+    case 'grey':
+    case 'gray':
       return {
         selectedFillStyle: GREY_40,
         unselectedFillStyle: GREY_40 + '60',
         selectedTextColor: '#000',
         gravity: 10,
       };
+    case 'darkgrey':
+    case 'darkgray':
+      return {
+        selectedFillStyle: GREY_50,
+        unselectedFillStyle: GREY_50 + '60',
+        selectedTextColor: '#fff',
+        gravity: 11,
+      };
     default:
       console.error(
         `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
       );
       return {
-        selectedFillStyle: GREY_30,
-        unselectedFillStyle: GREY_30 + '60',
-        selectedTextColor: '#000',
-        gravity: 9,
+        selectedFillStyle: GREY_40,
+        unselectedFillStyle: GREY_40 + '60',
+        selectedTextColor: '#fff',
+        gravity: 10,
       };
   }
 }
@@ -207,7 +216,7 @@ export function mapCategoryColorNameToStackChartStyles(
   if (colorName === 'transparent') {
     return {
       selectedFillStyle: GREY_30,
-      unselectedFillStyle: GREY_20 + '60',
+      unselectedFillStyle: GREY_30 + '60',
       selectedTextColor: '#000',
       gravity: 8,
     };
