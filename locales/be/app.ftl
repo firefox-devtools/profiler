@@ -50,6 +50,13 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--expand-all = Разгарнуць усё
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Шукаць назву функцыі у Searchfox
+CallNodeContextMenu--copy-function-name = Капіяваць назву функцыі
+CallNodeContextMenu--copy-script-url = Капіяваць URL-адрас скрыпту
+CallNodeContextMenu--copy-stack = Капіяваць стэк
 
 ## CallTree
 ## This is the component for Call Tree panel.
