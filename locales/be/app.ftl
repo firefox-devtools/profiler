@@ -299,6 +299,10 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Выдаліць { $profileName }
 ProfileDeletePanel--dialog-cancel-button =
     .value = Скасаваць
 ProfileDeletePanel--dialog-delete-button =
@@ -316,9 +320,15 @@ ProfileDeletePanel--message-success = Запампаваныя даныя был
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-local = Яшчэ не рэалізавана.
+ProfileLoaderAnimation--loading-public = Спампоўка і апрацоўка профілю…
+ProfileLoaderAnimation--loading-from-url = Спампоўка і апрацоўка профілю…
+ProfileLoaderAnimation--loading-compare = Чытанне і апрацоўка профіляў…
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Вярнуцца на галоўную
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
@@ -330,9 +340,11 @@ ProfileDeletePanel--message-success = Запампаваныя даныя был
 ## Chart panels. It's used to switch between different views of the stack.
 
 StackSettings--implementation-javascript = JavaScript
+StackSettings--use-data-source-label = Крыніца даных:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--js-tracer-tab = JS Tracer
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
