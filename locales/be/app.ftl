@@ -157,6 +157,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Паказваць толькі ўласны час
+    .title = Паказваць толькі час, праведзены ў вузле выкліку, ігнаруючы даччыныя элементы.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
