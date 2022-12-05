@@ -250,10 +250,12 @@ class CallTreeImpl extends PureComponent<Props> {
     }
 
     const newExpandedCallNodeIndexes = [];
+    let nodeToSelect = null;
+
     // This value is completely arbitrary and looked good on Julien's machine
     // when this was implemented. In the future we may want to look at the
     // available space instead.
-    const maxVisibleLines = 100;
+    const maxVisibleLines = 70;
 
     const idleCategoryIndex = categories.findIndex(
       (category) => category.name === 'Idle'
@@ -261,9 +263,8 @@ class CallTreeImpl extends PureComponent<Props> {
 
     let nodesToVisit = tree.getRoots();
     let visibleLinesCount = nodesToVisit.length;
-    let nodeToSelect = null;
 
-    outer: while (nodesToVisit.length) {
+    while (nodesToVisit.length) {
       const newNodesToVisit = [];
       const nonIdleNodes = nodesToVisit.filter(
         (nodeIndex) => callNodeTable.category[nodeIndex] !== idleCategoryIndex
@@ -274,28 +275,40 @@ class CallTreeImpl extends PureComponent<Props> {
         (sum, nodeIndex) => sum + tree.getNodeData(nodeIndex).total,
         0
       );
-
-      nodeToSelect = nonIdleNodes[0];
+      const runningTimeThreshold = sumOfNonIdleRunningTime / 20;
 
       for (let i = 0; i < nonIdleNodes.length; i++) {
         const nodeIndex = nonIdleNodes[i];
 
-        if (i > 0) {
-          // TODO
+        if (i === 0) {
+          nodeToSelect = nodeIndex;
+        } else {
           // The first node is always expanded, but let's check whether we
           // should open more nodes at this level.
-          break;
+          const thisRunningTime = tree.getNodeData(nodeIndex).total;
+          if (thisRunningTime < runningTimeThreshold) {
+            // This node doesn't have a lot of running time.
+            // The remaining nodes will have even less, let's break out of the
+            // inner loop.
+            break;
+          }
         }
 
         const children = tree.getChildren(nodeIndex);
 
         if (visibleLinesCount + children.length > maxVisibleLines) {
-          break outer;
+          // Expanding this node would exceed our budget.
+          // Let's look at the other nodes in case they have a smaller amount of children.
+          continue;
         }
 
         newExpandedCallNodeIndexes.push(nodeIndex);
         visibleLinesCount += children.length;
-        newNodesToVisit.push(...children);
+
+        if (i === 0) {
+          // Look at the children of the heaviest node only.
+          newNodesToVisit.push(...children);
+        }
       }
 
       nodesToVisit = newNodesToVisit;
