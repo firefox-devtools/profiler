@@ -234,8 +234,12 @@ MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
 MenuButtons--metaInfo--main-memory = Асноўная памяць:
 MenuButtons--index--show-moreInfo-button = Паказаць больш
 MenuButtons--index--hide-moreInfo-button = Паказаць менш
+MenuButtons--metaInfo--interval = Інтэрвал:
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
 MenuButtons--metaInfo--name-and-version = Назва і версія:
+MenuButtons--metaInfo--arguments = Аргументы:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -262,11 +266,14 @@ MenuButtons--metaOverheadStatistics-min = Мін
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--reupload-performance-profile = Паўторна запампаваць профіль прадукцыйнасці
+MenuButtons--publish--share-performance-profile = Абагуліць профіль прадукцыйнасці
 MenuButtons--publish--button-upload = Запампаваць
 MenuButtons--publish--upload-title = Запампоўванне профілю…
 MenuButtons--publish--cancel-upload = Скасаваць запампоўку
 MenuButtons--publish--message-try-again = Паспрабаваць зноў
 MenuButtons--publish--download = Спампаваць
+MenuButtons--publish--compressing = Сцісканне...
 
 ## NetworkSettings
 ## This is used in the network chart.
