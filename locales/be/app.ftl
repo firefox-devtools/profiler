@@ -218,25 +218,55 @@ MenuButtons--index--share-re-upload =
     .label = Паўторная запампаваць
 MenuButtons--index--share-error-uploading =
     .label = Памылка запампоўкі
+MenuButtons--index--revert = Вярнуцца да зыходнага профілю
+MenuButtons--index--docs = Дакументы
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Запампавана:
+MenuButtons--index--profile-info-uploaded-actions = Выдаліць
+MenuButtons--index--metaInfo-subtitle = Інфармацыя аб профілі
+MenuButtons--metaInfo--symbols = Сімвалы:
+MenuButtons--metaInfo--cpu-model = Мадэль ЦП:
+MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
+MenuButtons--metaInfo--main-memory = Асноўная памяць:
+MenuButtons--index--show-moreInfo-button = Паказаць больш
+MenuButtons--index--hide-moreInfo-button = Паказаць менш
+MenuButtons--metaInfo--application = Праграма
+MenuButtons--metaInfo--name-and-version = Назва і версія:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Debug
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
+MenuButtons--metaInfo--platform = Платформа
+MenuButtons--metaInfo--device = Прылада:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = АС:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo-renderRowOfList-label-features = Магчымасці:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Пашырэнні:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-max = Макс
+MenuButtons--metaOverheadStatistics-min = Мін
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--button-upload = Запампаваць
+MenuButtons--publish--upload-title = Запампоўванне профілю…
+MenuButtons--publish--cancel-upload = Скасаваць запампоўку
+MenuButtons--publish--message-try-again = Паспрабаваць зноў
+MenuButtons--publish--download = Спампаваць
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -256,6 +286,16 @@ MenuButtons--index--share-error-uploading =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Скасаваць
+ProfileDeletePanel--dialog-delete-button =
+    .value = Выдаліць
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Выдаленне…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Запампаваныя даныя былі паспяхова выдалены.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -276,6 +316,7 @@ MenuButtons--index--share-error-uploading =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-javascript = JavaScript
 
 ## Tab Bar for the bottom half of the analysis UI.
 
