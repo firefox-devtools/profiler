@@ -50,6 +50,11 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Аб'яднаць функцыю
+    .title =
+        Аб'яднанне функцыі выдаляе яе з профілю і прызначае яе час
+        функцыі, якая яе выклікала. Гэта адбываецца ўсюды, дзе функцыя была
+        выклікана ў дрэве.
 CallNodeContextMenu--expand-all = Разгарнуць усё
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -146,6 +151,8 @@ Home--your-recent-uploaded-recordings-title = Вашы нядаўна запам
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Увядзіце ўмовы фільтру
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -168,6 +175,12 @@ ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ніводн�
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Пачаць вылучэнне тут
+MarkerContextMenu--end-selection-here = Скончыць вылучэнне тут
+MarkerContextMenu--start-selection-at-marker-start = Пачаць вылучэнне ад <strong>пачатку</strong> маркера
+MarkerContextMenu--start-selection-at-marker-end = Пачаць вылучэнне ад <strong>канца</strong> маркера
+MarkerContextMenu--end-selection-at-marker-start = Скончыць вылучэнне на <strong>пачатку</strong> маркера
+MarkerContextMenu--end-selection-at-marker-end = Скончыць вылучэнне ў <strong>канцы</strong> маркера
 MarkerContextMenu--copy-description = Капіяваць апісанне
 MarkerContextMenu--copy-call-stack = Капіяваць стэк выклікаў
 MarkerContextMenu--copy-url = Капіяваць URL
@@ -185,10 +198,17 @@ MarkerContextMenu--copy-as-json = Капіяваць як JSON
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Пачатак
+MarkerTable--duration = Працягласць
+MarkerTable--type = Тып
+MarkerTable--description = Апісанне
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Даныя профілю
+MenuButtons--index--full-view = Поўны прагляд
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
