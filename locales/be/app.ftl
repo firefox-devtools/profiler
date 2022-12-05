@@ -162,6 +162,7 @@ ListOfPublishedProfiles--published-profiles-link =
     .title = Націсніце тут, каб загрузіць профіль { $smallProfileName }
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Выдаліць
     .title = Гэты профіль не можа быць выдалены, таму што мы не маем інфармацыі пра аўтарызацыю.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ніводнага профілю яшчэ не запампавана!
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
