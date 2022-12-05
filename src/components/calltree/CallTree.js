@@ -261,7 +261,6 @@ class CallTreeImpl extends PureComponent<Props> {
 
     let nodesToVisit = tree.getRoots();
     let visibleLinesCount = nodesToVisit.length;
-    let nodeToSelect = null;
 
     while (nodesToVisit.length) {
       const newNodesToVisit = [];
@@ -275,8 +274,6 @@ class CallTreeImpl extends PureComponent<Props> {
         0
       );
       const runningTimeThreshold = sumOfNonIdleRunningTime / 20;
-
-      nodeToSelect = nonIdleNodes[0];
 
       for (let i = 0; i < nonIdleNodes.length; i++) {
         const nodeIndex = nonIdleNodes[i];
@@ -312,6 +309,31 @@ class CallTreeImpl extends PureComponent<Props> {
       // Take care to not trigger a state change if there's nothing to change,
       // to avoid infinite render loop.
       this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
+    }
+
+    // Now we want to select the deepest node when following the first
+    // non-idle children only.
+    let nodeToSelect = null;
+    let children = tree.getRoots();
+    while (true) {
+      const firstNonIdleChild = children.find(
+        (nodeIndex) => callNodeTable.category[nodeIndex] !== idleCategoryIndex
+      );
+      if (firstNonIdleChild === undefined) {
+        // No suitable child has been found, let's break out of the loop.
+        break;
+      }
+
+      // This is a good candidate, until the next iteration at least.
+      nodeToSelect = firstNonIdleChild;
+      if (!newExpandedCallNodeIndexes.includes(nodeToSelect)) {
+        // This is the first node that wasn't expanded in the previous loop,
+        // then let's stop right here.
+        break;
+      }
+
+      // Otherwise, let's go deeper.
+      children = tree.getChildren(firstNonIdleChild);
     }
 
     if (nodeToSelect !== null) {
