@@ -211,6 +211,13 @@ MarkerTable--description = Апісанне
 MenuButtons--index--metaInfo-button =
     .label = Даныя профілю
 MenuButtons--index--full-view = Поўны прагляд
+MenuButtons--index--cancel-upload = Скасаваць запампоўку
+MenuButtons--index--share-upload =
+    .label = Запампаваць лакальны профіль
+MenuButtons--index--share-re-upload =
+    .label = Паўторная запампаваць
+MenuButtons--index--share-error-uploading =
+    .label = Памылка запампоўкі
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
