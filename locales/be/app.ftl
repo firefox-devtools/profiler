@@ -55,6 +55,8 @@ CallNodeContextMenu--transform-merge-function = Аб'яднаць функцыю
         Аб'яднанне функцыі выдаляе яе з профілю і прызначае яе час
         функцыі, якая яе выклікала. Гэта адбываецца ўсюды, дзе функцыя была
         выклікана ў дрэве.
+CallNodeContextMenu--transform-focus-function = Фокус на функцыі
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Разгарнуць усё
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
