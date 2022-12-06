@@ -2150,7 +2150,14 @@ const _upgraders = {
       let searchableFieldKeys;
       switch (schema.name) {
         case 'FileIO': {
-          searchableFieldKeys = ['filename', 'operation', 'source', 'threadId'];
+          // threadId wasn't in the schema before, so we need to add manually.
+          schema.data.push({
+            key: 'threadId',
+            label: 'Thread ID',
+            format: 'string',
+            searchable: true,
+          });
+          searchableFieldKeys = [];
           break;
         }
         case 'Log': {
@@ -2171,17 +2178,22 @@ const _upgraders = {
           searchableFieldKeys = ['target'];
           break;
         }
+        case 'TraceEvent': {
+          // These weren't included in our code before. But I thought this
+          // would be a useful addition.
+          searchableFieldKeys = ['name1', 'name2', 'val1', 'val2'];
+          break;
+        }
         default: {
           searchableFieldKeys = ['name', 'category'];
           break;
         }
       }
 
-      const searchableFields = schema.data.filter((field) =>
-        searchableFieldKeys.includes(field.key)
-      );
-      for (const field of searchableFields) {
-        field.searchable = true;
+      for (const field of schema.data) {
+        if (searchableFieldKeys.includes(field.key)) {
+          field.searchable = true;
+        }
       }
     }
   },

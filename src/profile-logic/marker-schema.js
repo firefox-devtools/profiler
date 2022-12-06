@@ -584,6 +584,12 @@ export function markerPayloadMatchesSearch(
   if (!data) {
     return false;
   }
+
+  // Reset regexp for each marker. Otherwise state from previous
+  // usages can cause matches to fail if the search is global or
+  // sticky.
+  searchRegExp.lastIndex = 0;
+
   // Check if searchable fields match the search regular expression.
   for (const payloadField of markerSchema.data) {
     if (payloadField.searchable) {
