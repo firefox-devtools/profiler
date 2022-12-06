@@ -245,6 +245,8 @@ MenuButtons--metaInfo--buffer-duration = Працягласць буфера:
 MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
 MenuButtons--metaInfo--name-and-version = Назва і версія:
+MenuButtons--metaInfo--build-id = ID зборкі:
+MenuButtons--metaInfo--build-type = Тып зборкі:
 MenuButtons--metaInfo--arguments = Аргументы:
 
 ## Strings refer to specific types of builds, and should be kept in English.
@@ -260,12 +262,20 @@ MenuButtons--metaInfo--device = Прылада:
 MenuButtons--metaInfo--os = АС:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Візуальныя паказчыкі
+MenuButtons--metaInfo--speed-index = Індэкс хуткасці:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Індэкс "Perceptual Speed":
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Індэкс "Contentful Speed":
 MenuButtons--metaInfo-renderRowOfList-label-features = Магчымасці:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Фільтр патокаў:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Пашырэнні:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-mean = Сярэдняе
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
 
@@ -287,6 +297,17 @@ MenuButtons--publish--compressing = Сцісканне…
 
 ## Timestamp formatting primitive
 
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
@@ -323,6 +344,13 @@ ProfileDeletePanel--message-success = Запампаваныя даныя был
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Поўны дыяпазон ({ $fullRangeDuration })
 
 ## Profile Loader Animation
 
