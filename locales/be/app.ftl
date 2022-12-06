@@ -236,7 +236,11 @@ MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
 MenuButtons--metaInfo--main-memory = Асноўная памяць:
 MenuButtons--index--show-moreInfo-button = Паказаць больш
 MenuButtons--index--hide-moreInfo-button = Паказаць менш
+MenuButtons--metaInfo--main-process-started = Асноўны працэс пачаўся:
+MenuButtons--metaInfo--main-process-ended = Асноўны працэс скончыўся:
 MenuButtons--metaInfo--interval = Інтэрвал:
+MenuButtons--metaInfo--buffer-capacity = Ёмістасць буфера:
+MenuButtons--metaInfo--buffer-duration = Працягласць буфера:
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
