@@ -111,7 +111,10 @@
   background-color: rgb(0 0 0 / 0.1);
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarRootItem, .filterNavigatorBarLeafItem):hover::before,
+.filterNavigatorBarItem:not(
+    .filterNavigatorBarRootItem,
+    .filterNavigatorBarLeafItem
+  ):hover::before,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover::after {
   border-color: rgb(0 0 0 / 0.1);
 }
@@ -120,7 +123,10 @@
   background-color: rgb(0 0 0 / 0.2);
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarRootItem, .filterNavigatorBarLeafItem):active:hover::before,
+.filterNavigatorBarItem:not(
+    .filterNavigatorBarRootItem,
+    .filterNavigatorBarLeafItem
+  ):active:hover::before,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover::after {
   border-color: rgb(0 0 0 / 0.2);
 }
