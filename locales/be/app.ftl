@@ -275,7 +275,7 @@ MenuButtons--publish--upload-title = Запампоўванне профілю�
 MenuButtons--publish--cancel-upload = Скасаваць запампоўку
 MenuButtons--publish--message-try-again = Паспрабаваць зноў
 MenuButtons--publish--download = Спампаваць
-MenuButtons--publish--compressing = Сцісканне...
+MenuButtons--publish--compressing = Сцісканне…
 
 ## NetworkSettings
 ## This is used in the network chart.
