@@ -254,6 +254,7 @@ class CallTreeImpl extends PureComponent<Props> {
     // when this was implemented. In the future we may want to look at the
     // available space instead.
     const maxVisibleLines = 70;
+    const minimumDepth = 10;
 
     const idleCategoryIndex = categories.findIndex(
       (category) => category.name === 'Idle'
@@ -274,9 +275,19 @@ class CallTreeImpl extends PureComponent<Props> {
 
       nodeToSelect = firstNonIdleNode;
 
+      const nodeData = tree.getNodeData(firstNonIdleNode);
+      if (nodeData.self > nodeData.total * 0.95) {
+        // This node doesn't have interesting children, let's stop here.
+        break;
+      }
+
+      const depth = tree.getDepth(firstNonIdleNode);
       children = tree.getChildren(firstNonIdleNode);
 
-      if (visibleLinesCount + children.length > maxVisibleLines) {
+      if (
+        depth > minimumDepth &&
+        visibleLinesCount + children.length > maxVisibleLines
+      ) {
         // Expanding this node would exceed our budget.
         break;
       }
