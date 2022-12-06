@@ -256,6 +256,7 @@ class CallTreeImpl extends PureComponent<Props> {
     // when this was implemented. In the future we may want to look at the
     // available space instead.
     const maxVisibleLines = 70;
+    const minimumDepth = 10;
 
     const idleCategoryIndex = categories.findIndex(
       (category) => category.name === 'Idle'
@@ -279,13 +280,21 @@ class CallTreeImpl extends PureComponent<Props> {
 
       for (let i = 0; i < nonIdleNodes.length; i++) {
         const nodeIndex = nonIdleNodes[i];
+        const nodeData = tree.getNodeData(nodeIndex);
 
         if (i === 0) {
           nodeToSelect = nodeIndex;
-        } else {
+        }
+
+        if (nodeData.self > nodeData.total * 0.95) {
+          // This node doesn't have interesting children, let's move on.
+          continue;
+        }
+
+        if (i !== 0) {
           // The first node is always expanded, but let's check whether we
           // should open more nodes at this level.
-          const thisRunningTime = tree.getNodeData(nodeIndex).total;
+          const thisRunningTime = nodeData.total;
           if (thisRunningTime < runningTimeThreshold) {
             // This node doesn't have a lot of running time.
             // The remaining nodes will have even less, let's break out of the
@@ -295,8 +304,13 @@ class CallTreeImpl extends PureComponent<Props> {
         }
 
         const children = tree.getChildren(nodeIndex);
+        const nodeDepth = tree.getDepth(nodeIndex);
 
-        if (visibleLinesCount + children.length > maxVisibleLines) {
+        if (
+          i !== 0 &&
+          nodeDepth > minimumDepth &&
+          visibleLinesCount + children.length > maxVisibleLines
+        ) {
           // Expanding this node would exceed our budget.
           // Let's look at the other nodes in case they have a smaller amount of children.
           continue;
