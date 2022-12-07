@@ -190,6 +190,16 @@ MarkerContextMenu--copy-call-stack = Капіяваць стэк выкліка�
 MarkerContextMenu--copy-url = Капіяваць URL
 MarkerContextMenu--copy-page-url = Капіяваць URL-адрас старонкі
 MarkerContextMenu--copy-as-json = Капіяваць як JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Выберыце паток-атрымальнік “<strong>{ $threadName }</strong>”
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Выберыце паток-адпраўнік “<strong>{ $threadName }</strong>”
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -236,6 +246,26 @@ MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
 MenuButtons--metaInfo--main-memory = Асноўная памяць:
 MenuButtons--index--show-moreInfo-button = Паказаць больш
 MenuButtons--index--hide-moreInfo-button = Паказаць менш
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } фізічнае ядро
+        [few] { $physicalCPUs } фізічных ядра
+       *[many] { $physicalCPUs } фізічных ядзер
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } лагічнае ядро
+        [few] { $logicalCPUs } лагічных ядра
+       *[many] { $logicalCPUs } лагічных ядзер
+    }
 MenuButtons--metaInfo--main-process-started = Асноўны працэс пачаўся:
 MenuButtons--metaInfo--main-process-ended = Асноўны працэс скончыўся:
 MenuButtons--metaInfo--interval = Інтэрвал:
@@ -245,6 +275,7 @@ MenuButtons--metaInfo--buffer-duration = Працягласць буфера:
 MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
 MenuButtons--metaInfo--name-and-version = Назва і версія:
+MenuButtons--metaInfo--update-channel = Канал абнаўлення:
 MenuButtons--metaInfo--build-id = ID зборкі:
 MenuButtons--metaInfo--build-type = Тып зборкі:
 MenuButtons--metaInfo--arguments = Аргументы:
