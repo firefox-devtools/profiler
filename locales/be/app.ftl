@@ -282,8 +282,13 @@ MenuButtons--metaOverheadStatistics-min = Мін
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-extension = Уключыць інфармацыю аб пашырэнні
+MenuButtons--publish--renderCheckbox-label-private-browsing = Уключыць даныя з вокнаў прыватнага прагляду
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Гэты профіль змяшчае даныя прыватнага прагляду
 MenuButtons--publish--reupload-performance-profile = Паўторна запампаваць профіль прадукцыйнасці
 MenuButtons--publish--share-performance-profile = Абагуліць профіль прадукцыйнасці
+MenuButtons--publish--info-description = Запампуйце свой профіль і зрабіце яго даступным для ўсіх, хто мае спасылку.
 MenuButtons--publish--button-upload = Запампаваць
 MenuButtons--publish--upload-title = Запампоўванне профілю…
 MenuButtons--publish--cancel-upload = Скасаваць запампоўку
