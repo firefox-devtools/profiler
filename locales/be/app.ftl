@@ -289,6 +289,7 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
 MenuButtons--publish--reupload-performance-profile = Паўторна запампаваць профіль прадукцыйнасці
 MenuButtons--publish--share-performance-profile = Абагуліць профіль прадукцыйнасці
 MenuButtons--publish--info-description = Запампуйце свой профіль і зрабіце яго даступным для ўсіх, хто мае спасылку.
+MenuButtons--publish--info-description-default = Тыпова вашы асабістыя даныя выдаляюцца.
 MenuButtons--publish--button-upload = Запампаваць
 MenuButtons--publish--upload-title = Запампоўванне профілю…
 MenuButtons--publish--cancel-upload = Скасаваць запампоўку
