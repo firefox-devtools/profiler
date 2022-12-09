@@ -405,6 +405,8 @@ ProfileRootMessage--additional = Вярнуцца на галоўную
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installed-button = Перазагрузіць праграму
+ServiceWorkerManager--new-version-is-ready = Новая версія праграмы спампавана і гатова да выкарыстання.
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -415,6 +417,9 @@ StackSettings--use-data-source-label = Крыніца даных:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Дрэва выклікаў
+TabBar--flame-graph-tab = Флэйм-дыяграма
+TabBar--marker-table-tab = Маркерная табліца
 TabBar--js-tracer-tab = JS Tracer
 
 ## TrackContextMenu
