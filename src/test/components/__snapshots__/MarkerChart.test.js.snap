@@ -303,6 +303,13 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
       <div
         class="tooltipLabel"
       >
+        Name
+        :
+      </div>
+      Marker B
+      <div
+        class="tooltipLabel"
+      >
         Marker
         :
       </div>
@@ -1238,6 +1245,13 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
         :
       </div>
       7ms
+      <div
+        class="tooltipLabel"
+      >
+        Event Type
+        :
+      </div>
+      click
       <div
         class="tooltipLabel"
       >

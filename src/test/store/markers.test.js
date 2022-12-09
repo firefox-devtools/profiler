@@ -18,6 +18,7 @@ import {
   getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
+import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 
 describe('selectors/getMarkerChartTimingAndBuckets', function () {
   function getMarkerChartTimingAndBuckets(testMarkers: TestDefinedMarkers) {
@@ -723,6 +724,7 @@ describe('profile upgrading and markers', () => {
         physicalCPUs: 0,
         logicalCPUs: 0,
         symbolicated: true,
+        markerSchema: markerSchemaForTests,
       },
       pages: [],
       threads: [
