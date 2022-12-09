@@ -309,6 +309,7 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Пашырэнні:
 MenuButtons--metaOverheadStatistics-mean = Сярэдняе
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
+MenuButtons--metaOverheadStatistics-profiled-duration = Працягласць запісу профілю:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -419,13 +420,24 @@ StackSettings--use-data-source-label = Крыніца даных:
 
 TabBar--calltree-tab = Дрэва выклікаў
 TabBar--flame-graph-tab = Флэйм-дыяграма
+TabBar--marker-chart-tab = Маркерная дыяграма
 TabBar--marker-table-tab = Маркерная табліца
+TabBar--network-tab = Сетка
 TabBar--js-tracer-tab = JS Tracer
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Паказваць толькі гэты працэс
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Паказваць толькі “{ $trackName }”
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Схаваць “{ $trackName }”
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
