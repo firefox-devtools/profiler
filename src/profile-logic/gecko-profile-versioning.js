@@ -1365,5 +1365,69 @@ const _upgraders = {
     // capturing this data and no new mandatory values are present in this
     // version.
   },
+  [26]: (profile) => {
+    // `searchable` property in the marker schema wasn't implemented before and
+    // we had some manual checks for the marker fields below. With this version,
+    // we removed this manual check and started to use the `searchable` property
+    // of the marker schema.
+    function convertToVersion26Recursive(p) {
+      for (const schema of p.meta.markerSchema) {
+        let searchableFieldKeys;
+        switch (schema.name) {
+          case 'FileIO': {
+            // threadId wasn't in the schema before, so we need to add manually.
+            schema.data.push({
+              key: 'threadId',
+              label: 'Thread ID',
+              format: 'string',
+              searchable: true,
+            });
+            searchableFieldKeys = [];
+            break;
+          }
+          case 'Log': {
+            searchableFieldKeys = ['name', 'module'];
+            break;
+          }
+          case 'DOMEvent': {
+            // In the earlier versions of Firefox, DOMEvent doesn't include
+            // eventType in the backend.
+            schema.data.push({
+              key: 'eventType',
+              label: 'Event Type',
+              format: 'string',
+              searchable: true,
+            });
+            // 'target' wasn't included in our code before. But I thought this
+            // would be a useful addition.
+            searchableFieldKeys = ['target'];
+            break;
+          }
+          case 'TraceEvent': {
+            // These weren't included in our code before. But I thought this
+            // would be a useful addition.
+            searchableFieldKeys = ['name1', 'name2', 'val1', 'val2'];
+            break;
+          }
+          default: {
+            searchableFieldKeys = ['name', 'category'];
+            break;
+          }
+        }
+
+        for (const field of schema.data) {
+          if (searchableFieldKeys.includes(field.key)) {
+            field.searchable = true;
+          }
+        }
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion26Recursive(subprocessProfile);
+      }
+    }
+
+    convertToVersion26Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */

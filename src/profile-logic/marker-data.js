@@ -13,7 +13,11 @@ import {
   INTERVAL_START,
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
-import { getMarkerSchemaName } from './marker-schema';
+import {
+  getMarkerSchemaName,
+  getSchemaFromMarker,
+  markerPayloadMatchesSearch,
+} from './marker-schema';
 
 import type {
   Thread,
@@ -115,85 +119,52 @@ export function deriveJankMarkers(
 export function getSearchFilteredMarkerIndexes(
   getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
+  markerSchemaByName: MarkerSchemaByName,
   searchRegExp: RegExp | null,
   categoryList: CategoryList
 ): MarkerIndex[] {
   if (!searchRegExp) {
     return markerIndexes;
   }
+  // Need to assign it to a constant variable so Flow doesn't complain about
+  // passing it inside a function below.
+  const regExp = searchRegExp;
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
-    const { data, name, category } = getMarker(markerIndex);
+    const marker = getMarker(markerIndex);
+    const { data, name, category } = marker;
 
     // Reset regexp for each iteration. Otherwise state from previous
     // iterations can cause matches to fail if the search is global or
     // sticky.
 
-    searchRegExp.lastIndex = 0;
+    regExp.lastIndex = 0;
 
     if (categoryList[category] !== undefined) {
       const markerCategory = categoryList[category].name;
-      if (searchRegExp.test(markerCategory)) {
+      if (regExp.test(markerCategory)) {
         newMarkers.push(markerIndex);
         continue;
       }
     }
 
-    if (searchRegExp.test(name)) {
+    if (regExp.test(name)) {
       newMarkers.push(markerIndex);
       continue;
     }
+
     if (data && typeof data === 'object') {
-      if (searchRegExp.test(data.type)) {
+      if (regExp.test(data.type)) {
+        // Check the type of the marker payload first.
         newMarkers.push(markerIndex);
         continue;
       }
 
-      if (data.type === 'FileIO') {
-        const { filename, operation, source, threadId } = data;
-        if (
-          searchRegExp.test(filename || '') ||
-          searchRegExp.test(operation) ||
-          searchRegExp.test(source) ||
-          (threadId !== undefined && searchRegExp.test(threadId.toString()))
-        ) {
-          newMarkers.push(markerIndex);
-          continue;
-        }
-      } else if (data.type === 'IPC') {
-        const { messageType, otherPid } = data;
-        if (
-          searchRegExp.test(messageType) ||
-          searchRegExp.test(otherPid.toString())
-        ) {
-          newMarkers.push(markerIndex);
-          continue;
-        }
-      } else if (data.type === 'Log') {
-        const { name, module } = data;
-
-        if (searchRegExp.test(name) || searchRegExp.test(module)) {
-          newMarkers.push(markerIndex);
-          continue;
-        }
-      }
-
+      // Now check the schema for the marker payload for searchable
+      const markerSchema = getSchemaFromMarker(markerSchemaByName, marker);
       if (
-        typeof data.eventType === 'string' &&
-        searchRegExp.test(data.eventType)
-      ) {
-        // Match DOMevents data.eventType
-        newMarkers.push(markerIndex);
-        continue;
-      }
-      if (typeof data.name === 'string' && searchRegExp.test(data.name)) {
-        // Match UserTiming's name.
-        newMarkers.push(markerIndex);
-        continue;
-      }
-      if (
-        typeof data.category === 'string' &&
-        searchRegExp.test(data.category)
+        markerSchema &&
+        markerPayloadMatchesSearch(markerSchema, marker, regExp)
       ) {
         newMarkers.push(markerIndex);
         continue;

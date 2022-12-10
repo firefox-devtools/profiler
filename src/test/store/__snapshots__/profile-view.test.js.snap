@@ -204,6 +204,7 @@ Object {
             "format": "string",
             "key": "prefName",
             "label": "Name",
+            "searchable": true,
           },
           Object {
             "format": "string",
@@ -230,6 +231,12 @@ Object {
       Object {
         "chartLabel": "{marker.data.name}",
         "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Name",
+            "searchable": true,
+          },
           Object {
             "label": "Marker",
             "value": "UserTiming",
@@ -259,6 +266,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Details",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -274,11 +282,13 @@ Object {
             "format": "string",
             "key": "module",
             "label": "Module",
+            "searchable": true,
           },
           Object {
             "format": "string",
             "key": "name",
             "label": "Name",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -294,6 +304,12 @@ Object {
             "format": "duration",
             "key": "latency",
             "label": "Latency",
+          },
+          Object {
+            "format": "string",
+            "key": "eventType",
+            "label": "Event Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -311,6 +327,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -326,6 +343,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -341,6 +359,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -389,6 +408,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Tick Reasons",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -403,7 +423,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 43,
+    "preprocessedProfileVersion": 44,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -411,7 +431,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 25,
+    "version": 26,
   },
   "pages": Array [
     Object {

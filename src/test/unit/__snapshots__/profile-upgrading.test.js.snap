@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 43,
+    "preprocessedProfileVersion": 44,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -50,7 +50,7 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 25,
+    "version": 26,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -7896,6 +7896,12 @@ Object {
             "label": "Filename",
             "searchable": true,
           },
+          Object {
+            "format": "string",
+            "key": "threadId",
+            "label": "Thread ID",
+            "searchable": true,
+          },
         ],
         "display": Array [
           "marker-chart",
@@ -8018,6 +8024,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Details",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -8033,11 +8040,13 @@ Object {
             "format": "string",
             "key": "module",
             "label": "Module",
+            "searchable": true,
           },
           Object {
             "format": "string",
             "key": "name",
             "label": "Name",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -8053,6 +8062,12 @@ Object {
             "format": "duration",
             "key": "latency",
             "label": "Latency",
+          },
+          Object {
+            "format": "string",
+            "key": "eventType",
+            "label": "Event Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -8070,6 +8085,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -8085,6 +8101,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -8100,6 +8117,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -8148,6 +8166,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Tick Reasons",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -8174,7 +8193,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 25,
+    "version": 26,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -9341,6 +9360,12 @@ Object {
             "label": "Filename",
             "searchable": true,
           },
+          Object {
+            "format": "string",
+            "key": "threadId",
+            "label": "Thread ID",
+            "searchable": true,
+          },
         ],
         "display": Array [
           "marker-chart",
@@ -9463,6 +9488,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Details",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -9478,11 +9504,13 @@ Object {
             "format": "string",
             "key": "module",
             "label": "Module",
+            "searchable": true,
           },
           Object {
             "format": "string",
             "key": "name",
             "label": "Name",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -9498,6 +9526,12 @@ Object {
             "format": "duration",
             "key": "latency",
             "label": "Latency",
+          },
+          Object {
+            "format": "string",
+            "key": "eventType",
+            "label": "Event Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -9515,6 +9549,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -9530,6 +9565,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -9545,6 +9581,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -9593,6 +9630,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Tick Reasons",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -9619,7 +9657,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 25,
+    "version": 26,
   },
   "pages": Array [
     Object {
@@ -10871,6 +10909,12 @@ Object {
             "label": "Filename",
             "searchable": true,
           },
+          Object {
+            "format": "string",
+            "key": "threadId",
+            "label": "Thread ID",
+            "searchable": true,
+          },
         ],
         "display": Array [
           "marker-chart",
@@ -10993,6 +11037,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Details",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -11008,11 +11053,13 @@ Object {
             "format": "string",
             "key": "module",
             "label": "Module",
+            "searchable": true,
           },
           Object {
             "format": "string",
             "key": "name",
             "label": "Name",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -11028,6 +11075,12 @@ Object {
             "format": "duration",
             "key": "latency",
             "label": "Latency",
+          },
+          Object {
+            "format": "string",
+            "key": "eventType",
+            "label": "Event Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -11045,6 +11098,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -11060,6 +11114,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -11075,6 +11130,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -11123,6 +11179,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Tick Reasons",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -11143,7 +11200,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 43,
+    "preprocessedProfileVersion": 44,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -12530,6 +12587,12 @@ Object {
             "label": "Filename",
             "searchable": true,
           },
+          Object {
+            "format": "string",
+            "key": "threadId",
+            "label": "Thread ID",
+            "searchable": true,
+          },
         ],
         "display": Array [
           "marker-chart",
@@ -12652,6 +12715,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Details",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -12667,11 +12731,13 @@ Object {
             "format": "string",
             "key": "module",
             "label": "Module",
+            "searchable": true,
           },
           Object {
             "format": "string",
             "key": "name",
             "label": "Name",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -12687,6 +12753,12 @@ Object {
             "format": "duration",
             "key": "latency",
             "label": "Latency",
+          },
+          Object {
+            "format": "string",
+            "key": "eventType",
+            "label": "Event Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -12704,6 +12776,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -12719,6 +12792,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -12734,6 +12808,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -12782,6 +12857,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Tick Reasons",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -12802,7 +12878,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 43,
+    "preprocessedProfileVersion": 44,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -14339,6 +14415,12 @@ Object {
             "label": "Filename",
             "searchable": true,
           },
+          Object {
+            "format": "string",
+            "key": "threadId",
+            "label": "Thread ID",
+            "searchable": true,
+          },
         ],
         "display": Array [
           "marker-chart",
@@ -14461,6 +14543,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Details",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -14476,11 +14559,13 @@ Object {
             "format": "string",
             "key": "module",
             "label": "Module",
+            "searchable": true,
           },
           Object {
             "format": "string",
             "key": "name",
             "label": "Name",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -14496,6 +14581,12 @@ Object {
             "format": "duration",
             "key": "latency",
             "label": "Latency",
+          },
+          Object {
+            "format": "string",
+            "key": "eventType",
+            "label": "Event Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -14513,6 +14604,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -14528,6 +14620,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -14543,6 +14636,7 @@ Object {
             "format": "string",
             "key": "category",
             "label": "Type",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -14591,6 +14685,7 @@ Object {
             "format": "string",
             "key": "name",
             "label": "Tick Reasons",
+            "searchable": true,
           },
         ],
         "display": Array [
@@ -14611,7 +14706,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 43,
+    "preprocessedProfileVersion": 44,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
