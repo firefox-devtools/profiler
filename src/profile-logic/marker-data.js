@@ -161,7 +161,11 @@ export function getSearchFilteredMarkerIndexes(
       }
 
       // Now check the schema for the marker payload for searchable
-      const markerSchema = getSchemaFromMarker(markerSchemaByName, marker);
+      const markerSchema = getSchemaFromMarker(
+        markerSchemaByName,
+        marker.name,
+        marker.data
+      );
       if (
         markerSchema &&
         markerPayloadMatchesSearch(markerSchema, marker, regExp)
@@ -1362,7 +1366,9 @@ export function filterMarkerByDisplayLocation(
       return additionalResult;
     }
 
-    return markerTypes.has(getMarkerSchemaName(markerSchemaByName, marker));
+    return markerTypes.has(
+      getMarkerSchemaName(markerSchemaByName, marker.name, marker.data)
+    );
   });
 }
 
