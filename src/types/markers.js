@@ -20,9 +20,7 @@ export type MarkerFormatType =
   // String types.
 
   // Show the URL, and handle PII sanitization
-  // TODO Handle PII sanitization. Issue #2757
   | 'url'
-  // TODO Handle PII sanitization. Issue #2757
   // Show the file path, and handle PII sanitization.
   | 'file-path'
   // Important, do not put URL or file path information here, as it will not be
