@@ -417,6 +417,7 @@ MenuButtons--metaOverheadStatistics-statkeys-cleaning = Pulizia
 MenuButtons--metaOverheadStatistics-statkeys-counter = Contatore
     .title = Tempo utilizzato per raccogliere tutti i contatori.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Intervallo
+    .title = Intervallo rispettato tra due campioni.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Locking
     .title = Tempo utilizzato per acquisire il lock prima del campionamento.
 MenuButtons--metaOverheadStatistics-overhead-duration = Durata complessiva overhead:
