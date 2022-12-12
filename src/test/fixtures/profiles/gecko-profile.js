@@ -336,7 +336,7 @@ type TestDefinedGeckoMarker = {|
   +endTime: Milliseconds | null,
   +phase: MarkerPhase,
   +category?: IndexIntoCategoryList,
-  +data?: MarkerPayload_Gecko,
+  +data?: MarkerPayload_Gecko | null,
 |};
 
 function _createGeckoThreadWithMarkers(

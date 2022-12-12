@@ -253,7 +253,7 @@ export type ProfilerMarkerPayload = {
  * it into a structured marker.
  */
 export type RawMarkerTable = {|
-  data: MarkerPayload[],
+  data: Array<MarkerPayload | null>,
   name: IndexIntoStringTable[],
   startTime: Array<number | null>,
   endTime: Array<number | null>,

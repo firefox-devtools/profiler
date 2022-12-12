@@ -3091,8 +3091,8 @@ export function replaceStackReferences(
 
   // Markers
   function replaceStackReferenceInMarkerPayload(
-    oldData: MarkerPayload
-  ): MarkerPayload {
+    oldData: MarkerPayload | null
+  ): MarkerPayload | null {
     if (oldData && 'cause' in oldData && oldData.cause) {
       // Replace the cause with the right stack index.
       // Use (...: any) because our current version of Flow has trouble with

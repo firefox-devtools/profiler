@@ -679,7 +679,7 @@ function _convertStackToCause(data: any): any {
  * from a gecko payload.
  */
 function _convertPayloadStackToIndex(
-  data: MarkerPayload_Gecko
+  data: MarkerPayload_Gecko | null
 ): IndexIntoStackTable | null {
   if (!data) {
     return null;
@@ -714,7 +714,7 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): {|
   let hasMemoryAddresses;
 
   for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
-    const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];
+    const geckoPayload = geckoMarkers.data[markerIndex];
 
     if (geckoPayload) {
       switch (geckoPayload.type) {
@@ -844,8 +844,8 @@ function convertPhaseTimes(
  * the GC information.
  */
 function _processMarkerPayload(
-  geckoPayload: MarkerPayload_Gecko
-): MarkerPayload {
+  geckoPayload: MarkerPayload_Gecko | null
+): MarkerPayload | null {
   if (!geckoPayload) {
     return null;
   }
@@ -854,7 +854,7 @@ function _processMarkerPayload(
   // pre-emptively done for every single marker payload.
   //
   // Warning: This function converts the payload into an any type
-  const payload = _convertStackToCause(geckoPayload);
+  const payload: MarkerPayload_Gecko = _convertStackToCause(geckoPayload);
 
   switch (payload.type) {
     /*
@@ -907,7 +907,7 @@ function _processMarkerPayload(
       // Coerce the payload into a MarkerPayload. This doesn't really provide
       // any more type safety, but it shows the intent of going from an object
       // without much type safety, to a specific type definition.
-      return (payload: MarkerPayload);
+      return (payload: any);
   }
 }
 

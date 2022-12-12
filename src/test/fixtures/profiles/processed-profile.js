@@ -75,7 +75,7 @@ export type TestDefinedMarkers = Array<
       MarkerName,
       MarkerTime, // start time
       MarkerTime | null, // end time
-      MarkerPayload | MockPayload
+      MarkerPayload | MockPayload | null
     ]
 >;
 
@@ -86,7 +86,7 @@ export type TestDefinedRawMarker = {|
   +endTime: Milliseconds | null,
   +phase: MarkerPhase,
   +category?: IndexIntoCategoryList,
-  +data?: MarkerPayload,
+  +data?: MarkerPayload | null,
 |};
 
 export type TestDefinedJsTracerEvent = [
@@ -131,7 +131,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const startTime = tuple[1];
     // Flow doesn't support variadic tuple types.
     const maybeEndTime = (tuple: any)[2] || null;
-    const payload: MarkerPayload = (tuple: any)[3] || null;
+    const payload: MarkerPayload | null = (tuple: any)[3] || null;
 
     markersTable.name.push(stringTable.indexForString(name));
     if (maybeEndTime === null) {
