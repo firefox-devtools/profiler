@@ -35,7 +35,6 @@ import type {
   IPCMarkerPayload,
   NetworkPayload,
   PrefMarkerPayload,
-  FileIoPayload,
   TextMarkerPayload,
   StartEndRange,
   IndexedArray,
@@ -1266,22 +1265,6 @@ export function removePrefMarkerPreferenceValues(
   payload: PrefMarkerPayload
 ): PrefMarkerPayload {
   return { ...payload, prefValue: '' };
-}
-
-/**
- * Sanitize FileIO marker's filename property if it's non-empty.
- */
-export function sanitizeFileIOMarkerFilenamePath(
-  payload: FileIoPayload
-): FileIoPayload {
-  if (!payload.filename) {
-    return payload;
-  }
-
-  return {
-    ...payload,
-    filename: removeFilePath(payload.filename),
-  };
 }
 
 /**

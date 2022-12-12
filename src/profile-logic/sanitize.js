@@ -14,7 +14,6 @@ import { removeURLs } from '../utils/string';
 import {
   removeNetworkMarkerURLs,
   removePrefMarkerPreferenceValues,
-  sanitizeFileIOMarkerFilenamePath,
   filterRawMarkerTableToRangeWithMarkersToDelete,
   sanitizeExtensionTextMarker,
   sanitizeTextMarker,
@@ -307,12 +306,6 @@ function sanitizeThreadPII(
             /:.*/,
             ''
           );
-        }
-
-        // Remove the all OS paths from FileIO markers if user wants to remove them.
-        if (currentMarker.type === 'FileIO') {
-          // Remove the filename path from marker payload.
-          markerTable.data[i] = sanitizeFileIOMarkerFilenamePath(currentMarker);
         }
 
         if (currentMarker.type === 'Text') {
