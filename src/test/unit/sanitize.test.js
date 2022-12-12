@@ -65,10 +65,44 @@ describe('sanitizePII', function () {
       }
     );
 
+    const markerSchemaByName = {
+      FileIO: {
+        name: 'FileIO',
+        display: ['marker-chart', 'marker-table', 'timeline-fileio'],
+        data: [
+          {
+            key: 'operation',
+            label: 'Operation',
+            format: 'string',
+            searchable: true,
+          },
+          {
+            key: 'source',
+            label: 'Source',
+            format: 'string',
+            searchable: true,
+          },
+          {
+            key: 'filename',
+            label: 'Filename',
+            format: 'file-path',
+            searchable: true,
+          },
+          {
+            key: 'threadId',
+            label: 'Thread ID',
+            format: 'string',
+            searchable: true,
+          },
+        ],
+      },
+    };
+
     const sanitizedProfile = sanitizePII(
       originalProfile,
       derivedMarkerInfoForAllThreads,
-      PIIToRemove
+      PIIToRemove,
+      markerSchemaByName
     ).profile;
 
     return {

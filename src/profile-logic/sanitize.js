@@ -18,7 +18,9 @@ import {
   filterRawMarkerTableToRangeWithMarkersToDelete,
   sanitizeExtensionTextMarker,
   sanitizeTextMarker,
+  sanitizeFromMarkerSchema,
 } from './marker-data';
+import { getSchemaFromMarker } from './marker-schema';
 import { filterThreadSamplesToRange } from './profile-data';
 import type {
   Profile,
@@ -30,6 +32,7 @@ import type {
   IndexIntoFrameTable,
   IndexIntoFuncTable,
   InnerWindowID,
+  MarkerSchemaByName,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
@@ -47,7 +50,8 @@ export type SanitizeProfileResult = {|
 export function sanitizePII(
   profile: Profile,
   derivedMarkerInfoForAllThreads: DerivedMarkerInfo[],
-  maybePIIToBeRemoved: RemoveProfileInformation | null
+  maybePIIToBeRemoved: RemoveProfileInformation | null,
+  markerSchemaByName: MarkerSchemaByName
 ): SanitizeProfileResult {
   if (maybePIIToBeRemoved === null) {
     // Nothing is sanitized.
@@ -133,7 +137,8 @@ export function sanitizePII(
         threadIndex,
         PIIToBeRemoved,
         windowIdFromPrivateBrowsing,
-        windowIdFromActiveTab
+        windowIdFromActiveTab,
+        markerSchemaByName
       );
 
       // Filtering out the current thread if it's null.
@@ -227,7 +232,8 @@ function sanitizeThreadPII(
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation,
   windowIdFromPrivateBrowsing: Set<InnerWindowID>,
-  windowIdFromActiveTab: Set<InnerWindowID>
+  windowIdFromActiveTab: Set<InnerWindowID>,
+  markerSchemaByName: MarkerSchemaByName
 ): Thread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
     // If this is a hidden thread, remove the thread immediately.
@@ -275,7 +281,22 @@ function sanitizeThreadPII(
       }
 
       if (currentMarker && PIIToBeRemoved.shouldRemoveUrls) {
-        // Remove the all network URLs if user wants to remove them.
+        // Use the schema to find some properties that need to be sanitized.
+        const markerNameIndex = markerTable.name[i];
+        const markerName = thread.stringTable.getString(markerNameIndex);
+        const markerSchema = getSchemaFromMarker(
+          markerSchemaByName,
+          markerName,
+          currentMarker
+        );
+        if (markerSchema) {
+          currentMarker = markerTable.data[i] = sanitizeFromMarkerSchema(
+            markerSchema,
+            currentMarker
+          );
+        }
+
+        // Remove the network URLs if user wants to remove them.
         if (currentMarker.type === 'Network') {
           // Remove the URI fields from marker payload.
           markerTable.data[i] = removeNetworkMarkerURLs(currentMarker);

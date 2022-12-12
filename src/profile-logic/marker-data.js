@@ -1320,6 +1320,41 @@ export function sanitizeExtensionTextMarker(
   return payload;
 }
 
+export function sanitizeFromMarkerSchema(
+  markerSchema: MarkerSchema,
+  markerPayload: MarkerPayload
+): MarkerPayload {
+  for (const propertyDescription of markerSchema.data) {
+    if (
+      propertyDescription.key !== undefined &&
+      propertyDescription.format !== undefined
+    ) {
+      const key = propertyDescription.key;
+      const format = propertyDescription.format;
+      if (!(key in markerPayload)) {
+        continue;
+      }
+
+      // We're typing the result of the sanitization with `any` because Flow
+      // doesn't like much our enormous enum of non-exact objects that's used as
+      // MarkerPayload type, and this code is too generic for Flow in this context.
+      if (format === 'url') {
+        markerPayload = ({
+          ...markerPayload,
+          [key]: removeURLs(markerPayload[key]),
+        }: any);
+      } else if (format === 'file-path') {
+        markerPayload = ({
+          ...markerPayload,
+          [key]: removeFilePath(markerPayload[key]),
+        }: any);
+      }
+    }
+  }
+
+  return markerPayload;
+}
+
 /**
  * Markers can be filtered by display area using the marker schema. Get a list of
  * marker "types" (the type field in the Payload) for a specific location.
