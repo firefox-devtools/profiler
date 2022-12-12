@@ -2056,6 +2056,13 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
     <div
       class="tooltipLabel"
     >
+      Event Type
+      :
+    </div>
+    commandupdate
+    <div
+      class="tooltipLabel"
+    >
       Thread
       :
     </div>
@@ -2110,6 +2117,13 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.6 1`] =
   <div
     class="tooltipDetails"
   >
+    <div
+      class="tooltipLabel"
+    >
+      Event Type
+      :
+    </div>
+    load
     <div
       class="tooltipLabel"
     >
@@ -2168,6 +2182,13 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] =
     <div
       class="tooltipLabel"
     >
+      Event Type
+      :
+    </div>
+    load
+    <div
+      class="tooltipLabel"
+    >
       Thread
       :
     </div>
@@ -2220,6 +2241,13 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.8 1`] =
   <div
     class="tooltipDetails"
   >
+    <div
+      class="tooltipLabel"
+    >
+      Event Type
+      :
+    </div>
+    load
     <div
       class="tooltipLabel"
     >
@@ -3295,6 +3323,13 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       :
     </div>
     Main Thread (Thread ID: 0)
+    <div
+      class="tooltipLabel"
+    >
+      Other Pid
+      :
+    </div>
+    2222
     <div
       class="tooltipLabel"
     >
@@ -4649,6 +4684,13 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
     <div
       class="tooltipLabel"
     >
+      Name
+      :
+    </div>
+    foobar
+    <div
+      class="tooltipLabel"
+    >
       Marker
       :
     </div>
@@ -4834,6 +4876,13 @@ exports[`TooltipMarker shows the source thread for markers from a merged thread 
         <div
           class="tooltipLabel"
         >
+          Event Type
+          :
+        </div>
+        click
+        <div
+          class="tooltipLabel"
+        >
           Thread
           :
         </div>
@@ -4892,6 +4941,13 @@ exports[`TooltipMarker shows the source thread for markers from a merged thread 
       <div
         class="tooltipDetails"
       >
+        <div
+          class="tooltipLabel"
+        >
+          Event Type
+          :
+        </div>
+        pageload
         <div
           class="tooltipLabel"
         >

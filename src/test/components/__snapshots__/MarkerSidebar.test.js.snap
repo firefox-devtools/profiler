@@ -55,6 +55,13 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
         <div
           class="tooltipLabel"
         >
+          Other Pid
+          :
+        </div>
+        2222
+        <div
+          class="tooltipLabel"
+        >
           Send Thread Latency
           :
         </div>
