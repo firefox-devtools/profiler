@@ -8,6 +8,8 @@ import * as React from 'react';
 import { Localized } from '@fluent/react';
 import memoize from 'memoize-one';
 
+import { averageIntensity } from '@tgwf/co2';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatNumber } from 'firefox-profiler/utils/format-numbers';
 import {
@@ -63,6 +65,13 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     return sum * 1e-12;
   }
 
+  _computeCO2eFromPower(power: number): number {
+    // total energy Wh to kWh
+    const energy = power / 1000;
+    const { WORLD } = averageIntensity.data;
+    return energy * WORLD;
+  }
+
   _computePowerSumForCommittedRange = memoize(
     ({ start, end }: StartEndRange): number =>
       this._computePowerSumForRange(start, end)
@@ -85,23 +94,32 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
     l10nIdMilliUnit,
     l10nIdMicroUnit
   ): Localized {
-    let value, l10nId;
+    let value, l10nId, carbonValue;
+    const carbon = this._computeCO2eFromPower(power);
     if (power > 1) {
       value = formatNumber(power, 3);
+      carbonValue = formatNumber(carbon, 3);
       l10nId = l10nIdUnit;
     } else if (power === 0) {
       value = 0;
+      carbonValue = 0;
       l10nId = l10nIdUnit;
     } else if (power < 0.001 && l10nIdMicroUnit) {
       value = formatNumber(power * 1000000);
+      carbonValue = formatNumber(carbon * 1000);
       l10nId = l10nIdMicroUnit;
     } else {
       value = formatNumber(power * 1000);
+      carbonValue = formatNumber(carbon * 1000);
       l10nId = l10nIdMilliUnit;
     }
 
     return (
-      <Localized id={l10nId} vars={{ value }} attrs={{ label: true }}>
+      <Localized
+        id={l10nId}
+        vars={{ value, carbonValue }}
+        attrs={{ label: true }}
+      >
         <TooltipDetail label="">{value}</TooltipDetail>
       </Localized>
     );
@@ -139,16 +157,16 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
           {previewSelection.hasSelection
             ? this._formatPowerValue(
                 this._computePowerSumForPreviewRange(previewSelection),
-                'TrackPower--tooltip-energy-used-in-preview-watthour',
-                'TrackPower--tooltip-energy-used-in-preview-milliwatthour',
-                'TrackPower--tooltip-energy-used-in-preview-microwatthour'
+                'TrackPower--tooltip-energy-carbon-used-in-preview-watthour',
+                'TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour',
+                'TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour'
               )
             : null}
           {this._formatPowerValue(
             this._computePowerSumForCommittedRange(committedRange),
-            'TrackPower--tooltip-energy-used-in-range-watthour',
-            'TrackPower--tooltip-energy-used-in-range-milliwatthour',
-            'TrackPower--tooltip-energy-used-in-range-microwatthour'
+            'TrackPower--tooltip-energy-carbon-used-in-range-watthour',
+            'TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour',
+            'TrackPower--tooltip-energy-carbon-used-in-range-microwatthour'
           )}
         </TooltipDetails>
       </div>
