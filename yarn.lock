@@ -1832,6 +1832,13 @@
     "@testing-library/dom" "^8.5.0"
     "@types/react-dom" "^18.0.0"
 
+"@tgwf/co2@^0.11.4":
+  version "0.11.4"
+  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.11.4.tgz#1e919364a3b1ce5ed835fb6449f78a7c7277e3f4"
+  integrity sha512-I6e+WzdDpVbKLkTDJXAA0kJvOJQg1TNfTOu7PA5+FfxLEix9EqdigVK0Qd4flC82fLgTKSw4upuh+nCm4fFCaQ==
+  dependencies:
+    debug "^4.3.4"
+
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
