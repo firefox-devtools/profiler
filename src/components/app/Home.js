@@ -355,6 +355,20 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 </p>
               </Localized>
             )}
+            <Localized
+              id="Home--profile-firefox-android-instructions"
+              elems={{
+                a: (
+                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+                ),
+              }}
+            >
+              <p>
+                You can also profile Firefox for Android. For more information,
+                please consult this documentation:{' '}
+                <a>Profiling Firefox for Android directly on device</a>.
+              </p>
+            </Localized>
           </div>
           {/* end of grid container */}
         </div>
@@ -393,6 +407,20 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               </p>
             </Localized>
             {this._renderShortcuts()}
+            <Localized
+              id="Home--profile-firefox-android-instructions"
+              elems={{
+                a: (
+                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+                ),
+              }}
+            >
+              <p>
+                You can also profile Firefox for Android. For more information,
+                please consult this documentation:{' '}
+                <a>Profiling Firefox for Android directly on device</a>.
+              </p>
+            </Localized>
           </div>
           {/* end of grid container */}
         </div>
@@ -417,9 +445,6 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           {/* Right column: instructions */}
           <div>
             <DocsButton />
-            <Localized id="Home--instructions-title">
-              <h2>How to view and record profiles</h2>
-            </Localized>
             <Localized
               id="Home--instructions-content"
               elems={{
@@ -431,6 +456,20 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>
                 . However, existing profiles can be viewed in any modern
                 browser.
+              </p>
+            </Localized>
+            <Localized
+              id="Home--profile-firefox-android-instructions"
+              elems={{
+                a: (
+                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+                ),
+              }}
+            >
+              <p>
+                You can also profile Firefox for Android. For more information,
+                please consult this documentation:{' '}
+                <a>Profiling Firefox for Android directly on device</a>.
               </p>
             </Localized>
           </div>
@@ -513,6 +552,37 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                   this._onLoadProfileFromUrlRequested
                 }
               />
+
+              <Localized
+                id="Home--load-files-from-other-tools"
+                elems={{
+                  perf: (
+                    <a href="https://profiler.firefox.com/docs/#/./guide-perf-profiling" />
+                  ),
+                  simpleperf: (
+                    <a href="https://profiler.firefox.com/docs/#/./guide-android-profiling" />
+                  ),
+                  androidstudio: (
+                    <a href="https://developer.android.com/studio/profile/cpu-profiler" />
+                  ),
+                  dhat: (
+                    <a href="https://valgrind.org/docs/manual/dh-manual.html" />
+                  ),
+                  write: (
+                    <a href="https://github.com/firefox-devtools/profiler/blob/main/docs-developer/custom-importer.md" />
+                  ),
+                }}
+              >
+                <p>
+                  The Firefox Profiler can also import profiles from other
+                  profilers, such as <perf>Linux perf</perf>,
+                  <simpleperf>Android SimplePerf</simpleperf>, the Chrome
+                  performance panel,{' '}
+                  <androidstudio>Android Studio</androidstudio>, or any file
+                  using the <dhat>dhat format</dhat>.{' '}
+                  <write>Learn how to write your own importer</write>.
+                </p>
+              </Localized>
 
               <Localized
                 id="Home--compare-recordings-info"
