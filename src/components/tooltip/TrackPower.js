@@ -106,6 +106,8 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
       l10nId = l10nIdUnit;
     } else if (power < 0.001 && l10nIdMicroUnit) {
       value = formatNumber(power * 1000000);
+      // Note: even though the power value is expressed in µWh, the carbon value
+      // is still expressed in mg.
       carbonValue = formatNumber(carbon * 1000);
       l10nId = l10nIdMicroUnit;
     } else {
