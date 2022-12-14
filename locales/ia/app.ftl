@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox pro Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -257,7 +258,6 @@ Home--record-instructions =
     Pro initiar profilar, clicca sur le button profila o usa le
     vias breve de claviero. Le icone es blau quando un profilo es in registration.
     Pulsa <kbd>Capturar</kbd> pro cargar le datos in profiler.firefox.com.
-Home--instructions-title = Como vider e registrar profilos
 Home--instructions-content =
     Registrar profilos de prestation require <a>{ -firefox-brand-name }</a>.
     Totevia, le profilos existente pote esser vidite in ulle moderne navigator.
