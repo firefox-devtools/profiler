@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox foar Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -260,7 +261,6 @@ Home--record-instructions =
     Klik om te starten mei it meitsjen fan in profyl op de profylknop of brûk de
     fluchtoetsen. It piktogram is blau as der in profyl opnommen wurdt.
     Klik op <kbd>Fêstlizze</kbd> om de gegevens yn profiler.firefox.com te laden.
-Home--instructions-title = Profilen besjen en opnimme
 Home--instructions-content =
     It opnimmen fan prestaasjeprofilen fereasket <a>{ -firefox-brand-name }</a>.
     Besteande profilen kinne echter besjoen wurde yn elke moderne browser.
