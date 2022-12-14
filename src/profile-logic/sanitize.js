@@ -274,40 +274,33 @@ function sanitizeThreadPII(
         markerTable.data[i] = removePrefMarkerPreferenceValues(currentMarker);
       }
 
-      // Remove the all network URLs if user wants to remove them.
-      if (
-        PIIToBeRemoved.shouldRemoveUrls &&
-        currentMarker &&
-        currentMarker.type === 'Network'
-      ) {
-        // Remove the URI fields from marker payload.
-        markerTable.data[i] = removeNetworkMarkerURLs(currentMarker);
+      if (currentMarker && PIIToBeRemoved.shouldRemoveUrls) {
+        // Remove the all network URLs if user wants to remove them.
+        if (currentMarker.type === 'Network') {
+          // Remove the URI fields from marker payload.
+          markerTable.data[i] = removeNetworkMarkerURLs(currentMarker);
 
-        // Strip the URL from the marker name
-        const stringIndex = markerTable.name[i];
-        stringArray[stringIndex] = stringArray[stringIndex].replace(/:.*/, '');
-      }
+          // Strip the URL from the marker name
+          const stringIndex = markerTable.name[i];
+          stringArray[stringIndex] = stringArray[stringIndex].replace(
+            /:.*/,
+            ''
+          );
+        }
 
-      // Remove the all OS paths from FileIO markers if user wants to remove them.
-      if (
-        PIIToBeRemoved.shouldRemoveUrls &&
-        currentMarker &&
-        currentMarker.type === 'FileIO'
-      ) {
-        // Remove the filename path from marker payload.
-        markerTable.data[i] = sanitizeFileIOMarkerFilenamePath(currentMarker);
-      }
+        // Remove the all OS paths from FileIO markers if user wants to remove them.
+        if (currentMarker.type === 'FileIO') {
+          // Remove the filename path from marker payload.
+          markerTable.data[i] = sanitizeFileIOMarkerFilenamePath(currentMarker);
+        }
 
-      if (
-        PIIToBeRemoved.shouldRemoveUrls &&
-        currentMarker &&
-        currentMarker.type === 'Text'
-      ) {
-        // Sanitize all the name fields of text markers in case they contain URLs.
-        markerTable.data[i] = sanitizeTextMarker(currentMarker);
-        // Re-assign the value of currentMarker as the marker may be
-        // sanitized again to remove extension ids.
-        currentMarker = markerTable.data[i];
+        if (currentMarker.type === 'Text') {
+          // Sanitize all the name fields of text markers in case they contain URLs.
+          markerTable.data[i] = sanitizeTextMarker(currentMarker);
+          // Re-assign the value of currentMarker as the marker may be
+          // sanitized again to remove extension ids.
+          currentMarker = markerTable.data[i];
+        }
       }
 
       if (
