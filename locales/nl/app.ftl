@@ -279,10 +279,10 @@ Home--your-recent-uploaded-recordings-title = Uw onlangs geüploade opnamen
 # documentation to use these tools.
 Home--load-files-from-other-tools =
     De { -profiler-brand-name } kan ook profielen van andere profilers importeren, zoals
-    <perf>Linux-perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, het
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, het
     Chrome-prestatiepaneel, <androidstudio>Android Studio</androidstudio> of
-    elk bestand dat de <dhat>dhat-indeling</dhat> gebruikt. <write>Leer hoe u uw
-    eigen importeerder kunt schrijven</write>.
+    elk bestand dat de <dhat>dhat-indeling</dhat> gebruikt. <write>Ontdek hoe u uw
+    eigen importroutine schrijft</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
