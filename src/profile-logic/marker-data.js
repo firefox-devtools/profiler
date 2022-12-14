@@ -496,9 +496,9 @@ export function deriveMarkersFromRawMarkerTable(
   // In the case of separate markers for the start and end of an interval,
   // merge the payloads together, with the end data overriding the start.
   function mergeIntervalData(
-    startData: MarkerPayload,
-    endData: MarkerPayload
-  ): MarkerPayload {
+    startData: MarkerPayload | null,
+    endData: MarkerPayload | null
+  ): MarkerPayload | null {
     if (!startData && !endData) {
       return null;
     }

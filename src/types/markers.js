@@ -766,8 +766,7 @@ export type MarkerPayload =
   | MediaSampleMarkerPayload
   | JankPayload
   | BrowsertimeMarkerPayload
-  | NoPayloadUserData
-  | null;
+  | NoPayloadUserData;
 
 export type MarkerPayload_Gecko =
   | GPUMarkerPayload
@@ -795,6 +794,4 @@ export type MarkerPayload_Gecko =
   | $ReplaceCauseWithStack<FileIoPayload>
   | $ReplaceCauseWithStack<PaintProfilerMarkerTracing>
   | $ReplaceCauseWithStack<StyleMarkerPayload>
-  | $ReplaceCauseWithStack<TextMarkerPayload>
-  // Payloads can be null.
-  | null;
+  | $ReplaceCauseWithStack<TextMarkerPayload>;

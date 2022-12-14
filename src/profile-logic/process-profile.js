@@ -661,13 +661,16 @@ function _processStackTable(
  * synchronous stack. Otherwise, if it happened before, it was an async stack, and is
  * most likely some event that happened in the past that triggered the marker.
  */
-function _convertStackToCause(data: any): any {
+function _convertStackToCause(data: MarkerPayload_Gecko) {
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
     const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
     const time = stack.samples.data[0][stack.samples.schema.time];
     if (stackIndex !== null) {
-      newData.cause = { tid: stack.tid, time, stack: stackIndex };
+      return {
+        ...newData,
+        cause: { tid: stack.tid, time, stack: stackIndex },
+      };
     }
     return newData;
   }
@@ -679,7 +682,7 @@ function _convertStackToCause(data: any): any {
  * from a gecko payload.
  */
 function _convertPayloadStackToIndex(
-  data: MarkerPayload_Gecko
+  data: MarkerPayload_Gecko | null
 ): IndexIntoStackTable | null {
   if (!data) {
     return null;
@@ -714,7 +717,7 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): {|
   let hasMemoryAddresses;
 
   for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
-    const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];
+    const geckoPayload = geckoMarkers.data[markerIndex];
 
     if (geckoPayload) {
       switch (geckoPayload.type) {
@@ -844,8 +847,8 @@ function convertPhaseTimes(
  * the GC information.
  */
 function _processMarkerPayload(
-  geckoPayload: MarkerPayload_Gecko
-): MarkerPayload {
+  geckoPayload: MarkerPayload_Gecko | null
+): MarkerPayload | null {
   if (!geckoPayload) {
     return null;
   }
@@ -904,10 +907,14 @@ function _processMarkerPayload(
       }
     }
     default:
-      // Coerce the payload into a MarkerPayload. This doesn't really provide
-      // any more type safety, but it shows the intent of going from an object
-      // without much type safety, to a specific type definition.
-      return (payload: MarkerPayload);
+      // `payload` is currently typed as the result of _convertStackToCause, which
+      // is MarkerPayload_Gecko where `stack` has been replaced with `cause`. This
+      // should be reasonably close to `MarkerPayload`, but Flow doesn't work well
+      // with our MarkerPayload type. So we're coerce this return value to `any`
+      // here, and then to `MarkerPayload` as the return value for this function.
+      // This doesn't provide type safety but it shows the intent of going from an
+      // object without much type safety, to a specific type definition.
+      return (payload: any);
   }
 }
 
