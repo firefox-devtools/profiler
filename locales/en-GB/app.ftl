@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox for Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -247,6 +248,10 @@ Home--menu-button = Enable { -profiler-brand-name } Menu Button
 Home--menu-button-instructions =
     Enable the profiler menu button to start recording a performance
     profile in { -firefox-brand-name }, then analyse it and share it with profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    You can also profile { -firefox-android-brand-name }. For more
+    information, please consult this documentation:
+    <a>Profiling { -firefox-android-brand-name } directly on device</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -264,7 +269,6 @@ Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording.
     Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
-Home--instructions-title = How to view and record profiles
 Home--instructions-content =
     Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
     However, existing profiles can be viewed in any modern browser.
@@ -275,6 +279,14 @@ Home--additional-content-title = Load existing profiles
 Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
 Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    The { -profiler-brand-name } can also import profiles from other profilers, such as
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, the
+    Chrome performance panel, <androidstudio>Android Studio</androidstudio>, or
+    any file using the <dhat>dhat format</dhat>. <write>Learn how to write your
+    own importer</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
