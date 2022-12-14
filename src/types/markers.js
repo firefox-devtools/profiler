@@ -732,6 +732,11 @@ export type NoPayloadUserData = {|
   innerWindowID?: number,
 |};
 
+export type UrlMarkerPayload = {|
+  type: 'Url',
+  url: string,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -764,7 +769,8 @@ export type MarkerPayload =
   | MediaSampleMarkerPayload
   | JankPayload
   | BrowsertimeMarkerPayload
-  | NoPayloadUserData;
+  | NoPayloadUserData
+  | UrlMarkerPayload;
 
 export type MarkerPayload_Gecko =
   | GPUMarkerPayload
@@ -786,6 +792,7 @@ export type MarkerPayload_Gecko =
   | IPCMarkerPayload_Gecko
   | MediaSampleMarkerPayload
   | NoPayloadUserData
+  | UrlMarkerPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.
