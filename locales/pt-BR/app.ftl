@@ -189,6 +189,10 @@ Home--menu-button = Ativar botão de menu do { -profiler-brand-name }
 Home--menu-button-instructions =
     Ative o botão de menu do profiler para iniciar a gravação de um profile de desempenho
     no { -firefox-brand-name }, depois analisar e compartilhar com profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Você também pode criar profile pelo { -firefox-android-brand-name }.
+    Para mais informações, consulte esta documentação:
+    <a>Como criar profile do { -firefox-android-brand-name } diretamente no dispositivo</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -208,6 +212,9 @@ Home--additional-content-title = Carregar profiles existentes
 Home--additional-content-content = Você pode <strong>arrastar e soltar</strong> aqui um arquivo de profile para carregar, ou:
 Home--compare-recordings-info = Você também pode comparar gravações. <a>Abra a interface de comparação.</a>
 Home--your-recent-uploaded-recordings-title = Suas gravações enviadas recentemente
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools = O { -profiler-brand-name } também pode importar profiles de outros criadores de profile, como o <perf>Linux perf</perf>, o <simpleperf>Android SimplePerf</simpleperf>, o painel de desempenho do Chrome, o <androidstudio>Android Studio</androidstudio> ou qualquer arquivo no <dhat>formato dhat</dhat>. <write>Saiba como escrever seu próprio importador</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
