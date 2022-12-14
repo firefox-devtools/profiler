@@ -244,6 +244,10 @@ Home--menu-button = Menuknop { -profiler-brand-name } inschakelen
 Home--menu-button-instructions =
     Schakel de menuknop Profiler in om te beginnen met het opnemen van een
     prestatieprofiel in { -firefox-brand-name }, analyseer dit en deel het met profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    U kunt ook { -firefox-android-brand-name } profileren. Voor meer
+    informatie kunt u deze documentatie raadplegen:
+    <a>{ -firefox-android-brand-name } rechtstreeks op apparaat profileren</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -271,6 +275,14 @@ Home--additional-content-title = Bestaande profielen laden
 Home--additional-content-content = U kunt een profielbestand hierheen <strong>verslepen</strong> om het te laden, of:
 Home--compare-recordings-info = U kunt ook opnamen vergelijken. <a>De vergelijkingsinterface openen.</a>
 Home--your-recent-uploaded-recordings-title = Uw onlangs geüploade opnamen
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    De { -profiler-brand-name } kan ook profielen van andere profilers importeren, zoals
+    <perf>Linux-perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, het
+    Chrome-prestatiepaneel, <androidstudio>Android Studio</androidstudio> of
+    elk bestand dat de <dhat>dhat-indeling</dhat> gebruikt. <write>Leer hoe u uw
+    eigen importeerder kunt schrijven</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
