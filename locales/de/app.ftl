@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox für Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -245,7 +246,6 @@ Home--record-instructions =
     Um die Profilerstellung zu starten, klicken Sie auf die Schaltfläche Profilerstellung oder verwenden Sie die
     Tastatürkürzel. Das Symbol ist blau, wenn ein Profil aufzeichnet.
     Drücken Sie <kbd>Aufzeichnen</kbd>, um die Daten in profiler.firefox.com zu laden.
-Home--instructions-title = So können Sie Profile anzeigen und aufzeichnen
 Home--instructions-content =
     Das Aufzeichnen von Leistungsprofilen benötigt <a>{ -firefox-brand-name }</a>.
     Vorhandene Profile können jedoch in jedem modernen Browser angezeigt werden.
