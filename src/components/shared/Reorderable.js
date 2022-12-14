@@ -27,6 +27,9 @@ type Props = {|
   // See https://flow.org/en/docs/react/children/ for more information.
   // Be careful: children need to handle a `style` property.
   children: React.ChildrenArray<React.Element<any>>,
+  // If present, this will be attached to the container added for these
+  // children. As a reminder, the container will use the tagName defined above.
+  innerElementRef?: React.Ref<any>,
 |};
 
 type State = {|
@@ -240,7 +243,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { className, order } = this.props;
+    const { className, order, innerElementRef } = this.props;
     const children = React.Children.toArray(this.props.children);
     const orderedChildren = order.map((childIndex) => children[childIndex]);
     const TagName = this.props.tagName;
@@ -248,7 +251,11 @@ export class Reorderable extends React.PureComponent<Props, State> {
 
     if (this.state.phase === 'RESTING') {
       return (
-        <TagName className={className} onMouseDown={this._onMouseDown}>
+        <TagName
+          className={className}
+          onMouseDown={this._onMouseDown}
+          ref={innerElementRef}
+        >
           {orderedChildren}
         </TagName>
       );
@@ -261,8 +268,9 @@ export class Reorderable extends React.PureComponent<Props, State> {
       adjustPrecedingBy,
       adjustSucceedingBy,
     } = this.state;
+
     return (
-      <TagName className={className}>
+      <TagName className={className} ref={innerElementRef}>
         {orderedChildren.map((child, childIndex) => {
           const style = {
             transition: '200ms ease-in-out transform',

@@ -47,6 +47,11 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
+type OwnProps = {|
+  // This ref will be added to the inner container.
+  +innerElementRef?: React.Ref<any>,
+|};
+
 type StateProps = {|
   +committedRange: StartEndRange,
   +globalTracks: GlobalTrack[],
@@ -64,7 +69,7 @@ type DispatchProps = {|
 
 type Props = {|
   ...SizeProps,
-  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
 |};
 
 type State = {|
@@ -144,6 +149,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       panelLayoutGeneration,
       hiddenTrackCount,
       changeRightClickedTrack,
+      innerElementRef,
     } = this.props;
 
     return (
@@ -173,6 +179,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
               order={globalTrackOrder}
               orient="vertical"
               onChangeOrder={changeGlobalTrackOrder}
+              innerElementRef={innerElementRef}
             >
               {globalTracks.map((globalTrack, trackIndex) => (
                 <TimelineGlobalTrack
@@ -191,7 +198,11 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const FullTimeline = explicitConnect<{||}, StateProps, DispatchProps>({
+export const FullTimeline = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state) => ({
     globalTracks: getGlobalTracks(state),
     globalTrackOrder: getGlobalTrackOrder(state),

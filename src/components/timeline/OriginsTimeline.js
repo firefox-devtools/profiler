@@ -37,6 +37,11 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './OriginsTimeline.css';
 
+type OwnProps = {|
+  // This ref will be added to the inner container.
+  +innerElementRef?: React.Ref<any>,
+|};
+
 type StateProps = {|
   +committedRange: StartEndRange,
   +panelLayoutGeneration: number,
@@ -51,7 +56,7 @@ type DispatchProps = {|
 
 type Props = {|
   ...SizeProps,
-  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
 |};
 
 type State = {|
@@ -145,6 +150,7 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
       width,
       panelLayoutGeneration,
       originsTimeline,
+      innerElementRef,
     } = this.props;
 
     return (
@@ -161,7 +167,7 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
             panelLayoutGeneration={panelLayoutGeneration}
             initialSelected={this.state.initialSelected}
           >
-            <ol className="timelineThreadList">
+            <ol className="timelineThreadList" ref={innerElementRef}>
               {originsTimeline.map(this.renderTrack)}
             </ol>
           </OverflowEdgeIndicator>
@@ -171,18 +177,20 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
   }
 }
 
-export const TimelineOrigins = explicitConnect<{||}, StateProps, DispatchProps>(
-  {
-    mapStateToProps: (state) => ({
-      threads: getThreads(state),
-      committedRange: getCommittedRange(state),
-      zeroAt: getZeroAt(state),
-      panelLayoutGeneration: getPanelLayoutGeneration(state),
-      originsTimeline: getOriginsTimeline(state),
-    }),
-    mapDispatchToProps: {
-      changeSelectedThreads,
-    },
-    component: withSize<Props>(OriginsTimelineView),
-  }
-);
+export const TimelineOrigins = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
+  mapStateToProps: (state) => ({
+    threads: getThreads(state),
+    committedRange: getCommittedRange(state),
+    zeroAt: getZeroAt(state),
+    panelLayoutGeneration: getPanelLayoutGeneration(state),
+    originsTimeline: getOriginsTimeline(state),
+  }),
+  mapDispatchToProps: {
+    changeSelectedThreads,
+  },
+  component: withSize<Props>(OriginsTimelineView),
+});
