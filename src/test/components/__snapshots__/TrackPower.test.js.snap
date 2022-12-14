@@ -27,7 +27,7 @@ exports[`TrackPower has a tooltip that matches the snapshot 1`] = `
       Energy used in the visible range
       :
     </div>
-    ⁨7.2⁩ µWh (⁨0.003⁩ mg co2e)
+    ⁨7.2⁩ µWh (⁨0.003⁩ mg CO₂e)
   </div>
 </div>
 `;
