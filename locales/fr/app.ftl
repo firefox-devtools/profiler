@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox pour Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -188,6 +189,10 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Documentation
 Home--menu-button = Activer le bouton de menu { -profiler-brand-name }
 Home--menu-button-instructions = Activez le bouton de menu du profileur pour commencer à enregistrer un profil des performances dans { -firefox-brand-name }, puis analysez-le et partagez-le avec profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Vous pouvez également profiler { -firefox-android-brand-name }.
+    Pour plus d’informations, veuillez consulter cette documentation :
+    <a>Profilage de { -firefox-android-brand-name } directement sur l’appareil</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -197,7 +202,6 @@ Home--enable-button-unavailable =
 # This message can be seen on https://main--perf-html.netlify.app/ .
 Home--web-channel-unavailable = Cette instance du profileur n’a pas pu se connecter à WebChannel. Généralement, cela signifie qu’il s’exécute sur un hôte différent de celui spécifié dans la préférence <code>devtools.performance.recording.ui-base-url</code>. Si vous souhaitez capturer de nouveaux profils avec cette instance, et lui donner par programmation le contrôle du bouton de menu du profileur, vous pouvez ouvrir <code>about:config</code> et modifier la préférence.
 Home--record-instructions = Pour démarrer le profilage, cliquez sur le bouton de profilage ou utilisez le raccourci clavier. L’icône est bleue lorsqu’un profil est en cours d’enregistrement. Appuyez sur <kbd>Capturer</kbd> pour charger les données dans profiler.firefox.com.
-Home--instructions-title = Comment afficher et enregistrer des profils
 Home--instructions-content =
     L’enregistrement de profils de performances nécessite <a>{ -firefox-brand-name }</a>.
     Cependant, les profils existants peuvent être consultés dans n’importe quel navigateur moderne.
@@ -208,6 +212,14 @@ Home--additional-content-title = Charger des profils existants
 Home--additional-content-content = Vous pouvez <strong>glisser-déposer</strong> un fichier de profil ici pour le charger, ou :
 Home--compare-recordings-info = Vous pouvez également comparer des enregistrements. <a>Ouvrir l’interface de comparaison.</a>
 Home--your-recent-uploaded-recordings-title = Vos enregistrements récemment envoyés
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    Le { -profiler-brand-name } peut également importer des profils d’autres profileurs, dont
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, le
+    Panneau de performances Chrome, <androidstudio>Android Studio</androidstudio>, ou
+    tout fichier utilisant le format <dhat>dhat</dhat>. <write>Apprenez à écrire votre
+    propre importateur</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
