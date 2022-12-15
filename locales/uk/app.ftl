@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox для Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -239,6 +240,10 @@ Home--menu-button = Увімкнути кнопку меню { -profiler-brand-n
 Home--menu-button-instructions =
     Увімкніть кнопку меню профайлера, щоб почати запис швидкодії профілю у
     { -firefox-brand-name }, потім аналізуйте його та оприлюдніть на profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Ви також можете створити профіль { -firefox-android-brand-name }. За
+    подробицями зверніться до цієї документації:
+    <a>Профілювання { -firefox-android-brand-name } безпосередньо на пристрої</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -256,7 +261,6 @@ Home--record-instructions =
     Щоб розпочати запис профілю, натисніть кнопку запису або скористайтеся
     комбінацією клавіш. Під час запису профілю піктограма стає синього кольору.
     Натисніть <kbd>Захопити</kbd>, щоб завантажити дані на profiler.firefox.com.
-Home--instructions-title = Як переглядати та записувати профілі
 Home--instructions-content =
     Для запису профілів швидкодії потрібен <a>{ -firefox-brand-name }</a>.
     Однак, наявні профілі можна переглядати в будь-якому сучасному браузері.
@@ -267,6 +271,14 @@ Home--additional-content-title = Завантажити наявні профі�
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
 Home--compare-recordings-info = Ви також можете порівняти записи. <a>Відкрити інтерфейс порівняння.</a>
 Home--your-recent-uploaded-recordings-title = Ваші недавно вивантажені записи
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    { -profiler-brand-name } також може імпортувати профілі з інших профайлерів, наприклад
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
+    Панель швидкодії Chrome, <androidstudio>Android Studio</androidstudio> або
+    будь-який файл у <dhat>форматі dhat</dhat>. <write>Навчіться записувати свій
+    власний імпортер</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
