@@ -122,7 +122,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
    */
   _onSampleClick = (
     event: SyntheticMouseEvent<>,
-    sampleIndex: IndexIntoSamplesTable
+    sampleIndex: IndexIntoSamplesTable | null
   ) => {
     const modifiers = getTrackSelectionModifiers(event);
     if (modifiers.ctrlOrMeta || modifiers.shift) {

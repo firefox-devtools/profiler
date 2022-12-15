@@ -148,20 +148,24 @@ export function changeRightClickedCallNode(
  */
 export function selectLeafCallNode(
   threadsKey: ThreadsKey,
-  sampleIndex: IndexIntoSamplesTable
+  sampleIndex: IndexIntoSamplesTable | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
-    // The newSelectedStack could be undefined if there are 0 samples.
-    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
+    let newSelectedCallNode = -1;
+    if (sampleIndex !== null) {
+      // The newSelectedStack could be undefined if there are 0 samples.
+      const newSelectedStack = filteredThread.samples.stack[sampleIndex];
 
-    const newSelectedCallNode =
-      newSelectedStack === null || newSelectedStack === undefined
-        ? -1
-        : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+      if (newSelectedStack !== null && newSelectedStack !== undefined) {
+        newSelectedCallNode =
+          callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+      }
+    }
+
     dispatch(
       changeSelectedCallNode(
         threadsKey,
@@ -180,15 +184,20 @@ export function selectLeafCallNode(
  */
 export function selectRootCallNode(
   threadsKey: ThreadsKey,
-  sampleIndex: IndexIntoSamplesTable
+  sampleIndex: IndexIntoSamplesTable | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
+    if (sampleIndex === null) {
+      dispatch(changeSelectedCallNode(threadsKey, []));
+      return;
+    }
     const newSelectedStack = filteredThread.samples.stack[sampleIndex];
     if (newSelectedStack === null || newSelectedStack === undefined) {
+      dispatch(changeSelectedCallNode(threadsKey, []));
       return;
     }
     const newSelectedCallNode =

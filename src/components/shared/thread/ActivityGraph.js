@@ -44,7 +44,7 @@ export type Props = {|
   +sampleIndexOffset: number,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
-    sampleIndex: IndexIntoSamplesTable
+    sampleIndex: IndexIntoSamplesTable | null
   ) => void,
   +categories: CategoryList,
   +samplesSelectedStates: null | SelectedState[],
@@ -145,9 +145,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
 
   _onClick = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
     const sampleState = this._getSampleAtMouseEvent(event);
-    if (sampleState !== null) {
-      this.props.onSampleClick(event, sampleState.sample);
-    }
+    this.props.onSampleClick(event, sampleState ? sampleState.sample : null);
   };
 
   _takeContainerRef = (el: HTMLElement | null) => {
