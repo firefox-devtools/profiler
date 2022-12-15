@@ -197,7 +197,7 @@ export type Marker = {|
   name: string,
   category: IndexIntoCategoryList,
   threadId: Tid | null,
-  data: MarkerPayload,
+  data: MarkerPayload | null,
   incomplete?: boolean,
 |};
 

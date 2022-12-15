@@ -44,7 +44,7 @@ export type GeckoMarkerTuple = [
   Milliseconds | null,
   MarkerPhase,
   IndexIntoCategoryList,
-  MarkerPayload_Gecko
+  MarkerPayload_Gecko | null
 ];
 
 export type GeckoMarkers = {
@@ -70,7 +70,7 @@ export type GeckoMarkerStruct = {|
   startTime: Milliseconds[],
   endTime: Milliseconds[],
   phase: MarkerPhase[],
-  data: MarkerPayload_Gecko[],
+  data: Array<MarkerPayload_Gecko | null>,
   category: IndexIntoCategoryList[],
   length: number,
 |};
