@@ -207,7 +207,7 @@ Home--your-recent-uploaded-recordings-title = Le tue registrazioni caricate di r
 # documentation to use these tools.
 Home--load-files-from-other-tools =
     { -profiler-brand-name } può anche importare profili da altri profiler, come <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, il
-    pannello prestazioni di Chrome, <androidstudio>Android Studio</androidstudio> o qualsiasi file che utilizzi il <dhat>formato dhat</dhat>. write>Scopri come creare uno strumento di importazione</write>.
+    pannello prestazioni di Chrome, <androidstudio>Android Studio</androidstudio> o qualsiasi file che utilizzi il <dhat>formato dhat</dhat>. <write>Scopri come creare uno strumento di importazione</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
