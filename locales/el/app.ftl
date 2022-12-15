@@ -244,6 +244,10 @@ Home--menu-button = Ενεργοποίηση κουμπιού μενού του 
 Home--menu-button-instructions =
     Ενεργοποιήστε το κουμπί του μενού του εργαλείου καταγραφής για να ξεκινήσετε ένα προφίλ
     επιδόσεων στο { -firefox-brand-name } και έπειτα, να το αναλύσετε και να το μοιραστείτε με το profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Μπορείτε επίσης να καταγράψετε προφίλ για το { -firefox-android-brand-name }.
+    Για περισσότερες πληροφορίες, παρακαλούμε συμβουλευτείτε την τεκμηρίωση:
+    <a>Καταγραφή προφίλ του { -firefox-android-brand-name } απευθείας στη συσκευή</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
