@@ -84,6 +84,8 @@ CallTreeSidebar--select-a-node = Fren takerrist i uskan n talɣut fell-as.
 CompareHome--instruction-title = Sekcem URLs n umaɣnu i tebɣiḍ ad tsenmehleḍ
 CompareHome--form-label-profile1 = Amaɣnu 1:
 CompareHome--form-label-profile2 = Amaɣnu 2:
+CompareHome--submit-button =
+    .value = Err-d imaɣunen
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
