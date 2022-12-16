@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox för Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -259,7 +260,6 @@ Home--record-instructions =
     För att starta profilering, klicka på profileringsknappen eller använd
     kortkommandona. Ikonen är blå när en profil spelas in. Tryck på
     <kbd>Fånga</kbd> för att ladda data till profiler.firefox.com.
-Home--instructions-title = Hur man visar och spelar in profiler
 Home--instructions-content =
     För att spela in prestandaprofiler krävs <a>{ -firefox-brand-name }</a>.
     Befintliga profiler kan dock visas i vilken modern webbläsare som helst.
