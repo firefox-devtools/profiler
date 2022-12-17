@@ -243,6 +243,10 @@ Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
 Home--menu-button-instructions =
     Aktivera profil-menyknappen för att börja spela in en prestandaprofil
     i { -firefox-brand-name }, analysera den och dela den med profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Du kan också profilera { -firefox-android-brand-name }. För mer
+    information, se denna dokumentation:
+    <a>Profilering av { -firefox-android-brand-name } direkt på enheten</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -270,6 +274,14 @@ Home--additional-content-title = Ladda befintliga profiler
 Home--additional-content-content = Du kan <strong>dra och släppa</strong> en profilfil här för att ladda den, eller:
 Home--compare-recordings-info = Du kan också jämföra inspelningar.<a>Öppna gränssnitt för att jämföra.</a>
 Home--your-recent-uploaded-recordings-title = Dina senaste uppladdade inspelningar
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    { -profiler-brand-name } kan också importera profiler från andra profilerare, t.ex
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
+    Chrome prestandapanel, <androidstudio>Android Studio</androidstudio> eller
+    vilken fil som helst som använder <dhat>dhat-formatet</dhat>. <write>Lär dig hur du skriver din
+    egen importör</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -699,8 +711,12 @@ TrackMemoryGraph--operations-since-the-previous-sample = operationer sedan före
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
@@ -712,42 +728,6 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Effekt
-# This is used in the tooltip when the energy used in the current range uses the
-# watt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
-    .label = Energi som används i det synliga området
-# This is used in the tooltip when the energy used in the current range uses the
-# milliwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
-    .label = Energi som används i det synliga området
-# This is used in the tooltip when the energy used in the current range uses the
-# microwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
-    .label = Energi som används i det synliga området
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the watt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
-    .label = Energi som används i det aktuella urvalet
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the milliwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
-    .label = Energi som används i det aktuella urvalet
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the microwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
-    .label = Energi som används i det aktuella urvalet
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
