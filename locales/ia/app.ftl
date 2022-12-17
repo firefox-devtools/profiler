@@ -695,8 +695,12 @@ TrackMemoryGraph--operations-since-the-previous-sample = operationes depost le p
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
@@ -712,37 +716,43 @@ TrackPower--tooltip-power-milliwatt = { $value } mW
 # watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
     .label = Energia usate in le campo visibile
 # This is used in the tooltip when the energy used in the current range uses the
 # milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
     .label = Energia usate in le campo visibile
 # This is used in the tooltip when the energy used in the current range uses the
 # microwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energia usate in le campo visibile
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
-    .label = Energia usate in le campo visibile
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
+    .label = Energia usate in le selection actual
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
-    .label = Energia usate in le campo visibile
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
+    .label = Energia usate in le selection actual
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the microwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energia usate in le selection actual
 
 ## TrackSearchField
