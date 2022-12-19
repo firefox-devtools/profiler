@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Profile } from 'firefox-profiler/types';
-
 import { oneLineTrim } from 'common-tags';
+import JSZip from 'jszip';
+import { indexedDB } from 'fake-indexeddb';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
@@ -14,7 +14,6 @@ import {
 } from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
-import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
@@ -35,10 +34,9 @@ import {
   changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
-import { indexedDB } from 'fake-indexeddb';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import JSZip from 'jszip';
+import { blankStore, storeWithProfile } from '../fixtures/stores';
 import {
   makeProfileSerializable,
   processGeckoProfile,
@@ -46,6 +44,7 @@ import {
 } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
+  getMergedProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
   getProfileWithMarkers,
   getProfileWithThreadCPUDelta,
@@ -57,6 +56,8 @@ import {
 import { waitUntilState } from '../fixtures/utils';
 
 import { compress } from '../../utils/gz';
+
+import type { Profile } from 'firefox-profiler/types';
 
 // Mocking SymbolStoreDB. By default the functions will return undefined, which
 // will make the symbolication move forward with some bogus information.
@@ -394,6 +395,22 @@ describe('actions/receive-profile', function () {
       expect(getHumanReadableTracks(store.getState())).toEqual([
         'hide [thread GeckoMain tab]',
         'show [thread GeckoMain tab] SELECTED',
+      ]);
+    });
+
+    it(`won't hide any tracks in a profile resulting from a compare operation`, () => {
+      const { profile } = getMergedProfileFromTextSamples(
+        'A',
+        'A  '.repeat(100)
+      );
+
+      const store = storeWithProfile(profile);
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
       ]);
     });
 
