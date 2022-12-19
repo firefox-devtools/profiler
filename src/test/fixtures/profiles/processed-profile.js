@@ -1042,7 +1042,13 @@ function _buildThreadFromTextOnlyStacks(
 /**
  * This returns a merged profile from a number of profile strings.
  */
-export function getMergedProfileFromTextSamples(profileStrings: string[]): {
+export function getMergedProfileFromTextSamples(
+  profileStrings: string[],
+  cpuValuesPerProfile: Array<{|
+    threadCPUDelta: Array<number | null>,
+    threadCPUDeltaUnit: ThreadCPUDeltaUnit,
+  |} | null> = []
+): {
   profile: Profile,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
@@ -1051,6 +1057,16 @@ export function getMergedProfileFromTextSamples(profileStrings: string[]): {
     getProfileFromTextSamples(str)
   );
   const profiles = profilesAndFuncNames.map(({ profile }) => profile);
+  cpuValuesPerProfile.forEach((cpuValues, profileIndex) => {
+    if (cpuValues) {
+      addCpuUsageValues(
+        profiles[profileIndex],
+        cpuValues.threadCPUDelta,
+        cpuValues.threadCPUDeltaUnit
+      );
+    }
+  });
+
   const profileState = stateFromLocation({
     pathname: '/public/fakehash1/',
     search: '?thread=0&v=3',

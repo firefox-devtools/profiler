@@ -491,6 +491,31 @@ describe('actions/receive-profile', function () {
           '  - show [thread Thread with 10% CPU] SELECTED', // <- Ensure this thread is not hidden.
         ]);
       });
+
+      it(`won't hide any tracks in a profile resulting from a compare operation`, () => {
+        const { profile } = getMergedProfileFromTextSamples(
+          ['A  A  A  A', 'B  B  B  B'],
+          [
+            {
+              threadCPUDelta: [10, 10, 10, 10_000_000],
+              threadCPUDeltaUnit: 'ns',
+            },
+            {
+              threadCPUDelta: [10, 10_000_000, 10, 25],
+              threadCPUDeltaUnit: 'ns',
+            },
+          ]
+        );
+
+        const store = storeWithProfile(profile);
+
+        store.dispatch(viewProfile(profile));
+        expect(getHumanReadableTracks(store.getState())).toEqual([
+          'show [thread Empty default] SELECTED',
+          'show [thread Empty default]',
+          'show [thread Diff between 1 and 2 comparison]',
+        ]);
+      });
     });
 
     describe('too many threads', function () {
