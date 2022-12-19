@@ -283,14 +283,14 @@ describe('calltree/ProfileCallTreeView', function () {
     expect(getRowElement('C')).toHaveClass('isSelected');
   });
 
-  it('does not select the heaviest stack if it is idle', () => {
+  it('does select a non-idle stack if the heaviest stack is idle', () => {
     const { profile } = getProfileFromTextSamples(`
-      A  A            A            A            A
-      B  C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  D
-      E                                         E
+      A  A            A            A            A  A
+      B  C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  B  D
+      E                                         E  F
     `);
-    const { container } = setup(profile);
-    expect(container.querySelector('.treeViewRow.isSelected')).toBeFalsy();
+    const { getRowElement } = setup(profile);
+    expect(getRowElement('E')).toHaveClass('isSelected');
   });
 });
 

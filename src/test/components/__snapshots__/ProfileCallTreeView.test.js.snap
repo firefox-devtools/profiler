@@ -3795,7 +3795,7 @@ for understanding where time was actually spent in a program."
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
-        aria-activedescendant="treeViewRow-9"
+        aria-activedescendant="treeViewRow-5"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -3806,7 +3806,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 48px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -3816,150 +3816,26 @@ for understanding where time was actually spent in a program."
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="67%"
-                >
-                  67%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="67%"
-                >
-                  67%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="67%"
-                >
-                  67%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="33%"
-                >
-                  33%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
                 class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="33%"
+                  title="67%"
                 >
-                  33%
+                  67%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  title="1"
+                  title="2"
                 >
-                  1
+                  2
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
+                  title="2"
                 >
-                  —
+                  2
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -3972,37 +3848,6 @@ for understanding where time was actually spent in a program."
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="33%"
-                >
-                  33%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4036,7 +3881,7 @@ for understanding where time was actually spent in a program."
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 48px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -4046,11 +3891,11 @@ for understanding where time was actually spent in a program."
               class="treeViewBodyInner treeViewBodyInner1InnerChunk"
             >
               <div
-                aria-expanded="true"
+                aria-expanded="false"
                 aria-label="Z, running count is 2 samples (67%), self count is 2 samples"
                 aria-level="1"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
+                aria-selected="true"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4060,7 +3905,7 @@ for understanding where time was actually spent in a program."
                   style="width: 0px;"
                 />
                 <span
-                  class="treeRowToggleButton expanded canBeExpanded"
+                  class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -4076,162 +3921,11 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="true"
-                aria-label="Y, running count is 2 samples (67%), self count is 0 samples"
-                aria-level="2"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd"
-                id="treeViewRow-6"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 10px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  Y
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="X, running count is 2 samples (67%), self count is 0 samples"
-                aria-level="3"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
-                id="treeViewRow-7"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 20px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  X
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                >
-                  libX.so
-                </span>
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="B, running count is 1 sample (33%), self count is 0 samples"
-                aria-level="4"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd"
-                id="treeViewRow-8"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 30px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  B
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-label="A, running count is 1 sample (33%), self count is 0 samples"
-                aria-level="5"
-                aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even isSelected"
-                id="treeViewRow-9"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 40px;"
-                />
-                <span
-                  class="treeRowToggleButton collapsed leaf"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  A
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="false"
-                aria-label="C, running count is 1 sample (33%), self count is 0 samples"
-                aria-level="4"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd"
-                id="treeViewRow-10"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 30px;"
-                />
-                <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  C
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
                 aria-expanded="false"
                 aria-label="E, running count is 1 sample (33%), self count is 1 sample"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
