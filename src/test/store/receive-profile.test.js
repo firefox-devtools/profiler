@@ -399,10 +399,10 @@ describe('actions/receive-profile', function () {
     });
 
     it(`won't hide any tracks in a profile resulting from a compare operation`, () => {
-      const { profile } = getMergedProfileFromTextSamples(
+      const { profile } = getMergedProfileFromTextSamples([
         'A',
-        'A  '.repeat(100)
-      );
+        'A  '.repeat(100),
+      ]);
 
       const store = storeWithProfile(profile);
 

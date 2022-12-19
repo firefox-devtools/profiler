@@ -540,10 +540,10 @@ describe('actions/ProfileView', function () {
           trackIndex: 2,
         };
 
-        const { profile } = getMergedProfileFromTextSamples(
+        const { profile } = getMergedProfileFromTextSamples([
           'A  B  C',
-          'A  B  B'
-        );
+          'A  B  B',
+        ]);
         const { getState, dispatch } = storeWithProfile(profile);
 
         dispatch(App.changeSelectedTab('flame-graph'));
@@ -2900,18 +2900,18 @@ describe('getTimingsForSidebar', () => {
   describe('for a diffing track', function () {
     function setup() {
       const { profile, funcNamesDictPerThread } =
-        getMergedProfileFromTextSamples(
+        getMergedProfileFromTextSamples([
           `
-        A              A  A
-        B              B  C
-        D[cat:Layout]  E  F
-      `,
+            A              A  A
+            B              B  C
+            D[cat:Layout]  E  F
+          `,
           `
-        A    A  A
-        B    B  B
-        Gjs  I  E
-      `
-        );
+            A    A  A
+            B    B  B
+            Gjs  I  E
+          `,
+        ]);
 
       const store = storeWithProfile(profile);
       store.dispatch(ProfileView.changeSelectedThreads(new Set([2])));

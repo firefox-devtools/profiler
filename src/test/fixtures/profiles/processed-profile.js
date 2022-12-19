@@ -1042,7 +1042,7 @@ function _buildThreadFromTextOnlyStacks(
 /**
  * This returns a merged profile from a number of profile strings.
  */
-export function getMergedProfileFromTextSamples(...profileStrings: string[]): {
+export function getMergedProfileFromTextSamples(profileStrings: string[]): {
   profile: Profile,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
