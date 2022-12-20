@@ -45,6 +45,7 @@ import type {
   CallNodeDisplayData,
   WeightType,
   TableViewOptions,
+  SelectionContext,
 } from 'firefox-profiler/types';
 import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
 
@@ -238,11 +239,15 @@ class CallTreeImpl extends PureComponent<Props> {
     }
   }
 
-  _onSelectedCallNodeChange = (newSelectedCallNode: IndexIntoCallNodeTable) => {
+  _onSelectedCallNodeChange = (
+    newSelectedCallNode: IndexIntoCallNodeTable,
+    context: SelectionContext
+  ) => {
     const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
+      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable),
+      context
     );
   };
 
@@ -345,7 +350,7 @@ class CallTreeImpl extends PureComponent<Props> {
       // completely dimmed activity graph because idle stacks are not drawn in
       // this graph. Because this isn't probably what the average user wants we
       // do it only when the category is something different.
-      this._onSelectedCallNodeChange(currentCallNodeIndex);
+      this._onSelectedCallNodeChange(currentCallNodeIndex, { source: 'auto' });
     }
   }
 
