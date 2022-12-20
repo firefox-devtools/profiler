@@ -114,7 +114,7 @@ export type ProfileViewState = {
     rightClickedMarker: MarkerReference | null,
     hoveredMarker: MarkerReference | null,
     mouseTimePosition: Milliseconds | null,
-    perTable: TableViewOptionsPerTab,
+    perTab: TableViewOptionsPerTab,
   |},
   +profile: Profile | null,
   +full: FullProfileViewState,
