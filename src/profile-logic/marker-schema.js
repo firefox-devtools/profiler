@@ -22,6 +22,7 @@ import type {
   MarkerSchemaByName,
   Marker,
   MarkerIndex,
+  MarkerPayload,
 } from 'firefox-profiler/types';
 
 /**
@@ -86,34 +87,33 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
  */
 export function getMarkerSchemaName(
   markerSchemaByName: MarkerSchemaByName,
-  marker: Marker
+  markerName: string,
+  markerData: MarkerPayload | null
 ): string {
-  const { data, name } = marker;
-  // Fall back to using the name if no payload exists.
-
-  if (data) {
-    const { type } = data;
-    if (type === 'tracing' && data.category) {
+  if (markerData) {
+    const { type } = markerData;
+    if (type === 'tracing' && markerData.category) {
       // TODO - Tracing markers have a duplicate "category" field.
       // See issue #2749
 
       // Does a marker schema for the "category" exist?
-      return markerSchemaByName[data.category] === undefined
+      return markerSchemaByName[markerData.category] === undefined
         ? // If not, default back to tracing
           'tracing'
         : // If so, use the category as the schema name.
-          data.category;
+          markerData.category;
     }
     if (type === 'Text') {
       // Text markers are a cheap and easy way to create markers with
       // a category. Check for schema if it exists, if not, fallback to
       // a Text type marker.
-      return markerSchemaByName[name] === undefined ? 'Text' : name;
+      return markerSchemaByName[markerName] === undefined ? 'Text' : markerName;
     }
-    return data.type;
+    return markerData.type;
   }
 
-  return name;
+  // Fall back to using the name if no payload exists.
+  return markerName;
 }
 
 /**
@@ -122,10 +122,13 @@ export function getMarkerSchemaName(
  */
 export function getSchemaFromMarker(
   markerSchemaByName: MarkerSchemaByName,
-  marker: Marker
+  markerName: string,
+  markerData: MarkerPayload | null
 ): MarkerSchema | null {
   return (
-    markerSchemaByName[getMarkerSchemaName(markerSchemaByName, marker)] || null
+    markerSchemaByName[
+      getMarkerSchemaName(markerSchemaByName, markerName, markerData)
+    ] || null
   );
 }
 
@@ -349,7 +352,11 @@ export function getLabelGetter(
     // No label exists, it will have to be generated for the first time.
     if (label === undefined) {
       const marker = getMarker(markerIndex);
-      const schemaName = getMarkerSchemaName(markerSchemaByName, marker);
+      const schemaName = getMarkerSchemaName(
+        markerSchemaByName,
+        marker.name,
+        marker.data
+      );
       const applyLabel = labelFns.get(schemaName);
 
       label = applyLabel
