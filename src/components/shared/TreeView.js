@@ -448,11 +448,15 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
   /* eslint-disable-next-line react/no-unused-class-component-methods */
   scrollSelectionIntoView() {
     const { selectedNodeId, tree } = this.props;
-    if (this._list && selectedNodeId !== null) {
-      const list = this._list; // this temp variable so that flow knows that it's non-null
-      const rowIndex = this._getAllVisibleRows().indexOf(selectedNodeId);
-      const depth = tree.getDepth(selectedNodeId);
-      list.scrollItemIntoView(rowIndex, depth * 10);
+    const list = this._list; // this temp variable so that flow knows that it's non-null later
+    if (list) {
+      if (selectedNodeId === null) {
+        list.scrollItemIntoView(0, 0);
+      } else {
+        const rowIndex = this._getAllVisibleRows().indexOf(selectedNodeId);
+        const depth = tree.getDepth(selectedNodeId);
+        list.scrollItemIntoView(rowIndex, depth * 10);
+      }
     }
   }
 

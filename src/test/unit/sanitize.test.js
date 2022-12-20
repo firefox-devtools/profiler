@@ -65,10 +65,55 @@ describe('sanitizePII', function () {
       }
     );
 
+    const markerSchemaByName = {
+      FileIO: {
+        name: 'FileIO',
+        display: ['marker-chart', 'marker-table', 'timeline-fileio'],
+        data: [
+          {
+            key: 'operation',
+            label: 'Operation',
+            format: 'string',
+            searchable: true,
+          },
+          {
+            key: 'source',
+            label: 'Source',
+            format: 'string',
+            searchable: true,
+          },
+          {
+            key: 'filename',
+            label: 'Filename',
+            format: 'file-path',
+            searchable: true,
+          },
+          {
+            key: 'threadId',
+            label: 'Thread ID',
+            format: 'string',
+            searchable: true,
+          },
+        ],
+      },
+      Url: {
+        name: 'Url',
+        tableLabel: '{marker.name} - {marker.data.url}',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          {
+            key: 'url',
+            format: 'url',
+          },
+        ],
+      },
+    };
+
     const sanitizedProfile = sanitizePII(
       originalProfile,
       derivedMarkerInfoForAllThreads,
-      PIIToRemove
+      PIIToRemove,
+      markerSchemaByName
     ).profile;
 
     return {
@@ -546,6 +591,38 @@ describe('sanitizePII', function () {
     // Now check the filename fields and make sure they are sanitized.
     expect(marker1.filename).toBe('<PATH>/' + marker1File);
     expect(marker2.filename).toBe('<PATH>\\' + marker2File);
+  });
+
+  it('should sanitize the URL properties in markers', function () {
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveUrls: true,
+      },
+      getProfileWithMarkers([
+        [
+          'SpeculativeConnect',
+          1,
+          2,
+          {
+            type: 'Url',
+            url: 'https://img-getpocket.cdn.mozilla.net',
+          },
+        ],
+      ])
+    );
+    expect(sanitizedProfile.threads.length).toEqual(1);
+    const thread = sanitizedProfile.threads[0];
+    expect(thread.markers.length).toEqual(1);
+
+    const marker = thread.markers.data[0];
+
+    // The url fields should still be there
+    if (!marker || !marker.url) {
+      throw new Error('Failed to find url property in the payload');
+    }
+
+    // Now check the url fields and make sure they are sanitized.
+    expect(marker.url).toBe('https://<URL>');
   });
 
   it('should sanitize the eTLD+1 field if urls are supposed to be sanitized', function () {
