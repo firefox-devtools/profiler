@@ -481,7 +481,7 @@ describe('mergeThreads function', function () {
 
     // Check if we properly merged the string tables and have the correct url fields.
     const markerUrlsAfterMerge = mergedMarkers.data.map((markerData) =>
-      markerData && 'url' in markerData && markerData.url
+      markerData && 'url' in markerData && typeof markerData.url === 'number'
         ? markerData.url
         : null
     );
