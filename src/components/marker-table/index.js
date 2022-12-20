@@ -123,7 +123,11 @@ class MarkerTree {
         start: _formatStart(marker.start, this._zeroAt),
         duration,
         name,
-        type: getMarkerSchemaName(this._markerSchemaByName, marker),
+        type: getMarkerSchemaName(
+          this._markerSchemaByName,
+          marker.name,
+          marker.data
+        ),
       };
       this._displayDataByIndex.set(markerIndex, displayData);
     }
