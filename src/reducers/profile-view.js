@@ -427,7 +427,7 @@ function _updateTableViewOptions(
 ): TableViewOptionsPerTab {
   const newState = { ...state };
   newState[tab] = {
-    ..._getTableViewOptions(state, tab),
+    ...(state[tab] ?? defaultTableViewOptions),
     ...updates,
   };
   return newState;
