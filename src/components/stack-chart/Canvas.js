@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { GREY_30 } from 'photon-colors';
+import { GREY_30, BLUE_60 } from 'photon-colors';
 import * as React from 'react';
 import memoize from 'memoize-immutable';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
@@ -356,10 +356,16 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             intH
           );
 
-          if (searchStringsRegExp && searchStringsRegExp.test(text)) {
-            ctx.strokeStyle = 'green';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(intX, intY, intW + BORDER_OPACITY, intH);
+          if (searchStringsRegExp) {
+            // Reset the position of the search regexp so that previous
+            // invocations don't influence this one.
+            searchStringsRegExp.lastIndex = 0;
+
+            if (searchStringsRegExp.test(text)) {
+              ctx.strokeStyle = BLUE_60;
+              ctx.lineWidth = 2;
+              ctx.strokeRect(intX, intY, intW + BORDER_OPACITY, intH);
+            }
           }
 
           lastDrawnPixelX =
