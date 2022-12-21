@@ -192,7 +192,7 @@ allocated or deallocated in the program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 144px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -418,11 +418,42 @@ allocated or deallocated in the program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="20%"
+                >
+                  20%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 144px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -615,7 +646,7 @@ allocated or deallocated in the program."
                 </span>
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="C, total size is 3 bytes (20%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
@@ -629,7 +660,7 @@ allocated or deallocated in the program."
                   style="width: 20px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -639,6 +670,36 @@ allocated or deallocated in the program."
                   class="treeViewRowColumn treeViewMainColumn name dim"
                 >
                   C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="D, total size is 3 bytes (20%), self size is 0 bytes"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-3"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  D
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -863,7 +924,7 @@ allocated or deallocated in the program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 144px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -1089,11 +1150,42 @@ allocated or deallocated in the program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="-20%"
+                >
+                  -20%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="-3"
+                >
+                  -3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 144px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -1286,7 +1378,7 @@ allocated or deallocated in the program."
                 </span>
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="C, total size is -3 bytes (-20%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
@@ -1300,7 +1392,7 @@ allocated or deallocated in the program."
                   style="width: 20px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -1310,6 +1402,36 @@ allocated or deallocated in the program."
                   class="treeViewRowColumn treeViewMainColumn name dim"
                 >
                   C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="D, total size is -3 bytes (-20%), self size is 0 bytes"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-3"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  D
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -1534,7 +1656,7 @@ allocated or deallocated in the program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 144px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -1760,11 +1882,42 @@ allocated or deallocated in the program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="27%"
+                >
+                  27%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="11"
+                >
+                  11
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 144px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -1957,7 +2110,7 @@ allocated or deallocated in the program."
                 </span>
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="C, total size is 11 bytes (27%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
@@ -1971,7 +2124,7 @@ allocated or deallocated in the program."
                   style="width: 20px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -1981,6 +2134,36 @@ allocated or deallocated in the program."
                   class="treeViewRowColumn treeViewMainColumn name dim"
                 >
                   C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="D, total size is 11 bytes (27%), self size is 0 bytes"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-3"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  D
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -2193,7 +2376,7 @@ allocated or deallocated in the program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 144px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -2419,11 +2602,42 @@ allocated or deallocated in the program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="20%"
+                >
+                  20%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 144px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -2616,7 +2830,7 @@ allocated or deallocated in the program."
                 </span>
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="C, total size is 3 bytes (20%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
@@ -2630,7 +2844,7 @@ allocated or deallocated in the program."
                   style="width: 20px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -2640,6 +2854,36 @@ allocated or deallocated in the program."
                   class="treeViewRowColumn treeViewMainColumn name dim"
                 >
                   C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="D, total size is 3 bytes (20%), self size is 0 bytes"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-3"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  D
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -2852,7 +3096,7 @@ allocated or deallocated in the program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 96px;"
+            style="height: 112px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -2960,6 +3204,37 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="-59%"
+                >
+                  -59%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="-24"
+                >
+                  -24
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="-11"
+                >
+                  -11
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-41%"
                 >
                   -41%
@@ -2986,7 +3261,7 @@ allocated or deallocated in the program."
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even"
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3020,7 +3295,7 @@ allocated or deallocated in the program."
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 96px; min-width: 3000px;"
+            style="height: 112px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -3090,7 +3365,7 @@ allocated or deallocated in the program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="C, total size is -24 bytes (-59%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
@@ -3104,7 +3379,7 @@ allocated or deallocated in the program."
                   style="width: 20px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -3120,11 +3395,41 @@ allocated or deallocated in the program."
                 />
               </div>
               <div
+                aria-expanded="false"
+                aria-label="J, total size is -24 bytes (-59%), self size is -11 bytes"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-9"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  J
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
                 aria-expanded="true"
                 aria-label="Fjs, total size is -17 bytes (-41%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3153,7 +3458,7 @@ allocated or deallocated in the program."
                 aria-label="Gjs, total size is -17 bytes (-41%), self size is -17 bytes"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3795,7 +4100,7 @@ for understanding where time was actually spent in a program."
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
-        aria-activedescendant="treeViewRow-9"
+        aria-activedescendant="treeViewRow-5"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -3806,7 +4111,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 48px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -3816,150 +4121,26 @@ for understanding where time was actually spent in a program."
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="67%"
-                >
-                  67%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="67%"
-                >
-                  67%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="67%"
-                >
-                  67%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="33%"
-                >
-                  33%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
                 class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="33%"
+                  title="67%"
                 >
-                  33%
+                  67%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  title="1"
+                  title="2"
                 >
-                  1
+                  2
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
+                  title="2"
                 >
-                  —
+                  2
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -3972,37 +4153,6 @@ for understanding where time was actually spent in a program."
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="33%"
-                >
-                  33%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4036,7 +4186,7 @@ for understanding where time was actually spent in a program."
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 48px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -4046,11 +4196,11 @@ for understanding where time was actually spent in a program."
               class="treeViewBodyInner treeViewBodyInner1InnerChunk"
             >
               <div
-                aria-expanded="true"
+                aria-expanded="false"
                 aria-label="Z, running count is 2 samples (67%), self count is 2 samples"
                 aria-level="1"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
+                aria-selected="true"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4060,7 +4210,7 @@ for understanding where time was actually spent in a program."
                   style="width: 0px;"
                 />
                 <span
-                  class="treeRowToggleButton expanded canBeExpanded"
+                  class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -4076,162 +4226,11 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="true"
-                aria-label="Y, running count is 2 samples (67%), self count is 0 samples"
-                aria-level="2"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd"
-                id="treeViewRow-6"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 10px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  Y
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="X, running count is 2 samples (67%), self count is 0 samples"
-                aria-level="3"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
-                id="treeViewRow-7"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 20px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  X
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                >
-                  libX.so
-                </span>
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="B, running count is 1 sample (33%), self count is 0 samples"
-                aria-level="4"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd"
-                id="treeViewRow-8"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 30px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  B
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-label="A, running count is 1 sample (33%), self count is 0 samples"
-                aria-level="5"
-                aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even isSelected"
-                id="treeViewRow-9"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 40px;"
-                />
-                <span
-                  class="treeRowToggleButton collapsed leaf"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  A
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="false"
-                aria-label="C, running count is 1 sample (33%), self count is 0 samples"
-                aria-level="4"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd"
-                id="treeViewRow-10"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 30px;"
-                />
-                <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  C
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
                 aria-expanded="false"
                 aria-label="E, running count is 1 sample (33%), self count is 1 sample"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4432,7 +4431,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 160px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -4645,9 +4644,71 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -4662,7 +4723,7 @@ for understanding where time was actually spent in a program."
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 160px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -4821,7 +4882,7 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="F, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
@@ -4835,7 +4896,7 @@ for understanding where time was actually spent in a program."
                   style="width: 30px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -4851,11 +4912,40 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-label="E, running count is 1 sample (33%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  E
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
                 aria-label="H, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4865,7 +4955,7 @@ for understanding where time was actually spent in a program."
                   style="width: 20px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -4881,6 +4971,35 @@ for understanding where time was actually spent in a program."
                 >
                   libH.so
                 </span>
+              </div>
+              <div
+                aria-label="I, running count is 1 sample (33%), self count is 1 sample"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-8"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  I
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
               </div>
             </div>
           </div>
@@ -5507,7 +5626,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 160px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -5720,9 +5839,71 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="33%"
+                >
+                  33%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5737,7 +5918,7 @@ for understanding where time was actually spent in a program."
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 160px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -5896,7 +6077,7 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="F, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
@@ -5910,7 +6091,7 @@ for understanding where time was actually spent in a program."
                   style="width: 30px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -5926,11 +6107,40 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-label="E, running count is 1 sample (33%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  E
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
                 aria-label="H, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5940,7 +6150,7 @@ for understanding where time was actually spent in a program."
                   style="width: 20px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -5956,6 +6166,35 @@ for understanding where time was actually spent in a program."
                 >
                   libH.so
                 </span>
+              </div>
+              <div
+                aria-label="I, running count is 1 sample (33%), self count is 1 sample"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-8"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  I
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
               </div>
             </div>
           </div>
@@ -6133,7 +6372,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 112px;"
+            style="height: 128px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -6328,11 +6567,42 @@ for understanding where time was actually spent in a program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="50%"
+                >
+                  50%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 112px; min-width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -6495,7 +6765,7 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
@@ -6509,7 +6779,7 @@ for understanding where time was actually spent in a program."
                   style="width: 30px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -6519,6 +6789,35 @@ for understanding where time was actually spent in a program."
                   class="treeViewRowColumn treeViewMainColumn name dim"
                 >
                   F
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="E, running count is 1 sample (50%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  E
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -6700,7 +6999,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 112px;"
+            style="height: 128px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -6895,11 +7194,42 @@ for understanding where time was actually spent in a program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="50%"
+                >
+                  50%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 112px; min-width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -7062,7 +7392,7 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
@@ -7076,7 +7406,7 @@ for understanding where time was actually spent in a program."
                   style="width: 30px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -7086,6 +7416,35 @@ for understanding where time was actually spent in a program."
                   class="treeViewRowColumn treeViewMainColumn name dim"
                 >
                   F
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="E, running count is 1 sample (50%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  E
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -7267,7 +7626,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 80px;"
+            style="height: 96px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -7400,11 +7759,42 @@ for understanding where time was actually spent in a program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 80px; min-width: 3000px;"
+            style="height: 96px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -7508,7 +7898,7 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="F, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
@@ -7522,7 +7912,7 @@ for understanding where time was actually spent in a program."
                   style="width: 30px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -7536,6 +7926,35 @@ for understanding where time was actually spent in a program."
                   >
                     F
                   </span>
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="E, running count is 1 sample (100%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  E
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -7717,7 +8136,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 80px;"
+            style="height: 96px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -7850,11 +8269,42 @@ for understanding where time was actually spent in a program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 80px; min-width: 3000px;"
+            style="height: 96px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -7958,7 +8408,7 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="F, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
@@ -7972,7 +8422,7 @@ for understanding where time was actually spent in a program."
                   style="width: 30px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -7985,6 +8435,39 @@ for understanding where time was actually spent in a program."
                     class="treeViewHighlighting"
                   >
                     F
+                  </span>
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="E, running count is 1 sample (100%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  <span
+                    class="treeViewHighlighting"
+                  >
+                    E
                   </span>
                 </span>
                 <span
@@ -8167,7 +8650,7 @@ for understanding where time was actually spent in a program."
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 112px;"
+            style="height: 128px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -8362,11 +8845,42 @@ for understanding where time was actually spent in a program."
                   />
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  title="50%"
+                >
+                  50%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn total"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn self"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 112px; min-width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -8533,7 +9047,7 @@ for understanding where time was actually spent in a program."
                 />
               </div>
               <div
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
@@ -8547,7 +9061,7 @@ for understanding where time was actually spent in a program."
                   style="width: 30px;"
                 />
                 <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
+                  class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
                   class="colored-square category-color-grey"
@@ -8557,6 +9071,39 @@ for understanding where time was actually spent in a program."
                   class="treeViewRowColumn treeViewMainColumn name dim"
                 >
                   F
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="E, running count is 1 sample (50%), self count is 1 sample"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  <span
+                    class="treeViewHighlighting"
+                  >
+                    E
+                  </span>
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"

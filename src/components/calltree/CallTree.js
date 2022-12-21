@@ -20,6 +20,7 @@ import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
+  getCategories,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -37,6 +38,7 @@ import type {
   ImplementationFilter,
   ThreadsKey,
   CallNodeInfo,
+  CategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   WeightType,
@@ -54,6 +56,7 @@ type StateProps = {|
   +focusCallTreeGeneration: number,
   +tree: CallTreeType,
   +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
@@ -144,27 +147,29 @@ class CallTreeImpl extends PureComponent<Props> {
 
   componentDidMount() {
     this.focus();
-    if (this.props.selectedCallNodeIndex === null) {
-      this.procureInterestingInitialSelection();
-    } else if (this._treeView) {
+    this.maybeProcureInterestingInitialSelection();
+
+    if (this.props.selectedCallNodeIndex === null && this._treeView) {
       this._treeView.scrollSelectionIntoView();
     }
   }
 
   componentDidUpdate(prevProps) {
     if (
-      this.props.scrollToSelectionGeneration >
-      prevProps.scrollToSelectionGeneration
-    ) {
-      if (this._treeView) {
-        this._treeView.scrollSelectionIntoView();
-      }
-    }
-
-    if (
       this.props.focusCallTreeGeneration > prevProps.focusCallTreeGeneration
     ) {
       this.focus();
+    }
+
+    this.maybeProcureInterestingInitialSelection();
+
+    if (
+      this.props.selectedCallNodeIndex !== null &&
+      this.props.scrollToSelectionGeneration >
+        prevProps.scrollToSelectionGeneration &&
+      this._treeView
+    ) {
+      this._treeView.scrollSelectionIntoView();
     }
   }
 
@@ -228,35 +233,109 @@ class CallTreeImpl extends PureComponent<Props> {
     openSourceView(file, 'calltree');
   };
 
-  procureInterestingInitialSelection() {
+  maybeProcureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
-    const { tree, expandedCallNodeIndexes } = this.props;
-    const newExpandedCallNodeIndexes = expandedCallNodeIndexes.slice();
-    const maxInterestingDepth = 17; // scientifically determined
-    let currentCallNodeIndex = tree.getRoots()[0];
-    if (currentCallNodeIndex === undefined) {
-      // This tree is empty.
+    const {
+      tree,
+      expandedCallNodeIndexes,
+      selectedCallNodeIndex,
+      callNodeInfo: { callNodeTable },
+      categories,
+    } = this.props;
+
+    if (selectedCallNodeIndex !== null || expandedCallNodeIndexes.length > 0) {
+      // Let's not change some existing state.
       return;
     }
-    newExpandedCallNodeIndexes.push(currentCallNodeIndex);
-    for (let i = 0; i < maxInterestingDepth; i++) {
-      const children = tree.getChildren(currentCallNodeIndex);
-      if (children.length === 0) {
-        break;
-      }
-      currentCallNodeIndex = children[0];
-      newExpandedCallNodeIndexes.push(currentCallNodeIndex);
-    }
-    this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
 
-    const category = tree.getDisplayData(currentCallNodeIndex).categoryName;
-    if (category !== 'Idle') {
-      // If we selected the call node with a "idle" category, we'd have a
-      // completely dimmed activity graph because idle stacks are not drawn in
-      // this graph. Because this isn't probably what the average user wants we
-      // do it only when the category is something different.
-      this._onSelectedCallNodeChange(currentCallNodeIndex);
+    const newExpandedCallNodeIndexes = [];
+    let nodeToSelect = null;
+
+    // This value is completely arbitrary and looked good on Julien's machine
+    // when this was implemented. In the future we may want to look at the
+    // available space instead.
+    const maxVisibleLines = 70;
+    const minimumDepth = 10;
+
+    const idleCategoryIndex = categories.findIndex(
+      (category) => category.name === 'Idle'
+    );
+
+    let nodesToVisit = tree.getRoots();
+    let visibleLinesCount = nodesToVisit.length;
+
+    while (nodesToVisit.length) {
+      const newNodesToVisit = [];
+      const nonIdleNodes = nodesToVisit.filter(
+        (nodeIndex) => callNodeTable.category[nodeIndex] !== idleCategoryIndex
+      );
+
+      // Look at the sum of the running times for all non-idle nodes
+      const sumOfNonIdleRunningTime = nonIdleNodes.reduce(
+        (sum, nodeIndex) => sum + tree.getNodeData(nodeIndex).total,
+        0
+      );
+      const runningTimeThreshold = sumOfNonIdleRunningTime / 20;
+
+      for (let i = 0; i < nonIdleNodes.length; i++) {
+        const nodeIndex = nonIdleNodes[i];
+        const nodeData = tree.getNodeData(nodeIndex);
+
+        if (i === 0) {
+          nodeToSelect = nodeIndex;
+        }
+
+        if (nodeData.self > nodeData.total * 0.95) {
+          // This node doesn't have interesting children, let's move on.
+          continue;
+        }
+
+        if (i !== 0) {
+          // The first node is always expanded, but let's check whether we
+          // should open more nodes at this level.
+          const thisRunningTime = nodeData.total;
+          if (thisRunningTime < runningTimeThreshold) {
+            // This node doesn't have a lot of running time.
+            // The remaining nodes will have even less, let's break out of the
+            // inner loop.
+            break;
+          }
+        }
+
+        const children = tree.getChildren(nodeIndex);
+        const nodeDepth = tree.getDepth(nodeIndex);
+
+        if (
+          i !== 0 &&
+          nodeDepth > minimumDepth &&
+          visibleLinesCount + children.length > maxVisibleLines
+        ) {
+          // Expanding this node would exceed our budget.
+          // Let's look at the other nodes in case they have a smaller amount of children.
+          continue;
+        }
+
+        newExpandedCallNodeIndexes.push(nodeIndex);
+        visibleLinesCount += children.length;
+
+        if (i === 0) {
+          // Look at the children of the heaviest node only.
+          newNodesToVisit.push(...children);
+        }
+      }
+
+      nodesToVisit = newNodesToVisit;
+    }
+
+    if (newExpandedCallNodeIndexes.length > 0) {
+      // Take care to not trigger a state change if there's nothing to change,
+      // to avoid infinite render loop.
+      this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
+    }
+
+    if (nodeToSelect !== null) {
+      this._onSelectedCallNodeChange(nodeToSelect);
     }
   }
 
@@ -308,6 +387,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getCallTree(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    categories: getCategories(state),
     selectedCallNodeIndex:
       selectedThreadSelectors.getSelectedCallNodeIndex(state),
     rightClickedCallNodeIndex:
