@@ -255,6 +255,10 @@ describe('ThreadActivityGraph', function () {
     //  A -> B -> H -> I
     clickActivityGraph(1, 0.8);
     expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
+
+    // There's no sample at this location.
+    clickActivityGraph(0, 1);
+    expect(getCallNodePath()).toEqual([]);
   });
 
   it('will redraw even when there are no samples in range', function () {

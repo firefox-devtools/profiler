@@ -405,7 +405,6 @@ export class ActivityFillGraphQuerier {
   ): HoveredPixelState | null {
     const {
       rangeFilteredThread: { samples, stackTable },
-      greyCategoryIndex,
     } = this.renderedComponentSettings;
     const { devicePixelRatio } = window;
     const deviceX = Math.round(cssX * devicePixelRatio);
@@ -437,10 +436,13 @@ export class ActivityFillGraphQuerier {
     // iteration - in the first iteration, yPercentage can be == categoryLowerEdge.)
     for (const { sample, contribution } of candidateSamples) {
       const stackIndex = samples.stack[sample];
-      const sampleCategory =
-        stackIndex !== null
-          ? stackTable.category[stackIndex]
-          : greyCategoryIndex;
+      if (stackIndex === null) {
+        console.error(
+          `Stack index was null for sample index ${sample}, this shouldn't happen normally, please fix your source of data.`
+        );
+        continue;
+      }
+      const sampleCategory = stackTable.category[stackIndex];
       const upperEdgeOfThisSample = upperEdgeOfPreviousSample + contribution;
       // Checking the sample category here because there are samples with different
       // categories that has y percentage is lower than the upperEdgeOfThisSample.
