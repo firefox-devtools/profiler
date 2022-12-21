@@ -346,6 +346,8 @@ class CallTreeImpl extends PureComponent<Props> {
       disableOverscan,
       callNodeMaxDepth,
       weightType,
+      tableViewOptions,
+      onTableViewOptionsChange,
     } = this.props;
     if (tree.getRoots().length === 0) {
       return <CallTreeEmptyReasons />;
@@ -372,8 +374,8 @@ class CallTreeImpl extends PureComponent<Props> {
         onKeyDown={this._onKeyDown}
         onEnterKey={this._onEnterOrDoubleClick}
         onDoubleClick={this._onEnterOrDoubleClick}
-        viewOptions={this.props.tableViewOptions}
-        onViewOptionsChange={this.props.onTableViewOptionsChange}
+        viewOptions={tableViewOptions}
+        onViewOptionsChange={onTableViewOptionsChange}
       />
     );
   }

@@ -412,14 +412,6 @@ export const defaultTableViewOptions: TableViewOptions = {
   fixedColumnWidths: null,
 };
 
-function _getTableViewOptions(state: TableViewOptionsPerTab, tab: TabSlug) {
-  const options = state[tab];
-  if (options) {
-    return options;
-  }
-  return defaultThreadViewOptions;
-}
-
 function _updateTableViewOptions(
   state: TableViewOptionsPerTab,
   tab: TabSlug,
@@ -437,7 +429,6 @@ const tableViewOptionsPerTab: Reducer<TableViewOptionsPerTab> = (
   state = ({}: TableViewOptionsPerTab),
   action
 ): TableViewOptionsPerTab => {
-  console.log(action);
   switch (action.type) {
     case 'CHANGE_TABLE_VIEW_OPTIONS':
       return _updateTableViewOptions(
@@ -766,7 +757,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rightClickedMarker,
       hoveredMarker,
       mouseTimePosition,
-      perTable: tableViewOptionsPerTab,
+      perTab: tableViewOptionsPerTab,
     }),
     profile,
     full: combineReducers({

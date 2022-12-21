@@ -97,7 +97,7 @@ export const getProfileViewOptions: Selector<
   $PropertyType<ProfileViewState, 'viewOptions'>
 > = (state) => getProfileView(state).viewOptions;
 export const getCurrentTableViewOptions: Selector<TableViewOptions> = (state) =>
-  getProfileViewOptions(state).perTable[UrlState.getSelectedTab(state)] ||
+  getProfileViewOptions(state).perTab[UrlState.getSelectedTab(state)] ||
   defaultTableViewOptions;
 export const getProfileRootRange: Selector<StartEndRange> = (state) =>
   getProfileViewOptions(state).rootRange;
@@ -130,7 +130,7 @@ export const getMouseTimePosition: Selector<Milliseconds | null> = (state) =>
 
 export const getTableViewOptionSelectors: (TabSlug) => Selector<TableViewOptions> =
   (tab) => (state) => {
-    const options = getProfileViewOptions(state).perTable[tab];
+    const options = getProfileViewOptions(state).perTab[tab];
     return options || defaultTableViewOptions;
   };
 

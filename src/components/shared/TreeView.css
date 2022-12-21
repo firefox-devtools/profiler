@@ -87,20 +87,23 @@
 }
 
 .treeViewColumnDivider {
-  width: 20px;
-  text-align: center;
   display: inline-block;
+  width: 20px;
   flex: none;
-  margin-left: -5px;
   margin-right: -5px;
+  margin-left: -5px;
+  text-align: center;
 }
-.treeViewColumnDivider[resize=true]:hover {
+
+.treeViewColumnDivider[data-resize='true']:hover {
   cursor: col-resize;
 }
 
-.treeViewColumnDivider span {
+.treeViewColumnDivider::before {
+  border-top: 2px solid var(--grey-30);
   border-right: 1px solid var(--grey-30);
-  box-sizing: border-box;
+  border-bottom: 2px solid var(--grey-30);
+  content: '';
 }
 
 .treeViewHeaderColumn.treeViewFixedColumn {
