@@ -316,7 +316,6 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getFunctionTableCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> =
     createSelector(
-      //threadSelectors.getPreviewFilteredThread,
       threadSelectors.getFilteredThread,
       ProfileSelectors.getPreviewSelection,
       threadSelectors.getFilteredSamplesForCallTree,

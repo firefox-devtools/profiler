@@ -188,7 +188,7 @@ type ProfileAction =
       +optionalExpandedToCallNodePath: ?CallNodePath,
     |}
   | {|
-      +type: 'CHANGE_SELECTED_FUNCTIONTABLE_CALL_NODE,',
+      +type: 'CHANGE_SELECTED_FUNCTIONTABLE_CALL_NODE',
       +threadsKey: ThreadsKey,
       +selectedFunction: IndexIntoFuncTable,
     |}

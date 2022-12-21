@@ -263,7 +263,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         expandedCallNodePaths,
       });
     }
-    case 'CHANGE_SELECTED_FUNCTIONTABLE_CALL_NODE,': {
+    case 'CHANGE_SELECTED_FUNCTIONTABLE_CALL_NODE': {
       const { selectedFunction, threadsKey } = action;
 
       const threadState = _getThreadViewOptions(state, threadsKey);
@@ -469,7 +469,7 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
     case 'CHANGE_SELECTED_CALL_NODE':
-    case 'CHANGE_SELECTED_FUNCTIONTABLE_CALL_NODE,':
+    case 'CHANGE_SELECTED_FUNCTIONTABLE_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
     case 'HIDE_GLOBAL_TRACK':

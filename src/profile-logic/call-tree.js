@@ -467,7 +467,7 @@ function _getStackSelf(
  * This computes all of the count and timing information displayed in the calltree.
  * It takes into account both the normal tree, and the inverted tree.
  *
- * Note: The "timionmgs" could have a number of different meanings based on the
+ * Note: The "timings" could have a number of different meanings based on the
  * what type of weight is in the SamplesLikeTable. For instance, it could be
  * milliseconds, sample counts, or bytes.
  */
@@ -628,7 +628,7 @@ type SummarySpecificFuncs<T> = {|
  * The whole sample range is split into slices of equal size.
  * We store for every slice the function list information.
  * The slices are further split recursively into smaller, non overlapping,
- * slides until the slices contain at mosty MAX_SAMPLE_SLICE_NUMBER samples.
+ * slices until the slices contain at mostly MAX_SAMPLE_SLICE_NUMBER samples.
  *
  * Now when we want to get the function list information for a specific range,
  * we combine the information from all tree nodes on the root level
@@ -639,6 +639,8 @@ type SummarySpecificFuncs<T> = {|
  *
  * The information in the tree nodes themselfes is only computed when needed,
  * and then cached.
+ *
+ * It usually contains indexes into the samples of the filtered thread.
  *
  * @param T The type of the information that is stored in the tree nodes,
  *          e.g. the function list information (_SummaryPerFunction).
@@ -868,7 +870,7 @@ const _createSummaryCacheTreeMemoized = memoize(_createSummaryCacheTree, {
  * It does only use the stackTable and the frameTable from the thread, and not the samples table.
  * The samples should include all samples of the whole range of the thread.
  *
- * Note: The "timionmgs" could have a number of different meanings based on the
+ * Note: The "timings" could have a number of different meanings based on the
  * what type of weight is in the SamplesLikeTable. For instance, it could be
  * milliseconds, sample counts, or bytes.
  */
