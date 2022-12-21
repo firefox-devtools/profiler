@@ -10,10 +10,12 @@ import { SourceView } from '../shared/SourceView';
 import {
   getSourceViewFile,
   getSourceViewActivationGeneration,
+  getSelectedTab,
 } from 'firefox-profiler/selectors/url-state';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
+  selectedFunctionTableNodeSelectors,
 } from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
@@ -274,7 +276,9 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
     sourceViewSource: getSourceViewSource(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
     selectedCallNodeLineTimings:
-      selectedNodeSelectors.getSourceViewLineTimings(state),
+      getSelectedTab(state) === 'function-table'
+        ? selectedFunctionTableNodeSelectors.getSourceViewLineTimings(state)
+        : selectedNodeSelectors.getSourceViewLineTimings(state),
     sourceViewActivationGeneration: getSourceViewActivationGeneration(state),
     disableOverscan: getPreviewSelection(state).isModifying,
   }),

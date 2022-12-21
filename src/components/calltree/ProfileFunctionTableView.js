@@ -14,9 +14,8 @@ import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/ca
 import { CallTree } from './CallTree';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
+  changeSelectedFunctionTableCallNode,
   changeSelectedCallNode,
-  changeRightClickedCallNode,
-  changeExpandedCallNodes,
 } from 'firefox-profiler/actions/profile-view';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
@@ -32,22 +31,19 @@ type StateProps = {|
 
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
-  +changeRightClickedCallNode: typeof changeRightClickedCallNode,
-  +changeExpandedCallNodes: typeof changeExpandedCallNodes,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class ProfileCallTreeViewImpl extends PureComponent<Props> {
+class ProfileFunctionTableViewImpl extends PureComponent<Props> {
   render() {
     return (
       <div
-        className="treeAndSidebarWrapper"
-        id="calltree-tab"
+        className="functionTableAndSidebarWrapper"
         role="tabpanel"
-        aria-labelledby="calltree-tab-button"
+        aria-labelledby="function-table-tab-button"
       >
-        <StackSettings />
+        <StackSettings hideInvertCallstack={true} />
         <TransformNavigator />
         <CallTree {...this.props} />
       </div>
@@ -55,31 +51,30 @@ class ProfileCallTreeViewImpl extends PureComponent<Props> {
   }
 }
 
-export const ProfileCallTreeView = explicitConnect<
+const _emptyExpandedCallNodexIndexes = [];
+
+export const ProfileFunctionTableView = explicitConnect<
   {||},
   StateProps,
   DispatchProps
 >({
   mapStateToProps: (state) => ({
-    tabslug: 'calltree',
-    tree: selectedThreadSelectors.getCallTree(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    tabslug: 'function-table',
+    tree: selectedThreadSelectors.getFunctionTableCallTree(state),
+    callNodeInfo:
+      selectedThreadSelectors.getFunctionTableCallNodeInfoWithFuncMapping(state)
+        .callNodeInfo,
     selectedCallNodeIndex:
-      selectedThreadSelectors.getSelectedCallNodeIndex(state),
-    rightClickedCallNodeIndex:
-      selectedThreadSelectors.getRightClickedCallNodeIndex(state),
-    expandedCallNodeIndexes:
-      selectedThreadSelectors.getExpandedCallNodeIndexes(state),
-    // Use the filtered call node max depth, rather than the preview filtered call node
-    // max depth so that the width of the TreeView component is stable across preview
-    // selections.
-    callNodeMaxDepth:
-      selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
+      selectedThreadSelectors.getSelectedFunctionTableCallNodeIndex(state),
+    // right clicking is not supported for now
+    // as most of the transformations do not make sense in this context
+    rightClickedCallNodeIndex: null,
+    // we cannot expand any call nodes
+    expandedCallNodeIndexes: _emptyExpandedCallNodexIndexes,
+    callNodeMaxDepth: 0,
   }),
   mapDispatchToProps: {
-    changeSelectedCallNode,
-    changeRightClickedCallNode,
-    changeExpandedCallNodes,
+    changeSelectedCallNode: changeSelectedFunctionTableCallNode,
   },
-  component: ProfileCallTreeViewImpl,
+  component: ProfileFunctionTableViewImpl,
 });
