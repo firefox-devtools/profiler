@@ -40,6 +40,7 @@ import type {
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
+import type { IndexIntoFuncTable } from '../types';
 
 export type DataSource =
   | 'none'
@@ -185,6 +186,11 @@ type ProfileAction =
       +threadsKey: ThreadsKey,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
+    |}
+  | {|
+      +type: 'CHANGE_SELECTED_FUNCTIONTABLE_CALL_NODE,',
+      +threadsKey: ThreadsKey,
+      +selectedFunction: IndexIntoFuncTable,
     |}
   | {|
       +type: 'UPDATE_TRACK_THREAD_HEIGHT',

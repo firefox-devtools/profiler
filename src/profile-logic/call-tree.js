@@ -31,13 +31,16 @@ import type {
   TracedTiming,
   SamplesTable,
   ExtraBadgeInfo,
+  IndexIntoStackTable,
 } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import memoize from 'memoize-immutable';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
+import type { CallNodeInfoWithFuncMapping } from './profile-data';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeSummary = {
@@ -60,10 +63,6 @@ function extractFaviconFromLibname(libname: string): string | null {
     }
     return url.href;
   } catch (e) {
-    console.error(
-      'Error while extracing the favicon from the libname',
-      libname
-    );
     return null;
   }
 }
@@ -141,7 +140,6 @@ export class CallTree {
         const childTotalSummary =
           this._callNodeSummary.total[childCallNodeIndex];
         const childChildCount = this._callNodeChildCount[childCallNodeIndex];
-
         if (
           childPrefixIndex === callNodeIndex &&
           (childTotalSummary !== 0 || childChildCount !== 0)
@@ -549,7 +547,383 @@ export function getCallTree(
   return timeCode('getCallTree', () => {
     const { callNodeSummary, callNodeChildCount, rootTotalSummary, rootCount } =
       callTreeCountsAndSummary;
+    const jsOnly = implementationFilter === 'js';
+    // By default add a single decimal value, e.g 13.1, 0.3, 5234.4
+    return new CallTree(
+      thread,
+      categories,
+      callNodeInfo.callNodeTable,
+      callNodeSummary,
+      callNodeChildCount,
+      rootTotalSummary,
+      rootCount,
+      jsOnly,
+      interval,
+      Boolean(thread.isJsTracer),
+      weightType
+    );
+  });
+}
 
+type _SummaryPerFunction = {|
+  callNodeSelf: Float32Array, // Milliseconds[]
+  callNodeTotal: Float32Array, // Milliseconds[]
+|};
+
+function _combineSummaryPerFunctions(
+  summaryPerFunctions: _SummaryPerFunction[]
+): _SummaryPerFunction {
+  ensureExists(summaryPerFunctions[0]);
+  if (summaryPerFunctions.length === 1) {
+    return summaryPerFunctions[0];
+  }
+  const callNodeSelf = new Float32Array(summaryPerFunctions[0].callNodeSelf);
+  const callNodeTotal = new Float32Array(summaryPerFunctions[0].callNodeTotal);
+  for (let i = 1; i < summaryPerFunctions.length; i++) {
+    const { callNodeSelf: self, callNodeTotal: total } = summaryPerFunctions[i];
+    for (let j = 0; j < self.length; j++) {
+      callNodeSelf[j] += self[j];
+      callNodeTotal[j] += total[j];
+    }
+  }
+  return { callNodeSelf, callNodeTotal };
+}
+
+function _subtractSummaryPerFunctions(
+  initial: _SummaryPerFunction,
+  subtracted: _SummaryPerFunction
+) {
+  const callNodeSelf = new Float32Array(initial.callNodeSelf);
+  const callNodeTotal = new Float32Array(initial.callNodeTotal);
+  for (let j = 0; j < callNodeSelf.length; j++) {
+    callNodeSelf[j] -= subtracted.callNodeSelf[j];
+    callNodeTotal[j] -= subtracted.callNodeTotal[j];
+  }
+  return { callNodeSelf, callNodeTotal };
+}
+
+/**
+ * The following code belongs to an optimization that improves the performance of the call tree
+ * significantly, by caching lots of computed data.
+ * It was implemented in https://github.com/firefox-devtools/profiler/pull/4227
+ */
+
+/** ensures that the slices are not to large for any reasonably sized sample */
+const MAX_SAMPLE_SLICE_NUMBER = 300;
+const MAX_SLICES_PER_LEVEL = 5;
+
+type SummarySpecificFuncs<T> = {|
+  /** compute the summary information for the sample range (the end index is not included) */
+  compute: (startIndex: number, endIndex: number) => T,
+  /** combine several instances to one */
+  combine: (summaryPerFunctions: T[]) => T,
+  /** subtract second instance from the first */
+  subtract: (initial: T, subtracted: T) => T,
+|};
+
+/**
+ * Node in the multilevel cache for the function list information
+ * (a mapping of functions to the number of stack samples they appear in) over time:
+ *
+ * The whole sample range is split into slices of equal size.
+ * We store for every slice the function list information.
+ * The slices are further split recursively into smaller, non overlapping,
+ * slides until the slices contain at mosty MAX_SAMPLE_SLICE_NUMBER samples.
+ *
+ * Now when we want to get the function list information for a specific range,
+ * we combine the information from all tree nodes on the root level
+ * that are fully contained in the range. We use the sub slices to recursively
+ * add the information for the borders.
+ * This way we only compute new information for at most 2 * (MAX_SLICES_PER_LEVEL - 1) slices.
+ * Which speeds up the computation.
+ *
+ * The information in the tree nodes themselfes is only computed when needed,
+ * and then cached.
+ *
+ * @param T The type of the information that is stored in the tree nodes,
+ *          e.g. the function list information (_SummaryPerFunction).
+ */
+class SummaryCacheTreeNode<T> {
+  _startIndex: number;
+  /** exclusive end index */
+  _endIndex: number;
+  /** combined information of all children, only non null
+   * if the information of all children is computed */
+  _sums: T | null;
+  /** children of this node if their information is already computed
+   * (the _sums of children objects is non null) */
+  _children: (SummaryCacheTreeNode<T> | null)[];
+  /** functions to compute, combine and subtract Ts */
+  _funcs: SummarySpecificFuncs<T>;
+  /** size of the leaf samples in this subtree (right border slices might be smaller) */
+  _finalSliceSize: number;
+  /** size of the slices of the direct children (right border slices might be smaller) */
+  _sliceSize: number;
+  /** we cache a single computation */
+  _lastComputation: {| start: number, end: number, sums: T |} | null;
+
+  constructor(
+    startIndex: number,
+    endIndex: number,
+    funcs: SummarySpecificFuncs<T>,
+    finalSliceSize: number
+  ) {
+    this._startIndex = startIndex;
+    this._endIndex = endIndex;
+    this._sums = null;
+    this._funcs = funcs;
+    this._finalSliceSize = finalSliceSize;
+    const finalSliceCount =
+      finalSliceSize < endIndex - startIndex
+        ? Math.ceil((this._endIndex - this._startIndex) / this._finalSliceSize)
+        : 0;
+    const numberOfChildren = Math.min(finalSliceCount, MAX_SLICES_PER_LEVEL);
+    this._sliceSize =
+      numberOfChildren > 0
+        ? Math.ceil((this._endIndex - this._startIndex) / numberOfChildren)
+        : 0;
+    this._children = new Array(numberOfChildren).fill(null);
+    this._lastComputation = null;
+  }
+
+  computeCached(start: number, end: number): T {
+    if (this._lastComputation === null) {
+      this._lastComputation = { start, end, sums: this._compute(start, end) };
+      return this._lastComputation.sums;
+    }
+    const {
+      start: lastStart,
+      end: lastEnd,
+      sums: lastSums,
+    } = this._lastComputation;
+    if (lastStart === start && lastEnd === end) {
+      return lastSums;
+    }
+    // check whether just computing looks at less samples
+    const rangeForCachedComputation =
+      Math.abs(lastStart - start) + Math.abs(lastEnd - end);
+    if (rangeForCachedComputation > Math.abs(start - end)) {
+      this._lastComputation = { start, end, sums: this._compute(start, end) };
+    } else {
+      let result = lastSums;
+      const applySlice = (start: number, end: number) => {
+        if (start === end) {
+          return;
+        }
+        const sum = this._compute(Math.min(start, end), Math.max(start, end));
+        if (start < end) {
+          // we added a slice
+          result = this._funcs.combine([result, sum]);
+        } else {
+          // we removed a slice
+          result = this._funcs.subtract(result, sum);
+        }
+      };
+      applySlice(start, lastStart);
+      applySlice(lastEnd, end);
+      this._lastComputation = { start, end, sums: result };
+    }
+    return this._lastComputation.sums;
+  }
+
+  _compute(start: number, end: number): T {
+    if (start === end) {
+      return this._funcs.compute(start, end);
+    }
+    if (start === this._startIndex && end === this._endIndex) {
+      // we use this._sums
+      return this._computeAll();
+    }
+    if (this._children.length === 0) {
+      return this._funcs.compute(start, end);
+    }
+    // so it is something in between
+
+    const startChildIndex = this._getChildIndex(start);
+    const endChildIndex = this._getChildIndex(end - 1);
+    const slices: T[] = [];
+    for (let i = startChildIndex; i <= endChildIndex; i++) {
+      const child = this._getChild(i);
+      const childStart = Math.max(start, child._startIndex);
+      const childEnd = Math.min(end, child._endIndex);
+      slices.push(child.computeCached(childStart, childEnd));
+    }
+    return this._funcs.combine(slices);
+  }
+
+  _rangeOfChild(childIndex: number): [number, number] {
+    if (childIndex === this._children.length - 1) {
+      return [this._startIndex + childIndex * this._sliceSize, this._endIndex];
+    }
+    return [
+      this._startIndex + childIndex * this._sliceSize,
+      this._startIndex + (childIndex + 1) * this._sliceSize,
+    ];
+  }
+
+  _computeAll(): T {
+    if (this._sums === null) {
+      if (this._endIndex - this._startIndex <= this._finalSliceSize) {
+        // leaf node
+        return this._funcs.compute(this._startIndex, this._endIndex);
+      }
+      // we need to split the node as it consists of at least 2 slices
+      this._sums = this._funcs.combine(
+        this._children.map((child, index) =>
+          this._getChild(index)._computeAll()
+        )
+      );
+    }
+    return this._sums;
+  }
+
+  _getChild(childIndex: number): SummaryCacheTreeNode<T> {
+    if (this._children[childIndex] === null) {
+      this._initChild(childIndex);
+    }
+    // $FlowExpectError
+    return this._children[childIndex];
+  }
+
+  _initChild(childIndex: number) {
+    const [start, end] = this._rangeOfChild(childIndex);
+    this._children[childIndex] = new SummaryCacheTreeNode(
+      start,
+      end,
+      this._funcs,
+      this._finalSliceSize
+    );
+  }
+
+  _getChildIndex(sampleIndex: number): number {
+    return Math.floor((sampleIndex - this._startIndex) / this._sliceSize);
+  }
+}
+
+/**
+ * Return the self and total per call node index
+ */
+function _getSummaryPerFunctionSlice(
+  thread: Thread,
+  samples: SamplesLikeTable,
+  funcToCallNodeIndex: Int32Array,
+  startIndex: number,
+  endIndex: number
+): _SummaryPerFunction {
+  const { frameTable, stackTable } = thread;
+  const callNodeSelf = new Float32Array(funcToCallNodeIndex.length); // intialized to 0
+  const callNodeTotal = new Float32Array(funcToCallNodeIndex.length);
+
+  for (let sampleIndex = startIndex; sampleIndex < endIndex; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    let stackStart: IndexIntoStackTable | null = stackIndex;
+    const alreadyCountedFuncs: Set<IndexIntoFuncTable> = new Set();
+    while (stackStart !== null) {
+      const funcIndex = frameTable.func[stackTable.frame[stackStart]];
+      if (!alreadyCountedFuncs.has(funcIndex)) {
+        alreadyCountedFuncs.add(funcIndex);
+        const callNodeIndex = funcToCallNodeIndex[funcIndex];
+        callNodeSelf[callNodeIndex] += stackStart === stackIndex ? weight : 0;
+        callNodeTotal[callNodeIndex] += weight;
+      }
+      stackStart = stackTable.prefix[stackStart];
+    }
+  }
+
+  return { callNodeSelf, callNodeTotal };
+}
+
+function _createSummaryCacheTree(
+  thread: Thread,
+  samples: SamplesLikeTable,
+  funcToCallNodeIndex: Int32Array
+): SummaryCacheTreeNode<_SummaryPerFunction> {
+  return new SummaryCacheTreeNode<_SummaryPerFunction>(
+    0,
+    samples.length,
+    {
+      compute: (startIndex, endIndex) =>
+        _getSummaryPerFunctionSlice(
+          thread,
+          samples,
+          funcToCallNodeIndex,
+          startIndex,
+          endIndex
+        ),
+      combine: _combineSummaryPerFunctions,
+      subtract: _subtractSummaryPerFunctions,
+    },
+    Math.min(samples.length, MAX_SAMPLE_SLICE_NUMBER)
+  );
+}
+
+const _createSummaryCacheTreeMemoized = memoize(_createSummaryCacheTree, {
+  limit: 1,
+});
+
+/**
+ * This computes all of the count and timing information displayed in the method table view.
+ *
+ * It does only use the stackTable and the frameTable from the thread, and not the samples table.
+ * The samples should include all samples of the whole range of the thread.
+ *
+ * Note: The "timionmgs" could have a number of different meanings based on the
+ * what type of weight is in the SamplesLikeTable. For instance, it could be
+ * milliseconds, sample counts, or bytes.
+ */
+export function computeFunctionTableCallTreeCountsAndSummary(
+  thread: Thread,
+  samples: SamplesLikeTable,
+  {
+    callNodeInfo: { callNodeTable },
+    funcToCallNodeIndex,
+  }: CallNodeInfoWithFuncMapping,
+  startIndex: number,
+  endIndex: number
+): CallTreeCountsAndSummary {
+  const { callNodeSelf, callNodeTotal } = _createSummaryCacheTreeMemoized(
+    thread,
+    samples,
+    funcToCallNodeIndex
+  ).computeCached(startIndex, endIndex);
+
+  // one call node for each function
+
+  // Compute the following variables:
+  const callNodeTotalSummary = callNodeTotal;
+  const callNodeChildCount = new Uint32Array(callNodeTable.length).fill(0);
+  const rootTotalSummary = samples.length;
+  const rootCount = callNodeTable.length;
+
+  return {
+    callNodeSummary: {
+      self: callNodeSelf,
+      total: callNodeTotalSummary,
+    },
+    callNodeChildCount,
+    rootTotalSummary,
+    rootCount,
+  };
+}
+
+/**
+ * An exported interface to get an instance of the CallTree class.
+ * This handles computing timing information, and passing it all into
+ * the CallTree constructor.
+ */
+export function getFunctionTableCallTree(
+  thread: Thread,
+  interval: Milliseconds,
+  { callNodeInfo }: CallNodeInfoWithFuncMapping,
+  categories: CategoryList,
+  implementationFilter: string,
+  callTreeCountsAndSummary: CallTreeCountsAndSummary,
+  weightType: WeightType
+): CallTree {
+  return timeCode('getFunctionTableCallTree', () => {
+    const { callNodeSummary, callNodeChildCount, rootTotalSummary, rootCount } =
+      callTreeCountsAndSummary;
     const jsOnly = implementationFilter === 'js';
     // By default add a single decimal value, e.g 13.1, 0.3, 5234.4
     return new CallTree(

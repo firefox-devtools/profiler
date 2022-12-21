@@ -303,3 +303,107 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     getSourceViewLineTimings,
   };
 })();
+
+export const selectedFunctionTableNodeSelectors: NodeSelectors = (() => {
+  const getName: Selector<string> = createSelector(
+    selectedThreadSelectors.getSelectedFunctionTableFunction,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedFunction, { stringTable, funcTable }) => {
+      if (selectedFunction === null) {
+        return '';
+      }
+
+      return stringTable.getString(funcTable.name[selectedFunction]);
+    }
+  );
+
+  const getIsJS: Selector<boolean> = createSelector(
+    selectedThreadSelectors.getSelectedFunctionTableFunction,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedFunction, { funcTable }) => {
+      return selectedFunction !== null && funcTable.isJS[selectedFunction];
+    }
+  );
+
+  const getLib: Selector<string> = createSelector(
+    selectedThreadSelectors.getSelectedFunctionTableFunction,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedFunction, { stringTable, funcTable, resourceTable }) => {
+      if (selectedFunction === null) {
+        return '';
+      }
+
+      return ProfileData.getOriginAnnotationForFunc(
+        selectedFunction,
+        funcTable,
+        resourceTable,
+        stringTable
+      );
+    }
+  );
+
+  const getTimingsForSidebar: Selector<TimingsForPath> = createSelector(
+    selectedThreadSelectors.getSelectedFunctionTableFunction,
+    selectedThreadSelectors.getFunctionTableCallNodeInfoWithFuncMapping,
+    ProfileSelectors.getProfileInterval,
+    selectedThreadSelectors.getPreviewFilteredThread,
+    selectedThreadSelectors.getThread,
+    selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
+    ProfileSelectors.getCategories,
+    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+    selectedThreadSelectors.getUnfilteredSamplesForCallTree,
+    ProfileSelectors.getProfileUsesFrameImplementation,
+    ProfileData.getTimingsForFunction
+  );
+
+  const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
+    createSelector(
+      selectedThreadSelectors.getFilteredThread,
+      UrlState.getSourceViewFile,
+      selectedThreadSelectors.getCallNodeInfo,
+      selectedThreadSelectors.getSelectedCallNodeIndex,
+      UrlState.getInvertCallstack,
+      (
+        { stackTable, frameTable, funcTable, stringTable }: Thread,
+        sourceViewFile,
+        callNodeInfo,
+        selectedCallNodeIndex,
+        invertCallStack
+      ): StackLineInfo | null => {
+        if (sourceViewFile === null || selectedCallNodeIndex === null) {
+          return null;
+        }
+        const selectedFunc =
+          callNodeInfo.callNodeTable.func[selectedCallNodeIndex];
+        const selectedFuncFile = funcTable.fileName[selectedFunc];
+        if (
+          selectedFuncFile === null ||
+          stringTable.getString(selectedFuncFile) !== sourceViewFile
+        ) {
+          return null;
+        }
+        return getStackLineInfoForCallNode(
+          stackTable,
+          frameTable,
+          selectedCallNodeIndex,
+          callNodeInfo,
+          invertCallStack
+        );
+      }
+    );
+
+  const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
+    getSourceViewStackLineInfo,
+    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+    getLineTimings
+  );
+
+  return {
+    getName,
+    getIsJS,
+    getLib,
+    getTimingsForSidebar,
+    getSourceViewStackLineInfo,
+    getSourceViewLineTimings,
+  };
+})();

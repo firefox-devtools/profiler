@@ -38,6 +38,7 @@ import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path.js';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { BrowserConnectionStatus } from 'firefox-profiler/app-logic/browser-connection';
+import type { IndexIntoFuncTable } from 'firefox-profiler/types';
 
 export type Reducer<T> = (T | void, Action) => T;
 
@@ -50,6 +51,7 @@ export type UploadedProfileInformation = ImportedUploadedProfileInformation;
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
+  +selectedFunctionTableFunction: IndexIntoFuncTable | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
   +selectedNetworkMarker: MarkerIndex | null,

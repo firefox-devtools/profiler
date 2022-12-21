@@ -4565,6 +4565,7 @@ Object {
     0,
     1,
   ],
+  "selectedFunctionTableFunction": null,
   "selectedMarker": 1,
   "selectedNetworkMarker": null,
 }

@@ -122,6 +122,24 @@ export function changeSelectedCallNode(
 }
 
 /**
+ * Select a call node for a given thread for the method table.
+ *
+ * Uses the last function index in selectedCallNodePath as the selected function.
+ * Ignores the third argument (it's just for compatibility with changeSelectedCallNode)
+ */
+export function changeSelectedFunctionTableCallNode(
+  threadsKey: ThreadsKey,
+  selectedCallNodePath: CallNodePath,
+  _?: CallNodePath
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_FUNCTIONTABLE_CALL_NODE,',
+    selectedFunction: selectedCallNodePath[selectedCallNodePath.length - 1],
+    threadsKey,
+  };
+}
+
+/**
  * This action is used when the user right clicks on a call node (in panels such
  * as the call tree, the flame chart, or the stack chart). It's especially used
  * to display the context menu.

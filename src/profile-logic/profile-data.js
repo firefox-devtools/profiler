@@ -223,6 +223,122 @@ export function getCallNodeInfo(
   });
 }
 
+export type CallNodeInfoWithFuncMapping = {|
+  callNodeInfo: CallNodeInfo,
+  funcToCallNodeIndex: Int32Array,
+  callNodeToFuncIndex: Int32Array,
+|};
+
+/**
+ * Generate the CallNodeInfo and a function to callnode index mapping (in both directions).
+ * The CallNodeInfo contains the CallNodeTable, and a map to convert
+ * an IndexIntoStackTable to a IndexIntoCallNodeTable. This function runs
+ * produces infos with one call node per function for the FunctionTableView.
+ *
+ * It removes all functions without any samples and uses the category (and subcategory) of the last
+ * frame for each function.
+ *
+ * See `src/types/profile-derived.js` for the type definitions.
+ * See `docs-developer/call-trees.md` for a detailed explanation of CallNodes.
+ */
+export function getFunctionTableCallNodeInfoWithFuncMapping(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  defaultCategory: IndexIntoCategoryList
+): CallNodeInfoWithFuncMapping {
+  return timeCode('getFunctionTableCallNodeInfo', () => {
+    const funcToCallNodeIndex = new Int32Array(funcTable.length).fill(-1);
+    const callNodeToFuncIndex = [];
+    const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
+
+    // The callNodeTable components, per function index
+    const func: Array<IndexIntoFuncTable> = [];
+    const category: Array<IndexIntoCategoryList> = [];
+    const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
+    const sourceFramesInlinedIntoSymbol: Array<
+      IndexIntoNativeSymbolTable | -1 | null
+    > = [];
+
+    function ensureCallNodeForFunction(
+      funcIndex: number,
+      categoryIndex: number,
+      subcategoryIndex: number,
+      inlinedIntoSymbol: IndexIntoNativeSymbolTable | null
+    ): IndexIntoCallNodeTable {
+      let callNodeIndex = funcToCallNodeIndex[funcIndex];
+      if (callNodeIndex === -1) {
+        // We found a new function.
+        callNodeIndex = callNodeToFuncIndex.length;
+        callNodeToFuncIndex.push(funcIndex);
+        funcToCallNodeIndex[funcIndex] = callNodeIndex;
+
+        func[callNodeIndex] = funcIndex;
+        sourceFramesInlinedIntoSymbol[callNodeIndex] = inlinedIntoSymbol;
+        category[callNodeIndex] = categoryIndex;
+        subcategory[callNodeIndex] = subcategoryIndex;
+      } else {
+        // Combine sourceFramesInlinedIntoSymbol, category and subcategory info.
+        if (
+          sourceFramesInlinedIntoSymbol[callNodeIndex] !== inlinedIntoSymbol
+        ) {
+          sourceFramesInlinedIntoSymbol[callNodeIndex] = -1; // conflicting information
+        }
+        if (category[callNodeIndex] !== categoryIndex) {
+          category[callNodeIndex] = defaultCategory;
+        } else {
+          category[callNodeIndex] = categoryIndex;
+        }
+        if (subcategory[callNodeIndex] !== subcategoryIndex) {
+          subcategory[callNodeIndex] = 0;
+        } else {
+          subcategory[callNodeIndex] = subcategoryIndex;
+        }
+      }
+      return callNodeIndex;
+    }
+
+    // Go through each stack, and create a new callNode table, which is based off of
+    // functions rather than frames.
+    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+      const frameIndex = stackTable.frame[stackIndex];
+      const categoryIndex = stackTable.category[stackIndex];
+      const subcategoryIndex = stackTable.subcategory[stackIndex];
+      const funcIndex = frameTable.func[frameIndex];
+      const inlinedIntoSymbol =
+        frameTable.inlineDepth[frameIndex] > 0
+          ? frameTable.nativeSymbol[frameIndex]
+          : null;
+
+      const callNodeIndex = ensureCallNodeForFunction(
+        funcIndex,
+        categoryIndex,
+        subcategoryIndex,
+        inlinedIntoSymbol
+      );
+      stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
+    }
+
+    const length = callNodeToFuncIndex.length;
+    const callNodeTable: CallNodeTable = {
+      prefix: new Int32Array(length).fill(-1),
+      func: new Int32Array(func),
+      category: new Int32Array(category),
+      subcategory: new Int32Array(subcategory),
+      depth: new Array(length).fill(0),
+      innerWindowID: new Float64Array(length),
+      sourceFramesInlinedIntoSymbol,
+      length: length,
+    };
+
+    return {
+      callNodeInfo: { callNodeTable, stackIndexToCallNodeIndex },
+      funcToCallNodeIndex,
+      callNodeToFuncIndex: Int32Array.from(callNodeToFuncIndex),
+    };
+  });
+}
+
 /**
  * Take a samples table, and return an array that contain indexes that point to the
  * leaf most call node, or null.
@@ -356,6 +472,81 @@ export function getSamplesSelectedStates(
     result[sampleIndex] = getSelectedStateFromCallNode(
       sampleCallNodes[sampleIndex],
       activeTabFilteredCallNodes[sampleIndex]
+    );
+  }
+  return result;
+}
+
+/**
+ * Go through the samples, and determine their current state.
+ *
+ * For samples that are neither 'FILTERED_OUT_*' nor 'SELECTED',
+ * this function uses 'UNSELECTED_ORDERED_AFTER_SELECTED'. It uses the same
+ * ordering as the function compareCallNodes in getTreeOrderComparator.
+ */
+export function getSamplesSelectedStatesForFunction(
+  { callNodeToFuncIndex }: CallNodeInfoWithFuncMapping,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  { stackTable, frameTable, samples }: Thread
+): SelectedState[] {
+  const result = new Array(sampleCallNodes.length);
+
+  const selectedFuncIndex =
+    selectedCallNodeIndex !== null
+      ? callNodeToFuncIndex[selectedCallNodeIndex]
+      : -1;
+
+  /**
+   * Take a call node, and compute its selected state.
+   */
+  function getSelectedStateFromCallNode(
+    callNode: IndexIntoCallNodeTable | null,
+    activeTabFilteredCallNode: IndexIntoCallNodeTable | null,
+    sampleIndex: IndexIntoStackTable
+  ): SelectedState {
+    if (callNode === null) {
+      return activeTabFilteredCallNode === null
+        ? // This sample was not part of the active tab.
+          'FILTERED_OUT_BY_ACTIVE_TAB'
+        : // This sample was filtered out in the transform pipeline.
+          'FILTERED_OUT_BY_TRANSFORM';
+    }
+
+    // When there's no selected call node, we don't want to shadow everything
+    // because everything is unselected. So let's decide this is as if
+    // everything is selected so that anything not filtered out will be nicely
+    // visible.
+    if (selectedCallNodeIndex === null) {
+      return 'SELECTED';
+    }
+
+    let currentStackIndex = samples.stack[sampleIndex];
+
+    while (currentStackIndex !== null) {
+      const frameIndex = stackTable.frame[currentStackIndex];
+      if (frameIndex !== -1) {
+        const funcIndex = frameTable.func[frameIndex];
+        if (funcIndex === selectedFuncIndex) {
+          return 'SELECTED'; // found a match
+        }
+      }
+      currentStackIndex = stackTable.prefix[currentStackIndex];
+    }
+    return 'UNSELECTED_ORDERED_AFTER_SELECTED';
+  }
+
+  // Go through each sample, and label its state.
+  for (
+    let sampleIndex = 0;
+    sampleIndex < sampleCallNodes.length;
+    sampleIndex++
+  ) {
+    result[sampleIndex] = getSelectedStateFromCallNode(
+      sampleCallNodes[sampleIndex],
+      activeTabFilteredCallNodes[sampleIndex],
+      sampleIndex
     );
   }
   return result;
@@ -810,6 +1001,41 @@ export function getTimingsForCallNodeIndex(
   }
 
   return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+}
+
+/**
+ * This function returns the timings for a specific function.
+ *
+ * Note that the unfilteredThread should be the original thread before any filtering
+ * (by range or other) happens. Also sampleIndexOffset needs to be properly
+ * specified and is the offset to be applied on thread's indexes to access
+ * the same samples in unfilteredThread.
+ */
+export function getTimingsForFunction(
+  funcIndex: IndexIntoFuncTable | null,
+  { callNodeInfo, funcToCallNodeIndex }: CallNodeInfoWithFuncMapping,
+  interval: Milliseconds,
+  thread: Thread,
+  unfilteredThread: Thread,
+  sampleIndexOffset: number,
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  unfilteredSamples: SamplesLikeTable,
+  displayImplementation: boolean
+): TimingsForPath {
+  return getTimingsForCallNodeIndex(
+    funcIndex === null ? null : funcToCallNodeIndex[funcIndex],
+    callNodeInfo,
+    interval,
+    false,
+    thread,
+    unfilteredThread,
+    sampleIndexOffset,
+    categories,
+    samples,
+    unfilteredSamples,
+    displayImplementation
+  );
 }
 
 // This function computes the time range for a thread, using both its samples
@@ -1845,6 +2071,17 @@ export function getCallNodeIndexFromPath(
 ): IndexIntoCallNodeTable | null {
   const [result] = getCallNodeIndicesFromPaths([callNodePath], callNodeTable);
   return result;
+}
+
+// This function returns a CallNodeIndex from a CallNodePath, using the
+// specified `callNodeTable` for the FunctionTable
+export function getFunctionTableCallNodeIndexFromPath(
+  callNodePath: CallNodePath,
+  { funcToCallNodeIndex }: CallNodeInfoWithFuncMapping
+): IndexIntoCallNodeTable | null {
+  return callNodePath.length > 0
+    ? funcToCallNodeIndex[callNodePath[callNodePath.length - 1]]
+    : null;
 }
 
 // This function returns a CallNodePath from a CallNodeIndex.
