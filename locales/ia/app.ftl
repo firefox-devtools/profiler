@@ -246,6 +246,10 @@ Home--menu-button = Activar le button { -profiler-brand-name } del menu
 Home--menu-button-instructions =
     Activa le button de menu profilator pro initiar registrar un profilo de
     prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Tu pote equalmente profilar { -firefox-android-brand-name }.
+    Pro saper plus, consulta iste documentation:
+    <a>Profilage de { -firefox-android-brand-name } directemente sur le apparato</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
