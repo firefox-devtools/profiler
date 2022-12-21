@@ -363,8 +363,14 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
             if (searchStringsRegExp.test(text)) {
               ctx.strokeStyle = BLUE_60;
-              ctx.lineWidth = 2;
-              ctx.strokeRect(intX, intY, intW + BORDER_OPACITY, intH);
+              ctx.lineWidth = 1;
+              // By using these "+1" computations, this is drawing the
+              // highlight stroke inside the boxes.
+              if (intW <= 2) {
+                ctx.strokeRect(intX + 1, intY + 1, 1, intH - 1);
+              } else {
+                ctx.strokeRect(intX + 1, intY + 1, intW - 1, intH - 1);
+              }
             }
           }
 
