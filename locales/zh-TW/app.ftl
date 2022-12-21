@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox for Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -193,7 +194,6 @@ Home--enable-button-unavailable =
 # This message can be seen on https://main--perf-html.netlify.app/ .
 Home--web-channel-unavailable = 此檢測器無法連線到 WebChannel。通常是因為執行檢測器的主機與 <code>devtools.performance.recording.ui-base-url</code> 偏好設定當中指定的主機不同。若您想要使用此檢測器捕捉新的效能檢測檔，並可程式化控制檢測器選單按鈕，可到 <code>about:config</code> 調整該偏好設定。
 Home--record-instructions = 請點擊檢測按鈕或按下鍵盤快速鍵即可開始進行檢測。進行效能紀錄時，此圖示將會顯示成藍色。按下<kbd>捕捉</kbd>即可將資料載入到 profiler.firefox.com。
-Home--instructions-title = 如何檢視並記錄檢測檔
 Home--instructions-content = 需要使用 <a>{ -firefox-brand-name }</a> 紀錄效能檢測檔。但可以使用任何現代瀏覽器檢視現有的檢測檔。
 Home--record-instructions-start-stop = 停止並開始檢測
 Home--record-instructions-capture-load = 捕捉並載入檢測檔
@@ -625,8 +625,12 @@ TrackMemoryGraph--operations-since-the-previous-sample = 自前一次取樣以�
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
@@ -638,42 +642,6 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = 功率
-# This is used in the tooltip when the energy used in the current range uses the
-# watt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
-    .label = 可見範圍內消耗的能源
-# This is used in the tooltip when the energy used in the current range uses the
-# milliwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
-    .label = 可見範圍內消耗的能源
-# This is used in the tooltip when the energy used in the current range uses the
-# microwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
-    .label = 目前選擇範圍內消耗的能源
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the watt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
-    .label = 目前選擇範圍內消耗的能源
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the milliwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
-    .label = 目前選擇範圍內消耗的能源
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the microwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
-    .label = 目前選擇範圍內消耗的能源
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
