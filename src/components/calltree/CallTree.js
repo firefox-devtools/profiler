@@ -20,6 +20,7 @@ import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
+  getCategories,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -37,6 +38,7 @@ import type {
   ImplementationFilter,
   ThreadsKey,
   CallNodeInfo,
+  CategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   WeightType,
@@ -54,6 +56,7 @@ type StateProps = {|
   +focusCallTreeGeneration: number,
   +tree: CallTreeType,
   +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
@@ -233,12 +236,22 @@ class CallTreeImpl extends PureComponent<Props> {
   maybeProcureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
-    const { tree, expandedCallNodeIndexes, selectedCallNodeIndex } = this.props;
+    const {
+      tree,
+      expandedCallNodeIndexes,
+      selectedCallNodeIndex,
+      callNodeInfo: { callNodeTable },
+      categories,
+    } = this.props;
 
     if (selectedCallNodeIndex !== null || expandedCallNodeIndexes.length > 0) {
       // Let's not change some existing state.
       return;
     }
+
+    const idleCategoryIndex = categories.findIndex(
+      (category) => category.name === 'Idle'
+    );
 
     const newExpandedCallNodeIndexes = expandedCallNodeIndexes.slice();
     const maxInterestingDepth = 17; // scientifically determined
@@ -253,13 +266,22 @@ class CallTreeImpl extends PureComponent<Props> {
       if (children.length === 0) {
         break;
       }
-      currentCallNodeIndex = children[0];
+
+      // Let's find if there's a non idle children.
+      const firstNonIdleNode = children.find(
+        (nodeIndex) => callNodeTable.category[nodeIndex] !== idleCategoryIndex
+      );
+
+      // If there's a non idle children, use it; otherwise use the first
+      // children (that will be idle).
+      currentCallNodeIndex =
+        firstNonIdleNode !== undefined ? firstNonIdleNode : children[0];
       newExpandedCallNodeIndexes.push(currentCallNodeIndex);
     }
     this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
 
-    const category = tree.getDisplayData(currentCallNodeIndex).categoryName;
-    if (category !== 'Idle') {
+    const categoryIndex = callNodeTable.category[currentCallNodeIndex];
+    if (categoryIndex !== idleCategoryIndex) {
       // If we selected the call node with a "idle" category, we'd have a
       // completely dimmed activity graph because idle stacks are not drawn in
       // this graph. Because this isn't probably what the average user wants we
@@ -316,6 +338,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getCallTree(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    categories: getCategories(state),
     selectedCallNodeIndex:
       selectedThreadSelectors.getSelectedCallNodeIndex(state),
     rightClickedCallNodeIndex:

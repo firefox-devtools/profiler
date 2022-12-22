@@ -315,8 +315,9 @@ describe('calltree/ProfileCallTreeView', function () {
       B  C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  D
       E                                         E
     `);
-    const { container } = setup(profile);
-    expect(container.querySelector('.treeViewRow.isSelected')).toBeFalsy();
+    const { getRowElement } = setup(profile);
+    expect(getRowElement('E', { selected: true })).toHaveClass('isSelected');
+    expect(getRowElement('B', { expanded: true })).toBeInTheDocument();
   });
 });
 
