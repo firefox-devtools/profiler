@@ -241,7 +241,6 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
                 className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
                 title={text}
                 style={style}
-                data-divider={col.hideDividerAfter !== true}
               >
                 {RenderComponent ? (
                   <RenderComponent displayData={displayData} />

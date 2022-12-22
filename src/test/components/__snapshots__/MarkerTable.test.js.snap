@@ -151,7 +151,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
-                  data-divider="true"
                   style="width: 90px;"
                   title="0.000s"
                 >
@@ -162,7 +161,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  data-divider="true"
                   style="width: 80px;"
                   title="0s"
                 >
@@ -173,7 +171,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn type"
-                  data-divider="true"
                   style="width: 150px;"
                   title="UserTiming"
                 >
@@ -189,7 +186,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
-                  data-divider="true"
                   style="width: 90px;"
                   title="0.002s"
                 >
@@ -200,7 +196,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  data-divider="true"
                   style="width: 80px;"
                   title=""
                 />
@@ -209,7 +204,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn type"
-                  data-divider="true"
                   style="width: 150px;"
                   title="Paint"
                 >
@@ -225,7 +219,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
-                  data-divider="true"
                   style="width: 90px;"
                   title="0.108s"
                 >
@@ -236,7 +229,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  data-divider="true"
                   style="width: 80px;"
                   title="unknown"
                 >
@@ -247,7 +239,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn type"
-                  data-divider="true"
                   style="width: 150px;"
                   title="IPC"
                 >
@@ -263,7 +254,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
-                  data-divider="true"
                   style="width: 90px;"
                   title="0.153s"
                 >
@@ -274,7 +264,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  data-divider="true"
                   style="width: 80px;"
                   title="584.00ns"
                 >
@@ -285,7 +274,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn type"
-                  data-divider="true"
                   style="width: 150px;"
                   title="Text"
                 >
@@ -301,7 +289,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
-                  data-divider="true"
                   style="width: 90px;"
                   title="0.153s"
                 >
@@ -312,7 +299,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  data-divider="true"
                   style="width: 80px;"
                   title="584.00ns"
                 >
@@ -323,7 +309,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn type"
-                  data-divider="true"
                   style="width: 150px;"
                   title="Text"
                 >
@@ -339,7 +324,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
-                  data-divider="true"
                   style="width: 90px;"
                   title="0.158s"
                 >
@@ -350,7 +334,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  data-divider="true"
                   style="width: 80px;"
                   title=""
                 />
@@ -359,7 +342,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn type"
-                  data-divider="true"
                   style="width: 150px;"
                   title="Log"
                 >
@@ -375,7 +357,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
-                  data-divider="true"
                   style="width: 90px;"
                   title="0.162s"
                 >
@@ -386,7 +367,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  data-divider="true"
                   style="width: 80px;"
                   title="1ms"
                 >
@@ -397,7 +377,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn type"
-                  data-divider="true"
                   style="width: 150px;"
                   title="FileIO"
                 >

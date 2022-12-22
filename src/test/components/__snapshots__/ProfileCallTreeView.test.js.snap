@@ -223,7 +223,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -231,7 +230,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="15"
                 >
@@ -242,7 +240,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -253,7 +250,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -271,7 +267,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -279,7 +274,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="15"
                 >
@@ -290,7 +284,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -301,7 +294,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -319,7 +311,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="80%"
                 >
@@ -327,7 +318,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="12"
                 >
@@ -338,7 +328,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -349,7 +338,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -367,7 +355,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="80%"
                 >
@@ -375,7 +362,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="12"
                 >
@@ -386,7 +372,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="5"
                 >
@@ -397,7 +382,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -415,7 +399,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="47%"
                 >
@@ -423,7 +406,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="7"
                 >
@@ -434,7 +416,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -445,7 +426,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -463,7 +443,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="47%"
                 >
@@ -471,7 +450,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="7"
                 >
@@ -482,7 +460,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="7"
                 >
@@ -493,7 +470,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -511,7 +487,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="20%"
                 >
@@ -519,7 +494,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="3"
                 >
@@ -530,7 +504,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -541,7 +514,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1029,7 +1001,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-100%"
                 >
@@ -1037,7 +1008,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-15"
                 >
@@ -1048,7 +1018,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -1059,7 +1028,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1077,7 +1045,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-100%"
                 >
@@ -1085,7 +1052,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-15"
                 >
@@ -1096,7 +1062,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -1107,7 +1072,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1125,7 +1089,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-80%"
                 >
@@ -1133,7 +1096,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-12"
                 >
@@ -1144,7 +1106,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -1155,7 +1116,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1173,7 +1133,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-80%"
                 >
@@ -1181,7 +1140,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-12"
                 >
@@ -1192,7 +1150,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="-5"
                 >
@@ -1203,7 +1160,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1221,7 +1177,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-47%"
                 >
@@ -1229,7 +1184,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-7"
                 >
@@ -1240,7 +1194,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -1251,7 +1204,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1269,7 +1221,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-47%"
                 >
@@ -1277,7 +1228,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-7"
                 >
@@ -1288,7 +1238,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="-7"
                 >
@@ -1299,7 +1248,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1317,7 +1265,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-20%"
                 >
@@ -1325,7 +1272,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-3"
                 >
@@ -1336,7 +1282,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -1347,7 +1292,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1835,7 +1779,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -1843,7 +1786,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="41"
                 >
@@ -1854,7 +1796,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -1865,7 +1806,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1883,7 +1823,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -1891,7 +1830,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="41"
                 >
@@ -1902,7 +1840,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -1913,7 +1850,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1931,7 +1867,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="73%"
                 >
@@ -1939,7 +1874,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="30"
                 >
@@ -1950,7 +1884,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -1961,7 +1894,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -1979,7 +1911,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="73%"
                 >
@@ -1987,7 +1918,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="30"
                 >
@@ -1998,7 +1928,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="13"
                 >
@@ -2009,7 +1938,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2027,7 +1955,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="41%"
                 >
@@ -2035,7 +1962,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="17"
                 >
@@ -2046,7 +1972,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -2057,7 +1982,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2075,7 +1999,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="41%"
                 >
@@ -2083,7 +2006,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="17"
                 >
@@ -2094,7 +2016,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="17"
                 >
@@ -2105,7 +2026,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2123,7 +2043,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="27%"
                 >
@@ -2131,7 +2050,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="11"
                 >
@@ -2142,7 +2060,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -2153,7 +2070,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2629,7 +2545,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -2637,7 +2552,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="15"
                 >
@@ -2648,7 +2562,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -2659,7 +2572,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2677,7 +2589,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -2685,7 +2596,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="15"
                 >
@@ -2696,7 +2606,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -2707,7 +2616,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2725,7 +2633,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="80%"
                 >
@@ -2733,7 +2640,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="12"
                 >
@@ -2744,7 +2650,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -2755,7 +2660,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2773,7 +2677,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="80%"
                 >
@@ -2781,7 +2684,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="12"
                 >
@@ -2792,7 +2694,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="5"
                 >
@@ -2803,7 +2704,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2821,7 +2721,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="47%"
                 >
@@ -2829,7 +2728,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="7"
                 >
@@ -2840,7 +2738,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -2851,7 +2748,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2869,7 +2765,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="47%"
                 >
@@ -2877,7 +2772,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="7"
                 >
@@ -2888,7 +2782,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="7"
                 >
@@ -2899,7 +2792,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -2917,7 +2809,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="20%"
                 >
@@ -2925,7 +2816,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="3"
                 >
@@ -2936,7 +2826,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -2947,7 +2836,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -3423,7 +3311,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-100%"
                 >
@@ -3431,7 +3318,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-41"
                 >
@@ -3442,7 +3328,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -3453,7 +3338,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -3471,7 +3355,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-100%"
                 >
@@ -3479,7 +3362,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-41"
                 >
@@ -3490,7 +3372,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -3501,7 +3382,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -3519,7 +3399,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-59%"
                 >
@@ -3527,7 +3406,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-24"
                 >
@@ -3538,7 +3416,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -3549,7 +3426,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -3567,7 +3443,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-41%"
                 >
@@ -3575,7 +3450,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-17"
                 >
@@ -3586,7 +3460,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="—"
                 >
@@ -3597,7 +3470,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -3615,7 +3487,6 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="-41%"
                 >
@@ -3623,7 +3494,6 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 140px;"
                   title="-17"
                 >
@@ -3634,7 +3504,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 90px;"
                   title="-17"
                 >
@@ -3645,7 +3514,6 @@ allocated or deallocated in the program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -4478,7 +4346,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="67%"
                 >
@@ -4486,7 +4353,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -4497,7 +4363,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -4508,7 +4373,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -4526,7 +4390,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="67%"
                 >
@@ -4534,7 +4397,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -4545,7 +4407,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -4556,7 +4417,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -4574,7 +4434,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="67%"
                 >
@@ -4582,7 +4441,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -4593,7 +4451,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -4604,7 +4461,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -4622,7 +4478,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -4630,7 +4485,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -4641,7 +4495,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -4652,7 +4505,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -4670,7 +4522,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -4678,7 +4529,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -4689,7 +4539,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -4700,7 +4549,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -4718,7 +4566,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -4726,7 +4573,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -4737,7 +4583,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -4748,7 +4593,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -4766,7 +4610,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -4774,7 +4617,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -4785,7 +4627,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -4796,7 +4637,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -5239,7 +5079,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -5247,7 +5086,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="3"
                 >
@@ -5258,7 +5096,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -5269,7 +5106,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -5287,7 +5123,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -5295,7 +5130,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="3"
                 >
@@ -5306,7 +5140,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -5317,7 +5150,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -5335,7 +5167,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="67%"
                 >
@@ -5343,7 +5174,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -5354,7 +5184,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -5365,7 +5194,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -5383,7 +5211,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -5391,7 +5218,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -5402,7 +5228,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -5413,7 +5238,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -5431,7 +5255,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -5439,7 +5262,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -5450,7 +5272,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -5461,7 +5282,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -5479,7 +5299,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -5487,7 +5306,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -5498,7 +5316,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -5509,7 +5326,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -5527,7 +5343,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -5535,7 +5350,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -5546,7 +5360,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -5557,7 +5370,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6000,7 +5812,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -6008,7 +5819,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6019,7 +5829,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6030,7 +5839,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6048,7 +5856,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -6056,7 +5863,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6067,7 +5873,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6078,7 +5883,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6096,7 +5900,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -6104,7 +5907,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6115,7 +5917,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6126,7 +5927,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6144,7 +5944,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -6152,7 +5951,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6163,7 +5961,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6174,7 +5971,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6533,7 +6329,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -6541,7 +6336,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="3"
                 >
@@ -6552,7 +6346,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6563,7 +6356,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6581,7 +6373,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -6589,7 +6380,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="3"
                 >
@@ -6600,7 +6390,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6611,7 +6400,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6629,7 +6417,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="67%"
                 >
@@ -6637,7 +6424,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -6648,7 +6434,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6659,7 +6444,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6677,7 +6461,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -6685,7 +6468,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6696,7 +6478,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6707,7 +6488,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6725,7 +6505,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -6733,7 +6512,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6744,7 +6522,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6755,7 +6532,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6773,7 +6549,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -6781,7 +6556,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6792,7 +6566,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6803,7 +6576,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -6821,7 +6593,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="33%"
                 >
@@ -6829,7 +6600,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -6840,7 +6610,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -6851,7 +6620,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -7294,7 +7062,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -7302,7 +7069,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -7313,7 +7079,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -7324,7 +7089,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -7342,7 +7106,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -7350,7 +7113,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -7361,7 +7123,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -7372,7 +7133,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -7390,7 +7150,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -7398,7 +7157,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -7409,7 +7167,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -7420,7 +7177,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -7438,7 +7194,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -7446,7 +7201,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -7457,7 +7211,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -7468,7 +7221,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -7486,7 +7238,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -7494,7 +7245,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -7505,7 +7255,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -7516,7 +7265,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -7534,7 +7282,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -7542,7 +7289,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -7553,7 +7299,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -7564,7 +7309,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -7979,7 +7723,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -7987,7 +7730,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -7998,7 +7740,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8009,7 +7750,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8027,7 +7767,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -8035,7 +7774,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -8046,7 +7784,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8057,7 +7794,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8075,7 +7811,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -8083,7 +7818,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -8094,7 +7828,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8105,7 +7838,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8123,7 +7855,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -8131,7 +7862,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -8142,7 +7872,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8153,7 +7882,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8171,7 +7899,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -8179,7 +7906,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -8190,7 +7916,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -8201,7 +7926,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8219,7 +7943,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -8227,7 +7950,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -8238,7 +7960,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8249,7 +7970,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8664,7 +8384,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -8672,7 +8391,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -8683,7 +8401,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8694,7 +8411,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8712,7 +8428,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -8720,7 +8435,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -8731,7 +8445,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8742,7 +8455,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8760,7 +8472,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -8768,7 +8479,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -8779,7 +8489,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8790,7 +8499,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -8808,7 +8516,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -8816,7 +8523,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -8827,7 +8533,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -8838,7 +8543,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9198,7 +8902,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -9206,7 +8909,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -9217,7 +8919,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -9228,7 +8929,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9246,7 +8946,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -9254,7 +8953,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -9265,7 +8963,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -9276,7 +8973,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9294,7 +8990,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -9302,7 +8997,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -9313,7 +9007,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -9324,7 +9017,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9342,7 +9034,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -9350,7 +9041,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -9361,7 +9051,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -9372,7 +9061,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9732,7 +9420,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -9740,7 +9427,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -9751,7 +9437,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -9762,7 +9447,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9780,7 +9464,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -9788,7 +9471,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -9799,7 +9481,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -9810,7 +9491,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9828,7 +9508,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="100%"
                 >
@@ -9836,7 +9515,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="2"
                 >
@@ -9847,7 +9525,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -9858,7 +9535,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9876,7 +9552,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -9884,7 +9559,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -9895,7 +9569,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -9906,7 +9579,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9924,7 +9596,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -9932,7 +9603,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -9943,7 +9613,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -9954,7 +9623,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >
@@ -9972,7 +9640,6 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  data-divider="false"
                   style="width: 50px;"
                   title="50%"
                 >
@@ -9980,7 +9647,6 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  data-divider="true"
                   style="width: 70px;"
                   title="1"
                 >
@@ -9991,7 +9657,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  data-divider="true"
                   style="width: 70px;"
                   title="—"
                 >
@@ -10002,7 +9667,6 @@ for understanding where time was actually spent in a program."
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
-                  data-divider="true"
                   style="width: 10px;"
                   title=""
                 >

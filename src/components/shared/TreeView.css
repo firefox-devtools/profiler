@@ -87,12 +87,13 @@
 }
 
 .treeViewColumnDivider {
-  display: inline-block;
+  display: flex;
   width: 20px;
   flex: none;
+  align-items: stretch;
+  justify-content: center;
   margin-right: -5px;
   margin-left: -5px;
-  text-align: center;
 }
 
 .treeViewColumnDivider.isResizable,
@@ -101,9 +102,7 @@
 }
 
 .treeViewColumnDivider::before {
-  border-top: 2px solid var(--grey-30);
   border-right: 1px solid var(--grey-30);
-  border-bottom: 2px solid var(--grey-30);
   content: '';
 }
 
