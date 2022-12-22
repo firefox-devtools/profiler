@@ -583,12 +583,12 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
 
   _onColumnWidthReset = (columnIndex: number) => {
     const column = this.props.fixedColumns[columnIndex];
-    const fixedColumnWidths =
-      this.state.fixedColumnWidths || this.props.viewOptions.fixedColumnWidths;
-    if (fixedColumnWidths) {
-      fixedColumnWidths[columnIndex] = column.initialWidth || 10;
-      this._propagateColumnWidthChange(fixedColumnWidths);
-    }
+    const fixedColumnWidths = this._getCurrentFixedColumnWidths();
+    const newFixedColumnWidths = fixedColumnWidths.slice();
+    newFixedColumnWidths[columnIndex] = column.initialWidth || 10;
+    this._stateCounter++;
+    this.setState({ fixedColumnWidths: newFixedColumnWidths });
+    this._propagateColumnWidthChange(newFixedColumnWidths);
   };
 
   // triggers a re-render
@@ -960,9 +960,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
             focusable={true}
             onKeyDown={this._onKeyDown}
             specialItems={this._getSpecialItems()}
-            disableOverscan={
-              !!disableOverscan || this._currentMovedColumnState === null
-            }
+            disableOverscan={!!disableOverscan || isResizingColumns}
             onCopy={this._onCopy}
             // If there is a deep call node depth, expand the width, or else keep it
             // at 3000 wide.
