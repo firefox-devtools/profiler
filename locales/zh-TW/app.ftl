@@ -185,6 +185,7 @@ Home--load-from-url-submit-button =
 Home--documentation-button = 文件
 Home--menu-button = 開啟 { -profiler-brand-name } 選單按鈕
 Home--menu-button-instructions = 開啟 { -firefox-brand-name } 當中的檢測器選單按鈕開始紀錄效能，然後進行分析並分享到 profiler.firefox.com。
+Home--profile-firefox-android-instructions = 您也可以對 { -firefox-android-brand-name } 進行效能檢測。若需更多資訊請參考下列文件：<a>直接於裝置上檢測 { -firefox-android-brand-name } 效能</a>。
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -202,6 +203,9 @@ Home--additional-content-title = 載入現有檢測檔
 Home--additional-content-content = 您可以將效能檢測檔<strong>拖曳</strong>到此處，或:
 Home--compare-recordings-info = 您也可以比較紀錄內容。<a>開啟比較介面。</a>
 Home--your-recent-uploaded-recordings-title = 您近期上傳的紀錄
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools = { -profiler-brand-name } 也可以匯入其他效能檢測器，例如 <perf>Linux perf</perf>、<simpleperf>Android SimplePerf</simpleperf>、Chrome 效能面板、<androidstudio>Android Studio</androidstudio> 所產生的效能檢測檔，或任何使用 <dhat>dhat 格式</dhat>儲存的效能檢測檔。<write>點擊此處了解如何撰寫您自己的匯入程式</write>。
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -669,6 +673,20 @@ TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh�
 #   $value (String) - the energy value for this range
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
 TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh（{ $carbonValue } g CO₂e）
+    .label = 目前選擇範圍中消耗的能源
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh（{ $carbonValue } mg CO₂e）
+    .label = 目前選擇範圍中消耗的能源
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh（{ $carbonValue } mg CO₂e）
     .label = 目前選擇範圍中消耗的能源
 
 ## TrackSearchField
