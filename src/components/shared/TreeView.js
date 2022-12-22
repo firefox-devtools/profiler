@@ -51,10 +51,14 @@ export type Column<DisplayData: Object> = {|
   +component?: React.ComponentType<{|
     displayData: DisplayData,
   |}>,
+|};
+
+export type MaybeResizableColumn<DisplayData: Object> = {|
+  ...Column<DisplayData>,
   /** defaults to initialWidth */
   +minWidth?: CssPixels,
-  /** has only to be present in resizable columns */
-  +initialWidth?: CssPixels,
+  /** This is the initial width, this can be changed in resizable columns */
+  +initialWidth: CssPixels,
   /** found width + adjustment = width of header column */
   +headerWidthAdjustment?: CssPixels,
   // false by default
@@ -64,7 +68,7 @@ export type Column<DisplayData: Object> = {|
 |};
 
 type TreeViewHeaderProps<DisplayData: Object> = {|
-  +fixedColumns: Column<DisplayData>[],
+  +fixedColumns: MaybeResizableColumn<DisplayData>[],
   +mainColumn: Column<DisplayData>,
   +viewOptions: TableViewOptions,
   // called when the users moves the divider right of the column,
@@ -181,7 +185,7 @@ function reactStringWithHighlightedSubstrings(
 type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
-  +columns: Column<DisplayData>[],
+  +columns: MaybeResizableColumn<DisplayData>[],
   +index: number,
   +isSelected: boolean,
   +isRightClicked: boolean,
@@ -445,7 +449,7 @@ interface Tree<DisplayData: Object> {
 }
 
 type TreeViewProps<DisplayData> = {|
-  +fixedColumns: Column<DisplayData>[],
+  +fixedColumns: MaybeResizableColumn<DisplayData>[],
   +mainColumn: Column<DisplayData>,
   +tree: Tree<DisplayData>,
   +expandedNodeIds: Array<NodeIndex | null>,
@@ -517,7 +521,6 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     if (widths === undefined) {
       throw new Error('The fixed column widths should be defined.');
     }
-    // $FlowExpectError - Flow doesn't understand that we're checking for undefined above.
     return widths;
   };
 
