@@ -551,9 +551,6 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       const column = this.props.fixedColumns[columnIndex];
       const fixedColumnWidths = this._getCurrentFixedColumnWidths();
       const diff = event.clientX - lastX;
-      if (diff === 0) {
-        return;
-      }
       const newWidth = Math.max(initialWidth + diff, column.minWidth || 10);
       this.setState((prevState) => {
         this._stateCounter++;
