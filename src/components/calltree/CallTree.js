@@ -144,27 +144,29 @@ class CallTreeImpl extends PureComponent<Props> {
 
   componentDidMount() {
     this.focus();
-    if (this.props.selectedCallNodeIndex === null) {
-      this.procureInterestingInitialSelection();
-    } else if (this._treeView) {
+    this.maybeProcureInterestingInitialSelection();
+
+    if (this.props.selectedCallNodeIndex === null && this._treeView) {
       this._treeView.scrollSelectionIntoView();
     }
   }
 
   componentDidUpdate(prevProps) {
     if (
-      this.props.scrollToSelectionGeneration >
-      prevProps.scrollToSelectionGeneration
-    ) {
-      if (this._treeView) {
-        this._treeView.scrollSelectionIntoView();
-      }
-    }
-
-    if (
       this.props.focusCallTreeGeneration > prevProps.focusCallTreeGeneration
     ) {
       this.focus();
+    }
+
+    this.maybeProcureInterestingInitialSelection();
+
+    if (
+      this.props.selectedCallNodeIndex !== null &&
+      this.props.scrollToSelectionGeneration >
+        prevProps.scrollToSelectionGeneration &&
+      this._treeView
+    ) {
+      this._treeView.scrollSelectionIntoView();
     }
   }
 
@@ -228,10 +230,16 @@ class CallTreeImpl extends PureComponent<Props> {
     openSourceView(file, 'calltree');
   };
 
-  procureInterestingInitialSelection() {
+  maybeProcureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
-    const { tree, expandedCallNodeIndexes } = this.props;
+    const { tree, expandedCallNodeIndexes, selectedCallNodeIndex } = this.props;
+
+    if (selectedCallNodeIndex !== null || expandedCallNodeIndexes.length > 0) {
+      // Let's not change some existing state.
+      return;
+    }
+
     const newExpandedCallNodeIndexes = expandedCallNodeIndexes.slice();
     const maxInterestingDepth = 17; // scientifically determined
     let currentCallNodeIndex = tree.getRoots()[0];
