@@ -513,6 +513,11 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     { limit: 1 }
   );
 
+  _computeInitialColumnWidthsMemoized = memoize(
+    (fixedColumns: Array<MaybeResizableColumn<DisplayData>>): CssPixels[] =>
+      fixedColumns.map((c) => c.initialWidth)
+  );
+
   // This returns the column widths from several possible sources, in this order:
   // * the current state (this means the user changed them recently, or is
   //   currently changing them)
@@ -523,7 +528,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     return (
       this.state.fixedColumnWidths ||
       this.props.viewOptions.fixedColumnWidths ||
-      this.props.fixedColumns.map((c) => c.initialWidth)
+      this._computeInitialColumnWidthsMemoized(this.props.fixedColumns)
     );
   };
 
