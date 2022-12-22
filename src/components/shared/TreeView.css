@@ -95,7 +95,8 @@
   text-align: center;
 }
 
-.treeViewColumnDivider.isResizable {
+.treeViewColumnDivider.isResizable,
+.treeView.isResizingColumns {
   cursor: col-resize;
 }
 
