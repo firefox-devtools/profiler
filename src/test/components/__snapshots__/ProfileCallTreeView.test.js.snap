@@ -163,9 +163,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -179,9 +178,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -190,7 +188,6 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -257,7 +254,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -305,7 +302,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -353,7 +350,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -401,7 +398,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -449,7 +446,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -497,7 +494,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -545,7 +542,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -972,9 +969,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -988,9 +984,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -999,7 +994,6 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -1066,7 +1060,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1114,7 +1108,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1162,7 +1156,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1210,7 +1204,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1258,7 +1252,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1306,7 +1300,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1354,7 +1348,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1781,9 +1775,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -1797,9 +1790,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -1808,7 +1800,6 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -1875,7 +1866,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1923,7 +1914,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -1971,7 +1962,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2019,7 +2010,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2067,7 +2058,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2115,7 +2106,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2163,7 +2154,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2578,9 +2569,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -2594,9 +2584,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -2605,7 +2594,6 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -2672,7 +2660,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2720,7 +2708,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2768,7 +2756,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2816,7 +2804,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2864,7 +2852,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2912,7 +2900,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -2960,7 +2948,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -3375,9 +3363,8 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -3391,9 +3378,8 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -3402,7 +3388,6 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -3469,7 +3454,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -3517,7 +3502,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -3565,7 +3550,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -3613,7 +3598,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -3661,7 +3646,7 @@ allocated or deallocated in the program."
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
                   data-divider="true"
-                  style=""
+                  style="width: 10px;"
                   title=""
                 >
                   <div
@@ -4434,9 +4419,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -4449,9 +4433,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -4460,7 +4443,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5198,9 +5180,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -5213,9 +5194,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -5224,7 +5204,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5962,9 +5941,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -5977,9 +5955,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -5988,7 +5965,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -6498,9 +6474,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -6513,9 +6488,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -6524,7 +6498,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7262,9 +7235,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -7277,9 +7249,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -7288,7 +7259,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7950,9 +7920,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -7965,9 +7934,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -7976,7 +7944,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -8638,9 +8605,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -8653,9 +8619,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -8664,7 +8629,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -9175,9 +9139,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -9190,9 +9153,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -9201,7 +9163,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -9712,9 +9673,8 @@ function."
         Total (samples)
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -9727,9 +9687,8 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -9738,7 +9697,6 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
-        data-resize="false"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"

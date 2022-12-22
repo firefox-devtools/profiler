@@ -122,7 +122,9 @@ class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
               {col.hideDividerAfter !== true ? (
                 <span
                   key={col.propName + 'Divider'}
-                  className="treeViewColumnDivider"
+                  className={classNames('treeViewColumnDivider', {
+                    isResizable: col.resizable,
+                  })}
                   onMouseDown={
                     col.resizable ? this._onDividerMouseDown : undefined
                   }
@@ -130,8 +132,6 @@ class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
                     col.resizable ? this._onDividerDoubleClick : undefined
                   }
                   data-column-index={i}
-                  // required for the CSS selector, to trigger the cursor change on hover
-                  data-resize={String(col.resizable || false)}
                 ></span>
               ) : null}
             </React.Fragment>

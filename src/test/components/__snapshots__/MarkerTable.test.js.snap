@@ -93,9 +93,8 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         Start
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="0"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn duration"
@@ -104,9 +103,8 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         Duration
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="1"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn type"
@@ -115,9 +113,8 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         Type
       </span>
       <span
-        class="treeViewColumnDivider"
+        class="treeViewColumnDivider isResizable"
         data-column-index="2"
-        data-resize="true"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"

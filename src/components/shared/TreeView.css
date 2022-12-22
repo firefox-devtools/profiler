@@ -95,7 +95,7 @@
   text-align: center;
 }
 
-.treeViewColumnDivider[data-resize='true']:hover {
+.treeViewColumnDivider.isResizable {
   cursor: col-resize;
 }
 
