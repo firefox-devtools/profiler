@@ -186,6 +186,11 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
             <Shortcut label="Move selection down" shortcut="ArrowDown" />
             <Shortcut label="Move selection left" shortcut="ArrowLeft" />
             <Shortcut label="Move selection right" shortcut="ArrowRight" />
+            <Shortcut
+              label="Copy call node label"
+              shortcut="ctrl,c"
+              macShortcut="cmd,c"
+            />
 
             <h2>Marker Table</h2>
             <Shortcut
