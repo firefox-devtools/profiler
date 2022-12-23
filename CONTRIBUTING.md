@@ -44,6 +44,8 @@ To get started clone the repo and get the web application started.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
  6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
 
+[Flow](https://flow.org/) is used for type checking. VSCode users can install the ["Flow Language Support" extension](https://marketplace.visualstudio.com/items?itemName=flowtype.flow-for-vscode), and disable VSCode's built-in TypeScript extension in the workspace via the [setup instructions here](https://github.com/flow/flow-for-vscode#setup).
+
 ## Using Gitpod
 
 Alternatively, you can also develop the Firefox Profiler online in a pre-configured development environment:
