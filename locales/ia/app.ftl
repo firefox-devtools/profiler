@@ -278,8 +278,8 @@ Home--load-files-from-other-tools =
     { -profiler-brand-name } pote alsi importar profilos de altere profilatores, tal como
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, 
     Chrome performance panel, <androidstudio>Android Studio</androidstudio>, o
-    ulle file que usa le <dhat>formato dhat</dhat>. <scriber>Apprende a scriber tu 
-    proprie importator</scriber>.
+    ulle file que usa le <dhat>formato dhat</dhat>. <write>Apprende a scriber tu 
+    proprie importator</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
