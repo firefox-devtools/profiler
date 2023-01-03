@@ -88,19 +88,34 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn start"
+        style="width: 90px;"
       >
         Start
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="0"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn duration"
+        style="width: 80px;"
       >
         Duration
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn type"
+        style="width: 150px;"
       >
         Type
       </span>
+      <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
       >
@@ -136,22 +151,34 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
+                  style="width: 90px;"
                   title="0.000s"
                 >
                   0.000s
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
+                  style="width: 80px;"
                   title="0s"
                 >
                   0s
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn type"
+                  style="width: 150px;"
                   title="UserTiming"
                 >
                   UserTiming
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -159,20 +186,32 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
+                  style="width: 90px;"
                   title="0.002s"
                 >
                   0.002s
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
+                  style="width: 80px;"
                   title=""
                 />
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn type"
+                  style="width: 150px;"
                   title="Paint"
                 >
                   Paint
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -180,22 +219,34 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
+                  style="width: 90px;"
                   title="0.108s"
                 >
                   0.108s
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
+                  style="width: 80px;"
                   title="unknown"
                 >
                   unknown
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn type"
+                  style="width: 150px;"
                   title="IPC"
                 >
                   IPC
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -203,22 +254,34 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
+                  style="width: 90px;"
                   title="0.153s"
                 >
                   0.153s
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
+                  style="width: 80px;"
                   title="584.00ns"
                 >
                   584.00ns
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn type"
+                  style="width: 150px;"
                   title="Text"
                 >
                   Text
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -226,22 +289,34 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
+                  style="width: 90px;"
                   title="0.153s"
                 >
                   0.153s
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
+                  style="width: 80px;"
                   title="584.00ns"
                 >
                   584.00ns
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn type"
+                  style="width: 150px;"
                   title="Text"
                 >
                   Text
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -249,20 +324,32 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
+                  style="width: 90px;"
                   title="0.158s"
                 >
                   0.158s
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
+                  style="width: 80px;"
                   title=""
                 />
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn type"
+                  style="width: 150px;"
                   title="Log"
                 >
                   Log
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -270,22 +357,34 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
+                  style="width: 90px;"
                   title="0.162s"
                 >
                   0.162s
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
+                  style="width: 80px;"
                   title="1ms"
                 >
                   1ms
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn type"
+                  style="width: 150px;"
                   title="FileIO"
                 >
                   FileIO
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>

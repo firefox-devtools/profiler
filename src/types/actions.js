@@ -37,6 +37,7 @@ import type {
   State,
   UploadedProfileInformation,
   SourceLoadingError,
+  TableViewOptions,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -502,6 +503,11 @@ type UrlStateAction =
   | {|
       +type: 'CHANGE_MOUSE_TIME_POSITION',
       +mouseTimePosition: Milliseconds | null,
+    |}
+  | {|
+      +type: 'CHANGE_TABLE_VIEW_OPTIONS',
+      +tab: TabSlug,
+      +tableViewOptions: TableViewOptions,
     |}
   | {|
       +type: 'TOGGLE_RESOURCES_PANEL',
