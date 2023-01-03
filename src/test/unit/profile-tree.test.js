@@ -335,6 +335,9 @@ describe('unfiltered call tree', function () {
           totalPercent: '100%',
           categoryColor: 'grey',
           categoryName: 'Other',
+          rawSelf: 0,
+          rawTotal: 3,
+          badge: undefined,
         });
         expect(callTree.getDisplayData(I)).toEqual({
           ariaLabel:
@@ -351,6 +354,9 @@ describe('unfiltered call tree', function () {
           totalPercent: '33%',
           categoryColor: 'grey',
           categoryName: 'Other',
+          rawSelf: 1,
+          rawTotal: 1,
+          badge: undefined,
         });
       });
     });

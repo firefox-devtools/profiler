@@ -319,6 +319,28 @@ describe('calltree/ProfileCallTreeView', function () {
     expect(getRowElement('E', { selected: true })).toHaveClass('isSelected');
     expect(getRowElement('B', { expanded: true })).toBeInTheDocument();
   });
+
+  it('sorts when the total column header is clicked', () => {
+    const { container, getByText } = setup();
+
+    expect(container.firstChild).toMatchSnapshot();
+
+    fireFullClick(getByText('Total (samples)'));
+    expect(container.firstChild).toMatchSnapshot();
+    fireFullClick(getByText('Total (samples)'));
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('sorts when the total header and self header is clicked', () => {
+    const { container, getByText } = setup();
+
+    fireFullClick(getByText('Total (samples)'));
+    expect(container).toMatchSnapshot();
+    fireFullClick(getByText('Total (samples)'));
+    expect(container).toMatchSnapshot();
+    fireFullClick(getByText('Self'));
+    expect(container).toMatchSnapshot();
+  });
 });
 
 describe('calltree/ProfileCallTreeView EmptyReasons', function () {
