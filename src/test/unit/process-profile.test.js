@@ -753,16 +753,12 @@ describe('visualMetrics processing', function () {
     const visualMetrics = getVisualMetrics();
 
     // Make all the VisualProgress timestamps null on purpose.
-    // Flow doesn't like null because it thinks that the timestamp can't be null.
-    // But this is a bug on browsertime.
     visualMetrics.VisualProgress = visualMetrics.VisualProgress.map(
-      (progress) => ({ ...progress, timestamp: (null: any) })
+      (progress) => ({ ...progress, timestamp: null })
     );
     // Make only one ContentfulSpeedIndexProgress timestamp null on purpose.
-    // Flow doesn't like null because it thinks that the timestamp can't be null.
-    // But this is a bug on browsertime.
     ensureExists(visualMetrics.ContentfulSpeedIndexProgress)[0].timestamp =
-      (null: any);
+      null;
 
     // Add the visual metrics to the profile.
     geckoProfile.meta.visualMetrics = visualMetrics;

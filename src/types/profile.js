@@ -681,7 +681,8 @@ export type ProgressGraphData = {|
   // A percentage that describes the visual completeness of the webpage, ranging from 0% - 100%
   percent: number,
   // The time in milliseconds which the sample was taken.
-  timestamp: Milliseconds,
+  // This can be null due to https://github.com/sitespeedio/browsertime/issues/1746.
+  timestamp: Milliseconds | null,
 |};
 
 /**
