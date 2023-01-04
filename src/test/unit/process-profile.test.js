@@ -664,8 +664,14 @@ describe('profile meta processing', function () {
 });
 
 describe('visualMetrics processing', function () {
-  function checkVisualMetricsForThread(thread: Thread) {
-    const metrics = [
+  function checkVisualMetricsForThread(
+    thread: Thread,
+    expectedMetricMarkers?: Array<{|
+      name: string,
+      changeMarkerLength: number,
+    |}>
+  ) {
+    const metrics = expectedMetricMarkers ?? [
       { name: 'Visual', changeMarkerLength: 7 },
       { name: 'ContentfulSpeedIndex', changeMarkerLength: 6 },
       { name: 'PerceptualSpeedIndex', changeMarkerLength: 6 },
@@ -679,7 +685,12 @@ describe('visualMetrics processing', function () {
       const metricProgressMarker = thread.markers.name.find(
         (name) => name === metricProgressMarkerIndex
       );
-      expect(metricProgressMarker).toBeTruthy();
+
+      if (changeMarkerLength > 0) {
+        expect(metricProgressMarker).toBeTruthy();
+      } else {
+        expect(metricProgressMarker).toBeFalsy();
+      }
 
       // Check the visual metric change markers.
       const metricChangeMarkerIndex = thread.stringTable.indexForString(
@@ -735,5 +746,50 @@ describe('visualMetrics processing', function () {
     }
 
     checkVisualMetricsForThread(tabProcessMainThread);
+  });
+
+  it('does not add markers to the parent process if metric timestamps are null', function () {
+    const geckoProfile = createGeckoProfile();
+    const visualMetrics = getVisualMetrics();
+
+    // Make all the VisualProgress timestamps null on purpose.
+    // Flow doesn't like null because it thinks that the timestamp can't be null.
+    // But this is a bug on browsertime.
+    visualMetrics.VisualProgress = visualMetrics.VisualProgress.map(
+      (progress) => ({ ...progress, timestamp: (null: any) })
+    );
+    // Make only one ContentfulSpeedIndexProgress timestamp null on purpose.
+    // Flow doesn't like null because it thinks that the timestamp can't be null.
+    // But this is a bug on browsertime.
+    ensureExists(visualMetrics.ContentfulSpeedIndexProgress)[0].timestamp =
+      (null: any);
+
+    // Add the visual metrics to the profile.
+    geckoProfile.meta.visualMetrics = visualMetrics;
+    // Make sure that the visual metrics are not changed.
+    expect(visualMetrics.VisualProgress).toHaveLength(7);
+    expect(visualMetrics.ContentfulSpeedIndexProgress).toHaveLength(6);
+    expect(visualMetrics.PerceptualSpeedIndexProgress).toHaveLength(6);
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const parentProcessMainThread = processedProfile.threads.find(
+      (thread) =>
+        thread.name === 'GeckoMain' && thread.processType === 'default'
+    );
+
+    if (!parentProcessMainThread) {
+      throw new Error('Could not find the parent process main thread.');
+    }
+
+    checkVisualMetricsForThread(parentProcessMainThread, [
+      // Instead of 7, we should have 0 markers for Visual because we made all
+      // the timestamps null.
+      { name: 'Visual', changeMarkerLength: 0 },
+      // Instead of 6, we should have 5 markers for ContentfulSpeedIndex.
+      { name: 'ContentfulSpeedIndex', changeMarkerLength: 5 },
+      // We didn't change the PerceptualSpeedIndexProgress, so we should have 6.
+      { name: 'PerceptualSpeedIndex', changeMarkerLength: 6 },
+    ]);
   });
 });
