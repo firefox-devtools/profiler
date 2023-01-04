@@ -225,6 +225,25 @@ exports[`app/KeyboardShortcut matches the snapshot when open 1`] = `
               ArrowRight
             </kbd>
           </div>
+          <div
+            class="appKeyboardShortcutsRow"
+          >
+            <div
+              class="appKeyboardShortcutsLabel"
+            >
+              Copy call node label
+            </div>
+            <kbd
+              class="appKeyboardShortcutsShortcut"
+            >
+              ctrl
+            </kbd>
+            <kbd
+              class="appKeyboardShortcutsShortcut"
+            >
+              c
+            </kbd>
+          </div>
           <h2>
             Marker Table
           </h2>
