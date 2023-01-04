@@ -16,7 +16,7 @@ import { VirtualList } from './VirtualList';
 
 import { ContextMenuTrigger } from './ContextMenuTrigger';
 
-import type { CssPixels } from 'firefox-profiler/types';
+import type { CssPixels, TableViewOptions } from 'firefox-profiler/types';
 
 import './TreeView.css';
 
@@ -44,6 +44,9 @@ function PermissiveLocalized(props: React.ElementConfig<typeof Localized>) {
 // See https://github.com/facebook/flow/issues/4099
 type RegExpResult = null | ({ index: number, input: string } & string[]);
 type NodeIndex = number;
+type TableViewOptionsWithDefault = {|
+  fixedColumnWidths: Array<CssPixels>,
+|};
 
 export type Column<DisplayData: Object> = {|
   +propName: string,
@@ -53,40 +56,95 @@ export type Column<DisplayData: Object> = {|
   |}>,
 |};
 
-type TreeViewHeaderProps<DisplayData: Object> = {|
-  +fixedColumns: Column<DisplayData>[],
-  +mainColumn: Column<DisplayData>,
+export type MaybeResizableColumn<DisplayData: Object> = {|
+  ...Column<DisplayData>,
+  /** defaults to initialWidth */
+  +minWidth?: CssPixels,
+  /** This is the initial width, this can be changed in resizable columns */
+  +initialWidth: CssPixels,
+  /** found width + adjustment = width of header column */
+  +headerWidthAdjustment?: CssPixels,
+  // false by default
+  +resizable?: boolean,
+  // is the divider after the column hidden? false by default
+  +hideDividerAfter?: boolean,
 |};
 
-const TreeViewHeader = <DisplayData: Object>({
-  fixedColumns,
-  mainColumn,
-}: TreeViewHeaderProps<DisplayData>) => {
-  if (fixedColumns.length === 0 && !mainColumn.titleL10nId) {
-    // If there is nothing to display in the header, do not render it.
-    return null;
-  }
-  return (
-    <div className="treeViewHeader">
-      {fixedColumns.map((col) => (
+type TreeViewHeaderProps<DisplayData: Object> = {|
+  +fixedColumns: MaybeResizableColumn<DisplayData>[],
+  +mainColumn: Column<DisplayData>,
+  +viewOptions: TableViewOptionsWithDefault,
+  // called when the users moves the divider right of the column,
+  // passes the column index and the start x coordinate
+  +onColumnWidthChangeStart: (number, CssPixels) => void,
+  +onColumnWidthReset: (number) => void,
+|};
+
+class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
+  TreeViewHeaderProps<DisplayData>
+> {
+  _onDividerMouseDown = (event: SyntheticMouseEvent<HTMLElement>) => {
+    this.props.onColumnWidthChangeStart(
+      Number(event.currentTarget.dataset.columnIndex),
+      event.clientX
+    );
+  };
+
+  _onDividerDoubleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
+    this.props.onColumnWidthReset(
+      Number(event.currentTarget.dataset.columnIndex)
+    );
+  };
+
+  render() {
+    const { fixedColumns, mainColumn, viewOptions } = this.props;
+    const columnWidths = viewOptions.fixedColumnWidths;
+    if (fixedColumns.length === 0 && !mainColumn.titleL10nId) {
+      // If there is nothing to display in the header, do not render it.
+      return null;
+    }
+    return (
+      <div className="treeViewHeader">
+        {fixedColumns.map((col, i) => {
+          const width = columnWidths[i] + (col.headerWidthAdjustment || 0);
+          return (
+            <React.Fragment key={col.propName}>
+              <PermissiveLocalized id={col.titleL10nId} attrs={{ title: true }}>
+                <span
+                  style={{ width }}
+                  className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
+                ></span>
+              </PermissiveLocalized>
+              {col.hideDividerAfter !== true ? (
+                <span
+                  key={col.propName + 'Divider'}
+                  className={classNames('treeViewColumnDivider', {
+                    isResizable: col.resizable,
+                  })}
+                  onMouseDown={
+                    col.resizable ? this._onDividerMouseDown : undefined
+                  }
+                  onDoubleClick={
+                    col.resizable ? this._onDividerDoubleClick : undefined
+                  }
+                  data-column-index={i}
+                ></span>
+              ) : null}
+            </React.Fragment>
+          );
+        })}
         <PermissiveLocalized
-          id={col.titleL10nId}
+          id={mainColumn.titleL10nId}
           attrs={{ title: true }}
-          key={col.propName}
         >
           <span
-            className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
+            className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
           ></span>
         </PermissiveLocalized>
-      ))}
-      <PermissiveLocalized id={mainColumn.titleL10nId} attrs={{ title: true }}>
-        <span
-          className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
-        ></span>
-      </PermissiveLocalized>
-    </div>
-  );
-};
+      </div>
+    );
+  }
+}
 
 function reactStringWithHighlightedSubstrings(
   string: string,
@@ -123,13 +181,14 @@ function reactStringWithHighlightedSubstrings(
 type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
-  +columns: Column<DisplayData>[],
+  +columns: MaybeResizableColumn<DisplayData>[],
   +index: number,
   +isSelected: boolean,
   +isRightClicked: boolean,
   +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
   +highlightRegExp: RegExp | null,
   +rowHeightStyle: { height: CssPixels, lineHeight: string },
+  +viewOptions: TableViewOptionsWithDefault,
 |};
 
 class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
@@ -144,12 +203,14 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
     const {
       displayData,
       columns,
+      viewOptions,
       index,
       isSelected,
       isRightClicked,
       highlightRegExp,
       rowHeightStyle,
     } = this.props;
+    const columnWidths = viewOptions.fixedColumnWidths;
     return (
       <div
         className={classNames('treeViewRow', 'treeViewRowFixedColumns', {
@@ -161,26 +222,30 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
         style={rowHeightStyle}
         onMouseDown={this._onClick}
       >
-        {columns.map((col) => {
+        {columns.map((col, i) => {
           const RenderComponent = col.component;
           const text = displayData[col.propName] || '';
-
           return (
-            <span
-              className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
-              key={col.propName}
-              title={text}
-            >
-              {RenderComponent ? (
-                <RenderComponent displayData={displayData} />
-              ) : (
-                reactStringWithHighlightedSubstrings(
-                  text,
-                  highlightRegExp,
-                  'treeViewHighlighting'
-                )
-              )}
-            </span>
+            <React.Fragment key={col.propName}>
+              <span
+                className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
+                title={text}
+                style={{ width: columnWidths[i] }}
+              >
+                {RenderComponent ? (
+                  <RenderComponent displayData={displayData} />
+                ) : (
+                  reactStringWithHighlightedSubstrings(
+                    text,
+                    highlightRegExp,
+                    'treeViewHighlighting'
+                  )
+                )}
+              </span>
+              {col.hideDividerAfter !== true ? (
+                <span className="treeViewColumnDivider"></span>
+              ) : null}
+            </React.Fragment>
           );
         })}
       </div>
@@ -373,7 +438,7 @@ interface Tree<DisplayData: Object> {
 }
 
 type TreeViewProps<DisplayData> = {|
-  +fixedColumns: Column<DisplayData>[],
+  +fixedColumns: MaybeResizableColumn<DisplayData>[],
   +mainColumn: Column<DisplayData>,
   +tree: Tree<DisplayData>,
   +expandedNodeIds: Array<NodeIndex | null>,
@@ -393,13 +458,40 @@ type TreeViewProps<DisplayData> = {|
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
+  +viewOptions: TableViewOptions,
+  +onViewOptionsChange?: (TableViewOptions) => void,
+|};
+
+type TreeViewState = {|
+  +fixedColumnWidths: Array<CssPixels> | null,
+  +isResizingColumns: boolean,
 |};
 
 export class TreeView<DisplayData: Object> extends React.PureComponent<
-  TreeViewProps<DisplayData>
+  TreeViewProps<DisplayData>,
+  TreeViewState
 > {
   _list: VirtualList<NodeIndex> | null = null;
   _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
+
+  // This contains the information about the current column resizing happening currently.
+  _currentMovedColumnState: {|
+    columnIndex: number,
+    startX: CssPixels,
+    initialWidth: CssPixels,
+  |} | null = null;
+
+  state = {
+    // This contains the current widths, while or after the user resizes them.
+    fixedColumnWidths: null,
+
+    // This is true when the user is currently resizing a column.
+    isResizingColumns: false,
+  };
+
+  // This is incremented when a column changed its size. We use this to force a
+  // rerender of the VirtualList component.
+  _columnSizeChangedCounter: number = 0;
 
   // The tuple `specialItems` always contains 2 elements: the first element is
   // the selected node id (if any), and the second element is the right clicked
@@ -420,6 +512,100 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       new Set<NodeIndex | null>(expandedNodeIds),
     { limit: 1 }
   );
+
+  _computeInitialColumnWidthsMemoized = memoize(
+    (fixedColumns: Array<MaybeResizableColumn<DisplayData>>): CssPixels[] =>
+      fixedColumns.map((c) => c.initialWidth)
+  );
+
+  // This returns the column widths from several possible sources, in this order:
+  // * the current state (this means the user changed them recently, or is
+  //   currently changing them)
+  // * the view options (this comes from the redux state, this means the user
+  //   changed them in the past)
+  // * or finally the initial values from the fixedColumns information.
+  _getCurrentFixedColumnWidths = (): Array<CssPixels> => {
+    return (
+      this.state.fixedColumnWidths ||
+      this.props.viewOptions.fixedColumnWidths ||
+      this._computeInitialColumnWidthsMemoized(this.props.fixedColumns)
+    );
+  };
+
+  _getCurrentViewOptions = (): TableViewOptionsWithDefault => {
+    return {
+      fixedColumnWidths: this._getCurrentFixedColumnWidths(),
+    };
+  };
+
+  _onColumnWidthChangeStart = (columnIndex: number, startX: CssPixels) => {
+    this._currentMovedColumnState = {
+      columnIndex,
+      startX,
+      initialWidth: this._getCurrentFixedColumnWidths()[columnIndex],
+    };
+    this.setState({ isResizingColumns: true });
+    window.addEventListener('mousemove', this._onColumnWidthChangeMouseMove);
+    window.addEventListener('mouseup', this._onColumnWidthChangeMouseUp);
+  };
+
+  _cleanUpMouseHandlers = () => {
+    window.removeEventListener('mousemove', this._onColumnWidthChangeMouseMove);
+    window.removeEventListener('mouseup', this._onColumnWidthChangeMouseUp);
+  };
+
+  _onColumnWidthChangeMouseMove = (event: MouseEvent) => {
+    const columnState = this._currentMovedColumnState;
+    if (columnState !== null) {
+      const { columnIndex, startX, initialWidth } = columnState;
+      const column = this.props.fixedColumns[columnIndex];
+      const fixedColumnWidths = this._getCurrentFixedColumnWidths();
+      const diff = event.clientX - startX;
+      const newWidth = Math.max(initialWidth + diff, column.minWidth || 10);
+      this.setState((prevState) => {
+        this._columnSizeChangedCounter++;
+        const newFixedColumnWidths = (
+          prevState.fixedColumnWidths || fixedColumnWidths
+        ).slice();
+        newFixedColumnWidths[columnIndex] = newWidth;
+        return {
+          fixedColumnWidths: newFixedColumnWidths,
+        };
+      });
+    }
+  };
+
+  _onColumnWidthChangeMouseUp = () => {
+    this.setState({ isResizingColumns: false });
+    this._cleanUpMouseHandlers();
+    this._currentMovedColumnState = null;
+    this._propagateColumnWidthChange(this._getCurrentFixedColumnWidths());
+  };
+
+  componentWillUnmount = () => {
+    this._cleanUpMouseHandlers();
+  };
+
+  _onColumnWidthReset = (columnIndex: number) => {
+    const column = this.props.fixedColumns[columnIndex];
+    const fixedColumnWidths = this._getCurrentFixedColumnWidths();
+    const newFixedColumnWidths = fixedColumnWidths.slice();
+    newFixedColumnWidths[columnIndex] = column.initialWidth || 10;
+    this._columnSizeChangedCounter++;
+    this.setState({ fixedColumnWidths: newFixedColumnWidths });
+    this._propagateColumnWidthChange(newFixedColumnWidths);
+  };
+
+  // triggers a re-render
+  _propagateColumnWidthChange = (fixedColumnWidths: Array<CssPixels>) => {
+    const { onViewOptionsChange, viewOptions } = this.props;
+    if (onViewOptionsChange) {
+      onViewOptionsChange({
+        ...viewOptions,
+        fixedColumnWidths,
+      });
+    }
+  };
 
   _computeAllVisibleRowsMemoized = memoize(
     (tree: Tree<DisplayData>, expandedNodes: Set<NodeIndex | null>) => {
@@ -482,6 +668,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
         <TreeViewRowFixedColumns
           displayData={displayData}
           columns={fixedColumns}
+          viewOptions={this._getCurrentViewOptions()}
           nodeId={nodeId}
           index={index}
           isSelected={nodeId === selectedNodeId}
@@ -747,9 +934,16 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       rowHeight,
       selectedNodeId,
     } = this.props;
+    const { isResizingColumns } = this.state;
     return (
-      <div className="treeView">
-        <TreeViewHeader fixedColumns={fixedColumns} mainColumn={mainColumn} />
+      <div className={classNames('treeView', { isResizingColumns })}>
+        <TreeViewHeader
+          fixedColumns={fixedColumns}
+          mainColumn={mainColumn}
+          viewOptions={this._getCurrentViewOptions()}
+          onColumnWidthChangeStart={this._onColumnWidthChangeStart}
+          onColumnWidthReset={this._onColumnWidthReset}
+        />
         <ContextMenuTrigger
           id={contextMenuId ?? 'unknown'}
           disable={!contextMenuId}
@@ -771,12 +965,13 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
             focusable={true}
             onKeyDown={this._onKeyDown}
             specialItems={this._getSpecialItems()}
-            disableOverscan={!!disableOverscan}
+            disableOverscan={!!disableOverscan || isResizingColumns}
             onCopy={this._onCopy}
             // If there is a deep call node depth, expand the width, or else keep it
             // at 3000 wide.
             containerWidth={Math.max(3000, maxNodeDepth * 10 + 2000)}
             ref={this._takeListRef}
+            forceRender={this._columnSizeChangedCounter}
           />
         </ContextMenuTrigger>
         {contextMenu}

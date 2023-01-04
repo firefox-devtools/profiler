@@ -24,6 +24,7 @@ import {
 import { getPathInZipFileFromUrl } from 'firefox-profiler/selectors/url-state';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { ProfileViewer } from './ProfileViewer';
+import { defaultTableViewOptions } from 'firefox-profiler/reducers/profile-view';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { ZipFileState } from 'firefox-profiler/types';
@@ -269,6 +270,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
                 rowHeight={30}
                 indentWidth={15}
                 onEnterKey={this._onEnterKey}
+                viewOptions={defaultTableViewOptions}
               />
               <DragAndDropOverlay />
             </div>
