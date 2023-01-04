@@ -1778,6 +1778,12 @@ export function processVisualMetrics(
       continue;
     }
 
+    if (metric.every((m) => m.timestamp === null)) {
+      // Skip it if we don't have any timestamps.
+      // This is due to https://github.com/sitespeedio/browsertime/issues/1746.
+      continue;
+    }
+
     const startTime = navigationStartTime ?? metric[0].timestamp;
     const endTime = metric[metric.length - 1].timestamp;
 
@@ -1798,6 +1804,11 @@ export function processVisualMetrics(
 
     const changeMarkerName = `${metricName} Change`;
     for (const { timestamp, percent } of metric) {
+      if (timestamp === null) {
+        // Skip it if we don't have a timestamp.
+        // This might be due to https://github.com/sitespeedio/browsertime/issues/1746.
+        continue;
+      }
       const payload = {
         type: 'VisualMetricProgress',
         // 'percentage' type expects a value between 0 and 1.
