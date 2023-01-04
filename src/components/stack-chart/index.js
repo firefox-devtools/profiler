@@ -192,7 +192,6 @@ class StackChartImpl extends React.PureComponent<Props> {
         id="stack-chart-tab"
         role="tabpanel"
         aria-labelledby="stack-chart-tab-button"
-        onKeyDown={this._handleKeyDown}
       >
         <StackSettings />
         <TransformNavigator />
@@ -205,7 +204,7 @@ class StackChartImpl extends React.PureComponent<Props> {
               className: 'treeViewContextMenu',
             }}
           >
-            <div className="stackChartContent">
+            <div className="stackChartContent" onKeyDown={this._handleKeyDown}>
               <StackChartCanvas
                 viewportProps={{
                   previewSelection,
