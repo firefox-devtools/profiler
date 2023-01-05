@@ -666,18 +666,13 @@ describe('profile meta processing', function () {
 describe('visualMetrics processing', function () {
   function checkVisualMetricsForThread(
     thread: Thread,
-    expectedMetricMarkers?: Array<{|
+    metrics: Array<{|
       name: string,
+      hasProgressMarker: boolean,
       changeMarkerLength: number,
     |}>
   ) {
-    const metrics = expectedMetricMarkers ?? [
-      { name: 'Visual', changeMarkerLength: 7 },
-      { name: 'ContentfulSpeedIndex', changeMarkerLength: 6 },
-      { name: 'PerceptualSpeedIndex', changeMarkerLength: 6 },
-    ];
-
-    for (const { name, changeMarkerLength } of metrics) {
+    for (const { name, hasProgressMarker, changeMarkerLength } of metrics) {
       // Check the visual metric progress markers.
       const metricProgressMarkerIndex = thread.stringTable.indexForString(
         `${name} Progress`
@@ -686,7 +681,7 @@ describe('visualMetrics processing', function () {
         (name) => name === metricProgressMarkerIndex
       );
 
-      if (changeMarkerLength > 0) {
+      if (hasProgressMarker) {
         expect(metricProgressMarker).toBeTruthy();
       } else {
         expect(metricProgressMarker).toBeFalsy();
@@ -723,7 +718,19 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the parent process main thread.');
     }
 
-    checkVisualMetricsForThread(parentProcessMainThread);
+    checkVisualMetricsForThread(parentProcessMainThread, [
+      { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
+      {
+        name: 'ContentfulSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+      {
+        name: 'PerceptualSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+    ]);
   });
 
   it('adds markers to the tab process', function () {
@@ -745,7 +752,19 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the tab process main thread.');
     }
 
-    checkVisualMetricsForThread(tabProcessMainThread);
+    checkVisualMetricsForThread(tabProcessMainThread, [
+      { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
+      {
+        name: 'ContentfulSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+      {
+        name: 'PerceptualSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+    ]);
   });
 
   it('does not add markers to the parent process if metric timestamps are null', function () {
@@ -781,11 +800,19 @@ describe('visualMetrics processing', function () {
     checkVisualMetricsForThread(parentProcessMainThread, [
       // Instead of 7, we should have 0 markers for Visual because we made all
       // the timestamps null.
-      { name: 'Visual', changeMarkerLength: 0 },
+      { name: 'Visual', hasProgressMarker: false, changeMarkerLength: 0 },
       // Instead of 6, we should have 5 markers for ContentfulSpeedIndex.
-      { name: 'ContentfulSpeedIndex', changeMarkerLength: 5 },
+      {
+        name: 'ContentfulSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 5,
+      },
       // We didn't change the PerceptualSpeedIndexProgress, so we should have 6.
-      { name: 'PerceptualSpeedIndex', changeMarkerLength: 6 },
+      {
+        name: 'PerceptualSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
     ]);
   });
 });
