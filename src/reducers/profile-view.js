@@ -485,17 +485,24 @@ const previewSelection: Reducer<PreviewSelection> = (
 const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
-    case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'HIDE_PROVIDED_TRACKS':
-    case 'CHANGE_SELECTED_MARKER':
-    case 'CHANGE_SELECTED_NETWORK_MARKER':
     case 'CHANGE_CALL_TREE_SEARCH_STRING':
     case 'CHANGE_MARKER_SEARCH_STRING':
     case 'CHANGE_NETWORK_SEARCH_STRING':
+      return state + 1;
+    case 'CHANGE_SELECTED_CALL_NODE':
+    case 'CHANGE_SELECTED_MARKER':
+    case 'CHANGE_SELECTED_NETWORK_MARKER':
+      if (action.context.source === 'pointer') {
+        // If the call node was changed as a result of a pointer click, do not
+        // scroll the table. Indeed this is disturbing and prevents double
+        // clicks.
+        return state;
+      }
       return state + 1;
     default:
       return state;

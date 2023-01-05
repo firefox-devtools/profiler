@@ -34,6 +34,7 @@ import type {
   MarkerIndex,
   StartEndRange,
   ThreadsKey,
+  SelectionContext,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -162,7 +163,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
 
     if (selected === null || selectedRowIndex === -1) {
       // the first condition is redundant, but it makes flow happy
-      this._select(allRows[0]);
+      this._selectWithKeyboard(allRows[0]);
       return;
     }
     if (isNavigationKey) {
@@ -170,30 +171,30 @@ class NetworkChartImpl extends React.PureComponent<Props> {
         case 'ArrowUp': {
           if (event.metaKey) {
             // On MacOS this is a common shortcut for the Home gesture
-            this._select(allRows[0]);
+            this._selectWithKeyboard(allRows[0]);
             break;
           }
 
           if (selectedRowIndex > 0) {
-            this._select(allRows[selectedRowIndex - 1]);
+            this._selectWithKeyboard(allRows[selectedRowIndex - 1]);
           }
           break;
         }
         case 'ArrowDown': {
           if (event.metaKey) {
             // On MacOS this is a common shortcut for the End gesture
-            this._select(allRows[allRows.length - 1]);
+            this._selectWithKeyboard(allRows[allRows.length - 1]);
             break;
           }
           if (selectedRowIndex < allRows.length - 1) {
-            this._select(allRows[selectedRowIndex + 1]);
+            this._selectWithKeyboard(allRows[selectedRowIndex + 1]);
           }
           break;
         }
         case 'PageUp': {
           if (selectedRowIndex > 0) {
             const nextRow = Math.max(0, selectedRowIndex - ROW_HEIGHT);
-            this._select(allRows[nextRow]);
+            this._selectWithKeyboard(allRows[nextRow]);
           }
           break;
         }
@@ -203,16 +204,16 @@ class NetworkChartImpl extends React.PureComponent<Props> {
               allRows.length - 1,
               selectedRowIndex + ROW_HEIGHT
             );
-            this._select(allRows[nextRow]);
+            this._selectWithKeyboard(allRows[nextRow]);
           }
           break;
         }
         case 'Home': {
-          this._select(allRows[0]);
+          this._selectWithKeyboard(allRows[0]);
           break;
         }
         case 'End': {
-          this._select(allRows[allRows.length - 1]);
+          this._selectWithKeyboard(allRows[allRows.length - 1]);
           break;
         }
         default:
@@ -227,16 +228,23 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   };
 
   _onLeftClick = (selectedNetworkMarkerIndex: MarkerIndex) => {
-    this._onSelectionChange(selectedNetworkMarkerIndex);
+    this._onSelectionChange(selectedNetworkMarkerIndex, { source: 'pointer' });
   };
 
-  _select(selectedNetworkMarkerIndex: MarkerIndex) {
-    this._onSelectionChange(selectedNetworkMarkerIndex);
+  _selectWithKeyboard(selectedNetworkMarkerIndex: MarkerIndex) {
+    this._onSelectionChange(selectedNetworkMarkerIndex, { source: 'keyboard' });
   }
 
-  _onSelectionChange = (selectedNetworkMarkerIndex: MarkerIndex) => {
+  _onSelectionChange = (
+    selectedNetworkMarkerIndex: MarkerIndex,
+    context: SelectionContext
+  ) => {
     const { threadsKey, changeSelectedNetworkMarker } = this.props;
-    changeSelectedNetworkMarker(threadsKey, selectedNetworkMarkerIndex);
+    changeSelectedNetworkMarker(
+      threadsKey,
+      selectedNetworkMarkerIndex,
+      context
+    );
   };
 
   _onRowHovered = (hoveredMarkerIndex: MarkerIndex | null) => {
@@ -289,7 +297,6 @@ class NetworkChartImpl extends React.PureComponent<Props> {
         isHoveredFromState={hoveredMarkerIndexFromState === markerIndex}
         onRightClick={this._onRightClick}
         isSelected={selectedNetworkMarkerIndex === markerIndex}
-        select={this._select}
         onLeftClick={this._onLeftClick}
         onHover={this._onRowHovered}
       />

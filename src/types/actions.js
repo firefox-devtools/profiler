@@ -171,6 +171,15 @@ export type Localization = ReactLocalization;
 // stored in the same property to accommodate all OSes.
 export type KeyboardModifiers = {| ctrlOrMeta: boolean, shift: boolean |};
 
+/**
+ * This type gives some context about the action leading to a selection.
+ */
+export type SelectionContext = {|
+  // This is the source for this selection: is it a keyboard or a pointer event,
+  // or is it the result of some automatic selection.
+  +source: 'keyboard' | 'pointer' | 'auto',
+|};
+
 type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',
@@ -186,6 +195,7 @@ type ProfileAction =
       +threadsKey: ThreadsKey,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
+      +context: SelectionContext,
     |}
   | {|
       +type: 'UPDATE_TRACK_THREAD_HEIGHT',
@@ -209,11 +219,13 @@ type ProfileAction =
       +type: 'CHANGE_SELECTED_MARKER',
       +threadsKey: ThreadsKey,
       +selectedMarker: MarkerIndex | null,
+      +context: SelectionContext,
     |}
   | {|
       +type: 'CHANGE_SELECTED_NETWORK_MARKER',
       +threadsKey: ThreadsKey,
       +selectedNetworkMarker: MarkerIndex | null,
+      +context: SelectionContext,
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_MARKER',

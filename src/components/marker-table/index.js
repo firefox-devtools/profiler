@@ -35,6 +35,7 @@ import type {
   Milliseconds,
   MarkerSchemaByName,
   TableViewOptions,
+  SelectionContext,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -217,9 +218,12 @@ class MarkerTableImpl extends PureComponent<Props> {
     }
   }
 
-  _onSelectionChange = (selectedMarker: MarkerIndex) => {
+  _onSelectionChange = (
+    selectedMarker: MarkerIndex,
+    context: SelectionContext
+  ) => {
     const { threadsKey, changeSelectedMarker } = this.props;
-    changeSelectedMarker(threadsKey, selectedMarker);
+    changeSelectedMarker(threadsKey, selectedMarker, context);
   };
 
   _onRightClickSelection = (selectedMarker: MarkerIndex) => {
