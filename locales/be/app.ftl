@@ -309,6 +309,10 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Пашырэнні:
 MenuButtons--metaOverheadStatistics-mean = Сярэдняе
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
+MenuButtons--metaOverheadStatistics-statkeys-counter = Лічыльнік
+    .title = Час збору ўсіх лічыльнікаў
+MenuButtons--metaOverheadStatistics-statkeys-interval = Інтэрвал
+    .title = Зафіксаваны інтэрвал паміж двума ўзорамі
 MenuButtons--metaOverheadStatistics-profiled-duration = Працягласць запісу профілю:
 
 ## Publish panel
