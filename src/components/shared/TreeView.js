@@ -77,12 +77,36 @@ type TreeViewHeaderProps<DisplayData: Object> = {|
   // called when the users moves the divider right of the column,
   // passes the column index and the start x coordinate
   +onColumnWidthChangeStart: (number, CssPixels) => void,
-  +onColumnWidthReset: (number) => void,
+  +onColumnWidthSet: (number, CssPixels) => void,
 |};
 
 class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
   TreeViewHeaderProps<DisplayData>
 > {
+  _onDividerKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
+    const {
+      viewOptions: { fixedColumnWidths },
+      fixedColumns,
+      onColumnWidthSet,
+    } = this.props;
+    const columnIndex = Number(event.currentTarget.dataset.columnIndex);
+    const currentColumnWidth = fixedColumnWidths[columnIndex];
+    const initialWidth = fixedColumns[columnIndex].initialWidth ?? 10;
+    switch (event.key) {
+      case 'ArrowLeft':
+        onColumnWidthSet(columnIndex, currentColumnWidth - 10);
+        break;
+      case 'ArrowRight':
+        onColumnWidthSet(columnIndex, currentColumnWidth + 10);
+        break;
+      case 'Escape':
+        onColumnWidthSet(columnIndex, initialWidth);
+        break;
+      default:
+      // Nothing to do here
+    }
+  };
+
   _onDividerMouseDown = (event: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onColumnWidthChangeStart(
       Number(event.currentTarget.dataset.columnIndex),
@@ -91,9 +115,10 @@ class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
   };
 
   _onDividerDoubleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
-    this.props.onColumnWidthReset(
-      Number(event.currentTarget.dataset.columnIndex)
-    );
+    const columnIndex = Number(event.currentTarget.dataset.columnIndex);
+    const initialWidth =
+      this.props.fixedColumns[columnIndex].initialWidth ?? 10;
+    this.props.onColumnWidthSet(columnIndex, initialWidth);
   };
 
   render() {
@@ -116,19 +141,29 @@ class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
                 ></span>
               </PermissiveLocalized>
               {col.hideDividerAfter !== true ? (
-                <span
-                  key={col.propName + 'Divider'}
-                  className={classNames('treeViewColumnDivider', {
-                    isResizable: col.resizable,
-                  })}
-                  onMouseDown={
-                    col.resizable ? this._onDividerMouseDown : undefined
-                  }
-                  onDoubleClick={
-                    col.resizable ? this._onDividerDoubleClick : undefined
-                  }
-                  data-column-index={i}
-                ></span>
+                <Localized
+                  id="TreeView--column-divider"
+                  attrs={{ title: true }}
+                >
+                  <span
+                    className={classNames('treeViewColumnDivider', {
+                      isResizable: col.resizable,
+                    })}
+                    role="separator"
+                    title="Use this handle to change this column size"
+                    tabIndex={col.resizable ? 0 : null}
+                    onKeyDown={
+                      col.resizable ? this._onDividerKeyDown : undefined
+                    }
+                    onMouseDown={
+                      col.resizable ? this._onDividerMouseDown : undefined
+                    }
+                    onDoubleClick={
+                      col.resizable ? this._onDividerDoubleClick : undefined
+                    }
+                    data-column-index={i}
+                  ></span>
+                </Localized>
               ) : null}
             </React.Fragment>
           );
@@ -243,7 +278,7 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
                 )}
               </span>
               {col.hideDividerAfter !== true ? (
-                <span className="treeViewColumnDivider"></span>
+                <span className="treeViewColumnDivider" role="separator"></span>
               ) : null}
             </React.Fragment>
           );
@@ -589,11 +624,14 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     this._cleanUpMouseHandlers();
   };
 
-  _onColumnWidthReset = (columnIndex: number) => {
+  _onColumnWidthSet = (columnIndex: number, newWidth: CssPixels) => {
     const column = this.props.fixedColumns[columnIndex];
     const fixedColumnWidths = this._getCurrentFixedColumnWidths();
     const newFixedColumnWidths = fixedColumnWidths.slice();
-    newFixedColumnWidths[columnIndex] = column.initialWidth || 10;
+    newFixedColumnWidths[columnIndex] = Math.max(
+      newWidth,
+      column.minWidth || 10
+    );
     this._columnSizeChangedCounter++;
     this.setState({ fixedColumnWidths: newFixedColumnWidths });
     this._propagateColumnWidthChange(newFixedColumnWidths);
@@ -951,7 +989,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
           mainColumn={mainColumn}
           viewOptions={this._getCurrentViewOptions()}
           onColumnWidthChangeStart={this._onColumnWidthChangeStart}
-          onColumnWidthReset={this._onColumnWidthReset}
+          onColumnWidthSet={this._onColumnWidthSet}
         />
         <ContextMenuTrigger
           id={contextMenuId ?? 'unknown'}

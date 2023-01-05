@@ -165,6 +165,9 @@ bytes of the callers from this function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -180,6 +183,9 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -188,6 +194,8 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -237,6 +245,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -247,6 +256,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -259,6 +269,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -281,6 +292,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -291,6 +303,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -303,6 +316,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -325,6 +339,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -335,6 +350,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -347,6 +363,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -369,6 +386,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -379,6 +397,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -391,6 +410,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -413,6 +433,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -423,6 +444,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -435,6 +457,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -457,6 +480,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -467,6 +491,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -479,6 +504,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -501,6 +527,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -511,6 +538,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -523,6 +551,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -943,6 +972,9 @@ bytes of the callers from this function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -958,6 +990,9 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -966,6 +1001,8 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -1015,6 +1052,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1025,6 +1063,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1037,6 +1076,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1059,6 +1099,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1069,6 +1110,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1081,6 +1123,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1103,6 +1146,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1113,6 +1157,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1125,6 +1170,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1147,6 +1193,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1157,6 +1204,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1169,6 +1217,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1191,6 +1240,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1201,6 +1251,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1213,6 +1264,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1235,6 +1287,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1245,6 +1298,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1257,6 +1311,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1279,6 +1334,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1289,6 +1345,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1301,6 +1358,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -1721,6 +1779,9 @@ bytes of the callers from this function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -1736,6 +1797,9 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -1744,6 +1808,8 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -1793,6 +1859,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1803,6 +1870,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1815,6 +1883,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1837,6 +1906,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1847,6 +1917,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1859,6 +1930,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1881,6 +1953,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1891,6 +1964,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1903,6 +1977,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1925,6 +2000,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1935,6 +2011,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1947,6 +2024,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -1969,6 +2047,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -1979,6 +2058,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -1991,6 +2071,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -2013,6 +2094,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2023,6 +2105,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2035,6 +2118,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -2057,6 +2141,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2067,6 +2152,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2079,6 +2165,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -2487,6 +2574,9 @@ bytes of the callers from this function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -2502,6 +2592,9 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -2510,6 +2603,8 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -2559,6 +2654,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2569,6 +2665,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2581,6 +2678,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -2603,6 +2701,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2613,6 +2712,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2625,6 +2725,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -2647,6 +2748,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2657,6 +2759,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2669,6 +2772,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -2691,6 +2795,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2701,6 +2806,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2713,6 +2819,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -2735,6 +2842,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2745,6 +2853,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2757,6 +2866,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -2779,6 +2889,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2789,6 +2900,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2801,6 +2913,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -2823,6 +2936,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2833,6 +2947,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2845,6 +2960,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -3253,6 +3369,9 @@ bytes of the callers from this function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -3268,6 +3387,9 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -3276,6 +3398,8 @@ allocated or deallocated in the program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -3325,6 +3449,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -3335,6 +3460,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -3347,6 +3473,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -3369,6 +3496,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -3379,6 +3507,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -3391,6 +3520,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -3413,6 +3543,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -3423,6 +3554,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -3435,6 +3567,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -3457,6 +3590,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -3467,6 +3601,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -3479,6 +3614,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -3501,6 +3637,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -3511,6 +3648,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -3523,6 +3661,7 @@ allocated or deallocated in the program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -4289,6 +4428,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -4303,6 +4445,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -4311,6 +4456,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -4360,6 +4507,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -4370,6 +4518,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -4382,6 +4531,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -4404,6 +4554,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -4414,6 +4565,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -4426,6 +4578,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -4448,6 +4601,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -4458,6 +4612,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -4470,6 +4625,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -4492,6 +4648,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -4502,6 +4659,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -4514,6 +4672,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -4536,6 +4695,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -4546,6 +4706,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -4558,6 +4719,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -4580,6 +4742,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -4590,6 +4753,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -4602,6 +4766,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -4624,6 +4789,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -4634,6 +4800,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -4646,6 +4813,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -5022,6 +5190,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -5036,6 +5207,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -5044,6 +5218,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5093,6 +5269,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5103,6 +5280,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5115,6 +5293,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5137,6 +5316,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5147,6 +5327,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5159,6 +5340,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5181,6 +5363,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5191,6 +5374,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5203,6 +5387,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5225,6 +5410,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5235,6 +5421,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5247,6 +5434,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5269,6 +5457,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5279,6 +5468,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5291,6 +5481,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5313,6 +5504,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5323,6 +5515,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5335,6 +5528,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5357,6 +5551,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5367,6 +5562,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5379,6 +5575,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -5755,6 +5952,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -5769,6 +5969,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -5777,6 +5980,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5826,6 +6031,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5836,6 +6042,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5848,6 +6055,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5870,6 +6078,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5880,6 +6089,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5892,6 +6102,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5914,6 +6125,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5924,6 +6136,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5936,6 +6149,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -5958,6 +6172,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -5968,6 +6183,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -5980,6 +6196,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -6272,6 +6489,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -6286,6 +6506,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -6294,6 +6517,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -6343,6 +6568,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -6353,6 +6579,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -6365,6 +6592,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -6387,6 +6615,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -6397,6 +6626,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -6409,6 +6639,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -6431,6 +6662,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -6441,6 +6673,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -6453,6 +6686,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -6475,6 +6709,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -6485,6 +6720,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -6497,6 +6733,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -6519,6 +6756,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -6529,6 +6767,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -6541,6 +6780,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -6563,6 +6803,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -6573,6 +6814,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -6585,6 +6827,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -6607,6 +6850,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -6617,6 +6861,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -6629,6 +6874,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -7005,6 +7251,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -7019,6 +7268,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -7027,6 +7279,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7076,6 +7330,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7086,6 +7341,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7098,6 +7354,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7120,6 +7377,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7130,6 +7388,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7142,6 +7401,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7164,6 +7424,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7174,6 +7435,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7186,6 +7448,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7208,6 +7471,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7218,6 +7482,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7230,6 +7495,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7252,6 +7518,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7262,6 +7529,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7274,6 +7542,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7296,6 +7565,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7306,6 +7576,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7318,6 +7589,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -7666,6 +7938,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -7680,6 +7955,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -7688,6 +7966,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7737,6 +8017,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7747,6 +8028,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7759,6 +8041,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7781,6 +8064,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7791,6 +8075,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7803,6 +8088,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7825,6 +8111,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7835,6 +8122,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7847,6 +8135,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7869,6 +8158,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7879,6 +8169,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7891,6 +8182,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7913,6 +8205,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7923,6 +8216,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7935,6 +8229,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -7957,6 +8252,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -7967,6 +8263,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -7979,6 +8276,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -8327,6 +8625,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -8341,6 +8642,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -8349,6 +8653,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -8398,6 +8704,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -8408,6 +8715,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -8420,6 +8728,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -8442,6 +8751,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -8452,6 +8762,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -8464,6 +8775,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -8486,6 +8798,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -8496,6 +8809,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -8508,6 +8822,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -8530,6 +8845,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -8540,6 +8856,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -8552,6 +8869,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -8845,6 +9163,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -8859,6 +9180,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -8867,6 +9191,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -8916,6 +9242,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -8926,6 +9253,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -8938,6 +9266,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -8960,6 +9289,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -8970,6 +9300,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -8982,6 +9313,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -9004,6 +9336,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -9014,6 +9347,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -9026,6 +9360,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -9048,6 +9383,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -9058,6 +9394,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -9070,6 +9407,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
@@ -9363,6 +9701,9 @@ function."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="1"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
@@ -9377,6 +9718,9 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
+        role="separator"
+        tabindex="0"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -9385,6 +9729,8 @@ for understanding where time was actually spent in a program."
       <span
         class="treeViewColumnDivider"
         data-column-index="3"
+        role="separator"
+        title="Use this handle to change this column size"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -9434,6 +9780,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -9444,6 +9791,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -9456,6 +9804,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -9478,6 +9827,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -9488,6 +9838,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -9500,6 +9851,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -9522,6 +9874,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -9532,6 +9885,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -9544,6 +9898,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -9566,6 +9921,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -9576,6 +9932,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -9588,6 +9945,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -9610,6 +9968,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -9620,6 +9979,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -9632,6 +9992,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
               <div
@@ -9654,6 +10015,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -9664,6 +10026,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -9676,6 +10039,7 @@ for understanding where time was actually spent in a program."
                 </span>
                 <span
                   class="treeViewColumnDivider"
+                  role="separator"
                 />
               </div>
             </div>
