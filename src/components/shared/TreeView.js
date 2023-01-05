@@ -644,7 +644,9 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       } else {
         const rowIndex = this._getAllVisibleRows().indexOf(selectedNodeId);
         const depth = tree.getDepth(selectedNodeId);
-        list.scrollItemIntoView(rowIndex, depth * 10);
+        const totalFixedColumnWidth =
+          this._getCurrentFixedColumnWidths().reduce((a, b) => a + b, 0);
+        list.scrollItemIntoView(rowIndex, depth * 10, totalFixedColumnWidth);
       }
     }
   }
