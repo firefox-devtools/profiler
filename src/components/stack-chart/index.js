@@ -158,8 +158,31 @@ class StackChartImpl extends React.PureComponent<Props> {
     handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
   };
 
+  _onCopy = (event: ClipboardEvent) => {
+    if (document.activeElement === this._viewport) {
+      event.preventDefault();
+      const {
+        callNodeInfo: { callNodeTable },
+        selectedCallNodeIndex,
+        thread,
+      } = this.props;
+      if (selectedCallNodeIndex !== null) {
+        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcName = thread.stringTable.getString(
+          thread.funcTable.name[funcIndex]
+        );
+        event.clipboardData.setData('text/plain', funcName);
+      }
+    }
+  };
+
   componentDidMount() {
+    document.addEventListener('copy', this._onCopy, false);
     this._focusViewport();
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('copy', this._onCopy, false);
   }
 
   render() {
