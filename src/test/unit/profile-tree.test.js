@@ -562,18 +562,18 @@ describe('inverted call tree', function () {
 
 describe('diffing trees', function () {
   function getProfile() {
-    const { profile } = getMergedProfileFromTextSamples(
+    const { profile } = getMergedProfileFromTextSamples([
       `
-      A  A  A
-      B  B  C
-      D  E  F
-    `,
+        A  A  A
+        B  B  C
+        D  E  F
+      `,
       `
-      A  A  A
-      B  B  B
-      G  I  E
-    `
-    );
+        A  A  A
+        B  B  B
+        G  I  E
+      `,
+    ]);
     return profile;
   }
 
