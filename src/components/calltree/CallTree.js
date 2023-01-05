@@ -20,6 +20,8 @@ import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
+  getCategories,
+  getCurrentTableViewOptions,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -29,6 +31,7 @@ import {
   addTransformToStack,
   handleCallNodeTransformShortcut,
   openSourceView,
+  changeTableViewOptions,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -37,13 +40,18 @@ import type {
   ImplementationFilter,
   ThreadsKey,
   CallNodeInfo,
+  CategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   WeightType,
+  TableViewOptions,
 } from 'firefox-profiler/types';
 import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
 
-import type { Column } from 'firefox-profiler/components/shared/TreeView';
+import type {
+  Column,
+  MaybeResizableColumn,
+} from 'firefox-profiler/components/shared/TreeView';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CallTree.css';
@@ -54,6 +62,7 @@ type StateProps = {|
   +focusCallTreeGeneration: number,
   +tree: CallTreeType,
   +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
@@ -63,6 +72,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +callNodeMaxDepth: number,
   +weightType: WeightType,
+  +tableViewOptions: TableViewOptions,
 |};
 
 type DispatchProps = {|
@@ -72,6 +82,7 @@ type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
   +openSourceView: typeof openSourceView,
+  +onTableViewOptionsChange: (TableViewOptions) => any,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -93,46 +104,97 @@ class CallTreeImpl extends PureComponent<Props> {
    * appropriate labels for the call tree based on this weight.
    */
   _weightTypeToColumns = memoize(
-    (weightType: WeightType): Column<CallNodeDisplayData>[] => {
+    (weightType: WeightType): MaybeResizableColumn<CallNodeDisplayData>[] => {
       switch (weightType) {
         case 'tracing-ms':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--tracing-ms-total',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--tracing-ms-self',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
             },
-            { propName: 'icon', titleL10nId: '', component: Icon },
+            {
+              propName: 'icon',
+              titleL10nId: '',
+              component: Icon,
+              initialWidth: 10,
+            },
           ];
         case 'samples':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--samples-total',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--samples-self',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
             },
-            { propName: 'icon', titleL10nId: '', component: Icon },
+            {
+              propName: 'icon',
+              titleL10nId: '',
+              component: Icon,
+              initialWidth: 10,
+            },
           ];
         case 'bytes':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--bytes-total',
+              minWidth: 30,
+              initialWidth: 140,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--bytes-self',
+              minWidth: 30,
+              initialWidth: 90,
+              resizable: true,
             },
-            { propName: 'icon', titleL10nId: '', component: Icon },
+            {
+              propName: 'icon',
+              titleL10nId: '',
+              component: Icon,
+              initialWidth: 10,
+            },
           ];
         default:
           throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
@@ -144,27 +206,29 @@ class CallTreeImpl extends PureComponent<Props> {
 
   componentDidMount() {
     this.focus();
-    if (this.props.selectedCallNodeIndex === null) {
-      this.procureInterestingInitialSelection();
-    } else if (this._treeView) {
+    this.maybeProcureInterestingInitialSelection();
+
+    if (this.props.selectedCallNodeIndex === null && this._treeView) {
       this._treeView.scrollSelectionIntoView();
     }
   }
 
   componentDidUpdate(prevProps) {
     if (
-      this.props.scrollToSelectionGeneration >
-      prevProps.scrollToSelectionGeneration
-    ) {
-      if (this._treeView) {
-        this._treeView.scrollSelectionIntoView();
-      }
-    }
-
-    if (
       this.props.focusCallTreeGeneration > prevProps.focusCallTreeGeneration
     ) {
       this.focus();
+    }
+
+    this.maybeProcureInterestingInitialSelection();
+
+    if (
+      this.props.selectedCallNodeIndex !== null &&
+      this.props.scrollToSelectionGeneration >
+        prevProps.scrollToSelectionGeneration &&
+      this._treeView
+    ) {
+      this._treeView.scrollSelectionIntoView();
     }
   }
 
@@ -228,10 +292,26 @@ class CallTreeImpl extends PureComponent<Props> {
     openSourceView(file, 'calltree');
   };
 
-  procureInterestingInitialSelection() {
+  maybeProcureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
-    const { tree, expandedCallNodeIndexes } = this.props;
+    const {
+      tree,
+      expandedCallNodeIndexes,
+      selectedCallNodeIndex,
+      callNodeInfo: { callNodeTable },
+      categories,
+    } = this.props;
+
+    if (selectedCallNodeIndex !== null || expandedCallNodeIndexes.length > 0) {
+      // Let's not change some existing state.
+      return;
+    }
+
+    const idleCategoryIndex = categories.findIndex(
+      (category) => category.name === 'Idle'
+    );
+
     const newExpandedCallNodeIndexes = expandedCallNodeIndexes.slice();
     const maxInterestingDepth = 17; // scientifically determined
     let currentCallNodeIndex = tree.getRoots()[0];
@@ -245,13 +325,22 @@ class CallTreeImpl extends PureComponent<Props> {
       if (children.length === 0) {
         break;
       }
-      currentCallNodeIndex = children[0];
+
+      // Let's find if there's a non idle children.
+      const firstNonIdleNode = children.find(
+        (nodeIndex) => callNodeTable.category[nodeIndex] !== idleCategoryIndex
+      );
+
+      // If there's a non idle children, use it; otherwise use the first
+      // children (that will be idle).
+      currentCallNodeIndex =
+        firstNonIdleNode !== undefined ? firstNonIdleNode : children[0];
       newExpandedCallNodeIndexes.push(currentCallNodeIndex);
     }
     this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
 
-    const category = tree.getDisplayData(currentCallNodeIndex).categoryName;
-    if (category !== 'Idle') {
+    const categoryIndex = callNodeTable.category[currentCallNodeIndex];
+    if (categoryIndex !== idleCategoryIndex) {
       // If we selected the call node with a "idle" category, we'd have a
       // completely dimmed activity graph because idle stacks are not drawn in
       // this graph. Because this isn't probably what the average user wants we
@@ -270,6 +359,8 @@ class CallTreeImpl extends PureComponent<Props> {
       disableOverscan,
       callNodeMaxDepth,
       weightType,
+      tableViewOptions,
+      onTableViewOptionsChange,
     } = this.props;
     if (tree.getRoots().length === 0) {
       return <CallTreeEmptyReasons />;
@@ -296,6 +387,8 @@ class CallTreeImpl extends PureComponent<Props> {
         onKeyDown={this._onKeyDown}
         onEnterKey={this._onEnterOrDoubleClick}
         onDoubleClick={this._onEnterOrDoubleClick}
+        viewOptions={tableViewOptions}
+        onViewOptionsChange={onTableViewOptionsChange}
       />
     );
   }
@@ -308,6 +401,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getCallTree(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    categories: getCategories(state),
     selectedCallNodeIndex:
       selectedThreadSelectors.getSelectedCallNodeIndex(state),
     rightClickedCallNodeIndex:
@@ -324,6 +418,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     callNodeMaxDepth:
       selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
+    tableViewOptions: getCurrentTableViewOptions(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
@@ -332,6 +427,8 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     addTransformToStack,
     handleCallNodeTransformShortcut,
     openSourceView,
+    onTableViewOptionsChange: (options: TableViewOptions) =>
+      changeTableViewOptions('calltree', options),
   },
   component: CallTreeImpl,
 });

@@ -25,6 +25,7 @@ import {
   changeInvertCallstack,
   commitRange,
   addTransformToStack,
+  selectTrackWithModifiers,
 } from '../../actions/profile-view';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
@@ -74,11 +75,12 @@ describe('calltree/ProfileCallTreeView', function () {
     );
     const { container } = renderResult;
 
-    const getRowElement = (functionName) =>
-      ensureExists(
-        screen.getByText(functionName).closest('.treeViewRow'),
-        `Couldn't find the row for node ${functionName}.`
-      );
+    const getRowElement = (functionName, modifiers = {}) =>
+      screen.getByRole('treeitem', {
+        name: new RegExp(`^${functionName}`),
+        ...modifiers,
+      });
+
     const getContextMenu = () =>
       ensureExists(
         container.querySelector('.react-contextmenu'),
@@ -273,14 +275,38 @@ describe('calltree/ProfileCallTreeView', function () {
     expect(getRowElement('A')).not.toHaveClass('isRightClicked');
   });
 
-  it('selects the heaviest stack if it is not idle', () => {
-    const { profile } = getProfileFromTextSamples(`
-      A  A  A  A  A
-      B  C  C  C  D
-      E           E
-    `);
-    const { getRowElement } = setup(profile);
-    expect(getRowElement('C')).toHaveClass('isSelected');
+  it('procures an interesting selection, also when switching threads', () => {
+    const { profile } = getProfileFromTextSamples(
+      `
+        A  A  A  A  A
+        B  C  C  C  D
+        E           E
+      `,
+      `
+        G  G  G  G  G
+        H  H  I  I  I
+        J  J  K  L
+      `
+    );
+    // Assign values so that these threads are considered global processes.
+    Object.assign(profile.threads[0], {
+      pid: 111,
+      tid: 111,
+      name: 'GeckoMain',
+    });
+    Object.assign(profile.threads[1], {
+      pid: 112,
+      tid: 112,
+      name: 'GeckoMain',
+    });
+    const { getRowElement, dispatch } = setup(profile);
+    expect(getRowElement('C', { selected: true })).toHaveClass('isSelected');
+    expect(getRowElement('A', { expanded: true })).toBeInTheDocument();
+
+    // now switch to the other thread
+    dispatch(selectTrackWithModifiers({ type: 'global', trackIndex: 1 }));
+    expect(getRowElement('K', { selected: true })).toHaveClass('isSelected');
+    expect(getRowElement('I', { expanded: true })).toBeInTheDocument();
   });
 
   it('does not select the heaviest stack if it is idle', () => {
@@ -289,8 +315,9 @@ describe('calltree/ProfileCallTreeView', function () {
       B  C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  D
       E                                         E
     `);
-    const { container } = setup(profile);
-    expect(container.querySelector('.treeViewRow.isSelected')).toBeFalsy();
+    const { getRowElement } = setup(profile);
+    expect(getRowElement('E', { selected: true })).toHaveClass('isSelected');
+    expect(getRowElement('B', { expanded: true })).toBeInTheDocument();
   });
 });
 

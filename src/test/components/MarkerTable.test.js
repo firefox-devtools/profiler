@@ -9,7 +9,11 @@ import { stripIndent } from 'common-tags';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  fireEvent,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { MarkerTable } from '../../components/marker-table';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import {
@@ -19,6 +23,7 @@ import {
   hideLocalTrack,
   selectTrackWithModifiers,
 } from '../../actions/profile-view';
+import { changeSelectedTab } from 'firefox-profiler/actions/app';
 import { ensureExists } from '../../utils/flow';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 
@@ -418,6 +423,58 @@ describe('MarkerTable', function () {
       // Make sure that it's not in the context menu.
       fireFullContextMenu(screen.getByText(/IPCOut/));
       expect(screen.queryByText(/Select the/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('column resizing', () => {
+    it('can resize a column, then move it back to its initial size', () => {
+      const store = storeWithProfile(getMarkerTableProfile());
+      store.dispatch(changeSelectedTab('marker-table'));
+      const { unmount } = render(
+        <Provider store={store}>
+          <MarkerTable />
+        </Provider>
+      );
+
+      let dividerForFirstColumn = ensureExists(
+        document.querySelector('.treeViewColumnDivider')
+      );
+      let firstColumn = screen.getByText('Start');
+      expect(firstColumn).toHaveStyle({ width: '90px' });
+      fireEvent.mouseDown(dividerForFirstColumn, { clientX: 90 });
+
+      const body = ensureExists(document.body);
+
+      // Move right
+      fireEvent.mouseMove(body, { clientX: 100 });
+      expect(firstColumn).toHaveStyle({ width: '100px' });
+
+      // Move left
+      fireEvent.mouseMove(body, { clientX: 80 });
+      expect(firstColumn).toHaveStyle({ width: '80px' });
+
+      // Release the mouse -> still the same style
+      fireEvent.mouseUp(body);
+      expect(firstColumn).toHaveStyle({ width: '80px' });
+
+      // Now we'll unmount and render again.
+      unmount();
+      render(
+        <Provider store={store}>
+          <MarkerTable />
+        </Provider>
+      );
+
+      // Make sure the first column kept its width
+      firstColumn = screen.getByText('Start');
+      expect(firstColumn).toHaveStyle({ width: '80px' });
+
+      // Now double click to reset the style.
+      dividerForFirstColumn = ensureExists(
+        document.querySelector('.treeViewColumnDivider')
+      );
+      fireEvent.dblClick(dividerForFirstColumn, { detail: 2 });
+      expect(firstColumn).toHaveStyle({ width: '90px' });
     });
   });
 });

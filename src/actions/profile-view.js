@@ -36,12 +36,7 @@ import {
   getInvertCallstack,
   getHash,
 } from 'firefox-profiler/selectors/url-state';
-import {
-  getCallNodePathFromIndex,
-  getSampleIndexToCallNodeIndex,
-  getSampleCategories,
-  findBestAncestorCallNode,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   assertExhaustiveCheck,
   getFirstItemFromSet,
@@ -78,6 +73,7 @@ import type {
   Tid,
   GlobalTrack,
   KeyboardModifiers,
+  TableViewOptions,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -148,20 +144,24 @@ export function changeRightClickedCallNode(
  */
 export function selectLeafCallNode(
   threadsKey: ThreadsKey,
-  sampleIndex: IndexIntoSamplesTable
+  sampleIndex: IndexIntoSamplesTable | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
-    // The newSelectedStack could be undefined if there are 0 samples.
-    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
+    let newSelectedCallNode = -1;
+    if (sampleIndex !== null) {
+      // The newSelectedStack could be undefined if there are 0 samples.
+      const newSelectedStack = filteredThread.samples.stack[sampleIndex];
 
-    const newSelectedCallNode =
-      newSelectedStack === null || newSelectedStack === undefined
-        ? -1
-        : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+      if (newSelectedStack !== null && newSelectedStack !== undefined) {
+        newSelectedCallNode =
+          callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+      }
+    }
+
     dispatch(
       changeSelectedCallNode(
         threadsKey,
@@ -180,15 +180,20 @@ export function selectLeafCallNode(
  */
 export function selectRootCallNode(
   threadsKey: ThreadsKey,
-  sampleIndex: IndexIntoSamplesTable
+  sampleIndex: IndexIntoSamplesTable | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
+    if (sampleIndex === null) {
+      dispatch(changeSelectedCallNode(threadsKey, []));
+      return;
+    }
     const newSelectedStack = filteredThread.samples.stack[sampleIndex];
     if (newSelectedStack === null || newSelectedStack === undefined) {
+      dispatch(changeSelectedCallNode(threadsKey, []));
       return;
     }
     const newSelectedCallNode =
@@ -203,67 +208,6 @@ export function selectRootCallNode(
     dispatch(
       changeSelectedCallNode(threadsKey, rootCallNodePath, selectedCallNodePath)
     );
-  };
-}
-
-/**
- * This function provides a different strategy for selecting call nodes. It selects
- * a "best" ancestor call node, but also expands out its children nodes to the
- * actual call node that was clicked. See findBestAncestorCallNode for more
- * on the "best" call node.
- */
-export function selectBestAncestorCallNodeAndExpandCallTree(
-  threadsKey: ThreadsKey,
-  sampleIndex: IndexIntoSamplesTable
-): ThunkAction<boolean> {
-  return (dispatch, getState) => {
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const fullThread = threadSelectors.getRangeFilteredThread(getState());
-    const filteredThread = threadSelectors.getFilteredThread(getState());
-    const unfilteredStack = fullThread.samples.stack[sampleIndex];
-    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
-
-    if (unfilteredStack === null) {
-      return false;
-    }
-
-    const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-    const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
-      filteredThread.samples.stack,
-      stackIndexToCallNodeIndex
-    );
-    const clickedCallNode = sampleIndexToCallNodeIndex[sampleIndex];
-    const clickedCategory = fullThread.stackTable.category[unfilteredStack];
-
-    if (clickedCallNode === null) {
-      return false;
-    }
-
-    const sampleCategories = getSampleCategories(
-      fullThread.samples,
-      fullThread.stackTable
-    );
-    const bestAncestorCallNode = findBestAncestorCallNode(
-      callNodeInfo,
-      sampleIndexToCallNodeIndex,
-      sampleCategories,
-      clickedCallNode,
-      clickedCategory
-    );
-
-    // In one dispatch, change the selected call node to the best ancestor call node, but
-    // also expand out to the clicked call node.
-    dispatch(
-      changeSelectedCallNode(
-        threadsKey,
-        // Select the best ancestor call node.
-        getCallNodePathFromIndex(bestAncestorCallNode, callNodeTable),
-        // Also expand the children nodes out further below it to what was actually
-        // clicked.
-        getCallNodePathFromIndex(clickedCallNode, callNodeTable)
-      )
-    );
-    return true;
   };
 }
 
@@ -1978,6 +1922,17 @@ export function changeMouseTimePosition(
   return {
     type: 'CHANGE_MOUSE_TIME_POSITION',
     mouseTimePosition,
+  };
+}
+
+export function changeTableViewOptions(
+  tab: TabSlug,
+  tableViewOptions: TableViewOptions
+): Action {
+  return {
+    type: 'CHANGE_TABLE_VIEW_OPTIONS',
+    tab,
+    tableViewOptions,
   };
 }
 

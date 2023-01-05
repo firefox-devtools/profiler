@@ -103,6 +103,14 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 class FlameGraphImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
 
+  componentDidMount() {
+    document.addEventListener('copy', this._onCopy, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('copy', this._onCopy, false);
+  }
+
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
@@ -298,6 +306,24 @@ class FlameGraphImpl extends React.PureComponent<Props> {
 
     if (nodeIndex !== null) {
       handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+    }
+  };
+
+  _onCopy = (event: ClipboardEvent) => {
+    if (document.activeElement === this._viewport) {
+      event.preventDefault();
+      const {
+        callNodeInfo: { callNodeTable },
+        selectedCallNodeIndex,
+        thread,
+      } = this.props;
+      if (selectedCallNodeIndex !== null) {
+        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcName = thread.stringTable.getString(
+          thread.funcTable.name[funcIndex]
+        );
+        event.clipboardData.setData('text/plain', funcName);
+      }
     }
   };
 

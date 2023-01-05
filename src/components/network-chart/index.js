@@ -91,6 +91,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
 
   componentDidMount() {
     this.focus();
+    this.scrollSelectionIntoView();
   }
 
   componentDidUpdate(prevProps) {

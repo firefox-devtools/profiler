@@ -158,8 +158,31 @@ class StackChartImpl extends React.PureComponent<Props> {
     handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
   };
 
+  _onCopy = (event: ClipboardEvent) => {
+    if (document.activeElement === this._viewport) {
+      event.preventDefault();
+      const {
+        callNodeInfo: { callNodeTable },
+        selectedCallNodeIndex,
+        thread,
+      } = this.props;
+      if (selectedCallNodeIndex !== null) {
+        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcName = thread.stringTable.getString(
+          thread.funcTable.name[funcIndex]
+        );
+        event.clipboardData.setData('text/plain', funcName);
+      }
+    }
+  };
+
   componentDidMount() {
+    document.addEventListener('copy', this._onCopy, false);
     this._focusViewport();
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('copy', this._onCopy, false);
   }
 
   render() {
@@ -192,7 +215,6 @@ class StackChartImpl extends React.PureComponent<Props> {
         id="stack-chart-tab"
         role="tabpanel"
         aria-labelledby="stack-chart-tab-button"
-        onKeyDown={this._handleKeyDown}
       >
         <StackSettings />
         <TransformNavigator />
@@ -205,7 +227,7 @@ class StackChartImpl extends React.PureComponent<Props> {
               className: 'treeViewContextMenu',
             }}
           >
-            <div className="stackChartContent">
+            <div className="stackChartContent" onKeyDown={this._handleKeyDown}>
               <StackChartCanvas
                 viewportProps={{
                   previewSelection,
