@@ -28,6 +28,7 @@ import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import {
   PROCESSED_PROFILE_VERSION,
   INTERVAL,
+  INTERVAL_END,
   INSTANT,
 } from '../app-logic/constants';
 import {
@@ -87,6 +88,7 @@ import type {
   PageList,
   ThreadIndex,
   BrowsertimeMarkerPayload,
+  MarkerPhase,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -1736,18 +1738,30 @@ export function processVisualMetrics(
     (cat) => cat.name === 'Test'
   );
 
-  function addMetricMarker(
+  function maybeAddMetricMarker(
     thread: Thread,
     name: string,
-    startTime: number,
-    endTime?: number,
+    phase: MarkerPhase,
+    startTime: number | null,
+    endTime: number | null,
     payload?: BrowsertimeMarkerPayload
   ) {
+    if (
+      // All phases except INTERVAL_END should have a start time.
+      (phase !== INTERVAL_END && startTime === null) ||
+      // Only INTERVAL and INTERVAL_END should have an end time.
+      ((phase === INTERVAL || phase === INTERVAL_END) && endTime === null)
+    ) {
+      // Do not add if some timestamps we expect are missing.
+      // This should ideally never happen but timestamps could be null due to
+      // browsertime bug here: https://github.com/sitespeedio/browsertime/issues/1746.
+      return;
+    }
     // Add the marker to the given thread.
     thread.markers.name.push(thread.stringTable.indexForString(name));
     thread.markers.startTime.push(startTime);
-    thread.markers.endTime.push(endTime ? endTime : 0);
-    thread.markers.phase.push(endTime ? INTERVAL : INSTANT);
+    thread.markers.endTime.push(endTime);
+    thread.markers.phase.push(phase);
     thread.markers.category.push(testingCategoryIdx);
     thread.markers.data.push(payload ?? null);
     thread.markers.length++;
@@ -1778,20 +1792,14 @@ export function processVisualMetrics(
       continue;
     }
 
-    if (metric.every((m) => m.timestamp === null)) {
-      // Skip it if we don't have any timestamps.
-      // This is due to https://github.com/sitespeedio/browsertime/issues/1746.
-      continue;
-    }
-
     const startTime = navigationStartTime ?? metric[0].timestamp;
     const endTime = metric[metric.length - 1].timestamp;
 
     // Add the progress marker to the parent process main thread.
     const markerName = `${metricName} Progress`;
-    addMetricMarker(mainThread, markerName, startTime, endTime);
+    maybeAddMetricMarker(mainThread, markerName, INTERVAL, startTime, endTime);
     // Add the progress marker to the tab process main thread.
-    addMetricMarker(tabThread, markerName, startTime, endTime);
+    maybeAddMetricMarker(tabThread, markerName, INTERVAL, startTime, endTime);
 
     // Add progress markers for every visual progress change for more fine grained information.
     const progressMarkerSchema = {
@@ -1804,11 +1812,6 @@ export function processVisualMetrics(
 
     const changeMarkerName = `${metricName} Change`;
     for (const { timestamp, percent } of metric) {
-      if (timestamp === null) {
-        // Skip it if we don't have a timestamp.
-        // This might be due to https://github.com/sitespeedio/browsertime/issues/1746.
-        continue;
-      }
       const payload = {
         type: 'VisualMetricProgress',
         // 'percentage' type expects a value between 0 and 1.
@@ -1816,19 +1819,21 @@ export function processVisualMetrics(
       };
 
       // Add it to the parent process main thread.
-      addMetricMarker(
+      maybeAddMetricMarker(
         mainThread,
         changeMarkerName,
+        INSTANT,
         timestamp,
-        undefined, // endTime
+        null, // endTime
         payload
       );
       // Add it to the tab process main thread.
-      addMetricMarker(
+      maybeAddMetricMarker(
         tabThread,
         changeMarkerName,
+        INSTANT,
         timestamp,
-        undefined, // endTime
+        null, // endTime
         payload
       );
     }
