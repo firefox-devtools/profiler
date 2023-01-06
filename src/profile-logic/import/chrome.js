@@ -517,6 +517,7 @@ async function processTracingEvents(
       threadInfo;
 
     let profileChunks = [];
+    let lineNumberAdjustment = 0;
     if (profileEvent.name === 'Profile') {
       threadInfo.lastSeenTime = (profileEvent.args.data.startTime: any) / 1000;
       const { id, pid } = profileEvent;
@@ -529,6 +530,7 @@ async function processTracingEvents(
       threadInfo.lastSeenTime =
         (profileEvent.args.data.cpuProfile.startTime: any) / 1000;
       profileChunks = [profileEvent];
+      lineNumberAdjustment = +1;
     }
 
     for (const profileChunk of profileChunks) {
@@ -570,6 +572,9 @@ async function processTracingEvents(
           let { url, lineNumber, columnNumber } = callFrame;
           if (lineNumber === -1) {
             lineNumber = undefined;
+          }
+          if (lineNumber !== undefined) {
+            lineNumber += lineNumberAdjustment;
           }
           if (columnNumber === -1) {
             columnNumber = undefined;
