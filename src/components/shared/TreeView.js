@@ -451,7 +451,10 @@ type TreeViewProps<DisplayData> = {|
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
   +maxNodeDepth: number,
-  +onSelectionChange: (NodeIndex) => mixed,
+  +onSelectionChange: (
+    NodeIndex,
+    {| source: 'keyboard' | 'pointer' |}
+  ) => mixed,
   +onRightClickSelection?: (NodeIndex) => mixed,
   +onEnterKey?: (NodeIndex) => mixed,
   +onDoubleClick?: (NodeIndex) => mixed,
@@ -751,21 +754,21 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     this._toggle(nodeId, newExpanded, true);
   }
 
-  _select(nodeId: NodeIndex) {
-    this.props.onSelectionChange(nodeId);
+  _selectWithMouse(nodeId: NodeIndex) {
+    this.props.onSelectionChange(nodeId, { source: 'pointer' });
   }
 
   _rightClickSelect(nodeId: NodeIndex) {
     if (this.props.onRightClickSelection) {
       this.props.onRightClickSelection(nodeId);
     } else {
-      this._select(nodeId);
+      this._selectWithMouse(nodeId);
     }
   }
 
   _onRowClicked = (nodeId: NodeIndex, event: SyntheticMouseEvent<>) => {
     if (event.button === 0) {
-      this._select(nodeId);
+      this._selectWithMouse(nodeId);
     } else if (event.button === 2) {
       this._rightClickSelect(nodeId);
     }
@@ -789,6 +792,10 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       clipboardData.setData('text/plain', displayData[mainColumn.propName]);
     }
   };
+
+  _selectWithKeyboard(nodeId: NodeIndex) {
+    this.props.onSelectionChange(nodeId, { source: 'keyboard' });
+  }
 
   _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
     if (this.props.onKeyDown) {
@@ -819,7 +826,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
 
     if (selected === null || selectedRowIndex === -1) {
       // the first condition is redundant, but it makes flow happy
-      this._select(visibleRows[0]);
+      this._selectWithKeyboard(visibleRows[0]);
       return;
     }
 
@@ -828,31 +835,31 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
         case 'ArrowUp': {
           if (event.metaKey) {
             // On MacOS this is a common shortcut for the Home gesture
-            this._select(visibleRows[0]);
+            this._selectWithKeyboard(visibleRows[0]);
             break;
           }
 
           if (selectedRowIndex > 0) {
-            this._select(visibleRows[selectedRowIndex - 1]);
+            this._selectWithKeyboard(visibleRows[selectedRowIndex - 1]);
           }
           break;
         }
         case 'ArrowDown': {
           if (event.metaKey) {
             // On MacOS this is a common shortcut for the End gesture
-            this._select(visibleRows[visibleRows.length - 1]);
+            this._selectWithKeyboard(visibleRows[visibleRows.length - 1]);
             break;
           }
 
           if (selectedRowIndex < visibleRows.length - 1) {
-            this._select(visibleRows[selectedRowIndex + 1]);
+            this._selectWithKeyboard(visibleRows[selectedRowIndex + 1]);
           }
           break;
         }
         case 'PageUp': {
           if (selectedRowIndex > 0) {
             const nextRow = Math.max(0, selectedRowIndex - PAGE_KEYS_DELTA);
-            this._select(visibleRows[nextRow]);
+            this._selectWithKeyboard(visibleRows[nextRow]);
           }
           break;
         }
@@ -862,16 +869,16 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
               visibleRows.length - 1,
               selectedRowIndex + PAGE_KEYS_DELTA
             );
-            this._select(visibleRows[nextRow]);
+            this._selectWithKeyboard(visibleRows[nextRow]);
           }
           break;
         }
         case 'Home': {
-          this._select(visibleRows[0]);
+          this._selectWithKeyboard(visibleRows[0]);
           break;
         }
         case 'End': {
-          this._select(visibleRows[visibleRows.length - 1]);
+          this._selectWithKeyboard(visibleRows[visibleRows.length - 1]);
           break;
         }
         case 'ArrowLeft': {
@@ -881,7 +888,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
           } else {
             const parent = this.props.tree.getParent(selected);
             if (parent !== -1) {
-              this._select(parent);
+              this._selectWithKeyboard(parent);
             }
           }
           break;
@@ -893,7 +900,9 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
           } else {
             // Do KEY_DOWN only if the next element is a child
             if (this.props.tree.hasChildren(selected)) {
-              this._select(this.props.tree.getChildren(selected)[0]);
+              this._selectWithKeyboard(
+                this.props.tree.getChildren(selected)[0]
+              );
             }
           }
           break;

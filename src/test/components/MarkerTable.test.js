@@ -42,6 +42,7 @@ import {
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import { getScrollToSelectionGeneration } from 'firefox-profiler/selectors/profile';
 
 import type { CauseBacktrace } from 'firefox-profiler/types';
 
@@ -109,14 +110,20 @@ describe('MarkerTable', function () {
   });
 
   it('selects a row when left clicking', () => {
-    const { getByText, getRowElement } = setup();
+    const { getByText, getRowElement, getState } = setup();
 
+    const initialScrollGeneration = getScrollToSelectionGeneration(getState());
     fireFullClick(getByText(/setTimeout/));
     expect(getRowElement(/setTimeout/)).toHaveClass('isSelected');
 
     fireFullClick(getByText('foobar'));
     expect(getRowElement(/setTimeout/)).not.toHaveClass('isSelected');
     expect(getRowElement('foobar')).toHaveClass('isSelected');
+
+    // The scroll generation hasn't moved.
+    expect(getScrollToSelectionGeneration(getState())).toEqual(
+      initialScrollGeneration
+    );
   });
 
   it('displays a context menu when right clicking', () => {

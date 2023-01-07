@@ -324,7 +324,6 @@ type NetworkChartRowProps = {|
   +isRightClicked: boolean,
   +isSelected: boolean,
   +isHoveredFromState: boolean,
-  +select: (MarkerIndex) => mixed,
   +onLeftClick?: (MarkerIndex) => mixed,
   +onRightClick?: (MarkerIndex) => mixed,
   +onHover?: (MarkerIndex | null) => mixed,
