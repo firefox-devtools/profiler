@@ -38,8 +38,8 @@ AppViewRouter--error-compare = 无法获取分析记录。
 # This error message is displayed when a Safari-specific error state is encountered.
 # Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
-AppViewRouter--error-from-localhost-url-safari = 由于 <a>Safari 的特殊限制</a>，{ -profiler-brand-name } 无法使用此浏览器从本地导入分析记录。请在 { -firefox-brand-name } 或 Chrome 中打开此页面。
-    .title = Safari 无法导入本地性能分析记录
+AppViewRouter--error-from-localhost-url-safari = 由于 <a>Safari 浏览器的特殊限制</a>，{ -profiler-brand-name } 无法使用此浏览器从本地导入分析记录。请在 { -firefox-brand-name } 或 Chrome 中打开此页面。
+    .title = Safari 浏览器无法导入本地性能分析记录
 AppViewRouter--route-not-found--home =
     .specialMessage = 无法识别您尝试访问的 URL。
 
@@ -184,7 +184,6 @@ Home--enable-button-unavailable =
 # This message can be seen on https://main--perf-html.netlify.app/ .
 Home--web-channel-unavailable = 此分析器无法连接至 WebChannel。通常是因为运行分析器的主机与 <code>devtools.performance.recording.ui-base-url</code> 首选项中指定的主机不同。若您想要使用此分析器捕捉新的性能分析记录，并可程序化控制分析器菜单按钮，可到 <code>about:config</code> 调整该首选项。
 Home--record-instructions = 要进行分析，请点击“分析”按钮，或使用键盘快捷键。在性能记录时，此图标将会变为蓝色。按下<kbd>捕捉</kbd>即可将数据加载至 profiler.firefox.com。
-Home--instructions-title = 如何查看并记录分析结果
 Home--instructions-content = 需使用 <a>{ -firefox-brand-name }</a> 记录性能分析信息。但可以使用任何现代浏览器查看现有分析记录。
 Home--record-instructions-start-stop = 停止并开始分析
 Home--record-instructions-capture-load = 捕捉并加载分析记录
@@ -615,8 +614,12 @@ TrackMemoryGraph--operations-since-the-previous-sample = 自前一次采样以�
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
@@ -628,42 +631,6 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = 功率
-# This is used in the tooltip when the energy used in the current range uses the
-# watt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
-    .label = 可见范围内的功耗
-# This is used in the tooltip when the energy used in the current range uses the
-# milliwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
-    .label = 可见范围内的功耗
-# This is used in the tooltip when the energy used in the current range uses the
-# microwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
-    .label = 可见范围内的功耗
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the watt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
-    .label = 当前选择范围内的功耗
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the milliwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
-    .label = 当前选择范围内的功耗
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the microwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
-    .label = 当前选择范围内的功耗
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

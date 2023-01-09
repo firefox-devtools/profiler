@@ -25,6 +25,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getScrollToSelectionGeneration } from 'firefox-profiler/selectors/profile';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -679,12 +680,13 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
   afterEach(removeRootOverlayElement);
 
   function setup(markers) {
-    const { container } = setupWithPayload(markers);
+    const { container, getState } = setupWithPayload(markers);
 
     const renderedRows = container.querySelectorAll('.networkChartRowItem');
     expect(renderedRows.length).toEqual(48);
 
     return {
+      getState,
       // take either a key as a string, or a full event if we need more
       // information like modifier keys.
       simulateKey: (param: string | { key: string }) => {
@@ -708,10 +710,16 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
   }
 
   it('selects row on left click', () => {
-    const { rowItem } = setupWithPayload(getNetworkMarkers());
+    const { rowItem, getState } = setupWithPayload(getNetworkMarkers());
 
+    const initialScrollGeneration = getScrollToSelectionGeneration(getState());
     fireFullClick(rowItem());
     expect(rowItem()).toHaveClass('isSelected');
+
+    // The scroll generation hasn't moved.
+    expect(getScrollToSelectionGeneration(getState())).toEqual(
+      initialScrollGeneration
+    );
   });
 
   it('reacts properly to up/down navigation keys', () => {
@@ -732,7 +740,9 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
       return [].concat(...arrayOfNetworkMarkers);
     })();
 
-    const { simulateKey, selectedText } = setup(markers);
+    const { simulateKey, selectedText, getState } = setup(markers);
+
+    const initialScrollGeneration = getScrollToSelectionGeneration(getState());
 
     simulateKey('ArrowDown');
     expect(selectedText()).toBe(`https://mozilla.org/1`);
@@ -752,5 +762,11 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     expect(selectedText()).toBe(`https://mozilla.org/48`);
     simulateKey({ key: 'ArrowUp', metaKey: true });
     expect(selectedText()).toBe(`https://mozilla.org/1`);
+
+    // Now we expect that the scroll generation increased, because scroll should
+    // be triggered with the keyboard navigation.
+    expect(getScrollToSelectionGeneration(getState())).toBeGreaterThan(
+      initialScrollGeneration
+    );
   });
 });

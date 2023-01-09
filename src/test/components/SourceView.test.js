@@ -101,6 +101,7 @@ describe('SourceView', () => {
     const { sourceView } = setup();
 
     const frameElement = screen.getByRole('treeitem', { name: /^A/ });
+
     fireFullClick(frameElement);
     fireFullClick(frameElement, { detail: 2 });
     expect(sourceView()).toBeInTheDocument();

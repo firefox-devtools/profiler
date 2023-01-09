@@ -21,6 +21,7 @@ import {
   getFocusCallTreeGeneration,
   getPreviewSelection,
   getCategories,
+  getCurrentTableViewOptions,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -30,6 +31,7 @@ import {
   addTransformToStack,
   handleCallNodeTransformShortcut,
   openSourceView,
+  changeTableViewOptions,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -42,10 +44,15 @@ import type {
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   WeightType,
+  TableViewOptions,
+  SelectionContext,
 } from 'firefox-profiler/types';
 import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
 
-import type { Column } from 'firefox-profiler/components/shared/TreeView';
+import type {
+  Column,
+  MaybeResizableColumn,
+} from 'firefox-profiler/components/shared/TreeView';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CallTree.css';
@@ -66,6 +73,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +callNodeMaxDepth: number,
   +weightType: WeightType,
+  +tableViewOptions: TableViewOptions,
 |};
 
 type DispatchProps = {|
@@ -75,6 +83,7 @@ type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
   +openSourceView: typeof openSourceView,
+  +onTableViewOptionsChange: (TableViewOptions) => any,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -96,46 +105,97 @@ class CallTreeImpl extends PureComponent<Props> {
    * appropriate labels for the call tree based on this weight.
    */
   _weightTypeToColumns = memoize(
-    (weightType: WeightType): Column<CallNodeDisplayData>[] => {
+    (weightType: WeightType): MaybeResizableColumn<CallNodeDisplayData>[] => {
       switch (weightType) {
         case 'tracing-ms':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--tracing-ms-total',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--tracing-ms-self',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
             },
-            { propName: 'icon', titleL10nId: '', component: Icon },
+            {
+              propName: 'icon',
+              titleL10nId: '',
+              component: Icon,
+              initialWidth: 10,
+            },
           ];
         case 'samples':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--samples-total',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--samples-self',
+              minWidth: 30,
+              initialWidth: 70,
+              resizable: true,
             },
-            { propName: 'icon', titleL10nId: '', component: Icon },
+            {
+              propName: 'icon',
+              titleL10nId: '',
+              component: Icon,
+              initialWidth: 10,
+            },
           ];
         case 'bytes':
           return [
-            { propName: 'totalPercent', titleL10nId: '' },
+            {
+              propName: 'totalPercent',
+              titleL10nId: '',
+              initialWidth: 50,
+              hideDividerAfter: true,
+            },
             {
               propName: 'total',
               titleL10nId: 'CallTree--bytes-total',
+              minWidth: 30,
+              initialWidth: 140,
+              resizable: true,
+              headerWidthAdjustment: 50,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--bytes-self',
+              minWidth: 30,
+              initialWidth: 90,
+              resizable: true,
             },
-            { propName: 'icon', titleL10nId: '', component: Icon },
+            {
+              propName: 'icon',
+              titleL10nId: '',
+              component: Icon,
+              initialWidth: 10,
+            },
           ];
         default:
           throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
@@ -179,11 +239,15 @@ class CallTreeImpl extends PureComponent<Props> {
     }
   }
 
-  _onSelectedCallNodeChange = (newSelectedCallNode: IndexIntoCallNodeTable) => {
+  _onSelectedCallNodeChange = (
+    newSelectedCallNode: IndexIntoCallNodeTable,
+    context: SelectionContext
+  ) => {
     const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
+      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable),
+      context
     );
   };
 
@@ -286,7 +350,7 @@ class CallTreeImpl extends PureComponent<Props> {
       // completely dimmed activity graph because idle stacks are not drawn in
       // this graph. Because this isn't probably what the average user wants we
       // do it only when the category is something different.
-      this._onSelectedCallNodeChange(currentCallNodeIndex);
+      this._onSelectedCallNodeChange(currentCallNodeIndex, { source: 'auto' });
     }
   }
 
@@ -300,6 +364,8 @@ class CallTreeImpl extends PureComponent<Props> {
       disableOverscan,
       callNodeMaxDepth,
       weightType,
+      tableViewOptions,
+      onTableViewOptionsChange,
     } = this.props;
     if (tree.getRoots().length === 0) {
       return <CallTreeEmptyReasons />;
@@ -326,6 +392,8 @@ class CallTreeImpl extends PureComponent<Props> {
         onKeyDown={this._onKeyDown}
         onEnterKey={this._onEnterOrDoubleClick}
         onDoubleClick={this._onEnterOrDoubleClick}
+        viewOptions={tableViewOptions}
+        onViewOptionsChange={onTableViewOptionsChange}
       />
     );
   }
@@ -355,6 +423,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     callNodeMaxDepth:
       selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
+    tableViewOptions: getCurrentTableViewOptions(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
@@ -363,6 +432,8 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     addTransformToStack,
     handleCallNodeTransformShortcut,
     openSourceView,
+    onTableViewOptionsChange: (options: TableViewOptions) =>
+      changeTableViewOptions('calltree', options),
   },
   component: CallTreeImpl,
 });

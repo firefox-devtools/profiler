@@ -265,6 +265,12 @@ export function mergeProfilesForDiffing(
     );
   }
 
+  // In merged profiles, we don't want to hide any threads: either they've been
+  // explicitely selected by the user, or it's the diffing track.
+  resultProfile.meta.initialVisibleThreads = resultProfile.threads.map(
+    (_, i) => i
+  );
+
   return { profile: resultProfile, implementationFilters, transformStacks };
 }
 

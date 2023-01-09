@@ -304,7 +304,9 @@ export function convertPerfScriptProfile(
       }
 
       // 	         23fe921 _ZN7mozilla3ipc14MessageChannel11MessageTask3RunEv (/home/mstange/Desktop/firefox/libxul.so)
-      const stackFrameMatch = /^\s*(\w+)\s*(.+) \((\S*)\)/.exec(stackFrameLine);
+      const stackFrameMatch = /^\s*(\w+)\s*(.+) \(([^)]*)\)/.exec(
+        stackFrameLine
+      );
       if (stackFrameMatch) {
         // const pc = stackFrameMatch[1];
         let rawFunc = stackFrameMatch[2];

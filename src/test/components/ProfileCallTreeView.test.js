@@ -11,6 +11,7 @@ import copy from 'copy-to-clipboard';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getScrollToSelectionGeneration } from 'firefox-profiler/selectors/profile';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { processGeckoProfile } from '../../profile-logic/process-profile';
@@ -171,14 +172,20 @@ describe('calltree/ProfileCallTreeView', function () {
   });
 
   it('selects a node when left clicking', () => {
-    const { getByText, getRowElement } = setup();
+    const { getByText, getRowElement, getState } = setup();
 
+    const initialScrollGeneration = getScrollToSelectionGeneration(getState());
     fireFullClick(getByText('A'));
     expect(getRowElement('A')).toHaveClass('isSelected');
 
     fireFullClick(getByText('B'));
     expect(getRowElement('A')).not.toHaveClass('isSelected');
     expect(getRowElement('B')).toHaveClass('isSelected');
+
+    // The scroll generation hasn't moved.
+    expect(getScrollToSelectionGeneration(getState())).toEqual(
+      initialScrollGeneration
+    );
   });
 
   it('displays a context menu when right clicking', () => {
@@ -379,6 +386,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     expect(renderedRows.length).toBe(expectedRowsLength);
 
     return {
+      ...store,
       // take either a key as a string, or a full event if we need more
       // information like modifier keys.
       simulateKey: (param: string | { key: string }) => {
@@ -415,7 +423,9 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
       ''
     );
 
-    const { simulateKey, selectedText } = setup(profileString, 100);
+    const { simulateKey, selectedText, getState } = setup(profileString, 100);
+
+    const initialScrollGeneration = getScrollToSelectionGeneration(getState());
 
     expect(selectedText()).toBe('name1');
     simulateKey('ArrowDown');
@@ -436,6 +446,12 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     expect(selectedText()).toBe('name100');
     simulateKey({ key: 'ArrowUp', metaKey: true });
     expect(selectedText()).toBe('name1');
+
+    // Now we expect that the scroll generation increased, because scroll should
+    // be triggered with the keyboard navigation.
+    expect(getScrollToSelectionGeneration(getState())).toBeGreaterThan(
+      initialScrollGeneration
+    );
   });
 });
 
