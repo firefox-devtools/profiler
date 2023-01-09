@@ -517,7 +517,6 @@ async function processTracingEvents(
       threadInfo;
 
     let profileChunks = [];
-    let lineNumberAdjustment = 0;
     if (profileEvent.name === 'Profile') {
       threadInfo.lastSeenTime = (profileEvent.args.data.startTime: any) / 1000;
       const { id, pid } = profileEvent;
@@ -530,7 +529,6 @@ async function processTracingEvents(
       threadInfo.lastSeenTime =
         (profileEvent.args.data.cpuProfile.startTime: any) / 1000;
       profileChunks = [profileEvent];
-      lineNumberAdjustment = +1;
     }
 
     for (const profileChunk of profileChunks) {
@@ -573,12 +571,20 @@ async function processTracingEvents(
           if (lineNumber === -1) {
             lineNumber = undefined;
           }
-          if (lineNumber !== undefined) {
-            lineNumber += lineNumberAdjustment;
-          }
+
           if (columnNumber === -1) {
             columnNumber = undefined;
           }
+
+          // Line and column number are zero-based in chrome profiles, but
+          // 1-based in the firefox profiler.
+          if (lineNumber !== undefined) {
+            lineNumber++;
+          }
+          if (columnNumber !== undefined) {
+            columnNumber++;
+          }
+
           if (url === '') {
             url = undefined;
           }
