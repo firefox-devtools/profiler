@@ -571,9 +571,20 @@ async function processTracingEvents(
           if (lineNumber === -1) {
             lineNumber = undefined;
           }
+
           if (columnNumber === -1) {
             columnNumber = undefined;
           }
+
+          // Line and column number are zero-based in chrome profiles, but
+          // 1-based in the firefox profiler.
+          if (lineNumber !== undefined) {
+            lineNumber++;
+          }
+          if (columnNumber !== undefined) {
+            columnNumber++;
+          }
+
           if (url === '') {
             url = undefined;
           }
