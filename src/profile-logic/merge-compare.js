@@ -1243,25 +1243,32 @@ function mergeMarkers(
       const oldData = markers.data[markerIndex];
 
       if (oldData && 'cause' in oldData && oldData.cause) {
-        // The old data has a cause, we need to convert the stack.
-        const oldStack = oldData.cause.stack;
-        const newStack = translationMapForStacks.get(oldStack);
-        if (newStack === undefined) {
-          throw new Error(
-            `Missing old stack entry ${oldStack} in the translation map.`
-          );
-        }
+        const newData = {
+          ...oldData,
+        };
+        for (const field in oldData) {
+          const oldFieldData = oldData[field];
+          if (!(oldFieldData instanceof Object) || !('stack' in oldFieldData)) {
+            continue;
+          }
+          // The old data has a cause like field, we need to convert the stack.
+          const oldStack = oldFieldData.stack;
+          const newStack = translationMapForStacks.get(oldStack);
+          if (newStack === undefined) {
+            throw new Error(
+              `Missing old stack entry ${oldStack} in the translation map.`
+            );
+          }
 
+          newData[field] = {
+            ...oldFieldData,
+            stack: newStack,
+          };
+        }
         // Flow doesn't know well how to handle the spread operator with our
         // MarkerPayload type.
         // $FlowExpectError
-        newMarkerTable.data.push({
-          ...oldData,
-          cause: {
-            ...oldData.cause,
-            stack: newStack,
-          },
-        });
+        newMarkerTable.data.push(newData);
       } else if (oldData && oldData.type === 'CompositorScreenshot') {
         const urlString =
           oldData.url === undefined
