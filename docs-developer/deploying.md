@@ -12,25 +12,6 @@ https://main--perf-html.netlify.app. Every pull request will be deployed as well
 separate domain, whose link will be added automatically to the PR:
 ![The link to the preview deployment is in the sections where checks are](images/netlify-link.png)
 
-## How to deploy main to production
-
-Before the deploy, changes in the [`l10n`](https://github.com/firefox-devtools/profiler/tree/l10n)
-branch should be merged into `main` if there are any localization changes. See
-the [section related to this step](#how-to-merge-l10n-into-main) for more details.
-
-After merging the `l10n` branch, we can continue with the deployment.
-The easiest by far is to
-[create a pull request on GitHub](https://github.com/firefox-devtools/profiler/compare/production...main?expand=1).
-It would be nice to write down the main changes in the PR description.
-
-After the PR is created all checks should run. When it's ready the PR can be
-merged. Be careful to always use the **create a merge commit** functionality,
-not *squash* or *rebase*, to keep a better history.
-
-Once it's done the new version should be deployed automatically. You can follow the
-process on [Netlify's dashboard](https://app.netlify.com/sites/perf-html/deploys)
-if you have access.
-
 ## How to merge l10n into main
 
 Our localization process happens inside [Pontoon](https://pontoon.mozilla.org/de/firefox-profiler/).
@@ -49,6 +30,25 @@ git fetch upstream && git diff --name-only upstream/main..upstream/l10n | awk -F
 
 Be careful to always use the **create a merge commit** functionality, not
 *squash* or *rebase*, to keep a better history.
+
+## How to deploy main to production
+
+Before the deploy, changes in the [`l10n`](https://github.com/firefox-devtools/profiler/tree/l10n)
+branch should be merged into `main` if there are any localization changes. See
+the [section related to this step](#how-to-merge-l10n-into-main) for more details.
+
+After merging the `l10n` branch, we can continue with the deployment.
+The easiest by far is to
+[create a pull request on GitHub](https://github.com/firefox-devtools/profiler/compare/production...main?expand=1).
+It would be nice to write down the main changes in the PR description.
+
+After the PR is created all checks should run. When it's ready the PR can be
+merged. Be careful to always use the **create a merge commit** functionality,
+not *squash* or *rebase*, to keep a better history.
+
+Once it's done the new version should be deployed automatically. You can follow the
+process on [Netlify's dashboard](https://app.netlify.com/sites/perf-html/deploys)
+if you have access.
 
 ## How to revert to a previous version
 
