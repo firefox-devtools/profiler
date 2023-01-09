@@ -1285,7 +1285,7 @@ export function adjustMarkerTimestamps(
       if (typeof newData.endTime === 'number') {
         newData.endTime += delta;
       }
-      if (newData.cause) {
+      if (newData.cause && newData.cause.time !== undefined) {
         newData.cause.time += delta;
       }
       if (newData.type === 'Network') {
