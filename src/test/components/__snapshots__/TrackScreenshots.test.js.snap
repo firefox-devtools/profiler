@@ -10,6 +10,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 0px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.000s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -20,6 +21,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 37.5px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.000s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -30,6 +32,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 75px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.001s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -40,6 +43,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 112.5px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.002s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -50,6 +54,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 150px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.003s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -60,6 +65,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 187.5px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.004s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -70,6 +76,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 225px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.004s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -80,6 +87,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 262.5px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.004s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -90,6 +98,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 300px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.004s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -100,6 +109,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 337.5px; width: 37.5px;"
   >
     <img
+      alt="Screenshot recorded at 0.004s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"
@@ -110,6 +120,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     style="left: 375px; width: 25px;"
   >
     <img
+      alt="Screenshot recorded at 0.004s"
       class="timelineTrackScreenshotImg"
       src="CompositorScreenshot"
       style="width: 100px; height: 50px;"

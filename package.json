@@ -12,6 +12,7 @@
     "build-photon": "webpack --config res/photon/webpack.config.js",
     "lint": "run-p lint-js lint-css",
     "lint-js": "eslint *.js bin src --report-unused-disable-directives --cache --cache-strategy content",
+    "lint-js-a11y": "yarn lint-js -c .eslintrc.a11y.js",
     "lint-fix-js": "yarn lint-js --fix",
     "lint-css": "stylelint \"src/**/*.css\" \"res/**/*.css\"",
     "lint-fix-css": "yarn lint-css --fix",
@@ -125,6 +126,7 @@
     "eslint-plugin-jest": "^27.1.7",
     "eslint-plugin-jest-dom": "^4.0.3",
     "eslint-plugin-jest-formatting": "^3.1.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-testing-library": "^5.9.1",
@@ -138,6 +140,7 @@
     "html-webpack-plugin": "^5.5.0",
     "husky": "^4.3.8",
     "jest": "^29.3.1",
+    "jest-axe": "^7.0.0",
     "jest-environment-jsdom": "^29.3.1",
     "jest-extended": "^3.2.0",
     "json-loader": "^0.5.7",
@@ -150,6 +153,7 @@
     "postcss-loader": "^7.0.2",
     "prettier": "^2.8.1",
     "raw-loader": "^4.0.2",
+    "react-axe": "^3.5.3",
     "rimraf": "^3.0.2",
     "style-loader": "^3.3.1",
     "stylelint": "^14.16.1",
@@ -181,6 +185,7 @@
     },
     "setupFilesAfterEnv": [
       "jest-extended/all",
+      "jest-axe/extend-expect",
       "./src/test/setup.js"
     ],
     "globals": {
