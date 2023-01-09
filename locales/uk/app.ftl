@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox для Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -239,6 +240,10 @@ Home--menu-button = Увімкнути кнопку меню { -profiler-brand-n
 Home--menu-button-instructions =
     Увімкніть кнопку меню профайлера, щоб почати запис швидкодії профілю у
     { -firefox-brand-name }, потім аналізуйте його та оприлюдніть на profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Ви також можете створити профіль { -firefox-android-brand-name }. За
+    подробицями зверніться до цієї документації:
+    <a>Профілювання { -firefox-android-brand-name } безпосередньо на пристрої</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -256,7 +261,6 @@ Home--record-instructions =
     Щоб розпочати запис профілю, натисніть кнопку запису або скористайтеся
     комбінацією клавіш. Під час запису профілю піктограма стає синього кольору.
     Натисніть <kbd>Захопити</kbd>, щоб завантажити дані на profiler.firefox.com.
-Home--instructions-title = Як переглядати та записувати профілі
 Home--instructions-content =
     Для запису профілів швидкодії потрібен <a>{ -firefox-brand-name }</a>.
     Однак, наявні профілі можна переглядати в будь-якому сучасному браузері.
@@ -267,6 +271,14 @@ Home--additional-content-title = Завантажити наявні профі�
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
 Home--compare-recordings-info = Ви також можете порівняти записи. <a>Відкрити інтерфейс порівняння.</a>
 Home--your-recent-uploaded-recordings-title = Ваші недавно вивантажені записи
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    { -profiler-brand-name } також може імпортувати профілі з інших профайлерів, наприклад
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
+    Панель швидкодії Chrome, <androidstudio>Android Studio</androidstudio> або
+    будь-який файл у <dhat>форматі dhat</dhat>. <write>Навчіться записувати свій
+    власний імпортер</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -702,8 +714,12 @@ TrackMemoryGraph--operations-since-the-previous-sample = операції, по�
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
@@ -719,38 +735,44 @@ TrackPower--tooltip-power-milliwatt = { $value } мВт
 # watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Вт·год
-    .label = Використовувана у видимому діапазоні енергія
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Вт·год ({ $carbonValue } г CO₂e)
+    .label = Спожита у видимому діапазоні енергія
 # This is used in the tooltip when the energy used in the current range uses the
 # milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } мВт·год
-    .label = Використовувана у видимому діапазоні енергія
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } мВт·год ({ $carbonValue } мг CO₂е)
+    .label = Спожита у видимому діапазоні енергія
 # This is used in the tooltip when the energy used in the current range uses the
 # microwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µВт·год
-    .label = Використовувана енергія у видимому діапазоні
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } мкВт·год ({ $carbonValue } мг CO₂e)
+    .label = Спожита у видимому діапазоні енергія
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Вт·год
-    .label = Використовувана в поточному виборі енергія
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Вт·год ({ $carbonValue } г CO₂e)
+    .label = Спожита у поточній вибірці енергія
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } Вт·год
-    .label = Використовувана в поточному виборі енергія
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } мВт·год ({ $carbonValue } мг CO₂е)
+    .label = Спожита у поточній вибірці енергія
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the microwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µВт·год
-    .label = Використана в поточній вибірці енергія
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } мкВт·год ({ $carbonValue } мг CO₂e)
+    .label = Спожита у поточній вибірці енергія
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

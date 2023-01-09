@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox i Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -83,6 +84,8 @@ CallTreeSidebar--select-a-node = Fren takerrist i uskan n talɣut fell-as.
 CompareHome--instruction-title = Sekcem URLs n umaɣnu i tebɣiḍ ad tsenmehleḍ
 CompareHome--form-label-profile1 = Amaɣnu 1:
 CompareHome--form-label-profile2 = Amaɣnu 2:
+CompareHome--submit-button =
+    .value = Err-d imaɣunen
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -129,13 +132,13 @@ Home--load-from-url-submit-button =
     .value = Sali
 Home--documentation-button = Tasemlit
 Home--menu-button = Rmed taqeffalt n wumuɣ { -profiler-brand-name }
-Home--instructions-title = Amek ara twaliḍ akked ad teskelseḍ imuɣna
 Home--record-instructions-start-stop = Seḥbes neɣ bdu timeɣna
 Home--record-instructions-capture-load = Ṭṭef neɣ sali amaɣnu
 Home--profiler-motto = Ṭṭef amaɣnu n temlellit. Sleḍ-it. Bḍu-t. Err web d arurad.
 Home--additional-content-title = Sali imuɣna yellan
 Home--additional-content-content = Tzemreḍ <strong>ad tzuɣreḍ syen sers</strong> afaylu n umaɣnu da i usali-ines, neɣ:
 Home--compare-recordings-info = Tzemreḍ daɣen ad tsenmehleḍ iseklasen. <a>Ldi agrudem n usnemhel.</a>
+Home--your-recent-uploaded-recordings-title = Iseklasen-ik·im i d-yulin melmi kan
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -226,7 +229,8 @@ MenuButtons--index--profile-info-uploaded-label = Yuli-d:
 MenuButtons--index--profile-info-uploaded-actions = Kkes
 MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
-MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--index--show-moreInfo-button = Sken ugar
+MenuButtons--index--hide-moreInfo-button = Sken drus
 MenuButtons--metaInfo--main-process-started = Asesfer agejdan yebda:
 MenuButtons--metaInfo--main-process-ended = Asesfer agejdan yekfa:
 MenuButtons--metaInfo--interval = Azilal:
@@ -429,7 +433,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
 
-## TrackPowerGraph
+## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
 ## It's not displayed by default in the UI, but an example can be found at
@@ -480,11 +484,6 @@ TransformNavigator--merge-function = Smezdi: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Sers: { $item }
-# "Collapse direct recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion = Fneẓ asniles: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
