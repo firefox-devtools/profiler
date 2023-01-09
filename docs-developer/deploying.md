@@ -25,7 +25,7 @@ To be able to get the changed locales quickly, this command can be used
 (assuming that `upstream` is the remote you use for this repository):
 
 ```
-git fetch upstream && git diff --name-only upstream/main..upstream/l10n | awk -F '/' '{print $2}'
+git fetch upstream && git diff --name-only upstream/main..upstream/l10n | awk -F '/' '{printf $2 ", "}'; echo
 ```
 
 Be careful to always use the **create a merge commit** functionality, not
