@@ -152,7 +152,7 @@
     "raw-loader": "^4.0.2",
     "rimraf": "^3.0.2",
     "style-loader": "^3.3.1",
-    "stylelint": "^14.16.0",
+    "stylelint": "^14.16.1",
     "stylelint-config-idiomatic-order": "^9.0.0",
     "stylelint-config-prettier": "^9.0.4",
     "stylelint-config-standard": "^29.0.0",
@@ -172,7 +172,9 @@
       "js",
       "jsx"
     ],
-    "transformIgnorePatterns": ["/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj)/)"],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(query-string|decode-uri-component|split-on-first|filter-obj)/)"
+    ],
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$": "<rootDir>/src/test/fixtures/mocks/file-mock.js",
       "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.js"
