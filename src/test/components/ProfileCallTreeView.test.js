@@ -11,6 +11,7 @@ import copy from 'copy-to-clipboard';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getScrollToSelectionGeneration } from 'firefox-profiler/selectors/profile';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { processGeckoProfile } from '../../profile-logic/process-profile';
@@ -25,6 +26,7 @@ import {
   changeInvertCallstack,
   commitRange,
   addTransformToStack,
+  selectTrackWithModifiers,
 } from '../../actions/profile-view';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
@@ -74,11 +76,12 @@ describe('calltree/ProfileCallTreeView', function () {
     );
     const { container } = renderResult;
 
-    const getRowElement = (functionName) =>
-      ensureExists(
-        screen.getByText(functionName).closest('.treeViewRow'),
-        `Couldn't find the row for node ${functionName}.`
-      );
+    const getRowElement = (functionName, modifiers = {}) =>
+      screen.getByRole('treeitem', {
+        name: new RegExp(`^${functionName}`),
+        ...modifiers,
+      });
+
     const getContextMenu = () =>
       ensureExists(
         container.querySelector('.react-contextmenu'),
@@ -169,14 +172,20 @@ describe('calltree/ProfileCallTreeView', function () {
   });
 
   it('selects a node when left clicking', () => {
-    const { getByText, getRowElement } = setup();
+    const { getByText, getRowElement, getState } = setup();
 
+    const initialScrollGeneration = getScrollToSelectionGeneration(getState());
     fireFullClick(getByText('A'));
     expect(getRowElement('A')).toHaveClass('isSelected');
 
     fireFullClick(getByText('B'));
     expect(getRowElement('A')).not.toHaveClass('isSelected');
     expect(getRowElement('B')).toHaveClass('isSelected');
+
+    // The scroll generation hasn't moved.
+    expect(getScrollToSelectionGeneration(getState())).toEqual(
+      initialScrollGeneration
+    );
   });
 
   it('displays a context menu when right clicking', () => {
@@ -273,14 +282,38 @@ describe('calltree/ProfileCallTreeView', function () {
     expect(getRowElement('A')).not.toHaveClass('isRightClicked');
   });
 
-  it('selects the heaviest stack if it is not idle', () => {
-    const { profile } = getProfileFromTextSamples(`
-      A  A  A  A  A
-      B  C  C  C  D
-      E           E
-    `);
-    const { getRowElement } = setup(profile);
-    expect(getRowElement('C')).toHaveClass('isSelected');
+  it('procures an interesting selection, also when switching threads', () => {
+    const { profile } = getProfileFromTextSamples(
+      `
+        A  A  A  A  A
+        B  C  C  C  D
+        E           E
+      `,
+      `
+        G  G  G  G  G
+        H  H  I  I  I
+        J  J  K  L
+      `
+    );
+    // Assign values so that these threads are considered global processes.
+    Object.assign(profile.threads[0], {
+      pid: 111,
+      tid: 111,
+      name: 'GeckoMain',
+    });
+    Object.assign(profile.threads[1], {
+      pid: 112,
+      tid: 112,
+      name: 'GeckoMain',
+    });
+    const { getRowElement, dispatch } = setup(profile);
+    expect(getRowElement('C', { selected: true })).toHaveClass('isSelected');
+    expect(getRowElement('A', { expanded: true })).toBeInTheDocument();
+
+    // now switch to the other thread
+    dispatch(selectTrackWithModifiers({ type: 'global', trackIndex: 1 }));
+    expect(getRowElement('K', { selected: true })).toHaveClass('isSelected');
+    expect(getRowElement('I', { expanded: true })).toBeInTheDocument();
   });
 
   it('does not select the heaviest stack if it is idle', () => {
@@ -289,8 +322,9 @@ describe('calltree/ProfileCallTreeView', function () {
       B  C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  D
       E                                         E
     `);
-    const { container } = setup(profile);
-    expect(container.querySelector('.treeViewRow.isSelected')).toBeFalsy();
+    const { getRowElement } = setup(profile);
+    expect(getRowElement('E', { selected: true })).toHaveClass('isSelected');
+    expect(getRowElement('B', { expanded: true })).toBeInTheDocument();
   });
 });
 
@@ -352,6 +386,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     expect(renderedRows.length).toBe(expectedRowsLength);
 
     return {
+      ...store,
       // take either a key as a string, or a full event if we need more
       // information like modifier keys.
       simulateKey: (param: string | { key: string }) => {
@@ -388,7 +423,9 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
       ''
     );
 
-    const { simulateKey, selectedText } = setup(profileString, 100);
+    const { simulateKey, selectedText, getState } = setup(profileString, 100);
+
+    const initialScrollGeneration = getScrollToSelectionGeneration(getState());
 
     expect(selectedText()).toBe('name1');
     simulateKey('ArrowDown');
@@ -409,6 +446,12 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     expect(selectedText()).toBe('name100');
     simulateKey({ key: 'ArrowUp', metaKey: true });
     expect(selectedText()).toBe('name1');
+
+    // Now we expect that the scroll generation increased, because scroll should
+    // be triggered with the keyboard navigation.
+    expect(getScrollToSelectionGeneration(getState())).toBeGreaterThan(
+      initialScrollGeneration
+    );
   });
 });
 

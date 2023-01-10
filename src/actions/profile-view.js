@@ -73,6 +73,8 @@ import type {
   Tid,
   GlobalTrack,
   KeyboardModifiers,
+  TableViewOptions,
+  SelectionContext,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -98,6 +100,7 @@ import { intersectSets } from 'firefox-profiler/utils/set';
 export function changeSelectedCallNode(
   threadsKey: ThreadsKey,
   selectedCallNodePath: CallNodePath,
+  context: SelectionContext = { source: 'auto' },
   optionalExpandedToCallNodePath?: CallNodePath
 ): Action {
   if (optionalExpandedToCallNodePath) {
@@ -118,6 +121,7 @@ export function changeSelectedCallNode(
     selectedCallNodePath,
     optionalExpandedToCallNodePath,
     threadsKey,
+    context,
   };
 }
 
@@ -205,7 +209,12 @@ export function selectRootCallNode(
     const rootCallNodePath = [selectedCallNodePath[0]];
 
     dispatch(
-      changeSelectedCallNode(threadsKey, rootCallNodePath, selectedCallNodePath)
+      changeSelectedCallNode(
+        threadsKey,
+        rootCallNodePath,
+        { source: 'auto' },
+        selectedCallNodePath
+      )
     );
   };
 }
@@ -1634,22 +1643,26 @@ export function changeExpandedCallNodes(
 
 export function changeSelectedMarker(
   threadsKey: ThreadsKey,
-  selectedMarker: MarkerIndex | null
+  selectedMarker: MarkerIndex | null,
+  context: SelectionContext = { source: 'auto' }
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',
     selectedMarker,
     threadsKey,
+    context,
   };
 }
 export function changeSelectedNetworkMarker(
   threadsKey: ThreadsKey,
-  selectedNetworkMarker: MarkerIndex | null
+  selectedNetworkMarker: MarkerIndex | null,
+  context: SelectionContext = { source: 'auto' }
 ): Action {
   return {
     type: 'CHANGE_SELECTED_NETWORK_MARKER',
     selectedNetworkMarker,
     threadsKey,
+    context,
   };
 }
 
@@ -1921,6 +1934,17 @@ export function changeMouseTimePosition(
   return {
     type: 'CHANGE_MOUSE_TIME_POSITION',
     mouseTimePosition,
+  };
+}
+
+export function changeTableViewOptions(
+  tab: TabSlug,
+  tableViewOptions: TableViewOptions
+): Action {
+  return {
+    type: 'CHANGE_TABLE_VIEW_OPTIONS',
+    tab,
+    tableViewOptions,
   };
 }
 

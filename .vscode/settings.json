@@ -1,0 +1,6 @@
+{
+    // Bypass check for node_modules/flow-bin/SHASUM256.txt.sign since it
+    // doesn't exist in flow-bin 0.96.0.
+    "flow.useNPMPackagedFlow": false,
+    "flow.pathToFlow": "${workspaceFolder}/node_modules/.bin/flow",
+}

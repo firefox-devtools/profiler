@@ -664,14 +664,15 @@ describe('profile meta processing', function () {
 });
 
 describe('visualMetrics processing', function () {
-  function checkVisualMetricsForThread(thread: Thread) {
-    const metrics = [
-      { name: 'Visual', changeMarkerLength: 7 },
-      { name: 'ContentfulSpeedIndex', changeMarkerLength: 6 },
-      { name: 'PerceptualSpeedIndex', changeMarkerLength: 6 },
-    ];
-
-    for (const { name, changeMarkerLength } of metrics) {
+  function checkVisualMetricsForThread(
+    thread: Thread,
+    metrics: Array<{|
+      name: string,
+      hasProgressMarker: boolean,
+      changeMarkerLength: number,
+    |}>
+  ) {
+    for (const { name, hasProgressMarker, changeMarkerLength } of metrics) {
       // Check the visual metric progress markers.
       const metricProgressMarkerIndex = thread.stringTable.indexForString(
         `${name} Progress`
@@ -679,7 +680,12 @@ describe('visualMetrics processing', function () {
       const metricProgressMarker = thread.markers.name.find(
         (name) => name === metricProgressMarkerIndex
       );
-      expect(metricProgressMarker).toBeTruthy();
+
+      if (hasProgressMarker) {
+        expect(metricProgressMarker).toBeTruthy();
+      } else {
+        expect(metricProgressMarker).toBeFalsy();
+      }
 
       // Check the visual metric change markers.
       const metricChangeMarkerIndex = thread.stringTable.indexForString(
@@ -712,7 +718,19 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the parent process main thread.');
     }
 
-    checkVisualMetricsForThread(parentProcessMainThread);
+    checkVisualMetricsForThread(parentProcessMainThread, [
+      { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
+      {
+        name: 'ContentfulSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+      {
+        name: 'PerceptualSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+    ]);
   });
 
   it('adds markers to the tab process', function () {
@@ -734,6 +752,67 @@ describe('visualMetrics processing', function () {
       throw new Error('Could not find the tab process main thread.');
     }
 
-    checkVisualMetricsForThread(tabProcessMainThread);
+    checkVisualMetricsForThread(tabProcessMainThread, [
+      { name: 'Visual', hasProgressMarker: true, changeMarkerLength: 7 },
+      {
+        name: 'ContentfulSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+      {
+        name: 'PerceptualSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+    ]);
+  });
+
+  it('does not add markers to the parent process if metric timestamps are null', function () {
+    const geckoProfile = createGeckoProfile();
+    const visualMetrics = getVisualMetrics();
+
+    // Make all the VisualProgress timestamps null on purpose.
+    visualMetrics.VisualProgress = visualMetrics.VisualProgress.map(
+      (progress) => ({ ...progress, timestamp: null })
+    );
+    // Make only one ContentfulSpeedIndexProgress timestamp null on purpose.
+    ensureExists(visualMetrics.ContentfulSpeedIndexProgress)[0].timestamp =
+      null;
+
+    // Add the visual metrics to the profile.
+    geckoProfile.meta.visualMetrics = visualMetrics;
+    // Make sure that the visual metrics are not changed.
+    expect(visualMetrics.VisualProgress).toHaveLength(7);
+    expect(visualMetrics.ContentfulSpeedIndexProgress).toHaveLength(6);
+    expect(visualMetrics.PerceptualSpeedIndexProgress).toHaveLength(6);
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const parentProcessMainThread = processedProfile.threads.find(
+      (thread) =>
+        thread.name === 'GeckoMain' && thread.processType === 'default'
+    );
+
+    if (!parentProcessMainThread) {
+      throw new Error('Could not find the parent process main thread.');
+    }
+
+    checkVisualMetricsForThread(parentProcessMainThread, [
+      // Instead of 7, we should have 0 markers for Visual because we made all
+      // the timestamps null.
+      { name: 'Visual', hasProgressMarker: false, changeMarkerLength: 0 },
+      // Instead of 6, we should have 5 markers for ContentfulSpeedIndex.
+      {
+        name: 'ContentfulSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 5,
+      },
+      // We didn't change the PerceptualSpeedIndexProgress, so we should have 6.
+      {
+        name: 'PerceptualSpeedIndex',
+        hasProgressMarker: true,
+        changeMarkerLength: 6,
+      },
+    ]);
   });
 });

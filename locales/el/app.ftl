@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox για Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -243,6 +244,10 @@ Home--menu-button = Ενεργοποίηση κουμπιού μενού του 
 Home--menu-button-instructions =
     Ενεργοποιήστε το κουμπί του μενού του εργαλείου καταγραφής για να ξεκινήσετε ένα προφίλ
     επιδόσεων στο { -firefox-brand-name } και έπειτα, να το αναλύσετε και να το μοιραστείτε με το profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Μπορείτε επίσης να καταγράψετε προφίλ για το { -firefox-android-brand-name }.
+    Για περισσότερες πληροφορίες, παρακαλούμε συμβουλευτείτε την τεκμηρίωση:
+    <a>Καταγραφή προφίλ του { -firefox-android-brand-name } απευθείας στη συσκευή</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -260,7 +265,6 @@ Home--record-instructions =
     Για να αρχίσει η καταγραφή προφίλ, κάντε κλικ στο αντίστοιχο κουμπί ή χρησιμοποιήστε
     τις συντομεύσεις πληκτρολογίου. Το εικονίδιο είναι μπλε κατά την καταγραφή ενός προφίλ.
     Πατήστε το <kbd>Καταγραφή</kbd> για να φορτώσετε τα δεδομένα στο profiler.firefox.com.
-Home--instructions-title = Τρόπος προβολής και καταγραφής προφίλ
 Home--instructions-content =
     Η καταγραφή των προφίλ επιδόσεων απαιτεί το <a>{ -firefox-brand-name }</a>.
     Ωστόσο, τα υπάρχοντα προφίλ μπορούν να προβληθούν σε όλα τα σύγχρονα προγράμματα περιήγησης.
@@ -700,8 +704,12 @@ TrackMemoryGraph--operations-since-the-previous-sample = λειτουργίες 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
@@ -717,38 +725,16 @@ TrackPower--tooltip-power-milliwatt = { $value } mW
 # watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
-    .label = Ενέργεια που χρησιμοποιείται στο ορατό εύρος
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στο ορατό εύρος
 # This is used in the tooltip when the energy used in the current range uses the
 # milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
-    .label = Ενέργεια που χρησιμοποιείται στο ορατό εύρος
-# This is used in the tooltip when the energy used in the current range uses the
-# microwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
     .label = Η ενέργεια που χρησιμοποιείται στο ορατό εύρος
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the watt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
-    .label = Ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the milliwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
-    .label = Ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
-# This is used in the tooltip when the energy used in the current preview
-# selection uses the microwatt-hour unit.
-# Variables:
-#   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
-    .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
