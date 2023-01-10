@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox для Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -74,6 +75,8 @@ CallTree--tracing-ms-total = Час працы (мс)
         на працягу якога гэта функцыя знаходзілася ў стэку. Сюды ўваходзіць час,
         на працягу якога функцыя фактычна выконвалася, а таксама час выканання
         функцый, якія вызвала гэта функцыі.
+CallTree--samples-total = Усяго (узоры)
+    .title = Лічыльнік “Усяго (узоры)” уключае ў сабе суму кожнага ўзору, у якога гэтая функцыя была выяўлена ў стэку. Сюды ўваходзіць час фактычнай працы функцыі, а таксама час, чакання вызаваў, якія рабіла гэтая функцыя.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -138,7 +141,6 @@ Home--menu-button = Уключыць кнопку меню { -profiler-brand-nam
 Home--menu-button-instructions =
     Уключыце кнопку меню прафайлера, каб пачаць запіс профілю прадукцыйнасці
     у { -firefox-brand-name }, затым прааналізуйце яго і падзяліцеся з profiler.firefox.com.
-Home--instructions-title = Як праглядаць і запісваць профілі
 Home--instructions-content =
     Для запісу профіляў прадукцыйнасці патрабуецца <a>{ -firefox-brand-name }</a>.
     Аднак існуючыя профілі можна праглядаць у любым сучасным браўзеры.
@@ -309,11 +311,16 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Пашырэнні:
 MenuButtons--metaOverheadStatistics-mean = Сярэдняе
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
+MenuButtons--metaOverheadStatistics-statkeys-counter = Лічыльнік
+    .title = Час збору ўсіх лічыльнікаў
+MenuButtons--metaOverheadStatistics-statkeys-interval = Інтэрвал
+    .title = Зафіксаваны інтэрвал паміж двума ўзорамі
 MenuButtons--metaOverheadStatistics-profiled-duration = Працягласць запісу профілю:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Уключыць даныя з іншых картак
 MenuButtons--publish--renderCheckbox-label-extension = Уключыць інфармацыю аб пашырэнні
 MenuButtons--publish--renderCheckbox-label-private-browsing = Уключыць даныя з вокнаў прыватнага прагляду
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
@@ -448,8 +455,12 @@ TrackContextMenu--hide-track = Схаваць “{ $trackName }”
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 
 ## TrackSearchField

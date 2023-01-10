@@ -75,7 +75,7 @@ export type TestDefinedMarkers = Array<
       MarkerName,
       MarkerTime, // start time
       MarkerTime | null, // end time
-      MarkerPayload | MockPayload
+      MarkerPayload | MockPayload | null
     ]
 >;
 
@@ -86,7 +86,7 @@ export type TestDefinedRawMarker = {|
   +endTime: Milliseconds | null,
   +phase: MarkerPhase,
   +category?: IndexIntoCategoryList,
-  +data?: MarkerPayload,
+  +data?: MarkerPayload | null,
 |};
 
 export type TestDefinedJsTracerEvent = [
@@ -131,7 +131,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const startTime = tuple[1];
     // Flow doesn't support variadic tuple types.
     const maybeEndTime = (tuple: any)[2] || null;
-    const payload: MarkerPayload = (tuple: any)[3] || null;
+    const payload: MarkerPayload | null = (tuple: any)[3] || null;
 
     markersTable.name.push(stringTable.indexForString(name));
     if (maybeEndTime === null) {
@@ -1042,7 +1042,13 @@ function _buildThreadFromTextOnlyStacks(
 /**
  * This returns a merged profile from a number of profile strings.
  */
-export function getMergedProfileFromTextSamples(...profileStrings: string[]): {
+export function getMergedProfileFromTextSamples(
+  profileStrings: string[],
+  cpuValuesPerProfile: Array<{|
+    threadCPUDelta: Array<number | null>,
+    threadCPUDeltaUnit: ThreadCPUDeltaUnit,
+  |} | null> = []
+): {
   profile: Profile,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
@@ -1051,6 +1057,16 @@ export function getMergedProfileFromTextSamples(...profileStrings: string[]): {
     getProfileFromTextSamples(str)
   );
   const profiles = profilesAndFuncNames.map(({ profile }) => profile);
+  cpuValuesPerProfile.forEach((cpuValues, profileIndex) => {
+    if (cpuValues) {
+      addCpuUsageValues(
+        profiles[profileIndex],
+        cpuValues.threadCPUDelta,
+        cpuValues.threadCPUDeltaUnit
+      );
+    }
+  });
+
   const profileState = stateFromLocation({
     pathname: '/public/fakehash1/',
     search: '?thread=0&v=3',

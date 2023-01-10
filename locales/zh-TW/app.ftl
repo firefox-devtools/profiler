@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox for Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -184,6 +185,7 @@ Home--load-from-url-submit-button =
 Home--documentation-button = 文件
 Home--menu-button = 開啟 { -profiler-brand-name } 選單按鈕
 Home--menu-button-instructions = 開啟 { -firefox-brand-name } 當中的檢測器選單按鈕開始紀錄效能，然後進行分析並分享到 profiler.firefox.com。
+Home--profile-firefox-android-instructions = 您也可以對 { -firefox-android-brand-name } 進行效能檢測。若需更多資訊請參考下列文件：<a>直接於裝置上檢測 { -firefox-android-brand-name } 效能</a>。
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -193,7 +195,6 @@ Home--enable-button-unavailable =
 # This message can be seen on https://main--perf-html.netlify.app/ .
 Home--web-channel-unavailable = 此檢測器無法連線到 WebChannel。通常是因為執行檢測器的主機與 <code>devtools.performance.recording.ui-base-url</code> 偏好設定當中指定的主機不同。若您想要使用此檢測器捕捉新的效能檢測檔，並可程式化控制檢測器選單按鈕，可到 <code>about:config</code> 調整該偏好設定。
 Home--record-instructions = 請點擊檢測按鈕或按下鍵盤快速鍵即可開始進行檢測。進行效能紀錄時，此圖示將會顯示成藍色。按下<kbd>捕捉</kbd>即可將資料載入到 profiler.firefox.com。
-Home--instructions-title = 如何檢視並記錄檢測檔
 Home--instructions-content = 需要使用 <a>{ -firefox-brand-name }</a> 紀錄效能檢測檔。但可以使用任何現代瀏覽器檢視現有的檢測檔。
 Home--record-instructions-start-stop = 停止並開始檢測
 Home--record-instructions-capture-load = 捕捉並載入檢測檔
@@ -202,6 +203,9 @@ Home--additional-content-title = 載入現有檢測檔
 Home--additional-content-content = 您可以將效能檢測檔<strong>拖曳</strong>到此處，或:
 Home--compare-recordings-info = 您也可以比較紀錄內容。<a>開啟比較介面。</a>
 Home--your-recent-uploaded-recordings-title = 您近期上傳的紀錄
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools = { -profiler-brand-name } 也可以匯入其他效能檢測器，例如 <perf>Linux perf</perf>、<simpleperf>Android SimplePerf</simpleperf>、Chrome 效能面板、<androidstudio>Android Studio</androidstudio> 所產生的效能檢測檔，或任何使用 <dhat>dhat 格式</dhat>儲存的效能檢測檔。<write>點擊此處了解如何撰寫您自己的匯入程式</write>。
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -625,8 +629,12 @@ TrackMemoryGraph--operations-since-the-previous-sample = 自前一次取樣以�
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
@@ -642,38 +650,44 @@ TrackPower--tooltip-power-milliwatt = { $value } mW
 # watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
-    .label = 可見範圍內消耗的能源
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh（{ $carbonValue } g CO₂e）
+    .label = 可見範圍中消耗的能源
 # This is used in the tooltip when the energy used in the current range uses the
 # milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
-    .label = 可見範圍內消耗的能源
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh（{ $carbonValue } mg CO₂e）
+    .label = 可見範圍中消耗的能源
 # This is used in the tooltip when the energy used in the current range uses the
 # microwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
-    .label = 目前選擇範圍內消耗的能源
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh（{ $carbonValue } mg CO₂e）
+    .label = 可見範圍中消耗的能源
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
-    .label = 目前選擇範圍內消耗的能源
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh（{ $carbonValue } g CO₂e）
+    .label = 目前選擇範圍中消耗的能源
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
-    .label = 目前選擇範圍內消耗的能源
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh（{ $carbonValue } mg CO₂e）
+    .label = 目前選擇範圍中消耗的能源
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the microwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
-    .label = 目前選擇範圍內消耗的能源
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh（{ $carbonValue } mg CO₂e）
+    .label = 目前選擇範圍中消耗的能源
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

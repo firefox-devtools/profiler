@@ -1715,7 +1715,8 @@ const _upgraders = {
           data &&
           data.type !== 'tracing' &&
           data.type !== 'Styles' &&
-          data.cause
+          data.cause &&
+          data.cause.time !== undefined
         ) {
           data.cause.time += delta;
         }

@@ -16,6 +16,7 @@ import {
   getContainsPrivateBrowsingInformation,
   getThreads,
   getActiveTabID,
+  getMarkerSchemaByName,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -222,6 +223,7 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> =
     getProfile,
     getDerivedMarkerInfoForAllThreads,
     getRemoveProfileInformation,
+    getMarkerSchemaByName,
     sanitizePII
   );
 

@@ -35,7 +35,6 @@ import type {
   IPCMarkerPayload,
   NetworkPayload,
   PrefMarkerPayload,
-  FileIoPayload,
   TextMarkerPayload,
   StartEndRange,
   IndexedArray,
@@ -161,7 +160,11 @@ export function getSearchFilteredMarkerIndexes(
       }
 
       // Now check the schema for the marker payload for searchable
-      const markerSchema = getSchemaFromMarker(markerSchemaByName, marker);
+      const markerSchema = getSchemaFromMarker(
+        markerSchemaByName,
+        marker.name,
+        marker.data
+      );
       if (
         markerSchema &&
         markerPayloadMatchesSearch(markerSchema, marker, regExp)
@@ -496,9 +499,9 @@ export function deriveMarkersFromRawMarkerTable(
   // In the case of separate markers for the start and end of an interval,
   // merge the payloads together, with the end data overriding the start.
   function mergeIntervalData(
-    startData: MarkerPayload,
-    endData: MarkerPayload
-  ): MarkerPayload {
+    startData: MarkerPayload | null,
+    endData: MarkerPayload | null
+  ): MarkerPayload | null {
     if (!startData && !endData) {
       return null;
     }
@@ -1265,22 +1268,6 @@ export function removePrefMarkerPreferenceValues(
 }
 
 /**
- * Sanitize FileIO marker's filename property if it's non-empty.
- */
-export function sanitizeFileIOMarkerFilenamePath(
-  payload: FileIoPayload
-): FileIoPayload {
-  if (!payload.filename) {
-    return payload;
-  }
-
-  return {
-    ...payload,
-    filename: removeFilePath(payload.filename),
-  };
-}
-
-/**
  * Sanitize Text marker's name property for potential URLs.
  */
 export function sanitizeTextMarker(
@@ -1314,6 +1301,41 @@ export function sanitizeExtensionTextMarker(
   }
 
   return payload;
+}
+
+export function sanitizeFromMarkerSchema(
+  markerSchema: MarkerSchema,
+  markerPayload: MarkerPayload
+): MarkerPayload {
+  for (const propertyDescription of markerSchema.data) {
+    if (
+      propertyDescription.key !== undefined &&
+      propertyDescription.format !== undefined
+    ) {
+      const key = propertyDescription.key;
+      const format = propertyDescription.format;
+      if (!(key in markerPayload)) {
+        continue;
+      }
+
+      // We're typing the result of the sanitization with `any` because Flow
+      // doesn't like much our enormous enum of non-exact objects that's used as
+      // MarkerPayload type, and this code is too generic for Flow in this context.
+      if (format === 'url') {
+        markerPayload = ({
+          ...markerPayload,
+          [key]: removeURLs(markerPayload[key]),
+        }: any);
+      } else if (format === 'file-path') {
+        markerPayload = ({
+          ...markerPayload,
+          [key]: removeFilePath(markerPayload[key]),
+        }: any);
+      }
+    }
+  }
+
+  return markerPayload;
 }
 
 /**
@@ -1362,7 +1384,9 @@ export function filterMarkerByDisplayLocation(
       return additionalResult;
     }
 
-    return markerTypes.has(getMarkerSchemaName(markerSchemaByName, marker));
+    return markerTypes.has(
+      getMarkerSchemaName(markerSchemaByName, marker.name, marker.data)
+    );
   });
 }
 

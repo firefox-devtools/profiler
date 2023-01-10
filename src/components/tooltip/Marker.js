@@ -230,7 +230,11 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
     if (data) {
       // Add the details for the markers based on their Marker schema.
-      const schema = getSchemaFromMarker(markerSchemaByName, marker);
+      const schema = getSchemaFromMarker(
+        markerSchemaByName,
+        marker.name,
+        marker.data
+      );
       if (schema) {
         for (const schemaData of schema.data) {
           // Check for a schema that is looking up and formatting a value from
@@ -410,7 +414,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     const { data, start } = marker;
     if (data && 'cause' in data && data.cause) {
       const { cause } = data;
-      const causeAge = start - cause.time;
+      const causeAge = cause.time !== undefined ? start - cause.time : 0;
       return [
         <TooltipDetailSeparator key="backtrace-separator" />,
         <TooltipDetail label="Stack" key="backtrace">

@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Firefox for Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -247,6 +248,10 @@ Home--menu-button = Enable { -profiler-brand-name } Menu Button
 Home--menu-button-instructions =
     Enable the profiler menu button to start recording a performance
     profile in { -firefox-brand-name }, then analyse it and share it with profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    You can also profile { -firefox-android-brand-name }. For more
+    information, please consult this documentation:
+    <a>Profiling { -firefox-android-brand-name } directly on device</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -264,7 +269,6 @@ Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording.
     Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
-Home--instructions-title = How to view and record profiles
 Home--instructions-content =
     Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
     However, existing profiles can be viewed in any modern browser.
@@ -275,6 +279,14 @@ Home--additional-content-title = Load existing profiles
 Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
 Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    The { -profiler-brand-name } can also import profiles from other profilers, such as
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, the
+    Chrome performance panel, <androidstudio>Android Studio</androidstudio>, or
+    any file using the <dhat>dhat format</dhat>. <write>Learn how to write your
+    own importer</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -704,8 +716,12 @@ TrackMemoryGraph--operations-since-the-previous-sample = operations since the pr
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
-## It's not displayed by default in the UI, but an example can be found at
+## It's not always displayed in the UI, but an example can be found at
 ## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
 
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
@@ -721,37 +737,43 @@ TrackPower--tooltip-power-milliwatt = { $value } mW
 # watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-watthour = { $value } Wh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
     .label = Energy used in the visible range
 # This is used in the tooltip when the energy used in the current range uses the
 # milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-milliwatthour = { $value } mWh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
     .label = Energy used in the visible range
 # This is used in the tooltip when the energy used in the current range uses the
 # microwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-range-microwatthour = { $value } µWh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energy used in the visible range
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-watthour = { $value } Wh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
     .label = Energy used in the current selection
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the milliwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-milliwatthour = { $value } mWh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
     .label = Energy used in the current selection
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the microwatt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
-TrackPower--tooltip-energy-used-in-preview-microwatthour = { $value } µWh
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energy used in the current selection
 
 ## TrackSearchField

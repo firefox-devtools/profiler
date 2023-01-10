@@ -95,6 +95,17 @@ exports[`app/Home renders a button to enable the popup in Firefox 1`] = `
             Enable the profiler menu button to start recording a performance
 profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com.
           </p>
+          <p>
+            You can also profile ⁨Firefox for Android⁩. For more
+information, please consult this documentation:
+
+            <a
+              href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
+            >
+              Profiling ⁨Firefox for Android⁩ directly on device
+            </a>
+            .
+          </p>
         </div>
       </div>
     </div>
@@ -141,6 +152,43 @@ profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com
             </button>
           </div>
         </div>
+        <p>
+          The ⁨Firefox Profiler⁩ can also import profiles from other profilers, such as
+
+          <a
+            href="https://profiler.firefox.com/docs/#/./guide-perf-profiling"
+          >
+            Linux perf
+          </a>
+          , 
+          <a
+            href="https://profiler.firefox.com/docs/#/./guide-android-profiling"
+          >
+            Android SimplePerf
+          </a>
+          , the
+Chrome performance panel, 
+          <a
+            href="https://developer.android.com/studio/profile/cpu-profiler"
+          >
+            Android Studio
+          </a>
+          , or
+any file using the 
+          <a
+            href="https://valgrind.org/docs/manual/dh-manual.html"
+          >
+            dhat format
+          </a>
+          . 
+          <a
+            href="https://github.com/firefox-devtools/profiler/blob/main/docs-developer/custom-importer.md"
+          >
+            Learn how to write your
+own importer
+          </a>
+          .
+        </p>
         <p>
           You can also compare recordings. 
           <a
@@ -273,9 +321,6 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             />
             Documentation
           </a>
-          <h2>
-            How to view and record profiles
-          </h2>
           <p>
             Recording performance profiles requires 
             <a
@@ -285,6 +330,17 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             </a>
             .
 However, existing profiles can be viewed in any modern browser.
+          </p>
+          <p>
+            You can also profile ⁨Firefox for Android⁩. For more
+information, please consult this documentation:
+
+            <a
+              href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device"
+            >
+              Profiling ⁨Firefox for Android⁩ directly on device
+            </a>
+            .
           </p>
         </div>
       </div>
@@ -332,6 +388,43 @@ However, existing profiles can be viewed in any modern browser.
             </button>
           </div>
         </div>
+        <p>
+          The ⁨Firefox Profiler⁩ can also import profiles from other profilers, such as
+
+          <a
+            href="https://profiler.firefox.com/docs/#/./guide-perf-profiling"
+          >
+            Linux perf
+          </a>
+          , 
+          <a
+            href="https://profiler.firefox.com/docs/#/./guide-android-profiling"
+          >
+            Android SimplePerf
+          </a>
+          , the
+Chrome performance panel, 
+          <a
+            href="https://developer.android.com/studio/profile/cpu-profiler"
+          >
+            Android Studio
+          </a>
+          , or
+any file using the 
+          <a
+            href="https://valgrind.org/docs/manual/dh-manual.html"
+          >
+            dhat format
+          </a>
+          . 
+          <a
+            href="https://github.com/firefox-devtools/profiler/blob/main/docs-developer/custom-importer.md"
+          >
+            Learn how to write your
+own importer
+          </a>
+          .
+        </p>
         <p>
           You can also compare recordings. 
           <a

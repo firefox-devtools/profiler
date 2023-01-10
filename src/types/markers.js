@@ -20,9 +20,7 @@ export type MarkerFormatType =
   // String types.
 
   // Show the URL, and handle PII sanitization
-  // TODO Handle PII sanitization. Issue #2757
   | 'url'
-  // TODO Handle PII sanitization. Issue #2757
   // Show the file path, and handle PII sanitization.
   | 'file-path'
   // Important, do not put URL or file path information here, as it will not be
@@ -136,7 +134,7 @@ export type CauseBacktrace = {|
   // `tid` is optional because older processed profiles may not have it.
   // No upgrader was written for this change.
   tid?: Tid,
-  time: Milliseconds,
+  time?: Milliseconds,
   stack: IndexIntoStackTable,
 |};
 
@@ -734,6 +732,11 @@ export type NoPayloadUserData = {|
   innerWindowID?: number,
 |};
 
+export type UrlMarkerPayload = {|
+  type: 'Url',
+  url: string,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -767,7 +770,7 @@ export type MarkerPayload =
   | JankPayload
   | BrowsertimeMarkerPayload
   | NoPayloadUserData
-  | null;
+  | UrlMarkerPayload;
 
 export type MarkerPayload_Gecko =
   | GPUMarkerPayload
@@ -789,12 +792,11 @@ export type MarkerPayload_Gecko =
   | IPCMarkerPayload_Gecko
   | MediaSampleMarkerPayload
   | NoPayloadUserData
+  | UrlMarkerPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.
   | $ReplaceCauseWithStack<FileIoPayload>
   | $ReplaceCauseWithStack<PaintProfilerMarkerTracing>
   | $ReplaceCauseWithStack<StyleMarkerPayload>
-  | $ReplaceCauseWithStack<TextMarkerPayload>
-  // Payloads can be null.
-  | null;
+  | $ReplaceCauseWithStack<TextMarkerPayload>;

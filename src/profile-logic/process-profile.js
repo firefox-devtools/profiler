@@ -28,6 +28,7 @@ import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import {
   PROCESSED_PROFILE_VERSION,
   INTERVAL,
+  INTERVAL_END,
   INSTANT,
 } from '../app-logic/constants';
 import {
@@ -87,6 +88,7 @@ import type {
   PageList,
   ThreadIndex,
   BrowsertimeMarkerPayload,
+  MarkerPhase,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -661,13 +663,16 @@ function _processStackTable(
  * synchronous stack. Otherwise, if it happened before, it was an async stack, and is
  * most likely some event that happened in the past that triggered the marker.
  */
-function _convertStackToCause(data: any): any {
+function _convertStackToCause(data: MarkerPayload_Gecko) {
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
     const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
     const time = stack.samples.data[0][stack.samples.schema.time];
     if (stackIndex !== null) {
-      newData.cause = { tid: stack.tid, time, stack: stackIndex };
+      return {
+        ...newData,
+        cause: { tid: stack.tid, time, stack: stackIndex },
+      };
     }
     return newData;
   }
@@ -679,7 +684,7 @@ function _convertStackToCause(data: any): any {
  * from a gecko payload.
  */
 function _convertPayloadStackToIndex(
-  data: MarkerPayload_Gecko
+  data: MarkerPayload_Gecko | null
 ): IndexIntoStackTable | null {
   if (!data) {
     return null;
@@ -714,7 +719,7 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): {|
   let hasMemoryAddresses;
 
   for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
-    const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];
+    const geckoPayload = geckoMarkers.data[markerIndex];
 
     if (geckoPayload) {
       switch (geckoPayload.type) {
@@ -844,8 +849,8 @@ function convertPhaseTimes(
  * the GC information.
  */
 function _processMarkerPayload(
-  geckoPayload: MarkerPayload_Gecko
-): MarkerPayload {
+  geckoPayload: MarkerPayload_Gecko | null
+): MarkerPayload | null {
   if (!geckoPayload) {
     return null;
   }
@@ -904,10 +909,14 @@ function _processMarkerPayload(
       }
     }
     default:
-      // Coerce the payload into a MarkerPayload. This doesn't really provide
-      // any more type safety, but it shows the intent of going from an object
-      // without much type safety, to a specific type definition.
-      return (payload: MarkerPayload);
+      // `payload` is currently typed as the result of _convertStackToCause, which
+      // is MarkerPayload_Gecko where `stack` has been replaced with `cause`. This
+      // should be reasonably close to `MarkerPayload`, but Flow doesn't work well
+      // with our MarkerPayload type. So we're coerce this return value to `any`
+      // here, and then to `MarkerPayload` as the return value for this function.
+      // This doesn't provide type safety but it shows the intent of going from an
+      // object without much type safety, to a specific type definition.
+      return (payload: any);
   }
 }
 
@@ -1278,7 +1287,7 @@ export function adjustMarkerTimestamps(
       if (typeof newData.endTime === 'number') {
         newData.endTime += delta;
       }
-      if (newData.cause) {
+      if (newData.cause && newData.cause.time !== undefined) {
         newData.cause.time += delta;
       }
       if (newData.type === 'Network') {
@@ -1729,18 +1738,30 @@ export function processVisualMetrics(
     (cat) => cat.name === 'Test'
   );
 
-  function addMetricMarker(
+  function maybeAddMetricMarker(
     thread: Thread,
     name: string,
-    startTime: number,
-    endTime?: number,
+    phase: MarkerPhase,
+    startTime: number | null,
+    endTime: number | null,
     payload?: BrowsertimeMarkerPayload
   ) {
+    if (
+      // All phases except INTERVAL_END should have a start time.
+      (phase !== INTERVAL_END && startTime === null) ||
+      // Only INTERVAL and INTERVAL_END should have an end time.
+      ((phase === INTERVAL || phase === INTERVAL_END) && endTime === null)
+    ) {
+      // Do not add if some timestamps we expect are missing.
+      // This should ideally never happen but timestamps could be null due to
+      // browsertime bug here: https://github.com/sitespeedio/browsertime/issues/1746.
+      return;
+    }
     // Add the marker to the given thread.
     thread.markers.name.push(thread.stringTable.indexForString(name));
     thread.markers.startTime.push(startTime);
-    thread.markers.endTime.push(endTime ? endTime : 0);
-    thread.markers.phase.push(endTime ? INTERVAL : INSTANT);
+    thread.markers.endTime.push(endTime);
+    thread.markers.phase.push(phase);
     thread.markers.category.push(testingCategoryIdx);
     thread.markers.data.push(payload ?? null);
     thread.markers.length++;
@@ -1776,9 +1797,9 @@ export function processVisualMetrics(
 
     // Add the progress marker to the parent process main thread.
     const markerName = `${metricName} Progress`;
-    addMetricMarker(mainThread, markerName, startTime, endTime);
+    maybeAddMetricMarker(mainThread, markerName, INTERVAL, startTime, endTime);
     // Add the progress marker to the tab process main thread.
-    addMetricMarker(tabThread, markerName, startTime, endTime);
+    maybeAddMetricMarker(tabThread, markerName, INTERVAL, startTime, endTime);
 
     // Add progress markers for every visual progress change for more fine grained information.
     const progressMarkerSchema = {
@@ -1798,19 +1819,21 @@ export function processVisualMetrics(
       };
 
       // Add it to the parent process main thread.
-      addMetricMarker(
+      maybeAddMetricMarker(
         mainThread,
         changeMarkerName,
+        INSTANT,
         timestamp,
-        undefined, // endTime
+        null, // endTime
         payload
       );
       // Add it to the tab process main thread.
-      addMetricMarker(
+      maybeAddMetricMarker(
         tabThread,
         changeMarkerName,
+        INSTANT,
         timestamp,
-        undefined, // endTime
+        null, // endTime
         payload
       );
     }

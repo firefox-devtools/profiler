@@ -158,7 +158,7 @@ describe('CallTreeSidebar', function () {
       getAllByText,
       funcNamesDict: { A, B, D },
     } = setup(
-      getMergedProfileFromTextSamples(
+      getMergedProfileFromTextSamples([
         `
           A  A  A
           B  B  C
@@ -168,8 +168,8 @@ describe('CallTreeSidebar', function () {
           A  A  A
           B  B  B
           G  I  E
-        `
-      )
+        `,
+      ])
     );
 
     dispatch(changeSelectedThreads(new Set([2])));

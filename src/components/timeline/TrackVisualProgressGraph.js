@@ -102,7 +102,7 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
         x =
-          (deviceWidth * (progressGraphData[i].timestamp - rangeStart)) /
+          (deviceWidth * ((progressGraphData[i].timestamp ?? 0) - rangeStart)) /
           rangeLength;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
@@ -133,7 +133,7 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
       // of the canvas.
       ctx.lineTo(x + interval, deviceHeight);
       ctx.lineTo(
-        (deviceWidth * (progressGraphData[0].timestamp - rangeStart)) /
+        (deviceWidth * ((progressGraphData[0].timestamp ?? 0) - rangeStart)) /
           rangeLength +
           interval,
         deviceHeight
@@ -221,15 +221,16 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
     if (
-      timeAtMouse < progressGraphData[0].timestamp ||
+      timeAtMouse < (progressGraphData[0].timestamp ?? 0) ||
       timeAtMouse >
-        progressGraphData[progressGraphData.length - 1].timestamp + interval
+        (progressGraphData[progressGraphData.length - 1].timestamp ?? 0) +
+          interval
     ) {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredVisualProgress: null });
     } else {
       const graphTimestamps = progressGraphData.map(
-        ({ timestamp }) => timestamp
+        ({ timestamp }) => timestamp ?? 0
       );
       let hoveredVisualProgress = bisectionRight(graphTimestamps, timeAtMouse);
       if (hoveredVisualProgress === progressGraphData.length) {
@@ -277,7 +278,8 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
     } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const left =
-      (width * (progressGraphData[graphDataIndex].timestamp - rangeStart)) /
+      (width *
+        ((progressGraphData[graphDataIndex].timestamp ?? 0) - rangeStart)) /
       rangeLength;
 
     const unitSampleCount = progressGraphData[graphDataIndex].percent / 100;

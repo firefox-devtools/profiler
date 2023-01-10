@@ -150,9 +150,11 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 190px;"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -161,7 +163,12 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 90px;"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -171,7 +178,16 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -207,30 +223,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="15"
                 >
                   15
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -238,30 +267,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="15"
                 >
                   15
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -269,30 +311,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="80%"
                 >
                   80%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="12"
                 >
                   12
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -300,30 +355,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="80%"
                 >
                   80%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="12"
                 >
                   12
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="5"
                 >
                   5
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -331,30 +399,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="47%"
                 >
                   47%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="7"
                 >
                   7
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd isSelected"
@@ -362,30 +443,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="47%"
                 >
                   47%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="7"
                 >
                   7
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="7"
                 >
                   7
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -393,30 +487,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="20%"
                 >
                   20%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="3"
                 >
                   3
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -821,9 +928,11 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 190px;"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -832,7 +941,12 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 90px;"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -842,7 +956,16 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -878,30 +1001,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-100%"
                 >
                   -100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-15"
                 >
                   -15
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -909,30 +1045,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-100%"
                 >
                   -100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-15"
                 >
                   -15
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -940,30 +1089,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-80%"
                 >
                   -80%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-12"
                 >
                   -12
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -971,30 +1133,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-80%"
                 >
                   -80%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-12"
                 >
                   -12
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="-5"
                 >
                   -5
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -1002,30 +1177,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-47%"
                 >
                   -47%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-7"
                 >
                   -7
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd isSelected"
@@ -1033,30 +1221,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-47%"
                 >
                   -47%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-7"
                 >
                   -7
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="-7"
                 >
                   -7
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -1064,30 +1265,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-20%"
                 >
                   -20%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-3"
                 >
                   -3
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -1492,9 +1706,11 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 190px;"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -1503,7 +1719,12 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 90px;"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -1513,7 +1734,16 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -1549,30 +1779,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="41"
                 >
                   41
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -1580,30 +1823,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="41"
                 >
                   41
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -1611,30 +1867,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="73%"
                 >
                   73%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="30"
                 >
                   30
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -1642,30 +1911,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="73%"
                 >
                   73%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="30"
                 >
                   30
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="13"
                 >
                   13
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -1673,30 +1955,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="41%"
                 >
                   41%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="17"
                 >
                   17
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd isSelected"
@@ -1704,30 +1999,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="41%"
                 >
                   41%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="17"
                 >
                   17
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="17"
                 >
                   17
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -1735,30 +2043,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="27%"
                 >
                   27%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="11"
                 >
                   11
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -2151,9 +2472,11 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 190px;"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -2162,7 +2485,12 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 90px;"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -2172,7 +2500,16 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -2208,30 +2545,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="15"
                 >
                   15
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -2239,30 +2589,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="15"
                 >
                   15
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -2270,30 +2633,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="80%"
                 >
                   80%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="12"
                 >
                   12
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -2301,30 +2677,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="80%"
                 >
                   80%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="12"
                 >
                   12
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="5"
                 >
                   5
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -2332,30 +2721,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="47%"
                 >
                   47%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="7"
                 >
                   7
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd isSelected"
@@ -2363,30 +2765,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="47%"
                 >
                   47%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="7"
                 >
                   7
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="7"
                 >
                   7
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -2394,30 +2809,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="20%"
                 >
                   20%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="3"
                 >
                   3
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -2810,9 +3238,11 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 190px;"
         title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
@@ -2821,7 +3251,12 @@ bytes of the callers from this function."
         Total Size (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 90px;"
         title="The “self” bytes includes the bytes allocated or deallocated while this
 function was the end of the stack. If this function called into
 other functions, then the “other” functions’ bytes are not included.
@@ -2831,7 +3266,16 @@ allocated or deallocated in the program."
         Self (bytes)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -2867,30 +3311,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-100%"
                 >
                   -100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-41"
                 >
                   -41
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -2898,30 +3355,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-100%"
                 >
                   -100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-41"
                 >
                   -41
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -2929,30 +3399,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-59%"
                 >
                   -59%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-24"
                 >
                   -24
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -2960,30 +3443,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-41%"
                 >
                   -41%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-17"
                 >
                   -17
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -2991,30 +3487,43 @@ allocated or deallocated in the program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="-41%"
                 >
                   -41%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 140px;"
                   title="-17"
                 >
                   -17
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 90px;"
                   title="-17"
                 >
                   -17
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -3765,9 +4274,11 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -3776,7 +4287,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -3785,7 +4301,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -3821,30 +4346,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -3852,30 +4390,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -3883,30 +4434,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -3914,30 +4478,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even isSelected"
@@ -3945,30 +4522,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -3976,30 +4566,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -4007,30 +4610,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -4391,9 +5007,11 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -4402,7 +5020,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -4411,7 +5034,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -4447,30 +5079,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="3"
                 >
                   3
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -4478,30 +5123,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="3"
                 >
                   3
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -4509,30 +5167,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -4540,30 +5211,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even isSelected"
@@ -4571,30 +5255,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -4602,30 +5299,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -4633,30 +5343,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -5017,9 +5740,11 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -5028,7 +5753,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -5037,7 +5767,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5073,30 +5812,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -5104,30 +5856,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -5135,30 +5900,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd isSelected"
@@ -5166,30 +5944,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -5466,9 +6257,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -5477,7 +6270,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -5486,7 +6284,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -5522,30 +6329,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="3"
                 >
                   3
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -5553,30 +6373,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="3"
                 >
                   3
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -5584,30 +6417,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -5615,30 +6461,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even isSelected"
@@ -5646,30 +6505,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -5677,30 +6549,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -5708,30 +6593,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -6092,9 +6990,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -6103,7 +7003,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -6112,7 +7017,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -6148,30 +7062,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -6179,30 +7106,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -6210,30 +7150,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -6241,30 +7194,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even isSelected"
@@ -6272,30 +7238,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -6303,30 +7282,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -6659,9 +7651,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -6670,7 +7664,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -6679,7 +7678,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -6715,30 +7723,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -6746,30 +7767,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -6777,30 +7811,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -6808,30 +7855,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even isSelected"
@@ -6839,30 +7899,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -6870,30 +7943,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -7226,9 +8312,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -7237,7 +8325,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -7246,7 +8339,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7282,30 +8384,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -7313,30 +8428,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -7344,30 +8472,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -7375,30 +8516,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -7676,9 +8830,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -7687,7 +8843,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -7696,7 +8857,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -7732,30 +8902,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -7763,30 +8946,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -7794,30 +8990,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -7825,30 +9034,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
@@ -8126,9 +9348,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     >
       <span
         class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
+        style="width: 50px;"
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
+        style="width: 120px;"
         title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
@@ -8137,7 +9361,12 @@ function."
         Total (samples)
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="1"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
+        style="width: 70px;"
         title="The “self” sample count only includes the samples where the function was
 the end of the stack. If this function called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -8146,7 +9375,16 @@ for understanding where time was actually spent in a program."
         Self
       </span>
       <span
+        class="treeViewColumnDivider isResizable"
+        data-column-index="2"
+      />
+      <span
         class="treeViewHeaderColumn treeViewFixedColumn icon"
+        style="width: 10px;"
+      />
+      <span
+        class="treeViewColumnDivider"
+        data-column-index="3"
       />
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -8182,30 +9420,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -8213,30 +9464,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
@@ -8244,30 +9508,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="2"
                 >
                   2
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -8275,30 +9552,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even isSelected"
@@ -8306,30 +9596,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
@@ -8337,30 +9640,43 @@ for understanding where time was actually spent in a program."
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
+                  style="width: 50px;"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
+                  style="width: 70px;"
                   title="1"
                 >
                   1
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn self"
+                  style="width: 70px;"
                   title="—"
                 >
                   —
                 </span>
                 <span
+                  class="treeViewColumnDivider"
+                />
+                <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
+                  style="width: 10px;"
                   title=""
                 >
                   <div
                     class="nodeIcon "
                   />
                 </span>
+                <span
+                  class="treeViewColumnDivider"
+                />
               </div>
             </div>
           </div>
