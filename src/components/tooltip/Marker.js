@@ -414,7 +414,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     const { data, start } = marker;
     if (data && 'cause' in data && data.cause) {
       const { cause } = data;
-      const causeAge = start - cause.time;
+      const causeAge = cause.time !== undefined ? start - cause.time : 0;
       return [
         <TooltipDetailSeparator key="backtrace-separator" />,
         <TooltipDetail label="Stack" key="backtrace">

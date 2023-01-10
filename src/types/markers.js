@@ -134,7 +134,7 @@ export type CauseBacktrace = {|
   // `tid` is optional because older processed profiles may not have it.
   // No upgrader was written for this change.
   tid?: Tid,
-  time: Milliseconds,
+  time?: Milliseconds,
   stack: IndexIntoStackTable,
 |};
 
