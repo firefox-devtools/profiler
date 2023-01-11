@@ -148,7 +148,13 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       } else {
         selectLeafCallNode(threadsKey, sampleIndex);
       }
-      focusCallTree();
+
+      if (sampleIndex !== null) {
+        // If the user clicked outside of the activity graph (sampleIndex === null),
+        // then we don't need to focus the call tree. This action also selects
+        // the call tree panel, which we don't want either in this case.
+        focusCallTree();
+      }
     }
     if (
       typeof threadsKey === 'number' &&
