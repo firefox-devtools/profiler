@@ -6,13 +6,19 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  fireEvent,
+  screen,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
 import {
   selectedThreadSelectors,
   getRightClickedTrack,
+  getMouseTimePosition,
 } from 'firefox-profiler/selectors';
-import { ensureExists } from '../../utils/flow';
+import { FULL_TRACK_SCREENSHOT_HEIGHT } from 'firefox-profiler/app-logic/constants';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -27,6 +33,7 @@ import {
   getElementWithFixedSize,
 } from '../fixtures/mocks/element-size';
 import {
+  getMouseEvent,
   fireFullClick,
   fireFullKeyPress,
   fireFullContextMenu,
@@ -41,12 +48,24 @@ import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-obs
 
 import type { Profile, ThreadIndex } from 'firefox-profiler/types';
 
-describe('Timeline multiple thread selection', function () {
-  autoMockDomRect();
-  autoMockCanvasContext();
-  autoMockElementSize({ width: 200, height: 300 });
-  autoMockIntersectionObserver();
+// Mock out the element size to have a 400 pixel width and some left/top
+// positioning.
+const TRACK_WIDTH = 400;
+const LEFT = 100;
+const TOP = 7;
+const INITIAL_ELEMENT_SIZE = {
+  width: TRACK_WIDTH,
+  height: FULL_TRACK_SCREENSHOT_HEIGHT,
+  offsetX: LEFT,
+  offsetY: TOP,
+};
 
+autoMockDomRect();
+autoMockCanvasContext();
+autoMockElementSize(INITIAL_ELEMENT_SIZE);
+autoMockIntersectionObserver();
+
+describe('Timeline multiple thread selection', function () {
   function setup(profile = getProfileWithNiceTracks()) {
     const store = storeWithProfile(profile);
 
@@ -169,7 +188,10 @@ describe('Timeline multiple thread selection', function () {
       null
     );
 
-    fireFullClick(activityGraph, { offsetX: 50, offsetY: 50 });
+    fireFullClick(activityGraph, {
+      offsetX: TRACK_WIDTH / 2,
+      offsetY: (FULL_TRACK_SCREENSHOT_HEIGHT * 3) / 4,
+    });
 
     expect(getHumanReadableTracks(getState())).toEqual([
       'show [thread GeckoMain default]',
@@ -1192,11 +1214,6 @@ function _getProfileWithDroppedSamples(): Profile {
 }
 
 describe('Timeline', function () {
-  autoMockCanvasContext();
-  autoMockElementSize({ width: 200, height: 300 });
-  autoMockIntersectionObserver();
-  autoMockDomRect();
-
   beforeEach(() => {
     jest
       .spyOn(ReactDOM, 'findDOMNode')
@@ -1356,5 +1373,93 @@ describe('Timeline', function () {
         '  - show [thread DOM Worker]',
       ]);
     });
+  });
+});
+
+describe('TimelineSelection', () => {
+  function setup() {
+    const flushRafCalls = mockRaf();
+    const profileLength = 10;
+    // There are 10 samples in this profile.
+    const { profile } = getProfileFromTextSamples('A  '.repeat(profileLength));
+
+    // getBoundingClientRect is already mocked by autoMockElementSize.
+    jest
+      .spyOn(HTMLElement.prototype, 'getClientRects')
+      .mockImplementation(() => {
+        const result = [
+          new DOMRect(LEFT, TOP, TRACK_WIDTH, FULL_TRACK_SCREENSHOT_HEIGHT),
+        ];
+        return result;
+      });
+
+    const store = storeWithProfile(profile);
+    render(
+      <Provider store={store}>
+        <Timeline />
+      </Provider>
+    );
+
+    // This is necessary to make sure the sizing is correct.
+    flushRafCalls();
+
+    function moveMouseOnThreadCanvas(mouseEventOptions) {
+      const threadCanvas = ensureExists(
+        document.querySelector('.threadActivityGraphCanvas'),
+        'Expected that a thread activity graph canvas is present.'
+      );
+
+      fireEvent(threadCanvas, getMouseEvent('mousemove', mouseEventOptions));
+    }
+
+    function getTimePositionLinePosition() {
+      const positionLine = ensureExists(
+        document.querySelector('.timelineSelectionHoverLine'),
+        'Expected that the vertical line indicating the time position is present.'
+      );
+      return parseInt(positionLine.style.left);
+    }
+
+    return {
+      ...store,
+      profileLength,
+      flushRafCalls,
+      moveMouseOnThreadCanvas,
+      getTimePositionLinePosition,
+    };
+  }
+
+  it('renders the vertical line indicating the time position from the mouse cursor', () => {
+    const {
+      moveMouseOnThreadCanvas,
+      getState,
+      profileLength,
+      getTimePositionLinePosition,
+    } = setup();
+    let samplePosition = 3;
+
+    moveMouseOnThreadCanvas({
+      pageX: LEFT + (TRACK_WIDTH * samplePosition) / profileLength,
+      pageY: TOP + 1,
+    });
+
+    expect(getMouseTimePosition(getState())).toBe(samplePosition);
+    expect(getTimePositionLinePosition()).toBe(
+      (TRACK_WIDTH * samplePosition) / profileLength
+    );
+    expect(document.body).toMatchSnapshot();
+
+    // Move the mouse in another position.
+    samplePosition = 6;
+
+    moveMouseOnThreadCanvas({
+      pageX: LEFT + (TRACK_WIDTH * samplePosition) / profileLength,
+      pageY: TOP + 1,
+    });
+
+    expect(getMouseTimePosition(getState())).toBe(samplePosition);
+    expect(getTimePositionLinePosition()).toBe(
+      (TRACK_WIDTH * samplePosition) / profileLength
+    );
   });
 });
