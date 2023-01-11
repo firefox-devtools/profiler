@@ -15,10 +15,12 @@ import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getTimelineType } from '../../selectors/url-state';
+import { getTimelineType, getSelectedTab } from '../../selectors/url-state';
+import { getLastVisibleThreadTabSlug } from '../../selectors/app';
 import { ensureExists } from '../../utils/flow';
 import { TimelineTrackThread } from '../../components/timeline/TrackThread';
 import { commitRange } from '../../actions/profile-view';
+import { changeSelectedTab } from '../../actions/app';
 
 import {
   autoMockCanvasContext,
@@ -259,6 +261,29 @@ describe('ThreadActivityGraph', function () {
     // There's no sample at this location.
     clickActivityGraph(0, 1);
     expect(getCallNodePath()).toEqual([]);
+  });
+
+  it('when clicking a stack, this selects the call tree panel', function () {
+    const { dispatch, getState, clickActivityGraph } = setup();
+
+    dispatch(changeSelectedTab('marker-chart'));
+
+    // The full call node at this sample is:
+    //  A -> B -> C -> F -> G
+    clickActivityGraph(1, 0.2);
+    expect(getSelectedTab(getState())).toBe('calltree');
+    expect(getLastVisibleThreadTabSlug(getState())).toBe('calltree');
+  });
+
+  it(`when clicking outside of the graph, this doesn't select the call tree panel`, function () {
+    const { dispatch, getState, clickActivityGraph } = setup();
+
+    dispatch(changeSelectedTab('marker-chart'));
+
+    // There's no sample at this location.
+    clickActivityGraph(0, 1);
+    expect(getSelectedTab(getState())).toBe('marker-chart');
+    expect(getLastVisibleThreadTabSlug(getState())).toBe('marker-chart');
   });
 
   it('will redraw even when there are no samples in range', function () {
