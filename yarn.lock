@@ -1121,10 +1121,10 @@
   resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-6.2.0.tgz#a0fb08403ced8c2a68d1d0acee926bd20be922f2"
   integrity sha512-69QXtcrsc3RYtOtd+GsvczJ319udtBf1PTrr2KbLWM/e2CXUPnh0Nz9AUo8WfhSQ7GeL8dPVNUmhQVgpmuaNGA==
 
-"@codemirror/view@^6.0.0", "@codemirror/view@^6.7.1":
-  version "6.7.1"
-  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.7.1.tgz#370e95d6f001e7f5cadc459807974b4f0a6eb225"
-  integrity sha512-kYtS+uqYw/q/0ytYxpkqE1JVuK5NsbmBklWYhwLFTKO9gVuTdh/kDEeZPKorbqHcJ+P+ucrhcsS1czVweOpT2g==
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.7.2":
+  version "6.7.2"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.7.2.tgz#13830dd6366af15d48e34a5518ab26bb42c440cb"
+  integrity sha512-HeK2GyycxceaQVyvYVYXmn1vUKYYBsHCcfGRSsFO+3fRRtwXx2STK0YiFBmiWx2vtU9gUAJgIUXUN8a0osI8Ng==
   dependencies:
     "@codemirror/state" "^6.1.4"
     style-mod "^4.0.0"
@@ -7264,9 +7264,9 @@ json5@^1.0.1:
     minimist "^1.2.0"
 
 json5@^2.1.2, json5@^2.2.0, json5@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.1.tgz#655d50ed1e6f95ad1a3caababd2b0efda10b395c"
-  integrity sha512-1hqLFMSrGHRHxav9q9gNjJ5EXznIxGVO09xQRrwplcS8qs28pZ8s8hupZAmqDwZUmVZ2Qb2jnyPOWcDH8m8dlA==
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.3.tgz#78cd6f1a19bdc12b73db5ad0c61efd66c1e29283"
+  integrity sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==
 
 jsonfile@^4.0.0:
   version "4.0.0"
