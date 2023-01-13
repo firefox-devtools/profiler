@@ -209,7 +209,7 @@ class CallTreeImpl extends PureComponent<Props> {
     this.focus();
     this.maybeProcureInterestingInitialSelection();
 
-    if (this.props.selectedCallNodeIndex === null && this._treeView) {
+    if (this.props.selectedCallNodeIndex !== null && this._treeView) {
       this._treeView.scrollSelectionIntoView();
     }
   }
