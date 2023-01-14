@@ -34,6 +34,7 @@ import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
   handleCallNodeTransformShortcut,
+  openSourceView,
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
@@ -57,6 +58,8 @@ import type {
   Page,
 } from 'firefox-profiler/types';
 
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 import './index.css';
@@ -73,6 +76,7 @@ type StateProps = {|
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
   +threadsKey: ThreadsKey,
+  +callTree: CallTree,
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -89,6 +93,7 @@ type DispatchProps = {|
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
+  +openSourceView: typeof openSourceView,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -143,10 +148,22 @@ class StackChartImpl extends React.PureComponent<Props> {
   _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
     const {
       threadsKey,
+      callTree,
       selectedCallNodeIndex,
       rightClickedCallNodeIndex,
       handleCallNodeTransformShortcut,
+      openSourceView,
     } = this.props;
+
+    if (event.key === 'Enter') {
+      if (selectedCallNodeIndex !== null) {
+        const file = callTree.getRawFileNameForCallNode(selectedCallNodeIndex);
+        if (file !== null) {
+          openSourceView(file, 'stack-chart');
+        }
+      }
+      return;
+    }
 
     const nodeIndex =
       rightClickedCallNodeIndex !== null
@@ -289,6 +306,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
       threadsKey: getSelectedThreadsKey(state),
+      callTree: selectedThreadSelectors.getCallTree(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       categories: getCategories(state),
       selectedCallNodeIndex:
@@ -308,6 +326,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedCallNode,
     updatePreviewSelection,
     handleCallNodeTransformShortcut,
+    openSourceView,
   },
   component: StackChartImpl,
 });
