@@ -254,11 +254,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
       changeMouseTimePosition(null);
     } else {
       const hoverPositionInPixels = event.pageX - rect.left;
-      const pixelsToMouseTimePosition = Math.round(
+      const pixelsToMouseTimePosition =
         ((committedRange.end - committedRange.start) * hoverPositionInPixels) /
           width +
-          committedRange.start
-      );
+        committedRange.start;
       changeMouseTimePosition(pixelsToMouseTimePosition);
     }
   };
