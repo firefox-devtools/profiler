@@ -507,11 +507,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const canCopyURL = isJS && filePath;
     const fileName =
       filePath &&
-      parseFileNameFromSymbolication(filePath)
-        .path.split('\\')
-        .pop()
-        .split('/')
-        .pop();
+      parseFileNameFromSymbolication(filePath).path.match(/[^\\/]+$/)[0];
     return (
       <>
         {fileName ? (
@@ -524,7 +520,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               },
               onClick: this._handleClick,
               data: { type: 'show-file' },
-              shortcut: 'Enter',
+              shortcut: '⏎',
               content: `Show <strong>${fileName}</strong>`,
             })}
             <div className="react-contextmenu-separator" />
