@@ -282,13 +282,14 @@ export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
  * type of the function.
  */
 function _createCounterSelectors(counterIndex: CounterIndex) {
-  const getCounter: Selector<Counter> = (state) =>
+  const getCounter: Selector<Counter> = createSelector(getProfile, (profile) =>
     processCounter(
       ensureExists(
-        getProfile(state).counters,
+        profile.counters,
         'Attempting to get a counter by index, but no counters exist.'
       )[counterIndex]
-    );
+    )
+  );
 
   const getDescription: Selector<string> = (state) =>
     getCounter(state).description;
