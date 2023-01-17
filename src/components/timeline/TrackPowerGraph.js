@@ -58,7 +58,6 @@ type CanvasProps = {|
  */
 class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
-  _requestedAnimationFrame: boolean = false;
   _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
     renderScheduled: false,
     inView: false,
@@ -179,7 +178,7 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
     }
   }
 
-  _scheduleDraw() {
+  _renderCanvas() {
     if (!this._canvasState.inView) {
       // Canvas is not in the view. Schedule the render for a later intersection
       // observer callback.
@@ -190,15 +189,9 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
     // Canvas is in the view. Render the canvas and reset the schedule state.
     this._canvasState.renderScheduled = false;
 
-    if (!this._requestedAnimationFrame) {
-      this._requestedAnimationFrame = true;
-      window.requestAnimationFrame(() => {
-        this._requestedAnimationFrame = false;
-        const canvas = this._canvas;
-        if (canvas) {
-          this.drawCanvas(canvas);
-        }
-      });
+    const canvas = this._canvas;
+    if (canvas) {
+      this.drawCanvas(canvas);
     }
   }
 
@@ -213,11 +206,11 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
       return;
     }
 
-    this._scheduleDraw();
+    this._renderCanvas();
   };
 
   render() {
-    this._scheduleDraw();
+    this._renderCanvas();
 
     return (
       <InView onChange={this._observerCallback}>
