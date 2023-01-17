@@ -507,7 +507,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const canCopyURL = isJS && filePath;
     const fileName =
       filePath &&
-      parseFileNameFromSymbolication(filePath).path.match(/[^\\/]+$/)[0];
+      parseFileNameFromSymbolication(filePath).path.match(/[^\\/]+$/)?.[0];
     return (
       <>
         {fileName ? (

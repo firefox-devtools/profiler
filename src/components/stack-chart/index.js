@@ -155,16 +155,6 @@ class StackChartImpl extends React.PureComponent<Props> {
       openSourceView,
     } = this.props;
 
-    if (event.key === 'Enter') {
-      if (selectedCallNodeIndex !== null) {
-        const file = callTree.getRawFileNameForCallNode(selectedCallNodeIndex);
-        if (file !== null) {
-          openSourceView(file, 'stack-chart');
-        }
-      }
-      return;
-    }
-
     const nodeIndex =
       rightClickedCallNodeIndex !== null
         ? rightClickedCallNodeIndex
@@ -172,6 +162,15 @@ class StackChartImpl extends React.PureComponent<Props> {
     if (nodeIndex === null) {
       return;
     }
+
+    if (event.key === 'Enter') {
+      const file = callTree.getRawFileNameForCallNode(nodeIndex);
+      if (file !== null) {
+        openSourceView(file, 'stack-chart');
+      }
+      return;
+    }
+
     handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
   };
 
