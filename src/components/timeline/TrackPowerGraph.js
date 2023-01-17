@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
@@ -58,6 +59,10 @@ type CanvasProps = {|
 class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _requestedAnimationFrame: boolean = false;
+  _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
+    renderScheduled: false,
+    inView: false,
+  };
 
   drawCanvas(canvas: HTMLCanvasElement): void {
     const {
@@ -175,6 +180,16 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
   }
 
   _scheduleDraw() {
+    if (!this._canvasState.inView) {
+      // Canvas is not in the view. Schedule the render for a later intersection
+      // observer callback.
+      this._canvasState.renderScheduled = true;
+      return;
+    }
+
+    // Canvas is in the view. Render the canvas and reset the schedule state.
+    this._canvasState.renderScheduled = false;
+
     if (!this._requestedAnimationFrame) {
       this._requestedAnimationFrame = true;
       window.requestAnimationFrame(() => {
@@ -191,11 +206,26 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
     this._canvas = canvas;
   };
 
+  _observerCallback = (inView: boolean, _entry: IntersectionObserverEntry) => {
+    this._canvasState.inView = inView;
+    if (!this._canvasState.renderScheduled) {
+      // Skip if render is not scheduled.
+      return;
+    }
+
+    this._scheduleDraw();
+  };
+
   render() {
     this._scheduleDraw();
 
     return (
-      <canvas className="timelineTrackPowerCanvas" ref={this._takeCanvasRef} />
+      <InView onChange={this._observerCallback}>
+        <canvas
+          className="timelineTrackPowerCanvas"
+          ref={this._takeCanvasRef}
+        />
+      </InView>
     );
   }
 }
