@@ -13,7 +13,10 @@ import copy from 'copy-to-clipboard';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { FlameGraph } from '../../components/flame-graph';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
-import { getInvertCallstack } from '../../selectors/url-state';
+import {
+  getInvertCallstack,
+  getSourceViewFile,
+} from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 import {
   getEmptyThread,
@@ -163,6 +166,11 @@ describe('FlameGraph', function () {
     // And down, back to our starting callnode again
     fireEvent.keyDown(div, { key: 'ArrowDown' });
     expect(selectedNode()).toBe('B');
+
+    expect(getSourceViewFile(getState())).toBeNull();
+    // Open source file for our starting callnode
+    fireEvent.keyDown(div, { key: 'Enter' });
+    expect(getSourceViewFile(getState())).toBe('path/for/B');
   });
 
   it('displays a context menu when rightclicking', () => {
@@ -274,6 +282,9 @@ function setupFlameGraph(addImplementationData: boolean = true) {
     funcTable.columnNumber[funcIndex] = funcIndex + 100;
     funcTable.fileName[funcIndex] = stringTable.indexForString('path/to/file');
   }
+
+  funcTable.fileName[funcNamesDict.B] =
+    stringTable.indexForString('path/for/B');
 
   funcTable.fileName[funcNamesDict.J] = stringTable.indexForString(
     'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28'
