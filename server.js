@@ -10,9 +10,25 @@ const port = process.env.FX_PROFILER_PORT || 4242;
 const host = process.env.FX_PROFILER_HOST || 'localhost';
 const fs = require('fs');
 const path = require('path');
+const yargs = require('yargs');
+const { hideBin } = require('yargs/helpers');
+const middleware = require('webpack-dev-middleware');
+const open = require('open');
 const localConfigExists = fs.existsSync(
   path.join(__dirname, './webpack.local-config.js')
 );
+
+const argv = yargs(hideBin(process.argv))
+  .option('b', {
+    alias: 'browser',
+    describe: 'Open browser after first bundle compilation',
+    type: 'boolean',
+    default: false,
+  })
+  // Disabled --version flag since no version number in package.json.
+  .version(false)
+  .strict()
+  .parseSync();
 
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],
@@ -64,7 +80,15 @@ if (localConfigExists) {
   }
 }
 
-const server = new WebpackDevServer(serverConfig, webpack(config));
+const profilerUrl = `http://${host}:${port}`;
+const compiler = webpack(config);
+if (argv.browser) {
+  const instance = middleware(compiler);
+  instance.waitUntilValid(() => {
+    open(profilerUrl);
+  });
+}
+const server = new WebpackDevServer(serverConfig, compiler);
 server
   .start()
   .then(() => {
@@ -72,7 +96,7 @@ server
       '------------------------------------------------------------------------------------------';
 
     console.log(barAscii);
-    console.log(`> Firefox Profiler is listening at: http://${host}:${port}\n`);
+    console.log(`> Firefox Profiler is listening at: ${profilerUrl}\n`);
     if (port === 4242) {
       console.log(
         '> You can change this default port with the environment variable FX_PROFILER_PORT.\n'
