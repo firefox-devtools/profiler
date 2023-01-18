@@ -1407,7 +1407,7 @@ export function retrieveProfileFromFile(
     dispatch(waitingForProfileFromFile());
 
     try {
-      if (file.type === 'application/zip') {
+      if (_deduceContentType(file.name, file.type) === 'application/zip') {
         // Open a zip file in the zip file viewer
         const buffer = await fileReader(file).asArrayBuffer();
         const zip = await JSZip.loadAsync(buffer);
