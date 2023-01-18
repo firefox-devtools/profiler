@@ -1426,6 +1426,7 @@ describe('actions/receive-profile', function () {
      */
     function mockFile({ type, payload }): File {
       const file = {
+        name: '',
         type,
         _payload: payload,
       };
