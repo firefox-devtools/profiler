@@ -48,6 +48,7 @@ import {
   findFillTextPositionFromDrawLog,
   fireFullClick,
   fireFullContextMenu,
+  fireFullKeyPress,
 } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
@@ -103,6 +104,21 @@ describe('StackChart', function () {
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null
+    );
+  });
+
+  it('can display the source view when pressing enter on the chart', function () {
+    const sourceViewFile =
+      'git:github.com/rust-lang/rust:library/std/src/sys/unix/thread.rs:53cb7b09b00cbea8754ffb78e7e3cb521cb8af4b';
+    const { dispatch, funcNames, getState, stackChartCanvas } = setupSamples(
+      `A[file:${sourceViewFile}]`
+    );
+    dispatch(changeSelectedCallNode(0, [funcNames.indexOf('A')]));
+
+    expect(UrlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    fireFullKeyPress(stackChartCanvas, { key: 'Enter' });
+    expect(UrlStateSelectors.getSourceViewFile(getState())).toBe(
+      sourceViewFile
     );
   });
 

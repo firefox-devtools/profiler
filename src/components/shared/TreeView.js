@@ -912,14 +912,16 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
       }
     }
 
+    const { rightClickedNodeId } = this.props;
+    const focusedNodeId = rightClickedNodeId ?? selected;
     if (isAsteriskKey) {
-      this._toggleAll(selected);
+      this._toggleAll(focusedNodeId);
     }
 
     if (isEnterKey) {
-      const { onEnterKey, selectedNodeId } = this.props;
-      if (onEnterKey && selectedNodeId !== null) {
-        onEnterKey(selectedNodeId);
+      const { onEnterKey } = this.props;
+      if (onEnterKey && focusedNodeId !== null) {
+        onEnterKey(focusedNodeId);
       }
     }
   };
