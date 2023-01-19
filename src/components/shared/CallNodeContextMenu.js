@@ -716,14 +716,6 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             Copy stack
           </MenuItem>
         </Localized>
-        <Localized id="CallNodeContextMenu--copy-call-stack">
-          <MenuItem
-            onClick={this._handleClick}
-            data={{ type: 'copy-call-stack' }}
-          >
-            Copy call stack
-          </MenuItem>
-        </Localized>
       </>
     );
   }

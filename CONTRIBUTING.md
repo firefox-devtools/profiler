@@ -90,10 +90,6 @@ When working on a new feature and code changes, it's important that things work 
 
 We have snapshot tests to ensure that components output the expected markup. If you change a `render` function, it will likely produce some snapshot failures when running `yarn test`. If the snapshot changes are what you expect, you can run `yarn test -u` to update the snapshots. Don't forget to include them in your commit as well.
 
-### Updating locales
-
-If your PR adds string that need localization to other languages please only update `locales/en-US/app.ftl`. Do not update other locales.
-
 ## Exposing the web application publicly
 
 If you'd like to use [profiler.firefox.com](https://profiler.firefox.com) via URLs that are not `localhost` (e.g. live preview, proxy, other device...) you can expose the web application publicly like so:
