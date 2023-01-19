@@ -332,7 +332,6 @@ export type FrameTable = {|
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
-  optimizations: ({} | null)[],
   length: number,
 |};
 

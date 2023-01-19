@@ -647,7 +647,6 @@ async function processTracingEvents(
             lineNumber === undefined ? null : lineNumber;
           frameTable.column[frameIndex] =
             columnNumber === undefined ? null : columnNumber;
-          frameTable.optimizations[frameIndex] = null;
           frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
           stackTable.frame.push(frameIndex);
