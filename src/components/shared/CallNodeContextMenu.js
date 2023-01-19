@@ -130,7 +130,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { stringTable, funcTable },
+      thread: { funcTable, stringTable },
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
@@ -167,7 +167,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { stringTable, funcTable },
+      thread: { funcTable, stringTable },
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
@@ -396,7 +396,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodePath,
-      thread: { funcTable, stringTable, resourceTable },
+      thread: { funcTable, resourceTable, stringTable },
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodePath[callNodePath.length - 1];
