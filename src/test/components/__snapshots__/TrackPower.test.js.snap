@@ -128,11 +128,13 @@ exports[`TrackPower matches the component snapshot 1`] = `
   <div
     class="timelineTrackPowerGraph"
   >
-    <canvas
-      class="timelineTrackPowerCanvas"
-      height="25"
-      width="80"
-    />
+    <div>
+      <canvas
+        class="timelineTrackPowerCanvas"
+        height="25"
+        width="80"
+      />
+    </div>
     <div
       class="timelineEmptyThreadIndicator"
     />
