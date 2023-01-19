@@ -2284,15 +2284,12 @@ export function getOriginAnnotationForFunc(
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   stringTable: UniqueStringArray,
-  { includeResourceOrigin = true } = {}
+  { includeResourceOrigin = true }: { includeResourceOrigin: boolean } = {}
 ): string {
   let resourceType = null;
   let origin = null;
-  let resourceIndex = null;
-  if (
-    includeResourceOrigin &&
-    (resourceIndex = funcTable.resource[funcIndex]) !== -1
-  ) {
+  const resourceIndex = funcTable.resource[funcIndex];
+  if (includeResourceOrigin && resourceIndex !== -1) {
     resourceType = resourceTable.type[resourceIndex];
     const resourceNameIndex = resourceTable.name[resourceIndex];
     origin = stringTable.getString(resourceNameIndex);
