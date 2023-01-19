@@ -2283,12 +2283,16 @@ export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray
+  stringTable: UniqueStringArray,
+  { includeResourceOrigin = true } = {}
 ): string {
   let resourceType = null;
   let origin = null;
-  const resourceIndex = funcTable.resource[funcIndex];
-  if (resourceIndex !== -1) {
+  let resourceIndex = null;
+  if (
+    includeResourceOrigin &&
+    (resourceIndex = funcTable.resource[funcIndex]) !== -1
+  ) {
     resourceType = resourceTable.type[resourceIndex];
     const resourceNameIndex = resourceTable.name[resourceIndex];
     origin = stringTable.getString(resourceNameIndex);
@@ -2299,7 +2303,10 @@ export function getOriginAnnotationForFunc(
   if (fileNameIndex !== null) {
     fileName = stringTable.getString(fileNameIndex);
 
-    // Strip off any filename decorations from symbolication.
+    // Strip off any filename decorations from symbolication. It could be a path
+    // (potentially using "special path" syntax, e.g. hg:...), or it could be a
+    // URL, if the function is a JS function. If it's a path from symbolication,
+    // strip it down to just the actual path.
     fileName = parseFileNameFromSymbolication(fileName).path;
 
     const lineNumber = funcTable.lineNumber[funcIndex];
@@ -2314,6 +2321,7 @@ export function getOriginAnnotationForFunc(
 
   if (fileName) {
     if (
+      // If `includeResourceOrigin` is false then `origin` is still null
       origin &&
       _shouldShowBothOriginAndFileName(fileName, origin, resourceType)
     ) {

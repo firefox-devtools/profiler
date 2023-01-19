@@ -16,6 +16,7 @@ import {
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 import { getCategories } from 'firefox-profiler/selectors';
+import { getOriginAnnotationForFunc } from 'firefox-profiler/profile-logic/profile-data';
 
 import copy from 'copy-to-clipboard';
 import {
@@ -37,7 +38,6 @@ import {
   convertToTransformType,
   assertExhaustiveCheck,
 } from 'firefox-profiler/utils/flow';
-import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 
 import { getShouldDisplaySearchfox } from 'firefox-profiler/selectors/profile';
 
@@ -194,7 +194,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     }
   }
 
-  copyStack({ withFileLineColumnInfo = false } = {}): void {
+  copyStack(): void {
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -205,7 +205,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { stringTable, funcTable },
+      thread: { funcTable, resourceTable, stringTable },
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
@@ -214,28 +214,20 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     do {
       const funcIndex = callNodeTable.func[curCallNodeIndex];
+      // Match the style of MarkerContextMenu.js#convertStackToString which uses
+      // square brackets around [file:line:column] info. This isn't provided by
+      // getOriginAnnotationForFunc, so build the string in two parts:
       const stringIndex = funcTable.name[funcIndex];
-      stack += stringTable.getString(stringIndex);
-      if (withFileLineColumnInfo) {
-        // Ported from src/profile-logic/profile-data.js' getOriginAnnotationForFunc()
-        let fileNameURL;
-        const fileNameIndex = funcTable.fileName[funcIndex];
-        if (fileNameIndex !== null) {
-          fileNameURL = stringTable.getString(fileNameIndex);
-          // Strip off any filename decorations from symbolication.
-          fileNameURL = parseFileNameFromSymbolication(fileNameURL).path;
-          const lineNumber = funcTable.lineNumber[funcIndex];
-          if (lineNumber !== null) {
-            fileNameURL += ':' + lineNumber;
-            const columnNumber = funcTable.columnNumber[funcIndex];
-            if (columnNumber !== null) {
-              fileNameURL += ':' + columnNumber;
-            }
-          }
-          stack += ` [${fileNameURL}]`;
-        }
-      }
-      stack += '\n';
+      const origin = stringTable.getString(stringIndex);
+      const fileNameURL = getOriginAnnotationForFunc(
+        funcIndex,
+        funcTable,
+        resourceTable,
+        stringTable,
+        // Got the origin above already
+        { includeResourceOrigin: false }
+      );
+      stack += origin + (fileNameURL ? ` [${fileNameURL}]\n` : '\n');
       curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
     } while (curCallNodeIndex !== -1);
 
@@ -266,9 +258,6 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         break;
       case 'copy-stack':
         this.copyStack();
-        break;
-      case 'copy-call-stack':
-        this.copyStack({ withFileLineColumnInfo: true });
         break;
       case 'expand-all':
         this.expandAll();

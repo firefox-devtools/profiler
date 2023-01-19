@@ -196,13 +196,6 @@ describe('calltree/CallNodeContextMenu', function () {
       const { getByText } = setup(createStoreWithJsCallStack());
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy stack'));
-      expect(copy).toHaveBeenCalledWith(`B.js\nA.js\n`);
-    });
-
-    it('can copy a call stack', function () {
-      const { getByText } = setup(createStoreWithJsCallStack());
-      // Copy is a mocked module, clear it both before and after.
-      fireFullClick(getByText('Copy call stack'));
       expect(copy).toHaveBeenCalledWith(
         `B.js [https://example.com/script.js:2:222]\nA.js [https://example.com/script.js:1:111]\n`
       );
