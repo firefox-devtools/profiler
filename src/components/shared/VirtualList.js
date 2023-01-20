@@ -343,19 +343,52 @@ export class VirtualList<Item> extends React.PureComponent<
   }
 
   /**
-   * Scroll the container horizontally if necessary
+   * Scroll the container horizontally if necessary.
+   *
+   * - container is the container to be scrolled.
+   * - itemX is the horizontal position of the item.
+   * - offsetX is the offset at the left of the scrolled column, if there are
+   *   sticky columns at the left. This is basically the width of the sticky
+   *   elements.
+   *
+   * Here is a diagram showing this visually:
+   *
+   * |------|---------------item---------|
+   *                  itemX ^
+   *        ^ offsetX
+   *         <-------------------------->   The part that will be scrolled.
+   *  <--------------------------------->   The container.
+   *
+   * The gotcha here is that scrollLeft applies to the container, but only the
+   * right part is scrolled, because of the sticky positioning for the offset
+   * part.
    */
-  _scrollContainerHorizontally(container: HTMLDivElement, offsetX: CssPixels) {
+  _scrollContainerHorizontally(
+    container: HTMLDivElement,
+    itemX: CssPixels,
+    offsetX: CssPixels
+  ) {
     const interestingWidth = 400;
-    const itemLeft = offsetX;
-    const itemRight = itemLeft + interestingWidth;
+    const itemLeft = itemX;
+    const itemRight = itemX + interestingWidth;
+    const scrollingColumnWidth = container.clientWidth - offsetX;
 
     if (container.scrollLeft > itemLeft) {
+      // Is the item scrolled to much towards the left (which means the
+      // container is scrolled to the right too much, scrollLeft is too high)?
+      // If yes, scroll so that its left edge is visible.
       container.scrollLeft = itemLeft;
-    } else if (container.scrollLeft + container.clientWidth < itemRight) {
+    } else if (container.scrollLeft + scrollingColumnWidth < itemRight) {
+      // Is the item scrolled to much towards the right (which means the
+      // container is scrolled too much to the left, scrollLeft is too small)?
+      // If yes, scroll so that its right edge is visible.
+
+      // The Math.min operation accounts for the case where the
+      // scrollingColumnWidth is smaller than interestingWidth. In that case we
+      // want to align with the left edge.
       container.scrollLeft = Math.min(
         itemLeft,
-        itemRight - container.clientWidth
+        itemRight - scrollingColumnWidth
       );
     }
   }
@@ -366,10 +399,17 @@ export class VirtualList<Item> extends React.PureComponent<
    * it'll be shown near one of the edges of the viewport.
    * We're keeping a margin of a few items after and before the intended item,
    * if there are any.
+   * * itemIndex is the index for the item to scroll to
+   * * itemX is it's horizontal position in its column
+   * * offsetX is how much the horizontal position is offset by fixed columns, if applicable.
    */
   /* This method is used by users of this component. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
-  scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
+  scrollItemIntoView(
+    itemIndex: number,
+    itemX: CssPixels,
+    offsetX: CssPixels = 0
+  ) {
     const container = this._container.current;
     if (!container) {
       return;
@@ -418,7 +458,7 @@ export class VirtualList<Item> extends React.PureComponent<
       );
     }
 
-    this._scrollContainerHorizontally(container, offsetX);
+    this._scrollContainerHorizontally(container, itemX, offsetX);
   }
 
   /* This method is used by users of this component. */

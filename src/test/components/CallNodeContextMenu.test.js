@@ -17,6 +17,7 @@ import {
   setContextMenuVisibility,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSourceViewFile } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
@@ -108,6 +109,22 @@ describe('calltree/CallNodeContextMenu', function () {
   });
 
   describe('clicking on the rest of the menu items', function () {
+    it('can show source file', function () {
+      const sourceViewFile =
+        'git:github.com/rust-lang/rust:library/std/src/sys/unix/thread.rs:53cb7b09b00cbea8754ffb78e7e3cb521cb8af4b';
+      const {
+        profile,
+        funcNamesDictPerThread: [{ A }],
+      } = getProfileFromTextSamples(`A[file:${sourceViewFile}]`);
+      const store = storeWithProfile(profile);
+      store.dispatch(changeRightClickedCallNode(0, [A]));
+      const { getByText, getState } = setup(store);
+
+      expect(getSourceViewFile(getState())).toBeNull();
+      fireFullClick(getByText(/Show/));
+      expect(getSourceViewFile(getState())).toBe(sourceViewFile);
+    });
+
     it('can expand all call nodes in the call tree', function () {
       const { getState, getByText } = setup();
       expect(
