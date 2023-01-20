@@ -1429,5 +1429,18 @@ const _upgraders = {
 
     convertToVersion26Recursive(profile);
   },
+  [27]: (profile) => {
+    // The "optimizations" column was removed from the frame table.
+    function convertToVersion27Recursive(p) {
+      for (const thread of p.threads) {
+        delete thread.frameTable.schema.optimizations;
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion27Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion27Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */

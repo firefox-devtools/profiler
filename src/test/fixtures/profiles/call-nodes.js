@@ -94,7 +94,6 @@ export default function getProfile(): Profile {
     implementation: Array(frameFuncs.length).fill(null),
     line: Array(frameFuncs.length).fill(null),
     column: Array(frameFuncs.length).fill(null),
-    optimizations: Array(frameFuncs.length).fill(null),
     length: frameFuncs.length,
   };
 

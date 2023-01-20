@@ -615,7 +615,6 @@ describe('Marker schema filtering', function () {
             implementation: [],
             line: [],
             column: [],
-            optimizations: [],
             length: 0,
           },
           stringArray: [
@@ -806,7 +805,6 @@ describe('profile upgrading and markers', () => {
             implementation: [null],
             line: [null],
             column: [null],
-            optimizations: [null],
             length: 1,
           },
           stringArray: [

@@ -202,11 +202,10 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
           relevantForJS: 1,
           innerWindowID: 2
           implementation: 3,
-          optimizations: 4,
-          line: 5,
-          column: 6,
-          category: 7,
-          subcategory: 8,
+          line: 4,
+          column: 5,
+          category: 6,
+          subcategory: 7,
         },
         data: [
           [
@@ -216,7 +215,6 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
             false, // for label frames, whether this label should be shown in "JS only" stacks
             2      // for JS frames, an innerWindowID that corresponds to a page object in the profile.pages array.
             40,    // for JS frames, an index into the string table, usually "Baseline" or "Ion"
-            null,  // JSON info about JIT optimizations.
             1536,  // The line of code
             3,     // an index into profile.meta.categories
             1      // an index into profile.meta.categories[3].subcategories
