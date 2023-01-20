@@ -278,6 +278,14 @@ Home--additional-content-title = Φόρτωση υπαρχόντων προφί�
 Home--additional-content-content = Μπορείτε να <strong>σύρετε και να εναποθέσετε</strong> ένα αρχείο προφίλ εδώ για φόρτωση, ή:
 Home--compare-recordings-info = Μπορείτε επίσης να συγκρίνετε καταγραφές. <a>Άνοιγμα περιβάλλοντος σύγκρισης.</a>
 Home--your-recent-uploaded-recordings-title = Πρόσφατα μεταφορτωμένες καταγραφές
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    Το { -profiler-brand-name } μπορεί επίσης να εισαγάγει προφίλ από άλλα εργαλεία καταγραφής, όπως
+    το <perf>Linux perf</perf>, το <simpleperf>Android SimplePerf</simpleperf>, ο πίνακας
+    επιδόσεων του Chrome, το <androidstudio>Android Studio</androidstudio> ή οποιοδήποτε
+    αρχείο της <dhat>μορφής dhat</dhat>. <write>Μάθετε πώς να γράψετε το δικό σας
+    εργαλείο εισαγωγής</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
