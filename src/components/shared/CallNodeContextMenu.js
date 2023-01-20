@@ -9,6 +9,7 @@ import { Localized } from '@fluent/react';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   funcHasDirectRecursiveCall,
   funcHasIndirectRecursiveCall,
@@ -20,6 +21,7 @@ import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
+  openSourceView,
   setContextMenuVisibility,
 } from 'firefox-profiler/actions/profile-view';
 import {
@@ -69,6 +71,7 @@ type StateProps = {|
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
+  +openSourceView: typeof openSourceView,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
@@ -152,7 +155,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     copy(this._getFunctionName());
   }
 
-  copyUrl(): void {
+  _getFilePath(): string | null {
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -169,9 +172,24 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const funcIndex = callNodeTable.func[callNodeIndex];
     const stringIndex = funcTable.fileName[funcIndex];
-    if (stringIndex !== null) {
-      const fileName = stringTable.getString(stringIndex);
-      copy(fileName);
+    if (stringIndex === null) {
+      return null;
+    }
+    return stringTable.getString(stringIndex);
+  }
+
+  showFile(): void {
+    const filePath = this._getFilePath();
+    if (filePath) {
+      const { openSourceView, selectedTab } = this.props;
+      openSourceView(filePath, selectedTab);
+    }
+  }
+
+  copyUrl(): void {
+    const url = this._getFilePath();
+    if (url) {
+      copy(url);
     }
   }
 
@@ -213,6 +231,9 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     }
 
     switch (type) {
+      case 'show-file':
+        this.showFile();
+        break;
       case 'searchfox':
         this.lookupFunctionOnSearchfox();
         break;
@@ -482,10 +503,30 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       ? categories[categoryIndex].name
       : '';
     const showExpandAll = selectedTab === 'calltree';
-    const canCopyURL =
-      isJS && funcTable.fileName[callNodeTable.func[callNodeIndex]] !== null;
+    const filePath = this._getFilePath();
+    const canCopyURL = isJS && filePath;
+    const fileName =
+      filePath &&
+      parseFileNameFromSymbolication(filePath).path.match(/[^\\/]+$/)?.[0];
     return (
       <>
+        {fileName ? (
+          <>
+            {this.renderMenuItemWithShortcut({
+              l10nId: 'CallNodeContextMenu--show-file',
+              l10nProps: {
+                vars: { fileName },
+                elems: { strong: <strong /> },
+              },
+              onClick: this._handleClick,
+              data: { type: 'show-file' },
+              shortcut: '⏎',
+              content: `Show <strong>${fileName}</strong>`,
+            })}
+            <div className="react-contextmenu-separator" />
+          </>
+        ) : null}
+
         {this.renderTransformMenuItem({
           l10nId: 'CallNodeContextMenu--transform-merge-function',
           shortcut: 'm',
@@ -689,6 +730,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
   renderMenuItemWithShortcut(props: {|
     +l10nId: string,
+    +l10nProps?: mixed,
     +content: React.Node,
     +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
     +shortcut: string,
@@ -696,7 +738,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   |}) {
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
-        <Localized id={props.l10nId}>
+        <Localized id={props.l10nId} {...props.l10nProps}>
           <div className="react-contextmenu-item-content">{props.content}</div>
         </Localized>
         <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
@@ -766,6 +808,7 @@ export const CallNodeContextMenu = explicitConnect<
   mapDispatchToProps: {
     addTransformToStack,
     expandAllCallNodeDescendants,
+    openSourceView,
     setContextMenuVisibility,
   },
   component: CallNodeContextMenuImpl,

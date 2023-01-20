@@ -225,16 +225,6 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       openSourceView,
     } = this.props;
 
-    if (event.key === 'Enter') {
-      if (selectedCallNodeIndex !== null) {
-        const file = callTree.getRawFileNameForCallNode(selectedCallNodeIndex);
-        if (file !== null) {
-          openSourceView(file, 'flame-graph');
-        }
-      }
-      return;
-    }
-
     if (
       // Please do not forget to update the switch/case below if changing the array to allow more keys.
       ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)
@@ -303,10 +293,19 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       rightClickedCallNodeIndex !== null
         ? rightClickedCallNodeIndex
         : selectedCallNodeIndex;
-
-    if (nodeIndex !== null) {
-      handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+    if (nodeIndex === null) {
+      return;
     }
+
+    if (event.key === 'Enter') {
+      const file = callTree.getRawFileNameForCallNode(nodeIndex);
+      if (file !== null) {
+        openSourceView(file, 'flame-graph');
+      }
+      return;
+    }
+
+    handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
   };
 
   _onCopy = (event: ClipboardEvent) => {
