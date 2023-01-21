@@ -3212,7 +3212,6 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       newFrameTable.implementation.push(frameTable.implementation[frame]);
       newFrameTable.line.push(frameTable.line[frame]);
       newFrameTable.column.push(frameTable.column[frame]);
-      newFrameTable.optimizations.push(frameTable.optimizations[frame]);
       newFrameTable.length++;
       oldIpFrameToNewIpFrame[frame] = newIpFrame;
       // Note: The duplicated frame uses the same func as the original frame.

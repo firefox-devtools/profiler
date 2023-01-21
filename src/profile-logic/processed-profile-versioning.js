@@ -2198,5 +2198,11 @@ const _upgraders = {
       }
     }
   },
+  [45]: (profile) => {
+    // The "optimizations" column was removed from the frame table.
+    for (const thread of profile.threads) {
+      delete thread.frameTable.optimizations;
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

@@ -101,11 +101,10 @@ export function convertPerfScriptProfile(
         relevantForJS: 1,
         innerWindowID: 2,
         implementation: 3,
-        optimizations: 4,
-        line: 5,
-        column: 6,
-        category: 7,
-        subcategory: 8,
+        line: 4,
+        column: 5,
+        category: 6,
+        subcategory: 7,
       },
       data: [],
     };
@@ -153,7 +152,6 @@ export function convertPerfScriptProfile(
             ? KERNEL_CATEGORY_INDEX
             : USER_CATEGORY_INDEX;
         const implementation = null;
-        const optimizations = null;
         const line = null;
         const relevantForJS = false;
         const subcategory = null;
@@ -164,7 +162,6 @@ export function convertPerfScriptProfile(
           relevantForJS,
           innerWindowID,
           implementation,
-          optimizations,
           line,
           column,
           category,

@@ -88,9 +88,7 @@ function mockCanvasContext() {
       })),
       createPattern: spyLog('createPattern', () => ({})),
       __flushDrawLog: (): Array<any> => {
-        const oldLog = log.slice();
-        log.splice(0, log.length);
-        return oldLog;
+        return log.splice(0, log.length);
       },
     },
     {
