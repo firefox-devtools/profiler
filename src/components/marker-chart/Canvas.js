@@ -8,6 +8,7 @@ import * as React from 'react';
 import {
   withChartViewport,
   type WithChartViewport,
+  type Viewport,
 } from 'firefox-profiler/components/shared/chart/Viewport';
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
@@ -31,7 +32,6 @@ import type {
 } from 'firefox-profiler/types';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 
-import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type MarkerDrawingInformation = {|

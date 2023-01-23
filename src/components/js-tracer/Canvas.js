@@ -13,6 +13,7 @@ import {
 import {
   withChartViewport,
   type WithChartViewport,
+  type Viewport,
 } from 'firefox-profiler/components/shared/chart/Viewport';
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
@@ -31,7 +32,6 @@ import type {
   JsTracerTiming,
 } from 'firefox-profiler/types';
 
-import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
