@@ -81,7 +81,7 @@ export type SourceFileDownloadRecipe =
 // Some rust stdlib functions: (https://bugzilla.mozilla.org/show_bug.cgi?id=1717973)
 //   "/builds/worker/fetches/rustc/lib/rustlib/src/rust/library/std/src/sys_common/backtrace.rs"
 const repoPathRegex =
-  /^(?<vcs>hg|git):(?<repo>[^:]*):(?<path>[^:]*):(?<rev>[0-9a-f]*)$/;
+  /^(?<vcs>hg|git):(?<repo>[^:]*):(?<path>[^:]*):(?<rev>.*)$/;
 const s3PathRegex =
   /^s3:(?<bucket>[^:]*):(?<digest>[0-9a-f]*)\/(?<path>[^:]*):$/;
 const cargoPathRegex =

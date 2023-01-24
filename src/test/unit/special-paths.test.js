@@ -54,6 +54,16 @@ describe('parseFileNameFromSymbolication', function () {
       path: 'core/fdrm/fx_crypt.cpp',
       rev: 'dab1161c861cc239e48a17e1a5d729aa12785a53',
     });
+    expect(
+      parseFileNameFromSymbolication(
+        'git:github.com/torvalds/linux:arch/x86/mm/fault.c:v5.15'
+      )
+    ).toEqual({
+      type: 'git',
+      repo: 'github.com/torvalds/linux',
+      path: 'arch/x86/mm/fault.c',
+      rev: 'v5.15',
+    });
   });
 
   it('parses s3 paths', function () {
