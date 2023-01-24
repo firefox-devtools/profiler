@@ -51,6 +51,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Паказаць <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Аб'яднаць функцыю
     .title =
         Аб'яднанне функцыі выдаляе яе з профілю і прызначае яе час
@@ -234,6 +237,8 @@ MenuButtons--index--share-error-uploading =
     .label = Памылка запампоўкі
 MenuButtons--index--revert = Вярнуцца да зыходнага профілю
 MenuButtons--index--docs = Дакументы
+MenuButtons--permalink--button =
+    .label = Пастаянная спасылка
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
@@ -413,14 +418,19 @@ ProfileRootMessage--additional = Вярнуцца на галоўную
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--applying-button = Прымяненне...
+ServiceWorkerManager--pending-button = Прымяніць і перазагрузіць
 ServiceWorkerManager--installed-button = Перазагрузіць праграму
+ServiceWorkerManager--updated-while-not-ready = Новая версія праграмы была прыменена да поўнай загрузкі гэтай старонкі. Вы можаце сутыкнуцца з няспраўнасцямі.
 ServiceWorkerManager--new-version-is-ready = Новая версія праграмы спампавана і гатова да выкарыстання.
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Усе стэкі
 StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Уласны
 StackSettings--use-data-source-label = Крыніца даных:
 
 ## Tab Bar for the bottom half of the analysis UI.
