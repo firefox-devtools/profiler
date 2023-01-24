@@ -755,7 +755,6 @@ function combineFrameTables(
       );
       newFrameTable.line.push(frameTable.line[i]);
       newFrameTable.column.push(frameTable.column[i]);
-      newFrameTable.optimizations.push(frameTable.optimizations[i]);
 
       translationMap.set(i, newFrameTable.length);
       newFrameTable.length++;

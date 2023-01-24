@@ -931,9 +931,6 @@ export function collapseResource(
             newFrameTable.implementation.push(
               frameTable.implementation[frameIndex]
             );
-            newFrameTable.optimizations.push(
-              frameTable.optimizations[frameIndex]
-            );
 
             // Add the psuedo-func
             newFuncTable.isJS.push(funcTable.isJS[funcIndex]);

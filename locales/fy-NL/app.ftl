@@ -51,6 +51,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = <strong>{ $fileName }</strong> toane
 CallNodeContextMenu--transform-merge-function = Funksje gearfoegje
     .title =
         As jo in funksje gearfoegje, wurdt dizze út it profyl fuortsmiten en wurdt de tiid tawezen oan

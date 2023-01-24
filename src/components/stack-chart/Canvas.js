@@ -10,6 +10,7 @@ import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import {
   withChartViewport,
   type WithChartViewport,
+  type Viewport,
 } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
@@ -43,7 +44,6 @@ import type {
   StackTimingDepth,
   IndexIntoStackTiming,
 } from '../../profile-logic/stack-timing';
-import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {|

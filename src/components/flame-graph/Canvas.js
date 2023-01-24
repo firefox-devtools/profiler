@@ -8,6 +8,7 @@ import memoize from 'memoize-immutable';
 import {
   withChartViewport,
   type WithChartViewport,
+  type Viewport,
 } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
@@ -42,7 +43,6 @@ import type {
 } from 'firefox-profiler/profile-logic/flame-graph';
 
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
-import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
 
 export type OwnProps = {|
   +thread: Thread,
