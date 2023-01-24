@@ -51,6 +51,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Εμφάνιση <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Συγχώνευση συνάρτησης
     .title =
         Η συγχώνευση μιας συνάρτησης την αφαιρεί από το προφίλ και αναθέτει το χρόνο της στη
@@ -275,6 +278,14 @@ Home--additional-content-title = Φόρτωση υπαρχόντων προφί�
 Home--additional-content-content = Μπορείτε να <strong>σύρετε και να εναποθέσετε</strong> ένα αρχείο προφίλ εδώ για φόρτωση, ή:
 Home--compare-recordings-info = Μπορείτε επίσης να συγκρίνετε καταγραφές. <a>Άνοιγμα περιβάλλοντος σύγκρισης.</a>
 Home--your-recent-uploaded-recordings-title = Πρόσφατα μεταφορτωμένες καταγραφές
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    Το { -profiler-brand-name } μπορεί επίσης να εισαγάγει προφίλ από άλλα εργαλεία καταγραφής, όπως
+    το <perf>Linux perf</perf>, το <simpleperf>Android SimplePerf</simpleperf>, ο πίνακας
+    επιδόσεων του Chrome, το <androidstudio>Android Studio</androidstudio> ή οποιοδήποτε
+    αρχείο της <dhat>μορφής dhat</dhat>. <write>Μάθετε πώς να γράψετε το δικό σας
+    εργαλείο εισαγωγής</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -735,6 +746,34 @@ TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh ({ $car
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
     .label = Η ενέργεια που χρησιμοποιείται στο ορατό εύρος
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στο ορατό εύρος
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

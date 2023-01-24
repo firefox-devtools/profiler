@@ -51,6 +51,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Visa <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Sammanfogningsfunktion
     .title =
         Sammanfoga en funktion tar bort det från profilen och tilldelar sin tid till

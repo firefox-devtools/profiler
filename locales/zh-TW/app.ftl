@@ -48,6 +48,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = 顯示 <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = 合併函數
     .title = 合併函數後會將其從效能檢測檔移除，並將時間歸入呼叫該函數的函數。此函數在效能樹中所有發生之處都會被合併。
 CallNodeContextMenu--transform-merge-call-node = 只合併節點

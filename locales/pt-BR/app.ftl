@@ -48,6 +48,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Mostrar <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Merge de função
     .title = Fazer merge de uma função a remove do profile e atribui seu tempo à função que a chamou. Isso acontece na árvore em qualquer lugar onde a função foi chamada.
 CallNodeContextMenu--transform-merge-call-node = Merge de node apenas
