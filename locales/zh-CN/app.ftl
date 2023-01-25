@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Android 版 Firefox
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -47,6 +48,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = 显示 <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = 合并函数
     .title = 将函数折叠后，其会从分析记录移除，并将所有时间归予调用该函数的函数。在树中调用该函数的任何地方都会如此。
 CallNodeContextMenu--transform-merge-call-node = 只合并节点
@@ -175,6 +179,10 @@ Home--load-from-url-submit-button =
 Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--menu-button-instructions = 启用分析器菜单按钮，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
+Home--profile-firefox-android-instructions =
+    您还可以分析 { -firefox-android-brand-name }。
+    有关更多信息，请查阅此文档：
+    <a>直接在设备上分析 { -firefox-android-brand-name }</a>。
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -584,6 +592,7 @@ TrackContextMenu--hide-other-screenshots-tracks = 隐藏其他快照轨
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = 隐藏“{ $trackName }”
 TrackContextMenu--show-all-tracks = 显示所有轨道
+TrackContextMenu--show-local-tracks-in-process = 显示此进程中的所有轨道
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = 显示所有匹配的轨道
