@@ -11,6 +11,7 @@ import {
 } from './special-paths';
 import { isGzip, decompress } from './gz';
 import { UntarFileStream } from './untar';
+import { isLocalURL } from './url';
 import type { SourceLoadingError, AddressProof } from 'firefox-profiler/types';
 
 export type FetchSourceCallbacks = {|
@@ -207,14 +208,5 @@ export async function fetchSource(
 // official Mozilla symbolication server with requests it can't handle.
 // This check can be removed once it adds support for /source/v1.
 function _serverMightSupportSource(symbolServerUrl: string): boolean {
-  try {
-    const url = new URL(symbolServerUrl);
-    return (
-      url.hostname === 'localhost' ||
-      url.hostname === '127.0.0.1' ||
-      url.hostname === '::1'
-    );
-  } catch (e) {
-    return false;
-  }
+  return isLocalURL(symbolServerUrl);
 }

@@ -11,6 +11,7 @@ import { getThreadsKey } from '../profile-logic/profile-data';
 import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
+import { localhostHostnames } from '../utils/url';
 
 import type {
   ThreadIndex,
@@ -330,7 +331,6 @@ export const getCommittedRangeLabels: Selector<string[]> = createSelector(
 
 function _shouldAllowSymbolServerUrl(symbolServerUrl) {
   try {
-    const localhostHostnames = ['localhost', '127.0.0.1'];
     const url = new URL(symbolServerUrl);
     if (localhostHostnames.includes(url.hostname)) {
       return true;
