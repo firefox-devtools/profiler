@@ -7,9 +7,13 @@ import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 import { Workbox } from 'workbox-window';
 
+import { isLocalURL } from 'firefox-profiler/utils/url';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import { getDataSource } from 'firefox-profiler/selectors/url-state';
+import {
+  getDataSource,
+  getProfileUrl,
+} from 'firefox-profiler/selectors/url-state';
 import { getView } from 'firefox-profiler/selectors/app';
 import { getSymbolicationStatus } from 'firefox-profiler/selectors/profile';
 
@@ -24,6 +28,7 @@ import './ServiceWorkerManager.css';
 
 type StateProps = {|
   +dataSource: DataSource,
+  +profileUrl: string,
   +phase: Phase,
   +symbolicationStatus: SymbolicationStatus,
 |};
@@ -200,7 +205,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   // This function checks whether we can safely update the service worker,
   // using the state of the running application.
   _canUpdateServiceWorker(): boolean {
-    const { dataSource } = this.props;
+    const { dataSource, profileUrl } = this.props;
 
     // We use a switch here, to make sure that when somebody adds a new
     // dataSource, we'll get a flow error if they forget to update here. This is
@@ -217,8 +222,14 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         // We should not propose to reload the page for these data sources,
         // because we'd lose the data.
         return false;
-      case 'public':
       case 'from-url':
+        // If loaded from localhost, don't propose to reload the page as the
+        // server may no longer be running:
+        if (isLocalURL(profileUrl)) {
+          return false;
+        }
+      // otherwise, fall through.
+      case 'public':
       case 'compare':
       case 'local':
         // Before updating the service worker, we need to make sure the profile
@@ -405,6 +416,7 @@ export const ServiceWorkerManager = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state) => ({
     phase: getView(state).phase,
     dataSource: getDataSource(state),
+    profileUrl: getProfileUrl(state),
     symbolicationStatus: getSymbolicationStatus(state),
   }),
   component: ServiceWorkerManagerImpl,
