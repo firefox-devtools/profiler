@@ -408,6 +408,7 @@ ProfileLoaderAnimation--loading-local = Яшчэ не рэалізавана.
 ProfileLoaderAnimation--loading-public = Спампоўка і апрацоўка профілю…
 ProfileLoaderAnimation--loading-from-url = Спампоўка і апрацоўка профілю…
 ProfileLoaderAnimation--loading-compare = Чытанне і апрацоўка профіляў…
+ProfileLoaderAnimation--loading-view-not-found = Прагляд не знойдзены
 
 ## ProfileRootMessage
 
@@ -423,6 +424,9 @@ ServiceWorkerManager--pending-button = Прымяніць і перазагру�
 ServiceWorkerManager--installed-button = Перазагрузіць праграму
 ServiceWorkerManager--updated-while-not-ready = Новая версія праграмы была прыменена да поўнай загрузкі гэтай старонкі. Вы можаце сутыкнуцца з няспраўнасцямі.
 ServiceWorkerManager--new-version-is-ready = Новая версія праграмы спампавана і гатова да выкарыстання.
+ServiceWorkerManager--hide-notice-button =
+    .title = Схаваць паведамленне аб перазагрузцы
+    .aria-label = Схаваць паведамленне аб перазагрузцы
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -432,6 +436,18 @@ StackSettings--implementation-all-stacks = Усе стэкі
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Уласны
 StackSettings--use-data-source-label = Крыніца даных:
+StackSettings--call-tree-strategy-timing = Таймінгі
+    .title = Стварыць зводку асобных стэкаў кода, выкананых за пэўны перыяд часу
+StackSettings--call-tree-strategy-js-allocations = Выдзяленне рэсурсаў JavaScript
+    .title = Сумаваць выдзеленыя байты JavaScript (без вызвалення)
+StackSettings--call-tree-strategy-native-retained-allocations = Утрыманая памяць
+    .title = Сумаваць байты памяці, якія былі выдзелены, але ніколі не вызваляліся ў бягучым выбары папярэдняга прагляду
+StackSettings--call-tree-native-allocations = Выдзеленая памяць
+    .title = Сумаваць байты выдзеленай памяці
+StackSettings--call-tree-strategy-native-deallocations-memory = Вызваленая памяць
+    .title = Сумаваць байты вызваленай памяці па сайтах, дзе яны былі выдзелены
+StackSettings--call-tree-strategy-native-deallocations-sites = Вызваленыя сайты
+    .title = Сумаваць байты вызваленай памяці па сайтах, дзе яны былі вызвалены
 
 ## Tab Bar for the bottom half of the analysis UI.
 
