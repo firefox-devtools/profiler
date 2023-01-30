@@ -248,6 +248,12 @@ MenuButtons--index--profile-info-uploaded-label = Запампавана:
 MenuButtons--index--profile-info-uploaded-actions = Выдаліць
 MenuButtons--index--metaInfo-subtitle = Інфармацыя аб профілі
 MenuButtons--metaInfo--symbols = Сімвалы:
+MenuButtons--metaInfo--profile-symbolicated = Профіль сімвалізаваны
+MenuButtons--metaInfo--profile-not-symbolicated = Профіль не сімвалізаваны
+MenuButtons--metaInfo--resymbolicate-profile = Паўторна сімвалізаваць профіль
+MenuButtons--metaInfo--symbolicate-profile = Сімвалізаваць профіль
+MenuButtons--metaInfo--attempting-resymbolicate = Спроба паўторна сімвалізаваць профіль
+MenuButtons--metaInfo--currently-symbolicating = Зараз профіль сімвалізуецца
 MenuButtons--metaInfo--cpu-model = Мадэль ЦП:
 MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
 MenuButtons--metaInfo--main-memory = Асноўная памяць:
@@ -511,6 +517,22 @@ SourceView--source-not-available-title = Зыходны код недаступ�
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Для гэтага файла няма вядомага cross-origin-accessible URL-адраса.
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Не ўдалося запытаць API сімвалізацыі браўзера: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = API сімвалізацыі браўзера вярнула памылку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = API сімвалізацыі лакальнага сервера сімвалаў вярнула памылку: { $apiErrorMessage }
 SourceView--close-button =
     .title = Закрыць акно з кодам
 
