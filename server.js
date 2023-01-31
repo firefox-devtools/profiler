@@ -4,15 +4,25 @@
 // @noflow
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
+const express = require('express');
 const config = require('./webpack.config');
 const { oneLine, stripIndent } = require('common-tags');
 const port = process.env.FX_PROFILER_PORT || 4242;
 const host = process.env.FX_PROFILER_HOST || 'localhost';
 const fs = require('fs');
 const path = require('path');
+const yargs = require('yargs');
+const { hideBin } = require('yargs/helpers');
 const localConfigExists = fs.existsSync(
   path.join(__dirname, './webpack.local-config.js')
 );
+
+const argv = yargs(hideBin(process.argv))
+  .command('* [<profile>]', 'Open Firefox Profiler, on <profile> if included.')
+  // Disabled --version flag since no version number in package.json.
+  .version(false)
+  .strict()
+  .parseSync();
 
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],
@@ -64,6 +74,36 @@ if (localConfigExists) {
   }
 }
 
+const profileUrl = `http://${host}:${port}`;
+if (argv.profile) {
+  // Not modifying serverConfig.static because that can roughly triple
+  // webpack cached build time.
+  const prevSetupMiddlewares = serverConfig.setupMiddlewares;
+  serverConfig.setupMiddlewares = (middlewares, devServer) => {
+    if (prevSetupMiddlewares) {
+      middlewares = prevSetupMiddlewares(middlewares, devServer);
+    }
+    devServer.app.use(
+      '/profiles/',
+      express.static(path.resolve(path.dirname(argv.profile)))
+    );
+    return middlewares;
+  };
+
+  const profileFromUrl = `${profileUrl}/from-url/${encodeURIComponent(
+    `${profileUrl}/profiles/${path.basename(argv.profile)}`
+  )}`;
+  if (
+    typeof serverConfig.open === 'object' &&
+    !Array.isArray(serverConfig.open) &&
+    serverConfig.open !== null
+  ) {
+    serverConfig.open.target = [profileFromUrl];
+  } else {
+    serverConfig.open = [profileFromUrl];
+  }
+}
+
 const server = new WebpackDevServer(serverConfig, webpack(config));
 server
   .start()
@@ -72,7 +112,7 @@ server
       '------------------------------------------------------------------------------------------';
 
     console.log(barAscii);
-    console.log(`> Firefox Profiler is listening at: http://${host}:${port}\n`);
+    console.log(`> Firefox Profiler is listening at: ${profileUrl}\n`);
     if (port === 4242) {
       console.log(
         '> You can change this default port with the environment variable FX_PROFILER_PORT.\n'
