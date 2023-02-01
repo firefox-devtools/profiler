@@ -5,7 +5,6 @@
 // @flow
 import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
-import memoize from 'memoize-immutable';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import {
   withChartViewport,
@@ -333,7 +332,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             depth === hoveredItem.depth &&
             i === hoveredItem.stackTimingIndex;
 
-          const colorStyles = this._mapCategoryColorNameToStyles(
+          const colorStyles = mapCategoryColorNameToStackChartStyles(
             category.color
           );
           // Draw the box.
@@ -395,16 +394,6 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       devicePixelsHeight
     );
   };
-
-  // Provide a memoized function that maps the category color names to specific color
-  // choices that are used across this project's charts.
-  _mapCategoryColorNameToStyles = memoize(
-    mapCategoryColorNameToStackChartStyles,
-    {
-      // Memoize every color that is seen.
-      limit: Infinity,
-    }
-  );
 
   _getHoveredStackInfo = ({
     depth,

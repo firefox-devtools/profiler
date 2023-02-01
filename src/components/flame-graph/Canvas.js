@@ -123,16 +123,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     }
   }
 
-  // Provide a memoized function that maps the category color names to specific color
-  // choices that are used across this project's charts.
-  _mapCategoryColorNameToStyles = memoize(
-    mapCategoryColorNameToStackChartStyles,
-    {
-      // Memoize every color that is seen.
-      limit: Infinity,
-    }
-  );
-
   _scrollSelectionIntoView = () => {
     const {
       selectedCallNodeIndex,
@@ -228,7 +218,9 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
         const categoryIndex = callNodeTable.category[callNodeIndex];
         const category = categories[categoryIndex];
-        const colorStyles = this._mapCategoryColorNameToStyles(category.color);
+        const colorStyles = mapCategoryColorNameToStackChartStyles(
+          category.color
+        );
 
         const background = isHighlighted
           ? colorStyles.selectedFillStyle
