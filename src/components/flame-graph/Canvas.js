@@ -11,6 +11,7 @@ import {
   type Viewport,
 } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
+import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import {
@@ -183,8 +184,9 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       this._textMeasurement = new TextMeasurement(ctx);
     }
     const textMeasurement = this._textMeasurement;
+    const fastFillStyle = new FastFillStyle(ctx);
 
-    ctx.fillStyle = '#ffffff';
+    fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, containerWidth, containerHeight);
 
     const startDepth = Math.floor(
@@ -205,23 +207,17 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         const startTime = stackTiming.start[i];
         const endTime = stackTiming.end[i];
 
-        const x: CssPixels = startTime * containerWidth;
-        const y: CssPixels =
-          (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
         const w: CssPixels = (endTime - startTime) * containerWidth;
-        const h: CssPixels = ROW_HEIGHT - 1;
-
         if (w < 2) {
           // Skip sending draw calls for sufficiently small boxes.
           continue;
         }
+        const x: CssPixels = startTime * containerWidth;
+        const y: CssPixels =
+          (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
+        const h: CssPixels = ROW_HEIGHT - 1;
 
         const callNodeIndex = stackTiming.callNode[i];
-        const funcIndex = callNodeTable.func[callNodeIndex];
-        const funcName = thread.stringTable.getString(
-          thread.funcTable.name[funcIndex]
-        );
-
         const isSelected = selectedCallNodeIndex === callNodeIndex;
         const isRightClicked = rightClickedCallNodeIndex === callNodeIndex;
         const isHovered =
@@ -237,25 +233,26 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         const background = isHighlighted
           ? colorStyles.selectedFillStyle
           : colorStyles.unselectedFillStyle;
-        const foreground = isHighlighted
-          ? colorStyles.selectedTextColor
-          : '#000';
 
-        ctx.fillStyle = background;
-        ctx.fillRect(x, y, w, h);
-        // Ensure spacing between blocks.
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(x, y, 1, h);
+        fastFillStyle.set(background);
+        // Draw rect at an offset to ensure spacing between blocks.
+        ctx.fillRect(x + 1, y, w - 1, h);
 
         // TODO - L10N RTL.
         // Constrain the x coordinate to the leftmost area.
         const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
         const w2: CssPixels = Math.max(0, w - (x2 - x));
-
         if (w2 > textMeasurement.minWidth) {
+          const funcIndex = callNodeTable.func[callNodeIndex];
+          const funcName = thread.stringTable.getString(
+            thread.funcTable.name[funcIndex]
+          );
           const fittedText = textMeasurement.getFittedText(funcName, w2);
           if (fittedText) {
-            ctx.fillStyle = foreground;
+            const foreground = isHighlighted
+              ? colorStyles.selectedTextColor
+              : '#000';
+            fastFillStyle.set(foreground);
             ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
           }
         }
