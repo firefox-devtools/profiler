@@ -78,7 +78,12 @@ CallTree--tracing-ms-total = Час працы (мс)
         на працягу якога гэта функцыя знаходзілася ў стэку. Сюды ўваходзіць час,
         на працягу якога функцыя фактычна выконвалася, а таксама час выканання выкліканых ёю функцый.
 CallTree--samples-total = Усяго (узоры)
-    .title = Лічыльнік “Усяго (узоры)” уключае ў сабе суму кожнага ўзору, у якога гэтая функцыя была выяўлена ў стэку. Сюды ўваходзіць час фактычнай працы функцыі, а таксама час, чакання вызаваў, якія рабіла гэтая функцыя.
+    .title = Лічыльнік “Усяго (узоры)” уключае ў сабе суму кожнага ўзору, у якога гэтая функцыя была выяўлена ў стэку. Сюды ўваходзіць час фактычнай працы функцыі, а таксама час чакання выкліканых ёю функцый.
+CallTree--bytes-total = Агульны памер (байты)
+    .title =
+        «Агульны памер» уключае суму ўсіх байтаў, выдзеленых або
+        вызваленых, пакуль гэтая функцыя знаходзілася ў стэку.
+        Гэта ўключае ў сябе як байты, дзе функцыя фактычна выконвалася, так і байты выкліканых ёю функцый.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -86,15 +91,22 @@ CallTree--samples-total = Усяго (узоры)
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (убудаваны)
+    .title = Выклікі функціі { $calledFunction } былі ўбудаваны кампілятарам у { $outerFunction }.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Выберыце вузел, каб паказаць інфармацыю аб ім.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Увядзіце URL-адрасы профіляў, якія вы хочаце параўнаць
 CompareHome--form-label-profile1 = Профіль 1:
 CompareHome--form-label-profile2 = Профіль 2:
 CompareHome--submit-button =
