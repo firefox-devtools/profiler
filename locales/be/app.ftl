@@ -59,8 +59,16 @@ CallNodeContextMenu--transform-merge-function = Аб'яднаць функцыю
         Аб'яднанне функцыі выдаляе яе з профілю і прызначае яе час
         функцыі, якая яе выклікала. Гэта адбываецца ўсюды, дзе функцыя была
         выклікана ў дрэве.
+CallNodeContextMenu--transform-merge-call-node = Аб'яднаць толькі вузел
+    .title =
+        Аб'яднанне вузла выдаляе яго з профілю і прызначае яго час
+        вузлу функцыі, які яго выклікаў. Гэта толькі выдаляе функцыю з гэтай 
+        канкрэтнай часткі дрэва. Любыя іншыя месцы, адкуль была выклікана функцыя, 
+        застануцца ў профілі.
 CallNodeContextMenu--transform-focus-function = Фокус на функцыі
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-drop-function = Адкінуць узоры з гэтай функцыяй
+    .title = Адкідванне ўзораў выдаляе іх час з профілю. Гэта карысна для выдалення інфармацыі аб часе, які не мае дачынення да аналізу.
 CallNodeContextMenu--expand-all = Разгарнуць усё
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -333,6 +341,8 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Пашырэнні:
 MenuButtons--metaOverheadStatistics-mean = Сярэдняе
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Накладныя выдаткі
+    .title = Час затрачаны на атрыманне ўсіх патокаў.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Лічыльнік
     .title = Час збору ўсіх лічыльнікаў
 MenuButtons--metaOverheadStatistics-statkeys-interval = Інтэрвал
@@ -343,6 +353,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Працягласць �
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-include-other-tabs = Уключыць даныя з іншых картак
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Уключыць здымкі экрана
 MenuButtons--publish--renderCheckbox-label-extension = Уключыць інфармацыю аб пашырэнні
 MenuButtons--publish--renderCheckbox-label-private-browsing = Уключыць даныя з вокнаў прыватнага прагляду
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
@@ -351,9 +362,11 @@ MenuButtons--publish--reupload-performance-profile = Паўторна запам
 MenuButtons--publish--share-performance-profile = Абагуліць профіль прадукцыйнасці
 MenuButtons--publish--info-description = Запампуйце свой профіль і зрабіце яго даступным для ўсіх, хто мае спасылку.
 MenuButtons--publish--info-description-default = Тыпова вашы асабістыя даныя выдаляюцца.
+MenuButtons--publish--include-additional-data = Уключыць дадатковыя даныя, якія могуць раскрыць вашу асобу
 MenuButtons--publish--button-upload = Запампаваць
 MenuButtons--publish--upload-title = Запампоўванне профілю…
 MenuButtons--publish--cancel-upload = Скасаваць запампоўку
+MenuButtons--publish--message-something-went-wrong = Ой, нешта пайшло не так падчас загрузкі профілю.
 MenuButtons--publish--message-try-again = Паспрабаваць зноў
 MenuButtons--publish--download = Спампаваць
 MenuButtons--publish--compressing = Сцісканне…
@@ -379,6 +392,7 @@ NumberFormat--short-date = { SHORTDATE($date) }
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Вы ведаеце, што для пошуку па некалькіх тэрмінах можна выкарыстоўваць коску (,)?
 
 ## Profile Delete Button
 
@@ -393,6 +407,9 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Пры выдаленні гэтага профілю адбылася памылка. <a>Навядзіце курсор, каб даведацца больш.</a>
 # This is the title of the dialog
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
@@ -421,6 +438,7 @@ ProfileFilterNavigator--full-range-with-duration = Поўны дыяпазон (
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-from-file = Чытанне файла і апрацоўка профілю…
 ProfileLoaderAnimation--loading-local = Яшчэ не рэалізавана.
 ProfileLoaderAnimation--loading-public = Спампоўка і апрацоўка профілю…
 ProfileLoaderAnimation--loading-from-url = Спампоўка і апрацоўка профілю…
@@ -465,6 +483,9 @@ StackSettings--call-tree-strategy-native-deallocations-memory = Вызвален
     .title = Сумаваць байты вызваленай памяці па сайтах, дзе яны былі выдзелены
 StackSettings--call-tree-strategy-native-deallocations-sites = Вызваленыя сайты
     .title = Сумаваць байты вызваленай памяці па сайтах, дзе яны былі вызвалены
+StackSettings--invert-call-stack = Інвертаваць стэк выклікаў
+    .title = Сартаваць па часе, праведзенаму ў вузле выкліку, ігнаруючы яго даччыныя вузлы.
+StackSettings--show-user-timing = Паказаць таймінгі карыстальніка
 
 ## Tab Bar for the bottom half of the analysis UI.
 
