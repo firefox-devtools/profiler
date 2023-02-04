@@ -74,7 +74,7 @@ if (localConfigExists) {
   }
 }
 
-const profileUrl = `http://${host}:${port}`;
+const profilerUrl = `http://${host}:${port}`;
 if (argv.profile) {
   // Not modifying serverConfig.static because that can roughly triple
   // webpack cached build time.
@@ -90,8 +90,8 @@ if (argv.profile) {
     return middlewares;
   };
 
-  const profileFromUrl = `${profileUrl}/from-url/${encodeURIComponent(
-    `${profileUrl}/profiles/${path.basename(argv.profile)}`
+  const profileFromUrl = `${profilerUrl}/from-url/${encodeURIComponent(
+    `${profilerUrl}/profiles/${path.basename(argv.profile)}`
   )}`;
   if (
     typeof serverConfig.open === 'object' &&
@@ -112,7 +112,7 @@ server
       '------------------------------------------------------------------------------------------';
 
     console.log(barAscii);
-    console.log(`> Firefox Profiler is listening at: ${profileUrl}\n`);
+    console.log(`> Firefox Profiler is listening at: ${profilerUrl}\n`);
     if (port === 4242) {
       console.log(
         '> You can change this default port with the environment variable FX_PROFILER_PORT.\n'
