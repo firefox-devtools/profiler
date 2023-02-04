@@ -79,11 +79,22 @@ if (argv.profile) {
   // Not modifying serverConfig.static because that can roughly triple
   // webpack cached build time.
   const profileDir = '/profiles/';
+  const profileFile = path.basename(argv.profile);
   const prevSetupMiddlewares = serverConfig.setupMiddlewares;
   serverConfig.setupMiddlewares = (middlewares, devServer) => {
     if (prevSetupMiddlewares) {
       middlewares = prevSetupMiddlewares(middlewares, devServer);
     }
+    devServer.app.use((req, res, next) => {
+      if (
+        req.url.startsWith(profileDir) &&
+        req.url !== `${profileDir}${profileFile}`
+      ) {
+        res.sendStatus(404);
+      } else {
+        next();
+      }
+    });
     devServer.app.use(
       profileDir,
       express.static(path.resolve(path.dirname(argv.profile)))
@@ -92,7 +103,7 @@ if (argv.profile) {
   };
 
   const profileFromUrl = `${profilerUrl}/from-url/${encodeURIComponent(
-    `${profilerUrl}${profileDir}${path.basename(argv.profile)}`
+    `${profilerUrl}${profileDir}${profileFile}`
   )}`;
   if (
     typeof serverConfig.open === 'object' &&
