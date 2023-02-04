@@ -78,20 +78,21 @@ const profilerUrl = `http://${host}:${port}`;
 if (argv.profile) {
   // Not modifying serverConfig.static because that can roughly triple
   // webpack cached build time.
+  const profileDir = '/profiles/';
   const prevSetupMiddlewares = serverConfig.setupMiddlewares;
   serverConfig.setupMiddlewares = (middlewares, devServer) => {
     if (prevSetupMiddlewares) {
       middlewares = prevSetupMiddlewares(middlewares, devServer);
     }
     devServer.app.use(
-      '/profiles/',
+      profileDir,
       express.static(path.resolve(path.dirname(argv.profile)))
     );
     return middlewares;
   };
 
   const profileFromUrl = `${profilerUrl}/from-url/${encodeURIComponent(
-    `${profilerUrl}/profiles/${path.basename(argv.profile)}`
+    `${profilerUrl}${profileDir}${path.basename(argv.profile)}`
   )}`;
   if (
     typeof serverConfig.open === 'object' &&
