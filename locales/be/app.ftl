@@ -303,6 +303,16 @@ MenuButtons--metaInfo--main-process-ended = Асноўны працэс скон
 MenuButtons--metaInfo--interval = Інтэрвал:
 MenuButtons--metaInfo--buffer-capacity = Ёмістасць буфера:
 MenuButtons--metaInfo--buffer-duration = Працягласць буфера:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } секунда
+        [few] { $configurationDuration } секунды
+        [many] { $configurationDuration } секунд
+       *[other] { $configurationDuration } секунд
+    }
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
@@ -338,15 +348,22 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Пашырэнні:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Накладныя выдаткі { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Сярэдняе
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Накладныя выдаткі
     .title = Час затрачаны на атрыманне ўсіх патокаў.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Ачыстка
+    .title = Час затрачаны на выдаленне старых даных.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Лічыльнік
     .title = Час збору ўсіх лічыльнікаў
 MenuButtons--metaOverheadStatistics-statkeys-interval = Інтэрвал
     .title = Зафіксаваны інтэрвал паміж двума ўзорамі
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Блакіроўкі
+    .title = Час затрачаны на атрыманне блакіроўкі перад правядзеннем вымярэнняў.
+MenuButtons--metaOverheadStatistics-overhead-duration = Працягласць накладных выдаткаў:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Працэнт накладных выдаткаў:
 MenuButtons--metaOverheadStatistics-profiled-duration = Працягласць запісу профілю:
 
 ## Publish panel
