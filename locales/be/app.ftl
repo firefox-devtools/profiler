@@ -486,11 +486,15 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Вызвален�
 StackSettings--invert-call-stack = Інвертаваць стэк выклікаў
     .title = Сартаваць па часе, праведзенаму ў вузле выкліку, ігнаруючы яго даччыныя вузлы.
 StackSettings--show-user-timing = Паказаць таймінгі карыстальніка
+StackSettings--panel-search =
+    .label = Фільтр стэкаў:
+    .title = Паказаць толькі стэкі, якія змяшчаюць функцыю, назва якой адпавядае гэтаму падрадку
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Дрэва выклікаў
 TabBar--flame-graph-tab = Флэйм-дыяграма
+TabBar--stack-chart-tab = Дыяграма стэка
 TabBar--marker-chart-tab = Маркерная дыяграма
 TabBar--marker-table-tab = Маркерная табліца
 TabBar--network-tab = Сетка
