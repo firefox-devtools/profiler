@@ -357,6 +357,7 @@ describe('url handling tracks', function () {
       const { profile } = getProfileFromTextSamples('A', 'B', 'C');
       const [thread1, thread2, thread3] = profile.threads;
       thread1.name = 'GeckoMain';
+      thread1.isMainThread = true;
       thread1.pid = 111;
 
       thread2.name = 'DOM Worker';

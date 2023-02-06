@@ -1125,6 +1125,7 @@ function _processThread(
 
   const newThread: Thread = {
     name: thread.name,
+    isMainThread: thread.name === 'GeckoMain',
     'eTLD+1': thread['eTLD+1'],
     processType: thread.processType,
     processName:

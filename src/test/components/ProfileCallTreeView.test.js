@@ -300,11 +300,13 @@ describe('calltree/ProfileCallTreeView', function () {
       pid: 111,
       tid: 111,
       name: 'GeckoMain',
+      isMainThread: true,
     });
     Object.assign(profile.threads[1], {
       pid: 112,
       tid: 112,
       name: 'GeckoMain',
+      isMainThread: true,
     });
     const { getRowElement, dispatch } = setup(profile);
     expect(getRowElement('C', { selected: true })).toHaveClass('isSelected');

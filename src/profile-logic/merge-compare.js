@@ -211,6 +211,7 @@ export function mergeProfilesForDiffing(
     // We're reseting the thread's PID and TID to make sure we don't have any collision.
     thread.pid = `${thread.pid} from profile ${i + 1}`;
     thread.tid = `${thread.tid} from profile ${i + 1}`;
+    thread.isMainThread = true;
     thread.processName = `${profileName || `Profile ${i + 1}`}: ${
       thread.processName || thread.name
     }`;
@@ -1013,6 +1014,7 @@ function getComparisonThread(
     name: 'Diff between 1 and 2',
     pid: 'Diff between 1 and 2',
     tid: 'Diff between 1 and 2',
+    isMainThread: true,
     samples: newSamples,
     markers: getEmptyRawMarkerTable(),
     stackTable: newStackTable,
@@ -1104,6 +1106,7 @@ export function mergeThreads(threads: Thread[]): Thread {
     name: 'Merged thread',
     pid: 'Merged thread',
     tid: 'Merged thread',
+    isMainThread: true,
     samples: newSamples,
     markers: newMarkers,
     stackTable: newStackTable,

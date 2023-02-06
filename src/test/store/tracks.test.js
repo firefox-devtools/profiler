@@ -336,7 +336,9 @@ describe('ordering and hiding', function () {
         profile.threads.push(getEmptyThread());
         const [threadA, threadB] = profile.threads;
         threadA.name = 'GeckoMain';
+        threadA.isMainThread = true;
         threadB.name = 'GeckoMain';
+        threadB.isMainThread = true;
         threadA.processType = 'tab';
         threadA.pid = 1;
         threadA.pid = 2;
