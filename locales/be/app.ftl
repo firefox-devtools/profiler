@@ -67,6 +67,8 @@ CallNodeContextMenu--transform-merge-call-node = Аб'яднаць толькі 
         застануцца ў профілі.
 CallNodeContextMenu--transform-focus-function = Фокус на функцыі
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Фокус на функцыі (інвертавана)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-drop-function = Адкінуць узоры з гэтай функцыяй
     .title = Адкідванне ўзораў выдаляе іх час з профілю. Гэта карысна для выдалення інфармацыі аб часе, які не мае дачынення да аналізу.
 CallNodeContextMenu--expand-all = Разгарнуць усё
