@@ -58,6 +58,8 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
+import { isLocalURL } from 'firefox-profiler/utils/url';
+
 type OwnProps = {|
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
   // that would mock out a local module, but I was having trouble getting it working
@@ -109,10 +111,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
       case 'local':
         return 'local';
       case 'from-url':
-        return profileUrl.startsWith('http://127.0.0.1') ||
-          profileUrl.startsWith('http://localhost')
-          ? 'local'
-          : 'uploaded';
+        return isLocalURL(profileUrl) ? 'local' : 'uploaded';
       case 'none':
       case 'uploaded-recordings':
         throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
