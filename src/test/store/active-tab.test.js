@@ -69,6 +69,7 @@ describe('ActiveTab', function () {
     it('can extract a screenshots track', function () {
       const profile = getScreenshotTrackProfile();
       profile.threads[0].name = 'GeckoMain';
+      profile.threads[0].isMainThread = true;
       const { getState } = setup(profile);
       expect(getHumanReadableActiveTabTracks(getState())).toEqual([
         'screenshots',
@@ -124,7 +125,9 @@ describe('ActiveTab', function () {
       );
 
       profile.threads[0].name = 'GeckoMain';
+      profile.threads[0].isMainThread = true;
       profile.threads[1].name = 'GeckoMain';
+      profile.threads[1].isMainThread = true;
 
       const {
         firstTabInnerWindowIDs,

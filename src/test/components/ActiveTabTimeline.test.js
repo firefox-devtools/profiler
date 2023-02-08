@@ -291,6 +291,7 @@ describe('ActiveTabTimeline', function () {
       profile.threads[threadIndex].frameTable.innerWindowID[0] =
         pageInfo.firstTabInnerWindowIDs[2];
       profile.threads[threadIndex].name = 'GeckoMain';
+      profile.threads[threadIndex].isMainThread = true;
       const store = storeWithProfile(profile);
       store.dispatch(
         changeTimelineTrackOrganization({

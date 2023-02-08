@@ -149,10 +149,12 @@ export function getProfileWithNiceTracks(): Profile {
   const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
   const [thread1, thread2, thread3, thread4] = profile.threads;
   thread1.name = 'GeckoMain';
+  thread1.isMainThread = true;
   thread1.pid = 111;
   thread1.tid = 11;
 
   thread2.name = 'GeckoMain';
+  thread2.isMainThread = true;
   thread2.processType = 'tab';
   thread2.pid = 222;
   thread2.tid = 22;
@@ -210,6 +212,7 @@ export function getProfileWithMoreNiceTracks() {
 
   // Global thread 1
   threads[0].name = 'GeckoMain';
+  threads[0].isMainThread = true;
   threads[0].pid = pid;
   threads[0].tid = tid++;
 
@@ -221,6 +224,7 @@ export function getProfileWithMoreNiceTracks() {
 
   // Global thread 2
   threads[6].name = 'GeckoMain';
+  threads[6].isMainThread = true;
   threads[6].processType = 'tab';
   threads[6].pid = ++pid;
   threads[6].tid = tid++;
@@ -235,6 +239,7 @@ export function getProfileWithMoreNiceTracks() {
 
   // Global thread 3
   threads[9].name = 'GeckoMain';
+  threads[9].isMainThread = true;
   threads[9].processType = 'tab';
   threads[9].pid = ++pid;
   threads[9].tid = tid++;
@@ -293,6 +298,7 @@ export function getStoreWithMemoryTrack(pid: number = 222) {
     // Modify the thread to include the counter.
     const thread = profile.threads[threadIndex];
     thread.name = 'GeckoMain';
+    thread.isMainThread = true;
     thread.pid = pid;
     const counter = getCounterForThread(thread, threadIndex);
     counter.category = 'Memory';
