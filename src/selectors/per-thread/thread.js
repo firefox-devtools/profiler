@@ -386,20 +386,6 @@ export function getThreadSelectorsPerThread(
     defaultThreadViewOptions;
 
   /**
-   * Check to see if there are any JS allocations for this thread. This way we
-   * can display a custom thread.
-   */
-  const getHasJsAllocations: Selector<boolean> = (state) =>
-    Boolean(getThread(state).jsAllocations);
-
-  /**
-   * Check to see if there are any JS allocations for this thread. This way we
-   * can display a custom thread.
-   */
-  const getHasNativeAllocations: Selector<boolean> = (state) =>
-    Boolean(getThread(state).nativeAllocations);
-
-  /**
    * We can only compute the retained memory in the versions of the native allocations
    * format that provide the memory address. The earlier versions did not have
    * balanced allocations and deallocations.
@@ -488,8 +474,6 @@ export function getThreadSelectorsPerThread(
     getJsTracerTable,
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,
-    getHasJsAllocations,
-    getHasNativeAllocations,
     getCanShowRetainedMemory,
     getCPUProcessedThread,
     getTabFilteredThread,
