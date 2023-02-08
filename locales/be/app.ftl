@@ -126,6 +126,10 @@ CallTreeSidebar--select-a-node = Выберыце вузел, каб паказ�
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Увядзіце URL-адрасы профіляў, якія вы хочаце параўнаць
+CompareHome--instruction-content =
+    Інструмент будзе браць даныя з выбранай дарожкі і дыяпазону для 
+    кожнага профілю і размяшчаць іх у адным выглядзе для зручнага 
+    параўнання.
 CompareHome--form-label-profile1 = Профіль 1:
 CompareHome--form-label-profile2 = Профіль 2:
 CompareHome--submit-button =
@@ -162,6 +166,13 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = Дарожак: <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span>
 
 ## Home page
 
@@ -537,16 +548,39 @@ TrackContextMenu--only-show-this-process = Паказваць толькі гэ�
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Паказваць толькі “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Схаваць дарожкі іншых здымкаў
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Схаваць “{ $trackName }”
+TrackContextMenu--show-all-tracks = Паказаць усе дарожкі
+TrackContextMenu--show-local-tracks-in-process = Паказаць усе дарожкі ў гэтым працэсе
+# This is used in the tracks context menu as a button to show all the tracks
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Паказаць усе адпаведныя дарожкі
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Схаваць усе адпаведныя дарожкі
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Няма вынікаў для “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Схаваць дарожку
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Схаваць працэс
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = адносная памяць на гэты момант
+TrackMemoryGraph--memory-range-in-graph = дыяпазон памяці ў графіку
+TrackMemoryGraph--operations-since-the-previous-sample = аперацый, пачынаючы з папярэдняга ўзору
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -614,6 +648,9 @@ TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } м�
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Увядзіце ўмовы фільтра
+    .title = Адлюстроўваць толькі дарожкі, якія адпавядаюць пэўнаму тэксту
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
