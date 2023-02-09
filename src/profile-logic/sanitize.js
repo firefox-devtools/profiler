@@ -163,7 +163,7 @@ export function sanitizePII(
             oldThreadIndexToNew
           );
 
-          // Filtering out the counter if it's its thread was removed.
+          // Filter out the counter completely if its thread has been removed.
           if (newCounter !== null) {
             acc.push(newCounter);
           }
