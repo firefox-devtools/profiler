@@ -199,6 +199,11 @@ Home--menu-button = Уключыць кнопку меню { -profiler-brand-nam
 Home--menu-button-instructions =
     Уключыце кнопку меню прафайлера, каб пачаць запіс профілю прадукцыйнасці
     у { -firefox-brand-name }, затым прааналізуйце яго і падзяліцеся з profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Гэты экзэмпляр прафайлера не змог падключыцца да WebChannel, таму не атрымалася ўключыць кнопку меню прафайлера.
 Home--instructions-content =
     Для запісу профіляў прадукцыйнасці патрабуецца <a>{ -firefox-brand-name }</a>.
     Аднак існуючыя профілі можна праглядаць у любым сучасным браўзеры.
