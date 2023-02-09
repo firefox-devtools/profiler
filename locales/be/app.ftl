@@ -65,6 +65,13 @@ CallNodeContextMenu--transform-merge-call-node = Аб'яднаць толькі 
         вузлу функцыі, які яго выклікаў. Гэта толькі выдаляе функцыю з гэтай 
         канкрэтнай часткі дрэва. Любыя іншыя месцы, адкуль была выклікана функцыя, 
         застануцца ў профілі.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Засяроджванне ўвагі на функцыі выдаліць усе ўзоры, якія не ўключаюць яе
+    функцыя. Акрамя таго, ён паўторна выкараняе дрэва выклікаў, каб функцыя
+    з'яўляецца адзіным коранем дрэва. Гэта можа аб'яднаць некалькі сайтаў выкліку функцый
+    праз профіль у адзін вузел выкліку.
 CallNodeContextMenu--transform-focus-function = Фокус на функцыі
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Фокус на функцыі (інвертавана)
