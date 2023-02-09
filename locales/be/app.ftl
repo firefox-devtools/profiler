@@ -204,6 +204,10 @@ Home--menu-button-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Гэты экзэмпляр прафайлера не змог падключыцца да WebChannel, таму не атрымалася ўключыць кнопку меню прафайлера.
+Home--record-instructions =
+    Каб пачаць запіс профілю, націсніце кнопку запісу або выкарыстоўвайце 
+    спалучэнне клавіш. Падчас запісу профілю значок стане сіняга колеру.
+    Націсніце <kbd>Захапіць</kbd>, каб запампаваць даныя на profiler.firefox.com.
 Home--instructions-content =
     Для запісу профіляў прадукцыйнасці патрабуецца <a>{ -firefox-brand-name }</a>.
     Аднак існуючыя профілі можна праглядаць у любым сучасным браўзеры.
@@ -239,6 +243,16 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Выдаліць
     .title = Гэты профіль не можа быць выдалены, таму што мы не маем інфармацыі пра аўтарызацыю.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ніводнага профілю яшчэ не запампавана!
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Кіраваць гэтым запісам
+        [few] Кіраваць гэтымі запісамі
+        [many] Кіраваць гэтымі запісамі
+       *[other] Кіраваць гэтымі запісамі
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
@@ -680,6 +694,12 @@ TrackSearchField--search-input =
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = “{ $item }” поўнасцю
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
