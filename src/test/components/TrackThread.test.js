@@ -76,6 +76,7 @@ describe('timeline/TrackThread', function () {
     const profile = getProfileWithMarkers(testMarkers);
     const [thread] = profile.threads;
     thread.name = 'GeckoMain';
+    thread.isMainThread = true;
     thread.processType = 'default';
     return profile;
   }
