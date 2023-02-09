@@ -423,7 +423,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 45,
+    "preprocessedProfileVersion": 46,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -636,6 +636,7 @@ Object {
           -1,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -946,6 +947,7 @@ Object {
         "relevantForJS": Array [],
         "resource": Array [],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [
           0,
@@ -1316,6 +1318,7 @@ Array [
         -1,
       ],
     },
+    "isMainThread": false,
     "markers": Object {
       "category": Array [],
       "data": Array [],
@@ -1626,6 +1629,7 @@ Array [
       "relevantForJS": Array [],
       "resource": Array [],
     },
+    "isMainThread": false,
     "markers": Object {
       "category": Array [
         0,
@@ -2817,6 +2821,7 @@ Object {
       -1,
     ],
   },
+  "isMainThread": false,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -3217,6 +3222,7 @@ Object {
       -1,
     ],
   },
+  "isMainThread": false,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -3531,6 +3537,7 @@ Object {
       -1,
     ],
   },
+  "isMainThread": false,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -3851,6 +3858,7 @@ Object {
       -1,
     ],
   },
+  "isMainThread": false,
   "markers": Object {
     "category": Array [],
     "data": Array [],
@@ -4175,6 +4183,7 @@ Object {
       -1,
     ],
   },
+  "isMainThread": false,
   "markers": Object {
     "category": Array [],
     "data": Array [],

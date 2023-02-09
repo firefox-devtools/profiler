@@ -8,22 +8,16 @@ This project is made up of a cross section of different parts of Mozilla, includ
 
 | - | Name | Github Handle | Position |
 | - | ---- | ------------- | -------- |
-| ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox Frontend Engineer |
 | ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox Frontend Engineer |
-| ![][brisad] | Michael Hoffmann | [@brisad](https://github.com/brisad) | Engineer and Contributor |
-| ![][squelart] | Gérald Squelart | [@squelart](https://github.com/squelart) | Firefox Platform Engineer |
 | ![][canova] | Nazim Can Altinova| [@canova](https://github.com/canova) | Firefox Platform and Frontend Engineer |
-| ![][fqueze] | Florian Quèze | [@fqueze](https://github.com/fqueze) | Firefox Profiler Team Manager |
 | <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
+| ![][davehunt]| Dave Hunt | [@davehunt](https://github.com/davehunt) | Firefox Profiler Team Manager |
 <!-- mstange's image is differently inserted because its size isn't properly controlled by the size parameter, strangely -->
 
 [mstange]:https://avatars.githubusercontent.com/mstange?size=56
-[gregtatum]:https://avatars.githubusercontent.com/gregtatum?size=56
 [julienw]:https://avatars.githubusercontent.com/julienw?size=56
-[brisad]:https://avatars.githubusercontent.com/brisad?size=56
-[squelart]:https://avatars.githubusercontent.com/squelart?size=56
 [canova]:https://avatars.githubusercontent.com/canova?size=56
-[fqueze]:https://avatars.githubusercontent.com/fqueze?size=56
+[davehunt]:https://avatars.githubusercontent.com/davehunt?size=56
 
 We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
 
@@ -43,6 +37,17 @@ To get started clone the repo and get the web application started.
  4. Run `yarn start`, this will start up the webpack server.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
  6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
+
+Other [webpack](https://webpack.js.org/configuration/) and [webpack server](https://webpack.js.org/configuration/dev-server/) options can be set in a `webpack.local-config.js` file at the repo root. For example, if you want a persistent build cache and the server to automatically open the home page, put in there the following code:
+
+```js
+module.exports = function (config, serverConfig) {
+  config.cache = {
+    type: 'filesystem',
+  };
+  serverConfig.open = true;
+};
+```
 
 [Flow](https://flow.org/) is used for type checking. VSCode users can install the ["Flow Language Support" extension](https://marketplace.visualstudio.com/items?itemName=flowtype.flow-for-vscode), and disable VSCode's built-in TypeScript extension in the workspace via the [setup instructions here](https://github.com/flow/flow-for-vscode#setup).
 
@@ -68,7 +73,7 @@ The web app doesn't include any performance profiles by default, so you'll need 
  - On the web, replace the https://profiler.firefox.com with your local server, usually `http://localhost:4242`. Be sure that that the protocol is `http` and not `https` when running the server locally.
  - Alternatively, if a profile has been previously downloaded, drag and drop it to the loading screen. Compared to the previous solution, refreshing won't work with this particular solution.
 
-For more information on loading a profile, visit its [documentation](loading-in-profiles.md).
+For more information on loading a profile, visit its [documentation](./docs-developer/loading-in-profiles.md).
 
 ## Running the tests
 

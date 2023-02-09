@@ -1430,6 +1430,49 @@ export function filterThreadSamplesToRange(
 }
 
 /**
+ * Filter the counter samples to the given range by iterating all of their sample groups.
+ */
+export function filterCounterSamplesToRange(
+  counter: Counter,
+  rangeStart: number,
+  rangeEnd: number
+): Counter {
+  const newCounter = { ...counter };
+  newCounter.sampleGroups = [...newCounter.sampleGroups];
+  const { sampleGroups } = newCounter;
+
+  for (
+    let sampleGroupIdx = 0;
+    sampleGroupIdx < sampleGroups.length;
+    sampleGroupIdx++
+  ) {
+    sampleGroups[sampleGroupIdx] = { ...sampleGroups[sampleGroupIdx] };
+    const sampleGroup = sampleGroups[sampleGroupIdx];
+    // Intentionally get the inclusive sample indexes with this one instead of
+    // getSampleIndexRangeForSelection because graphs like memory graph requires
+    // one sample before and after to be in the sample range so the graph doesn't
+    // look cut off.
+    const [beginSampleIndex, endSampleIndex] =
+      getInclusiveSampleIndexRangeForSelection(
+        sampleGroup.samples,
+        rangeStart,
+        rangeEnd
+      );
+
+    sampleGroup.samples = {
+      length: endSampleIndex - beginSampleIndex,
+      time: sampleGroup.samples.time.slice(beginSampleIndex, endSampleIndex),
+      count: sampleGroup.samples.count.slice(beginSampleIndex, endSampleIndex),
+      number: sampleGroup.samples.number
+        ? sampleGroup.samples.number.slice(beginSampleIndex, endSampleIndex)
+        : undefined,
+    };
+  }
+
+  return newCounter;
+}
+
+/**
  * Process the samples in the counter sample groups.
  */
 export function processCounter(counter: Counter): Counter {

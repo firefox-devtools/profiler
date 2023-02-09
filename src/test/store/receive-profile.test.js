@@ -201,8 +201,10 @@ describe('actions/receive-profile', function () {
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
+      idleThread.isMainThread = true;
       idleThread.pid = 0;
       workThread.name = 'GeckoMain';
+      workThread.isMainThread = true;
       idleThread.pid = 1;
 
       store.dispatch(viewProfile(profile));
@@ -217,8 +219,10 @@ describe('actions/receive-profile', function () {
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
+      idleThread.isMainThread = true;
       idleThread.pid = 0;
       workThread.name = 'GeckoMain';
+      workThread.isMainThread = true;
       workThread.pid = 1;
 
       store.dispatch(viewProfile(profile));
@@ -236,6 +240,7 @@ describe('actions/receive-profile', function () {
       );
       const [threadA, threadB] = profile.threads;
       threadA.name = 'GeckoMain';
+      threadA.isMainThread = true;
       threadA.processType = 'tab';
       threadA.pid = 111;
       threadB.name = 'Other';
@@ -258,6 +263,7 @@ describe('actions/receive-profile', function () {
 
       profile.threads.forEach((thread, threadIndex) => {
         thread.name = 'GeckoMain';
+        thread.isMainThread = true;
         thread.processType = 'tab';
         thread.pid = threadIndex;
       });
@@ -280,6 +286,7 @@ describe('actions/receive-profile', function () {
 
       profile.threads.forEach((thread, threadIndex) => {
         thread.name = 'GeckoMain';
+        thread.isMainThread = true;
         thread.processType = 'tab';
         thread.pid = threadIndex;
       });
@@ -387,6 +394,7 @@ describe('actions/receive-profile', function () {
 
       profile.threads.forEach((thread, threadIndex) => {
         thread.name = 'GeckoMain';
+        thread.isMainThread = true;
         thread.processType = 'tab';
         thread.pid = threadIndex;
       });
@@ -1832,6 +1840,7 @@ describe('actions/receive-profile', function () {
           ...profile1.threads[0],
           pid: '0 from profile 1',
           tid: '0 from profile 1',
+          isMainThread: true,
           processName: 'name 1: Empty',
           unregisterTime: getTimeRangeForThread(profile1.threads[0], 1).end,
         },
@@ -1839,6 +1848,7 @@ describe('actions/receive-profile', function () {
           ...profile2.threads[1],
           pid: '0 from profile 2',
           tid: '1 from profile 2',
+          isMainThread: true,
           processName: 'Profile 2: Empty',
           unregisterTime: getTimeRangeForThread(profile2.threads[1], 1).end,
         },
