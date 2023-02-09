@@ -85,6 +85,13 @@ CallNodeContextMenu--transform-focus-category = Фокус на катэгоры
     .title =
         Факусіраванне на вузлах, якія адносяцца да той жа катэгорыі, што і абраны вузел, 
         такім чынам аб'ядноўваючы ўсе вузлы, якія належаць да іншай катэгорыі.
+CallNodeContextMenu--transform-collapse-function-subtree = Згарнуць функцыю
+    .title = Згортванне функцыі выдаляе ўсё, што яна выклікала, і прызначае ўвесь час гэтай функцыі. Гэта можа дапамагчы спрасціць профіль, які выклікае код, які не трэба аналізаваць.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Згарнуць <strong>{ $nameForResource }</strong>
+    .title = Згортванне рэсурсу згладзіць усе выклікі да гэтага рэсурсу ў адзіны згорнуты вузел выкліку.
 CallNodeContextMenu--transform-drop-function = Адкінуць узоры з гэтай функцыяй
     .title = Адкідванне ўзораў выдаляе іх час з профілю. Гэта карысна для выдалення інфармацыі аб часе, які не мае дачынення да аналізу.
 CallNodeContextMenu--expand-all = Разгарнуць усё
