@@ -687,7 +687,7 @@ function sanitizeCounterPII(
 ): Counter | null {
   const newThreadIndex = oldThreadIndexToNew.get(counter.mainThreadIndex);
   if (newThreadIndex === undefined) {
-    // Sanitize the counter if the thread that it belongs is sanitized as well.
+    // Remove the counter completely if the thread that it belongs to is sanitized as well.
     return null;
   }
 
