@@ -81,6 +81,99 @@ type ColorStyles = {|
   +gravity: number,
 |};
 
+const GRAY_STYLE = {
+  selectedFillStyle: GREY_40,
+  unselectedFillStyle: GREY_40 + '60',
+  selectedTextColor: '#000',
+  gravity: 10,
+};
+const DARK_GRAY_STYLE = {
+  selectedFillStyle: GREY_50,
+  unselectedFillStyle: GREY_50 + '60',
+  selectedTextColor: '#fff',
+  gravity: 11,
+};
+const STYLE_MAP: { [string]: ColorStyles } = {
+  transparent: {
+    selectedFillStyle: 'transparent',
+    unselectedFillStyle: 'transparent',
+    selectedTextColor: '#000',
+    gravity: 0,
+  },
+  lightblue: {
+    selectedFillStyle: BLUE_40,
+    // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
+    // the end defines the transparency #RRGGBBAA.
+    unselectedFillStyle: BLUE_40 + '60',
+    selectedTextColor: '#000',
+    gravity: 1,
+  },
+  red: {
+    selectedFillStyle: RED_60,
+    unselectedFillStyle: RED_60 + '60',
+    selectedTextColor: '#fff',
+    gravity: 1,
+  },
+  lightred: {
+    selectedFillStyle: RED_70 + '60',
+    unselectedFillStyle: RED_70 + '30',
+    selectedTextColor: '#000',
+    gravity: 1,
+  },
+  orange: {
+    selectedFillStyle: ORANGE_50,
+    unselectedFillStyle: ORANGE_50 + '60',
+    selectedTextColor: '#fff',
+    gravity: 2,
+  },
+  blue: {
+    selectedFillStyle: BLUE_60,
+    unselectedFillStyle: BLUE_60 + '60',
+    selectedTextColor: '#fff',
+    gravity: 3,
+  },
+  green: {
+    selectedFillStyle: GREEN_60,
+    unselectedFillStyle: GREEN_60 + '60',
+    selectedTextColor: '#fff',
+    gravity: 4,
+  },
+  purple: {
+    selectedFillStyle: PURPLE_70,
+    unselectedFillStyle: PURPLE_70 + '60',
+    selectedTextColor: '#fff',
+    gravity: 5,
+  },
+  yellow: {
+    selectedFillStyle: '#ffe129', // This yellow has more contrast than YELLOW_50.
+    unselectedFillStyle: YELLOW_50 + '70',
+    selectedTextColor: '#000',
+    gravity: 6,
+  },
+  brown: {
+    selectedFillStyle: ORANGE_70,
+    unselectedFillStyle: ORANGE_70 + '60',
+    selectedTextColor: '#fff',
+    gravity: 7,
+  },
+  magenta: {
+    selectedFillStyle: MAGENTA_60,
+    unselectedFillStyle: MAGENTA_60 + '60',
+    selectedTextColor: '#fff',
+    gravity: 8,
+  },
+  lightgreen: {
+    selectedFillStyle: GREEN_50,
+    unselectedFillStyle: GREEN_50 + '60',
+    selectedTextColor: '#fff',
+    gravity: 9,
+  },
+  gray: GRAY_STYLE,
+  grey: GRAY_STYLE,
+  darkgray: DARK_GRAY_STYLE,
+  darkgrey: DARK_GRAY_STYLE,
+};
+
 /**
  * Map a color name, which comes from Gecko, into a CSS style color. These colors cannot
  * be changed without considering the values coming from Gecko, and from old profiles
@@ -90,120 +183,14 @@ type ColorStyles = {|
  * https://searchfox.org/mozilla-central/rev/9193635dca8cfdcb68f114306194ffc860456044/js/public/ProfilingCategory.h#33
  */
 export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
-  switch (colorName) {
-    case 'transparent':
-      return {
-        selectedFillStyle: 'transparent',
-        unselectedFillStyle: 'transparent',
-        selectedTextColor: '#000',
-        gravity: 0,
-      };
-    case 'lightblue':
-      return {
-        selectedFillStyle: BLUE_40,
-        // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
-        // the end defines the transparency #RRGGBBAA.
-        unselectedFillStyle: BLUE_40 + '60',
-        selectedTextColor: '#000',
-        gravity: 1,
-      };
-    case 'red':
-      return {
-        selectedFillStyle: RED_60,
-        unselectedFillStyle: RED_60 + '60',
-        selectedTextColor: '#fff',
-        gravity: 1,
-      };
-    case 'lightred':
-      return {
-        selectedFillStyle: RED_70 + '60',
-        unselectedFillStyle: RED_70 + '30',
-        selectedTextColor: '#000',
-        gravity: 1,
-      };
-    case 'orange':
-      return {
-        selectedFillStyle: ORANGE_50,
-        unselectedFillStyle: ORANGE_50 + '60',
-        selectedTextColor: '#fff',
-        gravity: 2,
-      };
-    case 'blue':
-      return {
-        selectedFillStyle: BLUE_60,
-        unselectedFillStyle: BLUE_60 + '60',
-        selectedTextColor: '#fff',
-        gravity: 3,
-      };
-    case 'green':
-      return {
-        selectedFillStyle: GREEN_60,
-        unselectedFillStyle: GREEN_60 + '60',
-        selectedTextColor: '#fff',
-        gravity: 4,
-      };
-    case 'purple':
-      return {
-        selectedFillStyle: PURPLE_70,
-        unselectedFillStyle: PURPLE_70 + '60',
-        selectedTextColor: '#fff',
-        gravity: 5,
-      };
-    case 'yellow':
-      return {
-        selectedFillStyle: '#ffe129', // This yellow has more contrast than YELLOW_50.
-        unselectedFillStyle: YELLOW_50 + '70',
-        selectedTextColor: '#000',
-        gravity: 6,
-      };
-    case 'brown':
-      return {
-        selectedFillStyle: ORANGE_70,
-        unselectedFillStyle: ORANGE_70 + '60',
-        selectedTextColor: '#fff',
-        gravity: 7,
-      };
-    case 'magenta':
-      return {
-        selectedFillStyle: MAGENTA_60,
-        unselectedFillStyle: MAGENTA_60 + '60',
-        selectedTextColor: '#fff',
-        gravity: 8,
-      };
-    case 'lightgreen':
-      return {
-        selectedFillStyle: GREEN_50,
-        unselectedFillStyle: GREEN_50 + '60',
-        selectedTextColor: '#fff',
-        gravity: 9,
-      };
-    case 'grey':
-    case 'gray':
-      return {
-        selectedFillStyle: GREY_40,
-        unselectedFillStyle: GREY_40 + '60',
-        selectedTextColor: '#000',
-        gravity: 10,
-      };
-    case 'darkgrey':
-    case 'darkgray':
-      return {
-        selectedFillStyle: GREY_50,
-        unselectedFillStyle: GREY_50 + '60',
-        selectedTextColor: '#fff',
-        gravity: 11,
-      };
-    default:
-      console.error(
-        `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
-      );
-      return {
-        selectedFillStyle: GREY_40,
-        unselectedFillStyle: GREY_40 + '60',
-        selectedTextColor: '#fff',
-        gravity: 10,
-      };
+  const colorStyles = STYLE_MAP[colorName];
+  if (colorStyles !== undefined) {
+    return colorStyles;
   }
+  console.error(
+    `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
+  );
+  return GRAY_STYLE;
 }
 
 /**
