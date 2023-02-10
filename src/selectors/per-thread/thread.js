@@ -16,11 +16,7 @@ import * as CallTree from '../../profile-logic/call-tree';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
 import * as Cpu from '../../profile-logic/cpu';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-  getFirstItemFromSet,
-} from '../../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
 import type {
   Thread,
@@ -276,10 +272,7 @@ export function getThreadSelectorsPerThread(
             }
             break;
           default:
-            assertExhaustiveCheck(
-              lastSelectedCallTreeSummaryStrategy,
-              'Unhandled call tree sumary strategy.'
-            );
+            return lastSelectedCallTreeSummaryStrategy;
         }
         return lastSelectedCallTreeSummaryStrategy;
       }
@@ -463,6 +456,12 @@ export function getThreadSelectorsPerThread(
       'Could not get the processed event delays'
     );
 
+  const getAdditionalStrategies: Selector<
+    Array<{ name: string, label: string }>
+  > = (state) => {
+    return ProfileData.getAdditionalStrategiesForThread(getThread(state));
+  };
+
   return {
     getThread,
     getStringTable,
@@ -496,5 +495,6 @@ export function getThreadSelectorsPerThread(
     getActiveTabFilteredThread,
     getProcessedEventDelays,
     getCallTreeSummaryStrategy,
+    getAdditionalStrategies,
   };
 }

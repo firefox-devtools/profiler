@@ -663,6 +663,29 @@ export type Thread = {|
   // It's absent in Firefox 97 and before, or in Firefox 98+ when this thread
   // had no extra attribute at all.
   userContextId?: number,
+  sampleLikeMarkersConfig?: SampleLikeMarkerConfig[],
+|};
+
+/**
+ * Configute markers for which a SamplesLikeTable can be generated
+ * (using the cause property for the stacktrace)
+ */
+export type SampleLikeMarkerConfig = {|
+  // Name of the strategy, used as a unique identifier
+  // and in the URL state. Configs with the same name are
+  // considered to be the same.
+  name: string,
+  // label of the strategy
+  label: string,
+  // marker type
+  marker: string,
+  // defaults to samples
+  weightType?: WeightType,
+  // field to obtain the weight from if present,
+  // else 1 is used as the weight for every marker
+  weightField?: string,
+  // field where the stack is stored, defaults to the cause field
+  stackField?: string,
 |};
 
 export type ExtensionTable = {|

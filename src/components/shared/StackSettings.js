@@ -56,6 +56,7 @@ type StateProps = {|
   +hasNativeAllocations: boolean,
   +canShowRetainedMemory: boolean,
   +allowSwitchingStackType: boolean,
+  +additionalStrategies: Array<{ name: string, label: string }>,
 |};
 
 type DispatchProps = {|
@@ -140,9 +141,13 @@ class StackSettingsImpl extends PureComponent<Props> {
       canShowRetainedMemory,
       callTreeSummaryStrategy,
       allowSwitchingStackType,
+      additionalStrategies,
     } = this.props;
 
-    const hasAllocations = hasJsAllocations || hasNativeAllocations;
+    const hasMultipleDataStrategies =
+      hasJsAllocations ||
+      hasNativeAllocations ||
+      additionalStrategies.length > 0;
 
     return (
       <div className="stackSettings">
@@ -163,7 +168,7 @@ class StackSettingsImpl extends PureComponent<Props> {
               )}
             </li>
           ) : null}
-          {hasAllocations ? (
+          {hasMultipleDataStrategies ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
                 <Localized id="StackSettings--use-data-source-label" />{' '}
@@ -206,6 +211,11 @@ class StackSettingsImpl extends PureComponent<Props> {
                         'native-deallocations-sites'
                       )
                     : null}
+                  {additionalStrategies.map((strategy) => (
+                    <option key={strategy.name} value={strategy.name}>
+                      {strategy.label}
+                    </option>
+                  ))}
                 </select>
               </label>
             </li>
@@ -280,6 +290,8 @@ export const StackSettings = explicitConnect<
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
     allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
+    additionalStrategies:
+      selectedThreadSelectors.getAdditionalStrategies(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,

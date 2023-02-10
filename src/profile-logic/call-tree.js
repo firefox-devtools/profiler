@@ -9,6 +9,7 @@ import {
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
+  getAdditionalStrategiesForThread,
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -634,7 +635,15 @@ export function extractSamplesLikeTable(
     }
     /* istanbul ignore next */
     default:
-      throw assertExhaustiveCheck(strategy);
+      if (
+        getAdditionalStrategiesForThread(thread).find(
+          (s) => s.name === strategy
+        )
+      ) {
+        return ProfileData.applyAdditionalStrategy(thread, strategy);
+      }
+      console.warn('unsupported strategy', strategy);
+      return thread.samples;
   }
 }
 
