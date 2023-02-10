@@ -1074,10 +1074,10 @@
     "@codemirror/language" "^6.0.0"
     "@lezer/cpp" "^1.0.0"
 
-"@codemirror/lang-javascript@^6.1.2":
-  version "6.1.2"
-  resolved "https://registry.yarnpkg.com/@codemirror/lang-javascript/-/lang-javascript-6.1.2.tgz#a11812ca1d21301cdeb80e51b4c007edcf55f813"
-  integrity sha512-OcwLfZXdQ1OHrLiIcKCn7MqZ7nx205CMKlhe+vL88pe2ymhT9+2P+QhwkYGxMICj8TDHyp8HFKVwpiisUT7iEQ==
+"@codemirror/lang-javascript@^6.1.3":
+  version "6.1.3"
+  resolved "https://registry.yarnpkg.com/@codemirror/lang-javascript/-/lang-javascript-6.1.3.tgz#d5015507f27a19e0e07fbdbede4521a9cb29f580"
+  integrity sha512-u3JgK9AwfNpyGwRhtzIVxVfH9yOK5ZNswmaN6W+XFuUXzW9o8CGgnSBEcaUgZ0hdLvHQHyM+3+22HKgbItki/w==
   dependencies:
     "@codemirror/autocomplete" "^6.0.0"
     "@codemirror/language" "^6.0.0"
@@ -1833,10 +1833,10 @@
     "@testing-library/dom" "^8.5.0"
     "@types/react-dom" "^18.0.0"
 
-"@tgwf/co2@^0.11.4":
-  version "0.11.4"
-  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.11.4.tgz#1e919364a3b1ce5ed835fb6449f78a7c7277e3f4"
-  integrity sha512-I6e+WzdDpVbKLkTDJXAA0kJvOJQg1TNfTOu7PA5+FfxLEix9EqdigVK0Qd4flC82fLgTKSw4upuh+nCm4fFCaQ==
+"@tgwf/co2@^0.12.1":
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.12.1.tgz#587478df81347c1353187bbce88a79b358e1051b"
+  integrity sha512-sg0B0AsdYhhG/hLmFouEG3ePFpdQK0hXJdkI7M9URYZ1pQ+HYtUnzb4H+36+UnCxHqbrGwUJ5wdWtdXU0RwcFA==
   dependencies:
     debug "^4.3.4"
 
