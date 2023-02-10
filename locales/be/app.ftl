@@ -258,6 +258,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Наладзьце выбарку на аснове працягласці маркера
 MarkerContextMenu--start-selection-here = Пачаць вылучэнне тут
 MarkerContextMenu--end-selection-here = Скончыць вылучэнне тут
 MarkerContextMenu--start-selection-at-marker-start = Пачаць вылучэнне ад <strong>пачатку</strong> маркера
@@ -424,9 +425,13 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Працягласць �
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Уключыць схаваныя патокі
 MenuButtons--publish--renderCheckbox-label-include-other-tabs = Уключыць даныя з іншых картак
+MenuButtons--publish--renderCheckbox-label-hidden-time = Уключыць схаваны дыяпазон часу
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Уключыць здымкі экрана
+MenuButtons--publish--renderCheckbox-label-resource = Уключыць URL-адрасы і шляхі рэсурсаў
 MenuButtons--publish--renderCheckbox-label-extension = Уключыць інфармацыю аб пашырэнні
+MenuButtons--publish--renderCheckbox-label-preference = Уключыць значэнні параметраў
 MenuButtons--publish--renderCheckbox-label-private-browsing = Уключыць даныя з вокнаў прыватнага прагляду
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Гэты профіль змяшчае даныя прыватнага прагляду
@@ -434,6 +439,7 @@ MenuButtons--publish--reupload-performance-profile = Паўторна запам
 MenuButtons--publish--share-performance-profile = Абагуліць профіль прадукцыйнасці
 MenuButtons--publish--info-description = Запампуйце свой профіль і зрабіце яго даступным для ўсіх, хто мае спасылку.
 MenuButtons--publish--info-description-default = Тыпова вашы асабістыя даныя выдаляюцца.
+MenuButtons--publish--info-description-firefox-nightly2 = Гэты профіль ад { -firefox-nightly-brand-name }, таму большая частка інфармацыі ўключана па змаўчанні.
 MenuButtons--publish--include-additional-data = Уключыць дадатковыя даныя, якія могуць раскрыць вашу асобу
 MenuButtons--publish--button-upload = Запампаваць
 MenuButtons--publish--upload-title = Запампоўванне профілю…
@@ -446,6 +452,9 @@ MenuButtons--publish--compressing = Сцісканне…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Фільтраваць сеткі:
+    .title = Паказваць толькі сеткавыя запыты, якія адпавядаюць пэўнаму імені
 
 ## Timestamp formatting primitive
 
@@ -486,6 +495,9 @@ ProfileDeletePanel--delete-error = Пры выдаленні гэтага про
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
 ProfileDeletePanel--dialog-title = Выдаліць { $profileName }
+ProfileDeletePanel--dialog-confirmation-question =
+    Вы ўпэўнены, што хочаце выдаліць запампаваныя даныя для гэтага профілю? Спасылкі,
+    якія былі абагулены раней, больш не будуць працаваць.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Скасаваць
 ProfileDeletePanel--dialog-delete-button =
@@ -510,6 +522,7 @@ ProfileFilterNavigator--full-range-with-duration = Поўны дыяпазон (
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Імпарт профілю непасрэдна з { -firefox-brand-name }…
 ProfileLoaderAnimation--loading-from-file = Чытанне файла і апрацоўка профілю…
 ProfileLoaderAnimation--loading-local = Яшчэ не рэалізавана.
 ProfileLoaderAnimation--loading-public = Спампоўка і апрацоўка профілю…
@@ -700,6 +713,11 @@ TrackSearchField--search-input =
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
 TransformNavigator--complete = “{ $item }” поўнасцю
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Згарнуць: { $item }
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
