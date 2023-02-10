@@ -733,6 +733,21 @@ TransformNavigator--focus-function = Фокус: { $item }
 # Variables:
 #   $item (String) - Name of the category that transform applied to.
 TransformNavigator--focus-category = Катэгорыя ў фокусе: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Аб'яднаць вузел: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Аб'яднаць: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Адхілена: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
@@ -747,9 +762,20 @@ SourceView--loading-browser-connection = Чаканне { -firefox-brand-name }�
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Зыходны код недаступны
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Глядзіце <a>абмеркаванне #3741</a> каб даведацца аб сцэнарыях, якія падтрымліваюцца, і запланаваных паляпшэннях.
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Для гэтага файла няма вядомага cross-origin-accessible URL-адраса.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Пры атрыманні URL { $url } адбылася памылка сеткі: { $networkErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if the browser could not
 # be queried for source code using the symbolication API.
 # Variables:
@@ -766,6 +792,12 @@ SourceView--browser-api-error-when-obtaining-source = API сімвалізацы
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = API сімвалізацыі лакальнага сервера сімвалаў вярнула памылку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Файл { $pathInArchive } не быў знойдзены ў архіве з { $url }.
 # Displayed below SourceView--cannot-obtain-source, if the file format of an
 # "archive" file was not recognized. The only supported archive formats at the
 # moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
