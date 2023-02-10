@@ -18,7 +18,7 @@ const localConfigExists = fs.existsSync(
 );
 
 const argv = yargs(hideBin(process.argv))
-  .command('* [<profile>]', 'Open Firefox Profiler, on <profile> if included.')
+  .command('* [profile]', 'Open Firefox Profiler, on [profile] if included.')
   // Disabled --version flag since no version number in package.json.
   .version(false)
   .strict()
