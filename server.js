@@ -4,7 +4,7 @@
 // @noflow
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const express = require('express');
+const http = require('node:http');
 const config = require('./webpack.config');
 const { oneLine, stripIndent } = require('common-tags');
 const port = process.env.FX_PROFILER_PORT || 4242;
@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
+const open = require('open');
 const localConfigExists = fs.existsSync(
   path.join(__dirname, './webpack.local-config.js')
 );
@@ -76,44 +77,40 @@ if (localConfigExists) {
 
 const profilerUrl = `http://${host}:${port}`;
 if (argv.profile) {
-  // Not modifying serverConfig.static because that can roughly triple
-  // webpack cached build time.
-  const profileDir = '/profiles/';
-  const profileFile = path.basename(argv.profile);
-  const prevSetupMiddlewares = serverConfig.setupMiddlewares;
-  serverConfig.setupMiddlewares = (middlewares, devServer) => {
-    if (prevSetupMiddlewares) {
-      middlewares = prevSetupMiddlewares(middlewares, devServer);
-    }
-    devServer.app.use((req, res, next) => {
-      if (
-        req.url.startsWith(profileDir) &&
-        req.url !== `${profileDir}${profileFile}`
-      ) {
-        res.sendStatus(404);
-      } else {
-        next();
-      }
-    });
-    devServer.app.use(
-      profileDir,
-      express.static(path.resolve(path.dirname(argv.profile)))
-    );
-    return middlewares;
-  };
+  // Spin up a simple http server serving the profile file.
+  const profileServer = http.createServer((req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', profilerUrl);
+    const fileStream = fs.createReadStream(argv.profile);
+    fileStream.pipe(res);
+  });
 
-  const profileFromUrl = `${profilerUrl}/from-url/${encodeURIComponent(
-    `${profilerUrl}${profileDir}${profileFile}`
-  )}`;
+  // Close the profile server on CTRL-C.
+  process.on('SIGINT', () => profileServer.close());
+  process.on('SIGTERM', () => profileServer.close());
+
+  // Delete "open" target (if any) in serverConfig.
   if (
     typeof serverConfig.open === 'object' &&
     !Array.isArray(serverConfig.open) &&
     serverConfig.open !== null
   ) {
-    serverConfig.open.target = [profileFromUrl];
+    delete serverConfig.open.target;
   } else {
-    serverConfig.open = [profileFromUrl];
+    delete serverConfig.open;
   }
+
+  // Save and delete "open" property from serverConfig so that
+  // webpack-dev-server doesn't open anything in tandem.
+  const openOptions = serverConfig.open;
+  delete serverConfig.open;
+
+  // Open on profile.
+  profileServer.listen(0, host, () => {
+    const profileFromUrl = `${profilerUrl}/from-url/${encodeURIComponent(
+      `http://${host}:${profileServer.address().port}/`
+    )}`;
+    open(profileFromUrl, openOptions);
+  });
 }
 
 const server = new WebpackDevServer(serverConfig, webpack(config));
