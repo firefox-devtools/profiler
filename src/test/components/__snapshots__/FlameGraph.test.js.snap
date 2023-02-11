@@ -482,20 +482,9 @@ Array [
   ],
   Array [
     "fillRect",
-    0,
-    284,
-    200,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    284,
     1,
+    284,
+    199,
     15,
   ],
   Array [
@@ -518,20 +507,9 @@ Array [
   ],
   Array [
     "fillRect",
-    0,
-    268,
-    200,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    268,
     1,
+    268,
+    199,
     15,
   ],
   Array [
@@ -554,20 +532,9 @@ Array [
   ],
   Array [
     "fillRect",
-    0,
-    252,
-    133.33333333333331,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    252,
     1,
+    252,
+    132.33333333333331,
     15,
   ],
   Array [
@@ -590,20 +557,9 @@ Array [
   ],
   Array [
     "fillRect",
-    133.33333333333331,
+    134.33333333333331,
     252,
-    66.66666666666667,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    133.33333333333331,
-    252,
-    1,
+    65.66666666666667,
     15,
   ],
   Array [
@@ -626,20 +582,9 @@ Array [
   ],
   Array [
     "fillRect",
-    0,
-    236,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    236,
     1,
+    236,
+    65.66666666666666,
     15,
   ],
   Array [
@@ -662,20 +607,9 @@ Array [
   ],
   Array [
     "fillRect",
-    66.66666666666666,
+    67.66666666666666,
     236,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    66.66666666666666,
-    236,
-    1,
+    65.66666666666666,
     15,
   ],
   Array [
@@ -698,20 +632,9 @@ Array [
   ],
   Array [
     "fillRect",
-    133.33333333333331,
+    134.33333333333331,
     236,
-    66.66666666666667,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    133.33333333333331,
-    236,
-    1,
+    65.66666666666667,
     15,
   ],
   Array [
@@ -734,20 +657,9 @@ Array [
   ],
   Array [
     "fillRect",
-    0,
-    220,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    220,
     1,
+    220,
+    65.66666666666666,
     15,
   ],
   Array [
@@ -770,20 +682,9 @@ Array [
   ],
   Array [
     "fillRect",
-    66.66666666666666,
+    67.66666666666666,
     220,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    66.66666666666666,
-    220,
-    1,
+    65.66666666666666,
     15,
   ],
   Array [
@@ -806,20 +707,9 @@ Array [
   ],
   Array [
     "fillRect",
-    66.66666666666666,
+    67.66666666666666,
     204,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    66.66666666666666,
-    204,
-    1,
+    65.66666666666666,
     15,
   ],
   Array [

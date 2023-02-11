@@ -163,8 +163,6 @@ type State = {|
   viewportTop: CssPixels,
   viewportBottom: CssPixels,
   horizontalViewport: HorizontalViewport,
-  dragX: CssPixels,
-  dragY: CssPixels,
   isDragging: boolean,
   isScrollHintVisible: boolean,
   isSizeSet: boolean,
@@ -229,6 +227,8 @@ export const withChartViewport: WithChartViewport<*, *> =
       _lastKeyboardNavigationFrame: number = 0;
       _keysDown: Set<NavigationKey> = new Set();
       _deltaToZoomFactor = (delta) => Math.pow(ZOOM_SPEED, delta);
+      _dragX: number = 0;
+      _dragY: number = 0;
 
       constructor(props: ViewportProps) {
         super(props);
@@ -267,8 +267,6 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportTop: 0,
           viewportBottom: startsAtBottom ? maxViewportHeight : 0,
           horizontalViewport,
-          dragX: 0,
-          dragY: 0,
           isDragging: false,
           isScrollHintVisible: false,
           isSizeSet: false,
@@ -560,7 +558,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       _mouseMoveListener = (event: MouseEvent) => {
         event.preventDefault();
 
-        let { dragX, dragY } = this.state;
+        let { _dragX: dragX, _dragY: dragY } = this;
         if (!this.state.isDragging) {
           dragX = event.clientX;
           dragY = event.clientY;
@@ -569,11 +567,9 @@ export const withChartViewport: WithChartViewport<*, *> =
         const offsetX = event.clientX - dragX;
         const offsetY = event.clientY - dragY;
 
-        this.setState({
-          dragX: event.clientX,
-          dragY: event.clientY,
-          isDragging: true,
-        });
+        this._dragX = event.clientX;
+        this._dragY = event.clientY;
+        this.setState({ isDragging: true });
 
         this.moveViewport(offsetX, offsetY);
       };
