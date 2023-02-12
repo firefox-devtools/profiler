@@ -250,7 +250,7 @@ export function computeLocalTracksByPid(
       localTracksByPid.set(pid, tracks);
     }
 
-    if (!isMainThread(thread)) {
+    if (!thread.isMainThread) {
       // This thread has not been added as a GlobalTrack, so add it as a local track.
       tracks.push({ type: 'thread', threadIndex });
     }
@@ -390,7 +390,7 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
   ) {
     const thread = profile.threads[threadIndex];
     const { pid, markers, stringTable } = thread;
-    if (isMainThread(thread)) {
+    if (thread.isMainThread) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
       let globalTrack = globalTracksByPid.get(pid);
@@ -1027,18 +1027,6 @@ function _findDefaultThread(threads: Thread[]): Thread | null {
     contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
 
   return threads[defaultThreadIndex];
-}
-
-export function isMainThread(thread: Thread): boolean {
-  return (
-    thread.name === 'GeckoMain' ||
-    // If the pid is a string, then it's not one that came from the system.
-    // These threads should all be treated as main threads.
-    typeof thread.pid === 'string' ||
-    // On Linux the tid of the main thread is the pid. This is useful for
-    // profiles imported from the Linux 'perf' tool.
-    String(thread.pid) === thread.tid
-  );
 }
 
 function _indexesAreValid(listLength: number, indexes: number[]) {

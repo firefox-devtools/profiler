@@ -608,7 +608,9 @@ describe('attemptToPublish', function () {
 
     // Setting those to make sure we are creating two global tracks.
     profile.threads[0].name = 'GeckoMain';
+    profile.threads[0].isMainThread = true;
     profile.threads[1].name = 'GeckoMain';
+    profile.threads[1].isMainThread = true;
     profile.threads[1].pid = 1;
 
     const store = storeWithProfile(profile);

@@ -20,7 +20,10 @@ import {
   sanitizeFromMarkerSchema,
 } from './marker-data';
 import { getSchemaFromMarker } from './marker-schema';
-import { filterThreadSamplesToRange } from './profile-data';
+import {
+  filterThreadSamplesToRange,
+  filterCounterSamplesToRange,
+} from './profile-data';
 import type {
   Profile,
   Thread,
@@ -32,6 +35,7 @@ import type {
   IndexIntoFuncTable,
   InnerWindowID,
   MarkerSchemaByName,
+  Counter,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
@@ -153,18 +157,16 @@ export function sanitizePII(
     // Also adjust other counters to point to the right thread.
     counters: profile.counters
       ? profile.counters.reduce((acc, counter) => {
-          const newThreadIndex = oldThreadIndexToNew.get(
-            counter.mainThreadIndex
+          const newCounter: Counter | null = sanitizeCounterPII(
+            counter,
+            PIIToBeRemoved,
+            oldThreadIndexToNew
           );
 
-          // Filtering out the counter if it's undefined.
-          if (newThreadIndex !== undefined) {
-            acc.push({
-              ...counter,
-              mainThreadIndex: newThreadIndex,
-            });
+          // Filter out the counter completely if its thread has been removed.
+          if (newCounter !== null) {
+            acc.push(newCounter);
           }
-
           return acc;
         }, [])
       : undefined,
@@ -403,7 +405,7 @@ function sanitizeThreadPII(
       PIIToBeRemoved.shouldFilterToCommittedRange
     ).rawMarkerTable;
 
-    // While we are here, we are also filterig the thread samples
+    // While we are here, we are also filtering the thread samples
     // to range.
     if (PIIToBeRemoved.shouldFilterToCommittedRange !== null) {
       const { start, end } = PIIToBeRemoved.shouldFilterToCommittedRange;
@@ -667,4 +669,38 @@ function isThreadNonEmpty(thread: Thread): boolean {
   );
 
   return hasSamples;
+}
+
+/**
+ * Sanitize the counter PII.
+ *
+ * - If the thread that the counter belongs to is removed, then remove the
+ *   counter as well.
+ * - If the time range is sanitized, then filter the counter samples to the
+ *   sanitized time range.
+ * - Update the thread index with the new thread index.
+ */
+function sanitizeCounterPII(
+  counter: Counter,
+  PIIToBeRemoved: RemoveProfileInformation,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
+): Counter | null {
+  const newThreadIndex = oldThreadIndexToNew.get(counter.mainThreadIndex);
+  if (newThreadIndex === undefined) {
+    // Remove the counter completely if the thread that it belongs to is sanitized as well.
+    return null;
+  }
+
+  // Sanitize the counter if the time range should be sanitized.
+  let newCounter = counter;
+  if (PIIToBeRemoved.shouldFilterToCommittedRange !== null) {
+    const { start, end } = PIIToBeRemoved.shouldFilterToCommittedRange;
+    newCounter = filterCounterSamplesToRange(newCounter, start, end);
+  }
+
+  return {
+    ...newCounter,
+    // Update the main thread index with the new thread index.
+    mainThreadIndex: newThreadIndex,
+  };
 }

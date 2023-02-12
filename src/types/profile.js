@@ -31,10 +31,9 @@ export type TabID = number;
 export type InnerWindowID = number;
 
 /**
- * If a pid is a number, then it is the int value that came from the profiler.
- * However, if it is a string, then it is an unique value generated during
- * the profile processing. This happens for older profiles before the pid was
- * collected, or for merged profiles.
+ * Pids can be numbers or strings. Strings are sometimes used to create unique
+ * values when multiple processes with the same pid exist in the same profile,
+ * such as during profile merging or diffing.
  */
 export type Pid = number | string;
 
@@ -629,6 +628,7 @@ export type Thread = {|
   unregisterTime: Milliseconds | null,
   pausedRanges: PausedRange[],
   name: string,
+  isMainThread: boolean,
   // The eTLD+1 of the isolated content process if provided by the back-end.
   // It will be undefined if:
   // - Fission is not enabled.

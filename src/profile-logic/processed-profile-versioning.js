@@ -2204,5 +2204,28 @@ const _upgraders = {
       delete thread.frameTable.optimizations;
     }
   },
+  [46]: (profile) => {
+    // An `isMainThread` field was added to the Thread type.
+    //
+    // This replaces the following function:
+    //
+    // export function isMainThread(thread: Thread): boolean {
+    //   return (
+    //     thread.name === 'GeckoMain' ||
+    //     // If the pid is a string, then it's not one that came from the system.
+    //     // These threads should all be treated as main threads.
+    //     typeof thread.pid === 'string' ||
+    //     // On Linux the tid of the main thread is the pid. This is useful for
+    //     // profiles imported from the Linux 'perf' tool.
+    //     String(thread.pid) === thread.tid
+    //   );
+    // }
+    for (const thread of profile.threads) {
+      thread.isMainThread =
+        thread.name === 'GeckoMain' ||
+        typeof thread.pid === 'string' ||
+        String(thread.pid) === thread.tid;
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

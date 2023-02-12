@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 45,
+    "preprocessedProfileVersion": 46,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -236,6 +236,7 @@ Object {
           0,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -521,6 +522,7 @@ Object {
           2,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -734,6 +736,7 @@ Object {
           2,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -1134,6 +1137,7 @@ Object {
           6,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -1477,6 +1481,7 @@ Object {
           3,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -1774,6 +1779,7 @@ Object {
           4,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2033,6 +2039,7 @@ Object {
           1,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2232,6 +2239,7 @@ Object {
           2,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2443,6 +2451,7 @@ Object {
           2,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2658,6 +2667,7 @@ Object {
           2,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -2886,6 +2896,7 @@ Object {
           3,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -3632,6 +3643,7 @@ Object {
           4,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -4588,6 +4600,7 @@ Object {
           4,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -5544,6 +5557,7 @@ Object {
           4,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -6504,6 +6518,7 @@ Object {
           4,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -7260,6 +7275,7 @@ Object {
           2,
         ],
       },
+      "isMainThread": false,
       "markers": Object {
         "category": Array [],
         "data": Array [],
@@ -10960,7 +10976,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 45,
+    "preprocessedProfileVersion": 46,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -11115,6 +11131,7 @@ Object {
           1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
@@ -11517,6 +11534,7 @@ Object {
           1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
@@ -11919,6 +11937,7 @@ Object {
           1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
@@ -12611,7 +12630,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 45,
+    "preprocessedProfileVersion": 46,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -12766,6 +12785,7 @@ Object {
           1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
@@ -13195,6 +13215,7 @@ Object {
           1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
@@ -13631,6 +13652,7 @@ Object {
           -1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
@@ -14410,7 +14432,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 45,
+    "preprocessedProfileVersion": 46,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -14591,6 +14613,7 @@ Object {
           1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
@@ -15033,6 +15056,7 @@ Object {
           1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
@@ -15471,6 +15495,7 @@ Object {
           -1,
         ],
       },
+      "isMainThread": true,
       "markers": Object {
         "category": Array [
           4,
