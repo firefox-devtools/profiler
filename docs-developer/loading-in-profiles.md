@@ -102,4 +102,4 @@ Firefox loads the profiles directly into the front-end through a WebChannel mech
 
 > `https://profiler.firefox.com/from-file/`
 
-When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the profiler.firefox.com client, or using the file upload input.
+When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the profiler.firefox.com client, or using the file upload input. On Linux, the provided [fp.sh](../bin/fp.sh) script can load files.
