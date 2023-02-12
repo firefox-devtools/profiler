@@ -289,6 +289,8 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
           class="tooltipTiming"
         >
           6ms
+           @ 
+          2ms
         </div>
         <div
           class="tooltipTitle"
@@ -1227,6 +1229,8 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
           class="tooltipTiming"
         >
           7ms
+           @ 
+          6ms
         </div>
         <div
           class="tooltipTitle"
