@@ -5,11 +5,12 @@ if [ "x$1" != "x" ]; then
   PROFILEPATH=$(realpath "$1")
 fi
 PWD=$(pwd)
-SCRIPTDIR=$(dirname $(realpath "$0"))
-cd "$SCRIPTDIR/.."
+SCRIPTPATH=$(realpath "$0")
+SCRIPTDIR=$(dirname "$SCRIPTPATH")
+cd "$SCRIPTDIR/.." || exit
 if [ "x$1" = "x" ]; then
   yarn start
 else
   yarn start "$PROFILEPATH"
 fi
-cd "$PWD"
+cd "$PWD" || exit
