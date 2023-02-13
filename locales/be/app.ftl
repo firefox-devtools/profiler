@@ -92,6 +92,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = Згарнуць фу
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Згарнуць <strong>{ $nameForResource }</strong>
     .title = Згортванне рэсурсу згладзіць усе выклікі да гэтага рэсурсу ў адзіны згорнуты вузел выкліку.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Згарнуць прамую рэкурсію
+    .title = Згортванне прамой рэкурсіі выдаляе выклікі, якія шматразова рэкурсіруюць у адну і тую ж функцыю без прамежкавых функцый у стэку.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Згарнуць непрамой рэкурсію
+    .title = Згортванне непрамой рэкурсіі выдаляе выклікі, якія шматразова рэкурсіруюць у адну і тую ж функцыю, нават з прамежкавымі функцыямі ў стэку.
 CallNodeContextMenu--transform-drop-function = Адкінуць узоры з гэтай функцыяй
     .title = Адкідванне ўзораў выдаляе іх час з профілю. Гэта карысна для выдалення інфармацыі аб часе, які не мае дачынення да аналізу.
 CallNodeContextMenu--expand-all = Разгарнуць усё
@@ -124,6 +128,10 @@ CallTree--bytes-total = Агульны памер (байты)
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Некаторыя выклікі { $calledFunction } былі ўбудаваны кампілятарам.
 # Variables:
 #   $calledFunction (String) - Name of the function whose call was inlined.
 #   $outerFunction (String) - Name of the outer function into which the called function was inlined.
