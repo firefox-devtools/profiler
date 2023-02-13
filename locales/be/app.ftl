@@ -161,6 +161,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Гэты профіль быў запісаны для зборцы без фінальных (рэлізных) аптымізацый.
+        Назіраемая прадукцыйнасць можа адрознівацца ад фінальнай (рэлізнай) зборкі.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -207,6 +211,10 @@ Home--menu-button = Уключыць кнопку меню { -profiler-brand-nam
 Home--menu-button-instructions =
     Уключыце кнопку меню прафайлера, каб пачаць запіс профілю прадукцыйнасці
     у { -firefox-brand-name }, затым прааналізуйце яго і падзяліцеся з profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Вы таксама можаце зрабіць профіль { -firefox-android-brand-name }. Падрабязней
+    можна даведацца ў дакументацыі:
+    <a>Прафіляванне { -firefox-android-brand-name } непасрэдна на прыладзе</a>.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
