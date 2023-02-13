@@ -284,10 +284,14 @@ MarkerContextMenu--select-the-sender-thread = Выберыце паток-адп
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Фільтра маркераў
+    .title = Паказваць толькі маркеры, якія адпавядаюць пэўнаму імені
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Выберыце маркер, каб паглядзець інфармацыі пра яго.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -748,6 +752,21 @@ TransformNavigator--merge-function = Аб'яднаць: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Адхілена: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion2 = Згарнуць прамую рэкурсію: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Згарнуць непрамую рэкурсію: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Згарнуць паддрэва: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
