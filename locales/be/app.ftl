@@ -251,6 +251,10 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Выдаліць
     .title = Гэты профіль не можа быць выдалены, таму што мы не маем інфармацыі пра аўтарызацыю.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ніводнага профілю яшчэ не запампавана!
+# This string is used below the 'Your recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Прагляд усіх вашых запісаў і кіраванне імі (яшчэ { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
@@ -346,6 +350,41 @@ MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
 MenuButtons--metaInfo--main-memory = Асноўная памяць:
 MenuButtons--index--show-moreInfo-button = Паказаць больш
 MenuButtons--index--hide-moreInfo-button = Паказаць менш
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізічнае ядро, { $logicalCPUs } лагічнае ядро
+                [few] { $physicalCPUs } фізічнае ядро, { $logicalCPUs } лагічныя ядры
+                [many] { $physicalCPUs } фізічнае ядро, { $logicalCPUs } лагічных ядзер
+               *[other] { $physicalCPUs } фізічнае ядро, { $logicalCPUs } лагічных ядзер
+            }
+        [few]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізічныя ядры, { $logicalCPUs } лагічнае ядро
+                [few] { $physicalCPUs } фізічныя ядры, { $logicalCPUs } лагічныя ядры
+                [many] { $physicalCPUs } фізічныя ядры, { $logicalCPUs } лагічных ядзер
+               *[other] { $physicalCPUs } фізічныя ядры, { $logicalCPUs } лагічных ядзер
+            }
+        [many]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічнае ядро
+                [few] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічныя ядры
+                [many] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічных ядзер
+               *[other] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічных ядзер
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічнае ядро
+                [few] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічныя ядры
+                [many] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічных ядзер
+               *[other] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічных ядзер
+            }
+    }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
 # Variable:
