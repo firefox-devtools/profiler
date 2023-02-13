@@ -5,6 +5,7 @@
 import type {
   Profile,
   Bytes,
+  IndexIntoStackTable,
   IndexIntoCategoryList,
   IndexIntoSubcategoryListForCategory,
 } from 'firefox-profiler/types';
@@ -187,10 +188,11 @@ export function attemptToConvertV8HeapProfile(json: mixed): Profile | null {
   thread.name = 'Total Allocated Bytes';
 
   const funcKeyToFuncId = new Map<string, number>();
+  const nodeIdToStackId = new Map<NodeId, IndexIntoStackTable>();
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
   const { funcTable, stringTable, frameTable, stackTable } = thread;
 
-  const { head } = coerce<mixed, SamplingHeapProfile>(json);
+  const { head, samples } = coerce<mixed, SamplingHeapProfile>(json);
   // Traverse the tree and populate the tables.
   // Each entry of the traversal stack is a pair (heap node, stack table index of parent node).
   const traversalStack = [[head, null]];
@@ -233,10 +235,15 @@ export function attemptToConvertV8HeapProfile(json: mixed): Profile | null {
       frameTable.length++;
     }
 
-    allocationsTable.time.push(0);
-    allocationsTable.stack.push(stackTable.length);
-    allocationsTable.weight.push(node.selfSize);
-    allocationsTable.length++;
+    if (samples.length) {
+      // If we have samples, the allocation table will be populated later with samples instead.
+      nodeIdToStackId.set(node.id, stackTable.length);
+    } else {
+      allocationsTable.time.push(0);
+      allocationsTable.stack.push(stackTable.length);
+      allocationsTable.weight.push(node.selfSize);
+      allocationsTable.length++;
+    }
 
     stackTable.frame.push(funcId);
     stackTable.category.push(ensureExists(frameTable.category[funcId]));
@@ -248,7 +255,39 @@ export function attemptToConvertV8HeapProfile(json: mixed): Profile | null {
     stackTable.length++;
   }
 
+  // Go over the samples by ascending ordinals since allocationsTable needs to be ordered.
+  // Reference for how samples was meant to be used:
+  // https://source.chromium.org/chromium/chromium/src/+/main:third_party/devtools-frontend/src/front_end/panels/profiler/HeapProfileView.ts;l=560-565;bpv=0;bpt=0
+  for (const sample of [...samples].sort((a, b) => a.ordinal - b.ordinal)) {
+    const { ordinal, nodeId, size } = sample;
+    allocationsTable.time.push(ordinal);
+    allocationsTable.stack.push(ensureExists(nodeIdToStackId.get(nodeId)));
+    allocationsTable.weight.push(size);
+    allocationsTable.length++;
+  }
+
   thread.nativeAllocations = allocationsTable;
   profile.threads = [thread];
+  if (samples.length) {
+    profile.counters = [
+      {
+        name: 'Memory',
+        category: 'Memory',
+        description: 'Graph of total allocated memory',
+        pid: '0',
+        mainThreadIndex: 0,
+        sampleGroups: [
+          {
+            id: 0,
+            samples: {
+              time: allocationsTable.time,
+              count: allocationsTable.weight,
+              length: allocationsTable.length,
+            },
+          },
+        ],
+      },
+    ];
+  }
   return profile;
 }
