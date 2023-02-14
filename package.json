@@ -109,7 +109,7 @@
     "babel-loader": "^9.1.2",
     "babel-plugin-module-resolver": "^5.0.0",
     "browserslist": "^4.21.5",
-    "caniuse-lite": "^1.0.30001442",
+    "caniuse-lite": "^1.0.30001451",
     "circular-dependency-plugin": "^5.2.1",
     "codecov": "^3.8.3",
     "copy-webpack-plugin": "^11.0.0",
