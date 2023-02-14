@@ -62,15 +62,15 @@ const LOCAL_TRACK_INDEX_ORDER = {
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
   memory: 1,
+  power: 2,
   // IPC tracks that belong to the global track will appear right after network
-  // and memory tracks. But we want to show the IPC tracks that belong to the
+  // and counter tracks. But we want to show the IPC tracks that belong to the
   // local threads right after their track. This special handling happens inside
   // the sort function.
-  ipc: 2,
-  thread: 3,
-  'event-delay': 4,
-  'process-cpu': 5,
-  power: 6,
+  ipc: 3,
+  thread: 4,
+  'event-delay': 5,
+  'process-cpu': 6,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -111,6 +111,17 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
       // If the IPC track belongs to that local thread, put the IPC tracks right
       // after it.
       return 1;
+    }
+
+    if (
+      profile &&
+      profile.counters &&
+      tracks[a].type === 'power' &&
+      tracks[b].type === 'power'
+    ) {
+      const nameA = profile.counters[tracks[a].counterIndex].name;
+      const nameB = profile.counters[tracks[b].counterIndex].name;
+      return naturalSort.compare(nameA, nameB);
     }
 
     // If the tracks are both threads, sort them by thread name, and then by
