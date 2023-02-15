@@ -35,7 +35,7 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
+      'Firefox – 1/1/1970, 12:00:00\u202FAM UTC – Firefox Profiler'
     );
   });
 
@@ -56,7 +56,7 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
+      'Firefox – macOS 10.14 – 1/1/1970, 12:00:00\u202FAM UTC – Firefox Profiler'
     );
   });
 
@@ -100,7 +100,9 @@ describe('WindowTitle', () => {
       </Provider>
     );
 
-    expect(document.title).toBe('1/1/1970, 12:00:00 AM UTC – Firefox Profiler');
+    expect(document.title).toBe(
+      '1/1/1970, 12:00:00\u202FAM UTC – Firefox Profiler'
+    );
   });
 
   it('shows the correct title for uploaded recordings', () => {
@@ -167,7 +169,7 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'bar/profile1.json – Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
+      'bar/profile1.json – Firefox – 1/1/1970, 12:00:00\u202FAM UTC – Firefox Profiler'
     );
   });
 });
