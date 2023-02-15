@@ -123,7 +123,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
         <div
           class="publishedProfilesDate"
         >
-          2:00 PM
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -182,7 +182,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
         <div
           class="publishedProfilesDate"
         >
-          1:00 PM
+          1:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -239,7 +239,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
         <div
           class="publishedProfilesDate"
         >
-          Jul 3, 8:00 AM
+          Jul 3, 8:00 AM
         </div>
         <div
           class="publishedProfilesInfo"
