@@ -5,12 +5,17 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import * as UrlStateSelectors from '../../selectors/url-state';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import {
+  selectedThreadSelectors,
+  selectedNodeSelectors,
+} from '../../selectors/per-thread';
+import { emptyAddressTimings } from '../../profile-logic/address-timings';
 import {
   getBottomBoxInfoForCallNode,
   getCallNodeIndexFromPath,
 } from '../../profile-logic/profile-data';
 import {
+  changeSelectedCallNode,
   updateBottomBoxContentsAndMaybeOpen,
   openAssemblyView,
   closeAssemblyView,
@@ -66,6 +71,9 @@ describe('bottom box', function () {
     expect(
       UrlStateSelectors.getAssemblyViewNativeSymbol(getState())
     ).toBeNull();
+    expect(
+      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
+    ).toEqual(emptyAddressTimings);
   });
 
   it('opens the source view when double-clicking a call node with source code', function () {
@@ -246,4 +254,61 @@ describe('bottom box', function () {
         .name
     ).toBeOneOf(['Asym', 'Bsym']);
   });
+
+  it('displays the correct timings', function () {
+    const { dispatch, getState, funcNamesDict, thread } = setup();
+    const { A, B, C, D } = funcNamesDict;
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+
+    const threadsKey = UrlStateSelectors.getSelectedThreadsKey(getState());
+
+    // Simulate double-clicking the call node at [A, B, C, D].
+    // We first select the call node, then we compute its "bottom box info" (this
+    // is what the call tree usually does on its own), and then we open the bottom
+    // box with that info.
+    dispatch(changeSelectedCallNode(threadsKey, [A, B, C, D]));
+    const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
+      ensureExists(
+        getCallNodeIndexFromPath([A, B, C, D], callNodeInfo.callNodeTable)
+      ),
+      callNodeInfo,
+      thread
+    );
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfoABC));
+
+    // Check the assembly view address timings, both the (thread-)global timings
+    // and the timings for the selected call node.
+    // Note the difference between "selectedThreadSelectors" and "selectedNodeSelectors" below.
+    // Both timings should be identical here because Dsym is selected and because
+    // there is no recursion on Dsym.
+    expect(
+      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
+        .totalAddressHits
+    ).toEqual(new Map([[0x51, 1]]));
+    expect(
+      selectedNodeSelectors.getAssemblyViewAddressTimings(getState())
+        .totalAddressHits
+    ).toEqual(new Map([[0x51, 1]]));
+
+    // Select the call node at [A, B, C].
+    dispatch(changeSelectedCallNode(threadsKey, [A, B, C]));
+
+    // The global timings should still remain the same.
+    expect(
+      selectedThreadSelectors.getAssemblyViewAddressTimings(getState())
+        .totalAddressHits
+    ).toEqual(new Map([[0x51, 1]]));
+
+    // The timings for the selected call node should have dropped to zero,
+    // because the call node at [A, B, C] does not have any frames in Dsym.
+    expect(
+      selectedNodeSelectors.getAssemblyViewAddressTimings(getState())
+        .totalAddressHits
+    ).toEqual(new Map());
+  });
+
+  // Further ideas for tests:
+  //
+  // - A test with multiple threads: Open the assembly view for a symbol, switch
+  //   to a different thread, check timings
 });
