@@ -1027,6 +1027,18 @@ SourceView--not-in-archive-error-when-obtaining-source =
 SourceView--archive-parsing-error-when-obtaining-source =
     The archive at { $url } could not be parsed: { $parsingErrorMessage }
 
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Show the assembly view
+
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Hide the assembly view
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/

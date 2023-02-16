@@ -80,7 +80,8 @@
   background-color: transparent;
 }
 
-.photon-button-ghost:hover:not(:disabled) {
+.photon-button-ghost:hover:not(:disabled),
+.photon-button-ghost--checked {
   background-color: var(--grey-90-a10);
 }
 
