@@ -9,6 +9,7 @@ import {
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
+  getBottomBoxInfoForCallNode,
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -27,6 +28,7 @@ import type {
   TracedTiming,
   SamplesTable,
   ExtraBadgeInfo,
+  BottomBoxInfo,
 } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
@@ -66,6 +68,7 @@ function extractFaviconFromLibname(libname: string): string | null {
 
 export class CallTree {
   _categories: CategoryList;
+  _callNodeInfo: CallNodeInfo;
   _callNodeTable: CallNodeTable;
   _callNodeSummary: CallNodeSummary;
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
@@ -84,7 +87,7 @@ export class CallTree {
   constructor(
     thread: Thread,
     categories: CategoryList,
-    callNodeTable: CallNodeTable,
+    callNodeInfo: CallNodeInfo,
     callNodeSummary: CallNodeSummary,
     callNodeChildCount: Uint32Array,
     rootTotalSummary: number,
@@ -95,7 +98,8 @@ export class CallTree {
     weightType: WeightType
   ) {
     this._categories = categories;
-    this._callNodeTable = callNodeTable;
+    this._callNodeInfo = callNodeInfo;
+    this._callNodeTable = callNodeInfo.callNodeTable;
     this._callNodeSummary = callNodeSummary;
     this._callNodeChildCount = callNodeChildCount;
     this._thread = thread;
@@ -359,15 +363,14 @@ export class CallTree {
     );
   }
 
-  getRawFileNameForCallNode(
+  getBottomBoxInfoForCallNode(
     callNodeIndex: IndexIntoCallNodeTable
-  ): string | null {
-    const funcIndex = this._callNodeTable.func[callNodeIndex];
-    const fileName = this._thread.funcTable.fileName[funcIndex];
-    if (fileName === null) {
-      return null;
-    }
-    return this._thread.stringTable.getString(fileName);
+  ): BottomBoxInfo {
+    return getBottomBoxInfoForCallNode(
+      callNodeIndex,
+      this._callNodeInfo,
+      this._thread
+    );
   }
 }
 
@@ -546,7 +549,7 @@ export function getCallTree(
     return new CallTree(
       thread,
       categories,
-      callNodeInfo.callNodeTable,
+      callNodeInfo,
       callNodeSummary,
       callNodeChildCount,
       rootTotalSummary,

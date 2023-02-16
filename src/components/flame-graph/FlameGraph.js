@@ -29,7 +29,7 @@ import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
   handleCallNodeTransformShortcut,
-  openSourceView,
+  updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
 
 import type {
@@ -96,7 +96,7 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
-  +openSourceView: typeof openSourceView,
+  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -131,16 +131,15 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     );
   };
 
-  _onCallNodeDoubleClick = (callNodeIndex: IndexIntoCallNodeTable | null) => {
+  _onCallNodeEnterOrDoubleClick = (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => {
     if (callNodeIndex === null) {
       return;
     }
-    const { callTree, openSourceView } = this.props;
-    const file = callTree.getRawFileNameForCallNode(callNodeIndex);
-    if (file === null) {
-      return;
-    }
-    openSourceView(file, 'flame-graph');
+    const { callTree, updateBottomBoxContentsAndMaybeOpen } = this.props;
+    const bottomBoxInfo = callTree.getBottomBoxInfoForCallNode(callNodeIndex);
+    updateBottomBoxContentsAndMaybeOpen('flame-graph', bottomBoxInfo);
   };
 
   _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
@@ -222,7 +221,6 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       rightClickedCallNodeIndex,
       changeSelectedCallNode,
       handleCallNodeTransformShortcut,
-      openSourceView,
     } = this.props;
 
     if (
@@ -298,10 +296,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     }
 
     if (event.key === 'Enter') {
-      const file = callTree.getRawFileNameForCallNode(nodeIndex);
-      if (file !== null) {
-        openSourceView(file, 'flame-graph');
-      }
+      this._onCallNodeEnterOrDoubleClick(nodeIndex);
       return;
     }
 
@@ -398,7 +393,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               onRightClick: this._onRightClickedCallNodeChange,
-              onDoubleClick: this._onCallNodeDoubleClick,
+              onDoubleClick: this._onCallNodeEnterOrDoubleClick,
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               isInverted,
@@ -462,7 +457,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     changeSelectedCallNode,
     changeRightClickedCallNode,
     handleCallNodeTransformShortcut,
-    openSourceView,
+    updateBottomBoxContentsAndMaybeOpen,
   },
   options: { forwardRef: true },
   component: FlameGraphImpl,

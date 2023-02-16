@@ -75,6 +75,7 @@ import type {
   KeyboardModifiers,
   TableViewOptions,
   SelectionContext,
+  BottomBoxInfo,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -1948,11 +1949,35 @@ export function changeTableViewOptions(
   };
 }
 
-export function openSourceView(file: string, currentTab: TabSlug): Action {
+export function updateBottomBoxContentsAndMaybeOpen(
+  currentTab: TabSlug,
+  { libIndex, sourceFile, nativeSymbols }: BottomBoxInfo
+): Action {
+  // TODO: If the set has more than one element, pick the native symbol with
+  // the highest total sample count
+  const nativeSymbol = nativeSymbols.length !== 0 ? nativeSymbols[0] : null;
+
   return {
-    type: 'OPEN_SOURCE_VIEW',
-    file,
+    type: 'UPDATE_BOTTOM_BOX',
+    libIndex,
+    sourceFile,
+    nativeSymbol,
+    allNativeSymbolsForInitiatingCallNode: nativeSymbols,
     currentTab,
+    shouldOpenBottomBox: sourceFile !== null || nativeSymbol !== null,
+    shouldOpenAssemblyView: sourceFile === null && nativeSymbol !== null,
+  };
+}
+
+export function openAssemblyView(): Action {
+  return {
+    type: 'OPEN_ASSEMBLY_VIEW',
+  };
+}
+
+export function closeAssemblyView(): Action {
+  return {
+    type: 'CLOSE_ASSEMBLY_VIEW',
   };
 }
 

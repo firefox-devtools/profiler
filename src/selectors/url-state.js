@@ -77,7 +77,7 @@ export const getInvertCallstack: Selector<boolean> = (state) =>
 export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
 export const getSourceViewFile: Selector<string | null> = (state) =>
-  getProfileSpecificState(state).sourceView.file;
+  getProfileSpecificState(state).sourceView.sourceFile;
 export const getSourceViewActivationGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).sourceView.activationGeneration;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
