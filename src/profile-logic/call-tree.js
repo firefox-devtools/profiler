@@ -12,13 +12,9 @@ import {
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
-import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
   CategoryList,
   Thread,
-  FuncTable,
-  ResourceTable,
-  NativeSymbolTable,
   IndexIntoFuncTable,
   SamplesLikeTable,
   WeightType,
@@ -73,10 +69,7 @@ export class CallTree {
   _callNodeTable: CallNodeTable;
   _callNodeSummary: CallNodeSummary;
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
-  _funcTable: FuncTable;
-  _resourceTable: ResourceTable;
-  _nativeSymbols: NativeSymbolTable;
-  _stringTable: UniqueStringArray;
+  _thread: Thread;
   _rootTotalSummary: number;
   _rootCount: number;
   _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
@@ -89,7 +82,7 @@ export class CallTree {
   _weightType: WeightType;
 
   constructor(
-    { funcTable, resourceTable, nativeSymbols, stringTable }: Thread,
+    thread: Thread,
     categories: CategoryList,
     callNodeTable: CallNodeTable,
     callNodeSummary: CallNodeSummary,
@@ -105,10 +98,7 @@ export class CallTree {
     this._callNodeTable = callNodeTable;
     this._callNodeSummary = callNodeSummary;
     this._callNodeChildCount = callNodeChildCount;
-    this._funcTable = funcTable;
-    this._resourceTable = resourceTable;
-    this._nativeSymbols = nativeSymbols;
-    this._stringTable = stringTable;
+    this._thread = thread;
     this._rootTotalSummary = rootTotalSummary;
     this._rootCount = rootCount;
     this._displayDataByIndex = new Map();
@@ -197,8 +187,8 @@ export class CallTree {
 
   getNodeData(callNodeIndex: IndexIntoCallNodeTable): CallNodeData {
     const funcIndex = this._callNodeTable.func[callNodeIndex];
-    const funcName = this._stringTable.getString(
-      this._funcTable.name[funcIndex]
+    const funcName = this._thread.stringTable.getString(
+      this._thread.funcTable.name[funcIndex]
     );
     const total = this._callNodeSummary.total[callNodeIndex];
     const totalRelative = total / this._rootTotalSummary;
@@ -236,8 +226,8 @@ export class CallTree {
     }
 
     const outerFunction = getFunctionName(
-      this._stringTable.getString(
-        this._nativeSymbols.name[inlinedIntoNativeSymbol]
+      this._thread.stringTable.getString(
+        this._thread.nativeSymbols.name[inlinedIntoNativeSymbol]
       )
     );
     return {
@@ -259,8 +249,8 @@ export class CallTree {
       const categoryIndex = this._callNodeTable.category[callNodeIndex];
       const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
       const badge = this._getInliningBadge(callNodeIndex, funcName);
-      const resourceIndex = this._funcTable.resource[funcIndex];
-      const resourceType = this._resourceTable.type[resourceIndex];
+      const resourceIndex = this._thread.funcTable.resource[funcIndex];
+      const resourceType = this._thread.resourceTable.type[resourceIndex];
       const isFrameLabel = resourceIndex === -1;
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
@@ -273,8 +263,9 @@ export class CallTree {
       } else if (resourceType === resourceTypes.addon) {
         iconSrc = ExtensionIcon;
 
-        const resourceNameIndex = this._resourceTable.name[resourceIndex];
-        const iconText = this._stringTable.getString(resourceNameIndex);
+        const resourceNameIndex =
+          this._thread.resourceTable.name[resourceIndex];
+        const iconText = this._thread.stringTable.getString(resourceNameIndex);
         icon = iconText;
       }
 
@@ -362,9 +353,9 @@ export class CallTree {
   _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {
     return getOriginAnnotationForFunc(
       funcIndex,
-      this._funcTable,
-      this._resourceTable,
-      this._stringTable
+      this._thread.funcTable,
+      this._thread.resourceTable,
+      this._thread.stringTable
     );
   }
 
@@ -372,11 +363,11 @@ export class CallTree {
     callNodeIndex: IndexIntoCallNodeTable
   ): string | null {
     const funcIndex = this._callNodeTable.func[callNodeIndex];
-    const fileName = this._funcTable.fileName[funcIndex];
+    const fileName = this._thread.funcTable.fileName[funcIndex];
     if (fileName === null) {
       return null;
     }
-    return this._stringTable.getString(fileName);
+    return this._thread.stringTable.getString(fileName);
   }
 }
 
