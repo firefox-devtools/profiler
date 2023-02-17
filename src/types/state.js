@@ -246,7 +246,7 @@ export type ZippedProfilesState = {
 };
 
 export type SourceViewState = {|
-  activationGeneration: number,
+  scrollGeneration: number,
   // Non-null if this source file was opened for a function from native code.
   // In theory, multiple different libraries can have source files with the same
   // path but different content.
@@ -264,7 +264,7 @@ export type AssemblyViewState = {|
   // true even if the bottom box itself is closed.
   isOpen: boolean,
   // When this is incremented, the assembly view scrolls to the "hotspot" line.
-  activationGeneration: number,
+  scrollGeneration: number,
   // The native symbol for which the assembly code is being shown at the moment.
   // Null if the initiating call node did not have a native symbol.
   nativeSymbol: NativeSymbolInfo | null,

@@ -555,13 +555,13 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
 };
 
 const sourceView: Reducer<SourceViewState> = (
-  state = { activationGeneration: 0, libIndex: null, sourceFile: null },
+  state = { scrollGeneration: 0, libIndex: null, sourceFile: null },
   action
 ) => {
   switch (action.type) {
     case 'UPDATE_BOTTOM_BOX': {
       return {
-        activationGeneration: state.activationGeneration + 1,
+        scrollGeneration: state.scrollGeneration + 1,
         libIndex: action.libIndex,
         sourceFile: action.sourceFile,
       };
@@ -573,7 +573,7 @@ const sourceView: Reducer<SourceViewState> = (
 
 const assemblyView: Reducer<AssemblyViewState> = (
   state = {
-    activationGeneration: 0,
+    scrollGeneration: 0,
     nativeSymbol: null,
     allNativeSymbolsForInitiatingCallNode: [],
     isOpen: false,
@@ -583,7 +583,7 @@ const assemblyView: Reducer<AssemblyViewState> = (
   switch (action.type) {
     case 'UPDATE_BOTTOM_BOX': {
       return {
-        activationGeneration: state.activationGeneration + 1,
+        scrollGeneration: state.scrollGeneration + 1,
         nativeSymbol: action.nativeSymbol,
         allNativeSymbolsForInitiatingCallNode:
           action.allNativeSymbolsForInitiatingCallNode,
