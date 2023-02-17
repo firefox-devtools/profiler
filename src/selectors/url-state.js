@@ -32,7 +32,6 @@ import type {
   ProfileSpecificUrlState,
   FullProfileSpecificUrlState,
   ActiveTabSpecificProfileUrlState,
-  IsOpenPerPanelState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -81,9 +80,6 @@ export const getSourceViewFile: Selector<string | null> = (state) =>
   getProfileSpecificState(state).sourceView.file;
 export const getSourceViewActivationGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).sourceView.activationGeneration;
-export const getisBottomBoxOpenPerPanel: Selector<IsOpenPerPanelState> = (
-  state
-) => getProfileSpecificState(state).isBottomBoxOpenPerPanel;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<
@@ -216,12 +212,10 @@ export const getTransformStack: DangerousSelectorWithArguments<
   );
 };
 
-export const getIsBottomBoxOpen: Selector<boolean> = createSelector(
-  getisBottomBoxOpenPerPanel,
-  getSelectedTab,
-  (isBottomBoxOpenPerPanel, selectedTabSlug) =>
-    isBottomBoxOpenPerPanel[selectedTabSlug]
-);
+export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
+  const tab = getSelectedTab(state);
+  return getProfileSpecificState(state).isBottomBoxOpenPerPanel[tab];
+};
 
 /**
  * The URL predictor is used to generate a link for an uploaded profile, to predict
