@@ -30,8 +30,8 @@ import {
   changeExpandedCallNodes,
   addTransformToStack,
   handleCallNodeTransformShortcut,
-  openSourceView,
   changeTableViewOptions,
+  updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -82,7 +82,7 @@ type DispatchProps = {|
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
   +addTransformToStack: typeof addTransformToStack,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
-  +openSourceView: typeof openSourceView,
+  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
   +onTableViewOptionsChange: (TableViewOptions) => any,
 |};
 
@@ -289,12 +289,9 @@ class CallTreeImpl extends PureComponent<Props> {
   };
 
   _onEnterOrDoubleClick = (nodeId: IndexIntoCallNodeTable) => {
-    const { tree, openSourceView } = this.props;
-    const file = tree.getRawFileNameForCallNode(nodeId);
-    if (file === null) {
-      return;
-    }
-    openSourceView(file, 'calltree');
+    const { tree, updateBottomBoxContentsAndMaybeOpen } = this.props;
+    const bottomBoxInfo = tree.getBottomBoxInfoForCallNode(nodeId);
+    updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo);
   };
 
   maybeProcureInterestingInitialSelection() {
@@ -431,7 +428,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     changeExpandedCallNodes,
     addTransformToStack,
     handleCallNodeTransformShortcut,
-    openSourceView,
+    updateBottomBoxContentsAndMaybeOpen,
     onTableViewOptionsChange: (options: TableViewOptions) =>
       changeTableViewOptions('calltree', options),
   },
