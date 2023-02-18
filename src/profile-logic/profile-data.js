@@ -37,6 +37,7 @@ import type {
   StackTable,
   FrameTable,
   FuncTable,
+  NativeSymbolTable,
   ResourceTable,
   CategoryList,
   IndexIntoCategoryList,
@@ -75,6 +76,9 @@ import type {
   Address,
   AddressProof,
   TimelineType,
+  NativeSymbolInfo,
+  BottomBoxInfo,
+  Bytes,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -3369,6 +3373,138 @@ export function findAddressProofForFile(
     };
   }
   return null;
+}
+
+/**
+ * Calculate a lower bound for the function size, in bytes, of a native symbol.
+ * This is used when the symbol server does not return a size for a function.
+ * We need to know the size when we want to show assembly code for the function,
+ * in order to know how many bytes to disassemble.
+ * We estimate the size by finding the highest known address for this symbol in
+ * the frame table, and adding one byte (because the instruction at that address
+ * is at least one byte long).
+ */
+export function calculateFunctionSizeLowerBound(
+  frameTable: FrameTable,
+  nativeSymbolAddress: Address,
+  nativeSymbolIndex: IndexIntoNativeSymbolTable
+): Bytes {
+  let maxFrameAddress = nativeSymbolAddress;
+  for (let i = 0; i < frameTable.length; i++) {
+    if (frameTable.nativeSymbol[i] === nativeSymbolIndex) {
+      const frameAddress = frameTable.address[i];
+      if (frameAddress > maxFrameAddress) {
+        maxFrameAddress = frameAddress;
+      }
+    }
+  }
+  return maxFrameAddress + 1 - nativeSymbolAddress;
+}
+
+/**
+ * Gathers the native symbols for a given call node. In most cases, a call node
+ * just has one native symbol (or zero if it's not native code). But in some
+ * cases, a call node can have its native code in multiple different functions,
+ * for example in the inverted tree if it was inlined into multiple different
+ * functions.
+ */
+export function getNativeSymbolsForCallNode(
+  callNodeIndex: IndexIntoCallNodeTable,
+  { stackIndexToCallNodeIndex }: CallNodeInfo,
+  stackTable: StackTable,
+  frameTable: FrameTable
+): IndexIntoNativeSymbolTable[] {
+  const set = new Set();
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
+      const frame = stackTable.frame[stackIndex];
+      const nativeSymbol = frameTable.nativeSymbol[frame];
+      if (nativeSymbol !== null) {
+        set.add(nativeSymbol);
+      }
+    }
+  }
+  return [...set];
+}
+
+/**
+ * Convert a native symbol index into a NativeSymbolInfo object, to create
+ * something that's meaningful outside of its associated thread.
+ */
+export function getNativeSymbolInfo(
+  nativeSymbol: IndexIntoNativeSymbolTable,
+  nativeSymbols: NativeSymbolTable,
+  frameTable: FrameTable,
+  stringTable: UniqueStringArray
+): NativeSymbolInfo {
+  const functionSizeOrNull = nativeSymbols.functionSize[nativeSymbol];
+  const functionSize =
+    functionSizeOrNull ??
+    calculateFunctionSizeLowerBound(
+      frameTable,
+      nativeSymbols.address[nativeSymbol],
+      nativeSymbol
+    );
+  return {
+    libIndex: nativeSymbols.libIndex[nativeSymbol],
+    address: nativeSymbols.address[nativeSymbol],
+    name: stringTable.getString(nativeSymbols.name[nativeSymbol]),
+    functionSize,
+    functionSizeIsKnown: functionSizeOrNull !== null,
+  };
+}
+
+/**
+ * Calculate the BottomBoxInfo for a call node, i.e. information about which
+ * things should be shown in the profiler UI's "bottom box" when this call node
+ * is double-clicked.
+ *
+ * We always want to update all panes in the bottom box when a new call node is
+ * double-clicked, so that we don't show inconsistent information side-by-side.
+ */
+export function getBottomBoxInfoForCallNode(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  thread: Thread
+): BottomBoxInfo {
+  const {
+    stackTable,
+    frameTable,
+    funcTable,
+    stringTable,
+    resourceTable,
+    nativeSymbols,
+  } = thread;
+
+  const funcIndex = callNodeInfo.callNodeTable.func[callNodeIndex];
+  const fileName = funcTable.fileName[funcIndex];
+  const sourceFile = fileName !== null ? stringTable.getString(fileName) : null;
+  const resource = funcTable.resource[funcIndex];
+  const libIndex =
+    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
+      ? resourceTable.lib[resource]
+      : null;
+  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
+    callNodeIndex,
+    callNodeInfo,
+    stackTable,
+    frameTable
+  );
+  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNode.map(
+    (nativeSymbolIndex) =>
+      getNativeSymbolInfo(
+        nativeSymbolIndex,
+        nativeSymbols,
+        frameTable,
+        stringTable
+      )
+  );
+
+  return {
+    libIndex,
+    sourceFile,
+    nativeSymbols: nativeSymbolInfosForCallNode,
+  };
 }
 
 /**

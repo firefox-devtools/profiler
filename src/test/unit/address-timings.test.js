@@ -26,10 +26,10 @@ import type {
 describe('getStackAddressInfo', function () {
   it('computes results for all stacks', function () {
     const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
-      A[lib:one][address:0x20][sym:Asym]  A[lib:one][address:0x21][sym:Asym]  A[lib:one][address:0x20][sym:Asym]
-      B[lib:one][address:0x30][sym:Bsym]  B[lib:one][address:0x30][sym:Bsym]  B[lib:one][address:0x30][sym:Bsym]
-      C[lib:two][address:0x10][sym:Csym]  C[lib:two][address:0x11][sym:Csym]  D[lib:two][address:0x40][sym:Dsym]
-      B[lib:one][address:0x30][sym:Bsym]                                      D[lib:two][address:0x40][sym:Dsym]
+      A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
+      B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]
+      C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  D[lib:two][address:40][sym:Dsym:40:]
+      B[lib:one][address:30][sym:Bsym:30:]                                        D[lib:two][address:40][sym:Dsym:40:]
     `);
     const [thread] = profile.threads;
     const [{ Asym }] = nativeSymbolsDictPerThread;
@@ -71,8 +71,8 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     // In this example, there's one self address hit at address 0x30.
     // Both address 0x20 and address 0x30 have one total time hit.
     const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
-      A[lib:file][address:0x20][sym:Asym]
-      A[lib:file][address:0x30][sym:Asym]
+      A[lib:file][address:20][sym:Asym:20:]
+      A[lib:file][address:30][sym:Asym:20:]
     `);
     const [thread] = profile.threads;
     const [{ Asym }] = nativeSymbolsDictPerThread;
@@ -89,10 +89,10 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     // In this example, there's one self address hit at address 0x30.
     // Both address 0x20 and address 0x30 have one total time hit.
     const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
-      A[lib:file][address:0x20][sym:Asym]
-      B[lib:file][address:0x20][sym:Asym][inl:1]
-      C[lib:file][address:0x20][sym:Asym][inl:2]
-      A[lib:file][address:0x30][sym:Asym]
+      A[lib:file][address:20][sym:Asym:20:]
+      B[lib:file][address:20][sym:Asym:20:][inl:1]
+      C[lib:file][address:20][sym:Asym:20:][inl:2]
+      A[lib:file][address:30][sym:Asym:20:]
     `);
     const [thread] = profile.threads;
     const [{ Asym }] = nativeSymbolsDictPerThread;
@@ -107,10 +107,10 @@ describe('getAddressTimings for getStackAddressInfo', function () {
 
   it('passes a test with two files and recursion', function () {
     const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
-      A[lib:one][address:0x20][sym:Asym]  A[lib:one][address:0x21][sym:Asym]  A[lib:one][address:0x20][sym:Asym]
-      B[lib:one][address:0x30][sym:Bsym]  B[lib:one][address:0x30][sym:Bsym]  B[lib:one][address:0x30][sym:Bsym]
-      C[lib:two][address:0x10][sym:Csym]  C[lib:two][address:0x11][sym:Csym]  D[lib:two][address:0x40][sym:Dsym]
-      B[lib:one][address:0x30][sym:Bsym]                                      D[lib:two][address:0x40][sym:Dsym]
+      A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
+      B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]
+      C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  D[lib:two][address:40][sym:Dsym:40:]
+      B[lib:one][address:30][sym:Bsym:30:]                                        D[lib:two][address:40][sym:Dsym:40:]
     `);
     const [thread] = profile.threads;
     const [{ Asym, Bsym, Csym, Dsym }] = nativeSymbolsDictPerThread;
@@ -157,10 +157,10 @@ describe('getAddressTimings for getStackAddressInfo', function () {
 
   it('computes the same values on an inverted thread', function () {
     const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
-    A[lib:one][address:0x20][sym:Asym]  A[lib:one][address:0x21][sym:Asym]  A[lib:one][address:0x20][sym:Asym]
-    B[lib:one][address:0x30][sym:Bsym]  B[lib:one][address:0x30][sym:Bsym]  B[lib:one][address:0x30][sym:Bsym]
-    C[lib:two][address:0x10][sym:Csym]  C[lib:two][address:0x11][sym:Csym]  D[lib:two][address:0x40][sym:Dsym]
-    B[lib:one][address:0x30][sym:Bsym]                                      D[lib:two][address:0x40][sym:Dsym]
+    A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
+    B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]
+    C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  D[lib:two][address:40][sym:Dsym:40:]
+    B[lib:one][address:30][sym:Bsym:30:]                                        D[lib:two][address:40][sym:Dsym:40:]
     `);
     const categories = ensureExists(
       profile.meta.categories,
@@ -223,8 +223,8 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   it('passes a basic test', function () {
     const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
       getProfileFromTextSamples(`
-      A[lib:file][address:0x20][sym:Asym]
-      B[lib:file][address:0x30][sym:Bsym]
+      A[lib:file][address:20][sym:Asym:20:]
+      B[lib:file][address:30][sym:Bsym:30:]
     `);
     const categories = ensureExists(
       profile.meta.categories,
@@ -261,9 +261,9 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   it('passes a basic test with recursion', function () {
     const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
       getProfileFromTextSamples(`
-      A[lib:file][address:0x20][sym:Asym]
-      B[lib:file][address:0x30][sym:Bsym]
-      A[lib:file][address:0x21][sym:Asym]
+      A[lib:file][address:20][sym:Asym:20:]
+      B[lib:file][address:30][sym:Bsym:30:]
+      A[lib:file][address:21][sym:Asym:20:]
     `);
     const categories = ensureExists(
       profile.meta.categories,
@@ -302,10 +302,10 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   it('passes a test where the same function is called via different call paths', function () {
     const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
       getProfileFromTextSamples(`
-      A[lib:one][address:0x20][sym:Asym]  A[lib:one][address:0x21][sym:Asym]  A[lib:one][address:0x20][sym:Asym]
-      B[lib:one][address:0x30][sym:Bsym]  D[lib:one][address:0x50][sym:Dsym]  B[lib:one][address:0x31][sym:Bsym]
-      C[lib:two][address:0x10][sym:Csym]  C[lib:two][address:0x11][sym:Csym]  C[lib:two][address:0x12][sym:Csym]
-                                                                              D[lib:one][address:0x51][sym:Dsym]
+      A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
+      B[lib:one][address:30][sym:Bsym:30:]  D[lib:one][address:50][sym:Dsym:40:]  B[lib:one][address:31][sym:Bsym:30:]
+      C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  C[lib:two][address:12][sym:Csym:10:]
+                                                                                 D[lib:one][address:51][sym:Dsym:40:]
     `);
     const categories = ensureExists(
       profile.meta.categories,
@@ -334,10 +334,10 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
   it('passes a test with an inverted thread', function () {
     const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
       getProfileFromTextSamples(`
-      A[lib:one][address:0x20][sym:Asym]  A[lib:one][address:0x21][sym:Asym]  A[lib:one][address:0x20][sym:Asym]
-      B[lib:one][address:0x30][sym:Bsym]  D[lib:one][address:0x50][sym:Dsym]  B[lib:one][address:0x31][sym:Bsym]
-      D[lib:one][address:0x51][sym:Dsym]  D[lib:one][address:0x52][sym:Dsym]  C[lib:two][address:0x12][sym:Csym]
-                                                                              D[lib:one][address:0x51][sym:Dsym]
+      A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
+      B[lib:one][address:30][sym:Bsym:30:]  D[lib:one][address:50][sym:Dsym:40:]  B[lib:one][address:31][sym:Bsym:30:]
+      D[lib:one][address:51][sym:Dsym:40:]  D[lib:one][address:52][sym:Dsym:40:]  C[lib:two][address:12][sym:Csym:10:]
+                                                                                  D[lib:one][address:51][sym:Dsym:40:]
     `);
     const categories = ensureExists(
       profile.meta.categories,
@@ -394,10 +394,10 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     // In this test, we compute the timings for native symbol Bsym.
     const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
       getProfileFromTextSamples(`
-      A[lib:one][address:0x20][sym:Asym]         A[lib:one][address:0x30][sym:Asym]         A[lib:one][address:0x20][sym:Asym]  A[lib:one][address:0x20][sym:Asym]
-      B[lib:one][address:0x40][sym:Bsym]         B[lib:one][address:0x30][sym:Asym][inl:1]  B[lib:one][address:0x45][sym:Bsym]  E[lib:one][address:0x31][sym:Esym]
-      C[lib:one][address:0x40][sym:Bsym][inl:1]  C[lib:one][address:0x30][sym:Asym][inl:2]  C[lib:one][address:0x45][sym:Bsym]
-                                                                                            D[lib:one][address:0x51][sym:Dsym]
+      A[lib:one][address:20][sym:Asym:20:]         A[lib:one][address:30][sym:Asym:20:]         A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
+      B[lib:one][address:40][sym:Bsym:30:]         B[lib:one][address:30][sym:Asym:20:][inl:1]  B[lib:one][address:45][sym:Bsym:30:]  E[lib:one][address:31][sym:Esym:30:]
+      C[lib:one][address:40][sym:Bsym:30:][inl:1]  C[lib:one][address:30][sym:Asym:20:][inl:2]  C[lib:one][address:45][sym:Bsym:30:]
+                                                                                                D[lib:one][address:51][sym:Dsym:40:]
     `);
     const categories = ensureExists(
       profile.meta.categories,
