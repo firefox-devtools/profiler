@@ -565,7 +565,7 @@ export type ChromeInstantTraceEventPayload = {|
 // ph: 'B' | 'E' in the Trace Event Format
 export type ChromeDurationTraceEventPayload = {|
   type: 'tracing',
-  category: 'FromChrome',
+  category: string,
   data: MixedObject | null,
   cause?: CauseBacktrace,
 |};

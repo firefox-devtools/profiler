@@ -140,9 +140,9 @@ describe('converting Google Chrome profile', function () {
     expect(profile).toMatchSnapshot();
   });
 
-  it('successfully imports a non-chunked profile (one that uses a CpuProfile trace event)', async function () {
-    // As in the previous test, mock out image loading behavior as the screenshots
-    // rely on the Image loading behavior.
+  it('successfully imports a chrome profile with an invalid "endTime" entry', async () => {
+    // Mock out image loading behavior as the screenshots rely on the Image loading
+    // behavior.
     jest
       .spyOn(Image.prototype, 'addEventListener')
       .mockImplementation((name: string, callback) => {
@@ -151,6 +151,36 @@ describe('converting Google Chrome profile', function () {
         }
       });
 
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const compressedBuffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/test.chrome.gz'
+    );
+    const buffer = zlib.gunzipSync(compressedBuffer);
+    const events: TracingEventUnion[] = JSON.parse(buffer.toString('utf8'));
+    events.push({
+      args: { data: { endTime: 300269884209 } },
+      cat: 'disabled-by-default-v8.cpu_profiler',
+      id: '0x2', // same id than in the original profile
+      name: 'ProfileChunk',
+      ph: 'P',
+      pid: 88999, // same pid than in the original profile
+      tid: 1,
+      ts: 300269884230,
+      tts: 24162,
+    });
+
+    const text = JSON.stringify(events);
+    const profile = await unserializeProfileOfArbitraryFormat(text);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a non-chunked profile (one that uses a CpuProfile trace event)', async function () {
     const fs = require('fs');
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/test.chrome-unchunked.json'
