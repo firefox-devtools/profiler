@@ -539,6 +539,11 @@ async function processTracingEvents(
     }
 
     for (const profileChunk of profileChunks) {
+      if (!profileChunk.args.data || !profileChunk.args.data.cpuProfile) {
+        // This is probably a FallbackEndEvent, ignore it instead of crashing.
+        continue;
+      }
+
       const { cpuProfile } = profileChunk.args.data;
       const { nodes, samples } = cpuProfile;
       const timeDeltas = getTimeDeltas(profileChunk);
