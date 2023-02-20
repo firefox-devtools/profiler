@@ -78,8 +78,8 @@ export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
 export const getSourceViewFile: Selector<string | null> = (state) =>
   getProfileSpecificState(state).sourceView.sourceFile;
-export const getSourceViewActivationGeneration: Selector<number> = (state) =>
-  getProfileSpecificState(state).sourceView.activationGeneration;
+export const getSourceViewScrollGeneration: Selector<number> = (state) =>
+  getProfileSpecificState(state).sourceView.scrollGeneration;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<
