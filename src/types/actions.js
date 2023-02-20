@@ -13,6 +13,7 @@ import type {
   Pid,
   TabID,
   IndexIntoCategoryList,
+  IndexIntoLibs,
 } from './profile';
 import type {
   CallNodePath,
@@ -24,6 +25,7 @@ import type {
   OriginsTimeline,
   ActiveTabTimeline,
   ThreadsKey,
+  NativeSymbolInfo,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -349,9 +351,20 @@ type ProfileAction =
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     |}
   | {|
-      +type: 'OPEN_SOURCE_VIEW',
-      +file: string,
+      +type: 'UPDATE_BOTTOM_BOX',
+      +libIndex: IndexIntoLibs | null,
+      +sourceFile: string | null,
+      +nativeSymbol: NativeSymbolInfo | null,
+      +allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
       +currentTab: TabSlug,
+      +shouldOpenBottomBox: boolean,
+      +shouldOpenAssemblyView: boolean,
+    |}
+  | {|
+      +type: 'OPEN_ASSEMBLY_VIEW',
+    |}
+  | {|
+      +type: 'CLOSE_ASSEMBLY_VIEW',
     |}
   | {|
       +type: 'CLOSE_BOTTOM_BOX_FOR_TAB',

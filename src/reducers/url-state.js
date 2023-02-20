@@ -22,6 +22,7 @@ import type {
   Reducer,
   TimelineTrackOrganization,
   SourceViewState,
+  AssemblyViewState,
   IsOpenPerPanelState,
 } from 'firefox-profiler/types';
 
@@ -554,14 +555,51 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
 };
 
 const sourceView: Reducer<SourceViewState> = (
-  state = { activationGeneration: 0, file: null },
+  state = { scrollGeneration: 0, libIndex: null, sourceFile: null },
   action
 ) => {
   switch (action.type) {
-    case 'OPEN_SOURCE_VIEW': {
+    case 'UPDATE_BOTTOM_BOX': {
       return {
-        activationGeneration: state.activationGeneration + 1,
-        file: action.file,
+        scrollGeneration: state.scrollGeneration + 1,
+        libIndex: action.libIndex,
+        sourceFile: action.sourceFile,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
+const assemblyView: Reducer<AssemblyViewState> = (
+  state = {
+    scrollGeneration: 0,
+    nativeSymbol: null,
+    allNativeSymbolsForInitiatingCallNode: [],
+    isOpen: false,
+  },
+  action
+) => {
+  switch (action.type) {
+    case 'UPDATE_BOTTOM_BOX': {
+      return {
+        scrollGeneration: state.scrollGeneration + 1,
+        nativeSymbol: action.nativeSymbol,
+        allNativeSymbolsForInitiatingCallNode:
+          action.allNativeSymbolsForInitiatingCallNode,
+        isOpen: state.isOpen || action.shouldOpenAssemblyView,
+      };
+    }
+    case 'OPEN_ASSEMBLY_VIEW': {
+      return {
+        ...state,
+        isOpen: true,
+      };
+    }
+    case 'CLOSE_ASSEMBLY_VIEW': {
+      return {
+        ...state,
+        isOpen: false,
       };
     }
     default:
@@ -580,9 +618,9 @@ const isBottomBoxOpenPerPanel: Reducer<IsOpenPerPanelState> = (
   action
 ) => {
   switch (action.type) {
-    case 'OPEN_SOURCE_VIEW': {
-      const { currentTab } = action;
-      if (!state[currentTab]) {
+    case 'UPDATE_BOTTOM_BOX': {
+      const { currentTab, shouldOpenBottomBox } = action;
+      if (shouldOpenBottomBox && !state[currentTab]) {
         return { ...state, [currentTab]: true };
       }
       return state;
@@ -662,6 +700,7 @@ const profileSpecific = combineReducers({
   networkSearchString,
   transforms,
   sourceView,
+  assemblyView,
   isBottomBoxOpenPerPanel,
   timelineType,
   full: fullProfileSpecific,

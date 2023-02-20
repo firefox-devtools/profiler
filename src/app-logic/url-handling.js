@@ -38,6 +38,7 @@ import type {
   ThreadIndex,
   TimelineType,
   SourceViewState,
+  AssemblyViewState,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -411,8 +412,8 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
       const { sourceView, isBottomBoxOpenPerPanel } = urlState.profileSpecific;
       query.sourceView =
-        sourceView.file !== null && isBottomBoxOpenPerPanel[selectedTab]
-          ? sourceView.file
+        sourceView.sourceFile !== null && isBottomBoxOpenPerPanel[selectedTab]
+          ? sourceView.sourceFile
           : undefined;
       break;
     }
@@ -575,13 +576,20 @@ export function stateFromLocation(
   const selectedTab =
     toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree';
   const sourceView: SourceViewState = {
-    activationGeneration: 0,
-    file: null,
+    scrollGeneration: 0,
+    libIndex: null,
+    sourceFile: null,
+  };
+  const assemblyView: AssemblyViewState = {
+    isOpen: false,
+    scrollGeneration: 0,
+    nativeSymbol: null,
+    allNativeSymbolsForInitiatingCallNode: [],
   };
   const isBottomBoxOpenPerPanel = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
   if (query.sourceView) {
-    sourceView.file = query.sourceView;
+    sourceView.sourceFile = query.sourceView;
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
 
@@ -617,6 +625,7 @@ export function stateFromLocation(
       networkSearchString: query.networkSearch || '',
       transforms,
       sourceView,
+      assemblyView,
       isBottomBoxOpenPerPanel,
       timelineType: validateTimelineType(query.timelineType),
       full: {
