@@ -576,13 +576,13 @@ export function stateFromLocation(
   const selectedTab =
     toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree';
   const sourceView: SourceViewState = {
-    activationGeneration: 0,
+    scrollGeneration: 0,
     libIndex: null,
     sourceFile: null,
   };
   const assemblyView: AssemblyViewState = {
     isOpen: false,
-    activationGeneration: 0,
+    scrollGeneration: 0,
     nativeSymbol: null,
     allNativeSymbolsForInitiatingCallNode: [],
   };
