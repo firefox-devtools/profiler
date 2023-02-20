@@ -154,7 +154,6 @@
     "style-loader": "^3.3.1",
     "stylelint": "^15.1.0",
     "stylelint-config-idiomatic-order": "^9.0.0",
-    "stylelint-config-prettier": "^9.0.5",
     "stylelint-config-standard": "^30.0.1",
     "stylelint-prettier": "^2.0.0",
     "webpack": "^5.75.0",

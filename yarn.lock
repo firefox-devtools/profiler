@@ -11539,11 +11539,6 @@ stylelint-config-idiomatic-order@^9.0.0:
   dependencies:
     stylelint-order "^5.0.0"
 
-stylelint-config-prettier@^9.0.5:
-  version "9.0.5"
-  resolved "https://registry.yarnpkg.com/stylelint-config-prettier/-/stylelint-config-prettier-9.0.5.tgz#9f78bbf31c7307ca2df2dd60f42c7014ee9da56e"
-  integrity sha512-U44lELgLZhbAD/xy/vncZ2Pq8sh2TnpiPvo38Ifg9+zeioR+LAkHu0i6YORIOxFafZoVg0xqQwex6e6F25S5XA==
-
 stylelint-config-recommended@^10.0.1:
   version "10.0.1"
   resolved "https://registry.yarnpkg.com/stylelint-config-recommended/-/stylelint-config-recommended-10.0.1.tgz#25a8828acf6cde87dac6db2950c8c4ed82a69ae1"
