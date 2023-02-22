@@ -40,7 +40,8 @@ export type TracingEventUnion =
   | ProcessLabelsEvent
   | ProcessSortIndexEvent
   | ThreadSortIndexEvent
-  | ScreenshotEvent;
+  | ScreenshotEvent
+  | FallbackEndEvent;
 
 type TracingEvent<Event> = {|
   cat: string,
@@ -50,10 +51,23 @@ type TracingEvent<Event> = {|
   pid: number, // Process ID
   tid: number, // Thread ID
   ts: number, // Timestamp
+  tts?: number, // Thread Timestamp
   tdur?: number, // Time duration
   dur?: number, // Time duration
   ...Event,
 |};
+
+// V8 can generate this backward compatible event.
+// See https://github.com/firefox-devtools/profiler/issues/4308#issuecomment-1303551614
+type FallbackEndEvent = TracingEvent<{|
+  name: 'ProfileChunk',
+  id: string,
+  args: {|
+    data: {|
+      endTime: number,
+    |},
+  |},
+|}>;
 
 type ProfileEvent = TracingEvent<{|
   name: 'Profile',
@@ -525,6 +539,11 @@ async function processTracingEvents(
     }
 
     for (const profileChunk of profileChunks) {
+      if (!profileChunk.args.data || !profileChunk.args.data.cpuProfile) {
+        // This is probably a FallbackEndEvent, ignore it instead of crashing.
+        continue;
+      }
+
       const { cpuProfile } = profileChunk.args.data;
       const { nodes, samples } = cpuProfile;
       const timeDeltas = getTimeDeltas(profileChunk);
