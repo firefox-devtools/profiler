@@ -26,8 +26,6 @@ import type {
   StackTimingByDepth,
 } from '../../profile-logic/stack-timing';
 
-import { ensureExists } from '../../utils/flow';
-
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
  * is done that so that the local type definition with `Selector<T>` is the canonical
@@ -92,8 +90,15 @@ export function getComposedSelectorsPerThread(
       }
       let hasSamples = samples.length > 0 && stackTable.length > 0;
       if (hasSamples) {
-        const stackIndex = ensureExists(samples.stack[0]);
-        if (stackTable.prefix[stackIndex] === null) {
+        // Find at least one non-null stack.
+        const stackIndex = samples.stack.find((stack) => stack !== null);
+        if (
+          stackIndex === undefined ||
+          stackIndex === null // We know that it can't be null at this point, but Flow doesn't.
+        ) {
+          // All samples were null.
+          hasSamples = false;
+        } else if (stackTable.prefix[stackIndex] === null) {
           // There's only a single stack frame, check if it's '(root)'.
           const frameIndex = stackTable.frame[stackIndex];
           const funcIndex = frameTable.func[frameIndex];
