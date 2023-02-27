@@ -19,7 +19,13 @@ import type {
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange, CssPixels, Milliseconds } from './units';
-import type { Profile, ThreadIndex, Pid, TabID } from './profile';
+import type {
+  Profile,
+  ThreadIndex,
+  Pid,
+  TabID,
+  IndexIntoLibs,
+} from './profile';
 
 import type {
   CallNodePath,
@@ -30,6 +36,7 @@ import type {
   ActiveTabTimeline,
   OriginsTimeline,
   ThreadsKey,
+  NativeSymbolInfo,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -239,8 +246,34 @@ export type ZippedProfilesState = {
 };
 
 export type SourceViewState = {|
-  activationGeneration: number,
-  file: string | null,
+  scrollGeneration: number,
+  // Non-null if this source file was opened for a function from native code.
+  // In theory, multiple different libraries can have source files with the same
+  // path but different content.
+  // Null if the source file is not for native code or if the lib is not known,
+  // for example if the source view was opened via the URL (the source URL param
+  // currently discards the libIndex).
+  libIndex: IndexIntoLibs | null,
+  // The path to the source file. Null if a function without a file path was
+  // double clicked.
+  sourceFile: string | null,
+|};
+
+export type AssemblyViewState = {|
+  // Whether the assembly view panel is open within the bottom box. This can be
+  // true even if the bottom box itself is closed.
+  isOpen: boolean,
+  // When this is incremented, the assembly view scrolls to the "hotspot" line.
+  scrollGeneration: number,
+  // The native symbol for which the assembly code is being shown at the moment.
+  // Null if the initiating call node did not have a native symbol.
+  nativeSymbol: NativeSymbolInfo | null,
+  // The set of native symbols which contributed samples to the initiating call
+  // node. Often, this will just be one element (the same as `nativeSymbol`),
+  // but it can also be multiple elements, for example when double-clicking a
+  // function like `Vec::push` in an inverted call tree, if that function has
+  // been inlined into multiple different callers.
+  allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
 |};
 
 export type FileSourceStatus =
@@ -318,6 +351,7 @@ export type ProfileSpecificUrlState = {|
   transforms: TransformStacksPerThread,
   timelineType: TimelineType,
   sourceView: SourceViewState,
+  assemblyView: AssemblyViewState,
   isBottomBoxOpenPerPanel: IsOpenPerPanelState,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,

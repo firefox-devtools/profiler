@@ -116,4 +116,18 @@ describe('getUsefulTabs', function () {
       'marker-table',
     ]);
   });
+
+  it('works when the first sample is null', () => {
+    const { profile } = getProfileFromTextSamples('A  B');
+    profile.threads[0].samples.stack[0] = null;
+
+    const { getState } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'calltree',
+      'flame-graph',
+      'stack-chart',
+      'marker-chart',
+      'marker-table',
+    ]);
+  });
 });

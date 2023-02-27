@@ -51,13 +51,53 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Паказаць <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Аб'яднаць функцыю
     .title =
         Аб'яднанне функцыі выдаляе яе з профілю і прызначае яе час
         функцыі, якая яе выклікала. Гэта адбываецца ўсюды, дзе функцыя была
         выклікана ў дрэве.
+CallNodeContextMenu--transform-merge-call-node = Аб'яднаць толькі вузел
+    .title =
+        Аб'яднанне вузла выдаляе яго з профілю і прызначае яго час
+        вузлу функцыі, які яго выклікаў. Гэта толькі выдаляе функцыю з гэтай 
+        канкрэтнай часткі дрэва. Любыя іншыя месцы, адкуль была выклікана функцыя, 
+        застануцца ў профілі.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Засяроджванне ўвагі на функцыі выдаліць усе ўзоры, якія не ўключаюць яе
+    функцыя. Акрамя таго, ён паўторна выкараняе дрэва выклікаў, каб функцыя
+    з'яўляецца адзіным коранем дрэва. Гэта можа аб'яднаць некалькі сайтаў выкліку функцый
+    праз профіль у адзін вузел выкліку.
 CallNodeContextMenu--transform-focus-function = Фокус на функцыі
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Фокус на функцыі (інвертавана)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Фокус толькі на паддрэве
+    .title = Фокус на паддрэве прывядзе да выдалення любога ўзору, які не ўключае гэтую канкрэтную частку дрэва выклікаў. Гэта выдаляе галіну дрэва выклікаў, але робіць гэта толькі для аднаго вузла выкліку. Усе іншыя выклікі функцый ігнаруюцца.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Фокус на катэгорыі <strong>{ $categoryName }</strong>
+    .title =
+        Факусіраванне на вузлах, якія адносяцца да той жа катэгорыі, што і абраны вузел, 
+        такім чынам аб'ядноўваючы ўсе вузлы, якія належаць да іншай катэгорыі.
+CallNodeContextMenu--transform-collapse-function-subtree = Згарнуць функцыю
+    .title = Згортванне функцыі выдаляе ўсё, што яна выклікала, і прызначае ўвесь час гэтай функцыі. Гэта можа дапамагчы спрасціць профіль, які выклікае код, які не трэба аналізаваць.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Згарнуць <strong>{ $nameForResource }</strong>
+    .title = Згортванне рэсурсу згладзіць усе выклікі да гэтага рэсурсу ў адзіны згорнуты вузел выкліку.
+CallNodeContextMenu--transform-collapse-direct-recursion2 = Згарнуць прамую рэкурсію
+    .title = Згортванне прамой рэкурсіі выдаляе выклікі, якія шматразова рэкурсіруюць у адну і тую ж функцыю без прамежкавых функцый у стэку.
+CallNodeContextMenu--transform-collapse-indirect-recursion = Згарнуць непрамой рэкурсію
+    .title = Згортванне непрамой рэкурсіі выдаляе выклікі, якія шматразова рэкурсіруюць у адну і тую ж функцыю, нават з прамежкавымі функцыямі ў стэку.
+CallNodeContextMenu--transform-drop-function = Адкінуць узоры з гэтай функцыяй
+    .title = Адкідванне ўзораў выдаляе іх час з профілю. Гэта карысна для выдалення інфармацыі аб часе, які не мае дачынення да аналізу.
 CallNodeContextMenu--expand-all = Разгарнуць усё
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -73,10 +113,28 @@ CallTree--tracing-ms-total = Час працы (мс)
     .title =
         «Агульны» час працы ўключае суму ўсяго часу,
         на працягу якога гэта функцыя знаходзілася ў стэку. Сюды ўваходзіць час,
-        на працягу якога функцыя фактычна выконвалася, а таксама час выканання
-        функцый, якія вызвала гэта функцыі.
+        на працягу якога функцыя фактычна выконвалася, а таксама час выканання выкліканых ёю функцый.
+CallTree--tracing-ms-self = Уласны (мс)
+    .title =
+        "Уласны" час уключае толькі час, калі функцыя была канцом стэка.
+        Калі гэтая функцыя выклікала іншыя функцыі, то час «іншых» функцый не ўлічваецца. «Уласны» час карысны для разумення таго, на што быў фактычна выдаткаваны час у праграме.
 CallTree--samples-total = Усяго (узоры)
-    .title = Лічыльнік “Усяго (узоры)” уключае ў сабе суму кожнага ўзору, у якога гэтая функцыя была выяўлена ў стэку. Сюды ўваходзіць час фактычнай працы функцыі, а таксама час, чакання вызаваў, якія рабіла гэтая функцыя.
+    .title = Лічыльнік “Усяго (узоры)” уключае ў сабе суму кожнага ўзору, у якога гэтая функцыя была выяўлена ў стэку. Сюды ўваходзіць час фактычнай працы функцыі, а таксама час чакання выкліканых ёю функцый.
+CallTree--samples-self = Уласны
+    .title =
+        "Уласны" падлік выбарак уключае толькі ўзоры, дзе функцыя была канцом стэка. 
+        Калі гэтая функцыя выклікала іншыя функцыі, то час «іншых» функцый не ўлічваецца. 
+        «Уласны» падлік карысны для таго, каб зразумець, які час на самай справе быў выдаткаваны на праграму.
+CallTree--bytes-total = Агульны памер (байты)
+    .title =
+        «Агульны памер» уключае суму ўсіх байтаў, выдзеленых або
+        вызваленых, пакуль гэтая функцыя знаходзілася ў стэку.
+        Гэта ўключае ў сябе як байты, дзе функцыя фактычна выконвалася, так і байты выкліканых ёю функцый.
+CallTree--bytes-self = Уласны (байты)
+    .title =
+        "Уласная" колькасць байтаў уключае суму ўсіх байтаў, выдзеленых або вызваленых, калі функцыя знаходзілася ў канцы стэка.
+        Калі гэтая функцыя выклікае іншыя функцыі, байты "іншых" функцый не ўключаюцца.
+        «Уласны» падлік байтаў карысны для разумення таго, колькі памяці было фактычна выдзелена або вызвалена ў праграме.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -84,15 +142,30 @@ CallTree--samples-total = Усяго (узоры)
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Некаторыя выклікі { $calledFunction } былі ўбудаваны кампілятарам.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (убудаваны)
+    .title = Выклікі функціі { $calledFunction } былі ўбудаваны кампілятарам у { $outerFunction }.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Выберыце вузел, каб паказаць інфармацыю аб ім.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Увядзіце URL-адрасы профіляў, якія вы хочаце параўнаць
+CompareHome--instruction-content =
+    Інструмент будзе браць даныя з выбранай дарожкі і дыяпазону для 
+    кожнага профілю і размяшчаць іх у адным выглядзе для зручнага 
+    параўнання.
 CompareHome--form-label-profile1 = Профіль 1:
 CompareHome--form-label-profile2 = Профіль 2:
 CompareHome--submit-button =
@@ -102,6 +175,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Гэты профіль быў запісаны для зборцы без фінальных (рэлізных) аптымізацый.
+        Назіраемая прадукцыйнасць можа адрознівацца ад фінальнай (рэлізнай) зборкі.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -129,6 +206,13 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = Дарожак: <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span>
 
 ## Home page
 
@@ -141,6 +225,27 @@ Home--menu-button = Уключыць кнопку меню { -profiler-brand-nam
 Home--menu-button-instructions =
     Уключыце кнопку меню прафайлера, каб пачаць запіс профілю прадукцыйнасці
     у { -firefox-brand-name }, затым прааналізуйце яго і падзяліцеся з profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Вы таксама можаце зрабіць профіль { -firefox-android-brand-name }. Падрабязней
+    можна даведацца ў дакументацыі:
+    <a>Прафіляванне { -firefox-android-brand-name } непасрэдна на прыладзе</a>.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Гэты экзэмпляр прафайлера не змог падключыцца да WebChannel, таму не атрымалася ўключыць кнопку меню прафайлера.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Гэты экзэмпляр прафайлера не змог падключыцца да WebChannel. Звычайна гэта азначае, 
+    што ён працуе на хосце адрозным ад таго, які пазначаны ў параметрах
+    <code>devtools.performance.recording.ui-base-url</code>. Калі вы хочаце запісаць новыя
+    профілі з дапамогай гэтага экзэмпляра і даць яму праграмнае кіраванне кнопкай меню 
+    прафайлера, вы можаце перайсці да <code>about:config</code> і змяніць налады.
+Home--record-instructions =
+    Каб пачаць запіс профілю, націсніце кнопку запісу або выкарыстоўвайце 
+    спалучэнне клавіш. Падчас запісу профілю значок стане сіняга колеру.
+    Націсніце <kbd>Захапіць</kbd>, каб запампаваць даныя на profiler.firefox.com.
 Home--instructions-content =
     Для запісу профіляў прадукцыйнасці патрабуецца <a>{ -firefox-brand-name }</a>.
     Аднак існуючыя профілі можна праглядаць у любым сучасным браўзеры.
@@ -151,6 +256,14 @@ Home--additional-content-title = Загрузіць існуючыя профі�
 Home--additional-content-content = Вы можаце <strong>перацягнуць</strong> файл профілю сюды, каб загрузіць яго, або:
 Home--compare-recordings-info = Вы таксама можаце параўнаць запісы. <a>Адкрыць інтэрфейс параўнання.</a>
 Home--your-recent-uploaded-recordings-title = Вашы нядаўна запампаваныя запісы
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools =
+    { -profiler-brand-name } таксама можа імпартаваць профілі з іншых прафайлераў, такіх як
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, 
+    панэль прадукцыйнасці Chrome, <androidstudio>Android Studio</androidstudio> або 
+    любога файла, які выкарыстоўвае <dhat>фармат dhat</dhat>. <write>Даведайцеся, 
+    як напісаць свой уласны імпарцёр</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -176,11 +289,26 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Выдаліць
     .title = Гэты профіль не можа быць выдалены, таму што мы не маем інфармацыі пра аўтарызацыю.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ніводнага профілю яшчэ не запампавана!
+# This string is used below the 'Your recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Прагляд усіх вашых запісаў і кіраванне імі (яшчэ { $profilesRestCount })
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Кіраваць гэтым запісам
+        [few] Кіраваць гэтымі запісамі
+        [many] Кіраваць гэтымі запісамі
+       *[other] Кіраваць гэтымі запісамі
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Наладзьце выбарку на аснове працягласці маркера
 MarkerContextMenu--start-selection-here = Пачаць вылучэнне тут
 MarkerContextMenu--end-selection-here = Скончыць вылучэнне тут
 MarkerContextMenu--start-selection-at-marker-start = Пачаць вылучэнне ад <strong>пачатку</strong> маркера
@@ -206,10 +334,14 @@ MarkerContextMenu--select-the-sender-thread = Выберыце паток-адп
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Фільтра маркераў
+    .title = Паказваць толькі маркеры, якія адпавядаюць пэўнаму імені
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Выберыце маркер, каб паглядзець інфармацыі пра яго.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -234,6 +366,8 @@ MenuButtons--index--share-error-uploading =
     .label = Памылка запампоўкі
 MenuButtons--index--revert = Вярнуцца да зыходнага профілю
 MenuButtons--index--docs = Дакументы
+MenuButtons--permalink--button =
+    .label = Пастаянная спасылка
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
@@ -243,11 +377,52 @@ MenuButtons--index--profile-info-uploaded-label = Запампавана:
 MenuButtons--index--profile-info-uploaded-actions = Выдаліць
 MenuButtons--index--metaInfo-subtitle = Інфармацыя аб профілі
 MenuButtons--metaInfo--symbols = Сімвалы:
+MenuButtons--metaInfo--profile-symbolicated = Профіль сімвалізаваны
+MenuButtons--metaInfo--profile-not-symbolicated = Профіль не сімвалізаваны
+MenuButtons--metaInfo--resymbolicate-profile = Паўторна сімвалізаваць профіль
+MenuButtons--metaInfo--symbolicate-profile = Сімвалізаваць профіль
+MenuButtons--metaInfo--attempting-resymbolicate = Спроба паўторна сімвалізаваць профіль
+MenuButtons--metaInfo--currently-symbolicating = Зараз профіль сімвалізуецца
 MenuButtons--metaInfo--cpu-model = Мадэль ЦП:
 MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
 MenuButtons--metaInfo--main-memory = Асноўная памяць:
 MenuButtons--index--show-moreInfo-button = Паказаць больш
 MenuButtons--index--hide-moreInfo-button = Паказаць менш
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізічнае ядро, { $logicalCPUs } лагічнае ядро
+                [few] { $physicalCPUs } фізічнае ядро, { $logicalCPUs } лагічныя ядры
+                [many] { $physicalCPUs } фізічнае ядро, { $logicalCPUs } лагічных ядзер
+               *[other] { $physicalCPUs } фізічнае ядро, { $logicalCPUs } лагічных ядзер
+            }
+        [few]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізічныя ядры, { $logicalCPUs } лагічнае ядро
+                [few] { $physicalCPUs } фізічныя ядры, { $logicalCPUs } лагічныя ядры
+                [many] { $physicalCPUs } фізічныя ядры, { $logicalCPUs } лагічных ядзер
+               *[other] { $physicalCPUs } фізічныя ядры, { $logicalCPUs } лагічных ядзер
+            }
+        [many]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічнае ядро
+                [few] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічныя ядры
+                [many] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічных ядзер
+               *[other] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічных ядзер
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічнае ядро
+                [few] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічныя ядры
+                [many] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічных ядзер
+               *[other] { $physicalCPUs } фізічных ядзер, { $logicalCPUs } лагічных ядзер
+            }
+    }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
 # Variable:
@@ -273,6 +448,16 @@ MenuButtons--metaInfo--main-process-ended = Асноўны працэс скон
 MenuButtons--metaInfo--interval = Інтэрвал:
 MenuButtons--metaInfo--buffer-capacity = Ёмістасць буфера:
 MenuButtons--metaInfo--buffer-duration = Працягласць буфера:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } секунда
+        [few] { $configurationDuration } секунды
+        [many] { $configurationDuration } секунд
+       *[other] { $configurationDuration } секунд
+    }
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
@@ -308,20 +493,34 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Пашырэнні:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Накладныя выдаткі { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Сярэдняе
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Накладныя выдаткі
+    .title = Час затрачаны на атрыманне ўсіх патокаў.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Ачыстка
+    .title = Час затрачаны на выдаленне старых даных.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Лічыльнік
     .title = Час збору ўсіх лічыльнікаў
 MenuButtons--metaOverheadStatistics-statkeys-interval = Інтэрвал
     .title = Зафіксаваны інтэрвал паміж двума ўзорамі
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Блакіроўкі
+    .title = Час затрачаны на атрыманне блакіроўкі перад правядзеннем вымярэнняў.
+MenuButtons--metaOverheadStatistics-overhead-duration = Працягласць накладных выдаткаў:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Працэнт накладных выдаткаў:
 MenuButtons--metaOverheadStatistics-profiled-duration = Працягласць запісу профілю:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Уключыць схаваныя патокі
 MenuButtons--publish--renderCheckbox-label-include-other-tabs = Уключыць даныя з іншых картак
+MenuButtons--publish--renderCheckbox-label-hidden-time = Уключыць схаваны дыяпазон часу
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Уключыць здымкі экрана
+MenuButtons--publish--renderCheckbox-label-resource = Уключыць URL-адрасы і шляхі рэсурсаў
 MenuButtons--publish--renderCheckbox-label-extension = Уключыць інфармацыю аб пашырэнні
+MenuButtons--publish--renderCheckbox-label-preference = Уключыць значэнні параметраў
 MenuButtons--publish--renderCheckbox-label-private-browsing = Уключыць даныя з вокнаў прыватнага прагляду
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Гэты профіль змяшчае даныя прыватнага прагляду
@@ -329,9 +528,12 @@ MenuButtons--publish--reupload-performance-profile = Паўторна запам
 MenuButtons--publish--share-performance-profile = Абагуліць профіль прадукцыйнасці
 MenuButtons--publish--info-description = Запампуйце свой профіль і зрабіце яго даступным для ўсіх, хто мае спасылку.
 MenuButtons--publish--info-description-default = Тыпова вашы асабістыя даныя выдаляюцца.
+MenuButtons--publish--info-description-firefox-nightly2 = Гэты профіль ад { -firefox-nightly-brand-name }, таму большая частка інфармацыі ўключана па змаўчанні.
+MenuButtons--publish--include-additional-data = Уключыць дадатковыя даныя, якія могуць раскрыць вашу асобу
 MenuButtons--publish--button-upload = Запампаваць
 MenuButtons--publish--upload-title = Запампоўванне профілю…
 MenuButtons--publish--cancel-upload = Скасаваць запампоўку
+MenuButtons--publish--message-something-went-wrong = Ой, нешта пайшло не так падчас загрузкі профілю.
 MenuButtons--publish--message-try-again = Паспрабаваць зноў
 MenuButtons--publish--download = Спампаваць
 MenuButtons--publish--compressing = Сцісканне…
@@ -339,6 +541,9 @@ MenuButtons--publish--compressing = Сцісканне…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Фільтраваць сеткі:
+    .title = Паказваць толькі сеткавыя запыты, якія адпавядаюць пэўнаму імені
 
 ## Timestamp formatting primitive
 
@@ -357,6 +562,7 @@ NumberFormat--short-date = { SHORTDATE($date) }
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Вы ведаеце, што для пошуку па некалькіх тэрмінах можна выкарыстоўваць коску (,)?
 
 ## Profile Delete Button
 
@@ -371,10 +577,16 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Пры выдаленні гэтага профілю адбылася памылка. <a>Навядзіце курсор, каб даведацца больш.</a>
 # This is the title of the dialog
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
 ProfileDeletePanel--dialog-title = Выдаліць { $profileName }
+ProfileDeletePanel--dialog-confirmation-question =
+    Вы ўпэўнены, што хочаце выдаліць запампаваныя даныя для гэтага профілю? Спасылкі,
+    якія былі абагулены раней, больш не будуць працаваць.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Скасаваць
 ProfileDeletePanel--dialog-delete-button =
@@ -399,10 +611,13 @@ ProfileFilterNavigator--full-range-with-duration = Поўны дыяпазон (
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Імпарт профілю непасрэдна з { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Чытанне файла і апрацоўка профілю…
 ProfileLoaderAnimation--loading-local = Яшчэ не рэалізавана.
 ProfileLoaderAnimation--loading-public = Спампоўка і апрацоўка профілю…
 ProfileLoaderAnimation--loading-from-url = Спампоўка і апрацоўка профілю…
 ProfileLoaderAnimation--loading-compare = Чытанне і апрацоўка профіляў…
+ProfileLoaderAnimation--loading-view-not-found = Прагляд не знойдзены
 
 ## ProfileRootMessage
 
@@ -413,20 +628,47 @@ ProfileRootMessage--additional = Вярнуцца на галоўную
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--applying-button = Прымяненне…
+ServiceWorkerManager--pending-button = Прымяніць і перазагрузіць
 ServiceWorkerManager--installed-button = Перазагрузіць праграму
+ServiceWorkerManager--updated-while-not-ready = Новая версія праграмы была прыменена да поўнай загрузкі гэтай старонкі. Вы можаце сутыкнуцца з няспраўнасцямі.
 ServiceWorkerManager--new-version-is-ready = Новая версія праграмы спампавана і гатова да выкарыстання.
+ServiceWorkerManager--hide-notice-button =
+    .title = Схаваць паведамленне аб перазагрузцы
+    .aria-label = Схаваць паведамленне аб перазагрузцы
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Усе стэкі
 StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Уласны
 StackSettings--use-data-source-label = Крыніца даных:
+StackSettings--call-tree-strategy-timing = Таймінгі
+    .title = Стварыць зводку асобных стэкаў кода, выкананых за пэўны перыяд часу
+StackSettings--call-tree-strategy-js-allocations = Выдзяленне рэсурсаў JavaScript
+    .title = Сумаваць выдзеленыя байты JavaScript (без вызвалення)
+StackSettings--call-tree-strategy-native-retained-allocations = Утрыманая памяць
+    .title = Сумаваць байты памяці, якія былі выдзелены, але ніколі не вызваляліся ў бягучым выбары папярэдняга прагляду
+StackSettings--call-tree-native-allocations = Выдзеленая памяць
+    .title = Сумаваць байты выдзеленай памяці
+StackSettings--call-tree-strategy-native-deallocations-memory = Вызваленая памяць
+    .title = Сумаваць байты вызваленай памяці па сайтах, дзе яны былі выдзелены
+StackSettings--call-tree-strategy-native-deallocations-sites = Вызваленыя сайты
+    .title = Сумаваць байты вызваленай памяці па сайтах, дзе яны былі вызвалены
+StackSettings--invert-call-stack = Інвертаваць стэк выклікаў
+    .title = Сартаваць па часе, праведзенаму ў вузле выкліку, ігнаруючы яго даччыныя вузлы.
+StackSettings--show-user-timing = Паказаць таймінгі карыстальніка
+StackSettings--panel-search =
+    .label = Фільтр стэкаў:
+    .title = Паказаць толькі стэкі, якія змяшчаюць функцыю, назва якой адпавядае гэтаму падрадку
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Дрэва выклікаў
 TabBar--flame-graph-tab = Флэйм-дыяграма
+TabBar--stack-chart-tab = Дыяграма стэка
 TabBar--marker-chart-tab = Маркерная дыяграма
 TabBar--marker-table-tab = Маркерная табліца
 TabBar--network-tab = Сетка
@@ -441,16 +683,39 @@ TrackContextMenu--only-show-this-process = Паказваць толькі гэ�
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Паказваць толькі “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Схаваць дарожкі іншых здымкаў
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Схаваць “{ $trackName }”
+TrackContextMenu--show-all-tracks = Паказаць усе дарожкі
+TrackContextMenu--show-local-tracks-in-process = Паказаць усе дарожкі ў гэтым працэсе
+# This is used in the tracks context menu as a button to show all the tracks
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Паказаць усе адпаведныя дарожкі
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Схаваць усе адпаведныя дарожкі
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Няма вынікаў для “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Схаваць дарожку
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Схаваць працэс
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = адносная памяць на гэты момант
+TrackMemoryGraph--memory-range-in-graph = дыяпазон памяці ў графіку
+TrackMemoryGraph--operations-since-the-previous-sample = аперацый, пачынаючы з папярэдняга ўзору
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -462,10 +727,65 @@ TrackContextMenu--hide-track = Схаваць “{ $trackName }”
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-watt = { $value } Вт
+    .label = Магутнасць
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-milliwatt = { $value } мВт
+    .label = Магутнасць
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Вт·гад ({ $carbonValue } г CO₂e)
+    .label = Энергія, якая спажываецца ў бачным дыяпазоне
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } мВт·гад ({ $carbonValue } мг CO₂e)
+    .label = Энергія, якая спажываецца ў бачным дыяпазоне
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } мкВт·гад ({ $carbonValue } мг CO₂e)
+    .label = Энергія, якая спажываецца ў бачным дыяпазоне
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Вт·гад ({ $carbonValue } г CO₂e)
+    .label = Энергія, якая спажываецца ў бягучай выбарцы
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } мВт·гад ({ $carbonValue } мг CO₂e)
+    .label = Энергія, якая спажываецца ў бягучай выбарцы
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } мкВт·гад ({ $carbonValue } мг CO₂e)
+    .label = Энергія, якая спажываецца ў бягучай выбарцы
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Увядзіце ўмовы фільтра
+    .title = Адлюстроўваць толькі дарожкі, якія адпавядаюць пэўнаму тэксту
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -476,15 +796,119 @@ TrackContextMenu--hide-track = Схаваць “{ $trackName }”
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = “{ $item }” поўнасцю
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Згарнуць: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Вузел у фокусе: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Фокус: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Катэгорыя ў фокусе: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Аб'яднаць вузел: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Аб'яднаць: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Адхілена: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion2 = Згарнуць прамую рэкурсію: { $item }
+# "Collapse indirect recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-indirect-recursion = Згарнуць непрамую рэкурсію: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Згарнуць паддрэва: { $item }
 
 ## Source code view in a box at the bottom of the UI.
 
+# Displayed while the source view is waiting for the network request which
+# delivers the source code.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Чаканне { $host }…
+# Displayed while the source view is waiting for the browser to deliver
+# the source code.
+SourceView--loading-browser-connection = Чаканне { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 SourceView--source-not-available-title = Зыходны код недаступны
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Глядзіце <a>абмеркаванне #3741</a> каб даведацца аб сцэнарыях, якія падтрымліваюцца, і запланаваных паляпшэннях.
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Для гэтага файла няма вядомага cross-origin-accessible URL-адраса.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Пры атрыманні URL { $url } адбылася памылка сеткі: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Не ўдалося запытаць API сімвалізацыі браўзера: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = API сімвалізацыі браўзера вярнула памылку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = API сімвалізацыі лакальнага сервера сімвалаў вярнула памылку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Файл { $pathInArchive } не быў знойдзены ў архіве з { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Не ўдалося прааналізаваць архіў па адрасе { $url }: { $parsingErrorMessage }
 SourceView--close-button =
     .title = Закрыць акно з кодам
 
