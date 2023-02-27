@@ -261,7 +261,7 @@ Home--your-recent-uploaded-recordings-title = Вашы нядаўна запам
 Home--load-files-from-other-tools =
     { -profiler-brand-name } таксама можа імпартаваць профілі з іншых прафайлераў, такіх як
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, 
-    панэль прадукцыйнасці Chrome, <androidstudio>Android Studio< /androidstudio> або 
+    панэль прадукцыйнасці Chrome, <androidstudio>Android Studio</androidstudio> або 
     любога файла, які выкарыстоўвае <dhat>фармат dhat</dhat>. <write>Даведайцеся, 
     як напісаць свой уласны імпарцёр</write>.
 
