@@ -43,6 +43,11 @@ exports[`correctly renders the FooterLinks component 1`] = `
         title="Change language"
       >
         <option
+          value="be"
+        >
+          Беларуская
+        </option>
+        <option
           value="de"
         >
           Deutsch
