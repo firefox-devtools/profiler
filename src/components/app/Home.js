@@ -554,7 +554,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               />
 
               <Localized
-                id="Home--load-files-from-other-tools"
+                id="Home--load-files-from-other-tools2"
                 elems={{
                   perf: (
                     <a href="https://profiler.firefox.com/docs/#/./guide-perf-profiling" />
@@ -571,6 +571,9 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                   write: (
                     <a href="https://github.com/firefox-devtools/profiler/blob/main/docs-developer/custom-importer.md" />
                   ),
+                  traceevent: (
+                    <a href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview" />
+                  ),
                 }}
               >
                 <p>
@@ -579,7 +582,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                   <simpleperf>Android SimplePerf</simpleperf>, the Chrome
                   performance panel,{' '}
                   <androidstudio>Android Studio</androidstudio>, or any file
-                  using the <dhat>dhat format</dhat>.{' '}
+                  using the <dhat>dhat format</dhat> or{' '}
+                  <traceevent>Google’s Trace Event Format</traceevent>.{' '}
                   <write>Learn how to write your own importer</write>.
                 </p>
               </Localized>
