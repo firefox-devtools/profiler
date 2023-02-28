@@ -226,6 +226,13 @@ export function attemptToConvertChromeProfile(
     events.push(
       wrapCpuProfileInEvent(coerce<MixedObject, CpuProfileData>(json))
     );
+  } else if (
+    typeof json === 'object' &&
+    'traceEvents' in json &&
+    Array.isArray(json.traceEvents)
+  ) {
+    // This is Google Tracing Event format, for example from chrome://tracing.
+    events = coerce<mixed, TracingEventUnion[]>(json.traceEvents);
   }
 
   if (!events) {
