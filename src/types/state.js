@@ -285,22 +285,11 @@ export type FileSourceLoadingSource =
   | {| type: 'URL', url: string |}
   | {| type: 'BROWSER_CONNECTION' |};
 
-export type SourceLoadingError =
-  | {| type: 'NO_KNOWN_CORS_URL' |}
+export type ApiQueryError =
   | {|
       type: 'NETWORK_ERROR',
       url: string,
       networkErrorMessage: string,
-    |}
-  | {|
-      type: 'NOT_PRESENT_IN_ARCHIVE',
-      url: string,
-      pathInArchive: string,
-    |}
-  | {|
-      type: 'ARCHIVE_PARSING_ERROR',
-      url: string,
-      parsingErrorMessage: string,
     |}
   | {|
       type: 'SYMBOL_SERVER_API_ERROR',
@@ -313,6 +302,20 @@ export type SourceLoadingError =
   | {|
       type: 'BROWSER_API_ERROR',
       apiErrorMessage: string,
+    |};
+
+export type SourceLoadingError =
+  | ApiQueryError
+  | {| type: 'NO_KNOWN_CORS_URL' |}
+  | {|
+      type: 'NOT_PRESENT_IN_ARCHIVE',
+      url: string,
+      pathInArchive: string,
+    |}
+  | {|
+      type: 'ARCHIVE_PARSING_ERROR',
+      url: string,
+      parsingErrorMessage: string,
     |};
 
 /**
