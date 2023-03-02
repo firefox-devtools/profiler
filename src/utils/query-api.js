@@ -27,20 +27,21 @@ export interface ExternalCommunicationDelegate {
   ): Promise<string>;
 }
 
-export type ApiQueryResult =
-  | { type: 'SUCCESS', responseJson: any }
+export type ApiQueryResult<T> =
+  | { type: 'SUCCESS', convertedResponse: T }
   | { type: 'ERROR', errors: ApiQueryError[] };
 
 /**
  * Sends a JSON query to the browser symbolication API and, if supplied, to a
  * symbol server.
  */
-export async function queryApiWithFallback(
+export async function queryApiWithFallback<T>(
   path: string,
   requestJson: string,
   symbolServerUrlForFallback: string | null,
-  delegate: ExternalCommunicationDelegate
-): Promise<ApiQueryResult> {
+  delegate: ExternalCommunicationDelegate,
+  convertJsonResponse: (MixedObject) => T
+): Promise<ApiQueryResult<T>> {
   const errors: ApiQueryError[] = [];
 
   // See if we can get an API result from the browser.
@@ -49,15 +50,22 @@ export async function queryApiWithFallback(
       path,
       requestJson
     );
-    const responseJson = await JSON.parse(response);
-    if (!responseJson.error) {
-      // The browser gave us a successful response.
-      return { type: 'SUCCESS', responseJson };
+    try {
+      const responseJson = JSON.parse(response);
+      if (!responseJson.error) {
+        const convertedResponse = convertJsonResponse(responseJson);
+        return { type: 'SUCCESS', convertedResponse };
+      }
+      errors.push({
+        type: 'BROWSER_API_ERROR',
+        apiErrorMessage: responseJson.error,
+      });
+    } catch (e) {
+      errors.push({
+        type: 'BROWSER_API_MALFORMED_RESPONSE',
+        errorMessage: e.toString(),
+      });
     }
-    errors.push({
-      type: 'BROWSER_API_ERROR',
-      apiErrorMessage: responseJson.error,
-    });
   } catch (e) {
     errors.push({
       type: 'BROWSER_CONNECTION_ERROR',
@@ -70,15 +78,24 @@ export async function queryApiWithFallback(
     const url = symbolServerUrlForFallback + path;
     try {
       const response = await delegate.fetchUrlResponse(url, requestJson);
-      const responseJson = await response.json();
-      if (!responseJson.error) {
-        // Local symbol server gave us the source. Success!
-        return { type: 'SUCCESS', responseJson };
+      const responseText = await response.text();
+
+      try {
+        const responseJson = JSON.parse(responseText);
+        if (!responseJson.error) {
+          const convertedResponse = convertJsonResponse(responseJson);
+          return { type: 'SUCCESS', convertedResponse };
+        }
+        errors.push({
+          type: 'SYMBOL_SERVER_API_ERROR',
+          apiErrorMessage: responseJson.error,
+        });
+      } catch (e) {
+        errors.push({
+          type: 'SYMBOL_SERVER_API_MALFORMED_RESPONSE',
+          errorMessage: e.toString(),
+        });
       }
-      errors.push({
-        type: 'SYMBOL_SERVER_API_ERROR',
-        apiErrorMessage: responseJson.error,
-      });
     } catch (e) {
       errors.push({
         type: 'NETWORK_ERROR',

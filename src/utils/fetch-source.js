@@ -66,13 +66,14 @@ export async function fetchSource(
         file,
       }),
       symbolServerUrlForFallback,
-      delegate
+      delegate,
+      convertResponseJsonToSourceCode
     );
     switch (queryResult.type) {
       case 'SUCCESS':
         return {
           type: 'SUCCESS',
-          source: queryResult.responseJson.source,
+          source: queryResult.convertedResponse,
         };
       case 'ERROR': {
         errors.push(...queryResult.errors);
@@ -170,6 +171,13 @@ export async function fetchSource(
       throw assertExhaustiveCheck(downloadRecipe.type);
   }
   return { type: 'ERROR', errors };
+}
+
+function convertResponseJsonToSourceCode(responseJson: MixedObject): string {
+  if (!('source' in responseJson) || typeof responseJson.source !== 'string') {
+    throw new Error('No string "source" property on API response');
+  }
+  return responseJson.source;
 }
 
 // At the moment, the official Mozilla symbolication server does not have an

@@ -291,17 +291,31 @@ export type ApiQueryError =
       url: string,
       networkErrorMessage: string,
     |}
+  // Used when the symbol server reported an error, for example because our
+  // request was bad.
   | {|
       type: 'SYMBOL_SERVER_API_ERROR',
       apiErrorMessage: string,
     |}
+  // Used when the symbol server's response was bad.
+  | {|
+      type: 'SYMBOL_SERVER_API_MALFORMED_RESPONSE',
+      errorMessage: string,
+    |}
+  // Used when the browser API reported an error, for example because our
+  // request was bad.
   | {|
       type: 'BROWSER_CONNECTION_ERROR',
       browserConnectionErrorMessage: string,
     |}
+  // Used when the browser's response was bad.
   | {|
       type: 'BROWSER_API_ERROR',
       apiErrorMessage: string,
+    |}
+  | {|
+      type: 'BROWSER_API_MALFORMED_RESPONSE',
+      errorMessage: string,
     |};
 
 export type SourceLoadingError =
