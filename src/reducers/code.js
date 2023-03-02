@@ -6,6 +6,7 @@
 import type {
   Reducer,
   SourceCodeStatus,
+  AssemblyCodeStatus,
   CodeState,
 } from 'firefox-profiler/types';
 import { combineReducers } from 'redux';
@@ -47,6 +48,49 @@ const sourceCodeCache: Reducer<Map<string, SourceCodeStatus>> = (
   }
 };
 
-const code: Reducer<CodeState> = combineReducers({ sourceCodeCache });
+const assemblyCodeCache: Reducer<Map<string, AssemblyCodeStatus>> = (
+  state = new Map(),
+  action
+) => {
+  switch (action.type) {
+    case 'ASSEMBLY_CODE_LOADING_BEGIN_URL': {
+      const { nativeSymbolKey, url } = action;
+      const newState = new Map(state);
+      newState.set(nativeSymbolKey, {
+        type: 'LOADING',
+        source: { type: 'URL', url },
+      });
+      return newState;
+    }
+    case 'ASSEMBLY_CODE_LOADING_BEGIN_BROWSER_CONNECTION': {
+      const { nativeSymbolKey } = action;
+      const newState = new Map(state);
+      newState.set(nativeSymbolKey, {
+        type: 'LOADING',
+        source: { type: 'BROWSER_CONNECTION' },
+      });
+      return newState;
+    }
+    case 'ASSEMBLY_CODE_LOADING_SUCCESS': {
+      const { nativeSymbolKey, instructions } = action;
+      const newState = new Map(state);
+      newState.set(nativeSymbolKey, { type: 'AVAILABLE', instructions });
+      return newState;
+    }
+    case 'ASSEMBLY_CODE_LOADING_ERROR': {
+      const { nativeSymbolKey, errors } = action;
+      const newState = new Map(state);
+      newState.set(nativeSymbolKey, { type: 'ERROR', errors });
+      return newState;
+    }
+    default:
+      return state;
+  }
+};
+
+const code: Reducer<CodeState> = combineReducers({
+  sourceCodeCache,
+  assemblyCodeCache,
+});
 
 export default code;

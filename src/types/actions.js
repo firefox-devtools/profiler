@@ -39,7 +39,9 @@ import type {
   State,
   UploadedProfileInformation,
   SourceCodeLoadingError,
+  ApiQueryError,
   TableViewOptions,
+  DecodedInstruction,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -638,6 +640,29 @@ type SourcesAction =
       errors: SourceCodeLoadingError[],
     |};
 
+// nativeSymbolKey == `${lib.debugName}/${lib.breakpadID}/${nativeSymbolInfo.address.toString(16)}`
+
+type AssemblyAction =
+  | {|
+      +type: 'ASSEMBLY_CODE_LOADING_BEGIN_URL',
+      nativeSymbolKey: string,
+      url: string,
+    |}
+  | {|
+      +type: 'ASSEMBLY_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
+      nativeSymbolKey: string,
+    |}
+  | {|
+      +type: 'ASSEMBLY_CODE_LOADING_SUCCESS',
+      nativeSymbolKey: string,
+      instructions: DecodedInstruction[],
+    |}
+  | {|
+      +type: 'ASSEMBLY_CODE_LOADING_ERROR',
+      nativeSymbolKey: string,
+      errors: ApiQueryError[],
+    |};
+
 type AppAction = {|
   +type: 'UPDATE_BROWSER_CONNECTION_STATUS',
   +browserConnectionStatus: BrowserConnectionStatus,
@@ -655,4 +680,5 @@ export type Action =
   | CurrentProfileUploadedInformationAction
   | L10nAction
   | SourcesAction
+  | AssemblyAction
   | AppAction;

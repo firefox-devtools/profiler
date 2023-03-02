@@ -9,6 +9,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { DetailsContainer } from './DetailsContainer';
 import { SourceCodeFetcher } from './SourceCodeFetcher';
+import { AssemblyCodeFetcher } from './AssemblyCodeFetcher';
 import { BottomBox } from './BottomBox';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
@@ -158,6 +159,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <DebugWarning />
           <CurrentProfileUploadedInformationLoader />
           <SourceCodeFetcher />
+          <AssemblyCodeFetcher />
         </div>
       </KeyboardShortcut>
     );

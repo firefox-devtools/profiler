@@ -18,7 +18,7 @@ import type {
   LastNonShiftClickInformation,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { StartEndRange, CssPixels, Milliseconds } from './units';
+import type { StartEndRange, CssPixels, Milliseconds, Address } from './units';
 import type {
   Profile,
   ThreadIndex,
@@ -276,12 +276,22 @@ export type AssemblyViewState = {|
   allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
 |};
 
+export type DecodedInstruction = {|
+  address: Address,
+  decodedString: string,
+|};
+
 export type SourceCodeStatus =
-  | {| type: 'LOADING', source: SourceCodeLoadingSource |}
+  | {| type: 'LOADING', source: CodeLoadingSource |}
   | {| type: 'ERROR', errors: SourceCodeLoadingError[] |}
   | {| type: 'AVAILABLE', source: string |};
 
-export type SourceCodeLoadingSource =
+export type AssemblyCodeStatus =
+  | {| type: 'LOADING', source: CodeLoadingSource |}
+  | {| type: 'ERROR', errors: ApiQueryError[] |}
+  | {| type: 'AVAILABLE', instructions: DecodedInstruction[] |};
+
+export type CodeLoadingSource =
   | {| type: 'URL', url: string |}
   | {| type: 'BROWSER_CONNECTION' |};
 
@@ -414,6 +424,7 @@ export type IconState = Set<string>;
 
 export type CodeState = {|
   +sourceCodeCache: Map<string, SourceCodeStatus>,
+  +assemblyCodeCache: Map<string, AssemblyCodeStatus>,
 |};
 
 export type State = {|
