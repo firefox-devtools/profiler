@@ -18,6 +18,8 @@ import {
   changeLocalTrackOrder,
   commitRange,
   setDataSource,
+  updateBottomBoxContentsAndMaybeOpen,
+  closeBottomBox,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -1849,5 +1851,141 @@ describe('symbolServerUrl', function () {
       'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net%2Fsubdir%2F'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
+  });
+});
+
+describe('URL persistence of bottom box (source view and assembly view)', function () {
+  function setup() {
+    const store = _getStoreWithURL();
+    return store;
+  }
+
+  it('persists the source file shown in the source view to the URL', function () {
+    const { dispatch, getState } = setup();
+    expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
+    expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
+    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+
+    // Open the source view for 'xpcom/threads/nsThread.cpp'.
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const bottomBoxInfo = {
+      libIndex: 0,
+      sourceFile,
+      nativeSymbols: [],
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
+    ).toBeTrue();
+    expect(urlStateSelectors.getSourceViewFile(newStore.getState())).toBe(
+      sourceFile
+    );
+    expect(
+      urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())
+    ).toBeFalse();
+    expect(
+      urlStateSelectors.getAssemblyViewNativeSymbol(newStore.getState())
+    ).toBeNull();
+  });
+
+  it('keeps a closed bottom box closed, even if a source file was loaded before', function () {
+    const { dispatch, getState } = setup();
+    expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
+    expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
+    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+
+    // Open the source view for 'xpcom/threads/nsThread.cpp'.
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const bottomBoxInfo = {
+      libIndex: 0,
+      sourceFile,
+      nativeSymbols: [],
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    dispatch(closeBottomBox());
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
+    ).toBeFalse();
+  });
+
+  it('persists the native symbol shown in the assembly view to the URL', function () {
+    const { dispatch, getState } = setup();
+    expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
+    expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
+    expect(urlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
+
+    // Open the assembly view for 'MySymbol'.
+    const nativeSymbolInfo = {
+      libIndex: 0,
+      name: 'MySymbol',
+      address: 12345,
+      functionSize: 14,
+      functionSizeIsKnown: false,
+    };
+    const bottomBoxInfo = {
+      libIndex: 0,
+      sourceFile: null,
+      nativeSymbols: [nativeSymbolInfo],
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
+    ).toBeTrue();
+    expect(
+      urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())
+    ).toBeTrue();
+    expect(
+      urlStateSelectors.getAssemblyViewNativeSymbol(newStore.getState())
+    ).toEqual(nativeSymbolInfo);
+  });
+
+  it('only opens the assembly view on reload if it was open before', function () {
+    const { dispatch, getState } = setup();
+    expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
+    expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
+    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    expect(urlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
+
+    // Open the source view for 'xpcom/threads/nsThread.cpp' and initialize the
+    // assembly view for 'MySymbol', but keep the assembly view closed.
+    // The decision to keep the assembly view closed happens in
+    // updateBottomBoxContentsAndMaybeOpen: If we have a non-null sourceFile,
+    // and the assembly view isn't open already, then we keep the assembly view
+    // closed even if we have a native symbol.
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const nativeSymbolInfo = {
+      libIndex: 0,
+      name: 'MySymbol',
+      address: 12345,
+      functionSize: 14,
+      functionSizeIsKnown: false,
+    };
+    const bottomBoxInfo = {
+      libIndex: 0,
+      sourceFile: sourceFile,
+      nativeSymbols: [nativeSymbolInfo],
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
+    ).toBeTrue();
+    expect(urlStateSelectors.getSourceViewFile(newStore.getState())).toBe(
+      sourceFile
+    );
+    // The assembly view should remain closed.
+    expect(
+      urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())
+    ).toBeFalse();
   });
 });
