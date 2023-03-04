@@ -145,6 +145,9 @@ if (config.mode === 'production') {
         // the index file as they're not part of the SPA
         /^\/docs(?:\/|$)/,
         /^\/photon(?:\/|$)/,
+        // Allow navigating to source maps. This is not necessary, but it is
+        // more developer friendly.
+        /^\/[^/?]+\.map$/,
         // While excluding the service worker file isn't necessary to work, it's
         // convenient that we can just access it from a browser.
         /^\/sw\.js/,
@@ -158,7 +161,7 @@ if (config.mode === 'production') {
         '_headers',
         '_redirects',
         // do not cache source maps
-        /.map$/,
+        /\.map$/,
         // nor the service worker imported script
         'service-worker-compat.js',
       ],
