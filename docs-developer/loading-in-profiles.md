@@ -92,6 +92,8 @@ server.listen(PORT, err => {
 });
 ```
 
+Note that if you have a copy of the project locally, you can simply add the profile path as a parameter to `yarn start` and a server serving this profile will be spawned for you. On Linux, the provided [launch-fp.sh](../bin/launch-fp.sh) script can do this for you as well, from any working directory.
+
 ### Directly from Firefox
 
 > `https://profiler.firefox.com/from-browser/`
@@ -102,4 +104,4 @@ Firefox loads the profiles directly into the front-end through a WebChannel mech
 
 > `https://profiler.firefox.com/from-file/`
 
-When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the profiler.firefox.com client, or using the file upload input. On Linux, the provided [fp.sh](../bin/fp.sh) script can load files.
+When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the profiler.firefox.com client, or using the file upload input.
