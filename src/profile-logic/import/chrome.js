@@ -318,7 +318,7 @@ function getThreadInfo(
     return cachedThreadInfo;
   }
   const thread = getEmptyThread();
-  thread.pid = chunk.pid;
+  thread.pid = `${chunk.pid}`;
   // It looks like the TID information in Chrome's data isn't the system's TID
   // but some internal values only unique for a pid. Therefore let's generate a
   // proper unique value.

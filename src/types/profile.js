@@ -31,11 +31,11 @@ export type TabID = number;
 export type InnerWindowID = number;
 
 /**
- * Pids can be numbers or strings. Strings are sometimes used to create unique
+ * Pids are strings, often stringified numbers. Strings allow creating unique
  * values when multiple processes with the same pid exist in the same profile,
  * such as during profile merging or diffing.
  */
-export type Pid = number | string;
+export type Pid = string;
 
 /**
  * The stack table stores the tree of stack nodes of a thread.

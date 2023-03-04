@@ -56,7 +56,7 @@ describe('timeline/GlobalTrack', function () {
         },
       } = getProfileFromTextSamples('A');
       thread.name = 'NoMain';
-      thread.pid = 5555;
+      thread.pid = '5555';
       profile.threads.push(thread);
     }
     {
@@ -69,7 +69,7 @@ describe('timeline/GlobalTrack', function () {
       } = getProfileFromTextSamples('A');
       thread.name = 'Private';
       thread['eTLD+1'] = 'https://example.org';
-      thread.pid = 6666;
+      thread.pid = '6666';
       thread.tid = 6666;
       thread.isPrivateBrowsing = true;
       profile.threads.push(thread);
@@ -84,7 +84,7 @@ describe('timeline/GlobalTrack', function () {
       } = getProfileFromTextSamples('A');
       thread.name = 'InContainer';
       thread['eTLD+1'] = 'https://example.org';
-      thread.pid = 7777;
+      thread.pid = '7777';
       thread.tid = 7777;
       thread.userContextId = 3;
       profile.threads.push(thread);

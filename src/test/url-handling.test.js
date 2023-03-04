@@ -163,21 +163,21 @@ describe('selectedThread', function () {
     const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
     Object.assign(profile.threads[0], {
       name: 'GeckoMain',
-      pid: 123,
+      pid: '123',
     });
     Object.assign(profile.threads[1], {
       name: 'Compositor',
-      pid: 123,
+      pid: '123',
     });
     Object.assign(profile.threads[2], {
       name: 'GeckoMain',
       processType: 'tab',
-      pid: 246,
+      pid: '246',
     });
     Object.assign(profile.threads[3], {
       name: 'GeckoMain',
       processType: 'tab',
-      pid: 789,
+      pid: '789',
     });
 
     store.dispatch(viewProfile(profile));
@@ -268,7 +268,7 @@ describe('url handling tracks', function () {
 
       // Set a different pid for each thread, so that they're only global tracks.
       profile.threads.forEach((thread, i) => {
-        thread.pid = i;
+        thread.pid = `${i}`;
       });
 
       const store = _getStoreWithURL({}, profile);
@@ -308,7 +308,7 @@ describe('url handling tracks', function () {
       );
 
       // Change the order of Style and DOM Worker
-      dispatch(changeLocalTrackOrder(222, [1, 0]));
+      dispatch(changeLocalTrackOrder('222', [1, 0]));
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
@@ -360,15 +360,15 @@ describe('url handling tracks', function () {
       const [thread1, thread2, thread3] = profile.threads;
       thread1.name = 'GeckoMain';
       thread1.isMainThread = true;
-      thread1.pid = 111;
+      thread1.pid = '111';
 
       thread2.name = 'DOM Worker';
       thread2.processType = 'tab';
-      thread2.pid = 111;
+      thread2.pid = '111';
 
       thread3.name = 'Style';
       thread3.processType = 'tab';
-      thread3.pid = 111;
+      thread3.pid = '111';
 
       const { getState } = _getStoreWithURL(
         // In this search query, we want to hide the second local track of the
@@ -1304,18 +1304,18 @@ describe('url upgrading', function () {
       );
       expect(urlStateSelectors.getLocalTrackOrderByPid(state)).toEqual(
         new Map([
-          [1234, [1, 0]],
-          [345, [2, 0, 1]],
+          ['1234', [1, 0]],
+          ['345', [2, 0, 1]],
         ])
       );
       expect(urlStateSelectors.getLocalTrackOrderByPid(state)).toEqual(
         new Map([
-          [1234, [1, 0]],
-          [345, [2, 0, 1]],
+          ['1234', [1, 0]],
+          ['345', [2, 0, 1]],
         ])
       );
       expect(urlStateSelectors.getHiddenLocalTracksByPid(state)).toEqual(
-        new Map([[678, new Set([0, 2, 3])]])
+        new Map([['678', new Set([0, 2, 3])]])
       );
       expect(urlStateSelectors.getSelectedThreadIndexesOrNull(state)).toEqual(
         new Set([12])

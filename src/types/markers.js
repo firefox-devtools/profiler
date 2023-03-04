@@ -677,7 +677,8 @@ export type IPCMarkerPayload_Gecko = {|
   type: 'IPC',
   startTime: Milliseconds,
   endTime: Milliseconds,
-  otherPid: Pid,
+  // otherPid is a number in the Gecko format.
+  otherPid: number,
   messageType: string,
   messageSeqno: number,
   side: 'parent' | 'child',
@@ -692,23 +693,39 @@ export type IPCMarkerPayload_Gecko = {|
 |};
 
 export type IPCMarkerPayload = {|
-  ...IPCMarkerPayload_Gecko,
+  type: 'IPC',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  // otherPid is a string in the processed format.
+  otherPid: Pid,
+  messageType: string,
+  messageSeqno: number,
+  side: 'parent' | 'child',
+  direction: 'sending' | 'receiving',
+  // Phase is not present in older profiles (in this case the phase is "endpoint").
+  phase?: 'endpoint' | 'transferStart' | 'transferEnd',
+  sync: boolean,
+  // `tid` of the thread that this marker is originated from. It is undefined
+  // when the IPC marker is originated from the same thread. Also, this field is
+  // added in Firefox 100. It will always be undefined for the older profiles.
+  threadId?: Tid,
 
   // These fields are added in the deriving process from `IPCSharedData`, and
   // correspond to data from all the markers associated with a particular IPC
   // message.
-  startTime?: Milliseconds,
+  // We mark these fields as optional because we represent non-derived markers
+  // and derived markers with the same type. These fields are always present on
+  // derived markers and never present on non-derived markers.
   sendStartTime?: Milliseconds,
   sendEndTime?: Milliseconds,
   recvEndTime?: Milliseconds,
-  endTime?: Milliseconds,
   sendTid?: Tid,
   recvTid?: Tid,
   sendThreadName?: string,
   recvThreadName?: string,
 
   // This field is a nicely formatted field for the direction.
-  niceDirection: string,
+  niceDirection?: string,
 |};
 
 export type MediaSampleMarkerPayload = {|

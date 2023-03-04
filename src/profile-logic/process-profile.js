@@ -89,6 +89,7 @@ import type {
   ThreadIndex,
   BrowsertimeMarkerPayload,
   MarkerPhase,
+  Pid,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -907,6 +908,34 @@ function _processMarkerPayload(
           throw new Error('Unknown GCMajor status');
       }
     }
+    case 'IPC': {
+      // Convert otherPid to a string.
+      const {
+        startTime,
+        endTime,
+        otherPid,
+        messageType,
+        messageSeqno,
+        side,
+        direction,
+        phase,
+        sync,
+        threadId,
+      } = payload;
+      return {
+        type: 'IPC',
+        startTime,
+        endTime,
+        otherPid: `${otherPid}`,
+        messageType,
+        messageSeqno,
+        side,
+        direction,
+        phase,
+        sync,
+        threadId,
+      };
+    }
     default:
       // `payload` is currently typed as the result of _convertStackToCause, which
       // is MarkerPayload_Gecko where `stack` has been replaced with `cause`. This
@@ -982,10 +1011,12 @@ function _processCounters(
     return [];
   }
 
+  const mainThreadPid: Pid = `${mainThread.pid}`;
+
   // The gecko profile's process don't map to the final thread list. Use the stable
   // thread list to look up the thread index for the main thread in this profile.
   const mainThreadIndex = stableThreadList.findIndex(
-    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThreadPid
   );
 
   if (mainThreadIndex === -1) {
@@ -1015,7 +1046,7 @@ function _processCounters(
         name,
         category,
         description,
-        pid: mainThread.pid,
+        pid: mainThreadPid,
         mainThreadIndex,
         sampleGroups,
       });
@@ -1050,10 +1081,12 @@ function _processProfilerOverhead(
     return null;
   }
 
+  const mainThreadPid: Pid = `${mainThread.pid}`;
+
   // The gecko profile's process don't map to the final thread list. Use the stable
   // thread list to look up the thread index for the main thread in this profile.
   const mainThreadIndex = stableThreadList.findIndex(
-    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThreadPid
   );
 
   if (mainThreadIndex === -1) {
@@ -1068,7 +1101,7 @@ function _processProfilerOverhead(
       _toStructOfArrays(geckoProfilerOverhead.samples),
       delta
     ),
-    pid: mainThread.pid,
+    pid: mainThreadPid,
     mainThreadIndex,
     statistics: geckoProfilerOverhead.statistics,
   };
@@ -1135,7 +1168,7 @@ function _processThread(
     registerTime: thread.registerTime,
     unregisterTime: thread.unregisterTime,
     tid: thread.tid,
-    pid: thread.pid,
+    pid: `${thread.pid}`,
     pausedRanges: pausedRanges || [],
     frameTable,
     funcTable,

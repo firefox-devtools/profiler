@@ -45,6 +45,7 @@ import type {
   Address,
   Bytes,
   CallNodePath,
+  Pid,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -387,7 +388,7 @@ export function getMarkerTableProfile() {
           type: 'IPC',
           startTime: 120,
           endTime: 120,
-          otherPid: 2222,
+          otherPid: '2222',
           messageType: 'PContent::Msg_PreferenceUpdate',
           messageSeqno: 1,
           side: 'parent',
@@ -1233,7 +1234,7 @@ export function getNetworkTrackProfile() {
 type IPCMarkersOptions = {|
   startTime: number,
   endTime: number,
-  otherPid: number,
+  otherPid: Pid,
   messageType: string,
   messageSeqno: number,
   side: 'parent' | 'child',
@@ -1249,7 +1250,7 @@ function _getIPCMarkers(
     type: 'IPC',
     startTime: 0,
     endTime: (options.startTime || 0) + 0.1,
-    otherPid: 1234,
+    otherPid: '1234',
     messageType: 'PContent::Msg_PreferenceUpdate',
     messageSeqno: 0,
     side: 'parent',
