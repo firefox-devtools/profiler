@@ -34,7 +34,7 @@ import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
   handleCallNodeTransformShortcut,
-  openSourceView,
+  updateBottomBoxContentsAndMaybeOpen,
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
@@ -93,7 +93,7 @@ type DispatchProps = {|
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
-  +openSourceView: typeof openSourceView,
+  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -152,7 +152,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       selectedCallNodeIndex,
       rightClickedCallNodeIndex,
       handleCallNodeTransformShortcut,
-      openSourceView,
+      updateBottomBoxContentsAndMaybeOpen,
     } = this.props;
 
     const nodeIndex =
@@ -164,10 +164,8 @@ class StackChartImpl extends React.PureComponent<Props> {
     }
 
     if (event.key === 'Enter') {
-      const file = callTree.getRawFileNameForCallNode(nodeIndex);
-      if (file !== null) {
-        openSourceView(file, 'stack-chart');
-      }
+      const bottomBoxInfo = callTree.getBottomBoxInfoForCallNode(nodeIndex);
+      updateBottomBoxContentsAndMaybeOpen('stack-chart', bottomBoxInfo);
       return;
     }
 
@@ -325,7 +323,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedCallNode,
     updatePreviewSelection,
     handleCallNodeTransformShortcut,
-    openSourceView,
+    updateBottomBoxContentsAndMaybeOpen,
   },
   component: StackChartImpl,
 });

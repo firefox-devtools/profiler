@@ -15,13 +15,14 @@ import {
   funcHasIndirectRecursiveCall,
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
+import { getBottomBoxInfoForCallNode } from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
 
 import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
-  openSourceView,
+  updateBottomBoxContentsAndMaybeOpen,
   setContextMenuVisibility,
 } from 'firefox-profiler/actions/profile-view';
 import {
@@ -71,7 +72,7 @@ type StateProps = {|
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
-  +openSourceView: typeof openSourceView,
+  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
@@ -179,11 +180,23 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   showFile(): void {
-    const filePath = this._getFilePath();
-    if (filePath) {
-      const { openSourceView, selectedTab } = this.props;
-      openSourceView(filePath, selectedTab);
+    const { updateBottomBoxContentsAndMaybeOpen, selectedTab } = this.props;
+
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
+
+    if (rightClickedCallNodeInfo === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
     }
+
+    const { callNodeIndex, thread, callNodeInfo } = rightClickedCallNodeInfo;
+    const bottomBoxInfo = getBottomBoxInfoForCallNode(
+      callNodeIndex,
+      callNodeInfo,
+      thread
+    );
+    updateBottomBoxContentsAndMaybeOpen(selectedTab, bottomBoxInfo);
   }
 
   copyUrl(): void {
@@ -808,7 +821,7 @@ export const CallNodeContextMenu = explicitConnect<
   mapDispatchToProps: {
     addTransformToStack,
     expandAllCallNodeDescendants,
-    openSourceView,
+    updateBottomBoxContentsAndMaybeOpen,
     setContextMenuVisibility,
   },
   component: CallNodeContextMenuImpl,

@@ -38,6 +38,8 @@ import type {
   ThreadIndex,
   TimelineType,
   SourceViewState,
+  AssemblyViewState,
+  NativeSymbolInfo,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -181,6 +183,7 @@ type BaseQuery = {|
   implementation: string,
   timelineType: string,
   sourceView: string,
+  assemblyView: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -409,11 +412,19 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         'timing'
           ? undefined
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
-      const { sourceView, isBottomBoxOpenPerPanel } = urlState.profileSpecific;
-      query.sourceView =
-        sourceView.file !== null && isBottomBoxOpenPerPanel[selectedTab]
-          ? sourceView.file
-          : undefined;
+      const { sourceView, assemblyView, isBottomBoxOpenPerPanel } =
+        urlState.profileSpecific;
+
+      if (isBottomBoxOpenPerPanel[selectedTab]) {
+        if (sourceView.sourceFile !== null) {
+          query.sourceView = sourceView.sourceFile;
+        }
+        if (assemblyView.isOpen && assemblyView.nativeSymbol !== null) {
+          query.assemblyView = stringifyAssemblyViewSymbol(
+            assemblyView.nativeSymbol
+          );
+        }
+      }
       break;
     }
     case 'marker-table':
@@ -575,14 +586,30 @@ export function stateFromLocation(
   const selectedTab =
     toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree';
   const sourceView: SourceViewState = {
-    activationGeneration: 0,
-    file: null,
+    scrollGeneration: 0,
+    libIndex: null,
+    sourceFile: null,
+  };
+  const assemblyView: AssemblyViewState = {
+    isOpen: false,
+    scrollGeneration: 0,
+    nativeSymbol: null,
+    allNativeSymbolsForInitiatingCallNode: [],
   };
   const isBottomBoxOpenPerPanel = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
   if (query.sourceView) {
-    sourceView.file = query.sourceView;
+    sourceView.sourceFile = query.sourceView;
     isBottomBoxOpenPerPanel[selectedTab] = true;
+  }
+  if (query.assemblyView) {
+    const symbol = parseAssemblyViewSymbol(query.assemblyView);
+    if (symbol !== null) {
+      assemblyView.nativeSymbol = symbol;
+      assemblyView.allNativeSymbolsForInitiatingCallNode = [symbol];
+      assemblyView.isOpen = true;
+      isBottomBoxOpenPerPanel[selectedTab] = true;
+    }
   }
 
   const localTrackOrderByPid = convertLocalTrackOrderByPidFromString(
@@ -617,6 +644,7 @@ export function stateFromLocation(
       networkSearchString: query.networkSearch || '',
       transforms,
       sourceView,
+      assemblyView,
       isBottomBoxOpenPerPanel,
       timelineType: validateTimelineType(query.timelineType),
       full: {
@@ -1237,4 +1265,45 @@ function validateTimelineType(type: ?string): TimelineType {
       (timelineType: empty);
       return 'cpu-category';
   }
+}
+
+/**
+ * Parses the value of the `assemblyView` parameter in the URL.
+ * This parameter has the following form:
+ *   <libIndex> '~' <hexAddress> '~' <hexSize> '_'? '~' <symbolName>
+ */
+function parseAssemblyViewSymbol(value: string): NativeSymbolInfo | null {
+  const [libIndexStr, hexAddress, sizeStr, name] = value.split('~');
+  const libIndex = parseInt(libIndexStr, 10);
+  const address = parseInt(hexAddress, 16);
+  // sizeStr is `b7c` or `b7c_`, the trailing underscore means "or more".
+  const [functionSizeStr, functionSizeIsKnown] = sizeStr.endsWith('_')
+    ? [sizeStr.slice(0, -1), false]
+    : [sizeStr, true];
+  const functionSize = parseInt(functionSizeStr, 16);
+  if (isNaN(libIndex) || isNaN(address) || isNaN(functionSize)) {
+    return null;
+  }
+  return {
+    libIndex,
+    address,
+    name,
+    functionSize,
+    functionSizeIsKnown,
+  };
+}
+
+/**
+ * Serializes the value of the `assemblyView` parameter in the URL.
+ * This parameter has the following form:
+ *   <libIndex> '~' <hexAddress> '~' <hexSize> '_'? '~' <symbolName>
+ */
+function stringifyAssemblyViewSymbol(symbol: NativeSymbolInfo): string {
+  const { libIndex, address, name, functionSize, functionSizeIsKnown } = symbol;
+  const addressStr = address.toString(16);
+  let functionSizeStr = functionSize.toString(16);
+  if (!functionSizeIsKnown) {
+    functionSizeStr += '_';
+  }
+  return `${libIndex}~${addressStr}~${functionSizeStr}~${name}`;
 }

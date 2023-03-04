@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import { SourceView } from '../shared/SourceView';
 import {
   getSourceViewFile,
-  getSourceViewActivationGeneration,
+  getSourceViewScrollGeneration,
 } from 'firefox-profiler/selectors/url-state';
 import {
   selectedThreadSelectors,
@@ -34,7 +34,7 @@ type StateProps = {|
   +sourceViewSource: FileSourceStatus | void,
   +globalLineTimings: LineTimings,
   +selectedCallNodeLineTimings: LineTimings,
-  +sourceViewActivationGeneration: number,
+  +sourceViewScrollGeneration: number,
   +disableOverscan: boolean,
 |};
 
@@ -218,7 +218,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewSource,
       globalLineTimings,
       disableOverscan,
-      sourceViewActivationGeneration,
+      sourceViewScrollGeneration,
       selectedCallNodeLineTimings,
     } = this.props;
     const source =
@@ -253,7 +253,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               timings={globalLineTimings}
               source={source}
               filePath={path}
-              scrollToHotSpotGeneration={sourceViewActivationGeneration}
+              scrollToHotSpotGeneration={sourceViewScrollGeneration}
               hotSpotTimings={selectedCallNodeLineTimings}
               ref={this._sourceView}
             />
@@ -275,7 +275,7 @@ export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
     selectedCallNodeLineTimings:
       selectedNodeSelectors.getSourceViewLineTimings(state),
-    sourceViewActivationGeneration: getSourceViewActivationGeneration(state),
+    sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
     disableOverscan: getPreviewSelection(state).isModifying,
   }),
   mapDispatchToProps: {

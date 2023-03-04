@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Milliseconds, StartEndRange, Address } from './units';
+import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
 import type { MarkerPayload } from './markers';
 import type {
   IndexIntoFuncTable,
@@ -12,6 +12,7 @@ import type {
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
   IndexIntoNativeSymbolTable,
+  IndexIntoLibs,
   CounterIndex,
   InnerWindowID,
   Page,
@@ -531,3 +532,30 @@ export type EventDelayInfo = {|
  * comma separated thread indexes, e.g. "5,7,10"
  */
 export type ThreadsKey = string | number;
+
+/**
+ * A representation of a native symbol which is independent from a thread.
+ * This is used for storing the global state of the assembly view, which needs
+ * to be independent from the selected thread. An IndexIntoNativeSymbolTable
+ * would only be meaningful within a thread.
+ * This can be removed if the native symbol table ever becomes global.
+ */
+export type NativeSymbolInfo = {|
+  name: string,
+  address: Address,
+  // The number of bytes belonging to this function, starting at the symbol address.
+  // If functionSizeIsKnown is false, then this is a minimum size.
+  functionSize: Bytes,
+  functionSizeIsKnown: boolean,
+  libIndex: IndexIntoLibs,
+|};
+
+/**
+ * Information about the initiating call node when the bottom box (source view +
+ * assembly view) is updated.
+ */
+export type BottomBoxInfo = {|
+  libIndex: IndexIntoLibs | null,
+  sourceFile: string | null,
+  nativeSymbols: NativeSymbolInfo[],
+|};

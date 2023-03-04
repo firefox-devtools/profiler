@@ -32,7 +32,7 @@ import type {
   ProfileSpecificUrlState,
   FullProfileSpecificUrlState,
   ActiveTabSpecificProfileUrlState,
-  IsOpenPerPanelState,
+  NativeSymbolInfo,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -78,12 +78,16 @@ export const getInvertCallstack: Selector<boolean> = (state) =>
 export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
 export const getSourceViewFile: Selector<string | null> = (state) =>
-  getProfileSpecificState(state).sourceView.file;
-export const getSourceViewActivationGeneration: Selector<number> = (state) =>
-  getProfileSpecificState(state).sourceView.activationGeneration;
-export const getisBottomBoxOpenPerPanel: Selector<IsOpenPerPanelState> = (
+  getProfileSpecificState(state).sourceView.sourceFile;
+export const getSourceViewScrollGeneration: Selector<number> = (state) =>
+  getProfileSpecificState(state).sourceView.scrollGeneration;
+export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
+  getProfileSpecificState(state).assemblyView.isOpen;
+export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
   state
-) => getProfileSpecificState(state).isBottomBoxOpenPerPanel;
+) => getProfileSpecificState(state).assemblyView.nativeSymbol;
+export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
+  getProfileSpecificState(state).assemblyView.scrollGeneration;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<
@@ -216,12 +220,10 @@ export const getTransformStack: DangerousSelectorWithArguments<
   );
 };
 
-export const getIsBottomBoxOpen: Selector<boolean> = createSelector(
-  getisBottomBoxOpenPerPanel,
-  getSelectedTab,
-  (isBottomBoxOpenPerPanel, selectedTabSlug) =>
-    isBottomBoxOpenPerPanel[selectedTabSlug]
-);
+export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
+  const tab = getSelectedTab(state);
+  return getProfileSpecificState(state).isBottomBoxOpenPerPanel[tab];
+};
 
 /**
  * The URL predictor is used to generate a link for an uploaded profile, to predict

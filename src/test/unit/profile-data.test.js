@@ -13,6 +13,7 @@ import {
 } from '../../profile-logic/process-profile';
 import {
   getCallNodeInfo,
+  invertCallstack,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
   getSampleIndexClosestToStartTime,
@@ -23,6 +24,9 @@ import {
   getSamplesSelectedStates,
   extractProfileFilterPageData,
   findAddressProofForFile,
+  calculateFunctionSizeLowerBound,
+  getNativeSymbolsForCallNode,
+  getNativeSymbolInfo,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -1099,15 +1103,15 @@ describe('extractProfileFilterPageData', function () {
 describe('findAddressProofForFile', function () {
   it('finds a correct address for a file', function () {
     const { profile } = getProfileFromTextSamples(`
-      wr_renderer_render[lib:XUL][file:/Users/mstange/code/mozilla/gfx/webrender_bindings/src/bindings.rs][line:622][address:0x49d67a7]
-      webrender::renderer::Renderer::render[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:1724][address:0x4bcff7b]
-      webrender::renderer::Renderer::render_impl[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2002][address:0x4bd0c57]
-      webrender::renderer::Renderer::draw_frame[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:4701][address:0x4bd8d8b]
-      webrender::renderer::Renderer::draw_picture_cache_target[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2808][address:0x4bd8d8b][inl:1]
-      webrender::renderer::Renderer::draw_alpha_batch_container[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2980][address:0x4bd4d43]
-      webrender::renderer::Renderer::draw_picture_cache_target[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2808][address:0x4bd8d8b][inl:1]
-      webrender::renderer::Renderer::draw_alpha_batch_container[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2980][address:0x4bd4d43]
-      webrender::renderer::shade::LazilyCompiledShader::bind[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/shade.rs][line:150][address:0x4a9f89b]
+      wr_renderer_render[lib:XUL][file:/Users/mstange/code/mozilla/gfx/webrender_bindings/src/bindings.rs][line:622][address:49d67a7]
+      webrender::renderer::Renderer::render[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:1724][address:4bcff7b]
+      webrender::renderer::Renderer::render_impl[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2002][address:4bd0c57]
+      webrender::renderer::Renderer::draw_frame[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:4701][address:4bd8d8b]
+      webrender::renderer::Renderer::draw_picture_cache_target[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2808][address:4bd8d8b][inl:1]
+      webrender::renderer::Renderer::draw_alpha_batch_container[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2980][address:4bd4d43]
+      webrender::renderer::Renderer::draw_picture_cache_target[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2808][address:4bd8d8b][inl:1]
+      webrender::renderer::Renderer::draw_alpha_batch_container[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs][line:2980][address:4bd4d43]
+      webrender::renderer::shade::LazilyCompiledShader::bind[lib:XUL][file:/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/shade.rs][line:150][address:4a9f89b]
     `);
 
     const addressProof1 = findAddressProofForFile(
@@ -1135,5 +1139,166 @@ describe('findAddressProofForFile', function () {
       '/Users/mstange/code/mozilla/xpcom/threads/nsThreadUtils.cpp'
     );
     expect(missingAddressProof).toBeNull();
+  });
+});
+
+describe('calculateFunctionSizeLowerBound', function () {
+  it('calculates the correct minimum size', function () {
+    const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
+      some_function[lib:XUL][file:hello.cpp][line:622][address:1005][sym:symSomeFunc:1000:]
+      some_function[lib:XUL][file:hello.cpp][line:622][address:1002][sym:symSomeFunc:1000:]
+      some_function[lib:XUL][file:hello.cpp][line:622][address:1007][sym:symSomeFunc:1000:]
+    `);
+
+    const thread = profile.threads[0];
+    const nativeSymbolsDict = nativeSymbolsDictPerThread[0];
+    const nativeSymbolIndex = nativeSymbolsDict.symSomeFunc;
+
+    const functionSizeLowerBound = calculateFunctionSizeLowerBound(
+      thread.frameTable,
+      0x1000,
+      nativeSymbolIndex
+    );
+    expect(functionSizeLowerBound).toEqual(8); // 0x1007 - 0x1000 + 1
+  });
+});
+
+describe('getNativeSymbolsForCallNode', function () {
+  it('finds a single symbol', function () {
+    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
+      getProfileFromTextSamples(`
+        funA[lib:XUL][address:1005][sym:symA:1000:]
+        funB[lib:XUL][address:2007][sym:symB:2000:]
+        funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]
+      `);
+
+    const thread = profile.threads[0];
+    const { funA, funB, funC } = funcNamesDictPerThread[0];
+    const { symB } = nativeSymbolsDictPerThread[0];
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const ab = getCallNodeIndexFromPath(
+      [funA, funB],
+      callNodeInfo.callNodeTable
+    );
+    expect(ab).not.toBeNull();
+    const abc = getCallNodeIndexFromPath(
+      [funA, funB, funC],
+      callNodeInfo.callNodeTable
+    );
+    expect(abc).not.toBeNull();
+
+    // Both the call path [funA, funB] and the call path [funA, funB, funC] end
+    // up at a call node with native symbol symB.
+    expect(
+      getNativeSymbolsForCallNode(
+        ensureExists(ab),
+        callNodeInfo,
+        thread.stackTable,
+        thread.frameTable
+      )
+    ).toEqual([symB]);
+    expect(
+      getNativeSymbolsForCallNode(
+        ensureExists(abc),
+        callNodeInfo,
+        thread.stackTable,
+        thread.frameTable
+      )
+    ).toEqual([symB]);
+  });
+
+  it('finds multiple symbols', function () {
+    const { profile, funcNamesDictPerThread, nativeSymbolsDictPerThread } =
+      getProfileFromTextSamples(`
+        funA[lib:XUL][address:1005][sym:symA:1000:]         funA[lib:XUL][address:1005][sym:symA:1000:]
+        funB[lib:XUL][address:2007][sym:symB:2000:]         funD[lib:XUL][address:4007][sym:symD:4000:]
+        funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]  funC[lib:XUL][address:4007][sym:symD:4000:][inl:1]
+      `);
+
+    const thread = profile.threads[0];
+    const { funC } = funcNamesDictPerThread[0];
+    const { symB, symD } = nativeSymbolsDictPerThread[0];
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+    const invertedThread = invertCallstack(thread, defaultCategory);
+    const callNodeInfo = getCallNodeInfo(
+      invertedThread.stackTable,
+      invertedThread.frameTable,
+      invertedThread.funcTable,
+      defaultCategory
+    );
+    const c = getCallNodeIndexFromPath([funC], callNodeInfo.callNodeTable);
+    expect(c).not.toBeNull();
+
+    // The call node for funC in the inverted thread has one sample where funC
+    // is called by funB and one sample where it's called by funD. The call to
+    // funC was inlined into each of those functions. So the call node has two
+    // native symbols, B and D.
+    expect(
+      new Set(
+        getNativeSymbolsForCallNode(
+          ensureExists(c),
+          callNodeInfo,
+          invertedThread.stackTable,
+          invertedThread.frameTable
+        )
+      )
+    ).toEqual(new Set([symB, symD]));
+  });
+});
+
+describe('getNativeSymbolInfo', function () {
+  it('calculates the correct native symbol info', function () {
+    const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
+      some_function[lib:XUL][file:hello.cpp][line:622][address:1005][sym:symSomeFunc:1000:]
+      some_function[lib:XUL][file:hello.cpp][line:622][address:1002][sym:symSomeFunc:1000:]
+      some_function[lib:XUL][file:hello.cpp][line:622][address:1007][sym:symSomeFunc:1000:]
+      other_function[lib:XUL][file:hello.cpp][line:622][address:2007][sym:symOtherFunc:2000:1e]
+    `);
+
+    const thread = profile.threads[0];
+    const { symSomeFunc, symOtherFunc } = nativeSymbolsDictPerThread[0];
+
+    expect(
+      getNativeSymbolInfo(
+        symSomeFunc,
+        thread.nativeSymbols,
+        thread.frameTable,
+        thread.stringTable
+      )
+    ).toEqual({
+      name: 'symSomeFunc',
+      address: 0x1000,
+      functionSize: 8,
+      functionSizeIsKnown: false,
+      libIndex: profile.libs.findIndex((l) => l.name === 'XUL'),
+    });
+    expect(
+      getNativeSymbolInfo(
+        symOtherFunc,
+        thread.nativeSymbols,
+        thread.frameTable,
+        thread.stringTable
+      )
+    ).toEqual({
+      name: 'symOtherFunc',
+      address: 0x2000,
+      functionSize: 0x1e,
+      functionSizeIsKnown: true,
+      libIndex: profile.libs.findIndex((l) => l.name === 'XUL'),
+    });
   });
 });
