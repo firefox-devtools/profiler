@@ -29,7 +29,6 @@ import type {
   FuncTable,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
-  IndexIntoFrameTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
   CallNodePath,
@@ -1034,9 +1033,14 @@ export function collapseDirectRecursion(
   // just have the line and instruction address of the recursive call, and the
   // purpose of "collapsing recursion" is to ignore that recursive call.
   //
-  // Applying the transform's implementation filter is done on a best effort
-  // basis and doesn't really have a clean solution. We want to make the
-  // following case work:
+  // This transform has to be aware of the implementation filter, because the
+  // implementation filter affects whether we consider a recursive call to be a
+  // "direct" recursive call, i.e. it affects the question "Is function X
+  // directly called by function X?"
+  // If the implementation filter is set to JS, then we want the answer to this
+  // question be "Yes" for the call Xjs -> Ycpp -> Xjs.
+  //
+  // Here's a more complete example. We want to make the following case work:
   // Full:     Ajs -> Xcpp -> Bjs -> Ycpp -> Bjs -> Zcpp -> Bjs -> Wcpp
   // JS-only:  Ajs -> Bjs -> Bjs -> Bjs
   // Now collapse recursion on Bjs.
@@ -1105,8 +1109,7 @@ export function collapseDirectRecursion(
 
 export function collapseIndirectRecursion(
   thread: Thread,
-  funcToCollapse: IndexIntoFuncTable,
-  implementation: ImplementationFilter
+  funcToCollapse: IndexIntoFuncTable
 ): Thread {
   // Collapse recursion by reparenting stack nodes for all "inner" frames of a
   // recursion to the same level as the outermost frame.
@@ -1117,12 +1120,14 @@ export function collapseIndirectRecursion(
   // Example with recursion on B:
   //  - A1                    - A1
   //    - B1                    - B1
-  //      - C1                  - B2
-  //        - B2        ->        - D1
-  //          - D1              - B1
-  //        - D2                  - D2
+  //      - C1                    - C1
+  //        - B2        ->          - D2
+  //          - D1              - B2
+  //        - D2                  - D1
   //      - B3                  - B3
   //        - D3                  - D3
+  //    - C2                    - C2
+  //      - D4                    - D4
   //
   // In the call tree, sibling stack nodes with the same function will be
   // collapsed into one call node.
@@ -1134,124 +1139,59 @@ export function collapseIndirectRecursion(
   // just have the line and instruction address of the recursive call, and the
   // purpose of "collapsing recursion" is to ignore that recursive call.
   //
-  // Applying the transform's implementation filter is done on a best effort
-  // basis and doesn't really have a clean solution. We want to make the
-  // following case work:
-  // Full:     Ajs -> Xcpp -> Bjs -> Ycpp -> Cjs -> Zcpp -> Bjs -> Wcpp
-  // JS-only:  Ajs -> Bjs -> Cjs -> Bjs
-  // Now collapse recursion on Bjs.
-  // Collapsed JS-only:  Ajs -> Bjs
-  // Now switch back to all stack types.
-  // Collapsed full:     Ajs -> Xcpp -> Bjs -> Wcpp
+  // We can ignore the transform's implementation filter. This is a difference
+  // compared to the "collapse direct recursion" transform: The "collapse direct
+  // recursion" transform has to be aware of the implementation filter because
+  // the implementation filter affects the "directness" check, but we don't have
+  // such a check here.
 
   const { stackTable, frameTable } = thread;
-  const funcMatchesImplementation = FUNC_MATCHES[implementation];
-  // Set of stack indices that are funcToCheck or have a funcToCheck descendant.
-  // E.g. B1, C1, B2 and B3 in the example.
-  const recursionChainParentStack = new Set<IndexIntoStackTable>();
-  // Map stack indices that are funcToCheck or have a funcToCheck ancestor
-  // to the parent stack index of the outermost recursive funcToCheck.
-  // E.g. B2 -> A1 or D3 -> A1 in the example.
-  const recursionChainPrefixForStack = new Map<
+
+  // Map all stack indexes that are inside a funcToCollapse subtree to the
+  // parent stack index of the funcToCollapse subtree root.
+  // In the example, all stack nodes under the B1 subtree would be mapped to
+  // B1's prefix A1.
+  const funcToCollapseSubtreePrefixForStack = new Map<
     IndexIntoStackTable,
     IndexIntoStackTable | null
   >();
-  // Map stack indices that are funcToCheck or have a funcToCheck ancestor
-  // to the frame index of the innermost recursive funcToCheck.
-  // E.g. B3 -> B3, D1 -> B2 or D2 -> B1 in the example.
-  const recursionChainFrameForStack = new Map<
-    IndexIntoStackTable,
-    IndexIntoFrameTable
-  >();
   const newStackTablePrefixColumn = stackTable.prefix.slice();
-  const newStackTableFrameColumn = stackTable.frame.slice();
 
-  // Bottom-up (i.e. reverse) iteration to collect all stacks that
-  // contain the collapsed function in their subtree.
-  // This information helps identify stacks that are part of the recursion
-  // chain, including "intermediate" stacks.
-  for (let stackIndex = stackTable.length - 1; stackIndex >= 0; stackIndex--) {
-    const prefix = stackTable.prefix[stackIndex];
-    const frameIndex = stackTable.frame[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
-
-    if (funcIndex === funcToCollapse) {
-      // This stack itself is the collapsed function.
-      recursionChainParentStack.add(stackIndex);
-    }
-    if (recursionChainParentStack.has(stackIndex) && prefix !== null) {
-      // Propagate being a parent of a recursion chain upwards, if possible.
-      recursionChainParentStack.add(prefix);
-    }
-  }
-
-  // Top-down (i.e. forward) iteration that does the actual collapsing
-  // similarly to collapseDirectRecursion.
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
-    const recursionChainPrefix =
-      prefix !== null ? recursionChainPrefixForStack.get(prefix) : undefined;
-    const recursionChainFrame =
-      prefix !== null ? recursionChainFrameForStack.get(prefix) : undefined;
-    if (
-      recursionChainPrefix === undefined ||
-      recursionChainFrame === undefined // To make flow happy.
-    ) {
-      // Our prefix was not part of a recursion chain.
-      // If this stack frame matches the collapsed func, this stack node is the root
-      // of a recursion chain.
+    const subtreePrefix =
+      prefix !== null
+        ? funcToCollapseSubtreePrefixForStack.get(prefix)
+        : undefined;
+    if (subtreePrefix === undefined) {
+      // Our prefix was not part of a funcToCollapse subtree.
+      // If this stack frame matches the collapsed func, this stack node is the
+      // root of a subtree.
       if (funcIndex === funcToCollapse) {
-        recursionChainPrefixForStack.set(stackIndex, prefix);
-        recursionChainFrameForStack.set(stackIndex, frameIndex);
+        funcToCollapseSubtreePrefixForStack.set(stackIndex, prefix);
       }
     } else {
-      // Our prefix is part of a recursion chain.
-      if (funcMatchesImplementation(thread, funcIndex)) {
-        const prefixInChain =
-          prefix !== null && recursionChainParentStack.has(prefix);
-        const thisInChain = recursionChainParentStack.has(stackIndex);
-        if (prefixInChain && thisInChain) {
-          // The recursion chain continues.
-          recursionChainPrefixForStack.set(stackIndex, recursionChainPrefix);
-          // Reparent this stack node to the recursion root's prefix.
-          newStackTablePrefixColumn[stackIndex] = recursionChainPrefix;
-
-          if (funcIndex === funcToCollapse) {
-            // This node is the new recursion chain frame.
-            recursionChainFrameForStack.set(stackIndex, frameIndex);
-          } else {
-            // The recursion chain frame continues.
-            recursionChainFrameForStack.set(stackIndex, recursionChainFrame);
-            // Change this "intermediate" stack node to the recursion chain frame.
-            newStackTableFrameColumn[stackIndex] = recursionChainFrame;
-          }
-        } else {
-          // The recursion chain ends here. Leave recursionChainPrefixForStack
-          // empty for stackIndex.
-        }
-      } else {
-        // This stack node doesn't match the transform's implementation filter.
-        // For example, this stack node could be Xcpp in the following recursive
-        // JS invocation: Ajs -> Xcpp -> Ajs
-        // Keep the recursion chain going.
-        recursionChainPrefixForStack.set(stackIndex, recursionChainPrefix);
-        recursionChainFrameForStack.set(stackIndex, recursionChainFrame);
+      // Our prefix is part of a funcToCollapse subtree.
+      funcToCollapseSubtreePrefixForStack.set(stackIndex, subtreePrefix);
+      if (funcIndex === funcToCollapse) {
+        // We found a recursive call!
+        // Reparent this stack node to the recursion root's prefix.
+        newStackTablePrefixColumn[stackIndex] = subtreePrefix;
       }
     }
   }
 
   // Since we're keeping all stack indexes unchanged, none of the other tables
-  // in the thread need to be updated. Only the stackTable's prefix and frame
-  // columns have changed.
+  // in the thread need to be updated. Only the stackTable's prefix column has
+  // changed.
   return {
     ...thread,
     stackTable: {
       ...stackTable,
       prefix: newStackTablePrefixColumn,
-      frame: newStackTableFrameColumn,
     },
   };
 }
@@ -1784,11 +1724,7 @@ export function applyTransform(
         transform.implementation
       );
     case 'collapse-indirect-recursion':
-      return collapseIndirectRecursion(
-        thread,
-        transform.funcIndex,
-        transform.implementation
-      );
+      return collapseIndirectRecursion(thread, transform.funcIndex);
     case 'collapse-function-subtree':
       return collapseFunctionSubtree(
         thread,
