@@ -229,6 +229,24 @@ describe('converting Google Chrome profile', function () {
     checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
   });
+
+  it('successfully imports a profile using the chrome tracing format', async function () {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const compressedBuffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/chrome-tracing.json.gz'
+    );
+    const decompressedBuffer = zlib.gunzipSync(compressedBuffer);
+    const profile = await unserializeProfileOfArbitraryFormat(
+      decompressedBuffer.buffer
+    );
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
 });
 
 describe('converting ART trace', function () {

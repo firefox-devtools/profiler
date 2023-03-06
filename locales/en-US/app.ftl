@@ -301,11 +301,12 @@ Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
 
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     The { -profiler-brand-name } can also import profiles from other profilers, such as
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, the
     Chrome performance panel, <androidstudio>Android Studio</androidstudio>, or
-    any file using the <dhat>dhat format</dhat>. <write>Learn how to write your
+    any file using the <dhat>dhat format</dhat> or <traceevent>Google’s Trace Event
+    Format</traceevent>. <write>Learn how to write your
     own importer</write>.
 
 ## IdleSearchField
