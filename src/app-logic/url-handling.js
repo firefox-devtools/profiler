@@ -727,11 +727,11 @@ function convertHiddenLocalTracksByPidFromString(
     if (!stringPart.includes('-')) {
       continue;
     }
-    const pidString = stringPart.slice(0, stringPart.indexOf('-'));
-    const hiddenTracksString = stringPart.slice(pidString.length + 1);
-    const pid = Number(pidString);
+    // TODO: handle escaped dashes and tildes in pid strings (#4512)
+    const pid = stringPart.slice(0, stringPart.indexOf('-'));
+    const hiddenTracksString = stringPart.slice(pid.length + 1);
     const indexes = decodeUintArrayFromUrlComponent(hiddenTracksString);
-    if (!isNaN(pid) && indexes.every((n) => !isNaN(n))) {
+    if (indexes.every((n) => !isNaN(n))) {
       hiddenLocalTracksByPid.set(pid, new Set(indexes));
     }
   }
@@ -744,6 +744,7 @@ function convertHiddenLocalTracksByPidToString(
   const strings = [];
   for (const [pid, tracks] of hiddenLocalTracksByPid) {
     if (tracks.size > 0) {
+      // TODO: escaped dashes and tildes in pids (#4512)
       strings.push(`${pid}-${encodeUintSetForUrlComponent(tracks)}`);
     }
   }
@@ -772,11 +773,11 @@ function convertLocalTrackOrderByPidFromString(
       // default value.
       continue;
     }
-    const pidString = stringPart.slice(0, stringPart.indexOf('-'));
-    const trackOrderString = stringPart.slice(pidString.length + 1);
-    const pid = Number(pidString);
+    // TODO: handle escaped dashes and tildes in pid strings (#4512)
+    const pid = stringPart.slice(0, stringPart.indexOf('-'));
+    const trackOrderString = stringPart.slice(pid.length + 1);
     const indexes = decodeUintArrayFromUrlComponent(trackOrderString);
-    if (!isNaN(pid) && indexes.every((n) => !isNaN(n))) {
+    if (indexes.every((n) => !isNaN(n))) {
       localTrackOrderByPid.set(pid, indexes);
     }
   }
@@ -795,9 +796,8 @@ function convertLocalTrackOrderByPidToString(
       continue;
     }
     if (trackOrder.length > 0) {
-      strings.push(
-        `${String(pid)}-${encodeUintArrayForUrlComponent(trackOrder)}`
-      );
+      // TODO: escaped dashes and tildes in pids (#4512)
+      strings.push(`${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`);
     }
   }
   return strings.join('~') || undefined;
@@ -1069,6 +1069,7 @@ const _upgraders: {|
       query.hiddenLocalTracksByPid = (query.hiddenLocalTracksByPid: string)
         .split('~')
         .map((pidAndTracks) => {
+          // TODO: handle escaped dashes and tildes in pid strings (#4512)
           const [pid, ...tracks] = pidAndTracks.split('-');
           const hiddenTracks = new Set(tracks.map((s) => +s));
           return `${pid}-${encodeUintSetForUrlComponent(hiddenTracks)}`;
@@ -1079,6 +1080,7 @@ const _upgraders: {|
       query.localTrackOrderByPid = (query.localTrackOrderByPid: string)
         .split('~')
         .map((pidAndTracks) => {
+          // TODO: handle escaped dashes and tildes in pid strings (#4512)
           const [pid, ...tracks] = pidAndTracks.split('-');
           const trackOrder = tracks.map((s) => +s);
           return `${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`;
