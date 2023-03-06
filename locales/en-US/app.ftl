@@ -926,6 +926,12 @@ TransformNavigator--collapse-indirect-recursion = Collapse indirect recursion: {
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Collapse subtree: { $item }
 
+## The TreeView is a common component used in various panels, notably the marker
+## table and the call tree.
+
+TreeView--column-divider =
+  .title = Use this handle to change this column size
+
 ## Source code view in a box at the bottom of the UI.
 
 # Displayed while the source view is waiting for the network request which
