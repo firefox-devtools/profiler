@@ -879,15 +879,24 @@ function extractMarkers(
       }
 
       // For Complete ('X') events, require a duration.
-      // Duration events ('B' and 'E') as well as Instant events ('I') do not
-      // require any extra fields.
+      // Other events do not require any extra fields.
       if (
+        // Complete events
         (event.ph === 'X' &&
           event.dur !== undefined &&
           Number.isFinite(event.dur)) ||
+        // Duration events
         event.ph === 'B' ||
         event.ph === 'E' ||
-        event.ph === 'I'
+        // Async events
+        event.ph === 'b' ||
+        event.ph === 'n' ||
+        event.ph === 'e' ||
+        // Instant events
+        event.ph === 'i' ||
+        event.ph === 'I' ||
+        // Mark events
+        event.ph === 'R'
       ) {
         const time: number = (event.ts: any) / 1000;
         const threadInfo = getThreadInfo(
@@ -918,20 +927,25 @@ function extractMarkers(
             category: event.cat,
             data: argData,
           });
-        } else if (event.ph === 'B' || event.ph === 'E') {
-          if (event.ph === 'B') {
-            // The 'B' phase stand for "begin", and is the Chrome equivalent of IntervalStart.
+        } else if (
+          event.ph === 'B' ||
+          event.ph === 'E' ||
+          event.ph === 'b' ||
+          event.ph === 'e'
+        ) {
+          if (event.ph === 'B' || event.ph === 'b') {
+            // The 'B' and 'b' phases stand for "begin", and is the Chrome equivalent of IntervalStart.
             markers.startTime.push(time);
             markers.endTime.push(null);
             markers.phase.push(INTERVAL_START);
           } else {
-            // The 'E' phase stand for "end", and is the Chrome equivalent of IntervalEnd.
+            // The 'E' and 'e' phase stand for "end", and is the Chrome equivalent of IntervalEnd.
             markers.startTime.push(null);
             markers.endTime.push(time);
             markers.phase.push(INTERVAL_END);
           }
 
-          // Duration Event
+          // Duration or Async Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
           markers.data.push({
             type: 'tracing',
@@ -939,7 +953,8 @@ function extractMarkers(
             data: argData,
           });
         } else {
-          // This assumes the phase is 'I', or Instant.
+          // This assumes the phase is 'I' or 'i' (Instant), 'n' (Async Instant)
+          // or 'R' (Mark events)
           markers.startTime.push(time);
           markers.endTime.push(null);
           markers.phase.push(INSTANT);
