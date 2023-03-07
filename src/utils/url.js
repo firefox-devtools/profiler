@@ -14,9 +14,9 @@ export const localhostHostnames: $ReadOnlyArray<string> = [
 // is local, and therefore likely to have gone away, meaning we should
 // be careful offering tools to the user that refresh the page or
 // otherwise lose state, as refetching that state may not work.
-export function isLocalURL(url: string): boolean {
+export function isLocalURL(url: string | URL): boolean {
   try {
-    const parsedUrl = new URL(url);
+    const parsedUrl = url instanceof URL ? url : new URL(url);
     return localhostHostnames.includes(parsedUrl.hostname);
   } catch (e) {
     return false;

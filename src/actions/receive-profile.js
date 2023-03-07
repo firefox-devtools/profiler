@@ -20,7 +20,7 @@ import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-co
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { expandUrl } from 'firefox-profiler/utils/shorten-url';
 import { TemporaryError } from 'firefox-profiler/utils/errors';
-import { localhostHostnames } from 'firefox-profiler/utils/url';
+import { isLocalURL } from 'firefox-profiler/utils/url';
 import {
   getSelectedThreadIndexesOrNull,
   getGlobalTrackOrder,
@@ -1073,7 +1073,7 @@ function _loadProbablyFailedDueToSafariLocalhostHTTPRestriction(
   return (
     error.name === 'TypeError' &&
     parsedUrl.protocol === 'http:' &&
-    localhostHostnames.includes(parsedUrl.hostname) &&
+    isLocalURL(parsedUrl) &&
     location.protocol === 'https:'
   );
 }
