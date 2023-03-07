@@ -9,7 +9,7 @@ import {
   getSourceViewFile,
   getSymbolServerUrl,
 } from 'firefox-profiler/selectors/url-state';
-import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
+import { getSourceViewCode } from 'firefox-profiler/selectors/sources';
 import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { getProfileOrNull } from 'firefox-profiler/selectors';
 import {
@@ -30,7 +30,7 @@ import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
 
 type StateProps = {|
   +sourceViewFile: string | null,
-  +sourceViewSource: SourceCodeStatus | void,
+  +sourceViewCode: SourceCodeStatus | void,
   +symbolServerUrl: string,
   +profile: Profile | null,
   +browserConnection: BrowserConnection | null,
@@ -57,8 +57,8 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
   }
 
   _triggerSourceLoadingIfNeeded() {
-    const { sourceViewFile, sourceViewSource } = this.props;
-    if (sourceViewFile && !sourceViewSource) {
+    const { sourceViewFile, sourceViewCode } = this.props;
+    if (sourceViewFile && !sourceViewCode) {
       this._fetchSourceForFile(sourceViewFile);
     }
   }
@@ -117,7 +117,7 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
 export const SourceFetcher = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
-    sourceViewSource: getSourceViewSource(state),
+    sourceViewCode: getSourceViewCode(state),
     symbolServerUrl: getSymbolServerUrl(state),
     profile: getProfileOrNull(state),
     browserConnection: getBrowserConnection(state),

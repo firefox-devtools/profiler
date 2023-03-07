@@ -10,7 +10,7 @@ import { getSourceViewFile } from './url-state';
 export const getSources: Selector<Map<string, SourceCodeStatus>> = (state) =>
   state.sources;
 
-export const getSourceViewSource: Selector<SourceCodeStatus | void> =
+export const getSourceViewCode: Selector<SourceCodeStatus | void> =
   createSelector(getSources, getSourceViewFile, (sources, file) =>
     file ? sources.get(file) : undefined
   );
