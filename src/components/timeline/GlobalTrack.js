@@ -273,13 +273,12 @@ class GlobalTrackComponent extends PureComponent<Props> {
               {trackName}
               {
                 // Only show the PID if:
-                //   1. It is a real number. A string PID is an artificially generated
-                //      value that is not useful, and a null value does not exist.
+                //   1. It is non-null. For example, Screenshot tracks have a null
+                //      PIDs, and we don't want to show "PID: " for them.
                 //   2. The global track actually points to a real thread. A stub
                 //      process track is created
               }
-              {typeof pid === 'number' &&
-              globalTrack.mainThreadIndex !== null ? (
+              {pid !== null && globalTrack.mainThreadIndex !== null ? (
                 <div className="timelineTrackNameButtonAdditionalDetails">
                   PID: {pid}
                 </div>

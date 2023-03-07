@@ -31,3 +31,7 @@
 # Set the correct MIME type for WebAssembly modules.
 /*.wasm
   Content-Type: application/wasm
+
+# Set a JSON MIME type for Source maps.
+/*.map
+  Content-Type: application/json

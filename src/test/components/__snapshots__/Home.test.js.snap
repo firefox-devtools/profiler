@@ -180,6 +180,13 @@ any file using the
           >
             dhat format
           </a>
+           or 
+          <a
+            href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview"
+          >
+            Google’s Trace Event
+Format
+          </a>
           . 
           <a
             href="https://github.com/firefox-devtools/profiler/blob/main/docs-developer/custom-importer.md"
@@ -415,6 +422,13 @@ any file using the
             href="https://valgrind.org/docs/manual/dh-manual.html"
           >
             dhat format
+          </a>
+           or 
+          <a
+            href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview"
+          >
+            Google’s Trace Event
+Format
           </a>
           . 
           <a

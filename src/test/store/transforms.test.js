@@ -1438,9 +1438,9 @@ describe('"collapse-indirect-recursion" transform', function () {
      *            ↙   ↘            Func B            ↙   ↘
      *          B       G            ->             B     G
      *        ↙   ↘                              ↙  ↓  ↘
-     *       C     F                            D   E   F
-     *     ↙   ↘
-     *    B     E
+     *       C     F                            C   D   F
+     *     ↙   ↘                                ↓
+     *    B     E                               E
      *    ↓
      *    D
      */
@@ -1486,8 +1486,9 @@ describe('"collapse-indirect-recursion" transform', function () {
       ).toEqual([
         '- A (total: 4, self: —)',
         '  - B (total: 3, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - E (total: 1, self: 1)',
         '    - D (total: 1, self: 1)',
-        '    - E (total: 1, self: 1)',
         '    - F (total: 1, self: 1)',
         '  - G (total: 1, self: 1)',
       ]);
@@ -1551,12 +1552,12 @@ describe('"collapse-indirect-recursion" transform', function () {
      *                    A    Collapse indirect recursion      A
      *                  ↙   ↘            Func B              ↙    ↘
      *                B       K            ->             B         K
-     *              ↙   ↘                           ↙  ↙  ↓  ↘  ↘
-     *             C     J                         F  G   H   I  J
-     *           ↙   ↘
-     *          B     I
-     *          ↓
-     *          D
+     *              ↙   ↘                            ↙  ↙   ↘  ↘
+     *             C     J                          F  D     C  J
+     *           ↙   ↘                               ↙   ↘   ↓
+     *          B     I                             E     H  I
+     *          ↓                                   ↓
+     *          D                                   G
      *        ↙   ↘
      *       E     H
      *     ↙   ↘
@@ -1618,10 +1619,13 @@ describe('"collapse-indirect-recursion" transform', function () {
       ).toEqual([
         '- A (total: 6, self: —)',
         '  - B (total: 5, self: —)',
+        '    - D (total: 2, self: —)',
+        '      - E (total: 1, self: —)',
+        '        - G (total: 1, self: 1)',
+        '      - H (total: 1, self: 1)',
+        '    - C (total: 1, self: —)',
+        '      - I (total: 1, self: 1)',
         '    - F (total: 1, self: 1)',
-        '    - G (total: 1, self: 1)',
-        '    - H (total: 1, self: 1)',
-        '    - I (total: 1, self: 1)',
         '    - J (total: 1, self: 1)',
         '  - K (total: 1, self: 1)',
       ]);
@@ -1759,11 +1763,11 @@ describe('"collapse-indirect-recursion" transform', function () {
      *                 ↙     ↘             Func B.js              ↙     ↘
      *               B.js     H.js            ->               B.js      H.js
      *             ↙    ↘                                    ↙   ↓   ↘
-     *         C.js      G.js                            E.js   F.js   G.js
-     *          ↓
-     *        D.cpp
-     *        ↙     ↘
-     *    B.js       F.js
+     *         C.js      G.js                            C.js   E.js   G.js
+     *          ↓                                         ↓
+     *        D.cpp                                     D.cpp
+     *        ↙     ↘                                     ↓
+     *    B.js       F.js                                F.js
      *     ↓
      *    E.js
      */
@@ -1814,8 +1818,9 @@ describe('"collapse-indirect-recursion" transform', function () {
       ).toEqual([
         '- A.js (total: 5, self: —)',
         '  - B.js (total: 4, self: —)',
-        '    - D.cpp (total: 2, self: 1)',
-        '      - F.js (total: 1, self: 1)',
+        '    - C.js (total: 2, self: —)',
+        '      - D.cpp (total: 2, self: 1)',
+        '        - F.js (total: 1, self: 1)',
         '    - E.js (total: 1, self: 1)',
         '    - G.js (total: 1, self: 1)',
         '  - H.js (total: 1, self: 1)',

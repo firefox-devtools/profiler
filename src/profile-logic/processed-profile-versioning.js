@@ -2227,5 +2227,29 @@ const _upgraders = {
         String(thread.pid) === thread.tid;
     }
   },
+  [47]: (profile) => {
+    // The `pid` field of the Thread type was changed from `string | number` to `string`.
+    // The same happened to the data.otherPid field of IPC markers, and to the
+    // pid fields in the profiler.counters and profile.profilerOverhead lists.
+    for (const thread of profile.threads) {
+      thread.pid = `${thread.pid}`;
+
+      for (const data of thread.markers.data) {
+        if (data && data.type === 'IPC') {
+          data.otherPid = `${data.otherPid}`;
+        }
+      }
+    }
+    if (profile.counters) {
+      for (const counter of profile.counters) {
+        counter.pid = `${counter.pid}`;
+      }
+    }
+    if (profile.profilerOverhead) {
+      for (const overhead of profile.profilerOverhead) {
+        overhead.pid = `${overhead.pid}`;
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

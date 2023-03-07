@@ -491,12 +491,12 @@ describe('NetworkChartRowBar URL split', function () {
 
   it('splits up the url by protocol / domain / path / filename / params / hash', function () {
     const { getUrlShorteningParts } = setupForUrl(
-      'https://test.mozilla.org/img/optimized/test.gif?param1=123&param2=321#hashNode2'
+      'https://test.mozilla.org:5000/img/optimized/test.gif?param1=123&param2=321#hashNode2'
     );
     expect(getUrlShorteningParts()).toEqual([
       // Then assert that it's broken up as expected
       ['networkChartRowItemUriOptional', 'https://'],
-      ['networkChartRowItemUriRequired', 'test.mozilla.org'],
+      ['networkChartRowItemUriRequired', 'test.mozilla.org:5000'],
       ['networkChartRowItemUriOptional', '/img/optimized'],
       ['networkChartRowItemUriRequired', '/test.gif'],
       ['networkChartRowItemUriOptional', '?param1=123&param2=321'],

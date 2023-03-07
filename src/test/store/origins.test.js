@@ -7,12 +7,13 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { viewProfile } from '../../actions/receive-profile';
 import { ensureExists } from '../../utils/flow';
 import createStore from '../../app-logic/create-store';
+import type { Pid } from 'firefox-profiler/types';
 
 type TestDefinedOriginThread = {|
   name?: string,
   origin?: string,
   parentOrigin?: string,
-  pid?: number,
+  pid?: Pid,
 |};
 
 function getProfileWithOrigins(...originThreads: TestDefinedOriginThread[]) {
@@ -62,7 +63,7 @@ function getProfileWithOrigins(...originThreads: TestDefinedOriginThread[]) {
     if (name) {
       thread.name = name;
     }
-    thread.pid = pid === undefined ? threadIndex : pid;
+    thread.pid = pid === undefined ? `${threadIndex}` : pid;
   }
 
   return profile;
@@ -80,8 +81,8 @@ describe('origins timeline', function () {
 
   it('can compute an origins based view', function () {
     const { getState } = setup(
-      { name: `GeckoMain`, pid: 1 },
-      { name: `Compositor`, pid: 1 },
+      { name: `GeckoMain`, pid: '1' },
+      { name: `Compositor`, pid: '1' },
       { origin: `https://AAAA.example.com` },
       {
         origin: `https://BBBB.example.com`,

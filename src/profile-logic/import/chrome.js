@@ -226,6 +226,13 @@ export function attemptToConvertChromeProfile(
     events.push(
       wrapCpuProfileInEvent(coerce<MixedObject, CpuProfileData>(json))
     );
+  } else if (
+    typeof json === 'object' &&
+    'traceEvents' in json &&
+    Array.isArray(json.traceEvents)
+  ) {
+    // This is Google Tracing Event format, for example from chrome://tracing.
+    events = coerce<mixed, TracingEventUnion[]>(json.traceEvents);
   }
 
   if (!events) {
@@ -311,7 +318,7 @@ function getThreadInfo(
     return cachedThreadInfo;
   }
   const thread = getEmptyThread();
-  thread.pid = chunk.pid;
+  thread.pid = `${chunk.pid}`;
   // It looks like the TID information in Chrome's data isn't the system's TID
   // but some internal values only unique for a pid. Therefore let's generate a
   // proper unique value.

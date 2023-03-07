@@ -19,6 +19,7 @@ import {
   failLoadingSource,
 } from 'firefox-profiler/actions/sources';
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
+import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
 import { findAddressProofForFile } from 'firefox-profiler/profile-logic/profile-data';
 import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
@@ -76,43 +77,24 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
     const addressProof =
       profile !== null ? findAddressProofForFile(profile, file) : null;
 
+    const delegate = new RegularExternalCommunicationDelegate(
+      browserConnection,
+      {
+        onBeginUrlRequest: (url) => {
+          beginLoadingSourceFromUrl(file, url);
+        },
+        onBeginBrowserConnectionQuery: () => {
+          beginLoadingSourceFromBrowserConnection(file);
+        },
+      }
+    );
+
     const fetchSourceResult = await fetchSource(
       file,
       symbolServerUrl,
       addressProof,
       this._archiveCache,
-      {
-        fetchUrlResponse: async (url: string, postData?: MixedObject) => {
-          beginLoadingSourceFromUrl(file, url);
-
-          const requestInit =
-            postData !== undefined
-              ? {
-                  body: postData,
-                  method: 'POST',
-                  mode: 'cors',
-                  credentials: 'omit',
-                }
-              : { credentials: 'omit' };
-          const response = await fetch(url, requestInit);
-          if (response.status !== 200) {
-            throw new Error(
-              `The request to ${url} returned HTTP status ${response.status}`
-            );
-          }
-          return response;
-        },
-        queryBrowserSymbolicationApi: async (
-          path: string,
-          requestJson: string
-        ) => {
-          if (browserConnection === null) {
-            throw new Error('No connection to the browser.');
-          }
-          beginLoadingSourceFromBrowserConnection(file);
-          return browserConnection.querySymbolicationApi(path, requestJson);
-        },
-      }
+      delegate
     );
 
     switch (fetchSourceResult.type) {

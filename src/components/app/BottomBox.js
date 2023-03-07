@@ -169,6 +169,28 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
                       </Localized>
                     );
                   }
+                  case 'BROWSER_API_MALFORMED_RESPONSE': {
+                    const { errorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--browser-api-malformed-response-when-obtaining-source"
+                        vars={{ errorMessage }}
+                      >
+                        <li>{`The browser’s symbolication API returned a malformed response: ${errorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
+                  case 'SYMBOL_SERVER_API_MALFORMED_RESPONSE': {
+                    const { errorMessage } = error;
+                    return (
+                      <Localized
+                        id="SourceView--local-symbol-server-api-malformed-response-when-obtaining-source"
+                        vars={{ errorMessage }}
+                      >
+                        <li>{`The local symbol server’s symbolication API returned a malformed response: ${errorMessage}`}</li>
+                      </Localized>
+                    );
+                  }
                   case 'NOT_PRESENT_IN_ARCHIVE': {
                     const { url, pathInArchive } = error;
                     return (
