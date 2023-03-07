@@ -38,7 +38,7 @@ import type {
   UploadState,
   State,
   UploadedProfileInformation,
-  SourceLoadingError,
+  SourceCodeLoadingError,
   TableViewOptions,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
@@ -629,13 +629,13 @@ type L10nAction =
     |};
 
 type SourcesAction =
-  | {| +type: 'SOURCE_LOADING_BEGIN_URL', file: string, url: string |}
-  | {| +type: 'SOURCE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
-  | {| +type: 'SOURCE_LOADING_SUCCESS', file: string, source: string |}
+  | {| +type: 'SOURCE_CODE_LOADING_BEGIN_URL', file: string, url: string |}
+  | {| +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
+  | {| +type: 'SOURCE_CODE_LOADING_SUCCESS', file: string, source: string |}
   | {|
-      +type: 'SOURCE_LOADING_ERROR',
+      +type: 'SOURCE_CODE_LOADING_ERROR',
       file: string,
-      errors: SourceLoadingError[],
+      errors: SourceCodeLoadingError[],
     |};
 
 type AppAction = {|

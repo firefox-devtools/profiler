@@ -3,20 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Reducer, FileSourceStatus } from 'firefox-profiler/types';
+import type { Reducer, SourceCodeStatus } from 'firefox-profiler/types';
 
-const sources: Reducer<Map<string, FileSourceStatus>> = (
+const sources: Reducer<Map<string, SourceCodeStatus>> = (
   state = new Map(),
   action
 ) => {
   switch (action.type) {
-    case 'SOURCE_LOADING_BEGIN_URL': {
+    case 'SOURCE_CODE_LOADING_BEGIN_URL': {
       const { file, url } = action;
       const newState = new Map(state);
       newState.set(file, { type: 'LOADING', source: { type: 'URL', url } });
       return newState;
     }
-    case 'SOURCE_LOADING_BEGIN_BROWSER_CONNECTION': {
+    case 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION': {
       const { file } = action;
       const newState = new Map(state);
       newState.set(file, {
@@ -25,13 +25,13 @@ const sources: Reducer<Map<string, FileSourceStatus>> = (
       });
       return newState;
     }
-    case 'SOURCE_LOADING_SUCCESS': {
+    case 'SOURCE_CODE_LOADING_SUCCESS': {
       const { file, source } = action;
       const newState = new Map(state);
       newState.set(file, { type: 'AVAILABLE', source });
       return newState;
     }
-    case 'SOURCE_LOADING_ERROR': {
+    case 'SOURCE_CODE_LOADING_ERROR': {
       const { file, errors } = action;
       const newState = new Map(state);
       newState.set(file, { type: 'ERROR', errors });

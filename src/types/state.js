@@ -276,12 +276,12 @@ export type AssemblyViewState = {|
   allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
 |};
 
-export type FileSourceStatus =
-  | {| type: 'LOADING', source: FileSourceLoadingSource |}
-  | {| type: 'ERROR', errors: SourceLoadingError[] |}
+export type SourceCodeStatus =
+  | {| type: 'LOADING', source: SourceCodeLoadingSource |}
+  | {| type: 'ERROR', errors: SourceCodeLoadingError[] |}
   | {| type: 'AVAILABLE', source: string |};
 
-export type FileSourceLoadingSource =
+export type SourceCodeLoadingSource =
   | {| type: 'URL', url: string |}
   | {| type: 'BROWSER_CONNECTION' |};
 
@@ -318,7 +318,7 @@ export type ApiQueryError =
       errorMessage: string,
     |};
 
-export type SourceLoadingError =
+export type SourceCodeLoadingError =
   | ApiQueryError
   | {| type: 'NO_KNOWN_CORS_URL' |}
   | {|
@@ -420,7 +420,7 @@ export type State = {|
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
   +l10n: L10nState,
-  +sources: Map<string, FileSourceStatus>,
+  +sources: Map<string, SourceCodeStatus>,
 |};
 
 export type IconWithClassName = {|

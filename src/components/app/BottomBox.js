@@ -23,7 +23,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { LineTimings, FileSourceStatus } from 'firefox-profiler/types';
+import type { LineTimings, SourceCodeStatus } from 'firefox-profiler/types';
 
 import { Localized } from '@fluent/react';
 
@@ -31,7 +31,7 @@ import './BottomBox.css';
 
 type StateProps = {|
   +sourceViewFile: string | null,
-  +sourceViewSource: FileSourceStatus | void,
+  +sourceViewSource: SourceCodeStatus | void,
   +globalLineTimings: LineTimings,
   +selectedCallNodeLineTimings: LineTimings,
   +sourceViewScrollGeneration: number,
@@ -44,7 +44,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-type SourceStatusOverlayProps = {| status: FileSourceStatus |};
+type SourceStatusOverlayProps = {| status: SourceCodeStatus |};
 
 function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
   switch (status.type) {

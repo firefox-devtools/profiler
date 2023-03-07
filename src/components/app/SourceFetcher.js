@@ -13,10 +13,10 @@ import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
 import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { getProfileOrNull } from 'firefox-profiler/selectors';
 import {
-  beginLoadingSourceFromUrl,
-  beginLoadingSourceFromBrowserConnection,
-  finishLoadingSource,
-  failLoadingSource,
+  beginLoadingSourceCodeFromUrl,
+  beginLoadingSourceCodeFromBrowserConnection,
+  finishLoadingSourceCode,
+  failLoadingSourceCode,
 } from 'firefox-profiler/actions/sources';
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
@@ -26,21 +26,21 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { FileSourceStatus, Profile } from 'firefox-profiler/types';
+import type { SourceCodeStatus, Profile } from 'firefox-profiler/types';
 
 type StateProps = {|
   +sourceViewFile: string | null,
-  +sourceViewSource: FileSourceStatus | void,
+  +sourceViewSource: SourceCodeStatus | void,
   +symbolServerUrl: string,
   +profile: Profile | null,
   +browserConnection: BrowserConnection | null,
 |};
 
 type DispatchProps = {|
-  +beginLoadingSourceFromUrl: typeof beginLoadingSourceFromUrl,
-  +beginLoadingSourceFromBrowserConnection: typeof beginLoadingSourceFromBrowserConnection,
-  +finishLoadingSource: typeof finishLoadingSource,
-  +failLoadingSource: typeof failLoadingSource,
+  +beginLoadingSourceCodeFromUrl: typeof beginLoadingSourceCodeFromUrl,
+  +beginLoadingSourceCodeFromBrowserConnection: typeof beginLoadingSourceCodeFromBrowserConnection,
+  +finishLoadingSourceCode: typeof finishLoadingSourceCode,
+  +failLoadingSourceCode: typeof failLoadingSourceCode,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -65,10 +65,10 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
 
   async _fetchSourceForFile(file: string) {
     const {
-      beginLoadingSourceFromUrl,
-      beginLoadingSourceFromBrowserConnection,
-      finishLoadingSource,
-      failLoadingSource,
+      beginLoadingSourceCodeFromUrl,
+      beginLoadingSourceCodeFromBrowserConnection,
+      finishLoadingSourceCode,
+      failLoadingSourceCode,
       symbolServerUrl,
       profile,
       browserConnection,
@@ -81,10 +81,10 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
       browserConnection,
       {
         onBeginUrlRequest: (url) => {
-          beginLoadingSourceFromUrl(file, url);
+          beginLoadingSourceCodeFromUrl(file, url);
         },
         onBeginBrowserConnectionQuery: () => {
-          beginLoadingSourceFromBrowserConnection(file);
+          beginLoadingSourceCodeFromBrowserConnection(file);
         },
       }
     );
@@ -99,10 +99,10 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
 
     switch (fetchSourceResult.type) {
       case 'SUCCESS':
-        finishLoadingSource(file, fetchSourceResult.source);
+        finishLoadingSourceCode(file, fetchSourceResult.source);
         break;
       case 'ERROR':
-        failLoadingSource(file, fetchSourceResult.errors);
+        failLoadingSourceCode(file, fetchSourceResult.errors);
         break;
       default:
         throw assertExhaustiveCheck(fetchSourceResult.type);
@@ -123,10 +123,10 @@ export const SourceFetcher = explicitConnect<{||}, StateProps, DispatchProps>({
     browserConnection: getBrowserConnection(state),
   }),
   mapDispatchToProps: {
-    beginLoadingSourceFromUrl,
-    beginLoadingSourceFromBrowserConnection,
-    finishLoadingSource,
-    failLoadingSource,
+    beginLoadingSourceCodeFromUrl,
+    beginLoadingSourceCodeFromBrowserConnection,
+    finishLoadingSourceCode,
+    failLoadingSourceCode,
   },
   component: SourceFetcherImpl,
 });

@@ -14,11 +14,14 @@ import { UntarFileStream } from './untar';
 import { isLocalURL } from './url';
 import { queryApiWithFallback } from './query-api';
 import type { ExternalCommunicationDelegate } from './query-api';
-import type { SourceLoadingError, AddressProof } from 'firefox-profiler/types';
+import type {
+  SourceCodeLoadingError,
+  AddressProof,
+} from 'firefox-profiler/types';
 
 export type FetchSourceResult =
   | { type: 'SUCCESS', source: string }
-  | { type: 'ERROR', errors: SourceLoadingError[] };
+  | { type: 'ERROR', errors: SourceCodeLoadingError[] };
 
 /**
  * Fetch the source code for a file path from the web.
@@ -41,7 +44,7 @@ export async function fetchSource(
   archiveCache: Map<string, Promise<Uint8Array>>,
   delegate: ExternalCommunicationDelegate
 ): Promise<FetchSourceResult> {
-  const errors: SourceLoadingError[] = [];
+  const errors: SourceCodeLoadingError[] = [];
 
   if (addressProof !== null) {
     // Prepare a request to /source/v1. The API format for this endpoint is documented

@@ -4,13 +4,13 @@
 
 // @flow
 import { createSelector } from 'reselect';
-import type { FileSourceStatus, Selector } from 'firefox-profiler/types';
+import type { SourceCodeStatus, Selector } from 'firefox-profiler/types';
 import { getSourceViewFile } from './url-state';
 
-export const getSources: Selector<Map<string, FileSourceStatus>> = (state) =>
+export const getSources: Selector<Map<string, SourceCodeStatus>> = (state) =>
   state.sources;
 
-export const getSourceViewSource: Selector<FileSourceStatus | void> =
+export const getSourceViewSource: Selector<SourceCodeStatus | void> =
   createSelector(getSources, getSourceViewFile, (sources, file) =>
     file ? sources.get(file) : undefined
   );
