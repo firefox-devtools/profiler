@@ -412,6 +412,10 @@ export type L10nState = {|
 
 export type IconState = Set<string>;
 
+export type CodeState = {|
+  +sourceCodeCache: Map<string, SourceCodeStatus>,
+|};
+
 export type State = {|
   +app: AppState,
   +profileView: ProfileViewState,
@@ -420,7 +424,7 @@ export type State = {|
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
   +l10n: L10nState,
-  +sources: Map<string, SourceCodeStatus>,
+  +code: CodeState,
 |};
 
 export type IconWithClassName = {|

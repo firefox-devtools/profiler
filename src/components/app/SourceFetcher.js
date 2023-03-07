@@ -6,18 +6,18 @@
 import React from 'react';
 
 import {
+  getProfileOrNull,
+  getSourceViewCode,
+  getBrowserConnection,
   getSourceViewFile,
   getSymbolServerUrl,
-} from 'firefox-profiler/selectors/url-state';
-import { getSourceViewCode } from 'firefox-profiler/selectors/sources';
-import { getBrowserConnection } from 'firefox-profiler/selectors/app';
-import { getProfileOrNull } from 'firefox-profiler/selectors';
+} from 'firefox-profiler/selectors';
 import {
   beginLoadingSourceCodeFromUrl,
   beginLoadingSourceCodeFromBrowserConnection,
   finishLoadingSourceCode,
   failLoadingSourceCode,
-} from 'firefox-profiler/actions/sources';
+} from 'firefox-profiler/actions/code';
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
 import { findAddressProofForFile } from 'firefox-profiler/profile-logic/profile-data';

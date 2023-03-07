@@ -3,9 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Reducer, SourceCodeStatus } from 'firefox-profiler/types';
+import type {
+  Reducer,
+  SourceCodeStatus,
+  CodeState,
+} from 'firefox-profiler/types';
+import { combineReducers } from 'redux';
 
-const sources: Reducer<Map<string, SourceCodeStatus>> = (
+const sourceCodeCache: Reducer<Map<string, SourceCodeStatus>> = (
   state = new Map(),
   action
 ) => {
@@ -42,4 +47,6 @@ const sources: Reducer<Map<string, SourceCodeStatus>> = (
   }
 };
 
-export default sources;
+const code: Reducer<CodeState> = combineReducers({ sourceCodeCache });
+
+export default code;

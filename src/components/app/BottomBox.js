@@ -17,7 +17,7 @@ import {
 } from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
-import { getSourceViewCode } from 'firefox-profiler/selectors/sources';
+import { getSourceViewCode } from 'firefox-profiler/selectors/code';
 import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
