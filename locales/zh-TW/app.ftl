@@ -206,9 +206,6 @@ Home--additional-content-title = 載入現有檢測檔
 Home--additional-content-content = 您可以將效能檢測檔<strong>拖曳</strong>到此處，或:
 Home--compare-recordings-info = 您也可以比較紀錄內容。<a>開啟比較介面。</a>
 Home--your-recent-uploaded-recordings-title = 您近期上傳的紀錄
-# We replace the elements such as <perf> and <simpleperf> with links to the
-# documentation to use these tools.
-Home--load-files-from-other-tools = { -profiler-brand-name } 也可以匯入其他效能檢測器，例如 <perf>Linux perf</perf>、<simpleperf>Android SimplePerf</simpleperf>、Chrome 效能面板、<androidstudio>Android Studio</androidstudio> 所產生的效能檢測檔，或任何使用 <dhat>dhat 格式</dhat>儲存的效能檢測檔。<write>點擊此處了解如何撰寫您自己的匯入程式</write>。
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -808,6 +805,17 @@ SourceView--browser-api-error-when-obtaining-source = 瀏覽器的符號化 API 
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = 本機符號伺服器的符號化 API 回傳錯誤: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = 瀏覽器的符號化 API 回傳異常的回應：{ $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = 本機符號伺服器的符號化 API 回傳異常的回應：{ $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
