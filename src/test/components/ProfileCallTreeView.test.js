@@ -297,13 +297,13 @@ describe('calltree/ProfileCallTreeView', function () {
     );
     // Assign values so that these threads are considered global processes.
     Object.assign(profile.threads[0], {
-      pid: 111,
+      pid: '111',
       tid: 111,
       name: 'GeckoMain',
       isMainThread: true,
     });
     Object.assign(profile.threads[1], {
-      pid: 112,
+      pid: '112',
       tid: 112,
       name: 'GeckoMain',
       isMainThread: true,

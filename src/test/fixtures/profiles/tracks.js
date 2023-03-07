@@ -16,6 +16,7 @@ import type {
   OriginsTimelineTrack,
   Profile,
   State,
+  Pid,
 } from 'firefox-profiler/types';
 
 import { assertExhaustiveCheck } from '../../../utils/flow';
@@ -150,13 +151,13 @@ export function getProfileWithNiceTracks(): Profile {
   const [thread1, thread2, thread3, thread4] = profile.threads;
   thread1.name = 'GeckoMain';
   thread1.isMainThread = true;
-  thread1.pid = 111;
+  thread1.pid = '111';
   thread1.tid = 11;
 
   thread2.name = 'GeckoMain';
   thread2.isMainThread = true;
   thread2.processType = 'tab';
-  thread2.pid = 222;
+  thread2.pid = '222';
   thread2.tid = 22;
 
   // Add a refresh driver tick so that this thread will not be idle.
@@ -174,11 +175,11 @@ export function getProfileWithNiceTracks(): Profile {
   thread2.markers.length++;
 
   thread3.name = 'DOM Worker';
-  thread3.pid = 222;
+  thread3.pid = '222';
   thread3.tid = 33;
 
   thread4.name = 'Style';
-  thread4.pid = 222;
+  thread4.pid = '222';
   thread4.tid = 44;
   return profile;
 }
@@ -213,12 +214,12 @@ export function getProfileWithMoreNiceTracks() {
   // Global thread 1
   threads[0].name = 'GeckoMain';
   threads[0].isMainThread = true;
-  threads[0].pid = pid;
+  threads[0].pid = `${pid}`;
   threads[0].tid = tid++;
 
   for (let i = 1; i <= 5; i++) {
     threads[i].name = `ThreadPool#${i}`;
-    threads[i].pid = pid;
+    threads[i].pid = `${pid}`;
     threads[i].tid = tid++;
   }
 
@@ -226,34 +227,34 @@ export function getProfileWithMoreNiceTracks() {
   threads[6].name = 'GeckoMain';
   threads[6].isMainThread = true;
   threads[6].processType = 'tab';
-  threads[6].pid = ++pid;
+  threads[6].pid = `${++pid}`;
   threads[6].tid = tid++;
 
   threads[7].name = 'DOM Worker';
-  threads[7].pid = pid;
+  threads[7].pid = `${pid}`;
   threads[7].tid = tid++;
 
   threads[8].name = 'Style';
-  threads[8].pid = pid;
+  threads[8].pid = `${pid}`;
   threads[8].tid = tid++;
 
   // Global thread 3
   threads[9].name = 'GeckoMain';
   threads[9].isMainThread = true;
   threads[9].processType = 'tab';
-  threads[9].pid = ++pid;
+  threads[9].pid = `${++pid}`;
   threads[9].tid = tid++;
 
   threads[10].name = 'AudioPool#1';
-  threads[10].pid = pid;
+  threads[10].pid = `${pid}`;
   threads[10].tid = tid++;
 
   threads[11].name = 'AudioPool#2';
-  threads[11].pid = pid;
+  threads[11].pid = `${pid}`;
   threads[11].tid = tid++;
 
   threads[12].name = 'Renderer';
-  threads[12].pid = pid;
+  threads[12].pid = `${pid}`;
   threads[12].tid = tid++;
 
   return profile;
@@ -270,22 +271,22 @@ export function getProfileWithFakeGlobalTrack(): Profile {
 
   // First group of threads
   thread1.name = 'Thread <0>';
-  thread1.pid = 111;
+  thread1.pid = '111';
 
   thread2.name = 'Thread <1>';
-  thread2.pid = 111;
+  thread2.pid = '111';
 
   // Second group of threads
   thread3.name = 'Thread <2>';
-  thread3.pid = 222;
+  thread3.pid = '222';
 
   thread4.name = 'Thread <3>';
-  thread4.pid = 222;
+  thread4.pid = '222';
 
   return profile;
 }
 
-export function getStoreWithMemoryTrack(pid: number = 222) {
+export function getStoreWithMemoryTrack(pid: Pid = '222') {
   const { profile } = getProfileFromTextSamples(
     // Create a trivial profile with 10 samples, all of the function "A".
     Array(10).fill('A').join('  ')

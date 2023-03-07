@@ -796,11 +796,6 @@ export function getGlobalTrackName(
         }
 
         // Fallback: Use the PID.
-        if (typeof pid === 'string') {
-          // The pid is a unique string label, use that.
-          return pid;
-        }
-        // The pid is a number, make a label for it.
         return `Process ${pid}`;
       }
 

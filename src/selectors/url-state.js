@@ -32,6 +32,7 @@ import type {
   ProfileSpecificUrlState,
   FullProfileSpecificUrlState,
   ActiveTabSpecificProfileUrlState,
+  NativeSymbolInfo,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -80,6 +81,13 @@ export const getSourceViewFile: Selector<string | null> = (state) =>
   getProfileSpecificState(state).sourceView.sourceFile;
 export const getSourceViewScrollGeneration: Selector<number> = (state) =>
   getProfileSpecificState(state).sourceView.scrollGeneration;
+export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
+  getProfileSpecificState(state).assemblyView.isOpen;
+export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
+  state
+) => getProfileSpecificState(state).assemblyView.nativeSymbol;
+export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
+  getProfileSpecificState(state).assemblyView.scrollGeneration;
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<

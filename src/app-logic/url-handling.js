@@ -39,6 +39,7 @@ import type {
   TimelineType,
   SourceViewState,
   AssemblyViewState,
+  NativeSymbolInfo,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -182,6 +183,7 @@ type BaseQuery = {|
   implementation: string,
   timelineType: string,
   sourceView: string,
+  assemblyView: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -410,11 +412,19 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         'timing'
           ? undefined
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
-      const { sourceView, isBottomBoxOpenPerPanel } = urlState.profileSpecific;
-      query.sourceView =
-        sourceView.sourceFile !== null && isBottomBoxOpenPerPanel[selectedTab]
-          ? sourceView.sourceFile
-          : undefined;
+      const { sourceView, assemblyView, isBottomBoxOpenPerPanel } =
+        urlState.profileSpecific;
+
+      if (isBottomBoxOpenPerPanel[selectedTab]) {
+        if (sourceView.sourceFile !== null) {
+          query.sourceView = sourceView.sourceFile;
+        }
+        if (assemblyView.isOpen && assemblyView.nativeSymbol !== null) {
+          query.assemblyView = stringifyAssemblyViewSymbol(
+            assemblyView.nativeSymbol
+          );
+        }
+      }
       break;
     }
     case 'marker-table':
@@ -592,6 +602,15 @@ export function stateFromLocation(
     sourceView.sourceFile = query.sourceView;
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
+  if (query.assemblyView) {
+    const symbol = parseAssemblyViewSymbol(query.assemblyView);
+    if (symbol !== null) {
+      assemblyView.nativeSymbol = symbol;
+      assemblyView.allNativeSymbolsForInitiatingCallNode = [symbol];
+      assemblyView.isOpen = true;
+      isBottomBoxOpenPerPanel[selectedTab] = true;
+    }
+  }
 
   const localTrackOrderByPid = convertLocalTrackOrderByPidFromString(
     query.localTrackOrderByPid
@@ -708,11 +727,11 @@ function convertHiddenLocalTracksByPidFromString(
     if (!stringPart.includes('-')) {
       continue;
     }
-    const pidString = stringPart.slice(0, stringPart.indexOf('-'));
-    const hiddenTracksString = stringPart.slice(pidString.length + 1);
-    const pid = Number(pidString);
+    // TODO: handle escaped dashes and tildes in pid strings (#4512)
+    const pid = stringPart.slice(0, stringPart.indexOf('-'));
+    const hiddenTracksString = stringPart.slice(pid.length + 1);
     const indexes = decodeUintArrayFromUrlComponent(hiddenTracksString);
-    if (!isNaN(pid) && indexes.every((n) => !isNaN(n))) {
+    if (indexes.every((n) => !isNaN(n))) {
       hiddenLocalTracksByPid.set(pid, new Set(indexes));
     }
   }
@@ -725,6 +744,7 @@ function convertHiddenLocalTracksByPidToString(
   const strings = [];
   for (const [pid, tracks] of hiddenLocalTracksByPid) {
     if (tracks.size > 0) {
+      // TODO: escaped dashes and tildes in pids (#4512)
       strings.push(`${pid}-${encodeUintSetForUrlComponent(tracks)}`);
     }
   }
@@ -753,11 +773,11 @@ function convertLocalTrackOrderByPidFromString(
       // default value.
       continue;
     }
-    const pidString = stringPart.slice(0, stringPart.indexOf('-'));
-    const trackOrderString = stringPart.slice(pidString.length + 1);
-    const pid = Number(pidString);
+    // TODO: handle escaped dashes and tildes in pid strings (#4512)
+    const pid = stringPart.slice(0, stringPart.indexOf('-'));
+    const trackOrderString = stringPart.slice(pid.length + 1);
     const indexes = decodeUintArrayFromUrlComponent(trackOrderString);
-    if (!isNaN(pid) && indexes.every((n) => !isNaN(n))) {
+    if (indexes.every((n) => !isNaN(n))) {
       localTrackOrderByPid.set(pid, indexes);
     }
   }
@@ -776,9 +796,8 @@ function convertLocalTrackOrderByPidToString(
       continue;
     }
     if (trackOrder.length > 0) {
-      strings.push(
-        `${String(pid)}-${encodeUintArrayForUrlComponent(trackOrder)}`
-      );
+      // TODO: escaped dashes and tildes in pids (#4512)
+      strings.push(`${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`);
     }
   }
   return strings.join('~') || undefined;
@@ -1050,6 +1069,7 @@ const _upgraders: {|
       query.hiddenLocalTracksByPid = (query.hiddenLocalTracksByPid: string)
         .split('~')
         .map((pidAndTracks) => {
+          // TODO: handle escaped dashes and tildes in pid strings (#4512)
           const [pid, ...tracks] = pidAndTracks.split('-');
           const hiddenTracks = new Set(tracks.map((s) => +s));
           return `${pid}-${encodeUintSetForUrlComponent(hiddenTracks)}`;
@@ -1060,6 +1080,7 @@ const _upgraders: {|
       query.localTrackOrderByPid = (query.localTrackOrderByPid: string)
         .split('~')
         .map((pidAndTracks) => {
+          // TODO: handle escaped dashes and tildes in pid strings (#4512)
           const [pid, ...tracks] = pidAndTracks.split('-');
           const trackOrder = tracks.map((s) => +s);
           return `${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`;
@@ -1246,4 +1267,45 @@ function validateTimelineType(type: ?string): TimelineType {
       (timelineType: empty);
       return 'cpu-category';
   }
+}
+
+/**
+ * Parses the value of the `assemblyView` parameter in the URL.
+ * This parameter has the following form:
+ *   <libIndex> '~' <hexAddress> '~' <hexSize> '_'? '~' <symbolName>
+ */
+function parseAssemblyViewSymbol(value: string): NativeSymbolInfo | null {
+  const [libIndexStr, hexAddress, sizeStr, name] = value.split('~');
+  const libIndex = parseInt(libIndexStr, 10);
+  const address = parseInt(hexAddress, 16);
+  // sizeStr is `b7c` or `b7c_`, the trailing underscore means "or more".
+  const [functionSizeStr, functionSizeIsKnown] = sizeStr.endsWith('_')
+    ? [sizeStr.slice(0, -1), false]
+    : [sizeStr, true];
+  const functionSize = parseInt(functionSizeStr, 16);
+  if (isNaN(libIndex) || isNaN(address) || isNaN(functionSize)) {
+    return null;
+  }
+  return {
+    libIndex,
+    address,
+    name,
+    functionSize,
+    functionSizeIsKnown,
+  };
+}
+
+/**
+ * Serializes the value of the `assemblyView` parameter in the URL.
+ * This parameter has the following form:
+ *   <libIndex> '~' <hexAddress> '~' <hexSize> '_'? '~' <symbolName>
+ */
+function stringifyAssemblyViewSymbol(symbol: NativeSymbolInfo): string {
+  const { libIndex, address, name, functionSize, functionSizeIsKnown } = symbol;
+  const addressStr = address.toString(16);
+  let functionSizeStr = functionSize.toString(16);
+  if (!functionSizeIsKnown) {
+    functionSizeStr += '_';
+  }
+  return `${libIndex}~${addressStr}~${functionSizeStr}~${name}`;
 }
