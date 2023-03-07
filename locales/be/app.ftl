@@ -258,11 +258,10 @@ Home--compare-recordings-info = Вы таксама можаце параўна�
 Home--your-recent-uploaded-recordings-title = Вашы нядаўна запампаваныя запісы
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     { -profiler-brand-name } таксама можа імпартаваць профілі з іншых прафайлераў, такіх як
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, 
-    панэль прадукцыйнасці Chrome, <androidstudio>Android Studio</androidstudio> або 
-    любога файла, які выкарыстоўвае <dhat>фармат dhat</dhat>. <write>Даведайцеся, 
+    панэль прадукцыйнасці Chrome, <androidstudio>Android Studio</androidstudio>. <write>Даведайцеся, 
     як напісаць свой уласны імпарцёр</write>.
 
 ## IdleSearchField
@@ -896,6 +895,17 @@ SourceView--browser-api-error-when-obtaining-source = API сімвалізацы
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = API сімвалізацыі лакальнага сервера сімвалаў вярнула памылку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = API сімвалізацыі браўзера вярнула няправільны адказ: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = API сімвалізацыі лакальнага сервера вярнула няправільны адказ: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
