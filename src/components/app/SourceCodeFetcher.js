@@ -45,7 +45,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class SourceFetcherImpl extends React.PureComponent<Props> {
+class SourceCodeFetcherImpl extends React.PureComponent<Props> {
   _archiveCache: Map<string, Promise<Uint8Array>> = new Map();
 
   componentDidMount() {
@@ -114,7 +114,11 @@ class SourceFetcherImpl extends React.PureComponent<Props> {
   }
 }
 
-export const SourceFetcher = explicitConnect<{||}, StateProps, DispatchProps>({
+export const SourceCodeFetcher = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
     sourceViewCode: getSourceViewCode(state),
@@ -128,5 +132,5 @@ export const SourceFetcher = explicitConnect<{||}, StateProps, DispatchProps>({
     finishLoadingSourceCode,
     failLoadingSourceCode,
   },
-  component: SourceFetcherImpl,
+  component: SourceCodeFetcherImpl,
 });
