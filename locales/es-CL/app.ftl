@@ -225,11 +225,11 @@ Home--compare-recordings-info = También puedes comparar los registros. <a>Abre 
 Home--your-recent-uploaded-recordings-title = Tus registros subidos recientemente
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     { -profiler-brand-name } también puede importar perfiles de otros generadores de perfiles, tales como
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, el
     panel de rendimiento de Chrome, <androidstudio>Android Studio</androidstudio>, o
-    cualquier archivo usando el <dhat>formato dhat</dhat>. <write>Aprende a escribir tu
+    cualquier archivo usando el <dhat>formato dhat</dhat> o el <traceevent>formato Trace Event de Google</traceevent>. <write>Aprende a escribir tu
     propio importador</write>.
 
 ## IdleSearchField
@@ -832,6 +832,17 @@ SourceView--browser-api-error-when-obtaining-source = La API de simbolización d
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = La API de simbolización del servidor de símbolos local devolvió un error: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = La API de simbolización del navegador devolvió una respuesta mal formulada: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = La API de simbolización del servidor local devolvió una respuesta mal formulada: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
