@@ -224,7 +224,7 @@ export function getMarkerTiming(
     }
 
     // Sort by names second
-    return a.name > b.name ? 1 : -1;
+    return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
   });
 
   return allMarkerTimings;
