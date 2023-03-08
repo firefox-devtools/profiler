@@ -256,6 +256,13 @@ Home--additional-content-title = Загрузіць існуючыя профі�
 Home--additional-content-content = Вы можаце <strong>перацягнуць</strong> файл профілю сюды, каб загрузіць яго, або:
 Home--compare-recordings-info = Вы таксама можаце параўнаць запісы. <a>Адкрыць інтэрфейс параўнання.</a>
 Home--your-recent-uploaded-recordings-title = Вашы нядаўна запампаваныя запісы
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 =
+    { -profiler-brand-name } таксама можа імпартаваць профілі з іншых прафайлераў, такіх як
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
+    панэль прадукцыйнасці Chrome, <androidstudio>Android Studio</androidstudio> або
+    любы файл, які выкарыстоўвае фарматы <dhat>dhat</dhat> або <traceevent>Google Trace Event</traceevent>. <write>Даведайцеся, як напісаць свой уласны імпарцёр</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
