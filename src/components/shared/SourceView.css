@@ -110,57 +110,7 @@
   text-overflow: ellipsis;
 }
 
-.sourceViewBody {
-  position: relative;
-  z-index: 0;
-  overflow: auto;
-  flex: 1;
-  line-height: 16px;
-  outline: 0;
-  will-change: scroll-position;
-}
-
-.sourceViewBodyInnerWrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
-  min-width: 100%;
-  flex-flow: row;
-}
-
-.sourceViewBodyInner0 {
-  position: sticky;
-  z-index: 2;
-  left: 0;
-}
-
-.sourceViewBodyInner1 {
-  /* This allows the right column to expand more than its content, so that the
-  * background always extends to the right edge. */
-  flex-grow: 1;
-}
-
-.sourceViewBodyInner {
-  overflow: hidden;
-  background: white;
-}
-
-.sourceViewRowFixedColumns {
-  display: flex;
-  flex-flow: row;
-  align-items: stretch;
-  justify-content: flex-start;
-  white-space: nowrap;
-}
-
-.sourceViewRowScrolledColumns {
-  padding-left: 3px;
-  white-space: pre;
-}
-
-.cm-nonZeroLine,
-.sourceViewRowNonZero {
+.cm-nonZeroLine {
   background-color: #edf6ff;
 }
 
