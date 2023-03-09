@@ -101,6 +101,17 @@
   min-width: 45px !important;
 }
 
+.cm-instruction-address-gutter {
+  color: #aaa;
+  font-family: ui-monospace, 'Roboto Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.cm-instruction-address-gutter .cm-gutterElement {
+  min-width: 45px !important;
+  padding: 0 8px;
+}
+
 .cm-total-timings-gutter .cm-gutterElement,
 .cm-self-timings-gutter .cm-gutterElement {
   overflow: hidden;

@@ -953,6 +953,18 @@ BottomBox--source-code-not-available-title = Source code not available
 SourceView--source-not-available-text =
     See <a>issue #3741</a> for supported scenarios and planned improvements.
 
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Assembly code not available
+
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text =
+    See <a>issue #4520</a> for supported scenarios and planned improvements.
+
 SourceView--close-button =
     .title = Close the source view
 

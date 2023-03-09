@@ -2,19 +2,36 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.bottom-box {
+.bottom-box-pane {
   display: flex;
-  height: 100%;
-  flex-flow: column;
+  height: 100%; /* direct child of SplitterLayout */
+  flex-flow: column nowrap;
 }
 
-.bottom-main {
-  position: relative;
+.bottom-sourceview-wrapper,
+.bottom-assemblyview-wrapper {
+  position: relative; /* containing block for status overlay */
   display: flex;
   min-height: 0;
   flex: 1;
   flex-flow: column;
   background: var(--grey-20);
+}
+
+.bottom-box .layout-splitter {
+  position: relative; /* containing block for absolute ::before */
+  width: 1px;
+  border: none;
+  background-color: var(--grey-30) !important;
+}
+
+/* Provide 3px extra grabbable surface on each side of the splitter */
+.bottom-box .layout-splitter::before {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  content: '';
+  inset: 0 -3px;
 }
 
 .bottom-box-bar {
@@ -24,26 +41,47 @@
   flex-flow: row;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid var(--grey-30);
   background: var(--grey-10);
-  box-shadow: inset 0 -1px var(--grey-30);
   line-height: 18px;
 }
 
 .bottom-box-title {
-  margin: 0;
-  margin-left: 8px;
+  overflow: hidden;
+  margin: 0 8px;
   font: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.bottom-close-button {
+.bottom-box-header-trailing-buttons {
+  display: flex;
+  height: 100%;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.bottom-close-button,
+.bottom-assembly-button {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  background: url(/res/img/svg/close-dark.svg) no-repeat center / 16px 16px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+.bottom-close-button {
+  background-image: url(/res/img/svg/close-dark.svg);
+}
+
+.bottom-assembly-button {
+  background-image: url(/res/img/svg/asm-icon.svg);
 }
 
 .codeLoadingOverlay,
-.sourceCodeErrorOverlay {
+.sourceCodeErrorOverlay,
+.assemblyCodeErrorOverlay {
   /**
    * Put the overlay on top of everything in .bottom-main, but centered
    * horizontally and vertically. We center using margin: auto, and enforce
@@ -81,7 +119,8 @@
 }
 
 /* Use ::before to add an alert icon */
-.sourceCodeErrorOverlay::before {
+.sourceCodeErrorOverlay::before,
+.assemblyCodeErrorOverlay::before {
   display: block;
   width: 50px;
   height: 50px;
