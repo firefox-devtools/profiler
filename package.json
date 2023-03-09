@@ -59,7 +59,7 @@
     "@fluent/langneg": "^0.6.2",
     "@fluent/react": "^0.14.1",
     "@lezer/highlight": "^1.1.3",
-    "@tgwf/co2": "^0.12.1",
+    "@tgwf/co2": "^0.12.2",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
     "clamp": "^1.0.1",
