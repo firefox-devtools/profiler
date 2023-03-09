@@ -8,7 +8,8 @@ import React, { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { DetailsContainer } from './DetailsContainer';
-import { SourceFetcher } from './SourceFetcher';
+import { SourceCodeFetcher } from './SourceCodeFetcher';
+import { AssemblyCodeFetcher } from './AssemblyCodeFetcher';
 import { BottomBox } from './BottomBox';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
@@ -157,7 +158,8 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <BeforeUnloadManager />
           <DebugWarning />
           <CurrentProfileUploadedInformationLoader />
-          <SourceFetcher />
+          <SourceCodeFetcher />
+          <AssemblyCodeFetcher />
         </div>
       </KeyboardShortcut>
     );
