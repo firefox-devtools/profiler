@@ -6,6 +6,7 @@
 import * as React from 'react';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
+import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 import type { LineTimings } from 'firefox-profiler/types';
 
 import type { SourceViewEditor } from './SourceView-codemirror';
@@ -47,18 +48,6 @@ type SourceViewProps = {|
   +hotSpotTimings: LineTimings,
 |};
 
-function _mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | void {
-  let maxValue = -Infinity;
-  let keyForMaxValue;
-  for (const [key, value] of map) {
-    if (value > maxValue) {
-      maxValue = value;
-      keyForMaxValue = key;
-    }
-  }
-  return keyForMaxValue;
-}
-
 let editorModulePromise: Promise<any> | null = null;
 
 export class SourceView extends React.PureComponent<SourceViewProps> {
@@ -88,8 +77,8 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
    */
   _scrollToHotSpot(timingsForScrolling: LineTimings) {
     const heaviestLine =
-      _mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
-      _mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
+      mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
+      mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
     if (heaviestLine !== undefined) {
       this._scrollToLine(heaviestLine - 5);
     }
