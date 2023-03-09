@@ -260,12 +260,16 @@ describe('MarkerTable', function () {
      */
     const parentTrackReference = { type: 'global', trackIndex: 0 };
     const tabTrackReference = { type: 'global', trackIndex: 1 };
-    const domWorkerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
-    const styleTrackReference = { type: 'local', trackIndex: 1, pid: 222 };
+    const domWorkerTrackReference = {
+      type: 'local',
+      trackIndex: 0,
+      pid: '222',
+    };
+    const styleTrackReference = { type: 'local', trackIndex: 1, pid: '222' };
     const parentThreadIndex = 0;
     const domWorkerThreadIndex = 2;
     const styleThreadIndex = 3;
-    const tabPid = 222;
+    const tabPid = '222';
     function setupWithTracksAndIPCMarker() {
       const profile = getProfileWithNiceTracks();
       addIPCMarkerPairToThreads(
@@ -299,7 +303,7 @@ describe('MarkerTable', function () {
             type: 'IPC',
             startTime: 20,
             endTime: 25,
-            otherPid: 444,
+            otherPid: '444',
             messageSeqno: 3,
             messageType: 'PContent::Msg_PreferenceUpdate',
             side: 'parent',

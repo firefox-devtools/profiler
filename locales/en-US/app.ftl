@@ -301,11 +301,12 @@ Home--your-recent-uploaded-recordings-title = Your recent uploaded recordings
 
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     The { -profiler-brand-name } can also import profiles from other profilers, such as
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, the
     Chrome performance panel, <androidstudio>Android Studio</androidstudio>, or
-    any file using the <dhat>dhat format</dhat>. <write>Learn how to write your
+    any file using the <dhat>dhat format</dhat> or <traceevent>Google’s Trace Event
+    Format</traceevent>. <write>Learn how to write your
     own importer</write>.
 
 ## IdleSearchField
@@ -982,6 +983,21 @@ SourceView--browser-api-error-when-obtaining-source =
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source =
     The local symbol server’s symbolication API returned an error: { $apiErrorMessage }
+
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source =
+    The browser’s symbolication API returned a malformed response: { $apiErrorMessage }
+
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source =
+    The local symbol server’s symbolication API returned a malformed response: { $apiErrorMessage }
 
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.

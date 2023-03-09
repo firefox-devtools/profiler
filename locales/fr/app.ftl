@@ -217,11 +217,11 @@ Home--compare-recordings-info = Vous pouvez également comparer des enregistreme
 Home--your-recent-uploaded-recordings-title = Vos enregistrements récemment envoyés
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     Le { -profiler-brand-name } peut également importer des profils d’autres profileurs, dont
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, le
     Panneau de performances Chrome, <androidstudio>Android Studio</androidstudio>, ou
-    tout fichier utilisant le format <dhat>dhat</dhat>. <write>Apprenez à écrire votre
+    tout fichier utilisant les formats <dhat>dhat</dhat> ou <traceevent>Trace Event de Google</traceevent>. <write>Apprenez à écrire votre
     propre importateur</write>.
 
 ## IdleSearchField
