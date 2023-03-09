@@ -11,13 +11,13 @@ import type { LineTimings } from 'firefox-profiler/types';
 
 import type { SourceViewEditor } from './SourceView-codemirror';
 
-import './SourceView.css';
+import './CodeView.css';
 
 const SourceViewHeader = () => {
   return (
-    <div className="sourceViewHeader">
+    <div className="codeViewHeader">
       <span
-        className="sourceViewHeaderColumn sourceViewFixedColumn total"
+        className="codeViewHeaderColumn codeViewFixedColumn total"
         title="The “total” sample count includes a summary of every sample where this
 line was observed to be on the stack. This includes the time where the
 line was actually running, and the time spent in the callers from this
@@ -26,7 +26,7 @@ line."
         Total
       </span>
       <span
-        className="sourceViewHeaderColumn sourceViewFixedColumn self"
+        className="codeViewHeaderColumn codeViewFixedColumn self"
         title="The “self” sample count only includes the samples where the line was
 the end of the stack. If this line called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -34,7 +34,7 @@ for understanding where time was actually spent in a program."
       >
         Self
       </span>
-      <span className="sourceViewHeaderColumn sourceViewMainColumn source"></span>
+      <span className="codeViewHeaderColumn codeViewMainColumn source"></span>
     </div>
   );
 };
@@ -117,7 +117,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
   render() {
     return (
-      <div className="sourceView">
+      <div className="sourceView codeView">
         <SourceViewHeader />
         <div className="codeMirrorContainer" ref={this._ref}></div>
       </div>

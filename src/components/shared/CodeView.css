@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.sourceView {
+.codeView {
   display: flex;
   min-height: 0;
   flex: 1;
@@ -24,7 +24,7 @@
   --theme-highlight-punctuation: var(--grey-70);
 }
 
-.sourceViewHeader {
+.codeViewHeader {
   display: flex;
   height: 16px;
   flex-flow: row;
@@ -55,11 +55,11 @@
   background-color: white !important;
 }
 
-.sourceViewHeaderMainColumn {
+.codeViewHeaderMainColumn {
   flex: 1;
 }
 
-.sourceViewHeaderColumn {
+.codeViewHeaderColumn {
   position: relative;
   box-sizing: border-box;
   padding: 1px 5px;
@@ -68,7 +68,7 @@
 }
 
 /* A small vertical separator line */
-.sourceViewHeaderColumn.sourceViewFixedColumn::after {
+.codeViewHeaderColumn.codeViewFixedColumn::after {
   position: absolute;
   top: 3px;
   right: 0;
@@ -78,8 +78,8 @@
   content: '';
 }
 
-.sourceViewHeaderColumn.total,
-.sourceViewHeaderColumn.self,
+.codeViewHeaderColumn.total,
+.codeViewHeaderColumn.self,
 .cm-total-timings-gutter,
 .cm-self-timings-gutter {
   width: 50px;
