@@ -71,6 +71,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = 折叠 <strong>{ $nameForResource }</strong>
     .title = 折叠资源可将所有对该资源的调用，扁平化为已折叠的单个调用节点。
+CallNodeContextMenu--transform-collapse-direct-recursion2 = 折叠直接递归
+    .title = 折叠直接递归会移除没有立即可用堆栈功能的重复递归函数
+CallNodeContextMenu--transform-collapse-indirect-recursion = 折叠间接递归
+    .title = 折叠间接递归会移除重复递归函数，即使这些函数有立即可用的堆栈功能。
 CallNodeContextMenu--transform-drop-function = 丢弃与此函数相关的样本
     .title = 将样本丢弃后，会从分析记录移除这些样本的时间。在需要清除与分析无关的计时信息时，十分有用。
 CallNodeContextMenu--expand-all = 全部展开
@@ -640,6 +644,27 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = 功率
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh（{ $carbonValue } g CO₂e）
+    .label = 可见范围内消耗的能源
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO2e)
+    .label = 可见范围内消耗的能源
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO2e)
+    .label = 可见范围内消耗的能源
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
