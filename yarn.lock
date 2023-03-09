@@ -1123,10 +1123,10 @@
   resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-6.2.0.tgz#a0fb08403ced8c2a68d1d0acee926bd20be922f2"
   integrity sha512-69QXtcrsc3RYtOtd+GsvczJ319udtBf1PTrr2KbLWM/e2CXUPnh0Nz9AUo8WfhSQ7GeL8dPVNUmhQVgpmuaNGA==
 
-"@codemirror/view@^6.0.0", "@codemirror/view@^6.8.1":
-  version "6.8.1"
-  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.8.1.tgz#6d4796344edd62670d1f202f9f014959f53242b5"
-  integrity sha512-bXWs42i1mnBexaktPABaEpYbt4FbJMnlesObDLF0GE8poRiNaRgm7H/2NfXfD5Swas1ULdFgONLLs4ncwHuz8g==
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.9.1":
+  version "6.9.1"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.9.1.tgz#2ce4c528974b6172a5a4a738b7b0a0f04a4c1140"
+  integrity sha512-bzfSjJn9dAADVpabLKWKNmMG4ibyTV2e3eOGowjElNPTdTkSbi6ixPYHm2u0ADcETfKsi2/R84Rkmi91dH9yEg==
   dependencies:
     "@codemirror/state" "^6.1.4"
     style-mod "^4.0.0"
@@ -1872,10 +1872,10 @@
     "@testing-library/dom" "^9.0.0"
     "@types/react-dom" "^18.0.0"
 
-"@tgwf/co2@^0.12.1":
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.12.1.tgz#587478df81347c1353187bbce88a79b358e1051b"
-  integrity sha512-sg0B0AsdYhhG/hLmFouEG3ePFpdQK0hXJdkI7M9URYZ1pQ+HYtUnzb4H+36+UnCxHqbrGwUJ5wdWtdXU0RwcFA==
+"@tgwf/co2@^0.12.2":
+  version "0.12.2"
+  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.12.2.tgz#4dbd1b137a9c19040e15ecbd168090fcf8e11db2"
+  integrity sha512-TcOtska9jKCRNJ+sEXa+s3ze36Ts5sS/S2sSIk7KR2UmPctANcKyTKusYBfmrXmkPKaxBc1QxGvFvBcneI1/Yw==
   dependencies:
     debug "^4.3.4"
 
@@ -10142,10 +10142,10 @@ react-dom@^18.2.0:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
 
-react-intersection-observer@^9.4.2:
-  version "9.4.2"
-  resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-9.4.2.tgz#a80401d290715d8b89941d037bc4ad1398b8397f"
-  integrity sha512-AdK+ryzZ7U9ZJYttDUZ8q2Am3nqE0exg5Ryl5Y124KeVsix/1hGZPbdu58EqA98TwnzwDNWHxg/kwNawmIiUig==
+react-intersection-observer@^9.4.3:
+  version "9.4.3"
+  resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-9.4.3.tgz#ec84ce0c25cad548075130ea045ac5c7adf908f3"
+  integrity sha512-WNRqMQvKpupr6MzecAQI0Pj0+JQong307knLP4g/nBex7kYfIaZsPpXaIhKHR+oV8z+goUbH9e10j6lGRnTzlQ==
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"

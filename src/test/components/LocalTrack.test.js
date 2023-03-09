@@ -45,7 +45,7 @@ import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-obs
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
 // local tracks.
-const PID = 222;
+const PID = '222';
 
 describe('timeline/LocalTrack', function () {
   autoMockCanvasContext();

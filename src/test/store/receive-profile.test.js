@@ -202,10 +202,10 @@ describe('actions/receive-profile', function () {
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
       idleThread.isMainThread = true;
-      idleThread.pid = 0;
+      idleThread.pid = '0';
       workThread.name = 'GeckoMain';
       workThread.isMainThread = true;
-      idleThread.pid = 1;
+      idleThread.pid = '1';
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -220,10 +220,10 @@ describe('actions/receive-profile', function () {
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
       idleThread.isMainThread = true;
-      idleThread.pid = 0;
+      idleThread.pid = '0';
       workThread.name = 'GeckoMain';
       workThread.isMainThread = true;
-      workThread.pid = 1;
+      workThread.pid = '1';
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -242,9 +242,9 @@ describe('actions/receive-profile', function () {
       threadA.name = 'GeckoMain';
       threadA.isMainThread = true;
       threadA.processType = 'tab';
-      threadA.pid = 111;
+      threadA.pid = '111';
       threadB.name = 'Other';
-      threadB.pid = 111;
+      threadB.pid = '111';
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -265,7 +265,7 @@ describe('actions/receive-profile', function () {
         thread.name = 'GeckoMain';
         thread.isMainThread = true;
         thread.processType = 'tab';
-        thread.pid = threadIndex;
+        thread.pid = `${threadIndex}`;
       });
 
       store.dispatch(viewProfile(profile));
@@ -288,7 +288,7 @@ describe('actions/receive-profile', function () {
         thread.name = 'GeckoMain';
         thread.isMainThread = true;
         thread.processType = 'tab';
-        thread.pid = threadIndex;
+        thread.pid = `${threadIndex}`;
       });
 
       store.dispatch(viewProfile(profile));
@@ -313,10 +313,10 @@ describe('actions/receive-profile', function () {
       profile.threads[2].name = 'Idle C';
       profile.threads[3].name = 'Work E';
 
-      profile.threads[0].pid = 1;
-      profile.threads[1].pid = 1;
-      profile.threads[2].pid = 2;
-      profile.threads[3].pid = 3;
+      profile.threads[0].pid = '1';
+      profile.threads[1].pid = '1';
+      profile.threads[2].pid = '2';
+      profile.threads[3].pid = '3';
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -396,7 +396,7 @@ describe('actions/receive-profile', function () {
         thread.name = 'GeckoMain';
         thread.isMainThread = true;
         thread.processType = 'tab';
-        thread.pid = threadIndex;
+        thread.pid = `${threadIndex}`;
       });
 
       store.dispatch(viewProfile(profile));
@@ -433,8 +433,8 @@ describe('actions/receive-profile', function () {
         ]);
         profile.threads[0].name = 'Thread with 100% CPU';
         profile.threads[1].name = 'Thread with 13% CPU';
-        profile.threads[0].pid = 1;
-        profile.threads[1].pid = 1;
+        profile.threads[0].pid = '1';
+        profile.threads[1].pid = '1';
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -454,8 +454,8 @@ describe('actions/receive-profile', function () {
         ]);
         profile.threads[0].name = 'Thread with 100% CPU';
         profile.threads[1].name = 'Thread with 4% CPU';
-        profile.threads[0].pid = 1;
-        profile.threads[1].pid = 1;
+        profile.threads[0].pid = '1';
+        profile.threads[1].pid = '1';
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -473,8 +473,8 @@ describe('actions/receive-profile', function () {
         ]);
         profile.threads[0].name = 'Thread with a very short burst of > 90% CPU';
         profile.threads[1].name = 'Thread with sustained 9% CPU';
-        profile.threads[0].pid = 1;
-        profile.threads[1].pid = 1;
+        profile.threads[0].pid = '1';
+        profile.threads[1].pid = '1';
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -491,7 +491,7 @@ describe('actions/receive-profile', function () {
           [1, 2, 100, 4, 1, 2, 6, 8, 6, 9],
         ]);
         profile.threads[0].name = 'Thread with 10% CPU';
-        profile.threads[0].pid = 1;
+        profile.threads[0].pid = '1';
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -559,7 +559,7 @@ describe('actions/receive-profile', function () {
             thread.samples.threadCPUDelta
           ).reduce((accum, delta) => accum + (delta ?? 0), 0);
           thread.processName = 'Single Process';
-          thread.pid = 0;
+          thread.pid = '0';
           thread.name = `Thread with ${cpuDeltaSum} CPU`;
           thread.tid = i;
         }
@@ -619,7 +619,7 @@ describe('actions/receive-profile', function () {
             thread.samples.threadCPUDelta
           ).reduce((accum, delta) => accum + (delta ?? 0), 0);
           thread.processName = 'Single Process';
-          thread.pid = 0;
+          thread.pid = '0';
           thread.name = `Thread with ${cpuDeltaSum} CPU`;
           thread.tid = i;
         }
@@ -679,7 +679,7 @@ describe('actions/receive-profile', function () {
       if (!profile) {
         profile = getEmptyProfile();
         profile.threads.push(
-          getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 1 })
+          getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: '1' })
         );
       }
 

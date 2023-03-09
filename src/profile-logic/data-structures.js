@@ -364,7 +364,7 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     pausedRanges: [],
     name: 'Empty',
     isMainThread: false,
-    pid: 0,
+    pid: '0',
     tid: 0,
     // Creating samples with event delay since it's the new samples table.
     samples: getEmptySamplesTableWithEventDelay(),
