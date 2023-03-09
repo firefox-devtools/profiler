@@ -41,7 +41,7 @@ for understanding where time was actually spent in a program."
 
 type SourceViewProps = {|
   +timings: LineTimings,
-  +source: string,
+  +sourceCode: string,
   +disableOverscan: boolean,
   +filePath: string | null,
   +scrollToHotSpotGeneration: number,
@@ -91,8 +91,8 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   }
 
   _getMaxLineNumber() {
-    const { source, timings } = this.props;
-    const sourceLines = source.split('\n');
+    const { sourceCode, timings } = this.props;
+    const sourceLines = sourceCode.split('\n');
     let maxLineNumber = sourceLines.length;
     if (maxLineNumber <= 1) {
       // We probably don't have the true source code yet, and don't really know
@@ -107,10 +107,10 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     return maxLineNumber;
   }
 
-  _getSourceOrFallback() {
-    const { source } = this.props;
-    if (source !== '') {
-      return source;
+  _getSourceCodeOrFallback() {
+    const { sourceCode } = this.props;
+    if (sourceCode !== '') {
+      return sourceCode;
     }
     return '\n'.repeat(this._getMaxLineNumber());
   }
@@ -139,7 +139,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       }
       const { SourceViewEditor } = codeMirrorModule;
       const editor = new SourceViewEditor(
-        this._getSourceOrFallback(),
+        this._getSourceCodeOrFallback(),
         this.props.filePath,
         this.props.timings,
         domParent
@@ -161,12 +161,12 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     }
 
     if (
-      this.props.source !== prevProps.source ||
-      (this.props.source === '' &&
-        prevProps.source === '' &&
+      this.props.sourceCode !== prevProps.sourceCode ||
+      (this.props.sourceCode === '' &&
+        prevProps.sourceCode === '' &&
         this.props.timings !== prevProps.timings)
     ) {
-      this._editor.setContents(this._getSourceOrFallback());
+      this._editor.setContents(this._getSourceCodeOrFallback());
     }
 
     if (

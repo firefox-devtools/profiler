@@ -243,9 +243,9 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewScrollGeneration,
       selectedCallNodeLineTimings,
     } = this.props;
-    const source =
+    const sourceCode =
       sourceViewCode && sourceViewCode.type === 'AVAILABLE'
-        ? sourceViewCode.source
+        ? sourceViewCode.code
         : '';
     const path =
       sourceViewFile !== null
@@ -273,7 +273,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
             <SourceView
               disableOverscan={disableOverscan}
               timings={globalLineTimings}
-              source={source}
+              sourceCode={sourceCode}
               filePath={path}
               scrollToHotSpotGeneration={sourceViewScrollGeneration}
               hotSpotTimings={selectedCallNodeLineTimings}

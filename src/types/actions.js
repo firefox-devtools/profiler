@@ -633,7 +633,7 @@ type L10nAction =
 type SourcesAction =
   | {| +type: 'SOURCE_CODE_LOADING_BEGIN_URL', file: string, url: string |}
   | {| +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
-  | {| +type: 'SOURCE_CODE_LOADING_SUCCESS', file: string, source: string |}
+  | {| +type: 'SOURCE_CODE_LOADING_SUCCESS', file: string, code: string |}
   | {|
       +type: 'SOURCE_CODE_LOADING_ERROR',
       file: string,
