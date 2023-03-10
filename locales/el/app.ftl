@@ -280,12 +280,12 @@ Home--compare-recordings-info = Μπορείτε επίσης να συγκρί�
 Home--your-recent-uploaded-recordings-title = Πρόσφατα μεταφορτωμένες καταγραφές
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     Το { -profiler-brand-name } μπορεί επίσης να εισαγάγει προφίλ από άλλα εργαλεία καταγραφής, όπως
     το <perf>Linux perf</perf>, το <simpleperf>Android SimplePerf</simpleperf>, ο πίνακας
     επιδόσεων του Chrome, το <androidstudio>Android Studio</androidstudio> ή οποιοδήποτε
-    αρχείο της <dhat>μορφής dhat</dhat>. <write>Μάθετε πώς να γράψετε το δικό σας
-    εργαλείο εισαγωγής</write>.
+    αρχείο των μορφών <dhat>dhat</dhat> ή <traceevent>Trace Event της Google</traceevent>.
+    <write>Μάθετε πώς να γράψετε το δικό σας εργαλείο εισαγωγής</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -891,6 +891,17 @@ SourceView--browser-api-error-when-obtaining-source = Το API συμβολισ�
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = Το API συμβολισμού του διακομιστή τοπικών συμβόλων επέστρεψε σφάλμα: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = Το API συμβολισμού του προγράμματος περιήγησης επέστρεψε απάντηση με εσφαλμένη μορφή: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = Το API συμβολισμού του διακομιστή τοπικών συμβόλων επέστρεψε απάντηση με εσφαλμένη μορφή: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
