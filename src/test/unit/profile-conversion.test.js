@@ -6,6 +6,10 @@
 import { unserializeProfileOfArbitraryFormat } from '../../profile-logic/process-profile';
 import { isPerfScriptFormat } from '../../profile-logic/import/linux-perf';
 import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
+
+import { storeWithProfile } from '../fixtures/stores';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors';
+
 import type {
   TracingEventUnion,
   CpuProfileEvent,
@@ -246,6 +250,116 @@ describe('converting Google Chrome profile', function () {
 
     checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a chrome profile using markers of different types', async function () {
+    const chromeProfile = {
+      traceEvents: [
+        {
+          cat: 'RunTask',
+          name: 'RunTask',
+          ph: 'B',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 1,
+        },
+        {
+          cat: 'RunTask',
+          name: 'RunTask',
+          ph: 'E',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 2,
+        },
+        {
+          args: {},
+          cat: 'disabled-by-default-devtools.timeline',
+          dur: 2,
+          name: 'RunTask Complete',
+          ph: 'X',
+          pid: 54782,
+          tdur: 1,
+          tid: 259,
+          ts: 3,
+          tts: 2522144,
+        },
+        {
+          cat: 'Instant',
+          name: 'Instant 1',
+          ph: 'i',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 7,
+        },
+        {
+          cat: 'Instant',
+          name: 'Instant 2',
+          ph: 'I',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 8,
+        },
+        {
+          args: { startTime: 3907.5999999940395 },
+          cat: 'blink.user_timing',
+          id: '0x2981878b',
+          name: 'async event',
+          ph: 'b',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 10,
+        },
+        {
+          args: {},
+          cat: 'blink.user_timing',
+          id: '0x2981878b',
+          name: 'async event',
+          ph: 'e',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 11,
+        },
+        {
+          args: {},
+          cat: 'blink.user_timing',
+          id: '0x2981878b',
+          name: 'async event instant',
+          ph: 'n',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 12,
+        },
+      ],
+    };
+    const strChromeProfile = JSON.stringify(chromeProfile);
+    const profile = await unserializeProfileOfArbitraryFormat(strChromeProfile);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    const state = storeWithProfile(profile).getState();
+    const mainGetMarker = selectedThreadSelectors.getMarkerGetter(state);
+    const markers = selectedThreadSelectors
+      .getFullMarkerListIndexes(state)
+      .map(mainGetMarker);
+
+    checkProfileContainsUniqueTid(profile);
+    expect(markers.map(({ name }) => name)).toEqual([
+      'RunTask',
+      'RunTask Complete',
+      'Instant 1',
+      'Instant 2',
+      'async event',
+      'async event instant',
+    ]);
+    expect(markers).toMatchSnapshot();
   });
 });
 

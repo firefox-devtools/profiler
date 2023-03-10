@@ -17,13 +17,13 @@ import {
 } from 'firefox-profiler/selectors/per-thread';
 import { closeBottomBox } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
-import { getSourceViewSource } from 'firefox-profiler/selectors/sources';
+import { getSourceViewCode } from 'firefox-profiler/selectors/code';
 import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { LineTimings, FileSourceStatus } from 'firefox-profiler/types';
+import type { LineTimings, SourceCodeStatus } from 'firefox-profiler/types';
 
 import { Localized } from '@fluent/react';
 
@@ -31,7 +31,7 @@ import './BottomBox.css';
 
 type StateProps = {|
   +sourceViewFile: string | null,
-  +sourceViewSource: FileSourceStatus | void,
+  +sourceViewCode: SourceCodeStatus | void,
   +globalLineTimings: LineTimings,
   +selectedCallNodeLineTimings: LineTimings,
   +sourceViewScrollGeneration: number,
@@ -44,7 +44,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-type SourceStatusOverlayProps = {| status: FileSourceStatus |};
+type SourceStatusOverlayProps = {| status: SourceCodeStatus |};
 
 function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
   switch (status.type) {
@@ -237,15 +237,15 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   render() {
     const {
       sourceViewFile,
-      sourceViewSource,
+      sourceViewCode,
       globalLineTimings,
       disableOverscan,
       sourceViewScrollGeneration,
       selectedCallNodeLineTimings,
     } = this.props;
     const source =
-      sourceViewSource && sourceViewSource.type === 'AVAILABLE'
-        ? sourceViewSource.source
+      sourceViewCode && sourceViewCode.type === 'AVAILABLE'
+        ? sourceViewCode.source
         : '';
     const path =
       sourceViewFile !== null
@@ -280,9 +280,9 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               ref={this._sourceView}
             />
           ) : null}
-          {sourceViewSource !== undefined &&
-          sourceViewSource.type !== 'AVAILABLE' ? (
-            <SourceStatusOverlay status={sourceViewSource} />
+          {sourceViewCode !== undefined &&
+          sourceViewCode.type !== 'AVAILABLE' ? (
+            <SourceStatusOverlay status={sourceViewCode} />
           ) : null}
         </div>
       </div>
@@ -293,7 +293,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
 export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),
-    sourceViewSource: getSourceViewSource(state),
+    sourceViewCode: getSourceViewCode(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
     selectedCallNodeLineTimings:
       selectedNodeSelectors.getSourceViewLineTimings(state),
