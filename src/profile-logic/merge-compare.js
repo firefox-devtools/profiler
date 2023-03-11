@@ -59,7 +59,6 @@ import type {
   UrlState,
   ImplementationFilter,
   TransformStacksPerThread,
-  Milliseconds,
   DerivedMarkerInfo,
   RawMarkerTable,
   MarkerIndex,
@@ -256,11 +255,13 @@ export function mergeProfilesForDiffing(
       getComparisonThread(translationMapsForCategories, [
         {
           thread: resultProfile.threads[0],
-          interval: profiles[0].meta.interval,
+          weightMultiplier:
+            profiles[0].meta.interval / resultProfile.meta.interval,
         },
         {
           thread: resultProfile.threads[1],
-          interval: profiles[1].meta.interval,
+          weightMultiplier:
+            profiles[1].meta.interval / resultProfile.meta.interval,
         },
       ])
     );
@@ -848,19 +849,22 @@ function combineStackTables(
  */
 function combineSamplesDiffing(
   translationMapsForStacks: TranslationMapForStacks[],
-  threadsAndIntervals: [ThreadAndInterval, ThreadAndInterval]
+  threadsAndWeightMultipliers: [
+    ThreadAndWeightMultiplier,
+    ThreadAndWeightMultiplier
+  ]
 ): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
   const translationMaps = [new Map(), new Map()];
   const [
     {
       thread: { samples: samples1, tid: tid1 },
-      interval: interval1,
+      weightMultiplier: weightMultiplier1,
     },
     {
       thread: { samples: samples2, tid: tid2 },
-      interval: interval2,
+      weightMultiplier: weightMultiplier2,
     },
-  ] = threadsAndIntervals;
+  ] = threadsAndWeightMultipliers;
 
   const newWeight = [];
   const newThreadId = [];
@@ -905,7 +909,8 @@ function combineSamplesDiffing(
       // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
       // base profile.
-      newWeight.push(-interval1);
+      const sampleWeight = samples1.weight ? samples1.weight[i] : 1;
+      newWeight.push(-weightMultiplier1 * sampleWeight);
 
       translationMaps[0].set(i, newSamples.length);
       newSamples.length++;
@@ -929,7 +934,8 @@ function combineSamplesDiffing(
       newSamples.eventDelay.push(null);
       newSamples.time.push(samples2.time[j]);
       newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
-      newWeight.push(interval2);
+      const sampleWeight = samples2.weight ? samples2.weight[i] : 1;
+      newWeight.push(weightMultiplier2 * sampleWeight);
 
       translationMaps[1].set(j, newSamples.length);
       newSamples.length++;
@@ -943,9 +949,9 @@ function combineSamplesDiffing(
   };
 }
 
-type ThreadAndInterval = {|
+type ThreadAndWeightMultiplier = {|
   thread: Thread,
-  interval: Milliseconds,
+  weightMultiplier: number,
 |};
 
 /**
@@ -954,11 +960,14 @@ type ThreadAndInterval = {|
  */
 function getComparisonThread(
   translationMapsForCategories: TranslationMapForCategories[],
-  threadsAndIntervals: [ThreadAndInterval, ThreadAndInterval]
+  threadsAndWeightMultipliers: [
+    ThreadAndWeightMultiplier,
+    ThreadAndWeightMultiplier
+  ]
 ): Thread {
   const newStringTable = new UniqueStringArray();
 
-  const threads = threadsAndIntervals.map((item) => item.thread);
+  const threads = threadsAndWeightMultipliers.map((item) => item.thread);
 
   const {
     resourceTable: newResourceTable,
@@ -990,7 +999,7 @@ function getComparisonThread(
   );
   const { samples: newSamples } = combineSamplesDiffing(
     translationMapsForStacks,
-    threadsAndIntervals
+    threadsAndWeightMultipliers
   );
 
   const mergedThread = {
