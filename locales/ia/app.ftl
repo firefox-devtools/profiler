@@ -275,6 +275,15 @@ Home--additional-content-title = Cargar profilos existente
 Home--additional-content-content = Tu pote <strong>traher e deponer</strong> hic un file profilo pro cargar lo, o:
 Home--compare-recordings-info = Tu pote alsi comparar registrationes. <a>Aperir le interfacie de comparation.</a>
 Home--your-recent-uploaded-recordings-title = Tu registrationes incargate recentemente
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 =
+    { -profiler-brand-name } pote alsi importar profilos de altere profilatores, tal como
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
+    Chrome performance panel, <androidstudio>Android Studio</androidstudio>, o
+    ulle file que usa le <dhat>formato dhat</dhat> o <traceevent>le formato Trace Event
+    de Google</traceevent>. <write>Apprende a scriber tu 
+    proprie importator</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
