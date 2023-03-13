@@ -4,10 +4,14 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
 import { Provider } from 'react-redux';
 import { UrlManager } from './UrlManager';
 import { FooterLinks } from './FooterLinks';
-import { ErrorBoundary } from './ErrorBoundary';
+import {
+  NonLocalizedErrorBoundary,
+  LocalizedErrorBoundary,
+} from './ErrorBoundary';
 import { AppViewRouter } from './AppViewRouter';
 import { ProfileLoader } from './ProfileLoader';
 import { ServiceWorkerManager } from './ServiceWorkerManager';
@@ -28,21 +32,28 @@ export class Root extends PureComponent<RootProps> {
   render() {
     const { store } = this.props;
     return (
-      <ErrorBoundary message="Uh oh, some error happened in profiler.firefox.com.">
+      <NonLocalizedErrorBoundary message="Uh oh, some error happened in profiler.firefox.com">
         <Provider store={store}>
           <AppLocalizationProvider>
-            <DragAndDrop>
-              <UrlManager>
-                <ServiceWorkerManager />
-                <ProfileLoader />
-                <AppViewRouter />
-                <FooterLinks />
-                <WindowTitle />
-              </UrlManager>
-            </DragAndDrop>
+            <Localized
+              id="Root--error-boundary-message"
+              attrs={{ message: true }}
+            >
+              <LocalizedErrorBoundary message="Uh oh, some error happened in profiler.firefox.com">
+                <DragAndDrop>
+                  <UrlManager>
+                    <ServiceWorkerManager />
+                    <ProfileLoader />
+                    <AppViewRouter />
+                    <FooterLinks />
+                    <WindowTitle />
+                  </UrlManager>
+                </DragAndDrop>
+              </LocalizedErrorBoundary>
+            </Localized>
           </AppLocalizationProvider>
         </Provider>
-      </ErrorBoundary>
+      </NonLocalizedErrorBoundary>
     );
   }
 }

@@ -1,6 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/ErrorBoundary matches the snapshot 1`] = `
+exports[`app/LocalizedErrorBoundary matches the snapshot 1`] = `
+<body>
+  <div>
+    <div
+      class="appErrorBoundary"
+    >
+      <div
+        class="appErrorBoundaryContents"
+      >
+        <div
+          class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content appErrorBoundaryMessage"
+        >
+          <div
+            class="photon-message-bar-inner-text"
+          >
+            Oops, there was an error
+             (Error: This is an error.)
+            .
+             
+            Please report this issue to the developers, including the full
+error as displayed in the Developer Tools’ Web Console.
+          </div>
+          <a
+            class="photon-button photon-button-micro photon-message-bar-action-button"
+            href="https://github.com/firefox-devtools/profiler/issues/new?title=An%20error%20occurred%20in%20Firefox%20Profiler"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Report the error on GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`app/NonLocalizedErrorBoundary matches the snapshot 1`] = `
 <div
   class="appErrorBoundary"
 >
@@ -14,28 +51,19 @@ exports[`app/ErrorBoundary matches the snapshot 1`] = `
         class="photon-message-bar-inner-text"
       >
         Oops, there was an error
+         (Error: This is an error.)
+        .
+         
+        Please report this error to the developers, including the full error as displayed in the Developer Tools’ Web Console.
       </div>
-      <button
-        aria-expanded="false"
+      <a
         class="photon-button photon-button-micro photon-message-bar-action-button"
-        type="button"
+        href="https://github.com/firefox-devtools/profiler/issues/new?title=An%20error%20occurred%20in%20Firefox%20Profiler"
+        rel="noreferrer"
+        target="_blank"
       >
-        View full error details
-      </button>
-    </div>
-    <div
-      class="appErrorBoundaryDetails hide"
-      data-testid="error-technical-details"
-    >
-      <div>
-        Error: This is an error.
-      </div>
-      <div>
-        
-    at ThrowingComponent (REDACTED)/src/test/components/ErrorBoundary.test.js:20:11)
-    at ErrorBoundary (REDACTED)/src/components/app/ErrorBoundary.js:28:66)
-    at LocalizationProvider (REDACTED)/node_modules/@fluent/react/index.js:(REDACTED)
-      </div>
+        Report the error on GitHub
+      </a>
     </div>
   </div>
 </div>
