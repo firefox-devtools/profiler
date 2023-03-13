@@ -24,8 +24,7 @@ Committing a range selection by clicking the zoom button is a useful way to zoom
 
 ![A screenshot highlighting the screenshot track in the timeline.](images/ui-tour-timeline-screenshots.png)
 
-The screenshots track help navigate in the profile and focus on the part that are
-more interesting to analyze.
+The screenshots track helps users navigate through the profile by providing visual context within the timeline.
 
 ## Timeline's activity graph
 
