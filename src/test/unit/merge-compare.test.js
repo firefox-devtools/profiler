@@ -113,6 +113,16 @@ describe('mergeProfilesForDiffing function', function () {
     );
 
     expect(mergedProfile.profile.meta.interval).toEqual(10);
+
+    const diffThread = mergedProfile.profile.threads[2];
+    const weightColumn = ensureExists(diffThread.samples.weight);
+    // Check that the weights have been adjusted based on the interval.
+    // Profile B has interval 20ms, so it started out with half the number of
+    // samples over the same duration as a profile with interval 10ms.
+    // So profile B's sample weights should be multiplied by 2 to make sense
+    // with the shared interval 10ms.
+    expect(weightColumn[0]).toBe(2); // The first sample is from profile B.
+    expect(weightColumn[1]).toBe(-1); // The second sample is from profile A.
   });
 
   it('should set the resulting profile to symbolicated if all are symbolicated', () => {
