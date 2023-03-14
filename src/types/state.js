@@ -284,7 +284,7 @@ export type DecodedInstruction = {|
 export type SourceCodeStatus =
   | {| type: 'LOADING', source: CodeLoadingSource |}
   | {| type: 'ERROR', errors: SourceCodeLoadingError[] |}
-  | {| type: 'AVAILABLE', source: string |};
+  | {| type: 'AVAILABLE', code: string |};
 
 export type AssemblyCodeStatus =
   | {| type: 'LOADING', source: CodeLoadingSource |}

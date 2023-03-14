@@ -23,8 +23,8 @@ export function beginLoadingSourceCodeFromBrowserConnection(
   return { type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file };
 }
 
-export function finishLoadingSourceCode(file: string, source: string): Action {
-  return { type: 'SOURCE_CODE_LOADING_SUCCESS', file, source };
+export function finishLoadingSourceCode(file: string, code: string): Action {
+  return { type: 'SOURCE_CODE_LOADING_SUCCESS', file, code };
 }
 
 export function failLoadingSourceCode(
