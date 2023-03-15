@@ -32,9 +32,9 @@ const sourceCodeCache: Reducer<Map<string, SourceCodeStatus>> = (
       return newState;
     }
     case 'SOURCE_CODE_LOADING_SUCCESS': {
-      const { file, source } = action;
+      const { file, code } = action;
       const newState = new Map(state);
-      newState.set(file, { type: 'AVAILABLE', source });
+      newState.set(file, { type: 'AVAILABLE', code });
       return newState;
     }
     case 'SOURCE_CODE_LOADING_ERROR': {
