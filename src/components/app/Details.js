@@ -103,7 +103,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           ) : null}
         </div>
         <Localized
-          id="Details--error-boundary-message2"
+          id="Details--error-boundary-message"
           attrs={{ message: true }}
         >
           <LocalizedErrorBoundary

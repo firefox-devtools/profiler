@@ -10,17 +10,22 @@ exports[`app/LocalizedErrorBoundary matches the snapshot 1`] = `
         class="appErrorBoundaryContents"
       >
         <div
-          class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content appErrorBoundaryMessage"
+          class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content"
         >
           <div
-            class="photon-message-bar-inner-text"
+            class="photon-message-bar-inner-text appErrorBoundaryInnerText"
           >
-            Oops, there was an error
-             (Error: This is an error.)
-            .
-             
-            Please report this issue to the developers, including the full
+            <p>
+              Oops, there was an error
+            </p>
+            <p>
+              Error: This is an error.
+              .
+            </p>
+            <p>
+              Please report this issue to the developers, including the full
 error as displayed in the Developer Tools’ Web Console.
+            </p>
           </div>
           <a
             class="photon-button photon-button-micro photon-message-bar-action-button"
@@ -45,16 +50,21 @@ exports[`app/NonLocalizedErrorBoundary matches the snapshot 1`] = `
     class="appErrorBoundaryContents"
   >
     <div
-      class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content appErrorBoundaryMessage"
+      class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content"
     >
       <div
-        class="photon-message-bar-inner-text"
+        class="photon-message-bar-inner-text appErrorBoundaryInnerText"
       >
-        Oops, there was an error
-         (Error: This is an error.)
-        .
-         
-        Please report this error to the developers, including the full error as displayed in the Developer Tools’ Web Console.
+        <p>
+          Oops, there was an error
+        </p>
+        <p>
+          Error: This is an error.
+          .
+        </p>
+        <p>
+          Please report this error to the developers, including the full error as displayed in the Developer Tools’ Web Console.
+        </p>
       </div>
       <a
         class="photon-button photon-button-micro photon-message-bar-action-button"

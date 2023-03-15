@@ -222,17 +222,19 @@ Details--open-sidebar-button =
     .title = Open the sidebar
 Details--close-sidebar-button =
     .title = Close the sidebar
-Details--error-boundary-message2 =
-    .message = Uh oh, some unknown error happened in this panel
+Details--error-boundary-message =
+    .message = Uh oh, some unknown error happened in this panel.
 
 ## ErrorBoundary
 ## This component is shown when an unexpected error is encountered in the application.
 ## Note that the localization won't be always applied in this component.
 
+# This message will always be displayed after another context-specific message.
 ErrorBoundary--report-error-to-developers-description =
     Please report this issue to the developers, including the full
     error as displayed in the Developer Tools’ Web Console.
 
+# This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Report the error on GitHub
 
 ## Footer Links
@@ -681,7 +683,7 @@ ProfileRootMessage--additional = Back to home
 ## Root
 
 Root--error-boundary-message =
-    .message = Uh oh, some error happened in profiler.firefox.com
+    .message = Uh oh, some unknown error happened in profiler.firefox.com.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation

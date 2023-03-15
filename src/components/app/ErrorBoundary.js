@@ -74,11 +74,11 @@ class ErrorBoundaryInternal extends React.Component<InternalProps, State> {
       return (
         <div className="appErrorBoundary">
           <div className="appErrorBoundaryContents">
-            <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content appErrorBoundaryMessage">
-              <div className="photon-message-bar-inner-text">
-                {this.props.message}
-                {errorString ? ` (${errorString})` : null}.{' '}
-                {this.props.reportExplanationMessage}
+            <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
+              <div className="photon-message-bar-inner-text appErrorBoundaryInnerText">
+                <p>{this.props.message}</p>
+                {errorString ? <p>{errorString}.</p> : null}
+                <p>{this.props.reportExplanationMessage}</p>
               </div>
               <a
                 className="photon-button photon-button-micro photon-message-bar-action-button"

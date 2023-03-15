@@ -46,9 +46,6 @@
 }
 
 .photon-message-bar-inner-text {
-  display: flex;
-  align-items: center;
-
   /* This padding is carefully computed so that multi-line message bars have the
    * same top padding than single-line message bars. Having this property
    * shouldn't change anything for single-line message bars.

@@ -32,14 +32,14 @@ export class Root extends PureComponent<RootProps> {
   render() {
     const { store } = this.props;
     return (
-      <NonLocalizedErrorBoundary message="Uh oh, some error happened in profiler.firefox.com">
+      <NonLocalizedErrorBoundary message="Uh oh, some unknown error happened in profiler.firefox.com.">
         <Provider store={store}>
           <AppLocalizationProvider>
             <Localized
               id="Root--error-boundary-message"
               attrs={{ message: true }}
             >
-              <LocalizedErrorBoundary message="Uh oh, some error happened in profiler.firefox.com">
+              <LocalizedErrorBoundary message="Uh oh, some unknown error happened in profiler.firefox.com.">
                 <DragAndDrop>
                   <UrlManager>
                     <ServiceWorkerManager />
