@@ -189,6 +189,7 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
           value: oneCategoryBreakdown.entireCategoryValue || 0,
           subcategories: category.subcategories
             .map((subcategoryName, subcategoryIndex) => ({
+              index: subcategoryIndex,
               name: subcategoryName,
               value:
                 oneCategoryBreakdown.subcategoryBreakdown[subcategoryIndex],
@@ -219,7 +220,7 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
           const expanded =
             openCats !== undefined && openCats.has(categoryIndex);
           return (
-            <React.Fragment key={category.name}>
+            <React.Fragment key={`category-${categoryIndex}`}>
               <SidebarDetail
                 label={
                   hasSubcategory ? (
@@ -251,9 +252,9 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
               </div>
 
               {hasSubcategory && expanded
-                ? subcategories.map(({ name, value }) => (
+                ? subcategories.map(({ index, name, value }) => (
                     <SidebarDetail
-                      key={name}
+                      key={`subcategory-${index}`}
                       label={name}
                       value={number(value)}
                       percentage={formatPercent(value / totalTime)}

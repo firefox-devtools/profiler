@@ -5,7 +5,8 @@
 import { stripIndent } from 'common-tags';
 import type { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
-import actions from '../actions';
+import actions from 'firefox-profiler/actions';
+import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -147,6 +148,7 @@ export function addDataToWindowObject(
     `);
   };
 
+  target.shortenUrl = shortenUrl;
   target.getState = getState;
   target.selectors = selectorsForConsole;
   target.dispatch = dispatch;

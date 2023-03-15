@@ -72,6 +72,7 @@ The web app doesn't include any performance profiles by default, so you'll need 
  #### 2. Use an existing profile:
  - On the web, replace the https://profiler.firefox.com with your local server, usually `http://localhost:4242`. Be sure that that the protocol is `http` and not `https` when running the server locally.
  - Alternatively, if a profile has been previously downloaded, drag and drop it to the loading screen. Compared to the previous solution, refreshing won't work with this particular solution.
+ - A third alternative on Linux is to run the provided [fp.sh](./bin/fp.sh) script, giving the profile file as the first argument. Both refreshing and symlinking to the script are supported.
 
 For more information on loading a profile, visit its [documentation](./docs-developer/loading-in-profiles.md).
 

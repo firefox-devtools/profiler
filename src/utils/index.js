@@ -120,3 +120,21 @@ export function countPositiveValues(arr: Array<number>): number {
   }
   return count;
 }
+
+/**
+ * Find the highest number among the map values and return its key.
+ * Returns undefined if the map is empty.
+ * If multiple entries with the highest value exist, it returns the key of the
+ * first encountered highest value.
+ */
+export function mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | void {
+  let maxValue = -Infinity;
+  let keyForMaxValue;
+  for (const [key, value] of map) {
+    if (value > maxValue) {
+      maxValue = value;
+      keyForMaxValue = key;
+    }
+  }
+  return keyForMaxValue;
+}

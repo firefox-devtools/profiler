@@ -6,17 +6,18 @@
 import * as React from 'react';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
+import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
 import type { LineTimings } from 'firefox-profiler/types';
 
 import type { SourceViewEditor } from './SourceView-codemirror';
 
-import './SourceView.css';
+import './CodeView.css';
 
 const SourceViewHeader = () => {
   return (
-    <div className="sourceViewHeader">
+    <div className="codeViewHeader">
       <span
-        className="sourceViewHeaderColumn sourceViewFixedColumn total"
+        className="codeViewHeaderColumn codeViewFixedColumn total"
         title="The “total” sample count includes a summary of every sample where this
 line was observed to be on the stack. This includes the time where the
 line was actually running, and the time spent in the callers from this
@@ -25,7 +26,7 @@ line."
         Total
       </span>
       <span
-        className="sourceViewHeaderColumn sourceViewFixedColumn self"
+        className="codeViewHeaderColumn codeViewFixedColumn self"
         title="The “self” sample count only includes the samples where the line was
 the end of the stack. If this line called into other functions,
 then the “other” functions’ counts are not included. The “self” count is useful
@@ -33,31 +34,19 @@ for understanding where time was actually spent in a program."
       >
         Self
       </span>
-      <span className="sourceViewHeaderColumn sourceViewMainColumn source"></span>
+      <span className="codeViewHeaderColumn codeViewMainColumn source"></span>
     </div>
   );
 };
 
 type SourceViewProps = {|
   +timings: LineTimings,
-  +source: string,
+  +sourceCode: string,
   +disableOverscan: boolean,
   +filePath: string | null,
   +scrollToHotSpotGeneration: number,
   +hotSpotTimings: LineTimings,
 |};
-
-function _mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | void {
-  let maxValue = -Infinity;
-  let keyForMaxValue;
-  for (const [key, value] of map) {
-    if (value > maxValue) {
-      maxValue = value;
-      keyForMaxValue = key;
-    }
-  }
-  return keyForMaxValue;
-}
 
 let editorModulePromise: Promise<any> | null = null;
 
@@ -88,8 +77,8 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
    */
   _scrollToHotSpot(timingsForScrolling: LineTimings) {
     const heaviestLine =
-      _mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
-      _mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
+      mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
+      mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
     if (heaviestLine !== undefined) {
       this._scrollToLine(heaviestLine - 5);
     }
@@ -102,8 +91,8 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   }
 
   _getMaxLineNumber() {
-    const { source, timings } = this.props;
-    const sourceLines = source.split('\n');
+    const { sourceCode, timings } = this.props;
+    const sourceLines = sourceCode.split('\n');
     let maxLineNumber = sourceLines.length;
     if (maxLineNumber <= 1) {
       // We probably don't have the true source code yet, and don't really know
@@ -118,17 +107,17 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     return maxLineNumber;
   }
 
-  _getSourceOrFallback() {
-    const { source } = this.props;
-    if (source !== '') {
-      return source;
+  _getSourceCodeOrFallback() {
+    const { sourceCode } = this.props;
+    if (sourceCode !== '') {
+      return sourceCode;
     }
     return '\n'.repeat(this._getMaxLineNumber());
   }
 
   render() {
     return (
-      <div className="sourceView">
+      <div className="sourceView codeView">
         <SourceViewHeader />
         <div className="codeMirrorContainer" ref={this._ref}></div>
       </div>
@@ -150,7 +139,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       }
       const { SourceViewEditor } = codeMirrorModule;
       const editor = new SourceViewEditor(
-        this._getSourceOrFallback(),
+        this._getSourceCodeOrFallback(),
         this.props.filePath,
         this.props.timings,
         domParent
@@ -172,12 +161,12 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     }
 
     if (
-      this.props.source !== prevProps.source ||
-      (this.props.source === '' &&
-        prevProps.source === '' &&
+      this.props.sourceCode !== prevProps.sourceCode ||
+      (this.props.sourceCode === '' &&
+        prevProps.sourceCode === '' &&
         this.props.timings !== prevProps.timings)
     ) {
-      this._editor.setContents(this._getSourceOrFallback());
+      this._editor.setContents(this._getSourceCodeOrFallback());
     }
 
     if (

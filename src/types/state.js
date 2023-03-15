@@ -18,7 +18,7 @@ import type {
   LastNonShiftClickInformation,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { StartEndRange, CssPixels, Milliseconds } from './units';
+import type { StartEndRange, CssPixels, Milliseconds, Address } from './units';
 import type {
   Profile,
   ThreadIndex,
@@ -276,12 +276,22 @@ export type AssemblyViewState = {|
   allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
 |};
 
-export type FileSourceStatus =
-  | {| type: 'LOADING', source: FileSourceLoadingSource |}
-  | {| type: 'ERROR', errors: SourceLoadingError[] |}
-  | {| type: 'AVAILABLE', source: string |};
+export type DecodedInstruction = {|
+  address: Address,
+  decodedString: string,
+|};
 
-export type FileSourceLoadingSource =
+export type SourceCodeStatus =
+  | {| type: 'LOADING', source: CodeLoadingSource |}
+  | {| type: 'ERROR', errors: SourceCodeLoadingError[] |}
+  | {| type: 'AVAILABLE', code: string |};
+
+export type AssemblyCodeStatus =
+  | {| type: 'LOADING', source: CodeLoadingSource |}
+  | {| type: 'ERROR', errors: ApiQueryError[] |}
+  | {| type: 'AVAILABLE', instructions: DecodedInstruction[] |};
+
+export type CodeLoadingSource =
   | {| type: 'URL', url: string |}
   | {| type: 'BROWSER_CONNECTION' |};
 
@@ -318,7 +328,7 @@ export type ApiQueryError =
       errorMessage: string,
     |};
 
-export type SourceLoadingError =
+export type SourceCodeLoadingError =
   | ApiQueryError
   | {| type: 'NO_KNOWN_CORS_URL' |}
   | {|
@@ -412,6 +422,11 @@ export type L10nState = {|
 
 export type IconState = Set<string>;
 
+export type CodeState = {|
+  +sourceCodeCache: Map<string, SourceCodeStatus>,
+  +assemblyCodeCache: Map<string, AssemblyCodeStatus>,
+|};
+
 export type State = {|
   +app: AppState,
   +profileView: ProfileViewState,
@@ -420,7 +435,7 @@ export type State = {|
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
   +l10n: L10nState,
-  +sources: Map<string, FileSourceStatus>,
+  +code: CodeState,
 |};
 
 export type IconWithClassName = {|

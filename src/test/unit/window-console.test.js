@@ -26,6 +26,7 @@ describe('console-accessible values on the window object', function () {
     expect(target.profile).toBeTruthy();
     expect(target.filteredThread).toBeTruthy();
     expect(target.callTree).toBeTruthy();
+    expect(target.shortenUrl).toBeTruthy();
   });
 
   it('logs a friendly message', function () {
