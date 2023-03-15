@@ -849,24 +849,44 @@ TransformNavigator--collapse-indirect-recursion = Yndirekte rekursy ynklappe: { 
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Subtree ynklappe: { $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Wachtsje op { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Wachtsje op { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Boarne net beskikber
+BottomBox--source-code-not-available-title = Boarnekoade net beskikber
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Sjoch <a>issue #3741</a> foar stipjende senario's en plande ferbetteringen.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Gearstallingskoade net beskikber
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Sjoch <a>issue #4520</a> foar stipjende senario's en plande ferbetteringen.
+SourceView--close-button =
+    .title = Boarnewerjefte slute
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Der is gjin bekende cross-origin-tagonklike URL foar dit bestân.
@@ -916,8 +936,17 @@ SourceView--not-in-archive-error-when-obtaining-source = It bestân { $pathInArc
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = It argyf op { $url } koe net ferwurke wurde: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Boarnewerjefte slute
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = De gearstallingswerjefte toane
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = De gearstallingswerjefte ferstopje
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
