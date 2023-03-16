@@ -279,11 +279,12 @@ Home--compare-recordings-info = Du kan också jämföra inspelningar.<a>Öppna g
 Home--your-recent-uploaded-recordings-title = Dina senaste uppladdade inspelningar
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     { -profiler-brand-name } kan också importera profiler från andra profilerare, t.ex
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
     Chrome prestandapanel, <androidstudio>Android Studio</androidstudio> eller
-    vilken fil som helst som använder <dhat>dhat-formatet</dhat>. <write>Lär dig hur du skriver din
+    vilken fil som helst som använder <dhat>dhat-formatet</dhat> eller <traceevent>Googles spårningshändelse
+    Format</traceevent>. <write>Lär dig hur du skriver din
     egen importör</write>.
 
 ## IdleSearchField
@@ -890,6 +891,17 @@ SourceView--browser-api-error-when-obtaining-source = Webbläsarens symboliserin
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = Den lokala symbolserverns symboliserings-API returnerade ett fel: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = Webbläsarens symboliserings-API returnerade ett felaktigt svar: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = Den lokala symbolserverns symboliserings-API returnerade ett felaktigt svar: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:

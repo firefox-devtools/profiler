@@ -225,11 +225,11 @@ Home--compare-recordings-info = También puedes comparar los registros. <a>Abre 
 Home--your-recent-uploaded-recordings-title = Tus registros subidos recientemente
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     { -profiler-brand-name } también puede importar perfiles de otros generadores de perfiles, tales como
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, el
     panel de rendimiento de Chrome, <androidstudio>Android Studio</androidstudio>, o
-    cualquier archivo usando el <dhat>formato dhat</dhat>. <write>Aprende a escribir tu
+    cualquier archivo usando el <dhat>formato dhat</dhat> o el <traceevent>formato Trace Event de Google</traceevent>. <write>Aprende a escribir tu
     propio importador</write>.
 
 ## IdleSearchField
@@ -789,24 +789,44 @@ TransformNavigator--collapse-indirect-recursion = Contraer recursión indirecta:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Colapsar subárbol: { $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Esperando a { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Esperando por { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Fuente no disponible
+BottomBox--source-code-not-available-title = Código fuente no disponible
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Consulta el <a>problema #3741</a> para conocer los escenarios compatibles y las mejoras planificadas.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Código de ensamblaje no disponible
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Consulta el <a>problema #4520</a> para conocer los escenarios compatibles y las mejoras planificadas.
+SourceView--close-button =
+    .title = Cerrar la vista de fuente
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = No se conoce una URL accesible por origen cruzado para este archivo.
@@ -832,6 +852,17 @@ SourceView--browser-api-error-when-obtaining-source = La API de simbolización d
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = La API de simbolización del servidor de símbolos local devolvió un error: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = La API de simbolización del navegador devolvió una respuesta mal formulada: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = La API de simbolización del servidor local devolvió una respuesta mal formulada: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
@@ -845,8 +876,17 @@ SourceView--not-in-archive-error-when-obtaining-source = El documento { $pathInA
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = El archivo de { $url } no pudo ser analizado: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Cerrar la vista de fuente
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Mostrar la vista de ensamblaje
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Ocultar la vista de ensamblaje
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
