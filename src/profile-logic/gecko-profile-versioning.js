@@ -9,6 +9,9 @@
  * run profiler.firefox.com on non-Nightly versions of Firefox, and we want
  * to be able to load old saved profiles, so this file upgrades old profiles
  * to the current format.
+ *
+ * Please don't forget to update the gecko profile format changelog in
+ * `docs-developer/CHANGELOG-formats.md`.
  */
 
 import { UniqueStringArray } from '../utils/unique-string-array';
@@ -1442,5 +1445,7 @@ const _upgraders = {
     }
     convertToVersion27Recursive(profile);
   },
+  // If you add a new upgrader here, please document the change in
+  // `docs-developer/CHANGELOG-formats.md`.
 };
 /* eslint-enable no-useless-computed-key */
