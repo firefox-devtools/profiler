@@ -10,6 +10,7 @@ executors:
 
 orbs:
   shellcheck: circleci/shellcheck@2.0.0
+  codecov: codecov/codecov@3.2.4
 
 commands:
   checkout-and-dependencies:
@@ -46,7 +47,7 @@ jobs:
       # We use workerIdleMemoryLimit to work around a memory issue with node.
       # See https://github.com/facebook/jest/issues/11956
       - run: yarn test --coverage --logHeapUsage -w=4 --workerIdleMemoryLimit=1.5G
-      - run: yarn codecov
+      - codecov/upload
 
   build-prod:
     executor: node
