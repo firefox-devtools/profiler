@@ -10,7 +10,7 @@ import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TabBar } from './TabBar';
-import { ErrorBoundary } from './ErrorBoundary';
+import { LocalizedErrorBoundary } from './ErrorBoundary';
 import { ProfileCallTreeView } from 'firefox-profiler/components/calltree/ProfileCallTreeView';
 import { MarkerTable } from 'firefox-profiler/components/marker-table';
 import { StackChart } from 'firefox-profiler/components/stack-chart/';
@@ -106,9 +106,9 @@ class ProfileViewerImpl extends PureComponent<Props> {
           id="Details--error-boundary-message"
           attrs={{ message: true }}
         >
-          <ErrorBoundary
+          <LocalizedErrorBoundary
             key={selectedTab}
-            message="Uh oh, some unknown error happened in this panel."
+            message="Uh oh, some unknown error happened in this panel"
           >
             {
               {
@@ -121,7 +121,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
                 'js-tracer': <JsTracer />,
               }[selectedTab]
             }
-          </ErrorBoundary>
+          </LocalizedErrorBoundary>
         </Localized>
         <CallNodeContextMenu />
         <MaybeMarkerContextMenu />
