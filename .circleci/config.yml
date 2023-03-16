@@ -7,9 +7,12 @@ executors:
   base:
     docker:
       - image: cimg/base:stable
+  windows: win/default
 
 orbs:
   shellcheck: circleci/shellcheck@2.0.0
+  win: circleci/windows@5.0
+  node: circleci/node@5.1.0
 
 commands:
   checkout-and-dependencies:
@@ -36,6 +39,17 @@ jobs:
     resource_class: large
     steps:
       - checkout-and-dependencies
+      - run: yarn lint
+
+  lint-windows:
+    executor:
+      name: win/default
+      shell: bash.exe
+    steps:
+      - checkout
+      - node/install
+      - run: npm --version
+      - run: yarn install --frozen-lockfile
       - run: yarn lint
 
   tests:
@@ -108,6 +122,7 @@ workflows:
     jobs:
       - tests
       - lint
+      - lint-windows
       - build-prod
       - flow
       - licence-check
