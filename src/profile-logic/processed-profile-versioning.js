@@ -10,6 +10,9 @@
  * want to be able to display profiles that were saved at any point in the
  * past, regardless of their version. So this file upgrades old profiles to
  * the current format.
+ *
+ * Please don't forget to update the processed profile format changelog in
+ * `docs-developer/CHANGELOG-formats.md`.
  */
 
 import { sortDataTable } from '../utils/data-table-utils';
@@ -2251,5 +2254,7 @@ const _upgraders = {
       }
     }
   },
+  // If you add a new upgrader here, please document the change in
+  // `docs-developer/CHANGELOG-formats.md`.
 };
 /* eslint-enable no-useless-computed-key */

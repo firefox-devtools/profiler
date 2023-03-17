@@ -4,15 +4,16 @@
 
 // @flow
 import * as React from 'react';
-import { screen } from '@testing-library/react';
 import { stripIndent } from 'common-tags';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
-import { ErrorBoundary } from '../../components/app/ErrorBoundary';
+import {
+  NonLocalizedErrorBoundary,
+  LocalizedErrorBoundary,
+} from '../../components/app/ErrorBoundary';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
-import { fireFullClick } from '../fixtures/utils';
 
-describe('app/ErrorBoundary', function () {
+describe('app/NonLocalizedErrorBoundary', function () {
   const childComponentText = 'This is a child component';
   const friendlyErrorMessage = 'Oops, there was an error';
   const technicalErrorMessage = 'This is an error.';
@@ -23,28 +24,15 @@ describe('app/ErrorBoundary', function () {
   function setupComponent(childComponent) {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const results = render(
-      <ErrorBoundary message={friendlyErrorMessage}>
+      <NonLocalizedErrorBoundary message={friendlyErrorMessage}>
         {childComponent}
-      </ErrorBoundary>
+      </NonLocalizedErrorBoundary>
     );
     return { spy, ...results };
   }
 
   it('matches the snapshot', () => {
     const { container } = setupComponent(<ThrowingComponent />);
-
-    // We need to change the textContent of the stack, so that path information
-    // isn't tied to a specific environment.
-    const stack = screen.getByText(/at ThrowingComponent/);
-    stack.textContent = stack.textContent
-      .replace(/\\/g, '/') // normalizes Windows paths
-      .replace(/\(.*\/src/g, '(REDACTED)/src') // Removes the home directory
-      // Removes the home directory and line / column numbers of vendored files.
-      .replace(
-        /\(.*\/node_modules\/([^:]*):.+/g,
-        '(REDACTED)/node_modules/$1:(REDACTED)'
-      );
-
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -55,25 +43,12 @@ describe('app/ErrorBoundary', function () {
 
   it('shows the error message children when the component throws error', () => {
     const { getByText } = setupComponent(<ThrowingComponent />);
-    expect(getByText(friendlyErrorMessage)).toBeInTheDocument();
+    expect(getByText(new RegExp(friendlyErrorMessage))).toBeInTheDocument();
   });
 
   it('surfaces the error via console.error', () => {
     setupComponent(<ThrowingComponent />);
     expect(console.error).toHaveBeenCalled();
-  });
-
-  it('can click the component to view the full details', () => {
-    const { getByText, getByTestId } = setupComponent(<ThrowingComponent />);
-
-    // The technical error isn't visible yet.
-    expect(getByTestId('error-technical-details')).toHaveClass('hide');
-
-    // Click the button to expand the details.
-    fireFullClick(getByText('View full error details'));
-
-    // The technical error now exists.
-    expect(getByTestId('error-technical-details')).not.toHaveClass('hide');
   });
 
   it('reports errors to the analytics', () => {
@@ -87,13 +62,37 @@ describe('app/ErrorBoundary', function () {
           new RegExp(stripIndent`
               Error: This is an error\\.
 
-                  at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:20:11\\)
-                  at ErrorBoundary \\(.*[/\\\\]ErrorBoundary.js:28:66\\)
+                  at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:.*\\)
+                  at ErrorBoundaryInternal \\(.*[/\\\\]ErrorBoundary.js:.*\\)
+                  at NonLocalizedErrorBoundary
                   at LocalizationProvider \\(.*[/\\\\]@fluent[/\\\\]react[/\\\\]index.js:.*\\)
           `)
         ),
         exFatal: true,
       });
     });
+  });
+});
+
+describe('app/LocalizedErrorBoundary', function () {
+  const friendlyErrorMessage = 'Oops, there was an error';
+  const technicalErrorMessage = 'This is an error.';
+  const ThrowingComponent = () => {
+    throw new Error(technicalErrorMessage);
+  };
+
+  function setupComponent(childComponent) {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const results = render(
+      <LocalizedErrorBoundary message={friendlyErrorMessage}>
+        {childComponent}
+      </LocalizedErrorBoundary>
+    );
+    return { spy, ...results };
+  }
+
+  it('matches the snapshot', () => {
+    setupComponent(<ThrowingComponent />);
+    expect(document.body).toMatchSnapshot();
   });
 });

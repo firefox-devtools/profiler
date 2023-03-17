@@ -4,19 +4,24 @@
 // @flow
 
 import * as React from 'react';
+import { Localized } from '@fluent/react';
 import { reportError } from 'firefox-profiler/utils/analytics';
 import './ErrorBoundary.css';
 
 type State = {|
   hasError: boolean,
-  showDetails: boolean,
   errorString: string | null,
-  componentStack?: string,
 |};
 
-type Props = {|
+type ExternalProps = {|
   +children: React.Node,
   +message: string,
+|};
+
+type InternalProps = {|
+  ...ExternalProps,
+  buttonContent: React.Node,
+  reportExplanationMessage: React.Node,
 |};
 
 /**
@@ -25,10 +30,9 @@ type Props = {|
  *
  * See: https://reactjs.org/docs/error-boundaries.html
  */
-export class ErrorBoundary extends React.Component<Props, State> {
+class ErrorBoundaryInternal extends React.Component<InternalProps, State> {
   state = {
     hasError: false,
-    showDetails: false,
     errorString: null,
   };
 
@@ -52,7 +56,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
         errorString = result;
       }
     }
-    this.setState({ hasError: true, errorString, componentStack });
+    this.setState({
+      hasError: true,
+      errorString,
+    });
     reportError({
       exDescription: errorString
         ? errorString + '\n' + componentStack
@@ -61,35 +68,26 @@ export class ErrorBoundary extends React.Component<Props, State> {
     });
   }
 
-  _toggleErrorDetails = () => {
-    this.setState((state) => ({ showDetails: !state.showDetails }));
-  };
-
   render() {
     if (this.state.hasError) {
-      const { errorString, componentStack, showDetails } = this.state;
+      const { errorString } = this.state;
       return (
         <div className="appErrorBoundary">
           <div className="appErrorBoundaryContents">
-            <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content appErrorBoundaryMessage">
-              <div className="photon-message-bar-inner-text">
-                {this.props.message}
+            <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
+              <div className="photon-message-bar-inner-text appErrorBoundaryInnerText">
+                <p>{this.props.message}</p>
+                {errorString ? <p>{errorString}.</p> : null}
+                <p>{this.props.reportExplanationMessage}</p>
               </div>
-              <button
+              <a
                 className="photon-button photon-button-micro photon-message-bar-action-button"
-                type="button"
-                onClick={this._toggleErrorDetails}
-                aria-expanded={showDetails ? 'true' : 'false'}
+                href="https://github.com/firefox-devtools/profiler/issues/new?title=An%20error%20occurred%20in%20Firefox%20Profiler"
+                target="_blank"
+                rel="noreferrer"
               >
-                {showDetails ? 'Hide error details' : 'View full error details'}
-              </button>
-            </div>
-            <div
-              data-testid="error-technical-details"
-              className={`appErrorBoundaryDetails ${showDetails ? '' : 'hide'}`}
-            >
-              {errorString ? <div>{errorString}</div> : null}
-              {componentStack ? <div>{componentStack}</div> : null}
+                {this.props.buttonContent}
+              </a>
             </div>
           </div>
         </div>
@@ -98,4 +96,39 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
     return this.props.children;
   }
+}
+
+/**
+ * Use this error boundary when outside of the AppLocalizationProvider hierarchy
+ */
+export function NonLocalizedErrorBoundary(props: ExternalProps) {
+  return (
+    <ErrorBoundaryInternal
+      {...props}
+      buttonContent="Report the error on GitHub"
+      reportExplanationMessage="Please report this error to the developers, including the full error as displayed in the Developer Tools’ Web Console."
+    />
+  );
+}
+
+/**
+ * Use this error boundary when inside of the AppLocalizationProvider hierarchy
+ */
+export function LocalizedErrorBoundary(props: ExternalProps) {
+  return (
+    <ErrorBoundaryInternal
+      {...props}
+      buttonContent={
+        <Localized id="ErrorBoundary--report-error-on-github">
+          Report the error on GitHub
+        </Localized>
+      }
+      reportExplanationMessage={
+        <Localized id="ErrorBoundary--report-error-to-developers-description">
+          Please report this issue to the developers, including the full error
+          as displayed in the Developer Tools’ Web Console.
+        </Localized>
+      }
+    />
+  );
 }
