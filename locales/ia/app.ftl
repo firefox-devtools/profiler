@@ -215,6 +215,13 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Oh oh, alcun error incognite eveniva in iste pannello.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Reportar le error sur GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Legal
@@ -613,6 +620,11 @@ ProfileLoaderAnimation--loading-view-not-found = Vista non trovate
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Receder a casa
 
+## Root
+
+Root--error-boundary-message =
+    .message = Oh oh, alcun error incognite eveniva in profiler.firefox.com.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -844,24 +856,35 @@ TransformNavigator--collapse-indirect-recursion = Collaber le recursion indirect
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Collaber sub-arbore: { $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Attendente { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Attendente { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Fonte non disponibile
+BottomBox--source-code-not-available-title = Codification fonte non disponibile
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Vide <a>issue #3741</a> pro scenarios supportate e meliorationes planate.
+SourceView--close-button =
+    .title = Clauder le vista fonte
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Pro iste file il non ha un note URL cross-origin accessibile.
@@ -911,8 +934,9 @@ SourceView--not-in-archive-error-when-obtaining-source = Le file { $pathInArchiv
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Le archivo a { $url } non pote esser tractate: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Clauder le vista fonte
+
+## Toggle buttons in the top right corner of the bottom box
+
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
