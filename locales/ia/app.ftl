@@ -878,6 +878,15 @@ BottomBox--source-code-not-available-title = Codification fonte non disponibile
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Vide <a>issue #3741</a> pro scenarios supportate e meliorationes planate.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Codice assembly non disponibile
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Vide <a>issue #4520</a> pro scenarios supportate e meliorationes planate.
 SourceView--close-button =
     .title = Clauder le vista fonte
 
@@ -937,6 +946,14 @@ SourceView--archive-parsing-error-when-obtaining-source = Le archivo a { $url } 
 
 ## Toggle buttons in the top right corner of the bottom box
 
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Monstrar le vista assembly
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Celar le vista assembly
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
