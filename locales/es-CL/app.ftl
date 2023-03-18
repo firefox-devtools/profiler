@@ -168,6 +168,15 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Chuta, ocurrió un error desconocido en este panel.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description = Por favor, reporta este problema a los desarrolladores, incluyendo el error completo tal como se muestra en la consola web de las herramientas de desarrollador.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Reportar el error en GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Legal
@@ -559,6 +568,11 @@ ProfileLoaderAnimation--loading-view-not-found = Vista no encontrada
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Volver al inicio
+
+## Root
+
+Root--error-boundary-message =
+    .message = Chuta, ocurrió un error desconocido en profiler.firefox.com.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
