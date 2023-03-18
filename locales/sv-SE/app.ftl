@@ -212,6 +212,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Oj, några okända fel inträffade i den här panelen.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Rapportera problemet till utvecklarna, inklusive hela
+    felet som visas i webbkonsolen för utvecklarverktygen.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Rapportera felet på GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Juridisk information
@@ -616,6 +627,11 @@ ProfileLoaderAnimation--loading-view-not-found = Vy hittades inte
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Tillbaka till hem
+
+## Root
+
+Root--error-boundary-message =
+    .message = Åh, något okänt fel inträffade i profiler.firefox.com.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
