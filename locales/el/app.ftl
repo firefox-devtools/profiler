@@ -213,6 +213,11 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Ωχ, προέκυψε άγνωστο σφάλμα σε αυτόν τον πίνακα.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+
 ## Footer Links
 
 FooterLinks--legal = Νομικά
@@ -617,6 +622,11 @@ ProfileLoaderAnimation--loading-view-not-found = Η προβολή δεν βρέ
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Πίσω στην αρχική
 
+## Root
+
+Root--error-boundary-message =
+    .message = Ωχ, προέκυψε κάποιο άγνωστο σφάλμα στο profiler.firefox.com.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -848,24 +858,39 @@ TransformNavigator--collapse-indirect-recursion = Σύμπτυξη έμμεση�
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Σύμπτυξη υπόδεντρου: { $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Αναμονή για { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Αναμονή για { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Μη διαθέσιμη πηγή
+BottomBox--source-code-not-available-title = Ο πηγαίος κώδικας δεν είναι διαθέσιμος
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Δείτε το <a>ζήτημα #3741</a> για υποστηριζόμενα σενάρια και προγραμματισμένες βελτιώσεις.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Ο κώδικας assembly δεν είναι διαθέσιμος
+SourceView--close-button =
+    .title = Κλείσιμο προβολής πηγής
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Δεν υπάρχει γνωστό URL με δυνατότητα πρόσβασης από πολλαπλές προελεύσεις για αυτό το αρχείο.
@@ -915,8 +940,9 @@ SourceView--not-in-archive-error-when-obtaining-source = Το αρχείο «{ $
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Δεν ήταν δυνατή η ανάλυση του αρχείου στο { $url }: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Κλείσιμο προβολής πηγής
+
+## Toggle buttons in the top right corner of the bottom box
+
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
