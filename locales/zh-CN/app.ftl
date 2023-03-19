@@ -64,6 +64,11 @@ CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反�
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = 聚集于分类 <strong>{ $categoryName }</strong>
+    .title = 聚焦于与选择的节点相同的分类，因此会将属于其他分类的节点合并。
 CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
     .title = 将函数折叠后，会移除其所有调用内容，并将所有时间归予该函数。此举可避免对不需要分析的代码进行调用，简化分析记录本身。
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -745,7 +750,7 @@ TransformNavigator--focus-function = 聚焦：{ $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
 #   $item (String) - Name of the category that transform applied to.
-TransformNavigator--focus-category = 聚焦类别：{ $item }
+TransformNavigator--focus-category = 聚焦分类：{ $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
