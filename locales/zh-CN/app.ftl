@@ -213,6 +213,9 @@ Home--additional-content-title = 加载现有分析记录
 Home--additional-content-content = 您可以将分析记录<strong>拖放</strong>至此处，或：
 Home--compare-recordings-info = 您也可以比较记录内容。<a>打开比较界面。</a>
 Home--your-recent-uploaded-recordings-title = 您最近上传的记录
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 = { -profiler-brand-name } 也可以从其他分析器导入记录，例如 <perf>Linux perf</perf>、<simpleperf>Android SimplePerf</simpleperf>、Chrome 性能面板、<androidstudio>Android Studio</androidstudio>，支持直接导入 <dhat>dhat</dhat>、<traceevent>Google 的 Trace Event</traceevent> 格式保存的分析记录。<write>点此了解如何编写您自己的导入程序</write>。
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -738,6 +741,11 @@ TransformNavigator--focus-subtree = 聚焦节点：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = 聚焦：{ $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = 聚焦类别：{ $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
