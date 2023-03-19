@@ -155,6 +155,8 @@ Details--error-boundary-message =
 ## This component is shown when an unexpected error is encountered in the application.
 ## Note that the localization won't be always applied in this component.
 
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description = 请将此问题报告给开发者，包含开发者工具的 Web 控制台中显示的完整错误。
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = 到 GitHub 报告错误
 
