@@ -151,6 +151,13 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = 啊哦，此面板发生某些未知错误。
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = 到 GitHub 报告错误
+
 ## Footer Links
 
 FooterLinks--legal = 法律
@@ -528,6 +535,11 @@ ProfileLoaderAnimation--loading-view-not-found = 找不到视图
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = 返回主页
 
+## Root
+
+Root--error-boundary-message =
+    .message = 啊哦，profiler.firefox.com 发生某些未知错误。
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -755,24 +767,44 @@ TransformNavigator--collapse-indirect-recursion = 折叠间接递归：{ $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = 等待 { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = 正在等待 { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = 源代码不可用
+BottomBox--source-code-not-available-title = 源代码不可用
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #3741</a>。
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = 汇编代码不可用
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #4520</a>。
+SourceView--close-button =
+    .title = 关闭源代码视图
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = 此文件没有已知的 cross-origin-accessible 网址。
@@ -822,8 +854,17 @@ SourceView--not-in-archive-error-when-obtaining-source = { $url } 处的存档�
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = 无法解析 { $url } 处的存档：{ $parsingErrorMessage }
-SourceView--close-button =
-    .title = 关闭源代码视图
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = 显示汇编代码视图
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = 隐藏汇编代码视图
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
