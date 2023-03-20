@@ -213,6 +213,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Uh oh, der is in ûnbekende flater yn dit paniel bard.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Dit probleem oan de ûntwikkelers melde, ynklusyf de folsleine
+    flatermelding lykas toand yn de webconsole fan de Untwikkelershelpmiddelen.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = De flater op GitHub melde
+
 ## Footer Links
 
 FooterLinks--legal = Juridysk
@@ -617,6 +628,11 @@ ProfileLoaderAnimation--loading-view-not-found = Werjefte net fûn
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Tebek nei startside
+
+## Root
+
+Root--error-boundary-message =
+    .message = Oh-oh, der is in ûnbekende flater op profiler.firefox.com bard.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
