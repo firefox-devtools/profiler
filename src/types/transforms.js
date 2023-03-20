@@ -331,6 +331,7 @@ export type TransformDefinitions = {
   'focus-category': {|
     +type: 'focus-category',
     +category: IndexIntoCategoryList,
+    +implementation: ImplementationFilter,
   |},
 
   /**
