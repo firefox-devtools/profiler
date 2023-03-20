@@ -213,6 +213,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Oh-oh, er is een onbekende fout in dit paneel opgetreden.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Dit probleem aan de ontwikkelaars melden, inclusief de volledige
+    foutmelding zoals getoond in de webconsole van de Ontwikkelaarshulpmiddelen.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = De fout op GitHub melden
+
 ## Footer Links
 
 FooterLinks--legal = Juridisch
@@ -617,6 +628,11 @@ ProfileLoaderAnimation--loading-view-not-found = Weergave niet gevonden
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Terug naar startpagina
+
+## Root
+
+Root--error-boundary-message =
+    .message = Oh-oh, er is een onbekende fout op profiler.firefox.com opgetreden.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
