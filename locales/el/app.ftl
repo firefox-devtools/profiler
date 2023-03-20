@@ -217,6 +217,12 @@ Details--error-boundary-message =
 ## This component is shown when an unexpected error is encountered in the application.
 ## Note that the localization won't be always applied in this component.
 
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Παρακαλώ αναφέρετε αυτό το ζήτημα στους προγραμματιστές, μαζί με το
+    πλήρες σφάλμα, όπως εμφανίζεται στην κονσόλα ιστού των εργαλείων ανάπτυξης.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο GitHub
 
 ## Footer Links
 
@@ -884,6 +890,11 @@ SourceView--source-not-available-text = Δείτε το <a>ζήτημα #3741</a
 # a file.
 # Assembly refers to the low-level programming language.
 BottomBox--assembly-code-not-available-title = Ο κώδικας assembly δεν είναι διαθέσιμος
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Δείτε το <a>ζήτημα #4520</a> για υποστηριζόμενα σενάρια και προγραμματισμένες βελτιώσεις.
 SourceView--close-button =
     .title = Κλείσιμο προβολής πηγής
 
@@ -943,6 +954,14 @@ SourceView--archive-parsing-error-when-obtaining-source = Δεν ήταν δυν
 
 ## Toggle buttons in the top right corner of the bottom box
 
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Εμφάνιση προβολής assembly
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Απόκρυψη προβολής assembly
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
