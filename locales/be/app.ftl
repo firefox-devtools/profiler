@@ -191,6 +191,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Ой, на гэтай панэлі адбылася невядомая памылка.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Калі ласка, паведаміце аб гэтай праблеме распрацоўшчыкам, дадаўшы 
+    памылку, паказаную ў вэб-кансолі Інструментаў распрацоўшчыка.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Паведаміце пра памылку на GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Прававыя звесткі
@@ -623,6 +634,11 @@ ProfileLoaderAnimation--loading-view-not-found = Прагляд не знойд�
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Вярнуцца на галоўную
 
+## Root
+
+Root--error-boundary-message =
+    .message = Ой, на profiler.firefox.com адбылася невядомая памылка.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -852,24 +868,44 @@ TransformNavigator--collapse-indirect-recursion = Згарнуць непрам�
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Згарнуць паддрэва: { $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Чаканне { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Чаканне { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Зыходны код недаступны
+BottomBox--source-code-not-available-title = Зыходны код недаступны
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Глядзіце <a>абмеркаванне #3741</a> каб даведацца аб сцэнарыях, якія падтрымліваюцца, і запланаваных паляпшэннях.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Код асэмблера недаступны
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Глядзіце <a>абмеркаванне #4520</a> каб даведацца аб сцэнарыях, якія падтрымліваюцца, і запланаваных паляпшэннях.
+SourceView--close-button =
+    .title = Закрыць акно з кодам
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Для гэтага файла няма вядомага cross-origin-accessible URL-адраса.
@@ -919,8 +955,17 @@ SourceView--not-in-archive-error-when-obtaining-source = Файл { $pathInArchi
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Не ўдалося прааналізаваць архіў па адрасе { $url }: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Закрыць акно з кодам
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Паказаць прагляд асэмблера
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Схаваць прагляд асэмблера
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
