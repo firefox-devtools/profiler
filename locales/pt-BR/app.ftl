@@ -820,6 +820,11 @@ SourceView--source-not-available-text = Consulte <a>issue #3741</a> para ver cen
 # a file.
 # Assembly refers to the low-level programming language.
 BottomBox--assembly-code-not-available-title = Código assembly não disponível
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Consulte <a>issue #4520</a> para ver cenários suportados e melhorias planejadas.
 SourceView--close-button =
     .title = Fechar visão de código-fonte
 
@@ -879,6 +884,14 @@ SourceView--archive-parsing-error-when-obtaining-source = O pacote em { $url } n
 
 ## Toggle buttons in the top right corner of the bottom box
 
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Mostrar a exibição em assembly
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Ocultar a exibição em assembly
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
