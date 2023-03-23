@@ -55,7 +55,7 @@
     "@codemirror/state": "^6.2.0",
     "@codemirror/view": "^6.9.2",
     "@firefox-devtools/react-contextmenu": "^5.1.0",
-    "@fluent/bundle": "^0.17.1",
+    "@fluent/bundle": "^0.18.0",
     "@fluent/langneg": "^0.6.2",
     "@fluent/react": "^0.14.1",
     "@lezer/highlight": "^1.1.3",
