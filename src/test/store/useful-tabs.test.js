@@ -103,9 +103,9 @@ describe('getUsefulTabs', function () {
 
   it('shows sample related tabs even when there are only allocation samples in the profile', function () {
     const { profile } = getProfileWithUnbalancedNativeAllocations();
-    profile.threads.forEach(
-      (thread) => (thread.samples = getEmptySamplesTableWithEventDelay())
-    );
+    for (const thread of profile.threads) {
+      thread.samples = getEmptySamplesTableWithEventDelay();
+    }
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
       'calltree',

@@ -28,6 +28,7 @@ import type {
   JsTracerTable,
   SamplesTable,
   NativeAllocationsTable,
+  JsAllocationsTable,
   SamplesLikeTable,
   Selector,
   ThreadViewOptions,
@@ -88,6 +89,8 @@ export function getThreadSelectorsPerThread(
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
     state
   ) => getThread(state).nativeAllocations;
+  const getJsAllocations: Selector<JsAllocationsTable | void> = (state) =>
+    getThread(state).jsAllocations;
   const getThreadRange: Selector<StartEndRange> = (state) =>
     // This function is already memoized in profile-data.js, so we don't need to
     // memoize it here with `createSelector`.
@@ -385,6 +388,24 @@ export function getThreadSelectorsPerThread(
     ProfileSelectors.getProfileViewOptions(state).perThread[threadsKey] ||
     defaultThreadViewOptions;
 
+  const getHasUsefulTimingSamples: Selector<boolean> = createSelector(
+    getSamplesTable,
+    getThread,
+    ProfileData.hasUsefulSamples
+  );
+
+  const getHasUsefulJsAllocations: Selector<boolean> = createSelector(
+    getJsAllocations,
+    getThread,
+    ProfileData.hasUsefulSamples
+  );
+
+  const getHasUsefulNativeAllocations: Selector<boolean> = createSelector(
+    getNativeAllocations,
+    getThread,
+    ProfileData.hasUsefulSamples
+  );
+
   /**
    * We can only compute the retained memory in the versions of the native allocations
    * format that provide the memory address. The earlier versions did not have
@@ -455,6 +476,7 @@ export function getThreadSelectorsPerThread(
     getSamplesTable,
     getSamplesWeightType,
     getNativeAllocations,
+    getJsAllocations,
     getThreadRange,
     getFilteredThread,
     getRangeFilteredThread,
@@ -474,6 +496,9 @@ export function getThreadSelectorsPerThread(
     getJsTracerTable,
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,
+    getHasUsefulTimingSamples,
+    getHasUsefulJsAllocations,
+    getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
     getCPUProcessedThread,
     getTabFilteredThread,

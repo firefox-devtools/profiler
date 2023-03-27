@@ -1280,11 +1280,11 @@ export function filterThreadByTab(
  * A useful sample being one that isn't a "(root)" sample.
  */
 export function hasUsefulSamples(
-  table: SamplesLikeTable,
+  table?: SamplesLikeTable,
   thread: Thread
 ): boolean {
   const { stackTable, frameTable, funcTable, stringTable } = thread;
-  if (table.length === 0 || stackTable.length === 0) {
+  if (table === undefined || table.length === 0 || stackTable.length === 0) {
     return false;
   }
   const stackIndex = table.stack.find((stack) => stack !== null);
@@ -1303,7 +1303,7 @@ export function hasUsefulSamples(
     if (stringTable.getString(stringIndex) === '(root)') {
       // If the first sample's stack is only the root, check if any other
       // sample is different.
-      return table.stack.some((s) => s !== stackIndex);
+      return table.stack.some((s) => s !== null && s !== stackIndex);
     }
   }
   return true;

@@ -24,7 +24,6 @@ import {
 import { PanelSearch } from './PanelSearch';
 
 import {
-  hasUsefulSamples,
   toValidImplementationFilter,
   toValidCallTreeSummaryStrategy,
 } from 'firefox-profiler/profile-logic/profile-data';
@@ -271,28 +270,24 @@ export const StackSettings = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: (state) => {
-    const thread = selectedThreadSelectors.getThread(state);
-    const { samples, jsAllocations, nativeAllocations } = thread;
-    return {
-      invertCallstack: getInvertCallstack(state),
-      selectedTab: getSelectedTab(state),
-      showUserTimings: getShowUserTimings(state),
-      implementationFilter: getImplementationFilter(state),
-      currentSearchString: getCurrentSearchString(state),
-      hasUsefulTimingSamples: hasUsefulSamples(samples, thread),
-      hasUsefulJsAllocations:
-        jsAllocations !== undefined && hasUsefulSamples(jsAllocations, thread),
-      hasUsefulNativeAllocations:
-        nativeAllocations !== undefined &&
-        hasUsefulSamples(nativeAllocations, thread),
-      canShowRetainedMemory:
-        selectedThreadSelectors.getCanShowRetainedMemory(state),
-      callTreeSummaryStrategy:
-        selectedThreadSelectors.getCallTreeSummaryStrategy(state),
-      allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
-    };
-  },
+  mapStateToProps: (state) => ({
+    invertCallstack: getInvertCallstack(state),
+    selectedTab: getSelectedTab(state),
+    showUserTimings: getShowUserTimings(state),
+    implementationFilter: getImplementationFilter(state),
+    currentSearchString: getCurrentSearchString(state),
+    hasUsefulTimingSamples:
+      selectedThreadSelectors.getHasUsefulTimingSamples(state),
+    hasUsefulJsAllocations:
+      selectedThreadSelectors.getHasUsefulJsAllocations(state),
+    hasUsefulNativeAllocations:
+      selectedThreadSelectors.getHasUsefulNativeAllocations(state),
+    canShowRetainedMemory:
+      selectedThreadSelectors.getCanShowRetainedMemory(state),
+    callTreeSummaryStrategy:
+      selectedThreadSelectors.getCallTreeSummaryStrategy(state),
+    allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
+  }),
   mapDispatchToProps: {
     changeImplementationFilter,
     changeInvertCallstack,
