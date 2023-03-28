@@ -26,6 +26,8 @@ import type {
   StackTimingByDepth,
 } from '../../profile-logic/stack-timing';
 
+import { hasUsefulSamples } from '../../profile-logic/profile-data';
+
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
  * is done that so that the local type definition with `Selector<T>` is the canonical
@@ -64,15 +66,7 @@ export function getComposedSelectorsPerThread(
     threadSelectors.getIsNetworkChartEmptyInFullRange,
     threadSelectors.getJsTracerTable,
     (thread, isNetworkChartEmpty, jsTracerTable) => {
-      const {
-        processType,
-        samples,
-        stackTable,
-        stringTable,
-        frameTable,
-        funcTable,
-      } = thread;
-      if (processType === 'comparison') {
+      if (thread.processType === 'comparison') {
         // For a diffing tracks, we display only the calltree tab for now, because
         // other views make no or not much sense.
         return ['calltree'];
@@ -85,37 +79,21 @@ export function getComposedSelectorsPerThread(
           (tabSlug) => tabSlug !== 'network-chart'
         );
       }
+
       if (!jsTracerTable) {
         visibleTabs = visibleTabs.filter((tabSlug) => tabSlug !== 'js-tracer');
       }
-      let hasSamples = samples.length > 0 && stackTable.length > 0;
-      if (hasSamples) {
-        // Find at least one non-null stack.
-        const stackIndex = samples.stack.find((stack) => stack !== null);
-        if (
-          stackIndex === undefined ||
-          stackIndex === null // We know that it can't be null at this point, but Flow doesn't.
-        ) {
-          // All samples were null.
-          hasSamples = false;
-        } else if (stackTable.prefix[stackIndex] === null) {
-          // There's only a single stack frame, check if it's '(root)'.
-          const frameIndex = stackTable.frame[stackIndex];
-          const funcIndex = frameTable.func[frameIndex];
-          const stringIndex = funcTable.name[funcIndex];
-          if (stringTable.getString(stringIndex) === '(root)') {
-            // If the first sample's stack is only the root, check if any other
-            // sample is different.
-            hasSamples = samples.stack.some((s) => s !== stackIndex);
-          }
-        }
-      }
 
+      const { samples, jsAllocations, nativeAllocations } = thread;
+      const hasSamples = [samples, jsAllocations, nativeAllocations].some(
+        (table) => hasUsefulSamples(table, thread)
+      );
       if (!hasSamples) {
         visibleTabs = visibleTabs.filter(
           (tabSlug) => !tabsShowingSampleData.includes(tabSlug)
         );
       }
+
       return visibleTabs;
     }
   );

@@ -28,6 +28,7 @@ import type {
   JsTracerTable,
   SamplesTable,
   NativeAllocationsTable,
+  JsAllocationsTable,
   SamplesLikeTable,
   Selector,
   ThreadViewOptions,
@@ -88,6 +89,8 @@ export function getThreadSelectorsPerThread(
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
     state
   ) => getThread(state).nativeAllocations;
+  const getJsAllocations: Selector<JsAllocationsTable | void> = (state) =>
+    getThread(state).jsAllocations;
   const getThreadRange: Selector<StartEndRange> = (state) =>
     // This function is already memoized in profile-data.js, so we don't need to
     // memoize it here with `createSelector`.
@@ -385,19 +388,23 @@ export function getThreadSelectorsPerThread(
     ProfileSelectors.getProfileViewOptions(state).perThread[threadsKey] ||
     defaultThreadViewOptions;
 
-  /**
-   * Check to see if there are any JS allocations for this thread. This way we
-   * can display a custom thread.
-   */
-  const getHasJsAllocations: Selector<boolean> = (state) =>
-    Boolean(getThread(state).jsAllocations);
+  const getHasUsefulTimingSamples: Selector<boolean> = createSelector(
+    getSamplesTable,
+    getThread,
+    ProfileData.hasUsefulSamples
+  );
 
-  /**
-   * Check to see if there are any JS allocations for this thread. This way we
-   * can display a custom thread.
-   */
-  const getHasNativeAllocations: Selector<boolean> = (state) =>
-    Boolean(getThread(state).nativeAllocations);
+  const getHasUsefulJsAllocations: Selector<boolean> = createSelector(
+    getJsAllocations,
+    getThread,
+    ProfileData.hasUsefulSamples
+  );
+
+  const getHasUsefulNativeAllocations: Selector<boolean> = createSelector(
+    getNativeAllocations,
+    getThread,
+    ProfileData.hasUsefulSamples
+  );
 
   /**
    * We can only compute the retained memory in the versions of the native allocations
@@ -469,6 +476,7 @@ export function getThreadSelectorsPerThread(
     getSamplesTable,
     getSamplesWeightType,
     getNativeAllocations,
+    getJsAllocations,
     getThreadRange,
     getFilteredThread,
     getRangeFilteredThread,
@@ -488,8 +496,9 @@ export function getThreadSelectorsPerThread(
     getJsTracerTable,
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,
-    getHasJsAllocations,
-    getHasNativeAllocations,
+    getHasUsefulTimingSamples,
+    getHasUsefulJsAllocations,
+    getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
     getCPUProcessedThread,
     getTabFilteredThread,
