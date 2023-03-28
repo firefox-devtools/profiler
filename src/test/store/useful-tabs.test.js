@@ -13,9 +13,11 @@ import {
   getNetworkMarkers,
   getProfileWithJsTracerEvents,
   getMergedProfileFromTextSamples,
+  getProfileWithUnbalancedNativeAllocations,
   addActiveTabInformationToProfile,
 } from '../fixtures/profiles/processed-profile';
 import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
+import { getEmptySamplesTableWithEventDelay } from '../../profile-logic/data-structures';
 
 describe('getUsefulTabs', function () {
   it('hides the network chart and JS tracer when no data is in the thread', function () {
@@ -96,6 +98,21 @@ describe('getUsefulTabs', function () {
       'marker-chart',
       'marker-table',
       'network-chart',
+    ]);
+  });
+
+  it('shows sample related tabs even when there are only allocation samples in the profile', function () {
+    const { profile } = getProfileWithUnbalancedNativeAllocations();
+    for (const thread of profile.threads) {
+      thread.samples = getEmptySamplesTableWithEventDelay();
+    }
+    const { getState } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'calltree',
+      'flame-graph',
+      'stack-chart',
+      'marker-chart',
+      'marker-table',
     ]);
   });
 

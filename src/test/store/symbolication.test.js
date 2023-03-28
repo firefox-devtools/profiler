@@ -22,7 +22,6 @@ import { formatTree } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
 import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
-import { TextDecoder } from 'util';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 /**
@@ -35,13 +34,11 @@ describe('doSymbolicateProfile', function () {
     // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
     window.indexedDB = indexedDB;
     window.IDBKeyRange = IDBKeyRange;
-    window.TextDecoder = TextDecoder;
   });
 
   afterAll(async function () {
     delete window.indexedDB;
     delete window.IDBKeyRange;
-    delete window.TextDecoder;
     await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
   });
 

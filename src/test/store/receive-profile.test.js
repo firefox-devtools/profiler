@@ -73,7 +73,6 @@ jest.mock('../../profile-logic/symbol-store-db');
 import { expandUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
-import { TextEncoder, TextDecoder } from 'util';
 import {
   simulateOldWebChannelAndFrameScript,
   simulateWebChannel,
@@ -803,8 +802,6 @@ describe('actions/receive-profile', function () {
 
       simulateSymbolStoreHasNoCache();
 
-      window.TextDecoder = TextDecoder;
-
       // Silence the warnings coming from the failed symbolication attempts, and
       // make sure that the logged error contains our error messages.
       jest.spyOn(console, 'warn').mockImplementation((error) => {
@@ -861,7 +858,6 @@ describe('actions/receive-profile', function () {
 
     afterEach(function () {
       delete window.geckoProfilerPromise;
-      delete window.TextDecoder;
     });
 
     for (const setupWith of ['frame-script', 'web-channel']) {
@@ -936,7 +932,6 @@ describe('actions/receive-profile', function () {
 
   describe('retrieveProfileFromStore', function () {
     beforeEach(function () {
-      window.TextDecoder = TextDecoder;
       window.fetch.catch(403);
 
       // Call the argument of setTimeout asynchronously right away
@@ -944,10 +939,6 @@ describe('actions/receive-profile', function () {
       jest
         .spyOn(window, 'setTimeout')
         .mockImplementation((callback) => process.nextTick(callback));
-    });
-
-    afterEach(function () {
-      delete window.TextDecoder;
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
@@ -1090,8 +1081,6 @@ describe('actions/receive-profile', function () {
 
   describe('retrieveProfileOrZipFromUrl', function () {
     beforeEach(function () {
-      window.TextDecoder = TextDecoder;
-      (window: any).TextEncoder = TextEncoder;
       window.fetch.catch(403);
 
       // Call the argument of setTimeout asynchronously right away
@@ -1099,11 +1088,6 @@ describe('actions/receive-profile', function () {
       jest
         .spyOn(window, 'setTimeout')
         .mockImplementation((callback) => process.nextTick(callback));
-    });
-
-    afterEach(function () {
-      delete window.TextDecoder;
-      delete (window: any).TextEncoder;
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
@@ -1229,14 +1213,6 @@ describe('actions/receive-profile', function () {
    * and zip file is sent, and what happens when things fail.
    */
   describe('_fetchProfile', function () {
-    beforeEach(function () {
-      window.TextDecoder = TextDecoder;
-    });
-
-    afterEach(function () {
-      delete window.TextDecoder;
-    });
-
     /**
      * This helper function encapsulates various configurations for the type of content
      * as well and response headers.
@@ -1419,16 +1395,6 @@ describe('actions/receive-profile', function () {
   });
 
   describe('retrieveProfileFromFile', function () {
-    beforeEach(function () {
-      if ((window: any).TextEncoder) {
-        throw new Error('A TextEncoder was already on the window object.');
-      }
-      (window: any).TextEncoder = TextEncoder;
-    });
-
-    afterEach(async function () {
-      delete (window: any).TextEncoder;
-    });
     /**
      * Bypass all of Flow's checks, and mock out the file interface.
      */
@@ -1513,7 +1479,6 @@ describe('actions/receive-profile', function () {
     });
 
     it('can load gzipped json with an empty mime type', async function () {
-      window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
@@ -1546,7 +1511,6 @@ describe('actions/receive-profile', function () {
     });
 
     it('can load gzipped json', async function () {
-      window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
@@ -1561,7 +1525,6 @@ describe('actions/receive-profile', function () {
     });
 
     it('can load gzipped json even with incorrect mime type', async function () {
-      window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
@@ -1576,7 +1539,6 @@ describe('actions/receive-profile', function () {
     });
 
     it('will give an error when unable to parse gzipped profiles', async function () {
-      window.TextDecoder = TextDecoder;
       const consoleErrorSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
