@@ -156,6 +156,15 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Uh, si è verificato un errore sconosciuto in questo pannello.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description = Segnalare questo problema agli sviluppatori, includendo l’errore completo come visualizzato nella Console web degli strumenti di sviluppo.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Segnala l’errore su GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Note legali
@@ -543,6 +552,11 @@ ProfileLoaderAnimation--loading-view-not-found = Vista non trovata
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Ritorna alla pagina iniziale
+
+## Root
+
+Root--error-boundary-message =
+    .message = Uh, si è verificato un errore sconosciuto in profiler.firefox.com.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
