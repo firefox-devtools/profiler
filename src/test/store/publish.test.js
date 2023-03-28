@@ -48,7 +48,6 @@ import {
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
-import { TextEncoder } from 'util';
 import { ensureExists } from '../../utils/flow';
 import { waitUntilData, waitUntilState } from '../fixtures/utils';
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
@@ -310,17 +309,6 @@ describe('attemptToPublish', function () {
   // { "profileToken": "FAKEHASH" }.
   const JWT_TOKEN = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlVG9rZW4iOiJGQUtFSEFTSCJ9.lrpqj6L1qu-vlV48Xp-3om2Lf3M7eztXuC8UlkePnKg`;
   const BARE_PROFILE_TOKEN = 'FAKEHASH';
-
-  beforeEach(function () {
-    if ((window: any).TextEncoder) {
-      throw new Error('A TextEncoder was already on the window object.');
-    }
-    (window: any).TextEncoder = TextEncoder;
-  });
-
-  afterEach(async function () {
-    delete (window: any).TextEncoder;
-  });
 
   function setupFakeUpload() {
     let updateUploadProgress;

@@ -5,7 +5,6 @@
 
 import { SymbolStore } from '../../profile-logic/symbol-store';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
-import { TextDecoder } from 'util';
 import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
 import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
@@ -28,13 +27,11 @@ describe('SymbolStore', function () {
     // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
     window.indexedDB = indexedDB;
     window.IDBKeyRange = IDBKeyRange;
-    window.TextDecoder = TextDecoder;
   });
 
   afterAll(function () {
     delete window.indexedDB;
     delete window.IDBKeyRange;
-    delete window.TextDecoder;
 
     symbolStore = null;
   });

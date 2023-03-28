@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { TextEncoder } from 'util';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type {
   AddressResult,

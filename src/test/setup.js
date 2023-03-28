@@ -9,12 +9,27 @@ import '@testing-library/jest-dom';
 // This installs jest matchers as a side effect as well.
 import fetchMock from 'fetch-mock-jest';
 import { Headers, Request, Response } from 'node-fetch';
+import { TextDecoder, TextEncoder } from 'util';
 
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
 import { autoMockResizeObserver } from './fixtures/mocks/resize-observer';
 
 autoMockResizeObserver();
+
+// Register TextDecoder and TextEncoder with the global scope.
+// These are now available globally in nodejs, but not when running with jsdom
+// in jest apparently.
+// Still let's double check that they're from the global scope as expected, so
+// that this can be removed once it's implemented.
+if ('TextDecoder' in global) {
+  throw new Error(
+    'TextDecoder is already present in the global scope, please update setup.js.'
+  );
+}
+
+global.TextDecoder = TextDecoder;
+global.TextEncoder = TextEncoder;
 
 beforeEach(function () {
   // Install fetch and fetch-related objects globally.

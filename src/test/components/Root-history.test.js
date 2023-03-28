@@ -25,8 +25,6 @@ import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 import type { SerializableProfile } from 'firefox-profiler/types';
 
-import { TextDecoder } from 'util';
-
 // ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
 // just test we want to render it, but otherwise test it more fully in a
 // separate test file.
@@ -102,14 +100,6 @@ describe('Root with history', function () {
       loadPageAgain,
     };
   }
-
-  beforeEach(function () {
-    window.TextDecoder = TextDecoder;
-  });
-
-  afterEach(() => {
-    delete window.TextDecoder;
-  });
 
   it('can view a file from the profile store, use history with it', async function () {
     const { waitForTab } = setup({

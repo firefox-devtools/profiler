@@ -5,17 +5,8 @@
 // @flow
 
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
-import { TextDecoder } from 'util';
 
 describe('fetchSource', function () {
-  beforeEach(function () {
-    window.TextDecoder = TextDecoder;
-  });
-
-  afterEach(function () {
-    delete window.TextDecoder;
-  });
-
   it('fetches single files', async function () {
     expect(
       await fetchSource(

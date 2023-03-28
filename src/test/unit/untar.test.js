@@ -5,17 +5,8 @@
 // @flow
 
 import { UntarFileStream } from 'firefox-profiler/utils/untar';
-import { TextDecoder } from 'util';
 
 describe('untar', function () {
-  beforeEach(function () {
-    window.TextDecoder = TextDecoder;
-  });
-
-  afterEach(function () {
-    delete window.TextDecoder;
-  });
-
   it('lists all files in example tar', function () {
     const fs = require('fs');
     const zlib = require('zlib');
