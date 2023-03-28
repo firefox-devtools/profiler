@@ -89,10 +89,6 @@
    */
 
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
   display: flex;
   width: max-content;
   min-width: 200px;
@@ -105,6 +101,7 @@
   margin: auto;
   background-color: rgb(240 240 240 / 0.8);
   gap: 15px;
+  inset: 0;
   word-break: break-word;
 }
 
