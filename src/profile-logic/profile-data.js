@@ -1276,6 +1276,40 @@ export function filterThreadByTab(
 }
 
 /**
+ * Checks if a sample table has any useful samples.
+ * A useful sample being one that isn't a "(root)" sample.
+ */
+export function hasUsefulSamples(
+  table?: SamplesLikeTable,
+  thread: Thread
+): boolean {
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
+  if (table === undefined || table.length === 0 || stackTable.length === 0) {
+    return false;
+  }
+  const stackIndex = table.stack.find((stack) => stack !== null);
+  if (
+    stackIndex === undefined ||
+    stackIndex === null // We know that it can't be null at this point, but Flow doesn't.
+  ) {
+    // All samples were null.
+    return false;
+  }
+  if (stackTable.prefix[stackIndex] === null) {
+    // There's only a single stack frame, check if it's '(root)'.
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const stringIndex = funcTable.name[funcIndex];
+    if (stringTable.getString(stringIndex) === '(root)') {
+      // If the first sample's stack is only the root, check if any other
+      // sample is different.
+      return table.stack.some((s) => s !== null && s !== stackIndex);
+    }
+  }
+  return true;
+}
+
+/**
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(

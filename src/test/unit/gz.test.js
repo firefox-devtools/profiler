@@ -6,19 +6,6 @@
 
 import { compress, decompress } from '../../utils/gz';
 
-import { TextEncoder, TextDecoder } from 'util';
-
-beforeAll(function () {
-  if ((window: any).TextEncoder) {
-    throw new Error('A TextEncoder was already on the window object.');
-  }
-  (window: any).TextEncoder = TextEncoder;
-});
-
-afterAll(async function () {
-  delete (window: any).TextEncoder;
-});
-
 describe('utils/gz', function () {
   it('compresses and decompresses properly', async () => {
     const clearText = '42';

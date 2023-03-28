@@ -4,7 +4,6 @@
 
 // @flow
 
-import { TextDecoder } from 'util';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
@@ -23,10 +22,6 @@ import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
 
 describe('app/DragAndDrop', () => {
-  afterEach(function () {
-    delete window.TextDecoder;
-  });
-
   it('matches the snapshot with default overlay', () => {
     const { container } = render(
       <Provider store={createStore()}>
@@ -81,8 +76,6 @@ describe('app/DragAndDrop', () => {
   });
 
   it('receives profile on file drop', async () => {
-    window.TextDecoder = TextDecoder;
-
     // When the file is dropped, the profiler tries to connect to the WebChannel
     // for symbolication. Handle that request so that we don't time out.
     // We handle it by rejecting it.

@@ -52,8 +52,9 @@ type StateProps = {|
   +invertCallstack: boolean,
   +showUserTimings: boolean,
   +currentSearchString: string,
-  +hasJsAllocations: boolean,
-  +hasNativeAllocations: boolean,
+  +hasUsefulTimingSamples: boolean,
+  +hasUsefulJsAllocations: boolean,
+  +hasUsefulNativeAllocations: boolean,
   +canShowRetainedMemory: boolean,
   +allowSwitchingStackType: boolean,
 |};
@@ -135,14 +136,15 @@ class StackSettingsImpl extends PureComponent<Props> {
       showUserTimings,
       hideInvertCallstack,
       currentSearchString,
-      hasJsAllocations,
-      hasNativeAllocations,
+      hasUsefulTimingSamples,
+      hasUsefulJsAllocations,
+      hasUsefulNativeAllocations,
       canShowRetainedMemory,
       callTreeSummaryStrategy,
       allowSwitchingStackType,
     } = this.props;
 
-    const hasAllocations = hasJsAllocations || hasNativeAllocations;
+    const hasAllocations = hasUsefulJsAllocations || hasUsefulNativeAllocations;
 
     return (
       <div className="stackSettings">
@@ -172,11 +174,13 @@ class StackSettingsImpl extends PureComponent<Props> {
                   onChange={this._onCallTreeSummaryStrategyChange}
                   value={callTreeSummaryStrategy}
                 >
-                  {this._renderCallTreeStrategyOption(
-                    'StackSettings--call-tree-strategy-timing',
-                    'timing'
-                  )}
-                  {hasJsAllocations
+                  {hasUsefulTimingSamples
+                    ? this._renderCallTreeStrategyOption(
+                        'StackSettings--call-tree-strategy-timing',
+                        'timing'
+                      )
+                    : null}
+                  {hasUsefulJsAllocations
                     ? this._renderCallTreeStrategyOption(
                         'StackSettings--call-tree-strategy-js-allocations',
                         'js-allocations'
@@ -188,7 +192,7 @@ class StackSettingsImpl extends PureComponent<Props> {
                         'native-retained-allocations'
                       )
                     : null}
-                  {hasNativeAllocations
+                  {hasUsefulNativeAllocations
                     ? this._renderCallTreeStrategyOption(
                         'StackSettings--call-tree-native-allocations',
                         'native-allocations'
@@ -200,7 +204,7 @@ class StackSettingsImpl extends PureComponent<Props> {
                         'native-deallocations-memory'
                       )
                     : null}
-                  {hasNativeAllocations
+                  {hasUsefulNativeAllocations
                     ? this._renderCallTreeStrategyOption(
                         'StackSettings--call-tree-strategy-native-deallocations-sites',
                         'native-deallocations-sites'
@@ -272,9 +276,12 @@ export const StackSettings = explicitConnect<
     showUserTimings: getShowUserTimings(state),
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
-    hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
-    hasNativeAllocations:
-      selectedThreadSelectors.getHasNativeAllocations(state),
+    hasUsefulTimingSamples:
+      selectedThreadSelectors.getHasUsefulTimingSamples(state),
+    hasUsefulJsAllocations:
+      selectedThreadSelectors.getHasUsefulJsAllocations(state),
+    hasUsefulNativeAllocations:
+      selectedThreadSelectors.getHasUsefulNativeAllocations(state),
     canShowRetainedMemory:
       selectedThreadSelectors.getCanShowRetainedMemory(state),
     callTreeSummaryStrategy:
