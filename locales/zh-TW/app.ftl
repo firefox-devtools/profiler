@@ -156,6 +156,15 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = 哇喔，此面板發生某些未知錯誤。
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description = 請將此問題報告給開發人員，包含開發者工具當中的 Web 主控台所顯示的完整錯誤。
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = 到 GitHub 回報錯誤
+
 ## Footer Links
 
 FooterLinks--legal = 法律資訊
@@ -534,6 +543,11 @@ ProfileLoaderAnimation--loading-view-not-found = 找不到畫面
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = 回到首頁
+
+## Root
+
+Root--error-boundary-message =
+    .message = 哇喔，profiler.firefox.com 發生某些未知錯誤。
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation

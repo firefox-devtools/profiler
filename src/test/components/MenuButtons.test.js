@@ -14,7 +14,6 @@ import { Provider } from 'react-redux';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { MenuButtons } from 'firefox-profiler/components/app/MenuButtons';
 import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
-import { TextEncoder } from 'util';
 
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { processGeckoProfile } from 'firefox-profiler/profile-logic/process-profile';
@@ -233,17 +232,9 @@ describe('app/MenuButtons', function () {
       };
     }
 
-    beforeAll(function () {
-      if ((window: any).TextEncoder) {
-        throw new Error('A TextEncoder was already on the window object.');
-      }
-      (window: any).TextEncoder = TextEncoder;
-    });
-
     afterAll(async function () {
       delete URL.createObjectURL;
       delete URL.revokeObjectURL;
-      delete (window: any).TextEncoder;
     });
 
     beforeEach(function () {

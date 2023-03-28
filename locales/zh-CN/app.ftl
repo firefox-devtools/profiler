@@ -64,6 +64,11 @@ CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反�
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = 聚集于分类 <strong>{ $categoryName }</strong>
+    .title = 聚焦于与选择的节点相同的分类，因此会将属于其他分类的节点合并。
 CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
     .title = 将函数折叠后，会移除其所有调用内容，并将所有时间归予该函数。此举可避免对不需要分析的代码进行调用，简化分析记录本身。
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -151,6 +156,15 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = 啊哦，此面板发生某些未知错误。
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description = 请将此问题报告给开发者，包含开发者工具的 Web 控制台中显示的完整错误。
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = 到 GitHub 报告错误
+
 ## Footer Links
 
 FooterLinks--legal = 法律
@@ -204,6 +218,9 @@ Home--additional-content-title = 加载现有分析记录
 Home--additional-content-content = 您可以将分析记录<strong>拖放</strong>至此处，或：
 Home--compare-recordings-info = 您也可以比较记录内容。<a>打开比较界面。</a>
 Home--your-recent-uploaded-recordings-title = 您最近上传的记录
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 = { -profiler-brand-name } 也可以从其他分析器导入记录，例如 <perf>Linux perf</perf>、<simpleperf>Android SimplePerf</simpleperf>、Chrome 性能面板、<androidstudio>Android Studio</androidstudio>，支持直接导入 <dhat>dhat</dhat>、<traceevent>Google 的 Trace Event</traceevent> 格式保存的分析记录。<write>点此了解如何编写您自己的导入程序</write>。
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -528,6 +545,11 @@ ProfileLoaderAnimation--loading-view-not-found = 找不到视图
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = 返回主页
 
+## Root
+
+Root--error-boundary-message =
+    .message = 啊哦，profiler.firefox.com 发生某些未知错误。
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -724,6 +746,11 @@ TransformNavigator--focus-subtree = 聚焦节点：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = 聚焦：{ $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = 聚焦分类：{ $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -755,24 +782,44 @@ TransformNavigator--collapse-indirect-recursion = 折叠间接递归：{ $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = 等待 { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = 正在等待 { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = 源代码不可用
+BottomBox--source-code-not-available-title = 源代码不可用
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #3741</a>。
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = 汇编代码不可用
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #4520</a>。
+SourceView--close-button =
+    .title = 关闭源代码视图
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = 此文件没有已知的 cross-origin-accessible 网址。
@@ -822,8 +869,17 @@ SourceView--not-in-archive-error-when-obtaining-source = { $url } 处的存档�
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = 无法解析 { $url } 处的存档：{ $parsingErrorMessage }
-SourceView--close-button =
-    .title = 关闭源代码视图
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = 显示汇编代码视图
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = 隐藏汇编代码视图
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

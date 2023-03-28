@@ -38,13 +38,11 @@ To get started clone the repo and get the web application started.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
  6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
 
-Other [webpack](https://webpack.js.org/configuration/) and [webpack server](https://webpack.js.org/configuration/dev-server/) options can be set in a `webpack.local-config.js` file at the repo root. For example, if you want a persistent build cache and the server to automatically open the home page, put in there the following code:
+Other [webpack](https://webpack.js.org/configuration/) and [webpack server](https://webpack.js.org/configuration/dev-server/) options can be set in a `webpack.local-config.js` file at the repo root. For example, if you want to disable caching and the server to automatically open the home page, put in there the following code:
 
 ```js
 module.exports = function (config, serverConfig) {
-  config.cache = {
-    type: 'filesystem',
-  };
+  config.cache = false;
   serverConfig.open = true;
 };
 ```

@@ -30,7 +30,6 @@ import {
 
 jest.mock('../../profile-logic/symbol-store');
 
-import { TextDecoder } from 'util';
 import { simulateOldWebChannelAndFrameScript } from '../fixtures/mocks/web-channel';
 
 describe('UrlManager', function () {
@@ -70,13 +69,11 @@ describe('UrlManager', function () {
         .fn()
         .mockRejectedValue(new Error('No symbol tables available')),
     };
-    window.TextDecoder = TextDecoder;
     simulateOldWebChannelAndFrameScript(geckoProfiler);
   });
 
   afterEach(function () {
     delete window.geckoProfilerPromise;
-    delete window.TextDecoder;
   });
 
   it('sets up the URL', async function () {

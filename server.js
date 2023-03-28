@@ -25,6 +25,9 @@ const argv = yargs(hideBin(process.argv))
   .strict()
   .parseSync();
 
+config.cache = {
+  type: 'filesystem',
+};
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],
   host,
@@ -107,7 +110,9 @@ if (argv.profile) {
   // Open on profile.
   profileServer.listen(0, host, () => {
     const profileFromUrl = `${profilerUrl}/from-url/${encodeURIComponent(
-      `http://${host}:${profileServer.address().port}/`
+      `http://${host}:${profileServer.address().port}/${encodeURIComponent(
+        path.basename(argv.profile)
+      )}`
     )}`;
     open(profileFromUrl, openOptions);
   });

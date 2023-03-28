@@ -16,19 +16,6 @@ import type {
 } from '../../profile-logic/import/chrome';
 import type { Profile } from 'firefox-profiler/types';
 
-import { TextDecoder } from 'util';
-
-beforeAll(function () {
-  if ((window: any).TextDecoder) {
-    throw new Error('A TextDecoder was already on the window object.');
-  }
-  (window: any).TextDecoder = TextDecoder;
-});
-
-afterAll(async function () {
-  delete (window: any).TextDecoder;
-});
-
 function checkProfileContainsUniqueTid(profile: Profile) {
   const foundTids = new Set();
 

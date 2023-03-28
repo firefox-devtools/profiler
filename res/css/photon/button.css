@@ -4,6 +4,9 @@
 
 /* See https://design.firefox.com/photon/components/buttons.html for the spec */
 .photon-button {
+  /* These two flex options aren't necessary when a real <button> is used, but they are when a <a> element is used as abutton */
+  display: flex;
+  align-items: center;
   padding: 0 8px;
   border: none;
   border-radius: 2px;
@@ -15,7 +18,10 @@
   /* photon styles */
   background-color: var(--grey-90-a10);
   color: var(--grey-90);
+  cursor: initial; /* reset the defaut link style when used as a button */
   font: inherit;
+  text-decoration: none; /* reset the defaut link style when used as a button */
+  user-select: none;
 }
 
 /* This is a Firefox-specific style because Firefox adds a focusring at a bad

@@ -759,8 +759,9 @@ class ThreadBuilder {
     schema: {
       location: 0,
       implementation: 1,
-      line: 2,
-      category: 3,
+      optimizations: 2,
+      line: 3,
+      category: 4,
     },
     data: [],
   };
@@ -832,7 +833,7 @@ class ThreadBuilder {
       this._stringTable.push(methodString);
       const category = this._categoryInfo.inferJavaCategory(methodString);
       frame = this._frameTable.data.length;
-      this._frameTable.data.push([stringIndex, null, null, category]);
+      this._frameTable.data.push([stringIndex, null, null, null, category]);
       this._frameMap.set(methodId, frame);
     }
     return frame;
