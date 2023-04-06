@@ -45,7 +45,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import {
   funcHasDirectRecursiveCall,
-  funcHasIndirectRecursiveCall,
+  funcHasRecursiveCall,
 } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from 'firefox-profiler/types';
@@ -818,8 +818,8 @@ describe('funcHasDirectRecursiveCall', function () {
   });
 });
 
-describe('funcHasIndirectRecursiveCall', function () {
-  it('correctly identifies directly recursive functions based taking into account implementation', function () {
+describe('funcHasRecursiveCall', function () {
+  it('correctly identifies directly recursive functions', function () {
     // Same test case as funcHasDirectRecursiveCall
     const {
       profile,
@@ -834,21 +834,13 @@ describe('funcHasIndirectRecursiveCall', function () {
     const [thread] = profile.threads;
 
     expect([
-      funcHasIndirectRecursiveCall(
-        thread,
-        'combined',
-        funcNames.indexOf('A.js')
-      ),
-      funcHasIndirectRecursiveCall(
-        thread,
-        'combined',
-        funcNames.indexOf('B.js')
-      ),
-      funcHasIndirectRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
+      funcHasRecursiveCall(thread, funcNames.indexOf('A.js')),
+      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
+      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
     ]).toEqual([false, true, true]);
   });
 
-  it('correctly identifies indirectly recursive functions based taking into account implementation', function () {
+  it('correctly identifies indirectly recursive functions', function () {
     const {
       profile,
       funcNamesPerThread: [funcNames],
@@ -863,12 +855,8 @@ describe('funcHasIndirectRecursiveCall', function () {
     const [thread] = profile.threads;
 
     expect([
-      funcHasIndirectRecursiveCall(
-        thread,
-        'combined',
-        funcNames.indexOf('B.js')
-      ),
-      funcHasIndirectRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
+      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
+      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
     ]).toEqual([true, true]);
   });
 });
