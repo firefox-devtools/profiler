@@ -13,7 +13,6 @@ const fs = require('fs');
 const path = require('path');
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
-const open = require('open');
 const localConfigExists = fs.existsSync(
   path.join(__dirname, './webpack.local-config.js')
 );
@@ -114,7 +113,7 @@ if (argv.profile) {
         path.basename(argv.profile)
       )}`
     )}`;
-    open(profileFromUrl, openOptions);
+    import('open').then((open) => open.default(profileFromUrl, openOptions));
   });
 }
 
