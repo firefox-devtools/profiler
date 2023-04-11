@@ -59,7 +59,7 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
   'drop-function',
   'collapse-resource',
   'collapse-direct-recursion',
-  'collapse-indirect-recursion',
+  'collapse-recursion',
   'collapse-function-subtree',
 ].forEach((transform: TransformType) => {
   // This is kind of an awkward switch, but it ensures we've exhaustively checked that
@@ -88,10 +88,10 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
       shortKey = 'cr';
       break;
     case 'collapse-direct-recursion':
-      shortKey = 'rec';
+      shortKey = 'drec';
       break;
-    case 'collapse-indirect-recursion':
-      shortKey = 'irec';
+    case 'collapse-recursion':
+      shortKey = 'rec';
       break;
     case 'collapse-function-subtree':
       shortKey = 'cfs';
@@ -155,32 +155,31 @@ export function parseTransforms(transformString: string): TransformStack {
 
         break;
       }
-      case 'collapse-direct-recursion':
-      case 'collapse-indirect-recursion': {
-        // e.g. "rec-js-325"
+      case 'collapse-recursion': {
+        // e.g. "rec-325"
+        const [, funcIndexRaw] = tuple;
+        const funcIndex = parseInt(funcIndexRaw, 10);
+        if (isNaN(funcIndex) || funcIndex < 0) {
+          break;
+        }
+        transforms.push({
+          type: 'collapse-recursion',
+          funcIndex,
+        });
+        break;
+      }
+      case 'collapse-direct-recursion': {
+        // e.g. "drec-js-325"
         const [, implementation, funcIndexRaw] = tuple;
         const funcIndex = parseInt(funcIndexRaw, 10);
         if (isNaN(funcIndex) || funcIndex < 0) {
           break;
         }
-        switch (type) {
-          case 'collapse-direct-recursion':
-            transforms.push({
-              type: 'collapse-direct-recursion',
-              funcIndex,
-              implementation: toValidImplementationFilter(implementation),
-            });
-            break;
-          case 'collapse-indirect-recursion':
-            transforms.push({
-              type: 'collapse-indirect-recursion',
-              funcIndex,
-              implementation: toValidImplementationFilter(implementation),
-            });
-            break;
-          default:
-            throw new Error('Unmatched transform.');
-        }
+        transforms.push({
+          type: 'collapse-direct-recursion',
+          funcIndex,
+          implementation: toValidImplementationFilter(implementation),
+        });
         break;
       }
       case 'merge-function':
@@ -302,8 +301,9 @@ export function stringifyTransforms(transformStack: TransformStack): string {
           return `${shortKey}-${transform.category}`;
         case 'collapse-resource':
           return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
+        case 'collapse-recursion':
+          return `${shortKey}-${transform.funcIndex}`;
         case 'collapse-direct-recursion':
-        case 'collapse-indirect-recursion':
           return `${shortKey}-${transform.implementation}-${transform.funcIndex}`;
         case 'focus-subtree':
         case 'merge-call-node': {
@@ -375,7 +375,7 @@ export function getTransformLabelL10nIds(
       case 'merge-function':
       case 'drop-function':
       case 'collapse-direct-recursion':
-      case 'collapse-indirect-recursion':
+      case 'collapse-recursion':
       case 'collapse-function-subtree':
         funcIndex = transform.funcIndex;
         break;
@@ -401,12 +401,12 @@ export function getTransformLabelL10nIds(
         return { l10nId: 'TransformNavigator--drop-function', item: funcName };
       case 'collapse-direct-recursion':
         return {
-          l10nId: 'TransformNavigator--collapse-direct-recursion2',
+          l10nId: 'TransformNavigator--collapse-direct-recursion-only',
           item: funcName,
         };
-      case 'collapse-indirect-recursion':
+      case 'collapse-recursion':
         return {
-          l10nId: 'TransformNavigator--collapse-indirect-recursion',
+          l10nId: 'TransformNavigator--collapse-recursion',
           item: funcName,
         };
       case 'collapse-function-subtree':
@@ -464,8 +464,8 @@ export function applyTransformToCallNodePath(
         transform.funcIndex,
         callNodePath
       );
-    case 'collapse-indirect-recursion':
-      return _collapseIndirectRecursionInCallNodePath(
+    case 'collapse-recursion':
+      return _collapseRecursionInCallNodePath(
         transform.funcIndex,
         callNodePath
       );
@@ -594,7 +594,7 @@ function _collapseDirectRecursionInCallNodePath(
   return newPath;
 }
 
-function _collapseIndirectRecursionInCallNodePath(
+function _collapseRecursionInCallNodePath(
   funcIndex: IndexIntoFuncTable,
   callNodePath: CallNodePath
 ) {
@@ -1107,15 +1107,12 @@ export function collapseDirectRecursion(
   };
 }
 
-export function collapseIndirectRecursion(
+export function collapseRecursion(
   thread: Thread,
   funcToCollapse: IndexIntoFuncTable
 ): Thread {
   // Collapse recursion by reparenting stack nodes for all "inner" frames of a
   // recursion to the same level as the outermost frame.
-  // "Intermediate" frames between indirect recursive calls of the collapsed function
-  // are changed to frames of the collapsed function to make them merge
-  // with the collapsed function at the outermost frame level.
   //
   // Example with recursion on B:
   //  - A1                    - A1
@@ -1648,11 +1645,10 @@ export function funcHasDirectRecursiveCall(
 
 /**
  * Search through the entire call stack and see if there are any examples of
- * indirect recursion.
+ * recursion (direct or indirect).
  */
-export function funcHasIndirectRecursiveCall(
+export function funcHasRecursiveCall(
   thread: Thread,
-  implementation: ImplementationFilter,
   funcToCheck: IndexIntoFuncTable
 ) {
   const { stackTable, frameTable } = thread;
@@ -1667,7 +1663,7 @@ export function funcHasIndirectRecursiveCall(
 
     if (funcToCheck === funcIndex) {
       if (recursivePrefix) {
-        // This function matches and so did its prefix of the same implementation.
+        // This function matches and so did one of its ancestors.
         return true;
       }
       recursiveStacks.add(stackIndex);
@@ -1723,8 +1719,8 @@ export function applyTransform(
         transform.funcIndex,
         transform.implementation
       );
-    case 'collapse-indirect-recursion':
-      return collapseIndirectRecursion(thread, transform.funcIndex);
+    case 'collapse-recursion':
+      return collapseRecursion(thread, transform.funcIndex);
     case 'collapse-function-subtree':
       return collapseFunctionSubtree(
         thread,

@@ -105,20 +105,20 @@ function testTransformKeyboardShortcuts(setup: () => TestSetup) {
     });
   });
 
-  it('handles collapse direct recursion', () => {
+  it('handles collapse recursion', () => {
     const { pressKey, getTransform, expectedFuncIndex } = setup();
     pressKey({ key: 'r' });
     expect(getTransform()).toMatchObject({
-      type: 'collapse-direct-recursion',
+      type: 'collapse-recursion',
       funcIndex: expectedFuncIndex,
     });
   });
 
-  it('handles collapse indirect recursion', () => {
+  it('handles collapse direct recursion', () => {
     const { pressKey, getTransform, expectedFuncIndex } = setup();
     pressKey({ key: 'R' });
     expect(getTransform()).toMatchObject({
-      type: 'collapse-indirect-recursion',
+      type: 'collapse-direct-recursion',
       funcIndex: expectedFuncIndex,
     });
   });
