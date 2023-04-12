@@ -101,14 +101,6 @@ CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $n
     .title =
         Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
         τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Σύμπτυξη άμεσης επανάληψης
-    .title =
-        Η σύμπτυξη άμεσης επανάληψης αφαιρεί τις κλήσεις που συνεχώς επαναλαμβάνονται στην
-        ίδια συνάρτηση, χωρίς ενδιάμεσες συναρτήσεις στη στοίβα.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Σύμπτυξη έμμεσης επανάληψης
-    .title =
-        Η σύμπτυξη έμμεσης επανάληψης αφαιρεί τις κλήσεις που συνεχώς επαναλαμβάνονται στην
-        ίδια συνάρτηση, ακόμη και με ενδιάμεσες συναρτήσεις στη στοίβα.
 CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
     .title =
         Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
@@ -848,16 +840,16 @@ TransformNavigator--merge-function = Συγχώνευση: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Απόρριψη: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Σύμπτυξη αναδρομής: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Σύμπτυξη άμεσης αναδρομής: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Σύμπτυξη έμμεσης αναδρομής: { $item }
+TransformNavigator--collapse-direct-recursion-only = Σύμπτυξη μόνο άμεσης αναδρομής: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
