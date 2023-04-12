@@ -76,6 +76,14 @@ CallNodeContextMenu--transform-collapse-function-subtree = Recolher função
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Recolher <strong>{ $nameForResource }</strong>
     .title = Recolher um recurso achata todas as chamadas àquele recurso em um único node de chamadas recolhido.
+CallNodeContextMenu--transform-collapse-recursion = Recolher recursão
+    .title =
+        Recolher recursão remove chamadas que voltam repetidamente
+        à mesma função, mesmo com funções intermediárias na pilha.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Só recolher recursão direta
+    .title =
+        Recolher recursão direta remove chamadas que voltam repetidamente
+        à mesma função sem funções intermediárias na pilha.
 CallNodeContextMenu--transform-drop-function = Descartar amostras com esta função
     .title = Descartar amostras remove o tempo delas do profile. Útil para eliminar informação de tempo que não é relevante para a análise.
 CallNodeContextMenu--expand-all = Expandir tudo
