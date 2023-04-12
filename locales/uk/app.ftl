@@ -101,10 +101,14 @@ CallNodeContextMenu--transform-collapse-resource = Згорнути <strong>{ $n
     .title =
         Згортання ресурсу згладить усі виклики до того
         ресурсу в єдиний згорнутий вузол виклику.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Згорнути пряму рекурсію
-    .title = Згортання прямої рекурсії вилучає виклики, які постійно рекурсуються в ту саму функцію без посередницьких функцій у стеку.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Згорнути непряму рекурсію
-    .title = Згортання непрямої рекурсії вилучає виклики, які постійно рекурсуються в ту саму функцію, навіть із посередницькими функціями у стеку.
+CallNodeContextMenu--transform-collapse-recursion = Згорнути рекурсію
+    .title =
+        Згортання рекурсії вилучає виклики, які повторювано звертаються
+        до тієї самої функції, навіть з проміжними функціями у стеку.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Згорнути лише пряму рекурсію
+    .title =
+        Згортання прямої рекурсії вилучає виклики, які повторювано звертаються
+        до тієї самої функції без проміжних функцій у стеку.
 CallNodeContextMenu--transform-drop-function = Покинути зразки з цією функцією
     .title =
         Якщо покинути зразки, їх час вилучається з профілю. Це корисно для
@@ -850,16 +854,16 @@ TransformNavigator--merge-function = Об’єднати: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Відкинуто: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Згорнути рекурсію: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Згорнути пряму рекурсію: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Згорнути непряму рекурсію: { $item }
+TransformNavigator--collapse-direct-recursion-only = Згорнути лише пряму рекурсію: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
