@@ -101,6 +101,14 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         As jo in boarne ynklappe, wurde alle oanroppen fan dy boarne
         ôfflakke ta ien inkelde ynklappe oanropnode.
+CallNodeContextMenu--transform-collapse-recursion = Rekursy ynklappe
+    .title =
+        Rekursy ynklappen smyt oanroppe fuort dy’t geregeld weromkomme yn
+        deselde funksje, sels mei yndirekte funksjes op de stack.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Rekursy direkt ynklappe
+    .title =
+        Rekursy direkt ynklappen smyt oanroppen fuort dy’t geregeld weromkomme yn
+        deselde funksje, sels sûnder yndirekte funksjes op de stack.
 CallNodeContextMenu--transform-drop-function = Meunsters mei dizze funksje weilitte
     .title =
         As jo meunsters weilitte, wurdt harren tiid út it profyl fuortsmiten. Dit is nuttich om
