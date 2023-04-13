@@ -934,7 +934,7 @@ function combineSamplesDiffing(
       newSamples.eventDelay.push(null);
       newSamples.time.push(samples2.time[j]);
       newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
-      const sampleWeight = samples2.weight ? samples2.weight[i] : 1;
+      const sampleWeight = samples2.weight ? samples2.weight[j] : 1;
       newWeight.push(weightMultiplier2 * sampleWeight);
 
       translationMaps[1].set(j, newSamples.length);
