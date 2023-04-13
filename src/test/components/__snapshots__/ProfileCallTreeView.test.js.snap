@@ -21,7 +21,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -33,7 +33,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -45,7 +45,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -781,7 +781,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -793,7 +793,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -805,7 +805,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -1559,7 +1559,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -1571,7 +1571,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -1583,7 +1583,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -2337,7 +2337,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -2349,7 +2349,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -2361,7 +2361,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3103,7 +3103,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3115,7 +3115,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3127,7 +3127,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3717,7 +3717,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3729,7 +3729,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3741,7 +3741,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3852,7 +3852,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3864,7 +3864,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3876,7 +3876,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3986,7 +3986,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3999,7 +3999,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4011,7 +4011,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4168,7 +4168,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4180,7 +4180,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4192,7 +4192,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4902,7 +4902,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4914,7 +4914,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4926,7 +4926,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5635,7 +5635,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5647,7 +5647,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5659,7 +5659,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -6152,7 +6152,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -6164,7 +6164,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -6176,7 +6176,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -6885,7 +6885,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -6897,7 +6897,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -6909,7 +6909,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -7546,7 +7546,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -7558,7 +7558,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -7570,7 +7570,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -8207,7 +8207,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -8219,7 +8219,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -8231,7 +8231,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -8725,7 +8725,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -8737,7 +8737,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -8749,7 +8749,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -9243,7 +9243,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -9255,7 +9255,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -9267,7 +9267,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"

@@ -16,7 +16,7 @@ exports[`StackSettings matches the snapshot 1`] = `
         >
           <input
             checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -28,7 +28,7 @@ exports[`StackSettings matches the snapshot 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -40,7 +40,7 @@ exports[`StackSettings matches the snapshot 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"

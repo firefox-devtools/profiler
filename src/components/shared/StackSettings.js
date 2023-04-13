@@ -8,45 +8,35 @@ import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
 import {
-  changeImplementationFilter,
   changeInvertCallstack,
   changeCallTreeSearchString,
   changeCallTreeSummaryStrategy,
   changeShowUserTimings,
 } from 'firefox-profiler/actions/profile-view';
 import {
-  getImplementationFilter,
   getInvertCallstack,
   getSelectedTab,
   getShowUserTimings,
   getCurrentSearchString,
 } from 'firefox-profiler/selectors/url-state';
 import { PanelSearch } from './PanelSearch';
+import { StackImplementationSetting } from './StackImplementationSetting';
 
-import {
-  toValidImplementationFilter,
-  toValidCallTreeSummaryStrategy,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { toValidCallTreeSummaryStrategy } from 'firefox-profiler/profile-logic/profile-data';
 import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
-import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
-
 import './StackSettings.css';
 
-import type {
-  ImplementationFilter,
-  CallTreeSummaryStrategy,
-} from 'firefox-profiler/types';
+import type { CallTreeSummaryStrategy } from 'firefox-profiler/types';
 
 type OwnProps = {|
   +hideInvertCallstack?: true,
 |};
 
 type StateProps = {|
-  +implementationFilter: ImplementationFilter,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +selectedTab: string,
   +invertCallstack: boolean,
@@ -56,11 +46,9 @@ type StateProps = {|
   +hasUsefulJsAllocations: boolean,
   +hasUsefulNativeAllocations: boolean,
   +canShowRetainedMemory: boolean,
-  +allowSwitchingStackType: boolean,
 |};
 
 type DispatchProps = {|
-  +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
   +changeShowUserTimings: typeof changeShowUserTimings,
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
@@ -70,14 +58,6 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class StackSettingsImpl extends PureComponent<Props> {
-  _onImplementationFilterChange = (e: SyntheticEvent<HTMLInputElement>) => {
-    this.props.changeImplementationFilter(
-      // This function is here to satisfy Flow that we are getting a valid
-      // implementation filter.
-      toValidImplementationFilter(e.currentTarget.value)
-    );
-  };
-
   _onCallTreeSummaryStrategyChange = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeCallTreeSummaryStrategy(
       // This function is here to satisfy Flow that we are getting a valid
@@ -97,26 +77,6 @@ class StackSettingsImpl extends PureComponent<Props> {
   _onSearch = (value: string) => {
     this.props.changeCallTreeSearchString(value);
   };
-
-  _renderImplementationRadioButton(
-    labelL10Id: string,
-    implementationFilter: ImplementationFilter
-  ) {
-    return (
-      <label className="photon-label photon-label-micro stackSettingsFilterLabel">
-        <input
-          type="radio"
-          className="photon-radio photon-radio-micro stackSettingsFilterInput"
-          value={implementationFilter}
-          name="stack-settings-filter"
-          title="Filter stack frames to a type."
-          onChange={this._onImplementationFilterChange}
-          checked={this.props.implementationFilter === implementationFilter}
-        />
-        <Localized id={labelL10Id}></Localized>
-      </label>
-    );
-  }
 
   _renderCallTreeStrategyOption(
     labelL10nId: string,
@@ -141,7 +101,6 @@ class StackSettingsImpl extends PureComponent<Props> {
       hasUsefulNativeAllocations,
       canShowRetainedMemory,
       callTreeSummaryStrategy,
-      allowSwitchingStackType,
     } = this.props;
 
     const hasAllocations = hasUsefulJsAllocations || hasUsefulNativeAllocations;
@@ -149,22 +108,7 @@ class StackSettingsImpl extends PureComponent<Props> {
     return (
       <div className="stackSettings">
         <ul className="stackSettingsList">
-          {allowSwitchingStackType ? (
-            <li className="stackSettingsListItem stackSettingsFilter">
-              {this._renderImplementationRadioButton(
-                'StackSettings--implementation-all-stacks',
-                'combined'
-              )}
-              {this._renderImplementationRadioButton(
-                'StackSettings--implementation-javascript',
-                'js'
-              )}
-              {this._renderImplementationRadioButton(
-                'StackSettings--implementation-native',
-                'cpp'
-              )}
-            </li>
-          ) : null}
+          <StackImplementationSetting />
           {hasAllocations ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
@@ -274,7 +218,6 @@ export const StackSettings = explicitConnect<
     invertCallstack: getInvertCallstack(state),
     selectedTab: getSelectedTab(state),
     showUserTimings: getShowUserTimings(state),
-    implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
     hasUsefulTimingSamples:
       selectedThreadSelectors.getHasUsefulTimingSamples(state),
@@ -286,10 +229,8 @@ export const StackSettings = explicitConnect<
       selectedThreadSelectors.getCanShowRetainedMemory(state),
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
-    allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
   }),
   mapDispatchToProps: {
-    changeImplementationFilter,
     changeInvertCallstack,
     changeCallTreeSearchString,
     changeCallTreeSummaryStrategy,
