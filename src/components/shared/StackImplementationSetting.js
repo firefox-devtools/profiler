@@ -17,7 +17,7 @@ import explicitConnect, {
 
 import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
 
-import './StackSettings.css';
+import './PanelSettingsList.css';
 
 import type { ImplementationFilter } from 'firefox-profiler/types';
 
@@ -48,7 +48,7 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
     implementationFilter: ImplementationFilter
   ) {
     return (
-      <label className="photon-label photon-label-micro stackSettingsFilterLabel">
+      <label className="photon-label photon-label-micro photon-label-horiz-padding">
         <input
           type="radio"
           className="photon-radio photon-radio-micro"
@@ -67,7 +67,7 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
     const { allowSwitchingStackType } = this.props;
 
     return allowSwitchingStackType ? (
-      <li className="stackSettingsListItem stackSettingsFilter">
+      <li className="panelSettingsListItem">
         {this._renderImplementationRadioButton(
           'StackSettings--implementation-all-stacks',
           'combined'

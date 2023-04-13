@@ -28,6 +28,7 @@ import explicitConnect, {
 } from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
+import './PanelSettingsList.css';
 import './StackSettings.css';
 
 import type { CallTreeSummaryStrategy } from 'firefox-profiler/types';
@@ -107,10 +108,10 @@ class StackSettingsImpl extends PureComponent<Props> {
 
     return (
       <div className="stackSettings">
-        <ul className="stackSettingsList">
+        <ul className="panelSettingsList">
           <StackImplementationSetting />
           {hasAllocations ? (
-            <li className="stackSettingsListItem stackSettingsFilter">
+            <li className="panelSettingsListItem">
               <label>
                 <Localized id="StackSettings--use-data-source-label" />{' '}
                 <select
@@ -158,37 +159,37 @@ class StackSettingsImpl extends PureComponent<Props> {
               </label>
             </li>
           ) : null}
-          {hideInvertCallstack ? null : (
-            <li className="stackSettingsListItem">
-              <label className="photon-label photon-label-micro stackSettingsLabel">
-                <input
-                  type="checkbox"
-                  className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-                  onChange={this._onInvertCallstackClick}
-                  checked={invertCallstack}
-                />
-                <Localized
-                  id="StackSettings--invert-call-stack"
-                  attrs={{ title: true }}
-                >
-                  <span>Invert call stack</span>
-                </Localized>
-              </label>
-            </li>
-          )}
-          {selectedTab !== 'stack-chart' ? null : (
-            <li className="stackSettingsListItem">
-              <label className="photon-label photon-label-micro stackSettingsLabel">
-                <input
-                  type="checkbox"
-                  className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-                  onChange={this._onShowUserTimingsClick}
-                  checked={showUserTimings}
-                />
-                <Localized id="StackSettings--show-user-timing">
-                  Show user timing
-                </Localized>
-              </label>
+          {hideInvertCallstack && selectedTab !== 'stack-chart' ? null : (
+            <li className="panelSettingsListItem">
+              {hideInvertCallstack ? null : (
+                <label className="photon-label photon-label-micro photon-label-horiz-padding">
+                  <input
+                    type="checkbox"
+                    className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                    onChange={this._onInvertCallstackClick}
+                    checked={invertCallstack}
+                  />
+                  <Localized
+                    id="StackSettings--invert-call-stack"
+                    attrs={{ title: true }}
+                  >
+                    <span>Invert call stack</span>
+                  </Localized>
+                </label>
+              )}
+              {selectedTab !== 'stack-chart' ? null : (
+                <label className="photon-label photon-label-micro photon-label-horiz-padding">
+                  <input
+                    type="checkbox"
+                    className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                    onChange={this._onShowUserTimingsClick}
+                    checked={showUserTimings}
+                  />
+                  <Localized id="StackSettings--show-user-timing">
+                    Show user timing
+                  </Localized>
+                </label>
+              )}
             </li>
           )}
         </ul>

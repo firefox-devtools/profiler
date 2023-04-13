@@ -18,3 +18,7 @@
 .photon-label-micro {
   font-size: 11px;
 }
+
+.photon-label-horiz-padding {
+  padding: 0 3px;
+}

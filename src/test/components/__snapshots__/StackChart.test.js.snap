@@ -11,13 +11,13 @@ exports[`CombinedChart renders combined stack chart 1`] = `
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -30,7 +30,7 @@ exports[`CombinedChart renders combined stack chart 1`] = `
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -42,7 +42,7 @@ exports[`CombinedChart renders combined stack chart 1`] = `
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -55,10 +55,10 @@ exports[`CombinedChart renders combined stack chart 1`] = `
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -70,12 +70,8 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             Invert call stack
           </span>
         </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -528,13 +524,13 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -547,7 +543,7 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -559,7 +555,7 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -572,10 +568,10 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -587,12 +583,8 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             Invert call stack
           </span>
         </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -999,13 +991,13 @@ exports[`StackChart matches the snapshot 1`] = `
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -1018,7 +1010,7 @@ exports[`StackChart matches the snapshot 1`] = `
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -1030,7 +1022,7 @@ exports[`StackChart matches the snapshot 1`] = `
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -1043,10 +1035,10 @@ exports[`StackChart matches the snapshot 1`] = `
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -1058,12 +1050,8 @@ exports[`StackChart matches the snapshot 1`] = `
             Invert call stack
           </span>
         </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"

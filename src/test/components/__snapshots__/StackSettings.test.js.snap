@@ -6,13 +6,13 @@ exports[`StackSettings matches the snapshot 1`] = `
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -25,7 +25,7 @@ exports[`StackSettings matches the snapshot 1`] = `
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -37,7 +37,7 @@ exports[`StackSettings matches the snapshot 1`] = `
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -50,10 +50,10 @@ exports[`StackSettings matches the snapshot 1`] = `
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"

@@ -11,13 +11,13 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -30,7 +30,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -42,7 +42,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -55,7 +55,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
         </label>
       </li>
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label>
           Data source:
@@ -79,10 +79,10 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -771,13 +771,13 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -790,7 +790,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -802,7 +802,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -815,7 +815,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         </label>
       </li>
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label>
           Data source:
@@ -857,10 +857,10 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -1549,13 +1549,13 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -1568,7 +1568,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -1580,7 +1580,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -1593,7 +1593,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         </label>
       </li>
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label>
           Data source:
@@ -1635,10 +1635,10 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -2327,13 +2327,13 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -2346,7 +2346,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -2358,7 +2358,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -2371,7 +2371,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         </label>
       </li>
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label>
           Data source:
@@ -2401,10 +2401,10 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -3093,13 +3093,13 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -3112,7 +3112,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -3124,7 +3124,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -3137,7 +3137,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         </label>
       </li>
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label>
           Data source:
@@ -3167,10 +3167,10 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -3707,13 +3707,13 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -3726,7 +3726,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -3738,7 +3738,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -3751,10 +3751,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -3842,13 +3842,13 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -3861,7 +3861,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -3873,7 +3873,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -3886,10 +3886,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -3977,13 +3977,13 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -3995,7 +3995,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -4008,7 +4008,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -4021,10 +4021,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -4158,13 +4158,13 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -4177,7 +4177,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -4189,7 +4189,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -4202,10 +4202,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -4892,13 +4892,13 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -4911,7 +4911,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -4923,7 +4923,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -4936,10 +4936,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -5625,13 +5625,13 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -5644,7 +5644,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -5656,7 +5656,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -5669,10 +5669,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -6142,13 +6142,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -6161,7 +6161,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -6173,7 +6173,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -6186,10 +6186,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -6875,13 +6875,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -6894,7 +6894,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -6906,7 +6906,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -6919,10 +6919,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -7536,13 +7536,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -7555,7 +7555,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -7567,7 +7567,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -7580,10 +7580,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -8197,13 +8197,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -8216,7 +8216,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -8228,7 +8228,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -8241,10 +8241,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -8715,13 +8715,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -8734,7 +8734,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -8746,7 +8746,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -8759,10 +8759,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -9233,13 +9233,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             checked=""
@@ -9252,7 +9252,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -9264,7 +9264,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-radio photon-radio-micro"
@@ -9277,10 +9277,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
