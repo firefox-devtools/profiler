@@ -713,6 +713,9 @@ StackSettings--implementation-javascript2 = JavaScript
 StackSettings--implementation-native2 = Native
     .title = Show only the stack frames for native code
 
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filter stacks:
+
 StackSettings--use-data-source-label = Data source:
 StackSettings--call-tree-strategy-timing = Timings
     .title = Summarize using sampled stacks of executed code over time

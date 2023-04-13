@@ -364,6 +364,7 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
       <li
         class="panelSettingsListItem"
       >
+        Filter stacks:
         <input
           checked=""
           class="photon-radio photon-radio-micro"
@@ -1335,6 +1336,7 @@ exports[`MarkerChart with active tab renders the marker chart and matches the sn
       <li
         class="panelSettingsListItem"
       >
+        Filter stacks:
         <input
           checked=""
           class="photon-radio photon-radio-micro"

@@ -38,7 +38,7 @@ class MarkerSettingsImpl extends PureComponent<Props> {
     return (
       <div className="markerSettings">
         <ul className="panelSettingsList">
-          <StackImplementationSetting />
+          <StackImplementationSetting labelL10nId="StackSettings--stack-implementation-label" />
         </ul>
         <Localized
           id="MarkerSettings--panel-search"

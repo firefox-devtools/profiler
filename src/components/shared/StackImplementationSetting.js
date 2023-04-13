@@ -21,7 +21,9 @@ import './PanelSettingsList.css';
 
 import type { ImplementationFilter } from 'firefox-profiler/types';
 
-type OwnProps = {||};
+type OwnProps = {|
+  labelL10nId?: string,
+|};
 
 type StateProps = {|
   +implementationFilter: ImplementationFilter,
@@ -71,10 +73,11 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
   }
 
   render() {
-    const { allowSwitchingStackType } = this.props;
+    const { allowSwitchingStackType, labelL10nId } = this.props;
 
     return allowSwitchingStackType ? (
       <li className="panelSettingsListItem">
+        {labelL10nId ? <Localized id={labelL10nId} /> : null}
         {this._renderImplementationRadioButton(
           'StackSettings--implementation-all-frames',
           'combined'
