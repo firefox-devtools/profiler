@@ -48,7 +48,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 8;
+export const CURRENT_URL_VERSION = 9;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -970,6 +970,10 @@ const _upgraders: {|
       return;
     }
 
+    // Parse the transforms. NOTE: This is parsing according to today's transform
+    // URL encoding, which is different from the V3 transform encoding!
+    // Some transforms, such as the former "collapse-direct-recursion" transform,
+    // will not be preserved.
     const transforms = parseTransforms(query.transforms);
 
     if (!transforms || transforms.length === 0) {
@@ -993,6 +997,12 @@ const _upgraders: {|
         continue;
       }
 
+      // Find a stack in `thread` which matches the JS-only call node path.
+      // NOTE: We're checking the stack table in the original, unfiltered thread.
+      // However, if this transform is not the first transform in the transform
+      // stack, the given call node path may not be valid in the original thread!
+      // To be correct, we would need to apply all previous transforms and find
+      // the right stack in the filtered thread.
       const callNodeStackIndex = getStackIndexFromVersion3JSCallNodePath(
         thread,
         transform.callNodePath
@@ -1008,6 +1018,9 @@ const _upgraders: {|
       );
     }
 
+    // Stringify the transforms.
+    // NOTE: This is stringifying according to today's transform encoding! It
+    // would be more correct to stringify according to the V4 encoding.
     processedLocation.query.transforms = stringifyTransforms(transforms);
   },
   [5]: ({ query }: ProcessedLocationBeforeUpgrade) => {
@@ -1095,7 +1108,7 @@ const _upgraders: {|
     // In this version, uintarray-encoding started supporting a range syntax:
     // Instead of "abcd" we now support "awd" as a shortcut.
     // This is not only used for the track index properties that we converted
-    // above, it also affects any cell tree transforms stored in the URL.
+    // above, it also affects any call tree transforms stored in the URL.
     // However, the change to the uintarray encoding is backwards compatible in
     // such a way that old encodings can still be decoded with the new version,
     // without any change in meaning.
@@ -1139,6 +1152,32 @@ const _upgraders: {|
   },
   [8]: (_) => {
     // just added the focus-category transform
+  },
+  [9]: ({ query }: ProcessedLocationBeforeUpgrade) => {
+    // The "collapse recursion" transforms have been renamed:
+    // irec-{implementation}-{funcIndex} -> rec-{funcIndex}
+    // rec-{implementation}-{funcIndex} -> drec-{implementation}-{funcIndex}
+    function upgradeTransformString(transformString) {
+      // Collapse recursion (formerly "collapse indirect recursion")
+      if (transformString.startsWith('irec-')) {
+        // irec-{implementation}-{funcIndex} -> rec-{funcIndex}
+        const [, , funcIndex] = transformString.split('-');
+        return `rec-${funcIndex}`;
+      }
+
+      // Collapse direct recursion only
+      if (transformString.startsWith('rec-')) {
+        // rec-{implementation}-{funcIndex} -> drec-{implementation}-{funcIndex}
+        return 'd' + transformString;
+      }
+
+      return transformString;
+    }
+
+    if (query.transforms) {
+      const transformStrings = query.transforms.split('~');
+      query.transforms = transformStrings.map(upgradeTransformString).join('~');
+    }
   },
 };
 

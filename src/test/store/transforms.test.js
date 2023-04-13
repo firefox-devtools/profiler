@@ -1317,11 +1317,11 @@ describe('"collapse-direct-recursion" transform', function () {
   });
 });
 
-describe('"collapse-indirect-recursion" transform', function () {
-  describe('direct combined implementation', function () {
+describe('"collapse-recursion" transform', function () {
+  describe('basic', function () {
     // Same test case as collapse-direct-recursion combined implementation.
     /**
-     *              A    Collapse indirect recursion   A
+     *              A        Collapse recursion        A
      *            ↙   ↘            Func B            ↙   ↘
      *          B       F            ->             B     F
      *        ↙   ↘                              ↙  ↓  ↘
@@ -1343,10 +1343,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     `);
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'combined',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1367,7 +1366,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
@@ -1382,7 +1381,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       const filteredThread = selectedThreadSelectors.getFilteredThread(
         getState()
       );
@@ -1424,17 +1423,17 @@ describe('"collapse-indirect-recursion" transform', function () {
           ['A', 'B', 'B', 'B', 'C'].map((name) => funcNames.indexOf(name))
         )
       );
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(['A', 'B', 'C'].map((name) => funcNames.indexOf(name)));
     });
   });
 
-  describe('small indirect combined implementation', function () {
+  describe('advanced', function () {
     // Like direct combined implementation, but with one indirect recursive call.
     /**
-     *              A    Collapse indirect recursion   A
+     *              A        Collapse recursion        A
      *            ↙   ↘            Func B            ↙   ↘
      *          B       G            ->             B     G
      *        ↙   ↘                              ↙  ↓  ↘
@@ -1456,10 +1455,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     `);
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'combined',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1480,7 +1478,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
@@ -1496,7 +1494,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       const filteredThread = selectedThreadSelectors.getFilteredThread(
         getState()
       );
@@ -1538,18 +1536,18 @@ describe('"collapse-indirect-recursion" transform', function () {
           ['A', 'B', 'C', 'B', 'D'].map((name) => funcNames.indexOf(name))
         )
       );
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(['A', 'B', 'D'].map((name) => funcNames.indexOf(name)));
     });
   });
 
-  describe('big indirect combined implementation', function () {
-    // Extension of small indirect combined implementation with
+  describe('super advanced', function () {
+    // Extension of "advanced" with
     // multiple indirect calls, multiple intermediate functions and direct calls.
     /**
-     *                    A    Collapse indirect recursion      A
+     *                    A        Collapse recursion           A
      *                  ↙   ↘            Func B              ↙    ↘
      *                B       K            ->             B         K
      *              ↙   ↘                            ↙  ↙   ↘  ↘
@@ -1583,10 +1581,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     `);
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'combined',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1613,7 +1610,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
@@ -1633,7 +1630,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       const filteredThread = selectedThreadSelectors.getFilteredThread(
         getState()
       );
@@ -1678,17 +1675,17 @@ describe('"collapse-indirect-recursion" transform', function () {
           )
         )
       );
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(['A', 'B', 'F'].map((name) => funcNames.indexOf(name)));
     });
   });
 
-  describe('direct filtered implementation', function () {
+  describe('incredibly advanced', function () {
     // Same test case as collapse-direct-recursion filtered implementation.
     /**
-     *                   A.js      Collapse indirect recursion      A.js
+     *                   A.js          Collapse recursion           A.js
      *                 ↙     ↘             Func B.js              ↙     ↘
      *               B.js     G.js            ->               B.js      G.js
      *             ↙    ↘                                    ↙   ↓   ↘
@@ -1716,10 +1713,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     // a recursion collapse.
     const B = funcNames.indexOf('B.js');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'js',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1741,7 +1737,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
@@ -1756,10 +1752,10 @@ describe('"collapse-indirect-recursion" transform', function () {
     });
   });
 
-  describe('indirect filtered implementation', function () {
+  describe('unbelievably advanced', function () {
     // Like direct filtered implementation, but with one indirect recursive call.
     /**
-     *                   A.js      Collapse indirect recursion      A.js
+     *                   A.js          Collapse recursion           A.js
      *                 ↙     ↘             Func B.js              ↙     ↘
      *               B.js     H.js            ->               B.js      H.js
      *             ↙    ↘                                    ↙   ↓   ↘
@@ -1787,10 +1783,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     // a recursion collapse.
     const B = funcNames.indexOf('B.js');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'js',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1812,7 +1807,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([

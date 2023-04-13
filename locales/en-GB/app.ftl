@@ -217,6 +217,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Uh oh, some unknown error happened in this panel.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Please report this issue to the developers, including the full
+    error as displayed in the Developer Tools’ Web Console.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Report the error on GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Legal
@@ -622,6 +633,11 @@ ProfileLoaderAnimation--loading-view-not-found = View not found
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Back to home
 
+## Root
+
+Root--error-boundary-message =
+    .message = Uh oh, some unknown error happened in profiler.firefox.com.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -853,24 +869,44 @@ TransformNavigator--collapse-indirect-recursion = Collapse indirect recursion: {
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Collapse subtree: { $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Waiting for { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Waiting for { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Source not available
+BottomBox--source-code-not-available-title = Source code not available
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = See <a>issue #3741</a> for supported scenarios and planned improvements.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Assembly code not available
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = See <a>issue #4520</a> for supported scenarios and planned improvements.
+SourceView--close-button =
+    .title = Close the source view
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = There is no known cross-origin-accessible URL for this file.
@@ -920,8 +956,17 @@ SourceView--not-in-archive-error-when-obtaining-source = The file { $pathInArchi
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = The archive at { $url } could not be parsed: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Close the source view
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Show the assembly view
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Hide the assembly view
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
