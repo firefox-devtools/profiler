@@ -47,19 +47,26 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
     labelL10nId: string,
     implementationFilter: ImplementationFilter
   ) {
+    const htmlId = `implementation-radio-${implementationFilter}`;
     return (
-      <label className="photon-label photon-label-micro photon-label-horiz-padding">
-        <input
-          type="radio"
-          className="photon-radio photon-radio-micro"
-          value={implementationFilter}
-          name="stack-settings-filter"
-          title="Filter stack frames to a type."
-          onChange={this._onImplementationFilterChange}
-          checked={this.props.implementationFilter === implementationFilter}
-        />
-        <Localized id={labelL10nId}></Localized>
-      </label>
+      <>
+        <Localized id={labelL10nId} attrs={{ title: true }}>
+          <input
+            type="radio"
+            className="photon-radio photon-radio-micro"
+            value={implementationFilter}
+            id={htmlId}
+            onChange={this._onImplementationFilterChange}
+            checked={this.props.implementationFilter === implementationFilter}
+          />
+        </Localized>
+        <Localized id={labelL10nId} attrs={{ title: true }}>
+          <label
+            className="photon-label photon-label-micro photon-label-horiz-padding"
+            htmlFor={htmlId}
+          ></label>
+        </Localized>
+      </>
     );
   }
 
@@ -69,15 +76,15 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
     return allowSwitchingStackType ? (
       <li className="panelSettingsListItem">
         {this._renderImplementationRadioButton(
-          'StackSettings--implementation-all-stacks',
+          'StackSettings--implementation-all-frames',
           'combined'
         )}
         {this._renderImplementationRadioButton(
-          'StackSettings--implementation-javascript',
+          'StackSettings--implementation-javascript2',
           'js'
         )}
         {this._renderImplementationRadioButton(
-          'StackSettings--implementation-native',
+          'StackSettings--implementation-native2',
           'cpp'
         )}
       </li>

@@ -66,11 +66,11 @@ describe('StackSettings', function () {
     expect(getImplementationFilter(getState())).toEqual('cpp');
   });
 
-  it('can change the implementation filter to All stacks', function () {
+  it('can change the implementation filter to All frames', function () {
     const { getByLabelText, getState } = setup();
     fireFullClick(getByLabelText(/Native/));
     expect(getImplementationFilter(getState())).toEqual('cpp');
-    const radioButton = getByLabelText(/All stacks/);
+    const radioButton = getByLabelText(/All frames/);
 
     fireFullClick(radioButton);
 
