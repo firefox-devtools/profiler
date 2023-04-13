@@ -44,9 +44,51 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
   <div
     class="markerSettings"
   >
-    <div
-      class="markerSettingsSpacer"
-    />
+    <ul
+      class="panelSettingsList"
+    >
+      <li
+        class="panelSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            class="photon-radio photon-radio-micro"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            class="photon-radio photon-radio-micro"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+    </ul>
     <div
       class="panelSearchField markerSettingsSearchField"
     >
