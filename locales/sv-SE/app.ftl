@@ -101,14 +101,6 @@ CallNodeContextMenu--transform-collapse-resource = Fäll ihop <strong> { $nameFo
     .title =
         Att fälla ihop en resurs plattar ut alla anrop till den
         resursen till en enda ihopfälld anropsnod.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Komprimera direkt rekursion
-    .title =
-        Att komprimera direkt rekursion tar bort anrop som upprepade gånger
-        återkommer till samma funktion utan några mellanliggande funktioner i stacken.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Kollaps indirekt rekursion
-    .title =
-        Att komprimera indirekt rekursion tar bort anrop som upprepade gånger
-        återkommer till samma funktion, även med mellanliggande funktioner i stacken.
 CallNodeContextMenu--transform-drop-function = Ta bort prover med denna funktion
     .title = Genom att ta bort proverna kommer de tillhörande körtiderna att tas bort från profilen. Detta är användbart för att eliminera tidsinformation som inte är relevant för analysen.
 CallNodeContextMenu--expand-all = Expandera alla
@@ -848,21 +840,16 @@ TransformNavigator--merge-function = Sammanfoga: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Släpp: { $item }
-# "Collapse direct recursion" transform.
+# "Collapse recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Komprimera direkt rekursion: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Komprimera indirekt rekursion: { $item }
+TransformNavigator--collapse-recursion = Fäll ihop rekursion: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-function-subtree = Dölj underträd: { $item }
+TransformNavigator--collapse-function-subtree = Fäll ihop underträd: { $item }
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
