@@ -17,7 +17,10 @@ import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
-import { getThreadSelectors } from '../../selectors/per-thread';
+import {
+  getThreadSelectors,
+  selectedThreadSelectors,
+} from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
 import { urlFromState } from '../../app-logic/url-handling';
 import { createBrowserConnection } from '../../app-logic/browser-connection';
@@ -1439,6 +1442,31 @@ describe('actions/receive-profile', function () {
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
         'JSON Test'
       );
+    });
+
+    it(`can load a processed profile that didn't go through serializeProfile`, async function () {
+      const profile = _getSimpleProfile();
+      profile.meta.product = 'JSON Test';
+      // Add a marker to be able to exercize the stringTable easily.
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+        ['A', 1, 3],
+      ]);
+
+      const { getState, view } = await setupTestWithFile({
+        type: 'application/json',
+        payload: JSON.stringify(profile), // Note: No serializeProfile call!
+      });
+
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
+
+      expect(
+        selectedThreadSelectors.getFullMarkerListIndexes(getState())
+      ).toEqual([0]);
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      expect(getMarker(0).name).toBe('A');
     });
 
     it('symbolicates unsymbolicated profiles', async function () {

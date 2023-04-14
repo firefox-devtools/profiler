@@ -1655,6 +1655,51 @@ function _unserializeProfile({
   };
 }
 
+// If applicable, this function will try to "fix" a processed profile that was
+// copied as is from the UI's console, without passing through the serialization
+// step.
+function attemptToFixProcessedProfileThroughMutation(
+  profile: MixedObject
+): SerializableProfile | null {
+  if (!profile || typeof profile !== 'object') {
+    return profile;
+  }
+  const { meta } = profile;
+  if (!meta || typeof meta !== 'object') {
+    return profile;
+  }
+
+  if (typeof meta.preprocessedProfileVersion !== 'number') {
+    return profile;
+  }
+
+  const { threads } = profile;
+  if (!threads || !Array.isArray(threads) || !threads.length) {
+    // This profile doesn't look well-formed or is empty, let's return it
+    // directly and let the following functions deal with it.
+    return profile;
+  }
+
+  const [firstThread] = threads;
+  if (firstThread.stringArray) {
+    // This looks good, nothing to fix!
+    return profile;
+  }
+
+  if (!firstThread.stringTable) {
+    // The profile didn't have a stringArray, but it doesn't seem to have a
+    // stringTable either. Let's be cautious and just return the profile input.
+    return profile;
+  }
+
+  // We mutate the profile directly, to avoid GC churn at load time.
+  for (const thread of profile.threads) {
+    thread.stringArray = thread.stringTable._array;
+    delete thread.stringTable;
+  }
+  return profile;
+}
+
 /**
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
@@ -1707,8 +1752,10 @@ export async function unserializeProfileOfArbitraryFormat(
     // At this point, we expect arbitraryFormat to contain a JSON object of some profile format.
     const json = arbitraryFormat;
 
+    const possiblyFixedProfile =
+      attemptToFixProcessedProfileThroughMutation(json);
     const processedProfile =
-      attemptToUpgradeProcessedProfileThroughMutation(json);
+      attemptToUpgradeProcessedProfileThroughMutation(possiblyFixedProfile);
     if (processedProfile) {
       return _unserializeProfile(processedProfile);
     }
