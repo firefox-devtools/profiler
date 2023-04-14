@@ -66,7 +66,7 @@ type StateProps = {|
   +uploadProgress: number,
   +uploadProgressString: string,
   +shouldSanitizeByDefault: boolean,
-  +error: mixed,
+  +uploadError: mixed,
   +abortFunction: () => mixed,
   +timelineTrackOrganizationType: 'full' | 'active-tab' | 'origins',
 |};
@@ -78,8 +78,16 @@ type DispatchProps = {|
 |};
 
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type PublishState = {|
+  compressError: Error | string | null,
+  prevCompressedPromise: Promise<Blob> | null,
+|};
 
-class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
+class MenuButtonsPublishImpl extends React.PureComponent<
+  PublishProps,
+  PublishState
+> {
+  state = { compressError: null, prevCompressedPromise: null };
   _toggles: { [$Keys<CheckedSharingOptions>]: () => mixed } = {
     includeHiddenThreads: () =>
       this.props.toggleCheckedSharingOptions('includeHiddenThreads'),
@@ -119,6 +127,24 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       </label>
     );
   }
+
+  static getDerivedStateFromProps(
+    props: PublishProps,
+    state: PublishState
+  ): $Shape<PublishState> | null {
+    if (state.prevCompressedPromise !== props.compressedProfileBlobPromise) {
+      return {
+        // Invalidate the old error info
+        prevCompressedPromise: props.compressedProfileBlobPromise,
+        compressError: null,
+      };
+    }
+    return null;
+  }
+
+  _onCompressError = (error) => {
+    this.setState({ compressError: error });
+  };
 
   _renderPublishPanel() {
     const {
@@ -222,15 +248,27 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
                 )
               : null}
           </div>
+          {this.state.compressError ? (
+            <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
+              <div className="photon-message-bar-inner-text">
+                <Localized id="MenuButtons--publish--error-while-compressing">
+                  Error while compressing, try unchecking some checkboxes to
+                  reduce the profile size.
+                </Localized>
+              </div>
+            </div>
+          ) : null}
           <div className="menuButtonsPublishButtons">
             <DownloadButton
               downloadFileName={downloadFileName}
               compressedProfileBlobPromise={compressedProfileBlobPromise}
               downloadSizePromise={downloadSizePromise}
+              onCompressError={this._onCompressError}
             />
             <button
               type="submit"
               className="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+              disabled={this.state.compressError}
             >
               <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload" />
               <Localized id="MenuButtons--publish--button-upload">
@@ -279,6 +317,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
             downloadFileName={downloadFileName}
             compressedProfileBlobPromise={compressedProfileBlobPromise}
             downloadSizePromise={downloadSizePromise}
+            onCompressError={this._onCompressError}
           />
           <button
             type="button"
@@ -295,7 +334,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   }
 
   _renderErrorPanel() {
-    const { error, resetUploadState } = this.props;
+    const { uploadError: error, resetUploadState } = this.props;
     let message: string =
       'There was an unknown error when trying to upload the profile.';
     if (
@@ -371,7 +410,7 @@ export const MenuButtonsPublish = explicitConnect<
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgress(state),
     uploadProgressString: getUploadProgressString(state),
-    error: getUploadError(state),
+    uploadError: getUploadError(state),
     shouldSanitizeByDefault: getShouldSanitizeByDefault(state),
     abortFunction: getAbortFunction(state),
     timelineTrackOrganizationType: getTimelineTrackOrganization(state).type,
@@ -442,11 +481,13 @@ type DownloadButtonProps = {|
   +compressedProfileBlobPromise: Promise<Blob>,
   +downloadSizePromise: Promise<string>,
   +downloadFileName: string,
+  +onCompressError: (Error | string) => mixed,
 |};
 
 type DownloadButtonState = {|
   compressedProfileBlob: Blob | null,
   prevPromise: Promise<Blob> | null,
+  error: Error | string | null,
 |};
 
 /**
@@ -460,6 +501,7 @@ class DownloadButton extends React.PureComponent<
   state = {
     compressedProfileBlob: null,
     prevPromise: null,
+    error: null,
   };
 
   static getDerivedStateFromProps(
@@ -471,6 +513,7 @@ class DownloadButton extends React.PureComponent<
         // Invalidate the old download size.
         compressedProfileBlob: null,
         prevPromise: props.compressedProfileBlobPromise,
+        error: null,
       };
     }
     return null;
@@ -478,11 +521,20 @@ class DownloadButton extends React.PureComponent<
 
   _unwrapPromise() {
     const { compressedProfileBlobPromise } = this.props;
-    compressedProfileBlobPromise.then((compressedProfileBlob) => {
-      if (this._isMounted) {
-        this.setState({ compressedProfileBlob });
+    compressedProfileBlobPromise.then(
+      (compressedProfileBlob) => {
+        if (this._isMounted) {
+          this.setState({ compressedProfileBlob, error: null });
+        }
+      },
+      (error) => {
+        if (this._isMounted) {
+          this.props.onCompressError(error);
+          console.error('Error while compressing the profile data', error);
+          this.setState({ compressedProfileBlob: null, error });
+        }
       }
-    });
+    );
   }
 
   componentDidMount() {
@@ -505,7 +557,7 @@ class DownloadButton extends React.PureComponent<
 
   render() {
     const { downloadFileName, downloadSizePromise } = this.props;
-    const { compressedProfileBlob } = this.state;
+    const { compressedProfileBlob, error } = this.state;
     const className =
       'photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload';
 
@@ -520,6 +572,14 @@ class DownloadButton extends React.PureComponent<
           <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
           <DownloadSize downloadSizePromise={downloadSizePromise} />
         </BlobUrlLink>
+      );
+    }
+
+    if (error) {
+      return (
+        <button type="button" className={className} disabled>
+          <Localized id="MenuButtons--publish--download">Download</Localized>
+        </button>
       );
     }
 
