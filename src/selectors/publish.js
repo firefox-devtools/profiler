@@ -238,7 +238,10 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> =
  */
 export const getSanitizedProfileData: Selector<Promise<Uint8Array>> =
   createSelector(getSanitizedProfile, ({ profile }) =>
-    compress(serializeProfile(profile))
+    // We use a Promise.resolve() call first so that the calls to compress and
+    // serializeProfile are out of React's rendering pipeline. We avoid crashes
+    // due to memory issues thanks to that.
+    Promise.resolve().then(() => compress(serializeProfile(profile)))
   );
 
 /**
