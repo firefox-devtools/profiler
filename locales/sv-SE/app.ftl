@@ -89,18 +89,26 @@ CallNodeContextMenu--transform-focus-category = Fokus på kategori <strong>{ $ca
     .title =
         Fokusera på noderna som tillhör samma kategori som den valda noden och
         därmed slå samman alla noder som tillhör en annan kategori.
-CallNodeContextMenu--transform-collapse-function-subtree = Fäll ihop funktion
+CallNodeContextMenu--transform-collapse-function-subtree = Komprimera funktion
     .title =
-        Att fälla ihop en funktion kommer ta bort allt som anropas, och tilldela
-        all tid till funktionen. Detta kan förenkla en profilering som
-        anropar kod som inte behöver analyseras.
+        Att komprimera en funktion kommer att ta bort allt den anropade och all tid
+        tilldelas funktionen. Detta kan hjälpa till att förenkla en profil som anropar kod
+        som inte behöver analyseras.
 # This is used as the context menu item to apply the "Collapse resource" transform.
 # Variables:
 #   $nameForResource (String) - Name of the resource to collapse.
-CallNodeContextMenu--transform-collapse-resource = Fäll ihop <strong> { $nameForResource } </strong>
+CallNodeContextMenu--transform-collapse-resource = Komprimera <strong> { $nameForResource } </strong>
     .title =
-        Att fälla ihop en resurs plattar ut alla anrop till den
-        resursen till en enda ihopfälld anropsnod.
+        Att komprimera en resurs kommer att plana ut alla anrop till den
+        resursen till en enda komprimerad anropsnod.
+CallNodeContextMenu--transform-collapse-recursion = Komprimera rekursion
+    .title =
+        Komprimering av rekursion tar bort anrop som upprepade gånger återkommer
+        till samma funktion, även med mellanliggande funktioner i stacken.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Komprimera endast direkt rekursion
+    .title =
+        Att komprimera direkt rekursion tar bort anrop som upprepade gånger återkommer
+        till samma funktion utan några mellanliggande funktioner i stacken.
 CallNodeContextMenu--transform-drop-function = Ta bort prover med denna funktion
     .title = Genom att ta bort proverna kommer de tillhörande körtiderna att tas bort från profilen. Detta är användbart för att eliminera tidsinformation som inte är relevant för analysen.
 CallNodeContextMenu--expand-all = Expandera alla
@@ -809,7 +817,7 @@ TransformNavigator--complete = Slutförd “{ $item }”
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
-TransformNavigator--collapse-resource = Fäll ihop: { $item }
+TransformNavigator--collapse-resource = Komprimera: { $item }
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
@@ -844,12 +852,17 @@ TransformNavigator--drop-function = Släpp: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-recursion = Fäll ihop rekursion: { $item }
+TransformNavigator--collapse-recursion = Komprimera rekursion: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion-only = Komprimera endast direkt rekursion: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-function-subtree = Fäll ihop underträd: { $item }
+TransformNavigator--collapse-function-subtree = Komprimera underträd: { $item }
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
