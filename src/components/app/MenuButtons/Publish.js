@@ -21,8 +21,7 @@ import {
   getAbortFunction,
   getCheckedSharingOptions,
   getFilenameString,
-  getDownloadSize,
-  getCompressedProfileBlob,
+  getSanitizedProfileData,
   getUploadPhase,
   getUploadProgress,
   getUploadProgressString,
@@ -32,6 +31,7 @@ import {
 import { getTimelineTrackOrganization } from 'firefox-profiler/selectors/url-state';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
 
 import explicitConnect, {
   type ConnectedProps,
@@ -59,8 +59,7 @@ type StateProps = {|
   +shouldShowPreferenceOption: boolean,
   +profileContainsPrivateBrowsingInformation: boolean,
   +checkedSharingOptions: CheckedSharingOptions,
-  +downloadSizePromise: Promise<string>,
-  +compressedProfileBlobPromise: Promise<Blob>,
+  +sanitizedProfileDataPromise: Promise<Uint8Array>,
   +downloadFileName: string,
   +uploadPhase: UploadPhase,
   +uploadProgress: number,
@@ -80,7 +79,7 @@ type DispatchProps = {|
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type PublishState = {|
   compressError: Error | string | null,
-  prevCompressedPromise: Promise<Blob> | null,
+  prevCompressedPromise: Promise<Uint8Array> | null,
 |};
 
 class MenuButtonsPublishImpl extends React.PureComponent<
@@ -132,10 +131,10 @@ class MenuButtonsPublishImpl extends React.PureComponent<
     props: PublishProps,
     state: PublishState
   ): $Shape<PublishState> | null {
-    if (state.prevCompressedPromise !== props.compressedProfileBlobPromise) {
+    if (state.prevCompressedPromise !== props.sanitizedProfileDataPromise) {
       return {
         // Invalidate the old error info
-        prevCompressedPromise: props.compressedProfileBlobPromise,
+        prevCompressedPromise: props.sanitizedProfileDataPromise,
         compressError: null,
       };
     }
@@ -150,10 +149,9 @@ class MenuButtonsPublishImpl extends React.PureComponent<
     const {
       shouldShowPreferenceOption,
       profileContainsPrivateBrowsingInformation,
-      downloadSizePromise,
+      sanitizedProfileDataPromise,
       attemptToPublish,
       downloadFileName,
-      compressedProfileBlobPromise,
       shouldSanitizeByDefault,
       isRepublish,
       timelineTrackOrganizationType,
@@ -261,8 +259,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
           <div className="menuButtonsPublishButtons">
             <DownloadButton
               downloadFileName={downloadFileName}
-              compressedProfileBlobPromise={compressedProfileBlobPromise}
-              downloadSizePromise={downloadSizePromise}
+              sanitizedProfileDataPromise={sanitizedProfileDataPromise}
               onCompressError={this._onCompressError}
             />
             <button
@@ -287,8 +284,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
       uploadProgressString,
       abortFunction,
       downloadFileName,
-      compressedProfileBlobPromise,
-      downloadSizePromise,
+      sanitizedProfileDataPromise,
     } = this.props;
 
     return (
@@ -315,8 +311,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
         <div className="menuButtonsPublishButtons">
           <DownloadButton
             downloadFileName={downloadFileName}
-            compressedProfileBlobPromise={compressedProfileBlobPromise}
-            downloadSizePromise={downloadSizePromise}
+            sanitizedProfileDataPromise={sanitizedProfileDataPromise}
             onCompressError={this._onCompressError}
           />
           <button
@@ -404,9 +399,8 @@ export const MenuButtonsPublish = explicitConnect<
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
     checkedSharingOptions: getCheckedSharingOptions(state),
-    downloadSizePromise: getDownloadSize(state),
     downloadFileName: getFilenameString(state),
-    compressedProfileBlobPromise: getCompressedProfileBlob(state),
+    sanitizedProfileDataPromise: getSanitizedProfileData(state),
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgress(state),
     uploadProgressString: getUploadProgressString(state),
@@ -423,70 +417,15 @@ export const MenuButtonsPublish = explicitConnect<
   component: MenuButtonsPublishImpl,
 });
 
-type DownloadSizeProps = {|
-  +downloadSizePromise: Promise<string>,
-|};
-
-type DownloadSizeState = {|
-  downloadSize: string | null,
-|};
-
-/**
- * The DownloadSize handles unpacking the downloadSizePromise.
- */
-class DownloadSize extends React.PureComponent<
-  DownloadSizeProps,
-  DownloadSizeState
-> {
-  _isMounted: boolean = true;
-
-  state = {
-    downloadSize: null,
-  };
-
-  _unwrapPromise() {
-    const { downloadSizePromise } = this.props;
-    downloadSizePromise.then((downloadSize) => {
-      if (this._isMounted) {
-        this.setState({ downloadSize });
-      }
-    });
-  }
-
-  componentDidUpdate(prevProps: DownloadSizeProps) {
-    if (prevProps.downloadSizePromise !== this.props.downloadSizePromise) {
-      this._unwrapPromise();
-    }
-  }
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._unwrapPromise();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  render() {
-    const { downloadSize } = this.state;
-    if (downloadSize === null) {
-      return null;
-    }
-    return <span className="menuButtonsDownloadSize">({downloadSize})</span>;
-  }
-}
-
 type DownloadButtonProps = {|
-  +compressedProfileBlobPromise: Promise<Blob>,
-  +downloadSizePromise: Promise<string>,
+  +sanitizedProfileDataPromise: Promise<Uint8Array>,
   +downloadFileName: string,
   +onCompressError: (Error | string) => mixed,
 |};
 
 type DownloadButtonState = {|
-  compressedProfileBlob: Blob | null,
-  prevPromise: Promise<Blob> | null,
+  sanitizedProfileData: Uint8Array | null,
+  prevPromise: Promise<Uint8Array> | null,
   error: Error | string | null,
 |};
 
@@ -499,7 +438,7 @@ class DownloadButton extends React.PureComponent<
 > {
   _isMounted: boolean = false;
   state = {
-    compressedProfileBlob: null,
+    sanitizedProfileData: null,
     prevPromise: null,
     error: null,
   };
@@ -508,11 +447,11 @@ class DownloadButton extends React.PureComponent<
     props: DownloadButtonProps,
     state: DownloadButtonState
   ): $Shape<DownloadButtonState> | null {
-    if (state.prevPromise !== props.compressedProfileBlobPromise) {
+    if (state.prevPromise !== props.sanitizedProfileDataPromise) {
       return {
         // Invalidate the old download size.
-        compressedProfileBlob: null,
-        prevPromise: props.compressedProfileBlobPromise,
+        sanitizedProfileData: null,
+        prevPromise: props.sanitizedProfileDataPromise,
         error: null,
       };
     }
@@ -520,18 +459,18 @@ class DownloadButton extends React.PureComponent<
   }
 
   _unwrapPromise() {
-    const { compressedProfileBlobPromise } = this.props;
-    compressedProfileBlobPromise.then(
-      (compressedProfileBlob) => {
+    const { sanitizedProfileDataPromise } = this.props;
+    sanitizedProfileDataPromise.then(
+      (sanitizedProfileData) => {
         if (this._isMounted) {
-          this.setState({ compressedProfileBlob, error: null });
+          this.setState({ sanitizedProfileData, error: null });
         }
       },
       (error) => {
         if (this._isMounted) {
           this.props.onCompressError(error);
           console.error('Error while compressing the profile data', error);
-          this.setState({ compressedProfileBlob: null, error });
+          this.setState({ sanitizedProfileData: null, error });
         }
       }
     );
@@ -544,8 +483,8 @@ class DownloadButton extends React.PureComponent<
 
   componentDidUpdate(prevProps: DownloadButtonProps) {
     if (
-      prevProps.compressedProfileBlobPromise !==
-      this.props.compressedProfileBlobPromise
+      prevProps.sanitizedProfileDataPromise !==
+      this.props.sanitizedProfileDataPromise
     ) {
       this._unwrapPromise();
     }
@@ -556,21 +495,26 @@ class DownloadButton extends React.PureComponent<
   }
 
   render() {
-    const { downloadFileName, downloadSizePromise } = this.props;
-    const { compressedProfileBlob, error } = this.state;
+    const { downloadFileName } = this.props;
+    const { sanitizedProfileData, error } = this.state;
     const className =
       'photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload';
 
-    if (compressedProfileBlob) {
+    if (sanitizedProfileData) {
+      const blob = new Blob([sanitizedProfileData], {
+        type: 'application/octet-binary',
+      });
       return (
         <BlobUrlLink
-          blob={compressedProfileBlob}
+          blob={blob}
           download={`${downloadFileName}.gz`}
           className={className}
         >
           <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload" />
           <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
-          <DownloadSize downloadSizePromise={downloadSizePromise} />
+          <span className="menuButtonsDownloadSize">
+            ({prettyBytes(blob.size)})
+          </span>
         </BlobUrlLink>
       );
     }

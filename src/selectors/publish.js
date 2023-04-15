@@ -25,7 +25,6 @@ import {
   getShouldSanitizeByDefault as getShouldSanitizeByDefaultImpl,
   type SanitizeProfileResult,
 } from '../profile-logic/sanitize';
-import prettyBytes from '../utils/pretty-bytes';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
 import {
@@ -243,20 +242,6 @@ export const getSanitizedProfileData: Selector<Promise<Uint8Array>> =
     // due to memory issues thanks to that.
     Promise.resolve().then(() => compress(serializeProfile(profile)))
   );
-
-/**
- * The blob is needed for both the download size, and the ObjectURL.
- */
-export const getCompressedProfileBlob: Selector<Promise<Blob>> = createSelector(
-  getSanitizedProfileData,
-  async (profileData) =>
-    new Blob([await profileData], { type: 'application/octet-binary' })
-);
-
-export const getDownloadSize: Selector<Promise<string>> = createSelector(
-  getCompressedProfileBlob,
-  (blobPromise) => blobPromise.then((blob) => prettyBytes(blob.size))
-);
 
 export const getUploadState: Selector<UploadState> = (state) =>
   getPublishState(state).upload;
