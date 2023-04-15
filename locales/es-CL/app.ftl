@@ -82,14 +82,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = Contraer función.
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Contraer <strong>{ $nameForResource }</strong>
     .title = Contraer un recurso aplanará todas las llamadas a ese recurso a un solo nodo de llamada contraído.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Contraer recursión directa
-    .title =
-        Contraer recursiones directas elimina las llamadas que recurren repetidamente en
-        la misma función sin funciones intermedias en la pila.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Contraer recursión indirecta
-    .title =
-        Contraer recursiones indirectas elimina las llamadas que recurren repetidamente en
-        la misma función, incluso con funciones intermedias en la pila.
+CallNodeContextMenu--transform-collapse-recursion = Contraer recursividad
+    .title = Contraer la recursividad elimina las llamadas que repetidamente recuren a una misma función, incluso con funciones intermedias en la pila.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Contraer solo recursividad directa
+    .title = Contraer la recursividad directa elimina las llamadas que repetidamente recuren a una misma función, sin funciones intermedias en la pila.
 CallNodeContextMenu--transform-drop-function = Descartar muestras con esta función
     .title = Descartar muestras elimina su tiempo del perfilador. Esto es útil para eliminar información de tiempos que no es relevante para el análisis.
 CallNodeContextMenu--expand-all = Expandir todo
@@ -787,16 +783,16 @@ TransformNavigator--merge-function = Fusionar: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Descartar: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Contraer recursividad: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Contraer recursión directa: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Contraer recursión indirecta: { $item }
+TransformNavigator--collapse-direct-recursion-only = Contraer solo recursividad directa: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
