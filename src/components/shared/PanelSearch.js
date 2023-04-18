@@ -54,18 +54,18 @@ export class PanelSearch extends React.PureComponent<Props, State> {
             onBlur={this._onSearchFieldBlur}
             onFocus={this._onSearchFieldFocus}
           />
-          <div
-            className={classNames('panelSearchFieldIntroduction', {
-              isHidden: !showIntroduction,
-              isDisplayed: showIntroduction,
-            })}
-          >
-            <Localized id="PanelSearch--search-field-hint">
-              Did you know you can use the comma (,) to search using several
-              terms?
-            </Localized>
-          </div>
         </label>
+        <div
+          className={classNames('panelSearchFieldIntroduction', {
+            isHidden: !showIntroduction,
+            isDisplayed: showIntroduction,
+          })}
+        >
+          <Localized id="PanelSearch--search-field-hint">
+            Did you know you can use the comma (,) to search using several
+            terms?
+          </Localized>
+        </div>
       </div>
     );
   }

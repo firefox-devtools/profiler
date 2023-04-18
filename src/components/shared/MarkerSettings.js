@@ -11,9 +11,11 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
 import { getMarkersSearchString } from 'firefox-profiler/selectors/url-state';
 import { PanelSearch } from './PanelSearch';
+import { StackImplementationSetting } from 'firefox-profiler/components/shared/StackImplementationSetting';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
+import 'firefox-profiler/components/shared/PanelSettingsList.css';
 import './MarkerSettings.css';
 
 type StateProps = {|
@@ -35,7 +37,9 @@ class MarkerSettingsImpl extends PureComponent<Props> {
     const { searchString } = this.props;
     return (
       <div className="markerSettings">
-        <div className="markerSettingsSpacer" />
+        <ul className="panelSettingsList">
+          <StackImplementationSetting labelL10nId="StackSettings--stack-implementation-label" />
+        </ul>
         <Localized
           id="MarkerSettings--panel-search"
           attrs={{ label: true, title: true }}
