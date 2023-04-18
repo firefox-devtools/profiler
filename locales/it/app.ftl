@@ -580,6 +580,10 @@ StackSettings--implementation-all-frames = Tutti i frame
     .title = Non filtrare gli stack frame
 StackSettings--implementation-javascript2 = JavaScript
     .title = Mostra solo gli stack frame relativi all’esecuzione di JavaScript
+StackSettings--implementation-native2 = Nativo
+    .title = Mostra solo gli stack frame per il codice nativo
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtra stack:
 StackSettings--use-data-source-label = Sorgente dati:
 StackSettings--call-tree-strategy-timing = Tempi
     .title = Sintetizza usando gli stack campionati del codice eseguito nel tempo
