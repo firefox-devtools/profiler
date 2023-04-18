@@ -76,10 +76,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = Comprimi funzione
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Comprimi <strong>{ $nameForResource }</strong>
     .title = Comprimendo una risorsa, tutte le chiamate a quella risorsa verranno compresse in un singolo nodo di chiamata.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Comprimi ricorsione diretta
+CallNodeContextMenu--transform-collapse-recursion = Comprimi ricorsione
+    .title = Comprimendo la ricorsione verranno rimosse tutte le chiamate ricorsive a quella stessa funzione, anche con funzioni intermedie nello stack.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Comprimi solo ricorsione diretta
     .title = Comprimendo la ricorsione diretta verranno rimosse tutte le chiamate ricorsive a quella stessa funzione senza funzioni intermedie nello stack.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Comprimi ricorsione indiretta
-    .title = Comprimendo la ricorsione indiretta verranno rimosse tutte le chiamate ricorsive a quella stessa funzione, anche con funzioni intermedie nello stack.
 CallNodeContextMenu--transform-drop-function = Scarta campioni con questa funzione
     .title = Rimuovendo i campioni, i tempi di esecuzione associati verranno rimossi dal profilo. Questo è utile per eliminare informazioni sui tempi che non sono rilevanti per l’analisi.
 CallNodeContextMenu--expand-all = Espandi tutto
@@ -771,16 +771,16 @@ TransformNavigator--merge-function = Unisci: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Scarta: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Comprimi ricorsione: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Comprimi ricorsione diretta: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Comprimi ricorsione indiretta: { $item }
+TransformNavigator--collapse-direct-recursion-only = Comprimi solo ricorsione diretta: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

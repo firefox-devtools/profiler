@@ -99,14 +99,12 @@ CallNodeContextMenu--transform-collapse-function-subtree = Collaber function
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Collaber <strong>{ $nameForResource }</strong>
     .title = Collaber un ressource applattara tote le appellos a ille ressource in un singule nodo de appello collabite.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Collaber le recursion directe
+CallNodeContextMenu--transform-collapse-recursion = Collaber recursion
+    .title = Collaber recursion remove appellos que repetitemente recurre in le mesme function, mesmo con functiones intermedie sur le pila.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Collaber solo le recursion directe
     .title =
-        Collaber le recursion directe remove appellos que recurre repetitemente in
+        Collaber le recursion directe remove appellos que repetitemente recurre in
         le mesme function sin functiones intermedie sur le pila.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Collaber recursion indirecte
-    .title =
-        Collaber le recursion indirecte remove appellos que repetitemente se recurre in
-        le mesme function, mesmo con functiones intermedie sur le pila
 CallNodeContextMenu--transform-drop-function = Lassar cader specimens con iste function
     .title =
         Lassar cader specimens remove lor tempore ab le profilo. Isto es utile pro
@@ -844,16 +842,16 @@ TransformNavigator--merge-function = Miscer: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Lassar cader: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Collaber recursion: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Collaber le recursion directe: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Collaber le recursion indirecte: { $item }
+TransformNavigator--collapse-direct-recursion-only = Collaber solo le recursion directe: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

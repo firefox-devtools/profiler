@@ -101,10 +101,14 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         Als u een bron samenvouwt, worden alle aanroepen van die bron
         afgevlakt tot een enkele samengevouwen aanroepnode.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Directe recursie samenvouwen
-    .title = Als directe recursie wordt samengevouwen, worden aanroepen die bij herhaling recursie hebben naar dezelfde functie zonder tussentijdse functies in de stack verwijderd.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Indirecte recursie samenvouwen
-    .title = Het samenvouwen van indirecte recursie verwijdert aanroepen die bij herhaling recursie hebben naar dezelfde functie, zelfs met tussentijdse functie in de stack.
+CallNodeContextMenu--transform-collapse-recursion = Recursie samenvouwen
+    .title =
+        Het samenvouwen van recursie verwijdert aanroepen die bij herhaling recurseren naar
+        dezelfde functie, zelfs met tussentijdse functies op de stack.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Alleen directe recursie samenvouwen
+    .title =
+        Het samenvouwen van directe recursie verwijdert aanroepen die bij herhaling recurseren naar
+        dezelfde functie zonder tussentijdse functies op de stack.
 CallNodeContextMenu--transform-drop-function = Monsters met deze functie weglaten
     .title =
         Als u monsters weglaat, wordt hun tijd uit het profiel verwijderd. Dit is nuttig om
@@ -849,16 +853,16 @@ TransformNavigator--merge-function = Samenvoegen: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Droppen: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Recursie samenvouwen: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Directe recursie samenvouwen: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Indirecte recursie samenvouwen: { $item }
+TransformNavigator--collapse-direct-recursion-only = Alleen directe recursie samenvouwen: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
