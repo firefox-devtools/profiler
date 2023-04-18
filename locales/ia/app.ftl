@@ -537,6 +537,7 @@ MenuButtons--publish--message-something-went-wrong = Guai, un error se ha produc
 MenuButtons--publish--message-try-again = Retentar
 MenuButtons--publish--download = Discargar
 MenuButtons--publish--compressing = Comprimente…
+MenuButtons--publish--error-while-compressing = Error comprimente, tenta dismarcar ulle quadratos de selection pro reducer le dimension del profilo.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -646,9 +647,8 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Tote le pilas
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Native
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtrar pilas:
 StackSettings--use-data-source-label = Fonte datos:
 StackSettings--call-tree-strategy-timing = Temporisationes
     .title = Summarisa per le pilas examinate de codice exequite sur le tempore
