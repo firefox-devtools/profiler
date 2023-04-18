@@ -657,9 +657,8 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Alle stacks
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Ingebouwd
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Stacks filteren:
 StackSettings--use-data-source-label = Gegevensbron:
 StackSettings--call-tree-strategy-timing = Timings
     .title = Samenvatting over de tijd met gebruikmaking van bemonsterde stacks van uitgevoerde code
