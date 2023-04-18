@@ -2,13 +2,15 @@
   /* so that the introduction is on top of other panels, _but_ still keep it
    * below the input field (see below) */
   z-index: 1;
-  padding: 0 5px;
+  padding: 0 4px;
 }
 
 .panelSearchFieldLabel {
   /* We fix the height so that the panelSearchFieldIntroduction doesn't increase it */
-  display: block;
+  display: inline-flex;
   height: 100%;
+  align-items: center;
+  gap: 4px;
 }
 
 .panelSearchFieldInput {
@@ -17,7 +19,7 @@
 
 .panelSearchFieldIntroduction {
   z-index: -1; /* it needs to be below the input field */
-  padding: 0 5px;
+  padding: 0 4px;
   background-color: white;
   box-shadow: 0 1px 4px rgb(12 12 13 / 0.1); /* This is grey-90 with 10% opacity, according to the photon design document */
   color: var(--grey-50);
