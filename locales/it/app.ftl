@@ -468,6 +468,7 @@ MenuButtons--publish--message-something-went-wrong = Uh, si è verificato un err
 MenuButtons--publish--message-try-again = Riprova
 MenuButtons--publish--download = Scarica
 MenuButtons--publish--compressing = Compressione in corso…
+MenuButtons--publish--error-while-compressing = Errore durante la compressione, prova a deselezionare alcune caselle di controllo per ridurre le dimensioni del profilo.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -575,9 +576,10 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Tutti gli stack
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Nativo
+StackSettings--implementation-all-frames = Tutti i frame
+    .title = Non filtrare gli stack frame
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Mostra solo gli stack frame relativi all’esecuzione di JavaScript
 StackSettings--use-data-source-label = Sorgente dati:
 StackSettings--call-tree-strategy-timing = Tempi
     .title = Sintetizza usando gli stack campionati del codice eseguito nel tempo
