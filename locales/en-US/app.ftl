@@ -590,6 +590,7 @@ MenuButtons--publish--message-something-went-wrong = Uh oh, something went wrong
 MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
+MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
 
 ## NetworkSettings
 ## This is used in the network chart.

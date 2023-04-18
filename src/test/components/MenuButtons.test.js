@@ -63,8 +63,20 @@ const { UploadAbortedError } = jest.requireActual(
 import sha1 from '../../utils/sha1';
 jest.mock('../../utils/sha1');
 
-// Mocking compress
-jest.mock('../../utils/gz');
+// We want this module to have mocks so that we can change the return values in
+// tests. But in beforeEach below, we return the real implementation by default.
+// Note that we can't do it using the factory function because of this Jest issue:
+// https://github.com/facebook/jest/issues/14080
+jest.mock('firefox-profiler/utils/gz');
+
+beforeEach(() => {
+  const realModule = jest.requireActual('firefox-profiler/utils/gz');
+  const { compress, decompress } = require('firefox-profiler/utils/gz');
+  // $FlowExpectError Flow doesn't know about Jest mocks.
+  compress.mockImplementation(realModule.compress);
+  // $FlowExpectError Flow doesn't know about Jest mocks.
+  decompress.mockImplementation(realModule.decompress);
+});
 
 // Mocking shortenUrl
 import { shortenUrl } from '../../utils/shorten-url';
@@ -262,6 +274,7 @@ describe('app/MenuButtons', function () {
       const { profile } = createSimpleProfile('nightly');
       const { getPanel, openPublishPanel } = setupForPublish(profile);
       await openPublishPanel();
+      await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -269,6 +282,7 @@ describe('app/MenuButtons', function () {
       const { profile } = createSimpleProfile('release');
       const { getPanel, openPublishPanel } = setupForPublish(profile);
       await openPublishPanel();
+      await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -279,6 +293,7 @@ describe('app/MenuButtons', function () {
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
       await openPublishPanel();
+      await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -391,7 +406,7 @@ describe('app/MenuButtons', function () {
       expect(await findPublishButton()).toBeTruthy();
     });
 
-    it('matches the snapshot for an error', async () => {
+    it('matches the snapshot for an upload error', async () => {
       const { getPanel, getPanelForm, rejectUpload, openPublishPanel } =
         setupForPublish();
 
@@ -405,6 +420,24 @@ describe('app/MenuButtons', function () {
       // Now click the error button, and get a snapshot of the panel.
       fireFullClick(errorButton);
       await screen.findByText(/something went wrong/);
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for a compression error', async () => {
+      const { compress } = require('firefox-profiler/utils/gz');
+      // $FlowExpectError Flow doesn't know about Jest mocks
+      compress.mockRejectedValue(new Error('Compression error'));
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { getPanel, openPublishPanel } = setupForPublish();
+
+      await openPublishPanel();
+      expect(
+        await screen.findByText(/Error while compressing/)
+      ).toBeInTheDocument();
+      expect(console.error).toHaveBeenCalledWith(
+        'Error while compressing the profile data',
+        expect.any(Error)
+      );
       expect(getPanel()).toMatchSnapshot();
     });
   });
