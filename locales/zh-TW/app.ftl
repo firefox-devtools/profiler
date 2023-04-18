@@ -76,10 +76,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = 摺疊函數
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = 摺疊<strong>{ $nameForResource }</strong>
     .title = 摺疊資源可將所有對該資源的呼叫，壓平成已摺疊的單一呼叫節點。
-CallNodeContextMenu--transform-collapse-direct-recursion2 = 摺疊直接遞迴
-    .title = 「摺疊直接遞迴」會移除重複遞迴同一函數，而在堆疊中沒有中介函數的呼叫。
-CallNodeContextMenu--transform-collapse-indirect-recursion = 摺疊間接遞迴
-    .title = 「摺疊間接遞迴」會移除重複遞迴同一函數，就算在堆疊中有中介函數的呼叫也將移除。
+CallNodeContextMenu--transform-collapse-recursion = 摺疊遞迴
+    .title = 移除重複遞迴相同函數，但堆疊中含有中介函數的遞迴。
+CallNodeContextMenu--transform-collapse-direct-recursion-only = 僅摺疊直接遞迴
+    .title = 移除重複遞迴相同函數，但堆疊中不含中介函數的直接遞迴。
 CallNodeContextMenu--transform-drop-function = 丟棄與此函數的相關檢測樣本
     .title = 丟棄樣本後將會從檢測檔移除該樣本所執行的時間。需要清除與分析無關的計時資訊時，此功能相當有用。
 CallNodeContextMenu--expand-all = 全部展開
@@ -765,16 +765,16 @@ TransformNavigator--merge-function = 合併: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = 丟棄: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = 摺疊遞迴：{ $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = 摺疊直接遞迴: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = 摺疊不直接遞迴: { $item }
+TransformNavigator--collapse-direct-recursion-only = 僅摺疊直接遞迴：{ $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

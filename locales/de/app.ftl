@@ -97,10 +97,10 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         Wenn eine Ressource eingeklappt wird, werden alle Aufrufe dieser 
         Ressource in einen einzigen eingeklappten Aufrufknoten umgewandelt.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Direkte Rekursion einklappen
-    .title = Wenn Sie die direkte Rekursion einklappen, werden Aufrufe entfernt, die wiederholt in die selbe Funktion rekurrieren, ohne dass es im Stapel Funktionen dazwischen gibt.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Indirekte Rekursion einklappen
-    .title = Wenn Sie die direkte Rekursion einklappen, werden Aufrufe entfernt, die wiederholt in die selbe Funktion rekurrieren, auch wenn es im Stapel Funktionen dazwischen gibt.
+CallNodeContextMenu--transform-collapse-recursion = Rekursion einklappen
+    .title = Wenn die Rekursion eingeklappt wird, werden Aufrufe entfernt, die direkt in dieselbe Funktion rekurrieren, auch wenn im Stapel noch Funktionen dazwischen liegen.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Nur direkte Rekursion einklappen
+    .title = Wenn die direkte Rekursion eingeklappt wird, werden Aufrufe entfernt, die wiederholt in dieselbe Funktion rekurrieren, ohne dass im Stapel noch Funktionen dazwischen liegen.
 CallNodeContextMenu--transform-drop-function = Teilmengen mit dieser Funktion verwerfen
     .title =
         Wenn Teilmengen verworfen werden, wird ihre Zeit aus dem Profil entfernt. Dies ist hilfreich,
@@ -829,16 +829,16 @@ TransformNavigator--merge-function = Zusammenführen: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Verwerfen: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Rekursion einklappen: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Direkte Rekursion einklappen: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Indirekte Rekursion einklappen: { $item }
+TransformNavigator--collapse-direct-recursion-only = Nur direkte Rekursion einklappen: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
