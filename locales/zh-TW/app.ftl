@@ -459,6 +459,7 @@ MenuButtons--publish--message-something-went-wrong = 哇喔，上傳檢測檔時
 MenuButtons--publish--message-try-again = 再試一次
 MenuButtons--publish--download = 下載
 MenuButtons--publish--compressing = 壓縮中…
+MenuButtons--publish--error-while-compressing = 壓縮時發生錯誤，請嘗試取消勾選部分項目來縮小檢測檔。
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -569,9 +570,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = 所有堆疊
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = 原生
+StackSettings--implementation-all-frames = 所有堆疊框
+    .title = 不過濾堆疊框
+StackSettings--implementation-javascript2 = JavaScript
+    .title = 僅顯示與執行 JavaScript 有關的堆疊框
+StackSettings--implementation-native2 = 原生
+    .title = 僅顯示原生程式碼相關的堆疊框
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = 過濾堆疊:
 StackSettings--use-data-source-label = 資料來源:
 StackSettings--call-tree-strategy-timing = 計時
     .title = 使用紀錄到已執行的程式碼顯示摘要
