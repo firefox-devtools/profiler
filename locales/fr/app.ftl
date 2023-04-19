@@ -76,12 +76,6 @@ CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Réduire <strong>{ $nameForResource }</strong>
     .title = Réduire une ressource aplatit tous les appels à cette ressource en un seul nœud d’appel réduit.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Réduire la récursivité directe
-    .title =
-        La réduction de la récursivité directe supprime les appels qui reviennent à plusieurs reprises dans
-        la même fonction sans fonctions intermédiaires sur la pile.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Réduire la récursivité indirecte
-    .title = La réduction de la récursivité indirecte supprime les appels qui reviennent à plusieurs reprises dans la même fonction, même en présence de fonctions intermédiaires sur la pile.
 CallNodeContextMenu--transform-drop-function = Ignorer les échantillons avec cette fonction
     .title = Ignorer des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
@@ -476,6 +470,7 @@ MenuButtons--publish--message-something-went-wrong = Oups, une erreur s’est pr
 MenuButtons--publish--message-try-again = Réessayer
 MenuButtons--publish--download = Télécharger
 MenuButtons--publish--compressing = Compression…
+MenuButtons--publish--error-while-compressing = Erreur lors de la compression, essayez de décocher certaines cases pour réduire la taille du profil.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -583,9 +578,8 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Toutes les piles
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Native
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtrer les piles :
 StackSettings--use-data-source-label = Source des données :
 StackSettings--call-tree-strategy-timing = Délais
     .title = Résumer à l’aide de piles d’échantillons du code exécuté au fil du temps
@@ -779,16 +773,16 @@ TransformNavigator--merge-function = Fusion : { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Ignorer : { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Réduction de la récursivité : { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Réduction de la récursivité directe : { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Réduction de la récursivité indirecte : { $item }
+TransformNavigator--collapse-direct-recursion-only = Réduction de la récursivité directe uniquement : { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
