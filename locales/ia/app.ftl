@@ -647,6 +647,12 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-frames = Tote le structuras
+    .title = Non filtrar le structuras de pila
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Monstrar solo le structuras de pila correlate a execution JavaScript
+StackSettings--implementation-native2 = Native
+    .title = Monstrar solo le structuras de pila pro codice native
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Filtrar pilas:
 StackSettings--use-data-source-label = Fonte datos:
