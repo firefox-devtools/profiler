@@ -546,6 +546,7 @@ MenuButtons--publish--message-something-went-wrong = Och heden, der is wat misgi
 MenuButtons--publish--message-try-again = Opnij probearje
 MenuButtons--publish--download = Downloade
 MenuButtons--publish--compressing = Komprimearje…
+MenuButtons--publish--error-while-compressing = Flater by it komprimearjen. Probearje guon seleksjefakjes út te skeakeljen om de profylgrutte te ferlytsjen.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -657,9 +658,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Alle stacks
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Ynboud
+StackSettings--implementation-all-frames = Alle frames
+    .title = De stackframes net filterje
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Allinnich de stackframes relatearre oan útfiering fan JavaScript toane
+StackSettings--implementation-native2 = Ynboud
+    .title = Allinnich de stackframes foar ynboude koade toane
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Stacks filterje:
 StackSettings--use-data-source-label = Gegevensboarne:
 StackSettings--call-tree-strategy-timing = Timings
     .title = Gearfetting oer de tiid mei gebrûk fan bemeunstere stacks fan útfierde koade
