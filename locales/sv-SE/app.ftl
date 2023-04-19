@@ -541,6 +541,7 @@ MenuButtons--publish--message-something-went-wrong = Hoppsan, något gick fel n�
 MenuButtons--publish--message-try-again = Försök igen
 MenuButtons--publish--download = Hämta
 MenuButtons--publish--compressing = Komprimerar…
+MenuButtons--publish--error-while-compressing = Fel vid komprimering, försök avmarkera några kryssrutor för att minska profilstorleken.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -652,9 +653,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Alla stackar
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Ursprunglig
+StackSettings--implementation-all-frames = Alla ramar
+    .title = Filtrera inte stackramar
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Visa endast stackramar relaterade till JavaScript-körning
+StackSettings--implementation-native2 = Intern
+    .title = Visa bara stackramar för intern kod
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtrera stackar:
 StackSettings--use-data-source-label = Datakälla:
 StackSettings--call-tree-strategy-timing = Tidpunkter
     .title = Sammanfatta med hjälp av samplade stackar av exekverad kod över tid
