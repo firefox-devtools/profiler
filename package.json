@@ -1,5 +1,8 @@
 {
   "private": true,
+  "engines": {
+    "node": ">= 18.16 < 19"
+  },
   "scripts": {
     "build:clean": "rimraf dist && mkdirp dist",
     "build:quiet": "yarn build:clean && cross-env NODE_ENV=development webpack",
