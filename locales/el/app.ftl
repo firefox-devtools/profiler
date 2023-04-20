@@ -644,9 +644,10 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Όλες οι στοίβες
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Εγγενές
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Εμφάνιση μόνο των καρέ στοίβας που σχετίζονται με την εκτέλεση της JavaScript
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Φιλτράρισμα στοιβών:
 StackSettings--use-data-source-label = Πηγή δεδομένων:
 StackSettings--call-tree-strategy-timing = Χρονισμοί
     .title = Περίληψη με δειγματοληπτικές στοίβες σταδιακά εκτελεσμένου κώδικα
