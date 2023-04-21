@@ -547,6 +547,7 @@ MenuButtons--publish--message-something-went-wrong = Йой, під час ви�
 MenuButtons--publish--message-try-again = Повторити спробу
 MenuButtons--publish--download = Завантажити
 MenuButtons--publish--compressing = Стиснення…
+MenuButtons--publish--error-while-compressing = Помилка під час стиснення, спробуйте прибрати прапорці біля деяких полів, щоб зменшити розмір профілю.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -658,9 +659,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Усі стеки
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Нативні
+StackSettings--implementation-all-frames = Усі фрейми
+    .title = Не фільтрувати фрейми стека
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Показувати лише фрейми стека, пов'язані з виконанням JavaScript
+StackSettings--implementation-native2 = Вбудовані
+    .title = Показувати лише фрейми стека для власного коду
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Фільтр стеків:
 StackSettings--use-data-source-label = Джерело даних:
 StackSettings--call-tree-strategy-timing = Таймінги
     .title = Створити підсумок окремих стеків виконаного впродовж певного часу коду
