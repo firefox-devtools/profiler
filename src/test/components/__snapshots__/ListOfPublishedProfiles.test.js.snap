@@ -61,7 +61,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         <div
           class="publishedProfilesDate"
         >
-          2:00 PM
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -104,7 +104,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         <div
           class="publishedProfilesDate"
         >
-          1:00 PM
+          1:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -304,7 +304,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
         <div
           class="publishedProfilesDate"
         >
-          2:00 PM
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -363,7 +363,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
         <div
           class="publishedProfilesDate"
         >
-          1:00 PM
+          1:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -420,7 +420,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
         <div
           class="publishedProfilesDate"
         >
-          Jul 3, 8:00 AM
+          Jul 3, 8:00 AM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -543,7 +543,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
         <div
           class="publishedProfilesDate"
         >
-          2:00 PM
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -586,7 +586,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
         <div
           class="publishedProfilesDate"
         >
-          Jul 3, 8:00 AM
+          Jul 3, 8:00 AM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -692,7 +692,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
         <div
           class="publishedProfilesDate"
         >
-          2:00 PM
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
