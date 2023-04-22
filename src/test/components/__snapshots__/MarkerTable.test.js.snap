@@ -50,7 +50,11 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
       <li
         class="panelSettingsListItem"
       >
-        Filter stacks:
+        <span
+          class="stackImplementationSettingLabel"
+        >
+          Filter stacks:
+        </span>
         <input
           checked=""
           class="photon-radio photon-radio-micro"

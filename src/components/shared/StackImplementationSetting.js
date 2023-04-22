@@ -18,6 +18,7 @@ import explicitConnect, {
 import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
 
 import './PanelSettingsList.css';
+import './StackImplementationSetting.css';
 
 import type { ImplementationFilter } from 'firefox-profiler/types';
 
@@ -77,7 +78,11 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
 
     return allowSwitchingStackType ? (
       <li className="panelSettingsListItem">
-        {labelL10nId ? <Localized id={labelL10nId} /> : null}
+        {labelL10nId ? (
+          <span className="stackImplementationSettingLabel">
+            <Localized id={labelL10nId} />
+          </span>
+        ) : null}
         {this._renderImplementationRadioButton(
           'StackSettings--implementation-all-frames',
           'combined'
