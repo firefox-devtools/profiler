@@ -661,6 +661,12 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-frames = Усе кадры
+    .title = Не фільтраваць кадры стэка
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Паказваць толькі кадры стэка, звязаныя з выкананнем JavaScript
+StackSettings--implementation-native2 = Убудаваны
+    .title = Паказваць толькі кадры стэка для ўбудаванага кода
 StackSettings--use-data-source-label = Крыніца даных:
 StackSettings--call-tree-strategy-timing = Таймінгі
     .title = Стварыць зводку асобных стэкаў кода, выкананых за пэўны перыяд часу
