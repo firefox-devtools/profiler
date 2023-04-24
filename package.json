@@ -156,7 +156,7 @@
     "raw-loader": "^4.0.2",
     "rimraf": "^5.0.0",
     "style-loader": "^3.3.2",
-    "stylelint": "^15.4.0",
+    "stylelint": "^15.6.0",
     "stylelint-config-idiomatic-order": "^9.0.0",
     "stylelint-config-standard": "^33.0.0",
     "stylelint-prettier": "^3.0.0",
