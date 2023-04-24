@@ -92,6 +92,14 @@ CallNodeContextMenu--transform-collapse-function-subtree = Згарнуць фу
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Згарнуць <strong>{ $nameForResource }</strong>
     .title = Згортванне рэсурсу згладзіць усе выклікі да гэтага рэсурсу ў адзіны згорнуты вузел выкліку.
+CallNodeContextMenu--transform-collapse-recursion = Згарнуць рэкурсію
+    .title =
+        Згортванне рэкурсіі выдаляе выклікі, якія паўторна ідуць у адну
+        і тую ж функцыю, нават з прамежкавымі функцыямі ў стэку.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Згарнуць толькі прамую рэкурсію
+    .title =
+        Згортванне прамой рэкурсіі выдаляе выклікі, якія паўторна ідуць
+        у адну і тую ж функцыю без прамежкавых функцый у стэку.
 CallNodeContextMenu--transform-drop-function = Адкінуць узоры з гэтай функцыяй
     .title = Адкідванне ўзораў выдаляе іх час з профілю. Гэта карысна для выдалення інфармацыі аб часе, які не мае дачынення да аналізу.
 CallNodeContextMenu--expand-all = Разгарнуць усё
@@ -543,6 +551,7 @@ MenuButtons--publish--message-something-went-wrong = Ой, нешта пайшл
 MenuButtons--publish--message-try-again = Паспрабаваць зноў
 MenuButtons--publish--download = Спампаваць
 MenuButtons--publish--compressing = Сцісканне…
+MenuButtons--publish--error-while-compressing = Памылка пры сцісканні, паспрабуйце зняць некаторыя птушкі, каб паменшыць памер профілю.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -652,9 +661,6 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Усе стэкі
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Уласны
 StackSettings--use-data-source-label = Крыніца даных:
 StackSettings--call-tree-strategy-timing = Таймінгі
     .title = Стварыць зводку асобных стэкаў кода, выкананых за пэўны перыяд часу
