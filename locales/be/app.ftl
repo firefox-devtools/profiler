@@ -667,6 +667,8 @@ StackSettings--implementation-javascript2 = JavaScript
     .title = Паказваць толькі кадры стэка, звязаныя з выкананнем JavaScript
 StackSettings--implementation-native2 = Убудаваны
     .title = Паказваць толькі кадры стэка для ўбудаванага кода
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Фільтр стэкаў:
 StackSettings--use-data-source-label = Крыніца даных:
 StackSettings--call-tree-strategy-timing = Таймінгі
     .title = Стварыць зводку асобных стэкаў кода, выкананых за пэўны перыяд часу
