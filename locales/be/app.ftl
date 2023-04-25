@@ -349,7 +349,7 @@ MarkerContextMenu--select-the-sender-thread = Выберыце паток-адп
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
-    .label = Фільтра маркераў
+    .label = Фільтр маркераў:
     .title = Паказваць толькі маркеры, якія адпавядаюць пэўнаму імені
 
 ## MarkerSidebar
@@ -666,7 +666,7 @@ StackSettings--implementation-all-frames = Усе кадры
 StackSettings--implementation-javascript2 = JavaScript
     .title = Паказваць толькі кадры стэка, звязаныя з выкананнем JavaScript
 StackSettings--implementation-native2 = Убудаваны
-    .title = Паказваць толькі кадры стэка для ўбудаванага кода
+    .title = Паказваць толькі кадры стэка для платформна-залежнага кода
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Фільтр стэкаў:
 StackSettings--use-data-source-label = Крыніца даных:
