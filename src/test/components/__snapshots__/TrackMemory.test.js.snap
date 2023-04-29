@@ -78,6 +78,23 @@ Array [
     0,
     0,
     80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
     25,
   ],
   Array [
@@ -155,23 +172,6 @@ Array [
   ],
   Array [
     "fill",
-  ],
-  Array [
-    "clearRect",
-    0,
-    0,
-    80,
-    10,
-  ],
-  Array [
-    "scale",
-    1,
-    1,
-  ],
-  Array [
-    "scale",
-    1,
-    1,
   ],
 ]
 `;
