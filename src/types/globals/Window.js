@@ -70,6 +70,7 @@ declare class Window {
   fetch: typeof fetch;
   requestIdleCallback: typeof requestIdleCallback;
   requestAnimationFrame: typeof requestAnimationFrame;
+  cancelAnimationFrame: typeof cancelAnimationFrame;
   devicePixelRatio: number;
   // The indexedDB is marked as optional, as we should handle the test environment
   // where this is not available. It can lead to hard to debug promise failure
