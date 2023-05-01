@@ -20,9 +20,8 @@ type Props<HoveredItem> = {|
   +getHoveredItemInfo: (HoveredItem) => React.Node,
   +drawCanvas: (
     CanvasRenderingContext2D,
-    hoveredItem: HoveredItem | null,
-    prevHoveredItem: HoveredItem | null,
-    isHoveredOnlyDifferent: boolean
+    ChartCanvasScale: ChartCanvasScale,
+    ChartCanvasHoverInfo: ChartCanvasHoverInfo<HoveredItem>
   ) => void,
   +isDragging: boolean,
   // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
@@ -39,6 +38,19 @@ type State<HoveredItem> = {
   hoveredItem: HoveredItem | null,
   pageX: CssPixels,
   pageY: CssPixels,
+};
+
+export type ChartCanvasScale = {
+  // Always equal to devicePixelRatio
+  cssToDeviceScale: number,
+  // 1 if scaleCtxToCssPixels is true, otherwise equal to cssToDeviceScale
+  cssToUserScale: number,
+};
+
+export type ChartCanvasHoverInfo<HoveredItem> = {
+  hoveredItem: HoveredItem | null,
+  prevHoveredItem: HoveredItem | null,
+  isHoveredOnlyDifferent: boolean,
 };
 
 import './Canvas.css';
@@ -160,15 +172,23 @@ export class ChartCanvas<HoveredItem> extends React.Component<
     isHoveredOnlyDifferent: boolean = false,
     prevHoveredItem: HoveredItem | null = null
   ) {
-    const { className, drawCanvas } = this.props;
+    const { className, drawCanvas, scaleCtxToCssPixels } = this.props;
+    const { hoveredItem } = this.state;
     if (this._canvas) {
       timeCode(`${className} render`, () => {
         this._prepCanvas();
+        const scale = this._devicePixelRatio;
         drawCanvas(
           this._ctx,
-          this.state.hoveredItem,
-          prevHoveredItem,
-          isHoveredOnlyDifferent
+          {
+            cssToDeviceScale: scale,
+            cssToUserScale: scaleCtxToCssPixels ? 1 : scale,
+          },
+          {
+            hoveredItem,
+            prevHoveredItem,
+            isHoveredOnlyDifferent,
+          }
         );
       });
     }

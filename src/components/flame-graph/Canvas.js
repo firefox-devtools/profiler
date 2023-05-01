@@ -43,6 +43,11 @@ import type {
   IndexIntoFlameGraphTiming,
 } from 'firefox-profiler/profile-logic/flame-graph';
 
+import type {
+  ChartCanvasScale,
+  ChartCanvasHoverInfo,
+} from '../shared/chart/Canvas';
+
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {|
@@ -149,7 +154,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
   _drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: HoveredStackTiming | null
+    scale: ChartCanvasScale,
+    hoverInfo: ChartCanvasHoverInfo<HoveredStackTiming>
   ) => {
     const {
       thread,
@@ -167,6 +173,15 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         viewportBottom,
       },
     } = this.props;
+
+    const { hoveredItem } = hoverInfo;
+
+    const { cssToUserScale } = scale;
+    if (cssToUserScale !== 1) {
+      throw new Error(
+        'FlameGraphCanvasImpl sets scaleCtxToCssPixels={true}, so canvas user space units should be equal to CSS pixels.'
+      );
+    }
 
     // Ensure the text measurement tool is created, since this is the first time
     // this class has access to a ctx.
