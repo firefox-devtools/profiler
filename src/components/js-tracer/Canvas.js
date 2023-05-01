@@ -97,6 +97,8 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
   state = {
     hasFirstDraw: false,
   };
+  _textMeasurement: null | TextMeasurement;
+  _textMeasurementCssToDeviceScale: number = 1;
 
   /**
    * This method is called by the ChartCanvas component whenever the canvas needs to
@@ -126,12 +128,25 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
       );
     }
 
-    // Set the font size before creating a text measurer.
+    // Set the font before creating the text renderer. The font property resets
+    // automatically whenever the canvas size is changed, so we set it on every
+    // call.
     ctx.font = `${FONT_SIZE * cssToDeviceScale}px sans-serif`;
+
+    // Ensure the text measurement tool is created, since this is the first time
+    // this class has access to a ctx. We also need to recreate it when the scale
+    // changes because we are working with device coordinates.
+    if (
+      !this._textMeasurement ||
+      this._textMeasurementCssToDeviceScale !== cssToDeviceScale
+    ) {
+      this._textMeasurement = new TextMeasurement(ctx);
+      this._textMeasurementCssToDeviceScale = cssToDeviceScale;
+    }
 
     const renderPass: RenderPass = {
       ctx,
-      textMeasurement: new TextMeasurement(ctx),
+      textMeasurement: this._textMeasurement,
       fastFillStyle: new FastFillStyle(ctx),
       // Define a start and end row, so that we only draw the events
       // that are vertically within view.

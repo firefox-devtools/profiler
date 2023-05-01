@@ -8,6 +8,11 @@
  * Measure the size of text for drawing within a 2d context. This will allow text
  * to be drawn in a constrained space. This class uses a variety of heuristics and
  * caching to make this process fast.
+ *
+ * All measurements are in user space coordinates of the context. When the
+ * context transform changes, these user space coordinates remain valid. They
+ * only become invalid when the context's font or font size changes. When this
+ * happens, a new TextMeasurement instance should be created.
  */
 class TextMeasurement {
   _ctx: CanvasRenderingContext2D;

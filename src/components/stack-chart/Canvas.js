@@ -94,6 +94,9 @@ const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
 
 class StackChartCanvasImpl extends React.PureComponent<Props> {
+  _textMeasurement: null | TextMeasurement;
+  _textMeasurementCssToDeviceScale: number = 1;
+
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
     // is mounted, but using componentDidMount won't work here as the
@@ -182,9 +185,23 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       );
     }
 
-    // Set the font size before creating a text measurer.
+    // Set the font before creating the text renderer. The font property resets
+    // automatically whenever the canvas size is changed, so we set it on every
+    // call.
     ctx.font = `${FONT_SIZE * cssToDeviceScale}px sans-serif`;
-    const textMeasurement = new TextMeasurement(ctx);
+
+    // Ensure the text measurement tool is created, since this is the first time
+    // this class has access to a ctx. We also need to recreate it when the scale
+    // changes because we are working with device coordinates.
+    if (
+      !this._textMeasurement ||
+      this._textMeasurementCssToDeviceScale !== cssToDeviceScale
+    ) {
+      this._textMeasurement = new TextMeasurement(ctx);
+      this._textMeasurementCssToDeviceScale = cssToDeviceScale;
+    }
+
+    const textMeasurement = this._textMeasurement;
 
     const devicePixelsWidth = containerWidth * cssToDeviceScale;
     const devicePixelsHeight = containerHeight * cssToDeviceScale;
