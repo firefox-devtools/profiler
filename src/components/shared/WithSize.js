@@ -47,7 +47,6 @@ export function withSize<
     _dirtySize: DOMRectReadOnly | null = null;
     state = { width: 0, height: 0 };
     _container: HTMLElement | null;
-    _animationFrameId: AnimationFrameID | null = null;
 
     componentDidMount() {
       const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node
@@ -94,9 +93,6 @@ export function withSize<
       if (container) {
         getResizeObserverWrapper().unsubscribe(container, this._resizeListener);
       }
-      if (this._animationFrameId) {
-        window.cancelAnimationFrame(this._animationFrameId);
-      }
 
       window.removeEventListener(
         'visibilitychange',
@@ -106,11 +102,9 @@ export function withSize<
     }
 
     _updateSize(container: HTMLElement, contentRect: DOMRectReadOnly) {
-      this._animationFrameId = window.requestAnimationFrame(() => {
-        this.setState({
-          width: contentRect.width,
-          height: contentRect.height,
-        });
+      this.setState({
+        width: contentRect.width,
+        height: contentRect.height,
       });
     }
 
