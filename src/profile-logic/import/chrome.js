@@ -322,7 +322,7 @@ function getThreadInfo(
   // It looks like the TID information in Chrome's data isn't the system's TID
   // but some internal values only unique for a pid. Therefore let's generate a
   // proper unique value.
-  thread.tid = `${chunk.pid},${chunk.tid}`;
+  thread.tid = pidAndTid;
 
   // Set the process type to something non-"Gecko". If this is left at
   // "default", threads + processes without samples will not be auto-hidden in
@@ -861,6 +861,26 @@ function extractMarkers(
     throw new Error('No "Other" category in empty profile category list');
   }
 
+  profile.meta.markerSchema = [
+    {
+      name: 'EventDispatch',
+      chartLabel: '{marker.data.type2}',
+      tooltipLabel: '{marker.data.type2} - EventDispatch',
+      tableLabel: '{marker.data.type2}',
+      display: ['marker-chart', 'marker-table', 'timeline-overview'],
+      data: [
+        {
+          // In the original chrome profile, the key is `type`, but we rename it
+          // so that it doesn't clash with our internal `type` property.
+          key: 'type2',
+          label: 'Event Type',
+          format: 'string',
+          searchable: true,
+        },
+      ],
+    },
+  ];
+
   for (const [name, events] of eventsByName.entries()) {
     if (
       name === 'Profile' ||
@@ -914,6 +934,23 @@ function extractMarkers(
         }
         markers.name.push(stringTable.indexForString(name));
         markers.category.push(otherCategoryIndex);
+
+        if (argData && 'type' in argData) {
+          argData.type2 = argData.type;
+        }
+        if (argData && 'category' in argData) {
+          argData.category2 = argData.category;
+        }
+
+        const newData = {
+          ...argData,
+          type: name,
+          category: event.cat,
+        };
+
+        // $FlowExpectError Opt out of Flow checking for this one.
+        markers.data.push(newData);
+
         if (event.ph === 'X') {
           // Complete Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lpfof2aylapb
@@ -921,51 +958,28 @@ function extractMarkers(
           markers.phase.push(INTERVAL);
           markers.startTime.push(time);
           markers.endTime.push(time + duration);
-
-          markers.data.push({
-            type: 'CompleteTraceEvent',
-            category: event.cat,
-            data: argData,
-          });
-        } else if (
-          event.ph === 'B' ||
-          event.ph === 'E' ||
-          event.ph === 'b' ||
-          event.ph === 'e'
-        ) {
-          if (event.ph === 'B' || event.ph === 'b') {
-            // The 'B' and 'b' phases stand for "begin", and is the Chrome equivalent of IntervalStart.
-            markers.startTime.push(time);
-            markers.endTime.push(null);
-            markers.phase.push(INTERVAL_START);
-          } else {
-            // The 'E' and 'e' phase stand for "end", and is the Chrome equivalent of IntervalEnd.
-            markers.startTime.push(null);
-            markers.endTime.push(time);
-            markers.phase.push(INTERVAL_END);
-          }
-
-          // Duration or Async Event
+        } else if (event.ph === 'B' || event.ph === 'b') {
+          // Duration or Async Event Begin
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
-          markers.data.push({
-            type: 'tracing',
-            category: event.cat,
-            data: argData,
-          });
+          // The 'B' and 'b' phases stand for "begin", and is the Chrome equivalent of IntervalStart.
+          markers.startTime.push(time);
+          markers.endTime.push(null);
+          markers.phase.push(INTERVAL_START);
+        } else if (event.ph === 'E' || event.ph === 'e') {
+          // Duration or Async Event End
+          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
+          // The 'E' and 'e' phase stand for "end", and is the Chrome equivalent of IntervalEnd.
+          markers.startTime.push(null);
+          markers.endTime.push(time);
+          markers.phase.push(INTERVAL_END);
         } else {
+          // Instant Event
+          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
           // This assumes the phase is 'I' or 'i' (Instant), 'n' (Async Instant)
           // or 'R' (Mark events)
           markers.startTime.push(time);
           markers.endTime.push(null);
           markers.phase.push(INSTANT);
-
-          // Instant Event
-          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
-          markers.data.push({
-            type: 'InstantTraceEvent',
-            category: event.cat,
-            data: argData,
-          });
         }
         markers.length++;
       }
