@@ -323,6 +323,31 @@ describe('converting Google Chrome profile', function () {
           tid: 259,
           ts: 12,
         },
+        {
+          args: {
+            data: {
+              stackTrace: [
+                {
+                  columnNumber: 38358,
+                  functionName: 'buildFragment',
+                  lineNumber: 40,
+                  scriptId: '117',
+                  url: 'https://journals.physiology.org/products/physio/releasedAssets/js/main.bundle-1bbca34150268d61be9d.js',
+                },
+              ],
+              type: 'DOMSubtreeModified',
+            },
+          },
+          cat: 'devtools.timeline',
+          dur: 51,
+          name: 'EventDispatch',
+          ph: 'X',
+          pid: 54782,
+          tdur: 4,
+          tid: 259,
+          ts: 13,
+          tts: 3934607,
+        },
       ],
     };
     const strChromeProfile = JSON.stringify(chromeProfile);
@@ -345,7 +370,15 @@ describe('converting Google Chrome profile', function () {
       'Instant 2',
       'async event',
       'async event instant',
+      'EventDispatch',
     ]);
+    expect(markers[6]).toMatchObject({
+      name: 'EventDispatch',
+      data: {
+        type: 'EventDispatch',
+        type2: 'DOMSubtreeModified',
+      },
+    });
     expect(markers).toMatchSnapshot();
   });
 });
