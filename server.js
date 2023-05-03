@@ -63,6 +63,9 @@ const serverConfig = {
     `,
   },
   static: false,
+  client: {
+    overlay: false,
+  },
 };
 
 // Allow a local file to override various options.
