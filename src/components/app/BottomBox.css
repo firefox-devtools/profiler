@@ -2,9 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+.bottom-box {
+  display: flex;
+  min-height: 0;
+  flex-flow: row nowrap;
+}
+
 .bottom-box-pane {
   display: flex;
-  height: 100%; /* direct child of SplitterLayout */
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
   flex-flow: column nowrap;
 }
 
@@ -18,7 +26,7 @@
   background: var(--grey-20);
 }
 
-.bottom-box .layout-splitter {
+.bottom-box .resizableWithSplitterSplitter {
   position: relative; /* containing block for absolute ::before */
   width: 1px;
   border: none;
@@ -26,7 +34,7 @@
 }
 
 /* Provide 3px extra grabbable surface on each side of the splitter */
-.bottom-box .layout-splitter::before {
+.bottom-box .resizableWithSplitterSplitter::before {
   position: absolute;
   z-index: 1;
   display: block;
@@ -39,6 +47,7 @@
   overflow: hidden;
   height: 24px;
   flex-flow: row;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--grey-30);

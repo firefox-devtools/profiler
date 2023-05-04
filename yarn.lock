@@ -10208,11 +10208,6 @@ react-redux@^9.2.0:
     "@types/use-sync-external-store" "^0.0.6"
     use-sync-external-store "^1.4.0"
 
-react-splitter-layout@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/react-splitter-layout/-/react-splitter-layout-4.0.0.tgz#70b43ca6a78c056f5e5fbf29c67b597f040fbf2e"
-  integrity sha512-SLqOjBOxRuizWUa83w6q5/u9cDWa9/yj9Iko9V9JFN8x+cqIXiDlUFWSx+icz3IIgvsN/oRIw3za5/32RjIwrA==
-
 react-transition-group@^4.4.5:
   version "4.4.5"
   resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-4.4.5.tgz#e53d4e3f3344da8521489fbef8f2581d42becdd1"
