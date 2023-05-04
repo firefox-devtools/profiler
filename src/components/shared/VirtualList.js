@@ -154,21 +154,6 @@ type VirtualListInnerProps<Item> = {|
 class VirtualListInner<Item> extends React.PureComponent<
   VirtualListInnerProps<Item>
 > {
-  _container: ?HTMLElement;
-
-  _takeContainerRef = (element: ?HTMLDivElement) => {
-    this._container = element;
-  };
-
-  /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
-  getBoundingClientRect() {
-    if (this._container) {
-      return this._container.getBoundingClientRect();
-    }
-    return new DOMRect(0, 0, 0, 0);
-  }
-
   render() {
     const {
       itemHeight,
@@ -194,7 +179,6 @@ class VirtualListInner<Item> extends React.PureComponent<
     return (
       <div
         className={className}
-        ref={this._takeContainerRef}
         // Add padding to list height to account for overlay scrollbars.
         style={{
           height: `${(items.length + 1) * itemHeight}px`,
@@ -261,21 +245,17 @@ type VirtualListProps<Item> = {|
   +ariaActiveDescendant?: null | string,
 |};
 
-type Geometry = {
-  // getBoundingClientRect in the Flow definitions is wrong, and labels the return values
-  // as a ClientRect, and not a DOMRect. https://github.com/facebook/flow/issues/5475
-  //
-  // Account for that here:
-  outerRect: DOMRect | ClientRect,
-  innerRectY: CssPixels,
-};
+type VirtualListState = {|
+  scrollTop: number,
+  clientHeight: number,
+|};
 
 export class VirtualList<Item> extends React.PureComponent<
-  VirtualListProps<Item>
+  VirtualListProps<Item>,
+  VirtualListState
 > {
   _container: {| current: HTMLDivElement | null |} = React.createRef();
-  _inner: {| current: VirtualListInner<Item> | null |} = React.createRef();
-  _geometry: ?Geometry;
+  state = { scrollTop: 0, clientHeight: 0 };
 
   componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
@@ -285,8 +265,6 @@ export class VirtualList<Item> extends React.PureComponent<
         'The container was assumed to exist while mounting The VirtualList.'
       );
     }
-    container.addEventListener('scroll', this._onScroll);
-    this._onScroll(); // for initial size
   }
 
   componentWillUnmount() {
@@ -297,12 +275,13 @@ export class VirtualList<Item> extends React.PureComponent<
         'The container was assumed to exist while unmounting The VirtualList.'
       );
     }
-    container.removeEventListener('scroll', this._onScroll);
   }
 
-  _onScroll = () => {
-    this._geometry = this._queryGeometry();
-    this.forceUpdate();
+  _onScroll = (event: SyntheticEvent<HTMLElement>) => {
+    this.setState({
+      scrollTop: event.currentTarget.scrollTop,
+      clientHeight: event.currentTarget.clientHeight,
+    });
   };
 
   _onCopy = (event: ClipboardEvent) => {
@@ -312,29 +291,14 @@ export class VirtualList<Item> extends React.PureComponent<
     }
   };
 
-  _queryGeometry(): Geometry | void {
-    const container = this._container.current;
-    const inner = this._inner.current;
-    if (!container || !inner) {
-      return undefined;
-    }
-    const outerRect = container.getBoundingClientRect();
-    const innerRectY = inner.getBoundingClientRect().top;
-    return { outerRect, innerRectY };
-  }
-
   computeVisibleRange() {
     const { itemHeight, disableOverscan } = this.props;
-    if (!this._geometry) {
-      return { visibleRangeStart: 0, visibleRangeEnd: 100 };
-    }
-    const { outerRect, innerRectY } = this._geometry;
+    const { scrollTop, clientHeight } = this.state;
     const overscan = disableOverscan ? 0 : 25;
     const chunkSize = 16;
-    let visibleRangeStart =
-      Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
+    let visibleRangeStart = Math.floor(scrollTop / itemHeight) - overscan;
     let visibleRangeEnd =
-      Math.ceil((outerRect.bottom - innerRectY) / itemHeight) + overscan;
+      Math.ceil((scrollTop + clientHeight) / itemHeight) + overscan;
     if (!disableOverscan) {
       visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
       visibleRangeEnd = Math.ceil(visibleRangeEnd / chunkSize) * chunkSize;
@@ -502,6 +466,7 @@ export class VirtualList<Item> extends React.PureComponent<
         role={ariaRole}
         aria-label={ariaLabel}
         aria-activedescendant={ariaActiveDescendant}
+        onScroll={this._onScroll}
       >
         <div
           className={`${className}InnerWrapper`}
@@ -523,7 +488,6 @@ export class VirtualList<Item> extends React.PureComponent<
               containerWidth={containerWidth}
               forceRender={forceRender}
               key={columnIndex}
-              ref={columnIndex === 0 ? this._inner : undefined}
             />
           ))}
         </div>
