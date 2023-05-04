@@ -64,6 +64,10 @@ const serverConfig = {
   },
   static: false,
   client: {
+    // See https://github.com/firefox-devtools/profiler/pull/4598#issuecomment-1529260852
+    // for the root cause of an error happening at load time. For this reason we
+    // disable the webpack overlay. We may be able to revisit after moving to
+    // the React 18 new API.
     overlay: false,
   },
 };
