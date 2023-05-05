@@ -17,26 +17,48 @@ export type ResizeObserverWrapper = {|
 function createResizeObserverWrapper() {
   // This keeps the list of callbacks for each observed element.
   const callbacks: Map<Element, Set<ResizeObserverCallback>> = new Map();
+  // This keeps the list of changes while the tab is hidden.
+  const dirtyChanges: Map<Element, DOMRectReadOnly> = new Map();
+
   let _resizeObserver = null;
+
+  function notifyListenersForElement(element: Element, rect: DOMRectReadOnly) {
+    const callbacksForElement = callbacks.get(element);
+    if (callbacksForElement) {
+      callbacksForElement.forEach((callback) => callback(rect));
+    }
+  }
 
   function resizeObserverCallback(entries) {
     for (const entry of entries) {
-      const callbacksForElement = callbacks.get(entry.target);
-      if (callbacksForElement) {
-        callbacksForElement.forEach((callback) => callback(entry.contentRect));
+      if (document.hidden) {
+        dirtyChanges.set(entry.target, entry.contentRect);
+      } else {
+        notifyListenersForElement(entry.target, entry.contentRect);
       }
+    }
+  }
+
+  function visibilityChangeListener() {
+    if (!document.hidden) {
+      dirtyChanges.forEach((rect, element) =>
+        notifyListenersForElement(element, rect)
+      );
+      dirtyChanges.clear();
     }
   }
 
   function getResizeObserver() {
     if (!_resizeObserver) {
       _resizeObserver = new ResizeObserver(resizeObserverCallback);
+      window.addEventListener('visibilitychange', visibilityChangeListener);
     }
     return _resizeObserver;
   }
 
   function stopResizeObserver() {
     _resizeObserver = null;
+    window.removeEventListener('visibilityChange', visibilityChangeListener);
   }
 
   return {
