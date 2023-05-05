@@ -17,21 +17,34 @@ export type ResizeObserverWrapper = {|
 function createResizeObserverWrapper() {
   // This keeps the list of callbacks for each observed element.
   const callbacks: Map<Element, Set<ResizeObserverCallback>> = new Map();
-  const resizeObserver = new ResizeObserver((entries) => {
+  let _resizeObserver = null;
+
+  function resizeObserverCallback(entries) {
     for (const entry of entries) {
       const callbacksForElement = callbacks.get(entry.target);
       if (callbacksForElement) {
         callbacksForElement.forEach((callback) => callback(entry.contentRect));
       }
     }
-  });
+  }
+
+  function getResizeObserver() {
+    if (!_resizeObserver) {
+      _resizeObserver = new ResizeObserver(resizeObserverCallback);
+    }
+    return _resizeObserver;
+  }
+
+  function stopResizeObserver() {
+    _resizeObserver = null;
+  }
 
   return {
     subscribe(element: HTMLElement, callback: ResizeObserverCallback) {
       const callbacksForElement = callbacks.get(element) ?? new Set();
       callbacks.set(element, callbacksForElement);
       callbacksForElement.add(callback);
-      resizeObserver.observe(element);
+      getResizeObserver().observe(element);
     },
     unsubscribe(element: HTMLElement, callback: ResizeObserverCallback) {
       const callbacksForElement = callbacks.get(element);
@@ -44,12 +57,12 @@ function createResizeObserverWrapper() {
         }
         if (callbacksForElement.size === 0) {
           callbacks.delete(element);
-          resizeObserver.unobserve(element);
+          getResizeObserver().unobserve(element);
         }
         if (callbacks.size === 0) {
           // It's important to clean this up properly so that tests are behaving
           // as expected.
-          _resizeObserverWrapper = null;
+          stopResizeObserver();
         }
       } else {
         console.warn(
