@@ -36,6 +36,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import range from 'array-range';
+import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
@@ -246,8 +247,10 @@ type VirtualListProps<Item> = {|
 |};
 
 type VirtualListState = {|
-  scrollTop: number,
-  clientHeight: number,
+  // This value is updated from the scroll event.
+  scrollTop: CssPixels,
+  // This is updated from a resize observer.
+  containerHeight: CssPixels,
 |};
 
 export class VirtualList<Item> extends React.PureComponent<
@@ -255,7 +258,7 @@ export class VirtualList<Item> extends React.PureComponent<
   VirtualListState
 > {
   _container: {| current: HTMLDivElement | null |} = React.createRef();
-  state = { scrollTop: 0, clientHeight: 0 };
+  state = { scrollTop: 0, containerHeight: 0 };
 
   componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
@@ -265,6 +268,8 @@ export class VirtualList<Item> extends React.PureComponent<
         'The container was assumed to exist while mounting The VirtualList.'
       );
     }
+
+    getResizeObserverWrapper().subscribe(container, this._resizeListener);
   }
 
   componentWillUnmount() {
@@ -275,12 +280,17 @@ export class VirtualList<Item> extends React.PureComponent<
         'The container was assumed to exist while unmounting The VirtualList.'
       );
     }
+    getResizeObserverWrapper().unsubscribe(container, this._resizeListener);
   }
+
+  // The listener is only called when the document is visible.
+  _resizeListener = (contentRect: DOMRectReadOnly) => {
+    this.setState({ containerHeight: contentRect.height });
+  };
 
   _onScroll = (event: SyntheticEvent<HTMLElement>) => {
     this.setState({
       scrollTop: event.currentTarget.scrollTop,
-      clientHeight: event.currentTarget.clientHeight,
     });
   };
 
@@ -293,12 +303,12 @@ export class VirtualList<Item> extends React.PureComponent<
 
   computeVisibleRange() {
     const { itemHeight, disableOverscan } = this.props;
-    const { scrollTop, clientHeight } = this.state;
+    const { scrollTop, containerHeight } = this.state;
     const overscan = disableOverscan ? 0 : 25;
     const chunkSize = 16;
     let visibleRangeStart = Math.floor(scrollTop / itemHeight) - overscan;
     let visibleRangeEnd =
-      Math.ceil((scrollTop + clientHeight) / itemHeight) + overscan;
+      Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan;
     if (!disableOverscan) {
       visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
       visibleRangeEnd = Math.ceil(visibleRangeEnd / chunkSize) * chunkSize;
