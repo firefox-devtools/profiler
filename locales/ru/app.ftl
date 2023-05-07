@@ -23,14 +23,29 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Веб-приложение для анализа производительности { -firefox-brand-name }</subheader>
+AppHeader--github-icon =
+    .title = Перейдите в наш репозиторий Git (он откроется в новом окне)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-unpublished = Не удалось получить профиль из { -firefox-brand-name }.
+AppViewRouter--error-from-file = Не удалось прочитать файл или проанализировать профиль в нем.
 AppViewRouter--error-local = Пока не реализовано.
 AppViewRouter--error-public = Не удалось загрузить профиль.
 AppViewRouter--error-from-url = Не удалось загрузить профиль.
 AppViewRouter--error-compare = Не удалось получить профили.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Из-за <a>особого ограничения Safari</a> { -profiler-brand-name } не может
+    импортировать профили с локальной машины в этот браузер. Пожалуйста, откройте
+    эту страницу в { -firefox-brand-name } или Chrome.
+    .title = Safari не может импортировать локальные профили
+AppViewRouter--route-not-found--home =
+    .specialMessage = URL-адрес, который вы пытались открыть, не был распознан.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -39,7 +54,69 @@ AppViewRouter--error-compare = Не удалось получить профил
 # Variables:
 #   $fileName (String) - Name of the file to open.
 CallNodeContextMenu--show-file = Показать <strong>{ $fileName }</strong>
+CallNodeContextMenu--transform-merge-function = Слить функцию
+    .title =
+        Слияние функции удаляет её из профиля и присваивает её время
+        функции, которая её вызвала. Это происходит везде, где функция была вызвана в
+        дереве.
+CallNodeContextMenu--transform-merge-call-node = Слить только узел
+    .title =
+        Слияние узла удаляет его из профиля и назначает его время узлу
+        функции, которая его вызвала. Это удаляет функцию только из этой
+        конкретной части дерева. Любые другие места, из которых была вызвана функция,
+        останутся в профиле.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Фокусировка на функции удалит любой сэмпл, который не включает в себя эту
+    функцию. Кроме того, она переустанавливает дерево вызовов так, чтобы функция
+    являлась единственным корнем дерева. Это может объединить несколько функций, вызывающих сайты
+    по всему профилю, в один узел вызова.
+CallNodeContextMenu--transform-focus-function = Сфокусироваться на функции
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Сфокусироваться на функции (инвертировано)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Сфокусироваться только на поддереве
+    .title =
+        Фокусировка на поддереве приведет к удалению любого сэмпла, который не включает эту
+        конкретную часть дерева вызовов. Она извлекает ветвь дерева вызовов,
+        однако делает это только для этого единственного узла вызова. Все остальные вызовы
+        функции игнорируются.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Сфокусироваться на категории <strong>{ $categoryName }</strong>
+    .title =
+        Фокусировка на узлах, принадлежащих к той же категории, что и выбранный узел,
+        тем самым объединяя все узлы, принадлежащие к другой категории.
+CallNodeContextMenu--transform-collapse-function-subtree = Свернуть функцию
+    .title =
+        Сворачивание функции приведет к удалению всего, что она вызвала, и назначению
+        функции всего времени. Это может помочь упростить профиль, который
+        вызывает код, не нуждающийся в анализе.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Свернуть <strong>{ $nameForResource }</strong>
+    .title =
+        Сворачивание ресурса сведет все вызовы к этому
+        ресурсу в один свернутый узел вызова.
+CallNodeContextMenu--transform-collapse-recursion = Свернуть рекурсию
+    .title =
+        Сворачивание рекурсии удаляет вызовы, которые многократно рекурсируют в
+        одну и ту же функцию, даже с промежуточными функциями в стеке.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Свернуть только прямую рекурсию
+    .title =
+        Сворачивание прямой рекурсии удаляет вызовы, которые многократно рекурсируют в
+        одну и ту же функцию без промежуточных функций в стеке.
+CallNodeContextMenu--transform-drop-function = Сбросить сэмплы с этой функцией
+    .title =
+        Сброс сэмплов удаляет их время из профиля. Это полезно для
+        устранения временной информации, которая не имеет отношения к анализу.
 CallNodeContextMenu--expand-all = Развернуть всё
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Найти название функции на Searchfox
 CallNodeContextMenu--copy-function-name = Скопировать имя функции
 CallNodeContextMenu--copy-script-url = Скопировать URL сценария
 CallNodeContextMenu--copy-stack = Скопировать стек
