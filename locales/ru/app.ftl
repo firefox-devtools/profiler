@@ -288,6 +288,9 @@ Home--record-instructions-start-stop = Остановить и начать пр
 Home--record-instructions-capture-load = Запись и загрузка профиля
 Home--profiler-motto = Запишите профиль производительности. Проанализируйте его. Поделитесь им. Сделайте Интернет быстрее.
 Home--additional-content-title = Загрузить существующие профили
+Home--additional-content-content = Вы можете <strong>перетащить</strong> сюда файл профиля, чтобы загрузить его, или:
+Home--compare-recordings-info = Вы также можете сравнить записи. <a>Откройте интерфейс сравнения.</a>
+Home--your-recent-uploaded-recordings-title = Ваши последние загруженные записи
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
