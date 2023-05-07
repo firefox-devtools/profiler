@@ -124,6 +124,43 @@ CallNodeContextMenu--copy-stack = Скопировать стек
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Время работы (мс)
+    .title =
+        «Общее» время выполнения включает в себя сводку всего времени, в течение которого наблюдалось нахождение этой
+        функции в стеке. Это включает в себя время, когда
+        функция фактически была запущена, и время, проведенное в вызывающих из
+        этой функции.
+CallTree--tracing-ms-self = Собственное (мс)
+    .title =
+        «Собственное» время включает в себя только то время, когда функция была
+        концом стека. Если эта функция вызывается в других функциях,
+        то время работы «других» функций не учитывается. «Собственное» время полезно
+        для понимания того, на что на самом деле было потрачено время в программе.
+CallTree--samples-total = Общее (семплы)
+    .title =
+        «Общее» количество семплов включает в себя сводку по каждому семплу, в котором
+        было обнаружено наличие этой функции в стеке. Оно включает в себя время, когда
+        функция фактически была запущена, и время, проведенное в вызывающих из этой
+        функции.
+CallTree--samples-self = Собственные
+    .title =
+        Количество «собственных» семплов включает только те семплы, в которых функция была
+        концом стека. Если эта функция вызывается в других функциях,
+        то количество «других» функций не учитывается. Подсчет «собственных» полезен
+        для понимания того, сколько времени на самом деле было потрачено в программе.
+CallTree--bytes-total = Общий размер (байты)
+    .title =
+        «Общий размер» включает в себя сумму всех байтов, выделенных или
+        освобожденных за то время, пока эта функция находилась в стеке. Он
+        включает в себя как байты, в которых функция фактически выполнялась, так и
+        байты вызывающих из этой функции.
+CallTree--bytes-self = Собственные (байты)
+    .title =
+        «Собственные» байты включают в себя байты, выделенные или освобожденные в то время, когда эта
+        функция была концом стека. Если эта функция вызывается в
+        других функциях, то байты «других» функций не включаются.
+        «Собственные» байты полезны для понимания того, где на самом деле
+        была выделена или освобождена память в программе.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -131,15 +168,30 @@ CallNodeContextMenu--copy-stack = Скопировать стек
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Некоторые вызовы { $calledFunction } были встроены компилятором.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (встроенный)
+    .title = Вызовы { $calledFunction } были встроены компилятором в { $outerFunction }.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Выберите узел, чтобы отобразить информацию о нем.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Введите URL-адреса профилей, которые вы хотите сравнить
+CompareHome--instruction-content =
+    Инструмент извлечет данные из выбранного трека и диапазона для
+    каждого профиля и поместит их оба на один и тот же вид, чтобы упростить их
+    сравнение.
 CompareHome--form-label-profile1 = Профиль 1:
 CompareHome--form-label-profile2 = Профиль 2:
 CompareHome--submit-button =
@@ -149,6 +201,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Этот профиль был записан в сборке без оптимизаций релиза.
+        Наблюдения за производительностью могут не относиться к пользователям релиза.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -158,13 +214,17 @@ Details--open-sidebar-button =
     .title = Открыть боковую панель
 Details--close-sidebar-button =
     .title = Закрыть боковую панель
+Details--error-boundary-message =
+    .message = О, в этой панели произошла неизвестная ошибка.
 
 ## ErrorBoundary
 ## This component is shown when an unexpected error is encountered in the application.
 ## Note that the localization won't be always applied in this component.
 
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description = Пожалуйста, сообщите об этой проблеме разработчикам, включая полный текст ошибки, отображаемый в Веб-консоли Инструментов разработчика.
 # This is used in a call to action button, displayed inside the error box.
-ErrorBoundary--report-error-on-github = Сообщите об ошибке на GitHub
+ErrorBoundary--report-error-on-github = Сообщить об ошибке на GitHub
 
 ## Footer Links
 
@@ -173,11 +233,21 @@ FooterLinks--Privacy = Приватность
 FooterLinks--Cookies = Куки
 FooterLinks--languageSwitcher--select =
     .title = Изменить язык
+FooterLinks--hide-button =
+    .title = Скрыть ссылки в нижнем колонтитуле
+    .aria-label = Скрыть ссылки в нижнем колонтитуле
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = Треки <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span>
 
 ## Home page
 
@@ -187,6 +257,33 @@ Home--load-from-url-submit-button =
     .value = Загрузить
 Home--documentation-button = Документация
 Home--menu-button = Включить кнопку меню { -profiler-brand-name }
+Home--menu-button-instructions =
+    Включите кнопку меню профайлера, чтобы начать запись производительности
+    профиля в { -firefox-brand-name }, затем проанализируйте его и поделитесь им с помощью profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Вы также можете профилировать { -firefox-android-brand-name }. Для получения
+    дополнительной информации, пожалуйста, обратитесь к этой документации:
+    <a>Профилирование { -firefox-android-brand-name } непосредственно на устройстве</a>.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Этот экземпляр профайлера не смог подключиться к WebChannel, поэтому он не может активировать кнопку меню профайлера.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Этот экземпляр профайлера не смог подключиться к WebChannel. Обычно это означает, что
+    он работает на другом хосте, отличном от того, который указан в настройках
+    <code>devtools.performance.recording.ui-base-url</code>. Если вы хотите захватить новые
+    профили с этим экземпляром и дать ему программный контроль над кнопкой меню профайлера,
+    вы можете перейти к <code>about:config</code> и изменить настройку.
+Home--record-instructions =
+    Чтобы начать профилирование, нажмите кнопку профилирования или используйте горячие
+    клавиши. Значок синий, когда профиль записывает.
+    Нажмите <kbd>Запись</kbd>, чтобы загрузить данные на profiler.firefox.com.
+Home--instructions-content =
+    Для записи профилей производительности требуется <a>{ -firefox-brand-name }</a>.
+    Однако существующие профили можно просматривать в любом современном браузере.
 Home--record-instructions-start-stop = Остановить и начать профилирование
 Home--record-instructions-capture-load = Запись и загрузка профиля
 Home--profiler-motto = Запишите профиль производительности. Проанализируйте его. Поделитесь им. Сделайте Интернет быстрее.
