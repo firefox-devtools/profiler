@@ -507,8 +507,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             <div className="react-contextmenu-separator" />
 
             <MenuItem onClick={this.filterByMarkerName}>
-              {/* TODO: Find an icon. */}
-              <span className="react-contextmenu-icon markerContextMenuIconCopyDescription" />
+              <span className="react-contextmenu-icon markerContextMenuIconFilterSamples" />
               <Localized
                 id="MarkerContextMenu--drop-samples-outside-of-marker"
                 vars={{

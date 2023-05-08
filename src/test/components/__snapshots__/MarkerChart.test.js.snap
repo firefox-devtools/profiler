@@ -140,7 +140,7 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     tabindex="-1"
   >
     <span
-      class="react-contextmenu-icon markerContextMenuIconCopyDescription"
+      class="react-contextmenu-icon markerContextMenuIconFilterSamples"
     />
     Drop samples outside of “
     <strong>

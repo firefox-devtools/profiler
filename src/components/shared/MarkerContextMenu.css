@@ -51,6 +51,10 @@
   background-image: url(firefox-profiler-res/img/svg/select-thread.svg);
 }
 
+.markerContextMenuIconFilterSamples {
+  background-image: url(firefox-profiler-res/img/svg/filter.svg);
+}
+
 /* These icons don't look nice when selected, unless if we invert them. However
  * the other icons look better without the filter, so we don't change them in
  * this state. */
