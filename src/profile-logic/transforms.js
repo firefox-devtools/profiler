@@ -40,6 +40,9 @@ import type {
   TransformType,
   TransformStack,
   ProfileMeta,
+  StartEndRange,
+  FilterSamplesType,
+  Marker,
 } from 'firefox-profiler/types';
 
 /**
@@ -61,6 +64,7 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
   'collapse-direct-recursion',
   'collapse-recursion',
   'collapse-function-subtree',
+  'filter-samples',
 ].forEach((transform: TransformType) => {
   // This is kind of an awkward switch, but it ensures we've exhaustively checked that
   // we have a mapping for every transform.
@@ -95,6 +99,9 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
       break;
     case 'collapse-function-subtree':
       shortKey = 'cfs';
+      break;
+    case 'filter-samples':
+      shortKey = 'fs';
       break;
     default: {
       throw assertExhaustiveCheck(transform);
@@ -268,11 +275,49 @@ export function parseTransforms(transformString: string): TransformStack {
 
         break;
       }
+      case 'filter-samples': {
+        // e.g. "fs-m-BackboneJS-TodoMVC.Adding100Items-async"
+        const [, shortFilterType, ...filter] = tuple;
+        // Filter string may include "-" characters, so we need to join them back.
+        const filterString = filter.join('-');
+        const filterType = convertToFullFilterType(shortFilterType);
+
+        transforms.push({
+          type: 'filter-samples',
+          filterType,
+          filter: filterString,
+        });
+        break;
+      }
       default:
         throw assertExhaustiveCheck(type);
     }
   });
   return transforms;
+}
+
+/**
+ * Convert the shortened filter type into the full filter type.
+ */
+function convertToFullFilterType(shortFilterType: string): FilterSamplesType {
+  switch (shortFilterType) {
+    case 'm':
+      return 'marker';
+    default:
+      throw new Error('Unknown filter type.');
+  }
+}
+
+/**
+ * Convert the full filter type into the shortened filter type.
+ */
+function convertToShortFilterType(filterType: FilterSamplesType): string {
+  switch (filterType) {
+    case 'marker':
+      return 'm';
+    default:
+      throw assertExhaustiveCheck(filterType);
+  }
 }
 
 /**
@@ -317,6 +362,10 @@ export function stringifyTransforms(transformStack: TransformStack): string {
           }
           return string;
         }
+        case 'filter-samples':
+          return `${shortKey}-${convertToShortFilterType(
+            transform.filterType
+          )}-${transform.filter}`;
         default:
           throw assertExhaustiveCheck(transform);
       }
@@ -362,6 +411,18 @@ export function getTransformLabelL10nIds(
         l10nId: 'TransformNavigator--focus-category',
         item: categories[transform.category].name,
       };
+    }
+
+    if (transform.type === 'filter-samples') {
+      switch (transform.filterType) {
+        case 'marker':
+          return {
+            l10nId: 'TransformNavigator--drop-samples-outside-of-markers',
+            item: transform.filter,
+          };
+        default:
+          throw assertExhaustiveCheck(transform.filterType);
+      }
     }
 
     // Lookup function name.
@@ -474,6 +535,14 @@ export function applyTransformToCallNodePath(
         transform.funcIndex,
         callNodePath
       );
+    case 'filter-samples':
+      // There's nothing to update in the call node path. But this call node path
+      // could disappear if we filtered out all the samples with this path.
+      // This is also the case for drop-function transform. We need to have a
+      // generic mechanism for: if the selected call node (after the transformation
+      // has been applied to the call path) is not present in the call tree, run
+      // some generic code that finds a close-by call node which is present.
+      return callNodePath;
     default:
       throw assertExhaustiveCheck(transform);
   }
@@ -1674,10 +1743,85 @@ export function funcHasRecursiveCall(
   return false;
 }
 
+function _findRangesByMarkerFilter(
+  markers: Marker[],
+  filter: string
+): StartEndRange[] {
+  const ranges = [];
+
+  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    const { name, start, end } = markers[markerIndex];
+
+    if (start === null || end === null) {
+      // This is not an interval marker, so we can't use it as a range.
+      continue;
+    }
+
+    if (name === filter) {
+      ranges.push({ start: start, end: end });
+    }
+  }
+  return ranges;
+}
+
+/**
+ * Find the sample ranges to filter depending on the filter type, then go
+ * through all the samples and remove the ones that are outside of the ranges.
+ */
+export function filterSamples(
+  thread: Thread,
+  markers: Marker[],
+  filterType: FilterSamplesType,
+  filter: string
+): Thread {
+  return timeCode('filterSamples', () => {
+    // Find the ranges to filter.
+    let ranges: StartEndRange[];
+    switch (filterType) {
+      case 'marker':
+        ranges = _findRangesByMarkerFilter(markers, filter);
+        break;
+      default:
+        throw assertExhaustiveCheck(filterType);
+    }
+
+    // Now let's go through all the samples and remove the ones that are outside
+    // of the ranges.
+    const { samples } = thread;
+    const newSamples = {
+      ...samples,
+      stack: samples.stack.slice(),
+    };
+
+    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+      const sampleTime = samples.time[sampleIndex];
+
+      let sampleInRange = false;
+      for (const { start, end } of ranges) {
+        if (sampleTime >= start && sampleTime <= end) {
+          sampleInRange = true;
+          break;
+        }
+      }
+
+      if (!sampleInRange) {
+        newSamples.stack[sampleIndex] = null;
+      }
+    }
+
+    const newThread = {
+      ...thread,
+      samples: newSamples,
+    };
+    return newThread;
+  });
+}
+
 export function applyTransform(
   thread: Thread,
   transform: Transform,
-  defaultCategory: IndexIntoCategoryList
+  defaultCategory: IndexIntoCategoryList,
+  markers: Marker[]
 ): Thread {
   switch (transform.type) {
     case 'focus-subtree':
@@ -1726,6 +1870,13 @@ export function applyTransform(
         thread,
         transform.funcIndex,
         defaultCategory
+      );
+    case 'filter-samples':
+      return filterSamples(
+        thread,
+        markers,
+        transform.filterType,
+        transform.filter
       );
     default:
       throw assertExhaustiveCheck(transform);

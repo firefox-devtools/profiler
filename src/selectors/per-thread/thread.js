@@ -404,11 +404,12 @@ export function getThreadSelectorsWithMarkersPerThread(
     threadSelectors.getRangeFilteredThread,
     getTransformStack,
     ProfileSelectors.getDefaultCategory,
-    (startingThread, transforms, defaultCategory) => {
+    threadSelectors.getFullMarkerList,
+    (startingThread, transforms, defaultCategory, markers) => {
       return transforms.reduce(
         // Apply the reducer using an arrow function to ensure correct memoization.
         (thread, transform) =>
-          _applyTransformMemoized(thread, transform, defaultCategory),
+          _applyTransformMemoized(thread, transform, defaultCategory, markers),
         startingThread
       );
     }
