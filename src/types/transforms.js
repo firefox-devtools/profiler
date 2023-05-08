@@ -24,6 +24,13 @@ import type {
 import type { CallNodePath, ThreadsKey } from './profile-derived';
 import type { ImplementationFilter } from './actions';
 
+/**
+ * This type represents the filter types for the 'filter-samples' transform.
+ * Currently the only filter type is 'marker-search', but in the future we may
+ * add more types of filters.
+ */
+export type FilterSamplesType = 'marker-search';
+
 /*
  * Define all of the transforms on an object to conveniently access $ObjMap and do
  * nice things like iterate over every transform type. There is no way to create a
@@ -324,6 +331,18 @@ export type TransformDefinitions = {
   'focus-category': {|
     +type: 'focus-category',
     +category: IndexIntoCategoryList,
+  |},
+
+  /**
+   * Filter the samples in the thread by the filter.
+   * Currently it only supports filtering by the marker name but can be extended
+   * to support more filters in the future.
+   */
+  'filter-samples': {|
+    +type: 'filter-samples',
+    // Expand this type when you need to support more than just the marker.
+    +filterType: FilterSamplesType,
+    +filter: string,
   |},
 };
 

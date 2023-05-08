@@ -972,6 +972,11 @@ TransformNavigator--collapse-direct-recursion-only = Collapse direct recursion o
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Collapse subtree: { $item }
 
+# "Drop samples outside of filtered markers" transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-marker-filter = Drop samples outside of marker filter: “{ $item }”
+
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
 ##
