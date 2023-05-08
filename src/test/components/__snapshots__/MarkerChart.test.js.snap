@@ -142,6 +142,24 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     <span
       class="react-contextmenu-icon markerContextMenuIconCopyDescription"
     />
+    Drop samples outside of “
+    <strong>
+      ⁨UserTiming⁩
+    </strong>
+    ” markers
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconCopyDescription"
+    />
     Copy description
   </div>
   <div

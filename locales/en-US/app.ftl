@@ -383,6 +383,12 @@ MarkerContextMenu--copy-url = Copy URL
 MarkerContextMenu--copy-page-url = Copy page URL
 MarkerContextMenu--copy-as-json = Copy as JSON
 
+# This string is used on the marker context menu item when right clicked on any marker.
+# It drops the samples outside of given markers.
+# Variables:
+#   $markerName (String) - Name of the marker that is selected.
+MarkerContextMenu--drop-samples-outside-of-marker = Drop samples outside of “<strong>{ $markerName }</strong>” markers
+
 # This string is used on the marker context menu item when right clicked on an
 # IPC marker.
 # Variables:

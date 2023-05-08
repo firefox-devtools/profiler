@@ -15,7 +15,9 @@ import {
   setContextMenuVisibility,
   updatePreviewSelection,
   selectTrackFromTid,
+  addTransformToStack,
 } from 'firefox-profiler/actions/profile-view';
+import { changeSelectedTab } from 'firefox-profiler/actions/app';
 import {
   getPreviewSelection,
   getCommittedRange,
@@ -71,6 +73,8 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
   +selectTrackFromTid: typeof selectTrackFromTid,
+  +addTransformToStack: typeof addTransformToStack,
+  +changeSelectedTab: typeof changeSelectedTab,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -180,6 +184,24 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   copyMarkerDescription = () => {
     const { markerIndex, getMarkerLabelToCopy } = this.props;
     copy(getMarkerLabelToCopy(markerIndex));
+  };
+
+  filterByMarkerName = () => {
+    const {
+      rightClickedMarkerInfo,
+      marker,
+      addTransformToStack,
+      changeSelectedTab,
+    } = this.props;
+    const { threadsKey } = rightClickedMarkerInfo;
+    addTransformToStack(threadsKey, {
+      type: 'filter-samples',
+      filterType: 'marker',
+      filter: marker.name,
+    });
+
+    // Then change the selected tab to call tree.
+    changeSelectedTab('calltree');
   };
 
   copyMarkerCause = () => {
@@ -479,7 +501,32 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
           </>
         )}
 
+        {/* Only show this context menu item for interval markers */}
+        {marker.start !== null && marker.end !== null ? (
+          <>
+            <div className="react-contextmenu-separator" />
+
+            <MenuItem onClick={this.filterByMarkerName}>
+              {/* TODO: Find an icon. */}
+              <span className="react-contextmenu-icon markerContextMenuIconCopyDescription" />
+              <Localized
+                id="MarkerContextMenu--drop-samples-outside-of-marker"
+                vars={{
+                  markerName: marker.name,
+                }}
+                elems={{ strong: <strong /> }}
+              >
+                <>
+                  Drop samples outside of “<strong>{marker.name}</strong>”
+                  markers
+                </>
+              </Localized>
+            </MenuItem>
+          </>
+        ) : null}
+
         <div className="react-contextmenu-separator" />
+
         <MenuItem onClick={this.copyMarkerDescription}>
           <span className="react-contextmenu-icon markerContextMenuIconCopyDescription" />
           <Localized id="MarkerContextMenu--copy-description">
@@ -536,6 +583,8 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
     updatePreviewSelection,
     setContextMenuVisibility,
     selectTrackFromTid,
+    addTransformToStack,
+    changeSelectedTab,
   },
   component: MarkerContextMenuImpl,
 });

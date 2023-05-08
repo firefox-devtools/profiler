@@ -141,7 +141,8 @@ describe('MarkerTable', function () {
 
     fireFullContextMenu(getByText(/setTimeout/));
     checkMenuIsDisplayedForNode(/setTimeout/);
-    expect(getRowElement(/setTimeout/)).toHaveClass('isRightClicked');
+    // There is another text with setTimeout inside the context menu. Pick the right one.
+    expect(getRowElement(/setTimeout\s/)).toHaveClass('isRightClicked');
 
     // Wait that all timers are done before trying again.
     jest.runAllTimers();
