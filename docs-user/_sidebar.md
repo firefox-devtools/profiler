@@ -9,6 +9,7 @@
     * [Remote Profiling](./guide-remote-profiling.md)
     * [Profiling directly on the device](./guide-profiling-android-directly-on-device.md)
   * [Memory Allocations](./memory-allocations.md)
+  * [Removing Profiler](./guide-removing-profiler.md)
 * [Advanced Topics](./advanced-topics.md)
   * [Profiling Firefox Startup & Shutdown](./guide-startup-shutdown.md)
   * [Perf profiling on Linux](./guide-perf-profiling.md)
