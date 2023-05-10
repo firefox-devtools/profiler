@@ -291,14 +291,26 @@ Home--additional-content-title = Загрузить существующие п�
 Home--additional-content-content = Вы можете <strong>перетащить</strong> сюда файл профиля, чтобы загрузить его, или:
 Home--compare-recordings-info = Вы также можете сравнить записи. <a>Откройте интерфейс сравнения.</a>
 Home--your-recent-uploaded-recordings-title = Ваши последние загруженные записи
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 =
+    { -profiler-brand-name } также может импортировать профили из других профилировщиков, таких как
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
+    панель производительности Chrome, <androidstudio>Android Studio</androidstudio> или
+    любой файл, использующий <dhat>формат dhat</dhat> или <traceevent>Формат отслеживания событий Google</traceevent>. <write>Узнайте, как написать
+    собственный инструмент импорта</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Введите условия фильтра
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Показывать только собственное время
+    .title = Показывать только время, проведенное в узле вызова, игнорируя его дочерние элементы.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -309,25 +321,61 @@ Home--your-recent-uploaded-recordings-title = Ваши последние заг
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
     .title = Щёлкните здесь, чтобы загрузить профиль { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Удалить
+    .title = Этот профиль невозможно удалить, поскольку у нас нет информации для авторизации.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Профиль ещё не загружен!
+# This string is used below the 'Your recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Просматривайте и управляйте всеми своими записями (еще { $profilesRestCount })
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Управление этой записью
+        [few] Управление этими записями
+       *[many] Управление этими записями
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Установить выделение из длительности маркера
+MarkerContextMenu--start-selection-here = Начать выбор здесь
+MarkerContextMenu--end-selection-here = Завершить выбор здесь
+MarkerContextMenu--start-selection-at-marker-start = Начать выделение с <strong>начала</strong> маркера
+MarkerContextMenu--start-selection-at-marker-end = Начать выделение с <strong>конца</strong> маркера
+MarkerContextMenu--end-selection-at-marker-start = Завершить выделение в <strong>начале</strong> маркера
+MarkerContextMenu--end-selection-at-marker-end = Завершить выделение в <strong>конце</strong> маркера
 MarkerContextMenu--copy-description = Скопировать описание
 MarkerContextMenu--copy-call-stack = Скопировать стек вызовов
 MarkerContextMenu--copy-url = Скопировать URL
 MarkerContextMenu--copy-page-url = Скопировать URL-адрес страницы
 MarkerContextMenu--copy-as-json = Скопировать как JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Выберите цепочку получателя “<strong>{ $threadName }</strong>”
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Выберите цепочку отправителя «<strong>{ $threadName }</strong>».
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Маркеры фильтра:
+    .title = Отображать только маркеры, совпадающие с определённым именем
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Выберите маркер, чтобы отобразить информацию о нем.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -342,6 +390,7 @@ MarkerTable--description = Описание
 
 MenuButtons--index--metaInfo-button =
     .label = Информация о профиле
+MenuButtons--index--full-view = Полный обзор
 MenuButtons--index--cancel-upload = Отменить выгрузку
 MenuButtons--index--share-upload =
     .label = Выгрузить локальный профиль
@@ -362,6 +411,8 @@ MenuButtons--index--profile-info-uploaded-label = Выгружено:
 MenuButtons--index--profile-info-uploaded-actions = Удалить
 MenuButtons--index--metaInfo-subtitle = Информация о профиле
 MenuButtons--metaInfo--symbols = Символы:
+MenuButtons--metaInfo--profile-symbolicated = Профиль символизирован
+MenuButtons--metaInfo--profile-not-symbolicated = Профиль не символизирован
 MenuButtons--metaInfo--cpu-model = Модель процессора:
 MenuButtons--metaInfo--cpu-cores = Ядер процессора:
 MenuButtons--metaInfo--main-memory = Основная память:
