@@ -472,6 +472,15 @@ MenuButtons--metaInfo--main-process-ended = Основной процесс за
 MenuButtons--metaInfo--interval = Интервал:
 MenuButtons--metaInfo--buffer-capacity = Емкость буфера:
 MenuButtons--metaInfo--buffer-duration = Длительность буфера:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } секунда
+        [few] { $configurationDuration } секунды
+       *[many] { $configurationDuration } секунд
+    }
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Неограничена
 MenuButtons--metaInfo--application = Приложение
@@ -483,6 +492,8 @@ MenuButtons--metaInfo--arguments = Параметры:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Отладка
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
@@ -494,12 +505,19 @@ MenuButtons--metaInfo--os = ОС:
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Визуальные метрики
 MenuButtons--metaInfo--speed-index = Индекс скорости:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Индекс скорости восприятия:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Индекс скорости контента:
 MenuButtons--metaInfo-renderRowOfList-label-features = Возможности:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Фильтр потоков:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Расширения:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Накладные расходы { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-mean = Середина
 
 ## Publish panel
 ## These strings are used in the publishing panel.
