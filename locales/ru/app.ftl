@@ -544,23 +544,49 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = Включая 
 MenuButtons--publish--renderCheckbox-label-resource = Включая URL-адреса ресурсов и пути
 MenuButtons--publish--renderCheckbox-label-extension = Включая информацию о расширении
 MenuButtons--publish--renderCheckbox-label-preference = Включая значения настроек
+MenuButtons--publish--renderCheckbox-label-private-browsing = Включая данные из окон приватного просмотра
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Этот профиль содержит личные данные просмотра
+MenuButtons--publish--reupload-performance-profile = Повторно загрузить профиль производительности
+MenuButtons--publish--share-performance-profile = Поделиться профилем производительности
+MenuButtons--publish--info-description = Загрузите свой профиль и сделайте его доступным для всех, у кого есть ссылка.
+MenuButtons--publish--info-description-default = По умолчанию ваши личные данные удаляются.
+MenuButtons--publish--info-description-firefox-nightly2 = Этот профиль принадлежит { -firefox-nightly-brand-name }, поэтому по умолчанию в него включена большая часть информации.
+MenuButtons--publish--include-additional-data = Включая дополнительные данные, которые могут быть идентифицированы
 MenuButtons--publish--button-upload = Выгрузить
 MenuButtons--publish--upload-title = Выгрузка профиля…
 MenuButtons--publish--cancel-upload = Отменить выгрузку
+MenuButtons--publish--message-something-went-wrong = Ой, что-то пошло не так при загрузке профиля.
 MenuButtons--publish--message-try-again = Попробовать снова
 MenuButtons--publish--download = Загрузить
 MenuButtons--publish--compressing = Сжатие…
+MenuButtons--publish--error-while-compressing = Ошибка при сжатии, попробуйте снять некоторые флажки, чтобы уменьшить размер профиля.
 
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Сети фильтров:
+    .title = Отображать только сетевые запросы, которые совпадают с конкретным именем
 
 ## Timestamp formatting primitive
 
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Знаете ли вы, что можно использовать запятую (,) для поиска по нескольким фильтрам?
 
 ## Profile Delete Button
 
