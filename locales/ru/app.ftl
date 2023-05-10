@@ -773,10 +773,55 @@ TrackPower--tooltip-power-watt = { $value } Вт
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } мВт
     .label = Мощность
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Вт-ч ({ $carbonValue } г CO₂e)
+    .label = Энергия, использованная в видимом диапазоне
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } мВт-ч ({ $carbonValue } мг CO₂e)
+    .label = Энергия, используемая в видимом диапазоне
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } мкВт-ч ({ $carbonValue } мг CO₂e)
+    .label = Энергия, использованная в видимом диапазоне
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Вт-ч ({ $carbonValue } г CO₂e)
+    .label = Энергия, использованная в текущей выборке
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } мВт-ч ({ $carbonValue } мг CO₂e)
+    .label = Энергия, использованная в текущей выборке
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } мкВт-ч ({ $carbonValue } мг CO₂e)
+    .label = Энергия, использованная в текущей выборке
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Введите условия фильтра
+    .title = Отображать только треки, которые совпадают с конкретным текстом
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -787,6 +832,62 @@ TrackPower--tooltip-power-milliwatt = { $value } мВт
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Завершить «{ $item }»
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Свернуть: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Узел фокусировки: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Фокус: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Фокусная категория: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Узел слияния: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Слияние: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Выпадание: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Свернуть рекурсию: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion-only = Свернуть только прямую рекурсию: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Свернуть поддерево: { $item }
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
@@ -794,16 +895,101 @@ TrackPower--tooltip-power-milliwatt = { $value } мВт
 ## Some of these string IDs still start with SourceView, even though the strings
 ## are used for both the source view and the assembly view.
 
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Ожидание { $host }…
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
+SourceView--loading-browser-connection = Ожидание { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+BottomBox--source-code-not-available-title = Исходный код недоступен
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = См. <a>проблему #3741</a>, чтобы узнать о поддерживаемых сценариях и запланированных улучшениях.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Ассемблерный код недоступен
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = См. <a>проблему #4520</a>, чтобы узнать о поддерживаемых сценариях и запланированных улучшениях.
+SourceView--close-button =
+    .title = Закрыть исходный вид
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
 
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Для этого файла нет известного URL-адреса, доступного из разных источников.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = Произошла сетевая ошибка при получении URL-адреса { $url }: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Не удалось запросить API символов браузера: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = API символов браузера вернул ошибку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = API символов локального сервера символов вернул ошибку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = API символов браузера вернул искаженный ответ: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = API символов локального сервера символов вернул искаженный ответ: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Файл { $pathInArchive } не найден в архиве из { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Архив по адресу { $url } не может быть проанализирован: { $parsingErrorMessage }
 
 ## Toggle buttons in the top right corner of the bottom box
 
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Показать вид сборки
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Скрыть вид сборки
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Загруженные записи
