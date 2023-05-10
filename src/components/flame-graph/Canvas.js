@@ -26,6 +26,7 @@ import type {
   Thread,
   CategoryList,
   CssPixels,
+  DevicePixels,
   Milliseconds,
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -42,6 +43,11 @@ import type {
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
 } from 'firefox-profiler/profile-logic/flame-graph';
+
+import type {
+  ChartCanvasScale,
+  ChartCanvasHoverInfo,
+} from '../shared/chart/Canvas';
 
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
@@ -90,9 +96,32 @@ import './Canvas.css';
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
+const FONT_SIZE = 10;
+
+/**
+ * Round the given value to integers, consistently rounding x.5 towards positive infinity.
+ * This is different from Math.round: Math.round rounds 0.5 to the right (to 1), and -0.5
+ * to the left (to -1).
+ * snap should be preferred over Math.round for rounding coordinates which might
+ * be negative, so that there is no discontinuity when a box moves past zero.
+ */
+function snap(floatDeviceValue: DevicePixels): DevicePixels {
+  return Math.floor(floatDeviceValue + 0.5);
+}
+
+/**
+ * Round the given value to a multiple of `integerFactor`.
+ */
+function snapValueToMultipleOf(
+  floatDeviceValue: DevicePixels,
+  integerFactor: number
+): DevicePixels {
+  return snap(floatDeviceValue / integerFactor) * integerFactor;
+}
 
 class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
+  _textMeasurementCssToDeviceScale: number = 1;
 
   componentDidUpdate(prevProps) {
     // If the stack depth changes (say, when changing the time range
@@ -149,7 +178,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
   _drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: HoveredStackTiming | null
+    scale: ChartCanvasScale,
+    hoverInfo: ChartCanvasHoverInfo<HoveredStackTiming>
   ) => {
     const {
       thread,
@@ -168,16 +198,43 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       },
     } = this.props;
 
-    // Ensure the text measurement tool is created, since this is the first time
-    // this class has access to a ctx.
-    if (!this._textMeasurement) {
-      this._textMeasurement = new TextMeasurement(ctx);
+    const { hoveredItem } = hoverInfo;
+
+    const { cssToDeviceScale, cssToUserScale } = scale;
+    if (cssToDeviceScale !== cssToUserScale) {
+      throw new Error(
+        'FlameGraphCanvasImpl sets scaleCtxToCssPixels={false}, so canvas user space units should be equal to device pixels.'
+      );
     }
+
+    const deviceContainerWidth = containerWidth * cssToDeviceScale;
+    const deviceContainerHeight = containerHeight * cssToDeviceScale;
+
+    // Set the font before creating the text renderer. The font property resets
+    // automatically whenever the canvas size is changed, so we set it on every
+    // call.
+    ctx.font = `${FONT_SIZE * cssToDeviceScale}px sans-serif`;
+
+    // Ensure the text measurement tool is created, since this is the first time
+    // this class has access to a ctx. We also need to recreate it when the scale
+    // changes because we are working with device coordinates.
+    if (
+      !this._textMeasurement ||
+      this._textMeasurementCssToDeviceScale !== cssToDeviceScale
+    ) {
+      this._textMeasurement = new TextMeasurement(ctx);
+      this._textMeasurementCssToDeviceScale = cssToDeviceScale;
+    }
+
     const textMeasurement = this._textMeasurement;
+
     const fastFillStyle = new FastFillStyle(ctx);
+    const deviceHorizontalPadding: DevicePixels = Math.round(
+      TEXT_OFFSET_START * cssToDeviceScale
+    );
 
     fastFillStyle.set('#ffffff');
-    ctx.fillRect(0, 0, containerWidth, containerHeight);
+    ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
 
     const startDepth = Math.floor(
       maxStackDepth - viewportBottom / stackFrameHeight
@@ -185,6 +242,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     const endDepth = Math.ceil(maxStackDepth - viewportTop / stackFrameHeight);
 
     // Only draw the stack frames that are vertically within view.
+    // The graph is drawn from bottom to top, in order of increasing depth.
     for (let depth = startDepth; depth < endDepth; depth++) {
       // Get the timing information for a row of stack frames.
       const stackTiming = flameGraphTiming[depth];
@@ -193,19 +251,45 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         continue;
       }
 
-      for (let i = 0; i < stackTiming.length; i++) {
-        const startTime = stackTiming.start[i];
-        const endTime = stackTiming.end[i];
+      const cssRowTop: CssPixels =
+        (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
+      const cssRowBottom: CssPixels =
+        (maxStackDepth - depth) * ROW_HEIGHT - viewportTop;
+      const deviceRowTop: DevicePixels = snap(cssRowTop * cssToDeviceScale);
+      const deviceRowBottom: DevicePixels =
+        snap(cssRowBottom * cssToDeviceScale) - 1;
+      const deviceRowHeight: DevicePixels = deviceRowBottom - deviceRowTop;
 
-        const w: CssPixels = (endTime - startTime) * containerWidth;
-        if (w < 2) {
-          // Skip sending draw calls for sufficiently small boxes.
+      const deviceTextTop =
+        deviceRowTop + snap(TEXT_OFFSET_TOP * cssToDeviceScale);
+
+      for (let i = 0; i < stackTiming.length; i++) {
+        // For each box, snap the left and right edges to the nearest multiple
+        // of two device pixels. If both edges snap to the same value, the box
+        // becomes empty and is not drawn.
+        //
+        // Boxes which remain are at least two device pixels wide. We create a
+        // translucent gap the end of each box by shifting the right edge to the
+        // left by 0.8 device pixels, so that this gap pixel column is filled to
+        // 20%.
+
+        const boxLeftFraction = stackTiming.start[i];
+        const boxRightFraction = stackTiming.end[i];
+        const deviceBoxLeftUnsnapped = boxLeftFraction * deviceContainerWidth;
+        const deviceBoxRightUnsnapped = boxRightFraction * deviceContainerWidth;
+
+        const deviceBoxLeft: DevicePixels = snapValueToMultipleOf(
+          deviceBoxLeftUnsnapped,
+          2
+        );
+        const deviceBoxRight: DevicePixels =
+          snapValueToMultipleOf(deviceBoxRightUnsnapped, 2) - 0.8;
+
+        const deviceBoxWidth: DevicePixels = deviceBoxRight - deviceBoxLeft;
+        if (deviceBoxWidth <= 0) {
+          // Skip drawing boxes which snapped away to nothing.
           continue;
         }
-        const x: CssPixels = startTime * containerWidth;
-        const y: CssPixels =
-          (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
-        const h: CssPixels = ROW_HEIGHT - 1;
 
         const callNodeIndex = stackTiming.callNode[i];
         const isSelected = selectedCallNodeIndex === callNodeIndex;
@@ -227,25 +311,32 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
           : colorStyles.unselectedFillStyle;
 
         fastFillStyle.set(background);
-        // Draw rect at an offset to ensure spacing between blocks.
-        ctx.fillRect(x + 1, y, w - 1, h);
+        ctx.fillRect(
+          deviceBoxLeft,
+          deviceRowTop,
+          deviceBoxWidth,
+          deviceRowHeight
+        );
 
-        // TODO - L10N RTL.
-        // Constrain the x coordinate to the leftmost area.
-        const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
-        const w2: CssPixels = Math.max(0, w - (x2 - x));
-        if (w2 > textMeasurement.minWidth) {
+        const deviceTextLeft: DevicePixels =
+          deviceBoxLeft + deviceHorizontalPadding;
+        const deviceTextWidth: DevicePixels = deviceBoxRight - deviceTextLeft;
+        if (deviceTextWidth > textMeasurement.minWidth) {
           const funcIndex = callNodeTable.func[callNodeIndex];
           const funcName = thread.stringTable.getString(
             thread.funcTable.name[funcIndex]
           );
-          const fittedText = textMeasurement.getFittedText(funcName, w2);
+          const fittedText = textMeasurement.getFittedText(
+            funcName,
+            deviceTextWidth
+          );
           if (fittedText) {
             const foreground = isHighlighted
               ? colorStyles.selectedTextColor
               : '#000';
             fastFillStyle.set(foreground);
-            ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+            // TODO - L10N RTL.
+            ctx.fillText(fittedText, deviceTextLeft, deviceTextTop);
           }
         }
       }
@@ -413,7 +504,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
-        scaleCtxToCssPixels={true}
+        scaleCtxToCssPixels={false}
         onDoubleClickItem={this._onDoubleClick}
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}

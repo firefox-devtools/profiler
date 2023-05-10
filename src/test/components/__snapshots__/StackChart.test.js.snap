@@ -180,14 +180,6 @@ Array [
     "10px sans-serif",
   ],
   Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
-  ],
-  Array [
     "set fillStyle",
     "#ffffff",
   ],
@@ -285,10 +277,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "A",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -308,10 +296,6 @@ Array [
     80,
     199.4,
     15,
-  ],
-  Array [
-    "measureText",
-    "B",
   ],
   Array [
     "set fillStyle",
@@ -335,10 +319,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "C",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -358,10 +338,6 @@ Array [
     96,
     65.4,
     15,
-  ],
-  Array [
-    "measureText",
-    "H",
   ],
   Array [
     "set fillStyle",
@@ -385,10 +361,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "D",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -408,10 +380,6 @@ Array [
     112,
     66.4,
     15,
-  ],
-  Array [
-    "measureText",
-    "F",
   ],
   Array [
     "set fillStyle",
@@ -435,10 +403,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "I",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -460,10 +424,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "E",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -483,10 +443,6 @@ Array [
     128,
     66.4,
     15,
-  ],
-  Array [
-    "measureText",
-    "G",
   ],
   Array [
     "set fillStyle",
@@ -697,14 +653,6 @@ Array [
   Array [
     "set font",
     "10px sans-serif",
-  ],
-  Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
   ],
   Array [
     "set fillStyle",

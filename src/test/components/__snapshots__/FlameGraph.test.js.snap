@@ -459,9 +459,8 @@ exports[`FlameGraph matches the snapshot 1`] = `
 exports[`FlameGraph matches the snapshot 2`] = `
 Array [
   Array [
-    "scale",
-    1,
-    1,
+    "set font",
+    "10px sans-serif",
   ],
   Array [
     "measureText",
@@ -488,9 +487,9 @@ Array [
   ],
   Array [
     "fillRect",
-    1,
+    0,
     284,
-    199,
+    199.2,
     15,
   ],
   Array [
@@ -513,9 +512,9 @@ Array [
   ],
   Array [
     "fillRect",
-    1,
+    0,
     268,
-    199,
+    199.2,
     15,
   ],
   Array [
@@ -538,9 +537,9 @@ Array [
   ],
   Array [
     "fillRect",
-    1,
+    0,
     252,
-    132.33333333333331,
+    133.2,
     15,
   ],
   Array [
@@ -563,9 +562,9 @@ Array [
   ],
   Array [
     "fillRect",
-    134.33333333333331,
+    134,
     252,
-    65.66666666666667,
+    65.19999999999999,
     15,
   ],
   Array [
@@ -579,7 +578,7 @@ Array [
   Array [
     "fillText",
     "H",
-    136.33333333333331,
+    137,
     263,
   ],
   Array [
@@ -588,9 +587,9 @@ Array [
   ],
   Array [
     "fillRect",
-    1,
+    0,
     236,
-    65.66666666666666,
+    65.2,
     15,
   ],
   Array [
@@ -613,9 +612,9 @@ Array [
   ],
   Array [
     "fillRect",
-    67.66666666666666,
+    66,
     236,
-    65.66666666666666,
+    67.19999999999999,
     15,
   ],
   Array [
@@ -629,7 +628,7 @@ Array [
   Array [
     "fillText",
     "F",
-    69.66666666666666,
+    69,
     247,
   ],
   Array [
@@ -638,9 +637,9 @@ Array [
   ],
   Array [
     "fillRect",
-    134.33333333333331,
+    134,
     236,
-    65.66666666666667,
+    65.19999999999999,
     15,
   ],
   Array [
@@ -654,7 +653,7 @@ Array [
   Array [
     "fillText",
     "I",
-    136.33333333333331,
+    137,
     247,
   ],
   Array [
@@ -663,9 +662,9 @@ Array [
   ],
   Array [
     "fillRect",
-    1,
+    0,
     220,
-    65.66666666666666,
+    65.2,
     15,
   ],
   Array [
@@ -688,9 +687,9 @@ Array [
   ],
   Array [
     "fillRect",
-    67.66666666666666,
+    66,
     220,
-    65.66666666666666,
+    67.19999999999999,
     15,
   ],
   Array [
@@ -704,7 +703,7 @@ Array [
   Array [
     "fillText",
     "G",
-    69.66666666666666,
+    69,
     231,
   ],
   Array [
@@ -713,9 +712,9 @@ Array [
   ],
   Array [
     "fillRect",
-    67.66666666666666,
+    66,
     204,
-    65.66666666666666,
+    67.19999999999999,
     15,
   ],
   Array [
@@ -729,7 +728,7 @@ Array [
   Array [
     "fillText",
     "J",
-    69.66666666666666,
+    69,
     215,
   ],
 ]
@@ -739,7 +738,7 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 80.66666666666666px; top: 226px;"
+  style="left: 80px; top: 226px;"
 >
   <div
     class="tooltipCallNode"
@@ -891,7 +890,7 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 80.66666666666666px; top: 226px;"
+  style="left: 80px; top: 226px;"
 >
   <div
     class="tooltipCallNode"

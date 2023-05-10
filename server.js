@@ -86,6 +86,9 @@ if (localConfigExists) {
 
 const profilerUrl = `http://${host}:${port}`;
 if (argv.profile) {
+  // Needed because of a later working directory change.
+  argv.profile = path.resolve(argv.profile);
+
   // Spin up a simple http server serving the profile file.
   const profileServer = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', profilerUrl);
@@ -124,6 +127,7 @@ if (argv.profile) {
   });
 }
 
+process.chdir(__dirname); // Allow server.js to be run from anywhere.
 const server = new WebpackDevServer(serverConfig, webpack(config));
 server
   .start()

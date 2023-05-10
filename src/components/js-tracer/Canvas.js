@@ -32,6 +32,11 @@ import type {
   JsTracerTiming,
 } from 'firefox-profiler/types';
 
+import type {
+  ChartCanvasScale,
+  ChartCanvasHoverInfo,
+} from '../shared/chart/Canvas';
+
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
@@ -92,6 +97,8 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
   state = {
     hasFirstDraw: false,
   };
+  _textMeasurement: null | TextMeasurement;
+  _textMeasurementCssToDeviceScale: number = 1;
 
   /**
    * This method is called by the ChartCanvas component whenever the canvas needs to
@@ -99,7 +106,8 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
    */
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoJsTracerEvents | null
+    scale: ChartCanvasScale,
+    hoverInfo: ChartCanvasHoverInfo<IndexIntoJsTracerEvents>
   ) => {
     const {
       rowHeight,
@@ -111,15 +119,34 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
         containerHeight,
       },
     } = this.props;
+    const { hoveredItem } = hoverInfo;
 
-    const { devicePixelRatio } = window;
+    const { cssToDeviceScale, cssToUserScale } = scale;
+    if (cssToDeviceScale !== cssToUserScale) {
+      throw new Error(
+        'JsTracerCanvasImpl sets scaleCtxToCssPixels={false}, so canvas user space units should be equal to device pixels.'
+      );
+    }
 
-    // Set the font size before creating a text measurer.
-    ctx.font = `${FONT_SIZE * devicePixelRatio}px sans-serif`;
+    // Set the font before creating the text renderer. The font property resets
+    // automatically whenever the canvas size is changed, so we set it on every
+    // call.
+    ctx.font = `${FONT_SIZE * cssToDeviceScale}px sans-serif`;
+
+    // Ensure the text measurement tool is created, since this is the first time
+    // this class has access to a ctx. We also need to recreate it when the scale
+    // changes because we are working with device coordinates.
+    if (
+      !this._textMeasurement ||
+      this._textMeasurementCssToDeviceScale !== cssToDeviceScale
+    ) {
+      this._textMeasurement = new TextMeasurement(ctx);
+      this._textMeasurementCssToDeviceScale = cssToDeviceScale;
+    }
 
     const renderPass: RenderPass = {
       ctx,
-      textMeasurement: new TextMeasurement(ctx),
+      textMeasurement: this._textMeasurement,
       fastFillStyle: new FastFillStyle(ctx),
       // Define a start and end row, so that we only draw the events
       // that are vertically within view.
@@ -130,19 +157,19 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
       ),
       devicePixels: {
         // Convert many of the common values provided by the Props into DevicePixels.
-        containerWidth: containerWidth * devicePixelRatio,
+        containerWidth: containerWidth * cssToDeviceScale,
         innerContainerWidth:
           (containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT) *
-          devicePixelRatio,
-        containerHeight: containerHeight * devicePixelRatio,
-        textOffsetStart: TEXT_OFFSET_START * devicePixelRatio,
-        textOffsetTop: TEXT_OFFSET_TOP * devicePixelRatio,
-        rowHeight: rowHeight * devicePixelRatio,
-        viewportTop: viewportTop * devicePixelRatio,
-        timelineMarginLeft: TIMELINE_MARGIN_LEFT * devicePixelRatio,
-        timelineMarginRight: TIMELINE_MARGIN_RIGHT * devicePixelRatio,
-        oneCssPixel: devicePixelRatio,
-        rowLabelOffsetLeft: ROW_LABEL_OFFSET_LEFT * devicePixelRatio,
+          cssToDeviceScale,
+        containerHeight: containerHeight * cssToDeviceScale,
+        textOffsetStart: TEXT_OFFSET_START * cssToDeviceScale,
+        textOffsetTop: TEXT_OFFSET_TOP * cssToDeviceScale,
+        rowHeight: rowHeight * cssToDeviceScale,
+        viewportTop: viewportTop * cssToDeviceScale,
+        timelineMarginLeft: TIMELINE_MARGIN_LEFT * cssToDeviceScale,
+        timelineMarginRight: TIMELINE_MARGIN_RIGHT * cssToDeviceScale,
+        oneCssPixel: cssToDeviceScale,
+        rowLabelOffsetLeft: ROW_LABEL_OFFSET_LEFT * cssToDeviceScale,
       },
     };
 
