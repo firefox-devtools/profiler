@@ -518,10 +518,32 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Расширения:
 
 MenuButtons--metaOverheadStatistics-subtitle = Накладные расходы { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Середина
+MenuButtons--metaOverheadStatistics-max = Максимум
+MenuButtons--metaOverheadStatistics-min = Минимум
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Накладные расходы
+    .title = Время для выборки всех потоков.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очистка
+    .title = Время для удаления просроченных данных.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Счётчики
+    .title = Время на сбор всех счётчиков.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Интервал
+    .title = Наблюдаемый интервал между двумя выборками.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Замки
+    .title = Время для получения замка перед семплированием.
+MenuButtons--metaOverheadStatistics-overhead-duration = Продолжительность накладных расходов:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Процент накладных расходов:
+MenuButtons--metaOverheadStatistics-profiled-duration = Профилированная продолжительность:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Включая скрытые потоки
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Включая данные с других вкладок
+MenuButtons--publish--renderCheckbox-label-hidden-time = Включая скрытый диапазон времени
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Включая скриншоты
+MenuButtons--publish--renderCheckbox-label-resource = Включая URL-адреса ресурсов и пути
+MenuButtons--publish--renderCheckbox-label-extension = Включая информацию о расширении
+MenuButtons--publish--renderCheckbox-label-preference = Включая значения настроек
 MenuButtons--publish--button-upload = Выгрузить
 MenuButtons--publish--upload-title = Выгрузка профиля…
 MenuButtons--publish--cancel-upload = Отменить выгрузку
