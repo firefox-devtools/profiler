@@ -711,11 +711,7 @@ function _computeHiddenTracksForVisibleThreads(
     const hiddenLocalTracks = new Set(
       localTrackOrder.filter((localTrackIndex) => {
         const localTrack = localTracks[localTrackIndex];
-        if (localTrack.type !== 'thread') {
-          // Keep non-thread local tracks visible.
-          return false;
-        }
-        return !visibleThreadIndexes.has(localTrack.threadIndex);
+        return !_isLocalTrackVisible(localTrack, visibleThreadIndexes);
       })
     );
     hiddenLocalTracksByPid.set(pid, hiddenLocalTracks);
@@ -1339,4 +1335,40 @@ export function getTrackReferenceFromThreadIndex(
 
   // Failed to find the thread from its thread index.
   return null;
+}
+
+/*
+ * Returns whether the local track should be visible or not.
+ * If the track is not a thread, some of them can be visible by default and some
+ * of them can be hidden to reduce the noise. This mostly depends on either the
+ * usefulness or the activity of that track.
+ *
+ * TODO: Check the memory track activity here to decide if it should be visible.
+ */
+function _isLocalTrackVisible(
+  localTrack: LocalTrack,
+  visibleThreadIndexes: Set<ThreadIndex>
+): boolean {
+  switch (localTrack.type) {
+    case 'thread':
+      // Show the local thread if it's included in the visible thread indexes.
+      return visibleThreadIndexes.has(localTrack.threadIndex);
+    case 'network':
+    case 'memory':
+    // 'event-delay' and 'process-cpu' tracks are experimental and they should
+    // be visible by default whenever they are included in a profile. (fallthrough)
+    case 'event-delay':
+    case 'process-cpu':
+    // Power tracks are there only if the power feature is enabled. So they should
+    // be visible by default whenever they're included in a profile. (fallthrough)
+    case 'power':
+      // Keep non-thread local tracks visible.
+      return true;
+    case 'ipc':
+      // IPC tracks are not always useful to the users. So we are making them hidden
+      // by default to reduce the noise.
+      return false;
+    default:
+      throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
+  }
 }
