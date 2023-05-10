@@ -681,24 +681,77 @@ StackSettings--implementation-native2 = Собственные
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Стеки фильтров:
 StackSettings--use-data-source-label = Источник данных:
+StackSettings--call-tree-strategy-timing = Тайминги
+    .title = Суммировать, используя выборочные стеки выполняемого кода с течением времени
+StackSettings--call-tree-strategy-js-allocations = Распределения JavaScript
+    .title = Суммировать, используя выделенные байты JavaScript (без отмены выделения)
+StackSettings--call-tree-strategy-native-retained-allocations = Сохраненная память
+    .title = Суммировать, используя байты памяти, которые были выделены и никогда не освобождались при текущем выборе предварительного просмотра
+StackSettings--call-tree-native-allocations = Выделенная память
+    .title = Суммировать, используя выделенные байты памяти
+StackSettings--call-tree-strategy-native-deallocations-memory = Освобожденная память
+    .title = Суммировать, используя освобожденные байты памяти, по сайту, где была выделена память
+StackSettings--call-tree-strategy-native-deallocations-sites = Сайты освобождения
+    .title = Суммировать, используя байты освобожденной памяти, по сайту, где была освобождена память
+StackSettings--invert-call-stack = Инвертировать стек вызовов
+    .title = Сортировать по времени, потраченному на вызов узла, игнорируя его дочерние элементы.
+StackSettings--show-user-timing = Показать время пользователя
+StackSettings--panel-search =
+    .label = Стеки фильтров:
+    .title = Отображать только стеки, содержащие функции, имена которых совпадают с этой подстрокой
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Дерево вызовов
+TabBar--flame-graph-tab = График сгорания
+TabBar--stack-chart-tab = Диаграмма стека
+TabBar--marker-chart-tab = Диаграмма маркеров
+TabBar--marker-table-tab = Таблица маркеров
+TabBar--network-tab = Сеть
+TabBar--js-tracer-tab = JS-трассировщик
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Показать только этот процесс
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Показать только «{ $trackName }»
+TrackContextMenu--hide-other-screenshots-tracks = Скрыть другие треки скриншотов
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Скрыть «{ $trackName }»
+TrackContextMenu--show-all-tracks = Показать все треки
+TrackContextMenu--show-local-tracks-in-process = Показать все треки в этом процессе
+# This is used in the tracks context menu as a button to show all the tracks
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Показать все совпадающие треки
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Скрыть все совпадающие треки
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Не найдено результатов для «<span>{ $searchFilter }</span>»
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Скрыть трек
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Скрыть процесс
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--relative-memory-at-this-time = относительная память в это время
+TrackMemoryGraph--memory-range-in-graph = диапазон памяти на графике
+TrackMemoryGraph--operations-since-the-previous-sample = операций по сравнению с предыдущим семплом
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -710,6 +763,16 @@ TrackContextMenu--hide-track = Скрыть «{ $trackName }»
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-watt = { $value } Вт
+    .label = Мощность
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-milliwatt = { $value } мВт
+    .label = Мощность
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
