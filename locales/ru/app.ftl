@@ -590,15 +590,27 @@ PanelSearch--search-field-hint = Знаете ли вы, что можно ис�
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Удалить
+    .title = Нажмите сюда, чтобы удалить профиль { $smallProfileName }
 
 ## Profile Delete Panel
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = При удалении этого профиля произошла ошибка. <a>Наведите курсор, чтобы узнать больше.</a>
 # This is the title of the dialog
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
 ProfileDeletePanel--dialog-title = Удалить { $profileName }
+ProfileDeletePanel--dialog-confirmation-question =
+    Вы уверены, что хотите удалить загруженные данные для этого профиля? Ссылки,
+    которые ранее были общими, больше не будут работать.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Отмена
 ProfileDeletePanel--dialog-delete-button =
@@ -607,24 +619,39 @@ ProfileDeletePanel--dialog-delete-button =
 # progress indicator.
 ProfileDeletePanel--dialog-deleting-button =
     .value = Удаление…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Загруженные данные успешно удалены.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Полный диапазон ({ $fullRangeDuration })
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Импорт профиля напрямую из { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Чтение файла и обработка профиля…
 ProfileLoaderAnimation--loading-local = Пока не реализовано.
 ProfileLoaderAnimation--loading-public = Загрузка и обработка профиля…
 ProfileLoaderAnimation--loading-from-url = Загрузка и обработка профиля…
 ProfileLoaderAnimation--loading-compare = Чтение и обработка профилей…
+ProfileLoaderAnimation--loading-view-not-found = Вид не найден
 
 ## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Вернуться на домашнюю страницу
 
 ## Root
 
+Root--error-boundary-message =
+    .message = Ой, какая-то неизвестная ошибка произошла в profiler.firefox.com.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
@@ -633,11 +660,26 @@ ProfileRootMessage--title = { -profiler-brand-name }
 ServiceWorkerManager--applying-button = Применение…
 ServiceWorkerManager--pending-button = Применить и перезагрузить
 ServiceWorkerManager--installed-button = Перезагрузить приложение
+ServiceWorkerManager--updated-while-not-ready =
+    Перед полной загрузки это страницы была применена новая
+    версия приложения. Вы можете столкнуться с неисправностями.
+ServiceWorkerManager--new-version-is-ready = Новая версия приложения загружена и готова к использованию.
+ServiceWorkerManager--hide-notice-button =
+    .title = Скрыть уведомление о перезагрузке
+    .aria-label = Скрыть уведомление о перезагрузке
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-frames = Все фреймы
+    .title = Не фильтровать стек фреймов
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Отображать только стек фреймов, относящихся к выполнению JavaScript
+StackSettings--implementation-native2 = Собственные
+    .title = Отображать только стек фреймов для собственного кода
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Стеки фильтров:
 StackSettings--use-data-source-label = Источник данных:
 
 ## Tab Bar for the bottom half of the analysis UI.
