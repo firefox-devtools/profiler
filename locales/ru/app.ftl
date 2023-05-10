@@ -413,15 +413,65 @@ MenuButtons--index--metaInfo-subtitle = Информация о профиле
 MenuButtons--metaInfo--symbols = Символы:
 MenuButtons--metaInfo--profile-symbolicated = Профиль символизирован
 MenuButtons--metaInfo--profile-not-symbolicated = Профиль не символизирован
+MenuButtons--metaInfo--resymbolicate-profile = Ресимволизировать профиль
+MenuButtons--metaInfo--symbolicate-profile = Символизировать профиль
+MenuButtons--metaInfo--attempting-resymbolicate = Попытка пересимволизировать профиль
+MenuButtons--metaInfo--currently-symbolicating = Символизированный в настоящий момент профиль
 MenuButtons--metaInfo--cpu-model = Модель процессора:
 MenuButtons--metaInfo--cpu-cores = Ядер процессора:
 MenuButtons--metaInfo--main-memory = Основная память:
 MenuButtons--index--show-moreInfo-button = Показать больше
 MenuButtons--index--hide-moreInfo-button = Показать меньше
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } физическое ядро, { $logicalCPUs } логическое ядро
+                [few] { $physicalCPUs } физическое ядро, { $logicalCPUs } логических ядра
+               *[many] { $physicalCPUs } физическое ядро, { $logicalCPUs } логических ядер
+            }
+        [few]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } физических ядра, { $logicalCPUs } логическое ядро
+                [few] { $physicalCPUs } физических ядра, { $logicalCPUs } логических ядра
+               *[many] { $physicalCPUs } физических ядра, { $logicalCPUs } логических ядер
+            }
+       *[many]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } физических ядер, { $logicalCPUs } логическое ядро
+                [few] { $physicalCPUs } физических ядер, { $logicalCPUs } логических ядра
+               *[many] { $physicalCPUs } физических ядер, { $logicalCPUs } логических ядер
+            }
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } физическое ядро
+        [few] { $physicalCPUs } физических ядра
+       *[many] { $physicalCPUs } физических ядер
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } логическое ядро
+        [few] { $logicalCPUs } логических ядра
+       *[many] { $logicalCPUs } логических ядер
+    }
 MenuButtons--metaInfo--main-process-started = Основной процесс запущен:
 MenuButtons--metaInfo--main-process-ended = Основной процесс завершен:
 MenuButtons--metaInfo--interval = Интервал:
 MenuButtons--metaInfo--buffer-capacity = Емкость буфера:
+MenuButtons--metaInfo--buffer-duration = Длительность буфера:
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Неограничена
 MenuButtons--metaInfo--application = Приложение
