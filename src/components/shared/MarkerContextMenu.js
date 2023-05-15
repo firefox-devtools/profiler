@@ -62,7 +62,7 @@ type StateProps = {|
   +markerIndex: MarkerIndex,
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +thread: Thread | null,
+  +thread: Thread,
   +implementationFilter: ImplementationFilter,
   +getMarkerLabelToCopy: (MarkerIndex) => string,
   +profiledThreadIds: Set<Tid>,
@@ -192,12 +192,13 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       marker,
       addTransformToStack,
       changeSelectedTab,
+      thread,
     } = this.props;
     const { threadsKey } = rightClickedMarkerInfo;
     addTransformToStack(threadsKey, {
       type: 'filter-samples',
       filterType: 'marker',
-      filter: marker.name,
+      filter: thread.stringTable.indexForString(marker.name),
     });
 
     // Then change the selected tab to call tree.

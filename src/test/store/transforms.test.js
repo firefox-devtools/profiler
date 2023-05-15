@@ -1834,7 +1834,8 @@ describe('"filter-samples" transform', function () {
          D
     `);
     const threadIndex = 0;
-    addMarkersToThreadWithCorrespondingSamples(profile.threads[threadIndex], [
+    const thread = profile.threads[threadIndex];
+    addMarkersToThreadWithCorrespondingSamples(thread, [
       [
         'DOMEvent',
         0,
@@ -1893,11 +1894,12 @@ describe('"filter-samples" transform', function () {
     });
 
     it('filtered to range of "DOMEvent"', function () {
+      const DOMEventStringIndex = thread.stringTable.indexForString('DOMEvent');
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',
           filterType: 'marker',
-          filter: 'DOMEvent',
+          filter: DOMEventStringIndex,
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -1911,11 +1913,12 @@ describe('"filter-samples" transform', function () {
     });
 
     it('filtered to range of "Log"', function () {
+      const logStringIndex = thread.stringTable.indexForString('Log');
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',
           filterType: 'marker',
-          filter: 'Log',
+          filter: logStringIndex,
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -1930,11 +1933,13 @@ describe('"filter-samples" transform', function () {
     });
 
     it('filtered to multiple ranges of "UserTiming"', function () {
+      const userTimingStringIndex =
+        thread.stringTable.indexForString('UserTiming');
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',
           filterType: 'marker',
-          filter: 'UserTiming',
+          filter: userTimingStringIndex,
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -1949,11 +1954,13 @@ describe('"filter-samples" transform', function () {
     });
 
     it('filtered to a non-existent marker name', function () {
+      const nonExistentStringIndex =
+        thread.stringTable.indexForString('non-existent');
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',
           filterType: 'marker',
-          filter: 'non-existent',
+          filter: nonExistentStringIndex,
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());

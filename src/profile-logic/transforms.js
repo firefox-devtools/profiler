@@ -44,6 +44,7 @@ import type {
   FilterSamplesType,
   Marker,
   Milliseconds,
+  IndexIntoStringTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -278,15 +279,14 @@ export function parseTransforms(transformString: string): TransformStack {
       }
       case 'filter-samples': {
         // e.g. "fs-m-BackboneJS-TodoMVC.Adding100Items-async"
-        const [, shortFilterType, ...filter] = tuple;
-        // Filter string may include "-" characters, so we need to join them back.
-        const filterString = filter.join('-');
+        const [, shortFilterType, filter] = tuple;
         const filterType = convertToFullFilterType(shortFilterType);
+        const filterIndex = parseInt(filter, 10);
 
         transforms.push({
           type: 'filter-samples',
           filterType,
-          filter: filterString,
+          filter: filterIndex,
         });
         break;
       }
@@ -419,7 +419,7 @@ export function getTransformLabelL10nIds(
         case 'marker':
           return {
             l10nId: 'TransformNavigator--drop-samples-outside-of-markers',
-            item: transform.filter,
+            item: stringTable.getString(transform.filter),
           };
         default:
           throw assertExhaustiveCheck(transform.filterType);
@@ -1774,14 +1774,15 @@ export function filterSamples(
   thread: Thread,
   markers: Marker[],
   filterType: FilterSamplesType,
-  filter: string
+  filter: IndexIntoStringTable
 ): Thread {
   return timeCode('filterSamples', () => {
     // Find the ranges to filter.
+    const filterString = thread.stringTable.getString(filter);
     let ranges: StartEndRange[];
     switch (filterType) {
       case 'marker':
-        ranges = _findRangesByMarkerFilter(markers, filter);
+        ranges = _findRangesByMarkerFilter(markers, filterString);
         break;
       default:
         throw assertExhaustiveCheck(filterType);

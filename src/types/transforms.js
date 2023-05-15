@@ -20,6 +20,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoResourceTable,
   IndexIntoCategoryList,
+  IndexIntoStringTable,
 } from './profile';
 import type { CallNodePath, ThreadsKey } from './profile-derived';
 import type { ImplementationFilter } from './actions';
@@ -342,7 +343,7 @@ export type TransformDefinitions = {
     +type: 'filter-samples',
     // Expand this type when you need to support more than just the marker.
     +filterType: FilterSamplesType,
-    +filter: string,
+    +filter: IndexIntoStringTable,
   |},
 };
 
