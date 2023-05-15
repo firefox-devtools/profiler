@@ -158,7 +158,7 @@
   display: grid;
   margin-top: 30px;
   column-gap: 30px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* minmax makes the grid ignore the element's intrinsic size. */
 }
 
 .homeInstructionsTransitionGroup {
@@ -206,7 +206,7 @@
 
   .homeAdditionalContent,
   .homeInstructions {
-    grid: none;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

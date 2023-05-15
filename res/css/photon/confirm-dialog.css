@@ -33,8 +33,10 @@
  */
 
 .confirmDialogTitle {
+  overflow: hidden;
   margin: 0;
   font-size: 1.2em;
+  text-overflow: ellipsis;
 }
 
 .confirmDialogContent {
