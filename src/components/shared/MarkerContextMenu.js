@@ -515,6 +515,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
                 }}
                 elems={{ strong: <strong /> }}
               >
+                {/* Using a fragment here so we can have a  strong tag inside. */}
                 <>
                   Drop samples outside of “<strong>{marker.name}</strong>”
                   markers

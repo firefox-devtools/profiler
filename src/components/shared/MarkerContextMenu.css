@@ -67,6 +67,7 @@
 .react-contextmenu-item--selected .markerContextMenuIconCopyPayload,
 .react-contextmenu-item:hover .markerContextMenuIconCopyPayload,
 .react-contextmenu-item--selected .markerContextMenuSelectThread,
-.react-contextmenu-item:hover .markerContextMenuSelectThread {
+.react-contextmenu-item:hover .markerContextMenuSelectThread,
+.react-contextmenu-item:hover .markerContextMenuIconFilterSamples {
   filter: invert(1);
 }

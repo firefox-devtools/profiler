@@ -1836,7 +1836,7 @@ describe('"filter-samples" transform', function () {
     const threadIndex = 0;
     addMarkersToThreadWithCorrespondingSamples(profile.threads[threadIndex], [
       [
-        'Marker A',
+        'DOMEvent',
         0,
         0.5,
         {
@@ -1846,17 +1846,17 @@ describe('"filter-samples" transform', function () {
         },
       ],
       [
-        'Marker B',
+        'Log',
         0.5,
         1.5,
         {
-          type: 'UserTiming',
-          name: 'measure-1',
-          entryType: 'measure',
+          type: 'Log',
+          name: 'Random log message',
+          module: 'RandomModule',
         },
       ],
       [
-        'Marker C',
+        'UserTiming',
         1.5,
         2.5,
         {
@@ -1866,7 +1866,7 @@ describe('"filter-samples" transform', function () {
         },
       ],
       [
-        'Marker C',
+        'UserTiming',
         2.5,
         3.5,
         {
@@ -1892,12 +1892,12 @@ describe('"filter-samples" transform', function () {
       ]);
     });
 
-    it('filtered to range of "Marker A"', function () {
+    it('filtered to range of "DOMEvent"', function () {
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',
           filterType: 'marker',
-          filter: 'Marker A',
+          filter: 'DOMEvent',
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -1910,12 +1910,12 @@ describe('"filter-samples" transform', function () {
       dispatch(popTransformsFromStack(0));
     });
 
-    it('filtered to range of "Marker B"', function () {
+    it('filtered to range of "Log"', function () {
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',
           filterType: 'marker',
-          filter: 'Marker B',
+          filter: 'Log',
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -1929,12 +1929,12 @@ describe('"filter-samples" transform', function () {
       dispatch(popTransformsFromStack(0));
     });
 
-    it('filtered to multiple ranges of "Marker C"', function () {
+    it('filtered to multiple ranges of "UserTiming"', function () {
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'filter-samples',
           filterType: 'marker',
-          filter: 'Marker C',
+          filter: 'UserTiming',
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());

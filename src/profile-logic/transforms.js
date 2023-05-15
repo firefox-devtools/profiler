@@ -543,6 +543,7 @@ export function applyTransformToCallNodePath(
       // generic mechanism for: if the selected call node (after the transformation
       // has been applied to the call path) is not present in the call tree, run
       // some generic code that finds a close-by call node which is present.
+      // See: https://github.com/firefox-devtools/profiler/issues/4618
       return callNodePath;
     default:
       throw assertExhaustiveCheck(transform);
