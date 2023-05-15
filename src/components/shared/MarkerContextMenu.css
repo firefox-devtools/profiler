@@ -52,7 +52,7 @@
 }
 
 .markerContextMenuIconFilterSamples {
-  background-image: url(firefox-profiler-res/img/svg/filter.svg);
+  background-image: url(firefox-profiler-res/img/svg/drop-icon.svg);
 }
 
 /* These icons don't look nice when selected, unless if we invert them. However
