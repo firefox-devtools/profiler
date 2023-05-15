@@ -43,6 +43,7 @@ import type {
   StartEndRange,
   FilterSamplesType,
   Marker,
+  Milliseconds,
 } from 'firefox-profiler/types';
 
 /**
@@ -1787,32 +1788,53 @@ export function filterSamples(
 
     // Now let's go through all the samples and remove the ones that are outside
     // of the ranges.
-    const { samples } = thread;
-    const newSamples = {
-      ...samples,
-      stack: samples.stack.slice(),
-    };
+    const { samples, jsAllocations, nativeAllocations } = thread;
 
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      const sampleTime = samples.time[sampleIndex];
+    function filterTable<
+      Table: {
+        stack: Array<IndexIntoStackTable | null>,
+        time: Milliseconds[],
+        length: number,
+      }
+    >(table: Table): Table {
+      const newTable = {
+        ...table,
+        stack: table.stack.slice(),
+      };
 
-      let sampleInRange = false;
-      for (const { start, end } of ranges) {
-        if (sampleTime >= start && sampleTime <= end) {
-          sampleInRange = true;
-          break;
+      for (let tableIndex = 0; tableIndex < newTable.length; tableIndex++) {
+        const sampleTime = newTable.time[tableIndex];
+
+        let sampleInRange = false;
+        for (const { start, end } of ranges) {
+          if (sampleTime >= start && sampleTime <= end) {
+            sampleInRange = true;
+            break;
+          }
+        }
+
+        if (!sampleInRange) {
+          newTable.stack[tableIndex] = null;
         }
       }
 
-      if (!sampleInRange) {
-        newSamples.stack[sampleIndex] = null;
-      }
+      return newTable;
     }
 
     const newThread = {
       ...thread,
-      samples: newSamples,
+      samples: filterTable(samples),
     };
+
+    if (jsAllocations) {
+      // Filter the JS allocations if there are any.
+      newThread.jsAllocations = filterTable(jsAllocations);
+    }
+    if (nativeAllocations) {
+      // Filter the native allocations if there are any.
+      newThread.nativeAllocations = filterTable(nativeAllocations);
+    }
+
     return newThread;
   });
 }
