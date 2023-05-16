@@ -76,6 +76,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Réduire <strong>{ $nameForResource }</strong>
     .title = Réduire une ressource aplatit tous les appels à cette ressource en un seul nœud d’appel réduit.
+CallNodeContextMenu--transform-collapse-recursion = Réduire la récursivité
+    .title = La réduction de la récursivité supprime les appels qui reviennent de manière répétée dans la même fonction, même si des fonctions intermédiaires se trouvent dans la pile.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Réduire la récursivité directe uniquement
+    .title = La réduction de la récursivité directe permet de supprimer les appels qui recourent de manière répétée à la même fonction sans qu’il y ait de fonctions intermédiaires dans la pile.
 CallNodeContextMenu--transform-drop-function = Ignorer les échantillons avec cette fonction
     .title = Ignorer des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
@@ -578,6 +582,12 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-frames = Toutes les trames
+    .title = Ne pas filtrer les trames de pile
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Afficher uniquement les trames de pile liées à l’exécution JavaScript
+StackSettings--implementation-native2 = Natif
+    .title = Afficher uniquement les trames de pile pour le code natif
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Filtrer les piles :
 StackSettings--use-data-source-label = Source des données :
