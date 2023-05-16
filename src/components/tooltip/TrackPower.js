@@ -90,13 +90,18 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 
   _formatPowerValue(
     power: number,
+    l10nIdKiloUnit,
     l10nIdUnit,
     l10nIdMilliUnit,
     l10nIdMicroUnit
   ): Localized {
     let value, l10nId, carbonValue;
     const carbon = this._computeCO2eFromPower(power);
-    if (power > 1) {
+    if (power > 1000) {
+      value = formatNumber(power / 1000, 3);
+      carbonValue = formatNumber(carbon / 1000, 2);
+      l10nId = l10nIdKiloUnit;
+    } else if (power > 1) {
       value = formatNumber(power, 3);
       carbonValue = formatNumber(carbon, 3);
       l10nId = l10nIdUnit;
@@ -153,12 +158,14 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
         <TooltipDetails>
           {this._formatPowerValue(
             power,
+            'TrackPower--tooltip-power-kilowatt',
             'TrackPower--tooltip-power-watt',
             'TrackPower--tooltip-power-milliwatt'
           )}
           {previewSelection.hasSelection
             ? this._formatPowerValue(
                 this._computePowerSumForPreviewRange(previewSelection),
+                'TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour',
                 'TrackPower--tooltip-energy-carbon-used-in-preview-watthour',
                 'TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour',
                 'TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour'
@@ -166,6 +173,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             : null}
           {this._formatPowerValue(
             this._computePowerSumForCommittedRange(committedRange),
+            'TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour',
             'TrackPower--tooltip-energy-carbon-used-in-range-watthour',
             'TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour',
             'TrackPower--tooltip-energy-carbon-used-in-range-microwatthour'
