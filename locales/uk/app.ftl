@@ -750,6 +750,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = операції, по�
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } кВт
+    .label = Потужність
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -760,6 +765,13 @@ TrackPower--tooltip-power-watt = { $value } Вт
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } мВт
     .label = Потужність
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } кВт·год ({ $carbonValue } кг CO₂e)
+    .label = Використана у видимому діапазоні енергія
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -781,6 +793,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } мВ�
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } мкВт·год ({ $carbonValue } мг CO₂e)
     .label = Спожита у видимому діапазоні енергія
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } кВт·год ({ $carbonValue } кг CO₂e)
+    .label = Використана у поточній вибірці енергія
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
