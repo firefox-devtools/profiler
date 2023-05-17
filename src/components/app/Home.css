@@ -158,7 +158,11 @@
   display: grid;
   margin-top: 30px;
   column-gap: 30px;
-  grid-template-columns: 1fr 1fr;
+
+  /* minmax makes the grid ignore the element's intrinsic size.
+   * If we use 1fr directly, the min is "auto", which depends on the content. If
+   * the content is too large then this can break the layout. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .homeInstructionsTransitionGroup {
@@ -206,7 +210,9 @@
 
   .homeAdditionalContent,
   .homeInstructions {
-    grid: none;
+    /* we switch to use just one column instead of 2.
+     * Note tha/ minmax makes the grid ignore the element's intrinsic size. */
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
