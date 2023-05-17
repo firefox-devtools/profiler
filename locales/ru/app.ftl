@@ -779,6 +779,13 @@ TrackPower--tooltip-power-watt = { $value } Вт
 TrackPower--tooltip-power-milliwatt = { $value } мВт
     .label = Мощность
 # This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } кВт-ч ({ $carbonValue } кг CO₂e)
+    .label = Энергия, использованная в видимом диапазоне
+# This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
 #   $value (String) - the energy value for this range
@@ -799,6 +806,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } мВ�
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } мкВт-ч ({ $carbonValue } мг CO₂e)
     .label = Энергия, использованная в видимом диапазоне
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } кВт-ч ({ $carbonValue } кг CO₂e)
+    .label = Энергия, использованная в текущей выборке
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
