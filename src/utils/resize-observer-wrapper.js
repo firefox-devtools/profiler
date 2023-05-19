@@ -58,7 +58,7 @@ function createResizeObserverWrapper() {
 
   function stopResizeObserver() {
     _resizeObserver = null;
-    window.removeEventListener('visibilityChange', visibilityChangeListener);
+    window.removeEventListener('visibilitychange', visibilityChangeListener);
   }
 
   return {
