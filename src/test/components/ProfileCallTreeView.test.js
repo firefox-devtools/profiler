@@ -44,13 +44,14 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { triggerResizeObservers } from '../fixtures/mocks/resize-observer';
 
 import type { Profile } from 'firefox-profiler/types';
 
 autoMockCanvasContext();
 
 // This makes the bounding box large enough so that we don't trigger
-// VirtualList's virtualization. We assert this above.
+// VirtualList's virtualization. We assert this below.
 autoMockElementSize({ width: 1000, height: 2000 });
 
 describe('calltree/ProfileCallTreeView', function () {
@@ -380,6 +381,9 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
         <ProfileCallTreeView />
       </Provider>
     );
+
+    // This automatically uses the bounding box set in autoMockElementSize.
+    triggerResizeObservers();
 
     // Assert that we used a large enough bounding box to include all children.
     const renderedRows = container.querySelectorAll(
