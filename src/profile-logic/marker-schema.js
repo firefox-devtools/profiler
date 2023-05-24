@@ -23,7 +23,9 @@ import type {
   Marker,
   MarkerIndex,
   MarkerPayload,
+  Thread,
 } from 'firefox-profiler/types';
+import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,
@@ -142,6 +144,7 @@ export function getSchemaFromMarker(
 export function parseLabel(
   markerSchema: MarkerSchema,
   categories: CategoryList,
+  thread: Thread,
   label: string
 ): (Marker) => string {
   // Split the label on the "{key}" capture groups.
@@ -262,7 +265,12 @@ export function parseLabel(
           return '';
         }
         return format
-          ? formatFromMarkerSchema(markerSchema.name, format, value)
+          ? formatFromMarkerSchema(
+              markerSchema.name,
+              format,
+              value,
+              thread.stringTable
+            )
           : value;
       };
     }
@@ -327,6 +335,7 @@ export function getLabelGetter(
   markerSchemaList: MarkerSchema[],
   markerSchemaByName: MarkerSchemaByName,
   categoryList: CategoryList,
+  thread: Thread,
   labelKey: LabelKey
 ): (MarkerIndex) => string {
   // Build up a list of label functions, that are tied to the schema name.
@@ -334,7 +343,10 @@ export function getLabelGetter(
   for (const schema of markerSchemaList) {
     const labelString = schema[labelKey];
     if (labelString) {
-      labelFns.set(schema.name, parseLabel(schema, categoryList, labelString));
+      labelFns.set(
+        schema.name,
+        parseLabel(schema, categoryList, thread, labelString)
+      );
     }
   }
 
@@ -381,7 +393,8 @@ export function getLabelGetter(
 export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
-  value: any
+  value: any,
+  stringTable: ?UniqueStringArray
 ): string {
   if (value === undefined || value === null) {
     console.warn(
@@ -432,6 +445,14 @@ export function formatFromMarkerSchema(
     case 'string':
       // Make sure a non-empty string is returned here.
       return String(value) || '(empty)';
+    case 'unique-string':
+      if (stringTable !== null && stringTable !== undefined) {
+        return stringTable.getString(value);
+      }
+      console.warn(
+        `Could not find marker table for index "${value}" in markertype "${markerType}"`
+      );
+      return 'Null or undefined string table.';
     case 'duration':
     case 'time':
       return formatTimestamp(value);
@@ -479,14 +500,15 @@ const URL_SCHEME_REGEXP = /^http(s?):\/\//;
 export function formatMarkupFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
-  value: any
+  value: any,
+  stringTable: ?UniqueStringArray
 ): React.Element<any> | string {
   if (value === undefined || value === null) {
     console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
     return '(empty)';
   }
   if (format !== 'url' && typeof format !== 'object' && format !== 'list') {
-    return formatFromMarkerSchema(markerType, format, value);
+    return formatFromMarkerSchema(markerType, format, value, stringTable);
   }
   if (typeof format === 'object') {
     switch (format.type) {
@@ -526,7 +548,8 @@ export function formatMarkupFromMarkerSchema(
                           {formatMarkupFromMarkerSchema(
                             markerType,
                             columns[i].type || 'string',
-                            cell
+                            cell,
+                            stringTable
                           )}
                         </td>
                       );

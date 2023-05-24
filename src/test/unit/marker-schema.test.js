@@ -9,7 +9,10 @@ import {
   markerSchemaFrontEndOnly,
 } from '../../profile-logic/marker-schema';
 import type { MarkerSchema, Marker } from 'firefox-profiler/types';
-import { getDefaultCategories } from '../../profile-logic/data-structures';
+import {
+  getDefaultCategories,
+  getEmptyThread,
+} from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -35,6 +38,7 @@ describe('marker schema labels', function () {
   function applyLabel(options: LabelOptions): string {
     const { schemaData, label, payload } = options;
     const categories = getDefaultCategories();
+    const thread = getEmptyThread();
 
     const schema = {
       name: 'TestDefinedMarker',
@@ -50,7 +54,7 @@ describe('marker schema labels', function () {
       threadId: 1,
       data: payload,
     };
-    const getter = parseLabel(schema, categories, label);
+    const getter = parseLabel(schema, categories, thread, label);
 
     // There is only one marker, marker 0
     return getter(marker);
