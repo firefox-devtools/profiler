@@ -397,12 +397,22 @@ MarkerContextMenu--select-the-receiver-thread =
 MarkerContextMenu--select-the-sender-thread =
     Select the sender thread “<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+MarkerFiltersContextMenu--drop-samples-outside-of-filtered-markers =
+    Drop samples outside of filtered markers
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Filter Markers:
     .title = Only display markers that match a certain name
+
+MarkerSettings--marker-filters =
+    .title = Marker Filters
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.

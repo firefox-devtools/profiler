@@ -9,3 +9,13 @@
   padding: 0;
   line-height: 25px;
 }
+
+.filterMarkersButton {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  margin: 0 4px;
+  background-image: url(firefox-profiler-res/img/svg/filter.svg);
+  background-position: center;
+  background-repeat: no-repeat;
+}
