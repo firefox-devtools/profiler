@@ -12,6 +12,7 @@ import { showMenu } from '@firefox-devtools/react-contextmenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
 import { getMarkersSearchString } from 'firefox-profiler/selectors/url-state';
+import { getIsMarkerFiltersMenuVisible } from 'firefox-profiler/selectors/app';
 import { PanelSearch } from './PanelSearch';
 import { StackImplementationSetting } from 'firefox-profiler/components/shared/StackImplementationSetting';
 import { MarkerFiltersContextMenu } from './MarkerFiltersContextMenu';
@@ -23,6 +24,7 @@ import './MarkerSettings.css';
 
 type StateProps = {|
   +searchString: string,
+  +isMarkerFiltersMenuVisible: boolean,
 |};
 
 type DispatchProps = {|
@@ -31,12 +33,27 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkerSettingsImpl extends PureComponent<Props> {
+type State = {|
+  // react-contextmenu library automatically hides the menu on mousedown even
+  // if it's already visible. That's why we need to handle the mousedown event
+  // as well and check if the menu is visible or not before it hides it.
+  // Otherwise, if we check this in onClick event, the state will always be
+  // `false` since the library already hid it on mousedown.
+  +isFilterMenuVisibleOnMouseDown: boolean,
+|};
+
+class MarkerSettingsImpl extends PureComponent<Props, State> {
   _onSearch = (value: string) => {
     this.props.changeMarkersSearchString(value);
   };
 
-  _onClickFilterButton = (event: SyntheticMouseEvent<HTMLElement>) => {
+  _onClickToggleFilterButton = (event: SyntheticMouseEvent<HTMLElement>) => {
+    const { isFilterMenuVisibleOnMouseDown } = this.state;
+    if (isFilterMenuVisibleOnMouseDown) {
+      // Do nothing as we would like to hide the menu if the menu was already visible on mouse down.
+      return;
+    }
+
     const rect = event.currentTarget.getBoundingClientRect();
     // FIXME: Currently we assume that the context menu is 250px wide, but ideally
     // we should get the real width. It's not so easy though, because the context
@@ -51,8 +68,14 @@ class MarkerSettingsImpl extends PureComponent<Props> {
     });
   };
 
+  _onMouseDownToggleFilterButton = () => {
+    this.setState({
+      isFilterMenuVisibleOnMouseDown: this.props.isMarkerFiltersMenuVisible,
+    });
+  };
+
   render() {
-    const { searchString } = this.props;
+    const { searchString, isMarkerFiltersMenuVisible } = this.props;
     return (
       <div className="markerSettings">
         <ul className="panelSettingsList">
@@ -75,12 +98,16 @@ class MarkerSettingsImpl extends PureComponent<Props> {
             className={classNames(
               'filterMarkersButton',
               'photon-button',
-              'photon-button-ghost'
+              'photon-button-ghost',
+              {
+                'photon-button-ghost--checked': isMarkerFiltersMenuVisible,
+              }
             )}
             title="Marker filters"
             type="button"
-            onClick={this._onClickFilterButton}
-            disabled={searchString === ''}
+            onClick={this._onClickToggleFilterButton}
+            onMouseDown={this._onMouseDownToggleFilterButton}
+            disabled={!searchString}
           />
         </Localized>
         <MarkerFiltersContextMenu />
@@ -92,6 +119,7 @@ class MarkerSettingsImpl extends PureComponent<Props> {
 export const MarkerSettings = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     searchString: getMarkersSearchString(state),
+    isMarkerFiltersMenuVisible: getIsMarkerFiltersMenuVisible(state),
   }),
   mapDispatchToProps: { changeMarkersSearchString },
   component: MarkerSettingsImpl,

@@ -428,3 +428,10 @@ export function toggleOpenCategoryInSidebar(
     category,
   };
 }
+
+export function setMarkerFiltersMenuVisibility(isVisible: boolean): Action {
+  return {
+    type: 'SET_MARKER_FILTERS_MENU_VISIBILITY',
+    isVisible,
+  };
+}

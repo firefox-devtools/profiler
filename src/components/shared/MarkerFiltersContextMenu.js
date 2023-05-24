@@ -13,7 +13,9 @@ import {
   getMarkersSearchString,
   getSelectedThreadsKey,
 } from 'firefox-profiler/selectors/url-state';
+import { getIsMarkerFiltersMenuVisible } from 'firefox-profiler/selectors/app';
 import { addTransformToStack } from 'firefox-profiler/actions/profile-view';
+import { setMarkerFiltersMenuVisibility } from 'firefox-profiler/actions/app';
 
 import type { ThreadsKey } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -21,15 +23,25 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 type StateProps = {|
   +searchString: string,
   +threadsKey: ThreadsKey,
+  +isMarkerFiltersMenuVisible: boolean,
 |};
 
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
+  +setMarkerFiltersMenuVisibility: typeof setMarkerFiltersMenuVisibility,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
+  _onShow = () => {
+    this.props.setMarkerFiltersMenuVisibility(true);
+  };
+
+  _onHide = () => {
+    this.props.setMarkerFiltersMenuVisibility(false);
+  };
+
   filterSamplesByMarker = () => {
     const { searchString, threadsKey, addTransformToStack } = this.props;
     addTransformToStack(threadsKey, {
@@ -44,6 +56,8 @@ class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
       <ContextMenu
         id="MarkerFiltersContextMenu"
         className="markerFiltersContextMenu"
+        onShow={this._onShow}
+        onHide={this._onHide}
       >
         <MenuItem onClick={this.filterSamplesByMarker}>
           <Localized id="MarkerFiltersContextMenu--drop-samples-outside-of-filtered-markers">
@@ -60,14 +74,14 @@ export const MarkerFiltersContextMenu = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: (state) => {
-    return {
-      searchString: getMarkersSearchString(state),
-      threadsKey: getSelectedThreadsKey(state),
-    };
-  },
+  mapStateToProps: (state) => ({
+    searchString: getMarkersSearchString(state),
+    threadsKey: getSelectedThreadsKey(state),
+    isMarkerFiltersMenuVisible: getIsMarkerFiltersMenuVisible(state),
+  }),
   mapDispatchToProps: {
     addTransformToStack,
+    setMarkerFiltersMenuVisibility,
   },
   component: MarkerFiltersContextMenuImpl,
 });

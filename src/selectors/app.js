@@ -94,6 +94,8 @@ export const getIsDragAndDropDragging: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropDragging;
 export const getIsDragAndDropOverlayRegistered: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropOverlayRegistered;
+export const getIsMarkerFiltersMenuVisible: Selector<boolean> = (state) =>
+  getApp(state).isMarkerFiltersMenuVisible;
 
 export const getCurrentProfileUploadedInformation: Selector<
   UploadedProfileInformation | null

@@ -357,6 +357,21 @@ const sidebarOpenCategories: Reducer<Map<string, Set<number>>> = (
   }
 };
 
+const isMarkerFiltersMenuVisible: Reducer<boolean> = (
+  state = false,
+  action
+) => {
+  switch (action.type) {
+    case 'SET_MARKER_FILTERS_MENU_VISIBILITY':
+      return action.isVisible;
+    case 'CHANGE_SELECTED_TAB':
+      // In case we change the selected tab while the filter menu is open, close it.
+      return false;
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   urlSetupPhase,
@@ -372,6 +387,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   currentProfileUploadedInformation,
   browserConnectionStatus,
   sidebarOpenCategories,
+  isMarkerFiltersMenuVisible,
 });
 
 export default appStateReducer;
