@@ -423,7 +423,8 @@ export function getTransformLabelL10nIds(
       switch (transform.filterType) {
         case 'marker-search':
           return {
-            l10nId: 'TransformNavigator--drop-samples-outside-of-marker-filter',
+            l10nId:
+              'TransformNavigator--drop-samples-outside-of-markers-matching',
             item: transform.filter,
           };
         default:

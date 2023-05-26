@@ -464,7 +464,11 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
         role="menuitem"
         tabindex="-1"
       >
-        Drop samples outside of filtered markers
+        Drop samples outside of markers matching “
+        <strong>
+          ⁨⁩
+        </strong>
+        ”
       </div>
     </nav>
   </div>
@@ -1461,7 +1465,11 @@ exports[`MarkerChart with active tab renders the marker chart and matches the sn
         role="menuitem"
         tabindex="-1"
       >
-        Drop samples outside of filtered markers
+        Drop samples outside of markers matching “
+        <strong>
+          ⁨⁩
+        </strong>
+        ”
       </div>
     </nav>
   </div>

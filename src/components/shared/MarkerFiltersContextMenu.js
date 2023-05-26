@@ -52,6 +52,7 @@ class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
   };
 
   render() {
+    const { searchString } = this.props;
     return (
       <ContextMenu
         id="MarkerFiltersContextMenu"
@@ -60,8 +61,16 @@ class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
         onHide={this._onHide}
       >
         <MenuItem onClick={this.filterSamplesByMarker}>
-          <Localized id="MarkerFiltersContextMenu--drop-samples-outside-of-filtered-markers">
-            Drop samples outside of filtered markers
+          <Localized
+            id="MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching"
+            vars={{ filter: searchString }}
+            elems={{ strong: <strong /> }}
+          >
+            {/* Using a fragment here so we can have a strong tag inside. */}
+            <>
+              Drop samples outside of markers matching “
+              <strong>${searchString}</strong>”
+            </>
           </Localized>
         </MenuItem>
       </ContextMenu>
