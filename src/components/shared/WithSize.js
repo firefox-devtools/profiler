@@ -44,7 +44,6 @@ export function withSize<
   // See: https://github.com/firefox-devtools/profiler/issues/3062
   // eslint-disable-next-line flowtype/no-existential-type
   return class WithSizeWrapper extends React.PureComponent<*, State> {
-    _dirtySize: DOMRectReadOnly | null = null;
     state = { width: 0, height: 0 };
     _container: HTMLElement | null;
 
@@ -55,37 +54,15 @@ export function withSize<
       }
       this._container = container;
       getResizeObserverWrapper().subscribe(container, this._resizeListener);
-      window.addEventListener(
-        'visibilitychange',
-        this._visibilityChangeListener
-      );
     }
 
-    // The size is only updated when the document is visible.
-    // In other cases resizing is registered in _dirtySize.
+    // The listener is only called when the document is visible.
     _resizeListener = (contentRect: DOMRectReadOnly) => {
       const container = this._container;
       if (!container) {
         return;
       }
-      if (document.hidden) {
-        this._dirtySize = contentRect;
-      } else {
-        this._updateSize(container, contentRect);
-      }
-    };
-
-    // If resizing was registered when the document wasn't visible,
-    // the size will be updated when the document becomes visible
-    _visibilityChangeListener = () => {
-      const container = this._container;
-      if (!container) {
-        return;
-      }
-      if (!document.hidden && this._dirtySize) {
-        this._updateSize(container, this._dirtySize);
-        this._dirtySize = null;
-      }
+      this._updateSize(container, contentRect);
     };
 
     componentWillUnmount() {
@@ -94,10 +71,6 @@ export function withSize<
         getResizeObserverWrapper().unsubscribe(container, this._resizeListener);
       }
 
-      window.removeEventListener(
-        'visibilitychange',
-        this._visibilityChangeListener
-      );
       this._container = null;
     }
 
