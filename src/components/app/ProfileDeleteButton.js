@@ -84,6 +84,7 @@ export class ProfileDeleteButton extends PureComponent<ButtonProps> {
             'photon-button',
             'photon-button-default'
           )}
+          panelClassName="profileDeletePanel"
           label="Delete"
           title={`Click here to delete the profile ${smallProfileName}`}
           onPanelOpen={this.props.onOpenConfirmDialog}

@@ -124,6 +124,7 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
       // power graph.
 
       ctx.lineWidth = deviceLineWidth;
+      ctx.lineJoin = 'bevel';
       ctx.strokeStyle = GREY_50;
       ctx.fillStyle = '#73737388'; // Grey 50 with transparency.
       ctx.beginPath();

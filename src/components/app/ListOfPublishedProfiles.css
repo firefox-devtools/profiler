@@ -64,7 +64,8 @@
 }
 
 .publishedProfilesDate {
-  width: 10em; /* The default flex properties make that it can shrink, so this is really the initial size. */
+  width: 10em;
+  flex: none;
   padding-right: 4px;
   white-space: nowrap;
 }

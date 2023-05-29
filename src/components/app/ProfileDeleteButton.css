@@ -21,3 +21,8 @@
   color: var(--red-60);
   word-break: break-word;
 }
+
+.profileDeletePanel {
+  width: 500px;
+  max-width: 80vw;
+}
