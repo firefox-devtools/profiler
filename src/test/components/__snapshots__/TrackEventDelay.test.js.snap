@@ -48,6 +48,10 @@ Array [
     2,
   ],
   Array [
+    "set lineJoin",
+    "bevel",
+  ],
+  Array [
     "set strokeStyle",
     "rgba(255, 0, 57, 0.7)",
   ],
