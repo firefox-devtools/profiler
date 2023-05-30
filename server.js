@@ -13,12 +13,14 @@ const fs = require('fs');
 const path = require('path');
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
-const localConfigExists = fs.existsSync(
-  path.join(__dirname, './webpack.local-config.js')
-);
 
 const argv = yargs(hideBin(process.argv))
   .command('* [profile]', 'Open Firefox Profiler, on [profile] if included.')
+  .option('c', {
+    alias: 'config',
+    describe: 'Path to local webpack config',
+    type: 'string',
+  })
   // Disabled --version flag since no version number in package.json.
   .version(false)
   .strict()
@@ -73,15 +75,27 @@ const serverConfig = {
 };
 
 // Allow a local file to override various options.
-if (localConfigExists) {
+let localConfigFile; // Set by readConfig() below.
+const defaultLocalConfigPath = path.join(
+  __dirname,
+  './webpack.local-config.js'
+);
+const readConfig = (localConfigPath) => {
+  const configRequirePath = `./${path.relative(__dirname, localConfigPath)}`;
   try {
-    require('./webpack.local-config.js')(config, serverConfig);
+    require(configRequirePath)(config, serverConfig);
+    localConfigFile = path.basename(configRequirePath);
   } catch (error) {
     console.error(
-      'Unable to load and apply settings from webpack.local-config.js'
+      `Unable to load and apply settings from ${configRequirePath}`
     );
     console.error(error);
   }
+};
+if (argv.config) {
+  readConfig(argv.config);
+} else if (fs.existsSync(defaultLocalConfigPath)) {
+  readConfig(defaultLocalConfigPath);
 }
 
 const profilerUrl = `http://${host}:${port}`;
@@ -142,9 +156,9 @@ server
         '> You can change this default port with the environment variable FX_PROFILER_PORT.\n'
       );
     }
-    if (localConfigExists) {
+    if (localConfigFile) {
       console.log(
-        '> We used your local file "webpack.local-config.js" to mutate webpack’s config values.'
+        `> We used your local file "${localConfigFile}" to mutate webpack’s config values.`
       );
     } else {
       console.log(stripIndent`
