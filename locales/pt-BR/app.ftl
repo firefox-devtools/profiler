@@ -296,12 +296,23 @@ MarkerContextMenu--select-the-receiver-thread = Selecionar o thread receptor “
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Selecionar o thread remetente “<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Descartar amostras fora dos marcadores correspondentes a “<strong>{ $filter }</strong>”
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Filtrar marcadores:
     .title = Só exibir marcadores que correspondem a um determinado nome
+MarkerSettings--marker-filters =
+    .title = Filtros de marcação
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -822,6 +833,10 @@ TransformNavigator--collapse-direct-recursion-only = Recolher só recursão dire
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Recolher subárvore: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Descartar amostras fora dos marcadores correspondentes a: “{ $item }”
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
