@@ -14,10 +14,14 @@ import {
   getSelectedThreadsKey,
 } from 'firefox-profiler/selectors/url-state';
 import { addTransformToStack } from 'firefox-profiler/actions/profile-view';
-import { setMarkerFiltersMenuVisibility } from 'firefox-profiler/actions/app';
 
 import type { ThreadsKey } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+
+type OwnProps = {|
+  +onShow: () => void,
+  +onHide: () => void,
+|};
 
 type StateProps = {|
   +searchString: string,
@@ -26,20 +30,11 @@ type StateProps = {|
 
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
-  +setMarkerFiltersMenuVisibility: typeof setMarkerFiltersMenuVisibility,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
-  _onShow = () => {
-    this.props.setMarkerFiltersMenuVisibility(true);
-  };
-
-  _onHide = () => {
-    this.props.setMarkerFiltersMenuVisibility(false);
-  };
-
   filterSamplesByMarker = () => {
     const { searchString, threadsKey, addTransformToStack } = this.props;
     addTransformToStack(threadsKey, {
@@ -50,13 +45,13 @@ class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
   };
 
   render() {
-    const { searchString } = this.props;
+    const { searchString, onShow, onHide } = this.props;
     return (
       <ContextMenu
         id="MarkerFiltersContextMenu"
         className="markerFiltersContextMenu"
-        onShow={this._onShow}
-        onHide={this._onHide}
+        onShow={onShow}
+        onHide={onHide}
       >
         <MenuItem onClick={this.filterSamplesByMarker}>
           <Localized
@@ -77,7 +72,7 @@ class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
 }
 
 export const MarkerFiltersContextMenu = explicitConnect<
-  {||},
+  OwnProps,
   StateProps,
   DispatchProps
 >({
@@ -87,7 +82,6 @@ export const MarkerFiltersContextMenu = explicitConnect<
   }),
   mapDispatchToProps: {
     addTransformToStack,
-    setMarkerFiltersMenuVisibility,
   },
   component: MarkerFiltersContextMenuImpl,
 });

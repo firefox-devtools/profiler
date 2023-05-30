@@ -211,7 +211,6 @@ export type AppState = {|
   +experimental: ExperimentalFlags,
   +currentProfileUploadedInformation: UploadedProfileInformation | null,
   +browserConnectionStatus: BrowserConnectionStatus,
-  +isMarkerFiltersMenuVisible: boolean,
 |};
 
 export type UploadPhase =

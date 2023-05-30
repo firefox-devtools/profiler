@@ -12,7 +12,6 @@ import { showMenu } from '@firefox-devtools/react-contextmenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
 import { getMarkersSearchString } from 'firefox-profiler/selectors/url-state';
-import { getIsMarkerFiltersMenuVisible } from 'firefox-profiler/selectors/app';
 import { PanelSearch } from './PanelSearch';
 import { StackImplementationSetting } from 'firefox-profiler/components/shared/StackImplementationSetting';
 import { MarkerFiltersContextMenu } from './MarkerFiltersContextMenu';
@@ -24,7 +23,6 @@ import './MarkerSettings.css';
 
 type StateProps = {|
   +searchString: string,
-  +isMarkerFiltersMenuVisible: boolean,
 |};
 
 type DispatchProps = {|
@@ -34,6 +32,7 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 type State = {|
+  +isMarkerFiltersMenuVisible: boolean,
   // react-contextmenu library automatically hides the menu on mousedown even
   // if it's already visible. That's why we need to handle the mousedown event
   // as well and check if the menu is visible or not before it hides it.
@@ -43,6 +42,11 @@ type State = {|
 |};
 
 class MarkerSettingsImpl extends PureComponent<Props, State> {
+  state = {
+    isMarkerFiltersMenuVisible: false,
+    isFilterMenuVisibleOnMouseDown: false,
+  };
+
   _onSearch = (value: string) => {
     this.props.changeMarkersSearchString(value);
   };
@@ -68,14 +72,24 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
     });
   };
 
+  _onShowFiltersContextMenu = () => {
+    this.setState({ isMarkerFiltersMenuVisible: true });
+  };
+
+  _onHideFiltersContextMenu = () => {
+    this.setState({ isMarkerFiltersMenuVisible: false });
+  };
+
   _onMouseDownToggleFilterButton = () => {
-    this.setState({
-      isFilterMenuVisibleOnMouseDown: this.props.isMarkerFiltersMenuVisible,
-    });
+    this.setState((state) => ({
+      isFilterMenuVisibleOnMouseDown: state.isMarkerFiltersMenuVisible,
+    }));
   };
 
   render() {
-    const { searchString, isMarkerFiltersMenuVisible } = this.props;
+    const { searchString } = this.props;
+    const { isMarkerFiltersMenuVisible } = this.state;
+
     return (
       <div className="markerSettings">
         <ul className="panelSettingsList">
@@ -110,7 +124,10 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
             disabled={!searchString}
           />
         </Localized>
-        <MarkerFiltersContextMenu />
+        <MarkerFiltersContextMenu
+          onShow={this._onShowFiltersContextMenu}
+          onHide={this._onHideFiltersContextMenu}
+        />
       </div>
     );
   }
@@ -119,7 +136,6 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
 export const MarkerSettings = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     searchString: getMarkersSearchString(state),
-    isMarkerFiltersMenuVisible: getIsMarkerFiltersMenuVisible(state),
   }),
   mapDispatchToProps: { changeMarkersSearchString },
   component: MarkerSettingsImpl,

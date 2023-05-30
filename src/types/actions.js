@@ -547,10 +547,6 @@ type UrlStateAction =
       +type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
       +kind: string,
       +category: IndexIntoCategoryList,
-    |}
-  | {|
-      +type: 'SET_MARKER_FILTERS_MENU_VISIBILITY',
-      +isVisible: boolean,
     |};
 
 type IconsAction =
