@@ -93,6 +93,7 @@ export function convertToTransformType(type: string): TransformType | null {
     case 'collapse-recursion':
     case 'collapse-function-subtree':
     case 'drop-function':
+    case 'filter-samples':
       return coercedType;
     default: {
       // The coerced type SHOULD be empty here. If in reality we get

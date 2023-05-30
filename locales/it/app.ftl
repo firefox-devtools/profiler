@@ -468,6 +468,7 @@ MenuButtons--publish--message-something-went-wrong = Uh, si è verificato un err
 MenuButtons--publish--message-try-again = Riprova
 MenuButtons--publish--download = Scarica
 MenuButtons--publish--compressing = Compressione in corso…
+MenuButtons--publish--error-while-compressing = Errore durante la compressione, prova a deselezionare alcune caselle di controllo per ridurre le dimensioni del profilo.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -575,9 +576,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Tutti gli stack
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Nativo
+StackSettings--implementation-all-frames = Tutti i frame
+    .title = Non filtrare gli stack frame
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Mostra solo gli stack frame relativi all’esecuzione di JavaScript
+StackSettings--implementation-native2 = Nativo
+    .title = Mostra solo gli stack frame per il codice nativo
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtra stack:
 StackSettings--use-data-source-label = Sorgente dati:
 StackSettings--call-tree-strategy-timing = Tempi
     .title = Sintetizza usando gli stack campionati del codice eseguito nel tempo
@@ -661,6 +667,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = operazioni dal campione
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Consumo
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -671,6 +682,13 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Consumo
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energia utilizzata nell’intervallo visibile
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -692,6 +710,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh (
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energia utilizzata nell’intervallo visibile
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energia utilizzata nella selezione corrente
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:

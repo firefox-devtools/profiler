@@ -101,6 +101,14 @@ CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $n
     .title =
         Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
         τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
+CallNodeContextMenu--transform-collapse-recursion = Σύμπτυξη αναδρομής
+    .title =
+        Η σύμπτυξη αναδρομής αφαιρεί κλήσεις που κάνουν επαναλαμβανόμενα αναδρομή
+        στην ίδια συνάρτηση, ακόμα και με ενδιάμεσες συναρτήσεις στη στοίβα.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Σύμπτυξη μόνο των άμεσων αναδρομών
+    .title =
+        Η σύμπτυξη άμεσης αναδρομής αφαιρεί κλήσεις που κάνουν επαναλαμβανόμενα αναδρομή
+        στην ίδια συνάρτηση, χωρίς ενδιάμεσες συναρτήσεις στη στοίβα.
 CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
     .title =
         Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
@@ -533,6 +541,7 @@ MenuButtons--publish--message-something-went-wrong = Ωχ όχι, κάτι πή�
 MenuButtons--publish--message-try-again = Δοκιμή ξανά
 MenuButtons--publish--download = Λήψη
 MenuButtons--publish--compressing = Συμπίεση…
+MenuButtons--publish--error-while-compressing = Σφάλμα κατά τη συμπίεση, δοκιμάστε να καταργήσετε μερικές επιλογές για να μειώσετε το μέγεθος του προφίλ.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -644,9 +653,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Όλες οι στοίβες
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Εγγενές
+StackSettings--implementation-all-frames = Όλα τα καρέ
+    .title = Να μην γίνεται φιλτράρισμα των καρέ στοίβας
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Εμφάνιση μόνο των καρέ στοίβας που σχετίζονται με την εκτέλεση της JavaScript
+StackSettings--implementation-native2 = Εγγενές
+    .title = Εμφάνιση μόνο των καρέ στοίβας για εγγενή κώδικα
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Φιλτράρισμα στοιβών:
 StackSettings--use-data-source-label = Πηγή δεδομένων:
 StackSettings--call-tree-strategy-timing = Χρονισμοί
     .title = Περίληψη με δειγματοληπτικές στοίβες σταδιακά εκτελεσμένου κώδικα
@@ -730,6 +744,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = λειτουργίες 
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Ισχύς
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -740,6 +759,13 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Ισχύς
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Ενέργεια που χρησιμοποιείται στο ορατό εύρος
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -761,6 +787,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh (
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Η ενέργεια που χρησιμοποιείται στο ορατό εύρος
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:

@@ -104,6 +104,11 @@ Details--open-sidebar-button =
 Details--close-sidebar-button =
     .title = Mdel agalis adisan
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+
 ## Footer Links
 
 FooterLinks--legal = Usḍif
@@ -380,6 +385,9 @@ ProfileLoaderAnimation--loading-view-not-found = Ur tettwaf ara teskant
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Uɣal ɣer ugejdan
 
+## Root
+
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -396,9 +404,6 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Meṛṛa tiwuriwin
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Adigan
 StackSettings--use-data-source-label = Aɣbalu n yisefka:
 StackSettings--show-user-timing = Sken tanzagt n useqdac
 
@@ -446,6 +451,11 @@ TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Power
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -492,19 +502,27 @@ TransformNavigator--merge-function = Smezdi: { $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Sers: { $item }
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Yettragu { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Yettraǧu { -firefox-brand-name }…
-# Displayed whenever the source view was not able to get the source code for
-# a file.
-SourceView--source-not-available-title = Ulac aɣbalu
+SourceView--close-button =
+    .title = Mdel timeẓri taneṣlit
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the browser could not
 # be queried for source code using the symbolication API.
 # Variables:
@@ -528,8 +546,9 @@ SourceView--not-in-archive-error-when-obtaining-source = Afaylu { $pathInArchive
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Aḥraz deg { $url } ur yezmir ara ad yettwasleḍ: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Mdel timeẓri taneṣlit
+
+## Toggle buttons in the top right corner of the bottom box
+
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
