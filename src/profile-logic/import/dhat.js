@@ -259,12 +259,8 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     new Map();
 
   for (const pp of dhat.pps) {
-    // Never reset the stackIndex, stack indexes always growing larger.
     let stackIndex = 0;
     let prefix = null;
-
-    // List of possible stack indexes to look for.
-    let candidateStackTables = postfix.get(null);
 
     // Go from root to tip on the backtrace.
     for (let i = pp.fs.length - 1; i >= 0; i--) {
@@ -275,9 +271,14 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
         'Expected to find a funcIndex from a frameIndex'
       );
 
+      // We want this to be the fallback, so that a stack index gets created when the 'if' below fails,
+      // or when we don't find a matching frame inside that loop.
+      stackIndex = stackTable.length;
+
+      // List of possible stack indexes to look for.
+      const candidateStackTables = postfix.get(prefix);
       if (candidateStackTables) {
         // Start searching for a stack index.
-        stackIndex = stackTable.length;
         for (const sliceStackIndex of candidateStackTables) {
           const nextFrameIndex = stackTable.frame[sliceStackIndex];
           // No need to look for the prefix, since candidateStackTables already takes that into account.
@@ -295,10 +296,9 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
         stackTable.category.push(otherSubCategory);
         stackTable.prefix.push(prefix);
 
-        const candidateList = postfix.get(prefix);
-        if (candidateList) {
+        if (candidateStackTables) {
           // Append us to the list of possible stack indexes of our parent.
-          candidateList.push(stackIndex);
+          candidateStackTables.push(stackIndex);
         } else {
           // We are the first descendents of our parent.
           postfix.set(prefix, [stackIndex]);
@@ -306,10 +306,6 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
 
         // The stack index already points to this spot.
         stackTable.length++;
-        // Since we just created a stack index, the next frames necessarily don't have an existing stack index.
-        candidateStackTables = [];
-      } else {
-        candidateStackTables = postfix.get(stackIndex);
       }
 
       prefix = stackIndex;
