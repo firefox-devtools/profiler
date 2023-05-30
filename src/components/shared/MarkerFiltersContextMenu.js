@@ -13,7 +13,6 @@ import {
   getMarkersSearchString,
   getSelectedThreadsKey,
 } from 'firefox-profiler/selectors/url-state';
-import { getIsMarkerFiltersMenuVisible } from 'firefox-profiler/selectors/app';
 import { addTransformToStack } from 'firefox-profiler/actions/profile-view';
 import { setMarkerFiltersMenuVisibility } from 'firefox-profiler/actions/app';
 
@@ -23,7 +22,6 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 type StateProps = {|
   +searchString: string,
   +threadsKey: ThreadsKey,
-  +isMarkerFiltersMenuVisible: boolean,
 |};
 
 type DispatchProps = {|
@@ -86,7 +84,6 @@ export const MarkerFiltersContextMenu = explicitConnect<
   mapStateToProps: (state) => ({
     searchString: getMarkersSearchString(state),
     threadsKey: getSelectedThreadsKey(state),
-    isMarkerFiltersMenuVisible: getIsMarkerFiltersMenuVisible(state),
   }),
   mapDispatchToProps: {
     addTransformToStack,
