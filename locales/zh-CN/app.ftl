@@ -76,10 +76,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = 折叠 <strong>{ $nameForResource }</strong>
     .title = 折叠资源可将所有对该资源的调用，扁平化为已折叠的单个调用节点。
-CallNodeContextMenu--transform-collapse-direct-recursion2 = 折叠直接递归
-    .title = 折叠直接递归会移除没有立即可用堆栈功能的重复递归函数
-CallNodeContextMenu--transform-collapse-indirect-recursion = 折叠间接递归
-    .title = 折叠间接递归会移除重复递归函数，即使这些函数有立即可用的堆栈功能。
+CallNodeContextMenu--transform-collapse-recursion = 取消递归
+    .title = 取消递归会删除同一函数的重复递归调用，也适用于栈上立即调用的函数
+CallNodeContextMenu--transform-collapse-direct-recursion-only = 仅取消直接递归
+    .title = 取消直接递归会删除同一函数的重复递归调用，不适用于栈上立即调用的函数
 CallNodeContextMenu--transform-drop-function = 丢弃与此函数相关的样本
     .title = 将样本丢弃后，会从分析记录移除这些样本的时间。在需要清除与分析无关的计时信息时，十分有用。
 CallNodeContextMenu--expand-all = 全部展开
@@ -460,6 +460,7 @@ MenuButtons--publish--message-something-went-wrong = 啊哦，上传分析记录
 MenuButtons--publish--message-try-again = 再试一次
 MenuButtons--publish--download = 下载
 MenuButtons--publish--compressing = 正在压缩…
+MenuButtons--publish--error-while-compressing = 压缩时出错，请尝试取消选中某些复选框以减小配置文件大小。
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -570,9 +571,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = 所有栈
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = 原生
+StackSettings--implementation-all-frames = 所有帧
+    .title = 不过滤栈上的帧
+StackSettings--implementation-javascript2 = JavaScript
+    .title = 仅显示栈上需要执行的 JavaScript 帧
+StackSettings--implementation-native2 = 原生
+    .title = 仅显示栈上的原生代码帧
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = 过滤栈：
 StackSettings--use-data-source-label = 数据源：
 StackSettings--call-tree-strategy-timing = 计时
     .title = 使用时间推移下已执行代码的采样栈进行汇总
@@ -766,16 +772,16 @@ TransformNavigator--merge-function = 合并：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = 丢弃：{ $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = 取消递归：{ $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = 折叠直接递归：{ $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = 折叠间接递归：{ $item }
+TransformNavigator--collapse-direct-recursion-only = 仅取消直接递归：{ $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

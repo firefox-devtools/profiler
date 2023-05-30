@@ -44,24 +44,30 @@ import type {
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
+import type { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
 
 /**
- * Infer the return type from the getThreadSelectorsPerThread function. This
- * is done that so that the local type definition with `Selector<T>` is the canonical
- * definition for the type of the selector.
+ * Infer the return type from the getBasicThreadSelectorsPerThread and
+ * getThreadSelectorsWithMarkersPerThread functions. This is done that so that
+ * the local type definition with `Selector<T>` is the canonical definition for
+ * the type of the selector.
  */
-export type ThreadSelectorsPerThread = $ReturnType<
-  typeof getThreadSelectorsPerThread
+export type BasicThreadSelectorsPerThread = $ReturnType<
+  typeof getBasicThreadSelectorsPerThread
 >;
+export type ThreadSelectorsPerThread = {|
+  ...BasicThreadSelectorsPerThread,
+  ...$ReturnType<typeof getThreadSelectorsWithMarkersPerThread>,
+|};
 
 /**
  * Create the selectors for a thread that have to do with an entire thread. This includes
  * the general filtering pipeline for threads.
  */
-export function getThreadSelectorsPerThread(
+export function getBasicThreadSelectorsPerThread(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
@@ -172,74 +178,6 @@ export function getThreadSelectorsPerThread(
     }
   );
 
-  // It becomes very expensive to apply each transform over and over again as they
-  // typically take around 100ms to run per transform on a fast machine. Memoize
-  // memoize each step individually so that they transform stack can be pushed and
-  // popped frequently and easily.
-  const _applyTransformMemoized = memoize(Transforms.applyTransform, {
-    cache: new MixedTupleMap(),
-  });
-
-  const getTransformStack: Selector<TransformStack> = (state) =>
-    UrlState.getTransformStack(state, threadsKey);
-
-  const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
-    getRangeFilteredThread,
-    getTransformStack,
-    ProfileSelectors.getDefaultCategory,
-    (startingThread, transforms, defaultCategory) => {
-      return transforms.reduce(
-        // Apply the reducer using an arrow function to ensure correct memoization.
-        (thread, transform) =>
-          _applyTransformMemoized(thread, transform, defaultCategory),
-        startingThread
-      );
-    }
-  );
-
-  const _getImplementationFilteredThread: Selector<Thread> = createSelector(
-    getRangeAndTransformFilteredThread,
-    UrlState.getImplementationFilter,
-    ProfileSelectors.getDefaultCategory,
-    ProfileData.filterThreadByImplementation
-  );
-
-  const _getImplementationAndSearchFilteredThread: Selector<Thread> =
-    createSelector(
-      _getImplementationFilteredThread,
-      UrlState.getSearchStrings,
-      (thread, searchStrings) => {
-        return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
-      }
-    );
-
-  const getFilteredThread: Selector<Thread> = createSelector(
-    _getImplementationAndSearchFilteredThread,
-    UrlState.getInvertCallstack,
-    ProfileSelectors.getDefaultCategory,
-    (thread, shouldInvertCallstack, defaultCategory) => {
-      return shouldInvertCallstack
-        ? ProfileData.invertCallstack(thread, defaultCategory)
-        : thread;
-    }
-  );
-
-  const getPreviewFilteredThread: Selector<Thread> = createSelector(
-    getFilteredThread,
-    ProfileSelectors.getPreviewSelection,
-    (thread, previewSelection): Thread => {
-      if (!previewSelection.hasSelection) {
-        return thread;
-      }
-      const { selectionStart, selectionEnd } = previewSelection;
-      return ProfileData.filterThreadSamplesToRange(
-        thread,
-        selectionStart,
-        selectionEnd
-      );
-    }
-  );
-
   /**
    * The CallTreeSummaryStrategy determines how the call tree summarizes the
    * the current thread. By default, this is done by timing, but other
@@ -295,20 +233,6 @@ export function getThreadSelectorsPerThread(
       CallTree.extractSamplesLikeTable
     );
 
-  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> =
-    createSelector(
-      getFilteredThread,
-      getCallTreeSummaryStrategy,
-      CallTree.extractSamplesLikeTable
-    );
-
-  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> =
-    createSelector(
-      getPreviewFilteredThread,
-      getCallTreeSummaryStrategy,
-      CallTree.extractSamplesLikeTable
-    );
-
   /**
    * This selector returns the offset to add to a sampleIndex when accessing the
    * base thread, if your thread is a range filtered thread (all but the base
@@ -328,29 +252,6 @@ export function getThreadSelectorsPerThread(
       }
     );
 
-  /**
-   * This selector returns the offset to add to a sampleIndex when accessing the
-   * base thread, if your thread is the preview filtered thread.
-   */
-  const getSampleIndexOffsetFromPreviewRange: Selector<number> = createSelector(
-    getFilteredSamplesForCallTree,
-    ProfileSelectors.getPreviewSelection,
-    getSampleIndexOffsetFromCommittedRange,
-    (samples, previewSelection, sampleIndexFromCommittedRange) => {
-      if (!previewSelection.hasSelection) {
-        return sampleIndexFromCommittedRange;
-      }
-
-      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
-        samples,
-        previewSelection.selectionStart,
-        previewSelection.selectionEnd
-      );
-
-      return sampleIndexFromCommittedRange + beginSampleIndex;
-    }
-  );
-
   const getFriendlyThreadName: Selector<string> = createSelector(
     ProfileSelectors.getThreads,
     getThread,
@@ -361,27 +262,6 @@ export function getThreadSelectorsPerThread(
     getThread,
     getFriendlyThreadName,
     ProfileData.getThreadProcessDetails
-  );
-
-  const getTransformLabelL10nIds: Selector<TransformLabeL10nIds[]> =
-    createSelector(
-      ProfileSelectors.getMeta,
-      getRangeAndTransformFilteredThread,
-      getFriendlyThreadName,
-      getTransformStack,
-      Transforms.getTransformLabelL10nIds
-    );
-
-  const getLocalizedTransformLabels: Selector<React.Node[]> = createSelector(
-    getTransformLabelL10nIds,
-    (transformL10nIds) =>
-      transformL10nIds.map((transform) => (
-        <Localized
-          id={transform.l10nId}
-          vars={{ item: transform.item }}
-          key={transform.item}
-        ></Localized>
-      ))
   );
 
   const getViewOptions: Selector<ThreadViewOptions> = (state) =>
@@ -478,20 +358,11 @@ export function getThreadSelectorsPerThread(
     getNativeAllocations,
     getJsAllocations,
     getThreadRange,
-    getFilteredThread,
     getRangeFilteredThread,
-    getRangeAndTransformFilteredThread,
-    getPreviewFilteredThread,
     getUnfilteredSamplesForCallTree,
-    getFilteredSamplesForCallTree,
-    getPreviewFilteredSamplesForCallTree,
     getSampleIndexOffsetFromCommittedRange,
-    getSampleIndexOffsetFromPreviewRange,
     getFriendlyThreadName,
     getThreadProcessDetails,
-    getTransformLabelL10nIds,
-    getLocalizedTransformLabels,
-    getTransformStack,
     getViewOptions,
     getJsTracerTable,
     getExpensiveJsTracerTiming,
@@ -505,5 +376,174 @@ export function getThreadSelectorsPerThread(
     getActiveTabFilteredThread,
     getProcessedEventDelays,
     getCallTreeSummaryStrategy,
+  };
+}
+
+type BasicThreadAndMarkerSelectorsPerThread = {|
+  ...BasicThreadSelectorsPerThread,
+  ...MarkerSelectorsPerThread,
+|};
+
+export function getThreadSelectorsWithMarkersPerThread(
+  threadSelectors: BasicThreadAndMarkerSelectorsPerThread,
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
+) {
+  // It becomes very expensive to apply each transform over and over again as they
+  // typically take around 100ms to run per transform on a fast machine. Memoize
+  // memoize each step individually so that they transform stack can be pushed and
+  // popped frequently and easily.
+  const _applyTransformMemoized = memoize(Transforms.applyTransform, {
+    cache: new MixedTupleMap(),
+  });
+
+  const getTransformStack: Selector<TransformStack> = (state) =>
+    UrlState.getTransformStack(state, threadsKey);
+
+  const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
+    threadSelectors.getRangeFilteredThread,
+    getTransformStack,
+    ProfileSelectors.getDefaultCategory,
+    threadSelectors.getMarkerGetter,
+    threadSelectors.getFullMarkerListIndexes,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getCategories,
+    (
+      startingThread,
+      transforms,
+      defaultCategory,
+      markerGetter,
+      markerIndexes,
+      markerSchemaByName,
+      categories
+    ) => {
+      return transforms.reduce(
+        // Apply the reducer using an arrow function to ensure correct memoization.
+        (thread, transform) =>
+          _applyTransformMemoized(
+            thread,
+            transform,
+            defaultCategory,
+            markerGetter,
+            markerIndexes,
+            markerSchemaByName,
+            categories
+          ),
+        startingThread
+      );
+    }
+  );
+
+  const _getImplementationFilteredThread: Selector<Thread> = createSelector(
+    getRangeAndTransformFilteredThread,
+    UrlState.getImplementationFilter,
+    ProfileSelectors.getDefaultCategory,
+    ProfileData.filterThreadByImplementation
+  );
+
+  const _getImplementationAndSearchFilteredThread: Selector<Thread> =
+    createSelector(
+      _getImplementationFilteredThread,
+      UrlState.getSearchStrings,
+      (thread, searchStrings) => {
+        return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
+      }
+    );
+
+  const getFilteredThread: Selector<Thread> = createSelector(
+    _getImplementationAndSearchFilteredThread,
+    UrlState.getInvertCallstack,
+    ProfileSelectors.getDefaultCategory,
+    (thread, shouldInvertCallstack, defaultCategory) => {
+      return shouldInvertCallstack
+        ? ProfileData.invertCallstack(thread, defaultCategory)
+        : thread;
+    }
+  );
+
+  const getPreviewFilteredThread: Selector<Thread> = createSelector(
+    getFilteredThread,
+    ProfileSelectors.getPreviewSelection,
+    (thread, previewSelection): Thread => {
+      if (!previewSelection.hasSelection) {
+        return thread;
+      }
+      const { selectionStart, selectionEnd } = previewSelection;
+      return ProfileData.filterThreadSamplesToRange(
+        thread,
+        selectionStart,
+        selectionEnd
+      );
+    }
+  );
+
+  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> =
+    createSelector(
+      getFilteredThread,
+      threadSelectors.getCallTreeSummaryStrategy,
+      CallTree.extractSamplesLikeTable
+    );
+
+  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> =
+    createSelector(
+      getPreviewFilteredThread,
+      threadSelectors.getCallTreeSummaryStrategy,
+      CallTree.extractSamplesLikeTable
+    );
+
+  /**
+   * This selector returns the offset to add to a sampleIndex when accessing the
+   * base thread, if your thread is the preview filtered thread.
+   */
+  const getSampleIndexOffsetFromPreviewRange: Selector<number> = createSelector(
+    getFilteredSamplesForCallTree,
+    ProfileSelectors.getPreviewSelection,
+    threadSelectors.getSampleIndexOffsetFromCommittedRange,
+    (samples, previewSelection, sampleIndexFromCommittedRange) => {
+      if (!previewSelection.hasSelection) {
+        return sampleIndexFromCommittedRange;
+      }
+
+      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+        samples,
+        previewSelection.selectionStart,
+        previewSelection.selectionEnd
+      );
+
+      return sampleIndexFromCommittedRange + beginSampleIndex;
+    }
+  );
+
+  const getTransformLabelL10nIds: Selector<TransformLabeL10nIds[]> =
+    createSelector(
+      ProfileSelectors.getMeta,
+      getRangeAndTransformFilteredThread,
+      threadSelectors.getFriendlyThreadName,
+      getTransformStack,
+      Transforms.getTransformLabelL10nIds
+    );
+
+  const getLocalizedTransformLabels: Selector<React.Node[]> = createSelector(
+    getTransformLabelL10nIds,
+    (transformL10nIds) =>
+      transformL10nIds.map((transform) => (
+        <Localized
+          id={transform.l10nId}
+          vars={{ item: transform.item }}
+          key={transform.item}
+        ></Localized>
+      ))
+  );
+
+  return {
+    getTransformStack,
+    getRangeAndTransformFilteredThread,
+    getFilteredThread,
+    getPreviewFilteredThread,
+    getFilteredSamplesForCallTree,
+    getPreviewFilteredSamplesForCallTree,
+    getSampleIndexOffsetFromPreviewRange,
+    getTransformLabelL10nIds,
+    getLocalizedTransformLabels,
   };
 }
