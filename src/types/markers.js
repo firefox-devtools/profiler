@@ -548,26 +548,11 @@ export type TextMarkerPayload = {|
   innerWindowID?: number,
 |};
 
-// ph: 'X' in the Trace Event Format
-export type ChromeCompleteTraceEventPayload = {|
-  type: 'CompleteTraceEvent',
+// Any import from a Chrome profile
+export type ChromeEventPayload = {|
+  type: string,
   category: string,
   data: MixedObject | null,
-|};
-
-// ph: 'I' in the Trace Event Format
-export type ChromeInstantTraceEventPayload = {|
-  type: 'InstantTraceEvent',
-  category: string,
-  data: MixedObject | null,
-|};
-
-// ph: 'B' | 'E' in the Trace Event Format
-export type ChromeDurationTraceEventPayload = {|
-  type: 'tracing',
-  category: string,
-  data: MixedObject | null,
-  cause?: CauseBacktrace,
 |};
 
 /**
@@ -780,9 +765,6 @@ export type MarkerPayload =
   | NavigationMarkerPayload
   | PrefMarkerPayload
   | IPCMarkerPayload
-  | ChromeCompleteTraceEventPayload
-  | ChromeDurationTraceEventPayload
-  | ChromeInstantTraceEventPayload
   | MediaSampleMarkerPayload
   | JankPayload
   | BrowsertimeMarkerPayload

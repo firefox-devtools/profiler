@@ -76,12 +76,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = Réduire la fonction
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Réduire <strong>{ $nameForResource }</strong>
     .title = Réduire une ressource aplatit tous les appels à cette ressource en un seul nœud d’appel réduit.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Réduire la récursivité directe
-    .title =
-        La réduction de la récursivité directe supprime les appels qui reviennent à plusieurs reprises dans
-        la même fonction sans fonctions intermédiaires sur la pile.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Réduire la récursivité indirecte
-    .title = La réduction de la récursivité indirecte supprime les appels qui reviennent à plusieurs reprises dans la même fonction, même en présence de fonctions intermédiaires sur la pile.
+CallNodeContextMenu--transform-collapse-recursion = Réduire la récursivité
+    .title = La réduction de la récursivité supprime les appels qui reviennent de manière répétée dans la même fonction, même si des fonctions intermédiaires se trouvent dans la pile.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Réduire la récursivité directe uniquement
+    .title = La réduction de la récursivité directe permet de supprimer les appels qui recourent de manière répétée à la même fonction sans qu’il y ait de fonctions intermédiaires dans la pile.
 CallNodeContextMenu--transform-drop-function = Ignorer les échantillons avec cette fonction
     .title = Ignorer des échantillons enlève leur temps du profil. Ceci est utile pour éliminer des informations temporelles non pertinentes pour l’analyse.
 CallNodeContextMenu--expand-all = Tout développer
@@ -476,6 +474,7 @@ MenuButtons--publish--message-something-went-wrong = Oups, une erreur s’est pr
 MenuButtons--publish--message-try-again = Réessayer
 MenuButtons--publish--download = Télécharger
 MenuButtons--publish--compressing = Compression…
+MenuButtons--publish--error-while-compressing = Erreur lors de la compression, essayez de décocher certaines cases pour réduire la taille du profil.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -583,9 +582,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Toutes les piles
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Native
+StackSettings--implementation-all-frames = Toutes les trames
+    .title = Ne pas filtrer les trames de pile
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Afficher uniquement les trames de pile liées à l’exécution JavaScript
+StackSettings--implementation-native2 = Natif
+    .title = Afficher uniquement les trames de pile pour le code natif
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtrer les piles :
 StackSettings--use-data-source-label = Source des données :
 StackSettings--call-tree-strategy-timing = Délais
     .title = Résumer à l’aide de piles d’échantillons du code exécuté au fil du temps
@@ -669,6 +673,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = opérations depuis l’
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Puissance
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -679,6 +688,13 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Puissance
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg eqCO₂)
+    .label = Énergie consommée dans l’intervalle visible
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -700,6 +716,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh 
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg eqCO₂)
     .label = Énergie consommée dans l’intervalle visible
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg eqCO₂)
+    .label = Énergie consommée dans la sélection courante
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -779,16 +802,16 @@ TransformNavigator--merge-function = Fusion : { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Ignorer : { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Réduction de la récursivité : { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Réduction de la récursivité directe : { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Réduction de la récursivité indirecte : { $item }
+TransformNavigator--collapse-direct-recursion-only = Réduction de la récursivité directe uniquement : { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

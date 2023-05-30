@@ -8,6 +8,7 @@ import {
   getProfileWithUnbalancedNativeAllocations,
   getProfileWithBalancedNativeAllocations,
   getProfileWithJsAllocations,
+  addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
@@ -1820,6 +1821,197 @@ describe('"collapse-recursion" transform', function () {
         '    - G.js (total: 1, self: 1)',
         '  - H.js (total: 1, self: 1)',
       ]);
+    });
+  });
+});
+
+describe('"filter-samples" transform', function () {
+  describe('on a call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A  A  A
+      B  B  C  B  F
+      C  C     E
+         D
+    `);
+    const threadIndex = 0;
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[threadIndex], [
+      [
+        'DOMEvent',
+        0,
+        0.5,
+        {
+          type: 'DOMEvent',
+          latency: 7,
+          eventType: 'click',
+        },
+      ],
+      [
+        'Log',
+        0.5,
+        1.5,
+        {
+          type: 'Log',
+          name: 'Random log message',
+          module: 'RandomModule',
+        },
+      ],
+      [
+        'UserTiming',
+        1.5,
+        2.5,
+        {
+          type: 'UserTiming',
+          name: 'measure-2',
+          entryType: 'measure',
+        },
+      ],
+      [
+        'UserTiming',
+        2.5,
+        3.5,
+        {
+          type: 'UserTiming',
+          name: 'measure-2',
+          entryType: 'measure',
+        },
+      ],
+    ]);
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    it('starts as an unfiltered call tree', function () {
+      expect(formatTree(originalCallTree)).toEqual([
+        '- A (total: 5, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 2, self: 1)',
+        '      - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+        '  - C (total: 1, self: 1)',
+        '  - F (total: 1, self: 1)',
+      ]);
+    });
+
+    it('filters to range of "DOMEvent"', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'DOMEvent',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to range of "DOMEvent" by looking at its searchable fields', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'click', // This is the `eventType` field.
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('does not filter to range of "DOMEvent" by looking at its unsearchable fields', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: '7', // This is the `latency` field.
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      // It should show an empty array because there is no match.
+      expect(formatTree(callTree)).toEqual([]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to range of "Log"', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'Log',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to range of "Log" by looking at its searchable fields', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'Random log message', // This is the `name` of the log message.
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to multiple ranges of "UserTiming"', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'UserTiming',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 2, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - E (total: 1, self: 1)',
+        '  - C (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to a non-existent marker name', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'non-existent',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
     });
   });
 });

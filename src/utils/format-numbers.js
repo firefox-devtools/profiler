@@ -244,13 +244,55 @@ export function formatSeconds(
   );
 }
 
+export function formatMinutes(
+  time: Milliseconds,
+  significantDigits: number = 5,
+  maxFractionalDigits: number = 2
+) {
+  return (
+    formatNumber(
+      time / (60 * 1000),
+      significantDigits,
+      Math.min(2, maxFractionalDigits)
+    ) + 'min'
+  );
+}
+
+export function formatHours(
+  time: Milliseconds,
+  significantDigits: number = 5,
+  maxFractionalDigits: number = 1
+) {
+  return (
+    formatNumber(
+      time / (3600 * 1000),
+      significantDigits,
+      Math.min(1, maxFractionalDigits)
+    ) + 'h'
+  );
+}
+
 export function formatTimestamp(
   time: Milliseconds,
   significantDigits: number = 5,
   maxFractionalDigits: number = 3
 ) {
-  // Format in the closest base (seconds, milliseconds, microseconds, or nanoseconds),
+  // Format in the closest base (hours, minutes, seconds, milliseconds, microseconds, or nanoseconds),
   // to avoid cases where times are displayed with too many leading zeroes to be useful.
+  if (time >= 3600 * 1000) {
+    return formatHours(
+      time,
+      significantDigits,
+      Number.isInteger(time / (3600 * 1000)) ? 0 : maxFractionalDigits
+    );
+  }
+  if (time >= 60 * 1000) {
+    return formatMinutes(
+      time,
+      significantDigits,
+      Number.isInteger(time / (60 * 1000)) ? 0 : maxFractionalDigits
+    );
+  }
   if (time >= 1000) {
     return formatSeconds(
       time,

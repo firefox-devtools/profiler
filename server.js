@@ -63,6 +63,13 @@ const serverConfig = {
     `,
   },
   static: false,
+  client: {
+    // See https://github.com/firefox-devtools/profiler/pull/4598#issuecomment-1529260852
+    // for the root cause of an error happening at load time. For this reason we
+    // disable the webpack overlay. We may be able to revisit after moving to
+    // the React 18 new API.
+    overlay: false,
+  },
 };
 
 // Allow a local file to override various options.
@@ -79,6 +86,9 @@ if (localConfigExists) {
 
 const profilerUrl = `http://${host}:${port}`;
 if (argv.profile) {
+  // Needed because of a later working directory change.
+  argv.profile = path.resolve(argv.profile);
+
   // Spin up a simple http server serving the profile file.
   const profileServer = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', profilerUrl);
@@ -117,6 +127,7 @@ if (argv.profile) {
   });
 }
 
+process.chdir(__dirname); // Allow server.js to be run from anywhere.
 const server = new WebpackDevServer(serverConfig, webpack(config));
 server
   .start()

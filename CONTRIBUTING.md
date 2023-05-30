@@ -11,6 +11,7 @@ This project is made up of a cross section of different parts of Mozilla, includ
 | ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox Frontend Engineer |
 | ![][canova] | Nazim Can Altinova| [@canova](https://github.com/canova) | Firefox Platform and Frontend Engineer |
 | <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
+| ![][AdamHarries] | Adam Harries | [@AdamHarries](https://github.com/AdamHarries) | Firefox Platform Engineer |
 | ![][davehunt]| Dave Hunt | [@davehunt](https://github.com/davehunt) | Firefox Profiler Team Manager |
 <!-- mstange's image is differently inserted because its size isn't properly controlled by the size parameter, strangely -->
 
@@ -18,6 +19,7 @@ This project is made up of a cross section of different parts of Mozilla, includ
 [julienw]:https://avatars.githubusercontent.com/julienw?size=56
 [canova]:https://avatars.githubusercontent.com/canova?size=56
 [davehunt]:https://avatars.githubusercontent.com/davehunt?size=56
+[AdamHarries]:https://avatars.githubusercontent.com/AdamHarries?size=56
 
 We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
 
