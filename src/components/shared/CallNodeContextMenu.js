@@ -363,6 +363,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         });
         break;
       }
+      case 'filter-samples':
+        throw new Error(
+          "Filter samples transform can't be applied from the call node context menu."
+        );
       default:
         assertExhaustiveCheck(type);
     }
