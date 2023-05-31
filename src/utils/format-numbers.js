@@ -249,12 +249,16 @@ export function formatMinutes(
   significantDigits: number = 5,
   maxFractionalDigits: number = 2
 ) {
+  const msPerSecond = 1000;
+  time = Math.round(time / msPerSecond) * msPerSecond;
+  const msPerMinute = 60 * msPerSecond;
+  const seconds = time % msPerMinute;
   return (
-    formatNumber(
-      time / (60 * 1000),
-      significantDigits,
-      Math.min(2, maxFractionalDigits)
-    ) + 'min'
+    formatNumber((time - seconds) / msPerMinute, significantDigits, 0) +
+    'min' +
+    (maxFractionalDigits > 0 && seconds > 0
+      ? formatSeconds(seconds, significantDigits, 0)
+      : '')
   );
 }
 
@@ -263,12 +267,34 @@ export function formatHours(
   significantDigits: number = 5,
   maxFractionalDigits: number = 1
 ) {
+  const msPerMinute = 60 * 1000;
+  time = Math.round(time / msPerMinute) * msPerMinute;
+  const msPerHour = 60 * msPerMinute;
+  const minutes = time % msPerHour;
   return (
-    formatNumber(
-      time / (3600 * 1000),
-      significantDigits,
-      Math.min(1, maxFractionalDigits)
-    ) + 'h'
+    formatNumber((time - minutes) / msPerHour, significantDigits, 0) +
+    'h' +
+    (maxFractionalDigits > 0 && minutes > 0
+      ? formatMinutes(minutes, significantDigits, 0)
+      : '')
+  );
+}
+
+export function formatDays(
+  time: Milliseconds,
+  significantDigits: number = 5,
+  maxFractionalDigits: number = 1
+) {
+  const msPerHour = 60 * 60 * 1000;
+  time = Math.round(time / msPerHour) * msPerHour;
+  const msPerDay = 24 * msPerHour;
+  const hours = time % msPerDay;
+  return (
+    formatNumber((time - hours) / msPerDay, significantDigits, 0) +
+    'd' +
+    (maxFractionalDigits > 0 && hours > 0
+      ? formatHours(hours, significantDigits, 0)
+      : '')
   );
 }
 
@@ -277,21 +303,20 @@ export function formatTimestamp(
   significantDigits: number = 5,
   maxFractionalDigits: number = 3
 ) {
-  // Format in the closest base (hours, minutes, seconds, milliseconds, microseconds, or nanoseconds),
-  // to avoid cases where times are displayed with too many leading zeroes to be useful.
-  if (time >= 3600 * 1000) {
-    return formatHours(
-      time,
-      significantDigits,
-      Number.isInteger(time / (3600 * 1000)) ? 0 : maxFractionalDigits
-    );
-  }
-  if (time >= 60 * 1000) {
-    return formatMinutes(
-      time,
-      significantDigits,
-      Number.isInteger(time / (60 * 1000)) ? 0 : maxFractionalDigits
-    );
+  // Format in the closest base (days, hours, minutes, seconds, milliseconds,
+  // microseconds, or nanoseconds), to avoid cases where times are displayed
+  // with too many leading zeroes to be useful.
+  // The Math.round call is needed to avoid showing values like '0min60s'.
+  if (Math.round(time / 1000) / 60 >= 1) {
+    // The if blocks are nested to avoid calling Math.round repeatedly for
+    // the most common case where the value will be less than 1 minute.
+    if (Math.round(time / (60 * 1000)) / 60 >= 1) {
+      if (Math.round(time / (60 * 60 * 1000)) / 24 >= 1) {
+        return formatDays(time, significantDigits, maxFractionalDigits);
+      }
+      return formatHours(time, significantDigits, maxFractionalDigits);
+    }
+    return formatMinutes(time, significantDigits, maxFractionalDigits);
   }
   if (time >= 1000) {
     return formatSeconds(
