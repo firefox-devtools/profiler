@@ -303,6 +303,8 @@ export type GeckoProfilerOverhead = {|
  * */
 export type GeckoProfileShortMeta = {|
   version: number,
+  // When the main process started. Timestamp expressed in milliseconds since
+  // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
   shutdownTime: Milliseconds | null,
   categories: CategoryList,
@@ -315,6 +317,10 @@ export type GeckoProfileShortMeta = {|
  * */
 export type GeckoProfileFullMeta = {|
   ...GeckoProfileShortMeta,
+  // When the recording started (in milliseconds after startTime).
+  profilingStartTime?: Milliseconds,
+  // When the recording ended (in milliseconds after startTime).
+  profilingEndTime?: Milliseconds,
   interval: Milliseconds,
   stackwalk: 0 | 1,
   // This value represents a boolean, but for some reason is written out as an int
