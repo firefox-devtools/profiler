@@ -61,7 +61,7 @@
     "@fluent/bundle": "^0.18.0",
     "@fluent/langneg": "^0.7.0",
     "@fluent/react": "^0.15.0",
-    "@lezer/highlight": "^1.1.4",
+    "@lezer/highlight": "^1.1.6",
     "@tgwf/co2": "^0.13.4",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
