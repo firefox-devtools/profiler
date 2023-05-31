@@ -367,12 +367,23 @@ MarkerContextMenu--select-the-receiver-thread = Selecteer de ontvangerthread ‘
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Selecteer de afzenderthread ‘<strong>{ $threadName }</strong>’
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Samples buiten markeringen overeenkomend met ‘<strong>{ $filter }</strong>’ buiten beschouwing laten
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Markeringen filteren:
     .title = Alleen markeringen tonen die overeenkomen met een bepaalde naam
+MarkerSettings--marker-filters =
+    .title = Markeringsfilters
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -893,6 +904,10 @@ TransformNavigator--collapse-direct-recursion-only = Alleen directe recursie sam
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Subtree samenvouwen: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Samples buiten markeringen overeenkomend met ‘{ $item }’ buiten beschouwing laten
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
