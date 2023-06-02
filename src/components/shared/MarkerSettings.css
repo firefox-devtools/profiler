@@ -9,3 +9,31 @@
   padding: 0;
   line-height: 25px;
 }
+
+.filterMarkersButton {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  padding-right: 30px;
+  margin: 0 4px;
+  background-image: url(firefox-profiler-res/img/svg/filter.svg);
+  background-position: 4px center;
+  background-repeat: no-repeat;
+}
+
+/* This is the dropdown arrow on the right of the button. */
+.filterMarkersButton::after {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  border-top: 6px solid;
+  border-right: 4px solid transparent;
+  border-bottom: 0 solid transparent;
+  border-left: 4px solid transparent;
+  margin-top: 7px;
+  margin-right: 4px;
+  margin-left: 4px;
+  color: var(--grey-90);
+  content: '';
+}

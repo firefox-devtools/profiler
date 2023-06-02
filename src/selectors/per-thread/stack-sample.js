@@ -44,6 +44,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { ThreadSelectorsPerThread } from './thread';
+import type { MarkerSelectorsPerThread } from './markers';
 
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
@@ -54,11 +55,16 @@ export type StackAndSampleSelectorsPerThread = $ReturnType<
   typeof getStackAndSampleSelectorsPerThread
 >;
 
+type ThreadAndMarkerSelectorsPerThread = {|
+  ...ThreadSelectorsPerThread,
+  ...MarkerSelectorsPerThread,
+|};
+
 /**
  * Create the selectors for a thread that have to do with either stacks or samples.
  */
 export function getStackAndSampleSelectorsPerThread(
-  threadSelectors: ThreadSelectorsPerThread,
+  threadSelectors: ThreadAndMarkerSelectorsPerThread,
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {

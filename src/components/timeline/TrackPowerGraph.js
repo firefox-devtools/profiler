@@ -362,6 +362,32 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
           // Right point is closer
           hoveredCounter = bisectionCounter;
         }
+
+        // If there are samples before or after hoveredCounter that fall
+        // horizontally on the same pixel, move hoveredCounter to the sample
+        // with the highest power value.
+        const mouseAtTime = (t) =>
+          Math.round(((t - rangeStart) / rangeLength) * width + left);
+        for (
+          let currentIndex = hoveredCounter - 1;
+          mouseAtTime(samples.time[currentIndex]) === mouseX &&
+          currentIndex > 0;
+          --currentIndex
+        ) {
+          if (samples.count[currentIndex] > samples.count[hoveredCounter]) {
+            hoveredCounter = currentIndex;
+          }
+        }
+        for (
+          let currentIndex = hoveredCounter + 1;
+          mouseAtTime(samples.time[currentIndex]) === mouseX &&
+          currentIndex < samples.time.length;
+          ++currentIndex
+        ) {
+          if (samples.count[currentIndex] > samples.count[hoveredCounter]) {
+            hoveredCounter = currentIndex;
+          }
+        }
       } else {
         hoveredCounter = bisectionCounter;
       }
