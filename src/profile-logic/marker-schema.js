@@ -23,7 +23,6 @@ import type {
   Marker,
   MarkerIndex,
   MarkerPayload,
-  Thread,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
@@ -144,7 +143,7 @@ export function getSchemaFromMarker(
 export function parseLabel(
   markerSchema: MarkerSchema,
   categories: CategoryList,
-  thread: Thread,
+  stringTable: UniqueStringArray,
   label: string
 ): (Marker) => string {
   // Split the label on the "{key}" capture groups.
@@ -269,7 +268,7 @@ export function parseLabel(
               markerSchema.name,
               format,
               value,
-              thread.stringTable
+              stringTable
             )
           : value;
       };
@@ -335,7 +334,7 @@ export function getLabelGetter(
   markerSchemaList: MarkerSchema[],
   markerSchemaByName: MarkerSchemaByName,
   categoryList: CategoryList,
-  thread: Thread,
+  stringTable: UniqueStringArray,
   labelKey: LabelKey
 ): (MarkerIndex) => string {
   // Build up a list of label functions, that are tied to the schema name.
@@ -345,7 +344,7 @@ export function getLabelGetter(
     if (labelString) {
       labelFns.set(
         schema.name,
-        parseLabel(schema, categoryList, thread, labelString)
+        parseLabel(schema, categoryList, stringTable, labelString)
       );
     }
   }
@@ -394,7 +393,7 @@ export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
   value: any,
-  stringTable: ?UniqueStringArray
+  stringTable: UniqueStringArray
 ): string {
   if (value === undefined || value === null) {
     console.warn(
@@ -427,7 +426,12 @@ export function formatFromMarkerSchema(
           }
           return row.map((cell, j) => {
             const { format } = columns[j];
-            return formatFromMarkerSchema(markerType, format || 'string', cell);
+            return formatFromMarkerSchema(
+              markerType,
+              format || 'string',
+              cell,
+              stringTable
+            );
           });
         });
         rows.push(...cellRows);
@@ -446,13 +450,7 @@ export function formatFromMarkerSchema(
       // Make sure a non-empty string is returned here.
       return String(value) || '(empty)';
     case 'unique-string':
-      if (stringTable !== null && stringTable !== undefined) {
-        return stringTable.getString(value);
-      }
-      console.warn(
-        `Could not find marker table for index "${value}" in markertype "${markerType}"`
-      );
-      return 'Null or undefined string table.';
+      return stringTable.getString(value, '(empty)');
     case 'duration':
     case 'time':
       return formatTimestamp(value);
@@ -477,7 +475,9 @@ export function formatFromMarkerSchema(
         throw new Error('Expected an array for list format');
       }
       return value
-        .map((v) => formatFromMarkerSchema(markerType, 'string', v))
+        .map((v) =>
+          formatFromMarkerSchema(markerType, 'string', v, stringTable)
+        )
         .join(', ');
     default:
       console.warn(
@@ -501,7 +501,7 @@ export function formatMarkupFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
   value: any,
-  stringTable: ?UniqueStringArray
+  stringTable: UniqueStringArray
 ): React.Element<any> | string {
   if (value === undefined || value === null) {
     console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
@@ -576,7 +576,12 @@ export function formatMarkupFromMarkerSchema(
         <ul className="marker-list-value">
           {value.map((entry, i) => (
             <li key={i}>
-              {formatFromMarkerSchema(markerType, 'string', value[i])}
+              {formatFromMarkerSchema(
+                markerType,
+                'string',
+                value[i],
+                stringTable
+              )}
             </li>
           ))}
         </ul>

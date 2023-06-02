@@ -414,7 +414,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getThread,
+      threadSelectors.getStringTable,
       () => 'tooltipLabel',
       getLabelGetter
     );
@@ -428,7 +428,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getThread,
+      threadSelectors.getStringTable,
       () => 'tableLabel',
       getLabelGetter
     );
@@ -442,7 +442,7 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getMarkerSchema,
       ProfileSelectors.getMarkerSchemaByName,
       ProfileSelectors.getCategories,
-      threadSelectors.getThread,
+      threadSelectors.getStringTable,
       () => 'chartLabel',
       getLabelGetter
     );
