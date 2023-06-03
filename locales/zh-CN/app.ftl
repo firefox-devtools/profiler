@@ -290,6 +290,10 @@ MarkerContextMenu--select-the-sender-thread = 选择 Sender 线程“<strong>{ $
 ## This is the menu when filter icon is clicked in Marker Chart and Marker Table
 ## panels.
 
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = 不用标记过滤器“<strong>{ $filter }</strong>”标记此样本
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -297,6 +301,8 @@ MarkerContextMenu--select-the-sender-thread = 选择 Sender 线程“<strong>{ $
 MarkerSettings--panel-search =
     .label = 过滤标记：
     .title = 只显示匹配特定名称的标记
+MarkerSettings--marker-filters =
+    .title = 标记过滤器
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -811,6 +817,10 @@ TransformNavigator--collapse-direct-recursion-only = 仅取消直接递归：{ $
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = 不用过滤器 “{ $item }” 标记该样本
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
