@@ -141,6 +141,7 @@ module.exports = {
         ],
         extensions: ['.js', '.jpg'],
       },
+      node: true,
     },
   },
   globals: {

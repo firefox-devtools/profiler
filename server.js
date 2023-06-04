@@ -4,7 +4,6 @@
 // @noflow
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const http = require('node:http');
 const config = require('./webpack.config');
 const { oneLine, stripIndent } = require('common-tags');
 const port = process.env.FX_PROFILER_PORT || 4242;
@@ -15,7 +14,6 @@ const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
 
 const argv = yargs(hideBin(process.argv))
-  .command('* [profile]', 'Open Firefox Profiler, on [profile] if included.')
   .option('c', {
     alias: 'config',
     describe: 'Path to local webpack config',
@@ -83,8 +81,10 @@ const defaultLocalConfigPath = path.join(
 const readConfig = (localConfigPath) => {
   const configRequirePath = `./${path.relative(__dirname, localConfigPath)}`;
   try {
-    require(configRequirePath)(config, serverConfig);
-    localConfigFile = path.basename(configRequirePath);
+    const configDetails = require(configRequirePath)(config, serverConfig);
+    localConfigFile = path.basename(
+      configDetails?.origConfigPath ?? configRequirePath
+    );
   } catch (error) {
     console.error(
       `Unable to load and apply settings from ${configRequirePath}`
@@ -98,49 +98,6 @@ if (argv.config) {
   readConfig(defaultLocalConfigPath);
 }
 
-const profilerUrl = `http://${host}:${port}`;
-if (argv.profile) {
-  // Needed because of a later working directory change.
-  argv.profile = path.resolve(argv.profile);
-
-  // Spin up a simple http server serving the profile file.
-  const profileServer = http.createServer((req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', profilerUrl);
-    const fileStream = fs.createReadStream(argv.profile);
-    fileStream.pipe(res);
-  });
-
-  // Close the profile server on CTRL-C.
-  process.on('SIGINT', () => profileServer.close());
-  process.on('SIGTERM', () => profileServer.close());
-
-  // Delete "open" target (if any) in serverConfig.
-  if (
-    typeof serverConfig.open === 'object' &&
-    !Array.isArray(serverConfig.open) &&
-    serverConfig.open !== null
-  ) {
-    delete serverConfig.open.target;
-  } else {
-    delete serverConfig.open;
-  }
-
-  // Save and delete "open" property from serverConfig so that
-  // webpack-dev-server doesn't open anything in tandem.
-  const openOptions = serverConfig.open;
-  delete serverConfig.open;
-
-  // Open on profile.
-  profileServer.listen(0, host, () => {
-    const profileFromUrl = `${profilerUrl}/from-url/${encodeURIComponent(
-      `http://${host}:${profileServer.address().port}/${encodeURIComponent(
-        path.basename(argv.profile)
-      )}`
-    )}`;
-    import('open').then((open) => open.default(profileFromUrl, openOptions));
-  });
-}
-
 process.chdir(__dirname); // Allow server.js to be run from anywhere.
 const server = new WebpackDevServer(serverConfig, webpack(config));
 server
@@ -150,7 +107,7 @@ server
       '------------------------------------------------------------------------------------------';
 
     console.log(barAscii);
-    console.log(`> Firefox Profiler is listening at: ${profilerUrl}\n`);
+    console.log(`> Firefox Profiler is listening at: http://${host}:${port}\n`);
     if (port === 4242) {
       console.log(
         '> You can change this default port with the environment variable FX_PROFILER_PORT.\n'

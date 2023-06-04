@@ -10,4 +10,4 @@
 
 SCRIPTPATH=$(realpath "$0")
 SCRIPTDIR=$(dirname "$SCRIPTPATH")
-NODE_ENV=development node "$SCRIPTDIR/../server.js" "$@"
+node "$SCRIPTDIR/../launch-fp.mjs" "$@"
