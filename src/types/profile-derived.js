@@ -4,7 +4,7 @@
 
 // @flow
 import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
-import type { MarkerPayload } from './markers';
+import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
   IndexIntoFuncTable,
   ThreadIndex,
@@ -313,6 +313,23 @@ export type AccumulatedCounterSamples = {|
   +accumulatedCounts: number[],
 |};
 
+/**
+ * A collection of the data for all configured lines for a given marker
+ */
+export type CollectedCustomMarkerSamples = {|
+  +minNumber: number,
+  +maxNumber: number,
+  // startTime
+  markers: Marker[],
+  // needed to make this type more sample table like
+  time: number[],
+  // This value holds the number per configured line
+  // selection. The array will share the indexes of the range filtered marker samples.
+  +numbersPerLine: number[][],
+  +indexes: MarkerIndex[],
+  length: number,
+|};
+
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
@@ -331,7 +348,12 @@ export type LocalTrack =
   | {| +type: 'ipc', +threadIndex: ThreadIndex |}
   | {| +type: 'event-delay', +threadIndex: ThreadIndex |}
   | {| +type: 'process-cpu', +counterIndex: CounterIndex |}
-  | {| +type: 'power', +counterIndex: CounterIndex |};
+  | {| +type: 'power', +counterIndex: CounterIndex |}
+  | {|
+      +type: 'marker',
+      +threadIndex: ThreadIndex,
+      +markerSchema: MarkerSchema,
+    |};
 
 export type Track = GlobalTrack | LocalTrack;
 

@@ -12,6 +12,7 @@ import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedMarkerInfo } from '../right-clicked-marker';
 import { getLabelGetter } from '../../profile-logic/marker-schema';
+import { getInclusiveSampleIndexRangeForSelection } from '../../profile-logic/profile-data';
 
 import type { BasicThreadSelectorsPerThread } from './thread';
 import type {
@@ -28,6 +29,10 @@ import type {
   $ReturnType,
   ThreadsKey,
   Tid,
+  MarkerSchema,
+  MarkerTrackConfig,
+  CollectedCustomMarkerSamples,
+  IndexIntoSamplesTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -47,8 +52,9 @@ export function getMarkerSelectorsPerThread(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
-  const _getRawMarkerTable: Selector<RawMarkerTable> = (state) =>
-    threadSelectors.getThread(state).markers;
+  const _getRawMarkerTable: Selector<RawMarkerTable> = (state) => {
+    return threadSelectors.getThread(state).markers;
+  };
 
   /**
    * Similar to thread filtering, the markers can be filtered as well, and it's
@@ -608,6 +614,104 @@ export function getMarkerSelectorsPerThread(
     }
   );
 
+  type MarkerTrackSelectors = $ReturnType<typeof _createMarkerTrackSelectors>;
+  const _markerTrackSelectors = {};
+  const getMarkerTrackSelectors = (name: string): MarkerTrackSelectors => {
+    let selectors = _markerTrackSelectors[name];
+    if (!selectors) {
+      selectors = _createMarkerTrackSelectors(name);
+      _markerTrackSelectors[name] = selectors;
+    }
+    return selectors;
+  };
+
+  /**
+   * This function creates selectors for each of the trackable markers of a thread. The type
+   * signature of each selector is defined in the function body, and inferred in the return
+   * type of the function.
+   */
+  function _createMarkerTrackSelectors(name: string) {
+    const _getMarkerSchema: Selector<MarkerSchema> = createSelector(
+      ProfileSelectors.getMarkerSchemaByName,
+      (schemaByName) => schemaByName[name]
+    );
+
+    const _getMarkerTrackConfig: Selector<MarkerTrackConfig> = createSelector(
+      _getMarkerSchema,
+      (schema) => {
+        if (schema.trackConfig === undefined) {
+          throw new Error('No trackConfig for marker ' + name);
+        }
+        return schema.trackConfig;
+      }
+    );
+
+    const _getTrackKeys: Selector<string[]> = createSelector(
+      _getMarkerTrackConfig,
+      (trackConfig) => trackConfig.lines.map((lineConfig) => lineConfig.key)
+    );
+
+    const getCollectedCustomMarkerSamples: Selector<CollectedCustomMarkerSamples> =
+      createSelector(
+        getFullMarkerList,
+        threadSelectors.getStringTable,
+        _getTrackKeys,
+        (fullMarkerList, stringTable, trackKeys) => {
+          const filteredIndexes = fullMarkerList
+            .map((n, i) => [n, i])
+            .filter((t) => t[0].name === name)
+            .map((t) => t[1]);
+          const markers = filteredIndexes.map((i) => fullMarkerList[i]);
+          const numbersPerLine: number[][] = trackKeys.map((key) =>
+            markers.map((marker) => {
+              const markerPayload = marker.data;
+              if (
+                !(markerPayload instanceof Object) ||
+                !(key in markerPayload)
+              ) {
+                throw new Error('Missing ' + key + ' in marker ' + name);
+              }
+              return markerPayload[key];
+            })
+          );
+          const minNumber = Math.min(
+            ...numbersPerLine.map((x) => Math.min(...x))
+          );
+          const maxNumber = Math.max(
+            ...numbersPerLine.map((x) => Math.max(...x))
+          );
+          const length = numbersPerLine.length;
+          return {
+            minNumber,
+            maxNumber,
+            markers,
+            time: markers.map((marker) => marker.start),
+            numbersPerLine,
+            indexes: filteredIndexes,
+            length,
+          };
+        }
+      );
+
+    const getCommittedRangeMarkerSampleRange: Selector<
+      [IndexIntoSamplesTable, IndexIntoSamplesTable]
+    > = createSelector(
+      getCollectedCustomMarkerSamples,
+      ProfileSelectors.getCommittedRange,
+      (collectedSamples, range) =>
+        getInclusiveSampleIndexRangeForSelection(
+          collectedSamples,
+          range.start,
+          range.end
+        )
+    );
+
+    return {
+      getCollectedCustomMarkerSamples,
+      getCommittedRangeMarkerSampleRange,
+    };
+  }
+
   return {
     getMarkerGetter,
     getTimelineJankMarkerIndexes,
@@ -646,5 +750,6 @@ export function getMarkerSelectorsPerThread(
     getRightClickedMarkerIndex,
     getRightClickedMarker,
     getHoveredMarkerIndex,
+    getMarkerTrackSelectors,
   };
 }

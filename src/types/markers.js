@@ -89,6 +89,34 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
+export type MarkerTrackConfigLineType = 'bar' | 'line';
+export type MarkerTrackConfigLineHeight = 'small' | 'medium' | 'large';
+export type MarkerTrackConfig = {|
+  label: string,
+  tooltip?: string,
+  // height of the track in pixels
+  height?: MarkerTrackConfigLineHeight,
+  isPreSelected?: boolean,
+  lines: Array<{|
+    key: string,
+    fillColor?: string,
+    strokeColor?:
+      | 'magenta'
+      | 'purple'
+      | 'teal'
+      | 'green'
+      | 'yellow'
+      | 'orange'
+      | 'red'
+      | 'transparent'
+      | 'grey'
+      | string,
+    width?: number,
+    type?: MarkerTrackConfigLineType,
+    isPreScaled?: boolean,
+  |}>,
+|};
+
 export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
@@ -116,6 +144,8 @@ export type MarkerSchema = {|
         label?: string,
         format: MarkerFormatType,
         searchable?: boolean,
+        // hidden in the side bar and tooltips?
+        isHidden?: boolean,
       |}
     | {|
         // This type is a static bit of text that will be displayed
@@ -123,6 +153,9 @@ export type MarkerSchema = {|
         value: string,
       |}
   >,
+
+  // if present, give the marker its own local track
+  trackConfig?: MarkerTrackConfig,
 |};
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
