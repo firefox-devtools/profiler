@@ -92,6 +92,14 @@ CallNodeContextMenu--transform-collapse-function-subtree = Згарнуць фу
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Згарнуць <strong>{ $nameForResource }</strong>
     .title = Згортванне рэсурсу згладзіць усе выклікі да гэтага рэсурсу ў адзіны згорнуты вузел выкліку.
+CallNodeContextMenu--transform-collapse-recursion = Згарнуць рэкурсію
+    .title =
+        Згортванне рэкурсіі выдаляе выклікі, якія паўторна ідуць у адну
+        і тую ж функцыю, нават з прамежкавымі функцыямі ў стэку.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Згарнуць толькі прамую рэкурсію
+    .title =
+        Згортванне прамой рэкурсіі выдаляе выклікі, якія паўторна ідуць
+        у адну і тую ж функцыю без прамежкавых функцый у стэку.
 CallNodeContextMenu--transform-drop-function = Адкінуць узоры з гэтай функцыяй
     .title = Адкідванне ўзораў выдаляе іх час з профілю. Гэта карысна для выдалення інфармацыі аб часе, які не мае дачынення да аналізу.
 CallNodeContextMenu--expand-all = Разгарнуць усё
@@ -341,7 +349,7 @@ MarkerContextMenu--select-the-sender-thread = Выберыце паток-адп
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
-    .label = Фільтра маркераў
+    .label = Фільтр маркераў:
     .title = Паказваць толькі маркеры, якія адпавядаюць пэўнаму імені
 
 ## MarkerSidebar
@@ -543,6 +551,7 @@ MenuButtons--publish--message-something-went-wrong = Ой, нешта пайшл
 MenuButtons--publish--message-try-again = Паспрабаваць зноў
 MenuButtons--publish--download = Спампаваць
 MenuButtons--publish--compressing = Сцісканне…
+MenuButtons--publish--error-while-compressing = Памылка пры сцісканні, паспрабуйце зняць некаторыя птушкі, каб паменшыць памер профілю.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -652,9 +661,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Усе стэкі
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Уласны
+StackSettings--implementation-all-frames = Усе кадры
+    .title = Не фільтраваць кадры стэка
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Паказваць толькі кадры стэка, звязаныя з выкананнем JavaScript
+StackSettings--implementation-native2 = Убудаваны
+    .title = Паказваць толькі кадры стэка для платформна-залежнага кода
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Фільтр стэкаў:
 StackSettings--use-data-source-label = Крыніца даных:
 StackSettings--call-tree-strategy-timing = Таймінгі
     .title = Стварыць зводку асобных стэкаў кода, выкананых за пэўны перыяд часу
@@ -738,6 +752,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = аперацый, па�
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Магутнасць
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -748,6 +767,13 @@ TrackPower--tooltip-power-watt = { $value } Вт
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } мВт
     .label = Магутнасць
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } кг CO₂e)
+    .label = Энергія, якая выкарыстоўваецца ў бачным дыяпазоне
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -769,6 +795,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } мВ�
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } мкВт·гад ({ $carbonValue } мг CO₂e)
     .label = Энергія, якая спажываецца ў бачным дыяпазоне
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } кг CO₂e)
+    .label = Энергія, якая выкарыстоўваецца ў бягучай выбарцы
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:

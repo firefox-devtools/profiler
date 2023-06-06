@@ -132,6 +132,31 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         Did you know you can use the comma (,) to search using several terms?
       </div>
     </div>
+    <button
+      class="filterMarkersButton photon-button photon-button-ghost"
+      disabled=""
+      title="Marker Filters"
+      type="button"
+    />
+    <nav
+      class="react-contextmenu markerFiltersContextMenu"
+      role="menu"
+      style="position: fixed; opacity: 0; pointer-events: none;"
+      tabindex="-1"
+    >
+      <div
+        aria-disabled="false"
+        class="react-contextmenu-item"
+        role="menuitem"
+        tabindex="-1"
+      >
+        Drop samples outside of markers matching “
+        <strong>
+          ⁨⁩
+        </strong>
+        ”
+      </div>
+    </nav>
   </div>
   <div
     class="treeView"
