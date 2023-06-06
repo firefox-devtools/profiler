@@ -35,7 +35,7 @@ import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 
 // The following constants determine the size of the drawn graph.
-const SAMPLE_COUNT = 8;
+const SAMPLE_COUNT = 12;
 const PIXELS_PER_SAMPLE = 10;
 const GRAPH_WIDTH = PIXELS_PER_SAMPLE * SAMPLE_COUNT;
 const GRAPH_HEIGHT = 10;
@@ -60,6 +60,11 @@ describe('TrackPower', function () {
     const thread = profile.threads[threadIndex];
     // Changing one of the sample times, so we can test different intervals.
     thread.samples.time[1] = 1.5; // It was 1 before.
+    // Ensure some samples are very close to each other, to exercise
+    // the max min decimation algorithm.
+    for (let i = 7; i < thread.samples.time.length - 1; ++i) {
+      thread.samples.time[i] = 7 + i / 100;
+    }
     profile.counters = [
       getCounterForThreadWithSamples(
         thread,
@@ -67,7 +72,10 @@ describe('TrackPower', function () {
         {
           time: thread.samples.time.slice(),
           // Power usage numbers. They are pWh so they are pretty big.
-          count: [10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 10000],
+          count: [
+            10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000,
+            20000, 1, 12000, 100000,
+          ],
           length: SAMPLE_COUNT,
         },
         'SystemPower',
@@ -197,10 +205,10 @@ describe('TrackPower', function () {
     expect(screen.getByText(/Power:/).nextSibling).toHaveTextContent(
       '360\u2069 mW'
     );
-    // Over the full range, we get 7.240 µWh, therefore we'll see in the tooltip
-    // 7.2 µWh.
+    // Over the full range, we get 8.352 µWh, therefore we'll see in the tooltip
+    // 8.4 µWh.
     expect(screen.getByText(/visible range:/).nextSibling).toHaveTextContent(
-      '7.2\u2069 µWh'
+      '8.4\u2069 µWh'
     );
     // Over the preview selection, we get 5 µWh which shows up as 5.0 µWh.
     expect(
