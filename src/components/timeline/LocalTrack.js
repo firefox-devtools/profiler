@@ -22,7 +22,6 @@ import {
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getLocalTrackName,
-  getLocalTrackTooltip,
   getCounterSelectors,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -55,7 +54,6 @@ type OwnProps = {|
 
 type StateProps = {|
   +trackName: string,
-  +trackTooltip: ?string,
   +isSelected: boolean,
   +isHidden: boolean,
   +titleText: string | null,
@@ -257,7 +255,6 @@ export const TimelineLocalTrack = explicitConnect<
 
     return {
       trackName: getLocalTrackName(state, pid, trackIndex),
-      trackTooltip: getLocalTrackTooltip(state, pid, trackIndex),
       titleText,
       isSelected,
       isHidden: getHiddenLocalTracks(state, pid).has(trackIndex),

@@ -35,9 +35,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-type State = {||};
-
-export class TrackCustomMarkerImpl extends React.PureComponent<Props, State> {
+export class TrackCustomMarkerImpl extends React.PureComponent<Props> {
   render() {
     const { markerSchema, threadIndex } = this.props;
     const trackHeight = getMarkerTrackHeight(markerSchema);

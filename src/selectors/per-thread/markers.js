@@ -29,7 +29,6 @@ import type {
   $ReturnType,
   ThreadsKey,
   Tid,
-  MarkerSchema,
   MarkerTrackConfig,
   CollectedCustomMarkerSamples,
   IndexIntoSamplesTable,
@@ -52,9 +51,8 @@ export function getMarkerSelectorsPerThread(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
-  const _getRawMarkerTable: Selector<RawMarkerTable> = (state) => {
-    return threadSelectors.getThread(state).markers;
-  };
+  const _getRawMarkerTable: Selector<RawMarkerTable> = (state) =>
+    threadSelectors.getThread(state).markers;
 
   /**
    * Similar to thread filtering, the markers can be filtered as well, and it's
@@ -631,37 +629,33 @@ export function getMarkerSelectorsPerThread(
    * type of the function.
    */
   function _createMarkerTrackSelectors(name: string) {
-    const _getMarkerSchema: Selector<MarkerSchema> = createSelector(
-      ProfileSelectors.getMarkerSchemaByName,
-      (schemaByName) => schemaByName[name]
-    );
-
-    const _getMarkerTrackConfig: Selector<MarkerTrackConfig> = createSelector(
-      _getMarkerSchema,
-      (schema) => {
-        if (schema.trackConfig === undefined) {
-          throw new Error('No trackConfig for marker ' + name);
-        }
-        return schema.trackConfig;
+    const _getMarkerTrackConfig: Selector<MarkerTrackConfig> = (state) => {
+      const markerSchemaByName = ProfileSelectors.getMarkerSchemaByName(state);
+      const schema = markerSchemaByName[name];
+      if (schema.trackConfig === undefined) {
+        throw new Error(
+          `No trackConfig for marker ${name}. This shouldn't happen.`
+        );
       }
-    );
-
-    const _getTrackKeys: Selector<string[]> = createSelector(
-      _getMarkerTrackConfig,
-      (trackConfig) => trackConfig.lines.map((lineConfig) => lineConfig.key)
-    );
+      return schema.trackConfig;
+    };
 
     const getCollectedCustomMarkerSamples: Selector<CollectedCustomMarkerSamples> =
       createSelector(
         getFullMarkerList,
         threadSelectors.getStringTable,
-        _getTrackKeys,
-        (fullMarkerList, stringTable, trackKeys) => {
+        _getMarkerTrackConfig,
+        (fullMarkerList, stringTable, trackConfig) => {
+          // FIXME this function is hard to read, loops too many times over the
+          // list of markers, and confuses markers schema with marker names.
           const filteredIndexes = fullMarkerList
             .map((n, i) => [n, i])
             .filter((t) => t[0].name === name)
             .map((t) => t[1]);
           const markers = filteredIndexes.map((i) => fullMarkerList[i]);
+          const trackKeys = trackConfig.lines.map(
+            (lineConfig) => lineConfig.key
+          );
           const numbersPerLine: number[][] = trackKeys.map((key) =>
             markers.map((marker) => {
               const markerPayload = marker.data;
@@ -680,15 +674,12 @@ export function getMarkerSelectorsPerThread(
           const maxNumber = Math.max(
             ...numbersPerLine.map((x) => Math.max(...x))
           );
-          const length = numbersPerLine.length;
           return {
             minNumber,
             maxNumber,
             markers,
-            time: markers.map((marker) => marker.start),
             numbersPerLine,
             indexes: filteredIndexes,
-            length,
           };
         }
       );
@@ -700,7 +691,10 @@ export function getMarkerSelectorsPerThread(
       ProfileSelectors.getCommittedRange,
       (collectedSamples, range) =>
         getInclusiveSampleIndexRangeForSelection(
-          collectedSamples,
+          {
+            time: collectedSamples.markers.map((m) => m.start),
+            length: collectedSamples.markers.length,
+          },
           range.start,
           range.end
         )

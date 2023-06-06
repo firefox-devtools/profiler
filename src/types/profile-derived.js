@@ -321,13 +321,10 @@ export type CollectedCustomMarkerSamples = {|
   +maxNumber: number,
   // startTime
   markers: Marker[],
-  // needed to make this type more sample table like
-  time: number[],
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.
   +numbersPerLine: number[][],
   +indexes: MarkerIndex[],
-  length: number,
 |};
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';

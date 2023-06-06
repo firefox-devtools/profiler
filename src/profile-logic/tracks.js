@@ -31,7 +31,10 @@ import {
   TRACK_MARKER_HEIGHTS,
 } from '../app-logic/constants';
 import {
+  BLUE_50,
   GREEN_50,
+  GREY_50,
+  INK_50,
   MAGENTA_50,
   ORANGE_50,
   PURPLE_50,
@@ -68,10 +71,6 @@ export const getMarkerTrackHeight = (schema: MarkerSchema) => {
   return (TRACK_MARKER_HEIGHTS[heightName]: number);
 };
 
-export const getMarkerTrackTooltip = (schema: MarkerSchema) => {
-  return getMarkerTrackConfig(schema).tooltip;
-};
-
 export const getMarkerTrackLineConfig = (
   schema: MarkerSchema,
   line: number
@@ -88,14 +87,6 @@ export const getMarkerTrackLineWidth = (schema: MarkerSchema, line: number) => {
 
 export const isMarkerTrackPreSelected = (schema: MarkerSchema) => {
   return getMarkerTrackConfig(schema).isPreSelected === true;
-};
-
-export const getMaximumMarkerTrackLineWidth = (schema: MarkerSchema) => {
-  return Math.max(
-    ...getMarkerTrackConfig(schema).lines.map(
-      (conf) => conf.width || TRACK_MARKER_DEFAULT_LINE_WIDTH
-    )
-  );
 };
 
 export const getMarkerTrackLineFillColor = (
@@ -115,13 +106,6 @@ export const getMarkerTrackConfigLineType = (
   return getMarkerTrackLineConfig(schema, line).type || 'line';
 };
 
-export const isMarkerTrackLinePreScaled = (
-  schema: MarkerSchema,
-  line: number
-) => {
-  return getMarkerTrackLineConfig(schema, line).isPreScaled === true;
-};
-
 export const getMarkerTrackLineStrokeColor = (
   schema: MarkerSchema,
   line: number
@@ -134,18 +118,24 @@ export const getMarkerTrackLineStrokeColor = (
       return MAGENTA_50;
     case 'purple':
       return PURPLE_50;
+    case 'blue':
+      return BLUE_50;
     case 'teal':
       return TEAL_50;
     case 'green':
       return GREEN_50;
     case 'yellow':
       return YELLOW_50;
-    case 'orange':
-      return ORANGE_50;
     case 'red':
       return RED_50;
+    case 'orange':
+      return ORANGE_50;
+    case 'grey':
+      return GREY_50;
+    case 'ink':
+      return INK_50;
     default:
-      return color;
+      throw new Error('Unexpected marker track stroke color: ' + color);
   }
 };
 
@@ -171,8 +161,8 @@ const LOCAL_TRACK_INDEX_ORDER = {
   ipc: 3,
   'event-delay': 4,
   'process-cpu': 5,
-  marker: 6,
-  power: 7,
+  power: 6,
+  marker: 7,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
@@ -247,11 +237,7 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
 
     // If the tracks are both threads, sort them by thread name, and then by
     // creation time if they have the same name.
-    if (
-      (tracks[a].type === 'thread' || tracks[a].type === 'marker') &&
-      (tracks[b].type === 'thread' || tracks[b].type === 'marker') &&
-      profile
-    ) {
+    if (tracks[a].type === 'thread' && tracks[b].type === 'thread' && profile) {
       const idxA = tracks[a].threadIndex;
       const idxB = tracks[b].threadIndex;
       if (idxA === undefined || idxB === undefined) {
@@ -373,7 +359,7 @@ export function computeLocalTracksByPid(
   const localTracksByPid = new Map();
 
   // find markers that might be shown
-  const timelineAwareMarkers = profile.meta.markerSchema
+  const markerSchemasWithTrackConfig = profile.meta.markerSchema
     ? profile.meta.markerSchema.filter(
         (schema) => schema.trackConfig !== undefined
       )
@@ -410,15 +396,16 @@ export function computeLocalTracksByPid(
       tracks.push({ type: 'ipc', threadIndex });
     }
 
+    // FIXME: the following code is confusing marker names and marker schema names.
     const timelineAwareMarkerConsts = new Set(
-      timelineAwareMarkers.map((marker) =>
+      markerSchemasWithTrackConfig.map((marker) =>
         thread.stringTable.indexForString(marker.name)
       )
     );
     const containedMarkerConsts = new Set(
       thread.markers.name.filter((x) => timelineAwareMarkerConsts.has(x))
     );
-    for (const marker of timelineAwareMarkers) {
+    for (const marker of markerSchemasWithTrackConfig) {
       if (
         containedMarkerConsts.has(
           thread.stringTable.indexForString(marker.name)
@@ -1003,15 +990,6 @@ export function getLocalTrackName(
       return getMarkerTrackConfig(localTrack.markerSchema).label;
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
-  }
-}
-
-export function getLocalTrackTooltip(localTrack: LocalTrack): ?string {
-  switch (localTrack.type) {
-    case 'marker':
-      return getMarkerTrackConfig(localTrack.markerSchema).tooltip;
-    default:
-      return undefined;
   }
 }
 

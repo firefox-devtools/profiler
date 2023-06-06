@@ -20,8 +20,6 @@ import {
   getMarkerTrackLineStrokeColor,
   getMarkerTrackLineWidth,
   getMarkerTrackConfigLineType,
-  getMarkerTrackConfig,
-  isMarkerTrackLinePreScaled,
 } from 'firefox-profiler/profile-logic/tracks';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
@@ -41,6 +39,7 @@ import type {
   MarkerIndex,
   Marker,
 } from 'firefox-profiler/types';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -65,26 +64,23 @@ function _calculateUnitValue(
   type: MarkerTrackConfigLineType,
   minNumber: number,
   maxNumber: number,
-  value: number,
-  isPreScaled
+  value: number
 ) {
-  let scaled = value;
-  if (isPreScaled) {
-    if (scaled < 0 || scaled > 1) {
-      throw new Error(`${scaled} is not pre-scaled`);
-    }
-  } else {
-    switch (type) {
-      case 'line':
-        scaled = (value - minNumber) / (maxNumber - minNumber);
-        break;
-      case 'bar':
-        scaled = value / maxNumber;
-        break;
-      default:
-        throw new Error('Unknown type ' + type);
-    }
+  let scaled;
+  switch (type) {
+    case 'line':
+      scaled = (value - minNumber) / (maxNumber - minNumber);
+      break;
+    case 'bar':
+      scaled = value / maxNumber;
+      break;
+    default:
+      throw assertExhaustiveCheck(
+        type,
+        `The type ${type} is unexpected in _calculateUnitValue`
+      );
   }
+  // Ensure we keep 10% of padding above the graph.
   return scaled * 0.9;
 }
 
@@ -152,7 +148,6 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       ) {
         const type = getMarkerTrackConfigLineType(markerSchema, lineIndex);
         const samples = collectedSamples.numbersPerLine[lineIndex];
-        const isPreScaled = isMarkerTrackLinePreScaled(markerSchema, lineIndex);
         // Draw the chart.
         //
         // Here the schematics for the line chart
@@ -186,15 +181,16 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             for (let i = sampleStart; i < sampleEnd; i++) {
               // Create a path for the top of the chart. This is the line that will have
               // a stroke applied to it.
-              x = (collectedSamples.time[i] - rangeStart) * millisecondWidth;
+              x =
+                (collectedSamples.markers[i].start - rangeStart) *
+                millisecondWidth;
               // Add on half the stroke's line width so that it won't be cut off the edge
               // of the graph.
               const unitValue = _calculateUnitValue(
                 type,
                 minNumber,
                 maxNumber,
-                samples[i],
-                isPreScaled
+                samples[i]
               );
               y =
                 innerDeviceHeight -
@@ -233,15 +229,15 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               // Create a path for the top of the chart. This is the line that will have
               // a stroke applied to it.
               const x =
-                (collectedSamples.time[i] - rangeStart) * millisecondWidth;
+                (collectedSamples.markers[i].start - rangeStart) *
+                millisecondWidth;
               // Add on half the stroke's line width so that it won't be cut off the edge
               // of the graph.
               const unitValue = _calculateUnitValue(
                 type,
                 minNumber,
                 maxNumber,
-                samples[i],
-                isPreScaled
+                samples[i]
               );
               const y =
                 innerDeviceHeight -
@@ -324,13 +320,11 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +threadIndex: ThreadIndex,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +interval: Milliseconds,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
-  +markerSchema: MarkerSchema,
   +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +collectedSamples: CollectedCustomMarkerSamples,
   +getMarker: (MarkerIndex) => Marker,
@@ -385,10 +379,10 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
 
+    const times = collectedSamples.markers.map((marker) => marker.start);
     if (
-      timeAtMouse < collectedSamples.time[0] ||
-      timeAtMouse >
-        collectedSamples.time[collectedSamples.time.length - 1] + interval
+      timeAtMouse < times[0] ||
+      timeAtMouse > times[times.length - 1] + interval
     ) {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
@@ -397,19 +391,14 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       let hoveredCounter;
       const [sampleStart, sampleEnd] = markerSampleRanges;
       const bisectionCounter = bisectionRight(
-        collectedSamples.time,
+        times,
         timeAtMouse,
         sampleStart,
         sampleEnd
       );
-      if (
-        bisectionCounter > 0 &&
-        bisectionCounter < collectedSamples.time.length
-      ) {
-        const leftDistance =
-          timeAtMouse - collectedSamples.time[bisectionCounter - 1];
-        const rightDistance =
-          collectedSamples.time[bisectionCounter] - timeAtMouse;
+      if (bisectionCounter > 0 && bisectionCounter < times.length) {
+        const leftDistance = timeAtMouse - times[bisectionCounter - 1];
+        const rightDistance = times[bisectionCounter] - timeAtMouse;
         if (leftDistance < rightDistance) {
           // Left point is closer
           hoveredCounter = bisectionCounter - 1;
@@ -421,11 +410,11 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
         hoveredCounter = bisectionCounter;
       }
 
-      if (hoveredCounter === collectedSamples.time.length) {
+      if (hoveredCounter === times.length) {
         // When hovering the last sample, it's possible the mouse is past the time.
         // In this case, hover over the last sample. This happens because of the
         // ` + interval` line in the `if` condition above.
-        hoveredCounter = collectedSamples.time.length - 1;
+        hoveredCounter = times.length - 1;
       }
 
       this.setState({
@@ -446,10 +435,10 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       getMarker,
     } = this.props;
     const { mouseX, mouseY } = this.state;
-    if (collectedSamples.length === 0) {
+    if (collectedSamples.numbersPerLine.length === 0) {
       throw new Error('No samples for marker ' + markerSchema.name);
     }
-    const sampleTime = collectedSamples.time[counterIndex];
+    const sampleTime = collectedSamples.markers[counterIndex].start;
     if (sampleTime < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the tooltip if it will be rendered outside of the timeline.
       // This could happen when a sample time is outside of the time range.
@@ -484,8 +473,13 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       collectedSamples,
     } = this.props;
 
+    const trackConfig = markerSchema.trackConfig;
+    if (trackConfig === undefined) {
+      throw new Error('No track config for marker');
+    }
+
     const rangeLength = rangeEnd - rangeStart;
-    const sampleTime = collectedSamples.time[counterIndex];
+    const sampleTime = collectedSamples.markers[counterIndex].start;
 
     if (sampleTime < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the dot if it will be rendered outside of the timeline.
@@ -501,19 +495,14 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     const dots = [];
 
-    for (
-      let lineIndex = 0;
-      lineIndex < getMarkerTrackConfig(markerSchema).lines.length;
-      lineIndex++
-    ) {
+    for (let lineIndex = 0; lineIndex < trackConfig.lines.length; lineIndex++) {
       const type = getMarkerTrackConfigLineType(markerSchema, lineIndex);
       const samples = numbersPerLine[lineIndex];
       const unitValue = _calculateUnitValue(
         type,
         minNumber,
         maxNumber,
-        samples[counterIndex],
-        isMarkerTrackLinePreScaled(markerSchema, lineIndex)
+        samples[counterIndex]
       );
       const lineWidth = getMarkerTrackLineWidth(markerSchema, lineIndex);
       const innerTrackHeight = graphHeight - lineWidth / 2;
@@ -593,8 +582,6 @@ export const TrackCustomMarkerGraph = explicitConnect<
       markerSchema.name
     );
     return {
-      threadIndex: threadIndex,
-      markerSchema: markerSchema,
       markerSampleRanges:
         markerTrackSelectors.getCommittedRangeMarkerSampleRange(state),
       collectedSamples:

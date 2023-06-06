@@ -89,31 +89,32 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
+export type MarkerTrackColor =
+  | 'green'
+  | 'grey'
+  | 'orange'
+  | 'red'
+  | 'teal'
+  | 'yellow'
+  | 'magenta'
+  | 'purple'
+  | 'blue'
+  | 'ink'
+  | 'transparent';
+
 export type MarkerTrackConfigLineType = 'bar' | 'line';
 export type MarkerTrackConfigLineHeight = 'small' | 'medium' | 'large';
 export type MarkerTrackConfig = {|
   label: string,
-  tooltip?: string,
   // height of the track in pixels
   height?: MarkerTrackConfigLineHeight,
   isPreSelected?: boolean,
   lines: Array<{|
     key: string,
-    fillColor?: string,
-    strokeColor?:
-      | 'magenta'
-      | 'purple'
-      | 'teal'
-      | 'green'
-      | 'yellow'
-      | 'orange'
-      | 'red'
-      | 'transparent'
-      | 'grey'
-      | string,
+    fillColor?: MarkerTrackColor,
+    strokeColor?: MarkerTrackColor,
     width?: number,
     type?: MarkerTrackConfigLineType,
-    isPreScaled?: boolean,
   |}>,
 |};
 
@@ -144,8 +145,6 @@ export type MarkerSchema = {|
         label?: string,
         format: MarkerFormatType,
         searchable?: boolean,
-        // hidden in the side bar and tooltips?
-        isHidden?: boolean,
       |}
     | {|
         // This type is a static bit of text that will be displayed
