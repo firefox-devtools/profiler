@@ -342,7 +342,6 @@ function _shouldAllowSymbolServerUrl(symbolServerUrl) {
     const otherAllowedHostnames = [
       'symbols.mozilla.org',
       'symbolication.services.mozilla.com',
-      'symbolication.stage.mozaws.net',
     ];
     if (!otherAllowedHostnames.includes(url.hostname)) {
       console.error(
