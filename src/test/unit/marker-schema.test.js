@@ -192,8 +192,19 @@ describe('marker schema formatting', function () {
       ['duration', 10],
       ['duration', 12.3456789],
       ['duration', 123456.789],
+      ['duration', 23456789],
+      ['duration', 50000],
+      ['duration', 2000000],
+      ['duration', 50000000],
       ['duration', 123456789],
       ['duration', 0.000123456],
+      ['duration', 1000 * 60 - 0.01], // slightly less than 1min, should not be shown as '60s'
+      ['duration', 1000 * 60 + 1], // slightly more than 1min, should not be shown as '1min0s'
+      ['duration', 779873.639], // '13min60s' should be rounded to '14min'
+      ['duration', 1000 * 3600 - 0.01], // slightly less than 1h, should not be shown as '0h60min'
+      ['duration', 1000 * 3600 + 1], // slightly more than 1h, should not be shown as '1h0min'
+      ['duration', 1000 * 3600 * 24 - 0.01], // slightly less than 1 day, should not be shown as '0d24h'
+      ['duration', 1000 * 3600 * 24 + 1], // slightly more than 1 day, should not be shown as '1min0s'
       ['time', 12.3456789],
       ['seconds', 0],
       ['seconds', 10],
@@ -251,9 +262,20 @@ describe('marker schema formatting', function () {
         "duration - 0s",
         "duration - 10ms",
         "duration - 12.346ms",
-        "duration - 2.06min",
-        "duration - 34.3h",
+        "duration - 2min3s",
+        "duration - 6h31min",
+        "duration - 50s",
+        "duration - 33min20s",
+        "duration - 13h53min",
+        "duration - 1d10h",
         "duration - 123.46ns",
+        "duration - 1min",
+        "duration - 1min",
+        "duration - 13min",
+        "duration - 1h",
+        "duration - 1h",
+        "duration - 1d",
+        "duration - 1d",
         "time - 12.346ms",
         "seconds - 0.000s",
         "seconds - 0.010s",
