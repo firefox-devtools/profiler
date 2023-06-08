@@ -362,12 +362,19 @@ MarkerContextMenu--select-the-receiver-thread = Επιλέξτε το νήμα �
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Επιλέξτε το νήμα αποστολέα «<strong>{ $threadName }</strong>»
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Φιλτράρισμα σημαδιών:
     .title = Εμφάνιση μόνο των σημαδιών που αντιστοιχούν σε ένα συγκεκριμένο όνομα
+MarkerSettings--marker-filters =
+    .title = Φίλτρα δείκτη
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
