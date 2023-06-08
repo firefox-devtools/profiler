@@ -92,7 +92,7 @@
     "reselect": "^4.1.8",
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0",
-    "workbox-window": "^6.6.1"
+    "workbox-window": "^7.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.21.5",
@@ -163,7 +163,7 @@
     "webpack": "^5.82.1",
     "webpack-cli": "^5.1.1",
     "webpack-dev-server": "^4.15.0",
-    "workbox-webpack-plugin": "^6.6.1",
+    "workbox-webpack-plugin": "^7.0.0",
     "yargs": "^17.7.2"
   },
   "jest": {
