@@ -92,6 +92,8 @@ export function convertPerfScriptProfile(
         stack: 0,
         time: 1,
         responsiveness: 2,
+        weight: 3,
+        weightType: 4,
       },
       data: [],
     };
@@ -175,7 +177,7 @@ export function convertPerfScriptProfile(
       return frame;
     }
 
-    function addSample(threadName, stackArray, time) {
+    function addSample(threadName, stackArray, time, period) {
       // often we create a thread which inherits the name of the parent, and
       // set the thread's name slightly later.  Avoid having the first
       // sample's name stick.
@@ -189,7 +191,7 @@ export function convertPerfScriptProfile(
       // We don't have this information, so simulate that there's no latency at
       // all in processing events.
       const responsiveness = 0;
-      samples.data.push([stack, time, responsiveness]);
+      samples.data.push([stack, time, responsiveness, period, "tracing-ms"]);
     }
 
     return {
@@ -214,7 +216,7 @@ export function convertPerfScriptProfile(
 
   const threadMap = new Map();
 
-  function _addThreadSample(pid, tid, threadName, timeStamp, stack) {
+  function _addThreadSample(pid, tid, threadName, timeStamp, period, stack) {
     // Right now this assumes that you can't have two identical tids in
     // different pids, which is true in linux at least.
     let thread = threadMap.get(tid);
@@ -222,7 +224,7 @@ export function convertPerfScriptProfile(
       thread = _createThread(threadName, pid, tid);
       threadMap.set(tid, thread);
     }
-    thread.addSample(threadName, stack, timeStamp);
+    thread.addSample(threadName, stack, timeStamp, period);
   }
 
   // Parse the format. Some of the regular expressions and comments below were
@@ -230,7 +232,9 @@ export function convertPerfScriptProfile(
   const lines = profile.split('\n');
 
   let lineIndex = 0;
-  let startTime = 0;
+  let startTime = Number.POSITIVE_INFINITY;
+  let endTime = 0;
+  let eventName = null;
   while (lineIndex < lines.length) {
     const line = lines[lineIndex++];
     // perf script --header outputs header lines beginning with #
@@ -255,7 +259,7 @@ export function convertPerfScriptProfile(
     //   (generate with "perf script -F +pid")
 
     // First, get the sample's time stamp and whatever comes before the timestamp:
-    const sampleStartMatch = /^(.*)\s+([\d.]+):/.exec(sampleStartLine);
+    const sampleStartMatch = /^(.*)\s+([\d.]+):\s+([\d]+)\s+(.*)$/.exec(sampleStartLine);
     if (!sampleStartMatch) {
       console.log(
         'Could not parse line as the start of a sample in the "perf script" profile format: "%s"',
@@ -266,6 +270,12 @@ export function convertPerfScriptProfile(
 
     const beforeTimeStamp = sampleStartMatch[1];
     const timeStamp = parseFloat(sampleStartMatch[2]) * 1000;
+    const period = parseInt(sampleStartMatch[3], 10) / 1000000;
+    if (eventName === null) {
+      eventName = sampleStartMatch[4];
+    } else if (eventName !== sampleStartMatch[4]) {
+      throw `mixed: ${eventName} !== ${sampleStartMatch[4]}`;
+    }
 
     // Now try to find the tid within `beforeTimeStamp`, possibly with a pid/ in
     // front of it. Treat everything before that as the thread name.
@@ -286,14 +296,13 @@ export function convertPerfScriptProfile(
       continue;
     }
 
-    const threadName = threadNamePidAndTidMatch[1].trim();
     const pid = Number(threadNamePidAndTidMatch[2] || 0);
     const tid = Number(threadNamePidAndTidMatch[3] || 0);
+    const threadName = `${threadNamePidAndTidMatch[1].trim()} tid: ${tid}`;
 
     // Assume start time is the time of the first sample
-    if (startTime === 0) {
-      startTime = timeStamp;
-    }
+    startTime = Math.min(startTime, timeStamp);
+    endTime = Math.max(endTime, timeStamp + period);
     // Parse the stack frames of the current sample in a nested loop.
     const stack = [];
     while (lineIndex < lines.length) {
@@ -314,8 +323,12 @@ export function convertPerfScriptProfile(
 
         // Linux 4.8 included symbol offsets in perf script output by default, eg:
         // 7fffb84c9afc cpu_startup_entry+0x800047c022ec ([kernel.kallsyms])
-        // strip these off:
-        rawFunc = rawFunc.replace(/\+0x[\da-f]+$/, '');
+        // move it to the front of symbol
+        const offsetMatcher = /\+0x[\da-f]+$/
+        const maybeOffset = offsetMatcher.exec(rawFunc);
+        if (maybeOffset) {
+          rawFunc = `${maybeOffset[0]}@${rawFunc.replace(offsetMatcher, '')}()`;
+        }
 
         if (rawFunc.startsWith('(')) {
           continue; // skip process names
@@ -335,7 +348,7 @@ export function convertPerfScriptProfile(
 
     if (stack.length !== 0) {
       stack.reverse();
-      _addThreadSample(pid, tid, threadName, timeStamp, stack);
+      _addThreadSample(pid, tid, threadName, timeStamp, period, stack);
     }
   }
 
@@ -351,9 +364,9 @@ export function convertPerfScriptProfile(
 
   return {
     meta: {
-      interval: 1,
+      interval: endTime - startTime,
       processType: 0,
-      product: 'Firefox',
+      product: `perf - ${eventName}`,
       stackwalk: 1,
       debug: 0,
       gcpoison: 0,

@@ -198,7 +198,7 @@ class CallTreeImpl extends PureComponent<Props> {
             },
           ];
         default:
-          throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+          throw assertExhaustiveCheck(weightType, `Unhandled WeightType.: ${weightType}`);
       }
     },
     // Use a Map cache, as the function only takes one argument, which is a simple string.
