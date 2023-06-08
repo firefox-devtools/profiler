@@ -408,7 +408,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
     }
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Illimitée
-MenuButtons--metaInfo--application = Applications
+MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Nom et version :
 MenuButtons--metaInfo--update-channel = Canal de mise à jour :
 MenuButtons--metaInfo--build-id = Identifiant de compilation :
