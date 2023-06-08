@@ -30,12 +30,12 @@
     ]
   ],
   "plugins": [
-    // Though `@babel/plugin-proposal-class-properties` is already included
+    // Though `@babel/plugin-transform-class-properties` is already included
     // in `@babel/preset-env`, we include it specifically to be able to set
     // `loose` mode on it, without enabling it for all the plugins included
     // in `@babel/preset-env`.
     [
-      "@babel/plugin-proposal-class-properties",
+      "@babel/plugin-transform-class-properties",
       {
         // Without `loose`, the transformation uses `Object.defineProperty` which
         // obeys the spec more, but we get a bundle that's 8kB larger. That was the
@@ -44,18 +44,18 @@
       }
     ],
     [
-      "@babel/plugin-proposal-private-methods",
+      "@babel/plugin-transform-private-methods",
       {
-        // Like `plugin-proposal-class-properties`, `loose` option is being used
+        // Like `plugin-transform-class-properties`, `loose` option is being used
         // inside of this plugin as well. These plugins must have the same value,
         // therefore it's set to true here.
         "loose": true
       }
     ],
     [
-      "@babel/plugin-proposal-private-property-in-object",
+      "@babel/plugin-transform-private-property-in-object",
       {
-        // Like `plugin-proposal-class-properties`, `loose` option is being used
+        // Like `plugin-transform-class-properties`, `loose` option is being used
         // inside of this plugin as well. These plugins must have the same value,
         // therefore it's set to true here.
         "loose": true
