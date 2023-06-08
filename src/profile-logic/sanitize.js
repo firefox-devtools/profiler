@@ -191,6 +191,12 @@ export function sanitizePII(
       : undefined,
   };
 
+  if (PIIToBeRemoved.shouldFilterToCommittedRange !== null) {
+    const { start, end } = PIIToBeRemoved.shouldFilterToCommittedRange;
+    newProfile.meta.profilingStartTime = start;
+    newProfile.meta.profilingEndTime = end;
+  }
+
   return {
     profile: newProfile,
     // Note that the profile was sanitized.

@@ -524,6 +524,21 @@ describe('app/MenuButtons', function () {
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
+    it('matches the snapshot with uptime', async () => {
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processGeckoProfile(createGeckoProfile());
+      // The profiler was started 500ms after the parent process.
+      profile.meta.profilingStartTime = 500;
+
+      const { displayMetaInfoPanel, getMetaInfoPanel } =
+        await setupForMetaInfoPanel(profile);
+      await displayMetaInfoPanel();
+
+      const uptime = ensureExists(screen.getByText(/Uptime:/).nextSibling);
+      expect(uptime).toHaveTextContent('500ms');
+      expect(getMetaInfoPanel()).toMatchSnapshot();
+    });
+
     it('with no statistics object should not make the app crash', async () => {
       // Using gecko profile because it has metadata and profilerOverhead data in it.
       const profile = processGeckoProfile(createGeckoProfile());
