@@ -83,7 +83,7 @@ function setup() {
   });
   const addMarker = (startTime: number, first: number, second: number) => {
     // $FlowExpectError - Invalid payload by our type system
-    thread.markers.data.push({ first: first, second: second });
+    thread.markers.data.push({ type: 'Marker', first: first, second: second });
     thread.markers.name.push(markerStringIndex);
     thread.markers.startTime.push(startTime);
     thread.markers.endTime.push(startTime + 1);
@@ -113,6 +113,7 @@ function setup() {
         markerSchema={
           profile.meta.markerSchema[profile.meta.markerSchema.length - 1]
         }
+        markerName={markerStringIndex}
       />
     </Provider>
   );

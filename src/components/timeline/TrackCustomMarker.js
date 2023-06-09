@@ -13,6 +13,7 @@ import { getMarkerTrackHeight } from 'firefox-profiler/profile-logic/tracks';
 
 import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
 import type { MarkerSchema } from 'firefox-profiler/types/markers';
+import type { IndexIntoStringTable } from 'firefox-profiler/types/profile';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -20,11 +21,11 @@ import './TrackCustomMarker.css';
 
 type OwnProps = {|
   +markerSchema: MarkerSchema,
+  +markerName: IndexIntoStringTable,
   +threadIndex: ThreadIndex,
 |};
 
 type StateProps = {|
-  +threadIndex: ThreadIndex,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
 |};
@@ -37,7 +38,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 export class TrackCustomMarkerImpl extends React.PureComponent<Props> {
   render() {
-    const { markerSchema, threadIndex } = this.props;
+    const { markerSchema, markerName, threadIndex } = this.props;
     const trackHeight = getMarkerTrackHeight(markerSchema);
     return (
       <div
@@ -51,6 +52,7 @@ export class TrackCustomMarkerImpl extends React.PureComponent<Props> {
         <TrackCustomMarkerGraph
           threadIndex={threadIndex}
           markerSchema={markerSchema}
+          markerName={markerName}
           graphHeight={trackHeight}
         />
       </div>
@@ -63,11 +65,9 @@ export const TrackCustomMarker = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: (state, ownProps) => {
-    const { threadIndex } = ownProps;
+  mapStateToProps: (state, _ownProps) => {
     const { start, end } = getCommittedRange(state);
     return {
-      threadIndex: threadIndex,
       rangeStart: start,
       rangeEnd: end,
     };

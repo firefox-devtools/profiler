@@ -33,12 +33,14 @@ import type {
   CssPixels,
   StartEndRange,
   IndexIntoSamplesTable,
+  IndexIntoStringTable,
   MarkerSchema,
   CollectedCustomMarkerSamples,
   MarkerTrackConfigLineType,
   MarkerIndex,
   Marker,
 } from 'firefox-profiler/types';
+
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
@@ -316,6 +318,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +markerSchema: MarkerSchema,
+  +markerName: IndexIntoStringTable,
   +graphHeight: CssPixels,
 |};
 
@@ -575,11 +578,12 @@ export const TrackCustomMarkerGraph = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
-    const { threadIndex, markerSchema } = ownProps;
+    const { threadIndex, markerSchema, markerName } = ownProps;
     const { start, end } = getCommittedRange(state);
     const selectors = getThreadSelectors(threadIndex);
     const markerTrackSelectors = selectors.getMarkerTrackSelectors(
-      markerSchema.name
+      markerSchema,
+      markerName
     );
     return {
       markerSampleRanges:

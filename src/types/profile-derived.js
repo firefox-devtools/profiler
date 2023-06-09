@@ -17,6 +17,7 @@ import type {
   InnerWindowID,
   Page,
   IndexIntoRawMarkerTable,
+  IndexIntoStringTable,
   TabID,
   Tid,
 } from './profile';
@@ -350,6 +351,7 @@ export type LocalTrack =
       +type: 'marker',
       +threadIndex: ThreadIndex,
       +markerSchema: MarkerSchema,
+      +markerName: IndexIntoStringTable,
     |};
 
 export type Track = GlobalTrack | LocalTrack;

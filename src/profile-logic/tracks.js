@@ -371,7 +371,7 @@ export function computeLocalTracksByPid(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid } = thread;
+    const { pid, markers } = thread;
     // Get or create the tracks and trackOrder.
     let tracks = localTracksByPid.get(pid);
     if (tracks === undefined) {
@@ -384,40 +384,41 @@ export function computeLocalTracksByPid(
       tracks.push({ type: 'thread', threadIndex });
     }
 
-    if (
-      thread.markers.data.some((datum) => datum && datum.type === 'Network')
-    ) {
+    if (markers.data.some((datum) => datum && datum.type === 'Network')) {
       // This thread has network markers.
       tracks.push({ type: 'network', threadIndex });
     }
 
-    if (thread.markers.data.some((datum) => datum && datum.type === 'IPC')) {
+    if (markers.data.some((datum) => datum && datum.type === 'IPC')) {
       // This thread has IPC markers.
       tracks.push({ type: 'ipc', threadIndex });
     }
 
-    // FIXME: the following code is confusing marker names and marker schema names.
-    const timelineAwareMarkerConsts = new Set(
-      markerSchemasWithTrackConfig.map((marker) =>
-        thread.stringTable.indexForString(marker.name)
-      )
-    );
-    const containedMarkerConsts = new Set(
-      thread.markers.name.filter((x) => timelineAwareMarkerConsts.has(x))
-    );
-    for (const marker of markerSchemasWithTrackConfig) {
-      if (
-        containedMarkerConsts.has(
-          thread.stringTable.indexForString(marker.name)
-        )
-      ) {
-        if (marker.trackConfig) {
-          tracks.push({
-            type: 'marker',
-            threadIndex,
-            markerSchema: marker,
-          });
+    const markerTracksBySchemaName = new Map();
+    for (const markerSchema of markerSchemasWithTrackConfig) {
+      markerTracksBySchemaName.set(markerSchema.name, {
+        markerSchema,
+        markerNames: new Set(),
+      });
+    }
+    for (let i = 0; i < markers.length; ++i) {
+      const schemaName = markers.data[i]?.type;
+      if (schemaName !== undefined) {
+        const mapEntry = markerTracksBySchemaName.get(schemaName);
+        if (mapEntry) {
+          mapEntry.markerNames.add(markers.name[i]);
         }
+      }
+    }
+
+    for (const [, { markerSchema, markerNames }] of markerTracksBySchemaName) {
+      for (const markerName of markerNames) {
+        tracks.push({
+          type: 'marker',
+          threadIndex,
+          markerSchema,
+          markerName,
+        });
       }
     }
   }
@@ -987,7 +988,9 @@ export function getLocalTrackName(
     case 'power':
       return counters[localTrack.counterIndex].name;
     case 'marker':
-      return getMarkerTrackConfig(localTrack.markerSchema).label;
+      return threads[localTrack.threadIndex].stringTable.getString(
+        localTrack.markerName
+      );
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }

@@ -20,6 +20,7 @@ import type {
   ThreadIndex,
   MarkerIndex,
   Marker,
+  MarkerSchema,
   MarkerTiming,
   MarkerTimingAndBuckets,
   DerivedMarkerInfo,
@@ -29,9 +30,9 @@ import type {
   $ReturnType,
   ThreadsKey,
   Tid,
-  MarkerTrackConfig,
   CollectedCustomMarkerSamples,
   IndexIntoSamplesTable,
+  IndexIntoStringTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -614,13 +615,21 @@ export function getMarkerSelectorsPerThread(
 
   type MarkerTrackSelectors = $ReturnType<typeof _createMarkerTrackSelectors>;
   const _markerTrackSelectors = {};
-  const getMarkerTrackSelectors = (name: string): MarkerTrackSelectors => {
-    let selectors = _markerTrackSelectors[name];
-    if (!selectors) {
-      selectors = _createMarkerTrackSelectors(name);
-      _markerTrackSelectors[name] = selectors;
+  const getMarkerTrackSelectors = (
+    markerSchema: MarkerSchema,
+    markerName: IndexIntoStringTable
+  ): MarkerTrackSelectors => {
+    const name = markerSchema.name;
+    if (!_markerTrackSelectors[name]) {
+      _markerTrackSelectors[name] = {};
     }
-    return selectors;
+    if (!_markerTrackSelectors[name][markerName]) {
+      _markerTrackSelectors[name][markerName] = _createMarkerTrackSelectors(
+        markerSchema,
+        markerName
+      );
+    }
+    return _markerTrackSelectors[name][markerName];
   };
 
   /**
@@ -628,58 +637,60 @@ export function getMarkerSelectorsPerThread(
    * signature of each selector is defined in the function body, and inferred in the return
    * type of the function.
    */
-  function _createMarkerTrackSelectors(name: string) {
-    const _getMarkerTrackConfig: Selector<MarkerTrackConfig> = (state) => {
-      const markerSchemaByName = ProfileSelectors.getMarkerSchemaByName(state);
-      const schema = markerSchemaByName[name];
-      if (schema.trackConfig === undefined) {
-        throw new Error(
-          `No trackConfig for marker ${name}. This shouldn't happen.`
-        );
-      }
-      return schema.trackConfig;
-    };
-
+  function _createMarkerTrackSelectors(
+    markerSchema: MarkerSchema,
+    markerName: IndexIntoStringTable
+  ) {
     const getCollectedCustomMarkerSamples: Selector<CollectedCustomMarkerSamples> =
       createSelector(
         getFullMarkerList,
         threadSelectors.getStringTable,
-        _getMarkerTrackConfig,
-        (fullMarkerList, stringTable, trackConfig) => {
-          // FIXME this function is hard to read, loops too many times over the
-          // list of markers, and confuses markers schema with marker names.
-          const filteredIndexes = fullMarkerList
-            .map((n, i) => [n, i])
-            .filter((t) => t[0].name === name)
-            .map((t) => t[1]);
-          const markers = filteredIndexes.map((i) => fullMarkerList[i]);
-          const trackKeys = trackConfig.lines.map(
-            (lineConfig) => lineConfig.key
-          );
-          const numbersPerLine: number[][] = trackKeys.map((key) =>
-            markers.map((marker) => {
-              const markerPayload = marker.data;
-              if (
-                !(markerPayload instanceof Object) ||
-                !(key in markerPayload)
-              ) {
-                throw new Error('Missing ' + key + ' in marker ' + name);
+        (fullMarkerList, stringTable) => {
+          if (markerSchema.trackConfig === undefined) {
+            throw new Error(
+              `No trackConfig for marker ${markerName}. This shouldn't happen.`
+            );
+          }
+          const indexes = [];
+          const markers = [];
+          let minNumber = Infinity;
+          let maxNumber = -Infinity;
+          const numbersPerLine = [];
+          const { trackConfig, name: schemaName } = markerSchema;
+          const keys = trackConfig.lines.map((graph) => {
+            numbersPerLine.push([]);
+            return graph.key;
+          });
+          const name = stringTable.getString(markerName);
+          fullMarkerList.forEach((marker, index) => {
+            const data = marker.data;
+            if (
+              data &&
+              marker.name === name &&
+              data.type === schemaName &&
+              keys.every((key) => key in data)
+            ) {
+              indexes.push(index);
+              markers.push(marker);
+              for (let i = 0; i < keys.length; ++i) {
+                const val = data[keys[i]];
+                numbersPerLine[i].push(val);
+                if (val < minNumber) {
+                  minNumber = val;
+                }
+                if (val > maxNumber) {
+                  maxNumber = val;
+                }
               }
-              return markerPayload[key];
-            })
-          );
-          const minNumber = Math.min(
-            ...numbersPerLine.map((x) => Math.min(...x))
-          );
-          const maxNumber = Math.max(
-            ...numbersPerLine.map((x) => Math.max(...x))
-          );
+            }
+          });
+
           return {
             minNumber,
             maxNumber,
             markers,
             numbersPerLine,
-            indexes: filteredIndexes,
+            indexes,
           };
         }
       );
