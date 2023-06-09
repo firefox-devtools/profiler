@@ -465,6 +465,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logische kern
        *[other] { $logicalCPUs } logische kernen
     }
+MenuButtons--metaInfo--profiling-started = Opname gestart:
+MenuButtons--metaInfo--profiling-session = Opnameduur:
 MenuButtons--metaInfo--main-process-started = Hoofdproces gestart:
 MenuButtons--metaInfo--main-process-ended = Hoofdproces beëindigd:
 MenuButtons--metaInfo--interval = Interval:
@@ -482,6 +484,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Onbeperkt
 MenuButtons--metaInfo--application = Toepassing
 MenuButtons--metaInfo--name-and-version = Naam en versie:
+MenuButtons--metaInfo--application-uptime = Uptime:
 MenuButtons--metaInfo--update-channel = Updatekanaal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Buildtype:
