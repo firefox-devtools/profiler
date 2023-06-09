@@ -478,6 +478,8 @@ MenuButtons--metaInfo--logical-cpu =
         [few] { $logicalCPUs } логических ядра
        *[many] { $logicalCPUs } логических ядер
     }
+MenuButtons--metaInfo--profiling-started = Запись началась:
+MenuButtons--metaInfo--profiling-session = Длина записи:
 MenuButtons--metaInfo--main-process-started = Основной процесс запущен:
 MenuButtons--metaInfo--main-process-ended = Основной процесс завершен:
 MenuButtons--metaInfo--interval = Интервал:
@@ -496,6 +498,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Неограничена
 MenuButtons--metaInfo--application = Приложение
 MenuButtons--metaInfo--name-and-version = Имя и версия:
+MenuButtons--metaInfo--application-uptime = Время работы:
 MenuButtons--metaInfo--update-channel = Канал обновлений:
 MenuButtons--metaInfo--build-id = ID сборки:
 MenuButtons--metaInfo--build-type = Тип сборки:
