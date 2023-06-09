@@ -750,10 +750,15 @@ export type ExtraProfileInfoSection = {|
 export type ProfileMeta = {|
   // The interval at which the threads are sampled.
   interval: Milliseconds,
-  // The number of milliseconds since midnight January 1, 1970 GMT.
+  // When the main process started. Timestamp expressed in milliseconds since
+  // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
   // The number of milliseconds since midnight January 1, 1970 GMT.
   endTime?: Milliseconds,
+  // When the recording started (in milliseconds after startTime).
+  profilingStartTime?: Milliseconds,
+  // When the recording ended (in milliseconds after startTime).
+  profilingEndTime?: Milliseconds,
   // The process type where the Gecko profiler was started. This is the raw enum
   // numeric value as defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#365

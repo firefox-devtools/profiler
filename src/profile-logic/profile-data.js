@@ -919,6 +919,15 @@ export function getTimeRangeIncludingAllThreads(
   profile: Profile
 ): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
+  if (
+    profile.meta.profilingStartTime !== undefined &&
+    profile.meta.profilingEndTime
+  ) {
+    return {
+      start: profile.meta.profilingStartTime,
+      end: profile.meta.profilingEndTime,
+    };
+  }
   profile.threads.forEach((thread) => {
     const threadRange = memoizedGetTimeRangeForThread(
       thread,

@@ -195,6 +195,8 @@ export function createGeckoProfile(): GeckoProfile {
     stackwalk: 1,
     debug: 1,
     startTime: 1460221352723.438,
+    profilingStartTime: 0,
+    profilingEndTime: 1007,
     shutdownTime: 1560221352723,
     toolkit: 'cocoa',
     version: GECKO_PROFILE_VERSION,

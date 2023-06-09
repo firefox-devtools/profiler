@@ -71,7 +71,9 @@ class WindowTitleImpl extends PureComponent<Props> {
           if (formattedMetaInfoString) {
             title += formattedMetaInfoString + SEPARATOR;
           }
-          title += _formatDateTime(meta.startTime);
+          title += _formatDateTime(
+            meta.startTime + (meta.profilingStartTime || 0)
+          );
           if (dataSource === 'public') {
             title += ` (${dataSource})`;
           }
