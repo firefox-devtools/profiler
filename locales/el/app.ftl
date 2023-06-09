@@ -460,6 +460,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } λογικός πυρήνας
        *[other] { $logicalCPUs } λογικοί πυρήνες
     }
+MenuButtons--metaInfo--profiling-started = Έναρξη καταγραφής:
+MenuButtons--metaInfo--profiling-session = Διάρκεια καταγραφής:
 MenuButtons--metaInfo--main-process-started = Έναρξη κύριας διεργασίας:
 MenuButtons--metaInfo--main-process-ended = Τέλος κύριας διεργασίας:
 MenuButtons--metaInfo--interval = Διάστημα:
@@ -477,6 +479,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Απεριόριστη
 MenuButtons--metaInfo--application = Εφαρμογή
 MenuButtons--metaInfo--name-and-version = Όνομα και έκδοση:
+MenuButtons--metaInfo--application-uptime = Χρόνος λειτουργίας:
 MenuButtons--metaInfo--update-channel = Κανάλι ενημερώσεων:
 MenuButtons--metaInfo--build-id = ID δομής:
 MenuButtons--metaInfo--build-type = Τύπος δομής:
