@@ -379,6 +379,8 @@ MenuButtons--metaInfo--logical-cpu =
     { $logicalCPUs ->
        *[other] { $logicalCPUs } 顆邏輯核心
     }
+MenuButtons--metaInfo--profiling-started = 紀錄開始於：
+MenuButtons--metaInfo--profiling-session = 紀錄長度：
 MenuButtons--metaInfo--main-process-started = 主處理程序開始:
 MenuButtons--metaInfo--main-process-ended = 主要處理程序結束於：
 MenuButtons--metaInfo--interval = 間隔:
@@ -395,6 +397,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = 無限制
 MenuButtons--metaInfo--application = 應用程式
 MenuButtons--metaInfo--name-and-version = 名稱與版本:
+MenuButtons--metaInfo--application-uptime = 運作時間：
 MenuButtons--metaInfo--update-channel = 更新頻道:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build Type:
