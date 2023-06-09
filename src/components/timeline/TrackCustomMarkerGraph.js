@@ -207,6 +207,12 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               } else {
                 ctx.lineTo(x, y);
               }
+              if (collectedSamples.markers[i].end) {
+                const x2 =
+                  (collectedSamples.markers[i].end - rangeStart) *
+                  millisecondWidth;
+                ctx.lineTo(x2, y);
+              }
             }
 
             // Don't do the fill yet, just stroke the top line. This will draw a line from
@@ -227,12 +233,21 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             ctx.closePath();
             break;
           case 'bar':
+            // Ensure we don't mix the fill and stroke colors when drawing a
+            // bar graph that may both draw lines and fill rectangles.
+            if (ctx.fillStyle === 'transparent') {
+              ctx.fillStyle = ctx.strokeStyle;
+            } else {
+              ctx.strokeStyle = ctx.fillStyle;
+            }
+
             for (let i = sampleStart; i < sampleEnd; i++) {
               // Create a path for the top of the chart. This is the line that will have
               // a stroke applied to it.
-              const x =
+              const x = Math.round(
                 (collectedSamples.markers[i].start - rangeStart) *
-                millisecondWidth;
+                  millisecondWidth
+              );
               // Add on half the stroke's line width so that it won't be cut off the edge
               // of the graph.
               const unitValue = _calculateUnitValue(
@@ -246,6 +261,17 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
                 innerDeviceHeight * unitValue +
                 deviceLineHalfWidth;
               const zero = innerDeviceHeight + deviceLineHalfWidth;
+
+              if (collectedSamples.markers[i].end) {
+                const x2 = Math.round(
+                  (collectedSamples.markers[i].end - rangeStart) *
+                    millisecondWidth
+                );
+                if (x2 >= x + 1) {
+                  ctx.fillRect(x, y, x2 - x, zero - y);
+                  continue;
+                }
+              }
               ctx.moveTo(x, zero);
               ctx.lineTo(x, y);
               ctx.stroke();
@@ -385,7 +411,10 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     const times = collectedSamples.markers.map((marker) => marker.start);
     if (
       timeAtMouse < times[0] ||
-      timeAtMouse > times[times.length - 1] + interval
+      timeAtMouse >
+        times[times.length - 1] +
+          (collectedSamples.markers[times.length - 1].end || 0) +
+          interval
     ) {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
@@ -402,7 +431,11 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       if (bisectionCounter > 0 && bisectionCounter < times.length) {
         const leftDistance = timeAtMouse - times[bisectionCounter - 1];
         const rightDistance = times[bisectionCounter] - timeAtMouse;
-        if (leftDistance < rightDistance) {
+        const leftEnd = collectedSamples.markers[bisectionCounter - 1].end;
+        if (
+          (leftEnd && leftEnd > timeAtMouse) ||
+          leftDistance < rightDistance
+        ) {
           // Left point is closer
           hoveredCounter = bisectionCounter - 1;
         } else {
@@ -441,8 +474,9 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     if (collectedSamples.numbersPerLine.length === 0) {
       throw new Error('No samples for marker ' + markerSchema.name);
     }
-    const sampleTime = collectedSamples.markers[counterIndex].start;
-    if (sampleTime < rangeStart || sampleTime > rangeEnd) {
+    const marker = collectedSamples.markers[counterIndex];
+    const sampleTime = marker.start;
+    if ((marker.end || sampleTime) < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the tooltip if it will be rendered outside of the timeline.
       // This could happen when a sample time is outside of the time range.
       // While range filtering the counters, we add the sample before start and
@@ -482,9 +516,10 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     }
 
     const rangeLength = rangeEnd - rangeStart;
-    const sampleTime = collectedSamples.markers[counterIndex].start;
+    const marker = collectedSamples.markers[counterIndex];
+    const sampleTime = marker.start;
 
-    if (sampleTime < rangeStart || sampleTime > rangeEnd) {
+    if ((marker.end || sampleTime) < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the dot if it will be rendered outside of the timeline.
       // This could happen when a sample time is outside of the time range.
       // While range filtering the counters, we add the sample before start and
@@ -511,9 +546,35 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       const innerTrackHeight = graphHeight - lineWidth / 2;
       const top =
         innerTrackHeight - unitValue * innerTrackHeight + lineWidth / 2;
+      // eslint-disable-next-line flowtype/no-weak-types
+      const style: Object = { left, top };
+      if (marker.end) {
+        let screenWidth = (width * (marker.end - marker.start)) / rangeLength;
+        const defaultWidth = 6;
+        if (screenWidth > defaultWidth) {
+          style.marginLeft = 0;
+          // Avoid overflowing on the left side.
+          if (left < 0) {
+            screenWidth += left;
+            style.left = 0;
+            style.borderTopLeftRadius = 0;
+            style.borderBottomLeftRadius = 0;
+          }
+          const screenLeft = Math.max(left, 0);
+          // Avoid overflowing into the vertical scrollbar area.
+          style.width = Math.min(screenWidth, width - screenLeft);
+          if (screenWidth > width - screenLeft) {
+            style.borderTopRightRadius = 0;
+            style.borderBottomRightRadius = 0;
+          }
+        } else {
+          style.marginLeft = -(defaultWidth - screenWidth) / 2;
+        }
+      }
+
       dots.push(
         <div
-          style={{ left, top }}
+          style={style}
           key={lineIndex}
           className="timelineTrackCustomMarkerGraphDot"
         />

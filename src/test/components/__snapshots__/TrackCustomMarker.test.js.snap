@@ -3,7 +3,7 @@
 exports[`TrackCustomMarker draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackCustomMarkerGraphDot"
-  style="left: 10px; top: 23.457142857142856px;"
+  style="left: 10px; top: 23.457142857142856px; margin-left: 0px; width: 10px;"
 />
 `;
 
@@ -89,6 +89,16 @@ Array [
   Array [
     "lineTo",
     10,
+    26,
+  ],
+  Array [
+    "lineTo",
+    10,
+    24.392857142857142,
+  ],
+  Array [
+    "lineTo",
+    20,
     24.392857142857142,
   ],
   Array [
@@ -99,6 +109,16 @@ Array [
   Array [
     "lineTo",
     30,
+    22.785714285714285,
+  ],
+  Array [
+    "lineTo",
+    30,
+    21.17857142857143,
+  ],
+  Array [
+    "lineTo",
+    40,
     21.17857142857143,
   ],
   Array [
@@ -109,6 +129,16 @@ Array [
   Array [
     "lineTo",
     50,
+    19.571428571428573,
+  ],
+  Array [
+    "lineTo",
+    50,
+    17.964285714285715,
+  ],
+  Array [
+    "lineTo",
+    60,
     17.964285714285715,
   ],
   Array [
@@ -119,6 +149,16 @@ Array [
   Array [
     "lineTo",
     70,
+    16.357142857142858,
+  ],
+  Array [
+    "lineTo",
+    70,
+    14.75,
+  ],
+  Array [
+    "lineTo",
+    80,
     14.75,
   ],
   Array [
@@ -153,108 +193,64 @@ Array [
     "transparent",
   ],
   Array [
-    "moveTo",
+    "set fillStyle",
+    "#30e60b",
+  ],
+  Array [
+    "fillRect",
     0,
     26,
-  ],
-  Array [
-    "lineTo",
-    0,
-    26,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "moveTo",
     10,
-    26,
+    0,
   ],
   Array [
-    "lineTo",
+    "fillRect",
     10,
     22.785714285714285,
+    10,
+    3.2142857142857153,
   ],
   Array [
-    "stroke",
-  ],
-  Array [
-    "moveTo",
-    20,
-    26,
-  ],
-  Array [
-    "lineTo",
+    "fillRect",
     20,
     19.571428571428573,
+    10,
+    6.428571428571427,
   ],
   Array [
-    "stroke",
-  ],
-  Array [
-    "moveTo",
-    30,
-    26,
-  ],
-  Array [
-    "lineTo",
+    "fillRect",
     30,
     16.357142857142858,
+    10,
+    9.642857142857142,
   ],
   Array [
-    "stroke",
-  ],
-  Array [
-    "moveTo",
-    40,
-    26,
-  ],
-  Array [
-    "lineTo",
+    "fillRect",
     40,
     13.142857142857144,
+    10,
+    12.857142857142856,
   ],
   Array [
-    "stroke",
-  ],
-  Array [
-    "moveTo",
-    50,
-    26,
-  ],
-  Array [
-    "lineTo",
+    "fillRect",
     50,
     9.928571428571427,
+    10,
+    16.071428571428573,
   ],
   Array [
-    "stroke",
-  ],
-  Array [
-    "moveTo",
-    60,
-    26,
-  ],
-  Array [
-    "lineTo",
+    "fillRect",
     60,
     6.714285714285715,
+    10,
+    19.285714285714285,
   ],
   Array [
-    "stroke",
-  ],
-  Array [
-    "moveTo",
-    70,
-    26,
-  ],
-  Array [
-    "lineTo",
+    "fillRect",
     70,
     3.5,
-  ],
-  Array [
-    "stroke",
+    10,
+    22.5,
   ],
 ]
 `;
