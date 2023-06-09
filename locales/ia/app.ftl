@@ -456,6 +456,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } nucleo logic
        *[other] { $logicalCPUs } nucleos logic
     }
+MenuButtons--metaInfo--profiling-started = Registration comenciate:
+MenuButtons--metaInfo--profiling-session = Durata de registration
 MenuButtons--metaInfo--main-process-started = Processo principal initiate:
 MenuButtons--metaInfo--main-process-ended = Processo principal finite:
 MenuButtons--metaInfo--interval = Intervallo:
@@ -473,6 +475,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Sin limite
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Nomine e version:
+MenuButtons--metaInfo--application-uptime = Tempore de activitate:
 MenuButtons--metaInfo--update-channel = Canal de actualisation:
 MenuButtons--metaInfo--build-id = ID de version:
 MenuButtons--metaInfo--build-type = Typo de compilation:
