@@ -460,6 +460,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logisk kärna
        *[other] { $logicalCPUs } logiska kärnor
     }
+MenuButtons--metaInfo--profiling-started = Inspelningen startade:
+MenuButtons--metaInfo--profiling-session = Inspelningslängd:
 MenuButtons--metaInfo--main-process-started = Huvudprocessen startade:
 MenuButtons--metaInfo--main-process-ended = Huvudprocessen avslutad:
 MenuButtons--metaInfo--interval = Intervall:
@@ -477,6 +479,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Obegränsat
 MenuButtons--metaInfo--application = Applikation
 MenuButtons--metaInfo--name-and-version = Namn och version:
+MenuButtons--metaInfo--application-uptime = Drifttid:
 MenuButtons--metaInfo--update-channel = Uppdateringskanal:
 MenuButtons--metaInfo--build-id = Bygg-ID:
 MenuButtons--metaInfo--build-type = Byggtyp:
