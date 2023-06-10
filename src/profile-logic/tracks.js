@@ -119,8 +119,13 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
       tracks[a].type === 'power' &&
       tracks[b].type === 'power'
     ) {
-      const nameA = profile.counters[tracks[a].counterIndex].name;
-      const nameB = profile.counters[tracks[b].counterIndex].name;
+      const idxA = tracks[a].counterIndex;
+      const idxB = tracks[b].counterIndex;
+      if (profile.meta.keepProfileThreadOrder) {
+        return idxA - idxB;
+      }
+      const nameA = profile.counters[idxA].name;
+      const nameB = profile.counters[idxB].name;
       return naturalSort.compare(nameA, nameB);
     }
 
