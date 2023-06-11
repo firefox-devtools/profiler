@@ -394,6 +394,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } core lógico
        *[other] { $logicalCPUs } cores lógicos
     }
+MenuButtons--metaInfo--profiling-started = Gravação iniciada:
+MenuButtons--metaInfo--profiling-session = Duração da gravação:
 MenuButtons--metaInfo--main-process-started = Processo principal iniciado:
 MenuButtons--metaInfo--main-process-ended = Processo principal finalizado:
 MenuButtons--metaInfo--interval = Intervalo:
@@ -411,6 +413,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitado
 MenuButtons--metaInfo--application = Aplicativo
 MenuButtons--metaInfo--name-and-version = Nome e versão:
+MenuButtons--metaInfo--application-uptime = Tempo de atividade:
 MenuButtons--metaInfo--update-channel = Canal de atualização:
 MenuButtons--metaInfo--build-id = ID da compilação:
 MenuButtons--metaInfo--build-type = Tipo de compilação:
