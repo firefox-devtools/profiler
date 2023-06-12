@@ -19,6 +19,7 @@ import {
   getMarkerTrackLineFillColor,
   getMarkerTrackLineStrokeColor,
   getMarkerTrackLineWidth,
+  getMarkerTrackLineDotColor,
   getMarkerTrackConfigLineType,
 } from 'firefox-profiler/profile-logic/tracks';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -548,6 +549,11 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
         innerTrackHeight - unitValue * innerTrackHeight + lineWidth / 2;
       // eslint-disable-next-line flowtype/no-weak-types
       const style: Object = { left, top };
+      style.backgroundColor = getMarkerTrackLineDotColor(
+        markerSchema,
+        lineIndex
+      );
+
       if (marker.end) {
         let screenWidth = (width * (marker.end - marker.start)) / rangeLength;
         const defaultWidth = 6;

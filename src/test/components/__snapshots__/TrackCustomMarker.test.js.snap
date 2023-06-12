@@ -3,7 +3,7 @@
 exports[`TrackCustomMarker draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackCustomMarkerGraphDot"
-  style="left: 10px; top: 23.457142857142856px; margin-left: 0px; width: 10px;"
+  style="left: 10px; top: 23.457142857142856px; background-color: rgb(74, 74, 79); margin-left: 0px; width: 10px;"
 />
 `;
 

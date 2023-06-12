@@ -32,15 +32,25 @@ import {
 } from '../app-logic/constants';
 import {
   BLUE_50,
+  BLUE_60,
   GREEN_50,
+  GREEN_60,
   GREY_50,
+  GREY_60,
   INK_50,
+  INK_60,
   MAGENTA_50,
+  MAGENTA_60,
   ORANGE_50,
+  ORANGE_60,
   PURPLE_50,
+  PURPLE_60,
   RED_50,
+  RED_60,
   TEAL_50,
+  TEAL_60,
   YELLOW_50,
+  YELLOW_60,
 } from 'photon-colors';
 
 export type TracksWithOrder = {|
@@ -134,6 +144,40 @@ export const getMarkerTrackLineStrokeColor = (
       return GREY_50;
     case 'ink':
       return INK_50;
+    default:
+      throw new Error('Unexpected marker track stroke color: ' + color);
+  }
+};
+
+export const getMarkerTrackLineDotColor = (
+  schema: MarkerSchema,
+  line: number
+) => {
+  const color =
+    getMarkerTrackLineConfig(schema, line).strokeColor ||
+    getMarkerTrackLineConfig(schema, line).fillColor ||
+    TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR;
+  switch (color) {
+    case 'magenta':
+      return MAGENTA_60;
+    case 'purple':
+      return PURPLE_60;
+    case 'blue':
+      return BLUE_60;
+    case 'teal':
+      return TEAL_60;
+    case 'green':
+      return GREEN_60;
+    case 'yellow':
+      return YELLOW_60;
+    case 'red':
+      return RED_60;
+    case 'orange':
+      return ORANGE_60;
+    case 'grey':
+      return GREY_60;
+    case 'ink':
+      return INK_60;
     default:
       throw new Error('Unexpected marker track stroke color: ' + color);
   }
