@@ -465,6 +465,8 @@ MenuButtons--metaInfo--logical-cpu =
         [few] { $logicalCPUs } логічні ядра
        *[many] { $logicalCPUs } логічних ядер
     }
+MenuButtons--metaInfo--profiling-started = Запис розпочато:
+MenuButtons--metaInfo--profiling-session = Тривалість запису:
 MenuButtons--metaInfo--main-process-started = Основний процес розпочато:
 MenuButtons--metaInfo--main-process-ended = Основний процес завершено:
 MenuButtons--metaInfo--interval = Інтервал:
@@ -483,6 +485,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Необмежено
 MenuButtons--metaInfo--application = Застосунок
 MenuButtons--metaInfo--name-and-version = Назва та версія:
+MenuButtons--metaInfo--application-uptime = Час роботи:
 MenuButtons--metaInfo--update-channel = Канал оновлень:
 MenuButtons--metaInfo--build-id = ID збірки:
 MenuButtons--metaInfo--build-type = Тип збірки:
