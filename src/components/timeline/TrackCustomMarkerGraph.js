@@ -11,14 +11,10 @@ import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
-import {
-  getCommittedRange,
-  getProfileInterval,
-} from 'firefox-profiler/selectors/profile';
+import { getCommittedRange } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
-import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import {
   TRACK_MARKER_DEFAULT_COLOR,
   TRACK_MARKER_LINE_WIDTH,
@@ -47,11 +43,9 @@ import {
 } from 'photon-colors';
 
 import type {
-  Thread,
   ThreadIndex,
   Milliseconds,
   CssPixels,
-  StartEndRange,
   IndexIntoSamplesTable,
   IndexIntoStringTable,
   MarkerSchema,
@@ -78,7 +72,6 @@ type CanvasProps = {|
   +markerSchema: MarkerSchema,
   +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +collectedSamples: CollectedCustomMarkerSamples,
-  +interval: Milliseconds,
   +width: CssPixels,
   +height: CssPixels,
 |};
@@ -104,8 +97,8 @@ function _calculateUnitValue(
         `The type ${type} is unexpected in _calculateUnitValue`
       );
   }
-  // Ensure we keep 10% of padding above the graph.
-  return scaled * 0.9;
+  // Ensure we keep 15% of padding above the graph.
+  return scaled * 0.85;
 }
 
 function _getStrokeColor(color: MarkerGraphColor) {
@@ -189,7 +182,6 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       collectedSamples,
       height,
       width,
-      interval,
     } = this.props;
     if (width === 0) {
       // This is attempting to draw before the canvas was laid out.
@@ -207,12 +199,16 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
     const deviceHeight = height * devicePixelRatio;
     const rangeLength = rangeEnd - rangeStart;
     const millisecondWidth = deviceWidth / rangeLength;
-    const intervalWidth = interval * millisecondWidth;
 
     // Resize and clear the canvas.
     canvas.width = Math.round(deviceWidth);
     canvas.height = Math.round(deviceHeight);
     ctx.clearRect(0, 0, deviceWidth, deviceHeight);
+
+    const deviceLineWidth = TRACK_MARKER_LINE_WIDTH * devicePixelRatio;
+    const deviceLineHalfWidth = deviceLineWidth * 0.5;
+    ctx.lineWidth = deviceLineWidth;
+    ctx.lineJoin = 'bevel';
 
     if (collectedSamples.numbersPerLine.length === 0) {
       // This is clearly an error made by the schema creator
@@ -223,104 +219,96 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
     const [sampleStart, sampleEnd] = markerSampleRanges;
 
     {
-      for (let lineIndex = 0; lineIndex < graphs.length; lineIndex++) {
-        const { type } = graphs[lineIndex];
-        const samples = collectedSamples.numbersPerLine[lineIndex];
+      for (let graphIndex = 0; graphIndex < graphs.length; graphIndex++) {
+        const { type, color } = graphs[graphIndex];
+        const samples = collectedSamples.numbersPerLine[graphIndex];
         // Draw the chart.
         //
-        // Here the schematics for the line chart
-        //
-        //                 ...--`
-        //  1 ...---```..--      `--. 2
-        //    |_____________________|
-        //  4                        3
-        //
-        // Start by drawing from 1 - 2. This will be the top of all the peaks of the
-        // graph.
-        const deviceLineWidth = TRACK_MARKER_LINE_WIDTH * devicePixelRatio;
-        const deviceLineHalfWidth = deviceLineWidth * 0.5;
-        const innerDeviceHeight = deviceHeight;
-        ctx.lineWidth = deviceLineWidth;
-        const color = graphs[lineIndex].color || TRACK_MARKER_DEFAULT_COLOR;
-        ctx.strokeStyle = _getStrokeColor(color);
-
-        let x = 0;
-        let y = 0;
-        let firstX = 0;
+        ctx.strokeStyle = _getStrokeColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
         switch (type) {
           case 'line':
-          case 'line-filled':
+          case 'line-filled': {
+            // Here the schematics for the line chart
+            //
+            //                 ...--`
+            //  1 ...---```..--      `--. 2
+            //    |_____________________|
+            //  4                        3
+            //
+            // Start by drawing from 1 - 2. This will be the top of all the
+            // peaks of the graph.
+            let x = 0;
+            let y = 0;
+            let firstX = 0;
             ctx.beginPath();
 
             for (let i = sampleStart; i < sampleEnd; i++) {
-              // Create a path for the top of the chart. This is the line that will have
-              // a stroke applied to it.
+              // Create a path for the top of the chart. This is the line that
+              // will have a stroke applied to it.
               x =
                 (collectedSamples.markers[i].start - rangeStart) *
                 millisecondWidth;
-              // Add on half the stroke's line width so that it won't be cut off the edge
-              // of the graph.
+              // Add on half the stroke's line width so that it won't be cut
+              // off the edge of the graph.
               const unitValue = _calculateUnitValue(
                 type,
                 minNumber,
                 maxNumber,
                 samples[i]
               );
-              y =
-                innerDeviceHeight -
-                innerDeviceHeight * unitValue +
-                deviceLineHalfWidth;
+              y = deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth;
               if (i === sampleStart) {
-                // This is the first iteration, only move the line, do not draw it. Also
-                // remember this first X, as the bottom of the graph will need to connect
-                // back up to it.
+                // This is the first iteration, only move the line, do not draw it.
+                // Also remember this first X, as the bottom of the graph will need
+                // to connect back up to it.
                 firstX = x;
                 ctx.moveTo(x, y);
               } else {
                 ctx.lineTo(x, y);
               }
               if (collectedSamples.markers[i].end) {
-                const x2 =
+                x =
                   (collectedSamples.markers[i].end - rangeStart) *
                   millisecondWidth;
-                ctx.lineTo(x2, y);
+                ctx.lineTo(x, y);
               }
             }
 
-            // Don't do the fill yet, just stroke the top line. This will draw a line from
-            // point 1 to 2 in the diagram above.
+            // Don't do the fill yet, just stroke the top line. This will draw
+            // a line from point 1 to 2 in the diagram above.
             ctx.stroke();
 
             if (type === 'line-filled') {
-              // After doing the stroke, continue the path to complete the fill to the bottom
-              // of the canvas. This continues the path to point 3 and then 4.
+              // After doing the stroke, continue the path to complete the fill
+              // to the bottom of the canvas. This continues the path to point 3
+              // and then 4.
 
               // Create a line from 2 to 3.
-              ctx.lineTo(x + intervalWidth, deviceHeight);
+              ctx.lineTo(x, deviceHeight);
 
               // Create a line from 3 to 4.
               ctx.lineTo(firstX, deviceHeight);
 
               // The line from 4 to 1 will be implicitly filled in.
-              ctx.fillStyle = _getFillColor(color);
+              ctx.fillStyle = _getFillColor(
+                color || TRACK_MARKER_DEFAULT_COLOR
+              );
               ctx.fill();
               ctx.closePath();
             }
             break;
+          }
 
           case 'bar':
             ctx.fillStyle = ctx.strokeStyle;
 
             for (let i = sampleStart; i < sampleEnd; i++) {
-              // Create a path for the top of the chart. This is the line that will have
-              // a stroke applied to it.
               const x = Math.round(
                 (collectedSamples.markers[i].start - rangeStart) *
                   millisecondWidth
               );
-              // Add on half the stroke's line width so that it won't be cut off the edge
-              // of the graph.
+
               const unitValue = _calculateUnitValue(
                 type,
                 minNumber,
@@ -328,10 +316,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
                 samples[i]
               );
               const y =
-                innerDeviceHeight -
-                innerDeviceHeight * unitValue +
-                deviceLineHalfWidth;
-              const zero = innerDeviceHeight + deviceLineHalfWidth;
+                deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth;
 
               if (collectedSamples.markers[i].end) {
                 const x2 = Math.round(
@@ -339,11 +324,11 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
                     millisecondWidth
                 );
                 if (x2 >= x + 1) {
-                  ctx.fillRect(x, y, x2 - x, zero - y);
+                  ctx.fillRect(x, y, x2 - x, deviceHeight - y);
                   continue;
                 }
               }
-              ctx.moveTo(x, zero);
+              ctx.moveTo(x, deviceHeight);
               ctx.lineTo(x, y);
               ctx.stroke();
             }
@@ -422,9 +407,6 @@ type OwnProps = {|
 type StateProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +interval: Milliseconds,
-  +filteredThread: Thread,
-  +unfilteredSamplesRange: StartEndRange | null,
   +markerSampleRanges: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +collectedSamples: CollectedCustomMarkerSamples,
   +getMarker: (MarkerIndex) => Marker,
@@ -472,7 +454,6 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       width,
       rangeStart,
       rangeEnd,
-      interval,
       markerSampleRanges,
       collectedSamples,
     } = this.props;
@@ -484,8 +465,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       timeAtMouse < times[0] ||
       timeAtMouse >
         times[times.length - 1] +
-          (collectedSamples.markers[times.length - 1].end || 0) +
-          interval
+          (collectedSamples.markers[times.length - 1].end || 0)
     ) {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
@@ -518,9 +498,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       }
 
       if (hoveredCounter === times.length) {
-        // When hovering the last sample, it's possible the mouse is past the time.
-        // In this case, hover over the last sample. This happens because of the
-        // ` + interval` line in the `if` condition above.
+        // When the mouse is past the time of the last marker, hover the last one.
         hoveredCounter = times.length - 1;
       }
 
@@ -604,24 +582,22 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     const dots = [];
 
-    for (let lineIndex = 0; lineIndex < graphs.length; lineIndex++) {
-      const { type } = graphs[lineIndex];
-      const samples = numbersPerLine[lineIndex];
+    for (let graphIndex = 0; graphIndex < graphs.length; graphIndex++) {
+      const { type, color } = graphs[graphIndex];
+      const samples = numbersPerLine[graphIndex];
       const unitValue = _calculateUnitValue(
         type,
         minNumber,
         maxNumber,
         samples[counterIndex]
       );
-      const lineWidth = TRACK_MARKER_LINE_WIDTH;
-      const innerTrackHeight = graphHeight - lineWidth / 2;
+      const halfLineWidth = TRACK_MARKER_LINE_WIDTH / 2;
+      const innerTrackHeight = graphHeight - halfLineWidth;
       const top =
-        innerTrackHeight - unitValue * innerTrackHeight + lineWidth / 2;
+        innerTrackHeight - unitValue * innerTrackHeight - halfLineWidth;
       // eslint-disable-next-line flowtype/no-weak-types
       const style: Object = { left, top };
-      style.backgroundColor = _getDotColor(
-        graphs[lineIndex].color || TRACK_MARKER_DEFAULT_COLOR
-      );
+      style.backgroundColor = _getDotColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
       if (marker.end) {
         let screenWidth = (width * (marker.end - marker.start)) / rangeLength;
@@ -650,7 +626,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       dots.push(
         <div
           style={style}
-          key={lineIndex}
+          key={graphIndex}
           className="timelineTrackCustomMarkerGraphDot"
         />
       );
@@ -662,11 +638,8 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
   render() {
     const { hoveredCounter } = this.state;
     const {
-      filteredThread,
-      interval,
       rangeStart,
       rangeEnd,
-      unfilteredSamplesRange,
       markerSchema,
       markerSampleRanges,
       graphHeight,
@@ -687,7 +660,6 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
           markerSampleRanges={markerSampleRanges}
           height={graphHeight}
           width={width}
-          interval={interval}
           collectedSamples={collectedSamples}
         />
         {hoveredCounter === null ? null : (
@@ -696,13 +668,6 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
             {this._renderTooltip(hoveredCounter)}
           </>
         )}
-        <EmptyThreadIndicator
-          thread={filteredThread}
-          interval={interval}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          unfilteredSamplesRange={unfilteredSamplesRange}
-        />
       </div>
     );
   }
@@ -728,9 +693,6 @@ export const TrackCustomMarkerGraph = explicitConnect<
         markerTrackSelectors.getCollectedCustomMarkerSamples(state),
       rangeStart: start,
       rangeEnd: end,
-      interval: getProfileInterval(state),
-      filteredThread: selectors.getFilteredThread(state),
-      unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       getMarker: selectors.getMarkerGetter(state),
     };
   },
