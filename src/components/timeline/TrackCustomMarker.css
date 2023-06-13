@@ -25,19 +25,3 @@
   background-color: var(--orange-60);
   pointer-events: none;
 }
-
-.timelineTrackCustomMarkerTooltipLine {
-  white-space: nowrap;
-}
-
-.timelineTrackCustomMarkerTooltipNumber {
-  display: inline-block;
-  min-width: 60px;
-  color: var(--grey-60);
-  font-weight: bold;
-}
-
-.timelineMarkersCustomMarker {
-  height: var(--markers-height, 15px);
-  opacity: 1;
-}

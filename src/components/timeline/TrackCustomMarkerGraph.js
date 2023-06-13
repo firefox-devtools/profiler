@@ -15,17 +15,36 @@ import {
   getCommittedRange,
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
-import {
-  getMarkerTrackLineFillColor,
-  getMarkerTrackLineStrokeColor,
-  getMarkerTrackLineWidth,
-  getMarkerTrackLineDotColor,
-  getMarkerTrackConfigLineType,
-} from 'firefox-profiler/profile-logic/tracks';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
+import {
+  TRACK_MARKER_DEFAULT_COLOR,
+  TRACK_MARKER_LINE_WIDTH,
+} from 'firefox-profiler/app-logic/constants';
+import {
+  BLUE_50,
+  BLUE_60,
+  GREEN_50,
+  GREEN_60,
+  GREY_50,
+  GREY_60,
+  INK_50,
+  INK_60,
+  MAGENTA_50,
+  MAGENTA_60,
+  ORANGE_50,
+  ORANGE_60,
+  PURPLE_50,
+  PURPLE_60,
+  RED_50,
+  RED_60,
+  TEAL_50,
+  TEAL_60,
+  YELLOW_50,
+  YELLOW_60,
+} from 'photon-colors';
 
 import type {
   Thread,
@@ -37,7 +56,8 @@ import type {
   IndexIntoStringTable,
   MarkerSchema,
   CollectedCustomMarkerSamples,
-  MarkerTrackConfigLineType,
+  MarkerGraphColor,
+  MarkerGraphType,
   MarkerIndex,
   Marker,
 } from 'firefox-profiler/types';
@@ -64,7 +84,7 @@ type CanvasProps = {|
 |};
 
 function _calculateUnitValue(
-  type: MarkerTrackConfigLineType,
+  type: MarkerGraphType,
   minNumber: number,
   maxNumber: number,
   value: number
@@ -72,6 +92,7 @@ function _calculateUnitValue(
   let scaled;
   switch (type) {
     case 'line':
+    case 'line-filled':
       scaled = (value - minNumber) / (maxNumber - minNumber);
       break;
     case 'bar':
@@ -85,6 +106,65 @@ function _calculateUnitValue(
   }
   // Ensure we keep 10% of padding above the graph.
   return scaled * 0.9;
+}
+
+function _getStrokeColor(color: MarkerGraphColor) {
+  switch (color) {
+    case 'magenta':
+      return MAGENTA_50;
+    case 'purple':
+      return PURPLE_50;
+    case 'blue':
+      return BLUE_50;
+    case 'teal':
+      return TEAL_50;
+    case 'green':
+      return GREEN_50;
+    case 'yellow':
+      return YELLOW_50;
+    case 'red':
+      return RED_50;
+    case 'orange':
+      return ORANGE_50;
+    case 'grey':
+      return GREY_50;
+    case 'ink':
+      return INK_50;
+    default:
+      throw new Error('Unexpected marker track stroke color: ' + color);
+  }
+}
+
+function _getFillColor(color: MarkerGraphColor) {
+  // Same as stroke color with transparency.
+  return _getStrokeColor(color) + '88';
+}
+
+function _getDotColor(color: MarkerGraphColor) {
+  switch (color) {
+    case 'magenta':
+      return MAGENTA_60;
+    case 'purple':
+      return PURPLE_60;
+    case 'blue':
+      return BLUE_60;
+    case 'teal':
+      return TEAL_60;
+    case 'green':
+      return GREEN_60;
+    case 'yellow':
+      return YELLOW_60;
+    case 'red':
+      return RED_60;
+    case 'orange':
+      return ORANGE_60;
+    case 'grey':
+      return GREY_60;
+    case 'ink':
+      return INK_60;
+    default:
+      throw new Error('Unexpected marker track stroke color: ' + color);
+  }
 }
 
 /**
@@ -116,7 +196,10 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       return;
     }
 
-    const { name, trackConfig } = markerSchema;
+    const { name, graphs } = markerSchema;
+    if (graphs === undefined) {
+      throw new Error('No track config for marker');
+    }
 
     const ctx = canvas.getContext('2d');
     const devicePixelRatio = window.devicePixelRatio;
@@ -136,20 +219,12 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       throw new Error('No lines for marker ' + name);
     }
 
-    if (trackConfig === undefined) {
-      throw new Error('No track config for marker');
-    }
-
     const { minNumber, maxNumber } = collectedSamples;
     const [sampleStart, sampleEnd] = markerSampleRanges;
 
     {
-      for (
-        let lineIndex = 0;
-        lineIndex < trackConfig.lines.length;
-        lineIndex++
-      ) {
-        const type = getMarkerTrackConfigLineType(markerSchema, lineIndex);
+      for (let lineIndex = 0; lineIndex < graphs.length; lineIndex++) {
+        const { type } = graphs[lineIndex];
         const samples = collectedSamples.numbersPerLine[lineIndex];
         // Draw the chart.
         //
@@ -162,16 +237,12 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         //
         // Start by drawing from 1 - 2. This will be the top of all the peaks of the
         // graph.
-        const deviceLineWidth =
-          getMarkerTrackLineWidth(markerSchema, lineIndex) * devicePixelRatio;
+        const deviceLineWidth = TRACK_MARKER_LINE_WIDTH * devicePixelRatio;
         const deviceLineHalfWidth = deviceLineWidth * 0.5;
         const innerDeviceHeight = deviceHeight;
         ctx.lineWidth = deviceLineWidth;
-        ctx.strokeStyle = getMarkerTrackLineStrokeColor(
-          markerSchema,
-          lineIndex
-        );
-        ctx.fillStyle = getMarkerTrackLineFillColor(markerSchema, lineIndex);
+        const color = graphs[lineIndex].color || TRACK_MARKER_DEFAULT_COLOR;
+        ctx.strokeStyle = _getStrokeColor(color);
 
         let x = 0;
         let y = 0;
@@ -179,6 +250,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 
         switch (type) {
           case 'line':
+          case 'line-filled':
             ctx.beginPath();
 
             for (let i = sampleStart; i < sampleEnd; i++) {
@@ -220,27 +292,25 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             // point 1 to 2 in the diagram above.
             ctx.stroke();
 
-            // After doing the stroke, continue the path to complete the fill to the bottom
-            // of the canvas. This continues the path to point 3 and then 4.
+            if (type === 'line-filled') {
+              // After doing the stroke, continue the path to complete the fill to the bottom
+              // of the canvas. This continues the path to point 3 and then 4.
 
-            // Create a line from 2 to 3.
-            ctx.lineTo(x + intervalWidth, deviceHeight);
+              // Create a line from 2 to 3.
+              ctx.lineTo(x + intervalWidth, deviceHeight);
 
-            // Create a line from 3 to 4.
-            ctx.lineTo(firstX, deviceHeight);
+              // Create a line from 3 to 4.
+              ctx.lineTo(firstX, deviceHeight);
 
-            // The line from 4 to 1 will be implicitly filled in.
-            ctx.fill();
-            ctx.closePath();
-            break;
-          case 'bar':
-            // Ensure we don't mix the fill and stroke colors when drawing a
-            // bar graph that may both draw lines and fill rectangles.
-            if (ctx.fillStyle === 'transparent') {
-              ctx.fillStyle = ctx.strokeStyle;
-            } else {
-              ctx.strokeStyle = ctx.fillStyle;
+              // The line from 4 to 1 will be implicitly filled in.
+              ctx.fillStyle = _getFillColor(color);
+              ctx.fill();
+              ctx.closePath();
             }
+            break;
+
+          case 'bar':
+            ctx.fillStyle = ctx.strokeStyle;
 
             for (let i = sampleStart; i < sampleEnd; i++) {
               // Create a path for the top of the chart. This is the line that will have
@@ -511,8 +581,8 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       collectedSamples,
     } = this.props;
 
-    const trackConfig = markerSchema.trackConfig;
-    if (trackConfig === undefined) {
+    const { graphs } = markerSchema;
+    if (graphs === undefined) {
       throw new Error('No track config for marker');
     }
 
@@ -534,8 +604,8 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     const dots = [];
 
-    for (let lineIndex = 0; lineIndex < trackConfig.lines.length; lineIndex++) {
-      const type = getMarkerTrackConfigLineType(markerSchema, lineIndex);
+    for (let lineIndex = 0; lineIndex < graphs.length; lineIndex++) {
+      const { type } = graphs[lineIndex];
       const samples = numbersPerLine[lineIndex];
       const unitValue = _calculateUnitValue(
         type,
@@ -543,15 +613,14 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
         maxNumber,
         samples[counterIndex]
       );
-      const lineWidth = getMarkerTrackLineWidth(markerSchema, lineIndex);
+      const lineWidth = TRACK_MARKER_LINE_WIDTH;
       const innerTrackHeight = graphHeight - lineWidth / 2;
       const top =
         innerTrackHeight - unitValue * innerTrackHeight + lineWidth / 2;
       // eslint-disable-next-line flowtype/no-weak-types
       const style: Object = { left, top };
-      style.backgroundColor = getMarkerTrackLineDotColor(
-        markerSchema,
-        lineIndex
+      style.backgroundColor = _getDotColor(
+        graphs[lineIndex].color || TRACK_MARKER_DEFAULT_COLOR
       );
 
       if (marker.end) {

@@ -89,33 +89,23 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
-export type MarkerTrackColor =
+export type MarkerGraphColor =
+  | 'blue'
   | 'green'
   | 'grey'
+  | 'ink'
+  | 'magenta'
   | 'orange'
+  | 'purple'
   | 'red'
   | 'teal'
-  | 'yellow'
-  | 'magenta'
-  | 'purple'
-  | 'blue'
-  | 'ink'
-  | 'transparent';
+  | 'yellow';
 
-export type MarkerTrackConfigLineType = 'bar' | 'line';
-export type MarkerTrackConfigLineHeight = 'small' | 'medium' | 'large';
-export type MarkerTrackConfig = {|
-  label: string,
-  // height of the track in pixels
-  height?: MarkerTrackConfigLineHeight,
-  isPreSelected?: boolean,
-  lines: Array<{|
-    key: string,
-    fillColor?: MarkerTrackColor,
-    strokeColor?: MarkerTrackColor,
-    width?: number,
-    type?: MarkerTrackConfigLineType,
-  |}>,
+export type MarkerGraphType = 'bar' | 'line' | 'line-filled';
+export type MarkerGraph = {|
+  key: string,
+  type: MarkerGraphType,
+  color?: MarkerGraphColor,
 |};
 
 export type MarkerSchema = {|
@@ -154,7 +144,7 @@ export type MarkerSchema = {|
   >,
 
   // if present, give the marker its own local track
-  trackConfig?: MarkerTrackConfig,
+  graphs?: Array<MarkerGraph>,
 |};
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;

@@ -49,11 +49,9 @@ export const TRACK_IPC_MARKERS_HEIGHT = 25;
 export const TRACK_IPC_HEIGHT = TRACK_IPC_MARKERS_HEIGHT;
 
 // The following values are the defaults for marker tracks
-export const TRACK_MARKER_DEFAULT_HEIGHT = 'medium';
-export const TRACK_MARKER_HEIGHTS = { small: 12, medium: 25, large: 40 };
-export const TRACK_MARKER_DEFAULT_LINE_WIDTH = 2;
-export const TRACK_MARKER_DEFAULT_LINE_FILL_COLOR = 'transparent';
-export const TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR = 'grey';
+export const TRACK_MARKER_HEIGHT = 25;
+export const TRACK_MARKER_LINE_WIDTH = 2;
+export const TRACK_MARKER_DEFAULT_COLOR = 'grey';
 
 // Height of the blank area in process track.
 export const TRACK_PROCESS_BLANK_HEIGHT = 30;

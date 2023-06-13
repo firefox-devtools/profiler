@@ -646,9 +646,9 @@ export function getMarkerSelectorsPerThread(
         getFullMarkerList,
         threadSelectors.getStringTable,
         (fullMarkerList, stringTable) => {
-          if (markerSchema.trackConfig === undefined) {
+          if (markerSchema.graphs === undefined) {
             throw new Error(
-              `No trackConfig for marker ${markerName}. This shouldn't happen.`
+              `No graphs for marker ${markerName}. This shouldn't happen.`
             );
           }
           const indexes = [];
@@ -656,8 +656,8 @@ export function getMarkerSelectorsPerThread(
           let minNumber = Infinity;
           let maxNumber = -Infinity;
           const numbersPerLine = [];
-          const { trackConfig, name: schemaName } = markerSchema;
-          const keys = trackConfig.lines.map((graph) => {
+          const { graphs, name: schemaName } = markerSchema;
+          const keys = graphs.map((graph) => {
             numbersPerLine.push([]);
             return graph.key;
           });

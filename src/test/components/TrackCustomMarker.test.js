@@ -64,22 +64,18 @@ function setup() {
       { key: 'first', label: 'first', format: 'integer', searchable: true },
       { key: 'second', label: 'second', format: 'integer', searchable: true },
     ],
-    trackConfig: {
-      label: 'JVM CPU Usage',
-      lines: [
-        // multiple lines are supported
-        {
-          key: 'first',
-          type: 'line',
-        },
-        {
-          key: 'second',
-          strokeColor: 'green', // the default color is orange
-          type: 'bar',
-        },
-      ],
-      isPreSelected: true,
-    },
+    graphs: [
+      // multiple lines are supported
+      {
+        key: 'first',
+        type: 'line',
+      },
+      {
+        key: 'second',
+        color: 'green', // the default color is grey
+        type: 'bar',
+      },
+    ],
   });
   const addMarker = (startTime: number, first: number, second: number) => {
     // $FlowExpectError - Invalid payload by our type system

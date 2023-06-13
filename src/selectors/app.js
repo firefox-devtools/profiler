@@ -18,7 +18,6 @@ import {
   getLocalTracksByPid,
   getActiveTabTimeline,
 } from './profile';
-import { getMarkerTrackHeight } from '../profile-logic/tracks';
 import { getZipFileState } from './zipped-profiles.js';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
@@ -35,6 +34,7 @@ import {
   TIMELINE_MARGIN_LEFT,
   ACTIVE_TAB_TIMELINE_MARGIN_LEFT,
   TRACK_PROCESS_CPU_HEIGHT,
+  TRACK_MARKER_HEIGHT,
 } from '../app-logic/constants';
 
 import type {
@@ -299,8 +299,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                   height += TRACK_PROCESS_CPU_HEIGHT + border;
                   break;
                 case 'marker':
-                  height +=
-                    getMarkerTrackHeight(localTrack.markerSchema) + border;
+                  height += TRACK_MARKER_HEIGHT + border;
                   break;
                 default:
                   throw assertExhaustiveCheck(localTrack);

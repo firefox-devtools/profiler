@@ -15,7 +15,6 @@ import type {
   Counter,
   Tid,
   TrackReference,
-  MarkerSchema,
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
@@ -23,35 +22,6 @@ import { computeMaxCPUDeltaPerInterval } from './cpu';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
-import {
-  TRACK_MARKER_DEFAULT_HEIGHT,
-  TRACK_MARKER_DEFAULT_LINE_FILL_COLOR,
-  TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR,
-  TRACK_MARKER_DEFAULT_LINE_WIDTH,
-  TRACK_MARKER_HEIGHTS,
-} from '../app-logic/constants';
-import {
-  BLUE_50,
-  BLUE_60,
-  GREEN_50,
-  GREEN_60,
-  GREY_50,
-  GREY_60,
-  INK_50,
-  INK_60,
-  MAGENTA_50,
-  MAGENTA_60,
-  ORANGE_50,
-  ORANGE_60,
-  PURPLE_50,
-  PURPLE_60,
-  RED_50,
-  RED_60,
-  TEAL_50,
-  TEAL_60,
-  YELLOW_50,
-  YELLOW_60,
-} from 'photon-colors';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -64,124 +34,6 @@ export type HiddenTracks = {|
   +hiddenGlobalTracks: Set<TrackIndex>,
   +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
 |};
-
-export const getMarkerTrackConfig = (schema: MarkerSchema) => {
-  if (schema.trackConfig === undefined) {
-    throw new Error('No track config for marker ' + schema.name);
-  }
-  return schema.trackConfig;
-};
-
-export const getMarkerTrackHeight = (schema: MarkerSchema) => {
-  const heightName =
-    getMarkerTrackConfig(schema).height || TRACK_MARKER_DEFAULT_HEIGHT;
-  if (!(heightName in TRACK_MARKER_HEIGHTS)) {
-    throw new Error('Unknown height ' + heightName);
-  }
-  return (TRACK_MARKER_HEIGHTS[heightName]: number);
-};
-
-export const getMarkerTrackLineConfig = (
-  schema: MarkerSchema,
-  line: number
-) => {
-  return getMarkerTrackConfig(schema).lines[line];
-};
-
-export const getMarkerTrackLineWidth = (schema: MarkerSchema, line: number) => {
-  return (
-    getMarkerTrackLineConfig(schema, line).width ||
-    TRACK_MARKER_DEFAULT_LINE_WIDTH
-  );
-};
-
-export const isMarkerTrackPreSelected = (schema: MarkerSchema) => {
-  return getMarkerTrackConfig(schema).isPreSelected === true;
-};
-
-export const getMarkerTrackLineFillColor = (
-  schema: MarkerSchema,
-  line: number
-) => {
-  return (
-    getMarkerTrackLineConfig(schema, line).fillColor ||
-    TRACK_MARKER_DEFAULT_LINE_FILL_COLOR
-  );
-};
-
-export const getMarkerTrackConfigLineType = (
-  schema: MarkerSchema,
-  line: number
-) => {
-  return getMarkerTrackLineConfig(schema, line).type || 'line';
-};
-
-export const getMarkerTrackLineStrokeColor = (
-  schema: MarkerSchema,
-  line: number
-) => {
-  const color =
-    getMarkerTrackLineConfig(schema, line).strokeColor ||
-    TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR;
-  switch (color) {
-    case 'magenta':
-      return MAGENTA_50;
-    case 'purple':
-      return PURPLE_50;
-    case 'blue':
-      return BLUE_50;
-    case 'teal':
-      return TEAL_50;
-    case 'green':
-      return GREEN_50;
-    case 'yellow':
-      return YELLOW_50;
-    case 'red':
-      return RED_50;
-    case 'orange':
-      return ORANGE_50;
-    case 'grey':
-      return GREY_50;
-    case 'ink':
-      return INK_50;
-    default:
-      throw new Error('Unexpected marker track stroke color: ' + color);
-  }
-};
-
-export const getMarkerTrackLineDotColor = (
-  schema: MarkerSchema,
-  line: number
-) => {
-  const color =
-    getMarkerTrackLineConfig(schema, line).strokeColor ||
-    getMarkerTrackLineConfig(schema, line).fillColor ||
-    TRACK_MARKER_DEFAULT_LINE_STROKE_COLOR;
-  switch (color) {
-    case 'magenta':
-      return MAGENTA_60;
-    case 'purple':
-      return PURPLE_60;
-    case 'blue':
-      return BLUE_60;
-    case 'teal':
-      return TEAL_60;
-    case 'green':
-      return GREEN_60;
-    case 'yellow':
-      return YELLOW_60;
-    case 'red':
-      return RED_60;
-    case 'orange':
-      return ORANGE_60;
-    case 'grey':
-      return GREY_60;
-    case 'ink':
-      return INK_60;
-    default:
-      throw new Error('Unexpected marker track stroke color: ' + color);
-  }
-};
 
 /**
  * This file collects all the logic that goes into validating URL-encoded view options.
@@ -402,12 +254,10 @@ export function computeLocalTracksByPid(
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
-  // find markers that might be shown
-  const markerSchemasWithTrackConfig = profile.meta.markerSchema
-    ? profile.meta.markerSchema.filter(
-        (schema) => schema.trackConfig !== undefined
-      )
-    : [];
+  // find markers that might have their own track.
+  const markerSchemasWithGraphs = (profile.meta.markerSchema || []).filter(
+    (schema) => schema.graphs !== undefined
+  );
 
   for (
     let threadIndex = 0;
@@ -439,7 +289,7 @@ export function computeLocalTracksByPid(
     }
 
     const markerTracksBySchemaName = new Map();
-    for (const markerSchema of markerSchemasWithTrackConfig) {
+    for (const markerSchema of markerSchemasWithGraphs) {
       markerTracksBySchemaName.set(markerSchema.name, {
         markerSchema,
         markerNames: new Set(),
@@ -1547,7 +1397,6 @@ function _isLocalTrackVisible(
       // Show the local thread if it's included in the visible thread indexes.
       return visibleThreadIndexes.has(localTrack.threadIndex);
     case 'marker':
-      return isMarkerTrackPreSelected(localTrack.markerSchema);
     case 'network':
     case 'memory':
     // 'event-delay' and 'process-cpu' tracks are experimental and they should
