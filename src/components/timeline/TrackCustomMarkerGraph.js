@@ -462,6 +462,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 
     const times = collectedSamples.markers.map((marker) => marker.start);
     if (
+      times.length === 0 ||
       timeAtMouse < times[0] ||
       timeAtMouse >
         times[times.length - 1] +

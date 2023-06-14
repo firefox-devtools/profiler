@@ -292,14 +292,16 @@ export function computeLocalTracksByPid(
     for (const markerSchema of markerSchemasWithGraphs) {
       markerTracksBySchemaName.set(markerSchema.name, {
         markerSchema,
+        keys: (markerSchema.graphs || []).map((graph) => graph.key),
         markerNames: new Set(),
       });
     }
+
     for (let i = 0; i < markers.length; ++i) {
-      const schemaName = markers.data[i]?.type;
-      if (schemaName !== undefined) {
-        const mapEntry = markerTracksBySchemaName.get(schemaName);
-        if (mapEntry) {
+      const markerData = markers.data[i];
+      if (markerData && markerData.type !== undefined) {
+        const mapEntry = markerTracksBySchemaName.get(markerData.type);
+        if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
           mapEntry.markerNames.add(markers.name[i]);
         }
       }
