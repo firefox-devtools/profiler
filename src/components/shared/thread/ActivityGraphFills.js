@@ -421,16 +421,22 @@ export class ActivityFillGraphQuerier {
     const deviceX = Math.round(cssX * devicePixelRatio);
     const deviceY = Math.round(cssY * devicePixelRatio);
     const categoryUnderMouse = this._categoryAtDevicePixel(deviceX, deviceY);
+
+    const candidateSamples = this._getSamplesAtTime(time);
+    const cpuRatioInTimeRange = this._getCPURatioAtX(deviceX, candidateSamples);
+
     if (categoryUnderMouse === null) {
-      return null;
+      if (cpuRatioInTimeRange === null) {
+        // If there is not CPU ratio values iun that time range, do not show the tooltip.
+        return null;
+      }
+      // Show only the CPU ratio in the tooltip.
+      return { sample: null, cpuRatioInTimeRange };
     }
 
     // Get all samples that contribute pixels to the clicked category in this
     // pixel column of the graph.
     const { category, categoryLowerEdge, yPercentage } = categoryUnderMouse;
-    const candidateSamples = this._getSamplesAtTime(time);
-
-    const cpuRatioInTimeRange = this._getCPURatioAtX(deviceX, candidateSamples);
 
     // The candidate samples are sorted by gravity, bottom to top.
     // Each sample occupies a non-empty subrange of the [0, 1] range. The height
