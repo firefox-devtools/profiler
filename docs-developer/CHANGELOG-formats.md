@@ -68,7 +68,7 @@ Older versions are not documented in this changelog but can be found in [process
 
 ### Version 28
 
-A new `unique-string` type has been added as part of the marker schema, allowing markers to carry unique-strings in their payloads.
+A new `unique-string` marker schema format type has been added, allowing markers to carry unique-strings in their payloads.
 
 ### Version 27
 

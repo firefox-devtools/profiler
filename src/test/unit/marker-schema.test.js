@@ -268,11 +268,11 @@ describe('marker schema formatting', function () {
       ['percentage', 0.123456789],
       ['percentage', 1234.56789],
       ['percentage', 0.000123456],
-      ['unique-string', 0],
-      ['unique-string', 1],
-      ['unique-string', null],
-      ['unique-string', undefined],
-      ['unique-string', 42],
+      ['unique-string', 0], // Should be "IPC Message", see "stringTable" in "applyLabel" fn
+      ['unique-string', 1], // Should be "MouseDown Event", see "stringTable" in "applyLabel" fn
+      ['unique-string', null], // Should be "(empty)"
+      ['unique-string', undefined], // Should be "(empty)"
+      ['unique-string', 42], // Should be "(empty)"
     ];
 
     expect(
