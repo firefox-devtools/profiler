@@ -203,26 +203,6 @@ export type TransformDefinitions = {
   |},
 
   /**
-   * The DropFunction transform removes samples from the thread that have a function
-   * somewhere in its stack.
-   *
-   *                 A:4,0                              A:1,0
-   *                 /    \        Drop Func C            |
-   *                v      v           -->                v
-   *            B:3,0     C:1,0                         B:1,0
-   *           /      \                                   |
-   *          v        v                                  v
-   *        C:2,1     D:1,1                             D:1,1
-   *        |
-   *        v
-   *      D:1,1
-   */
-  'drop-function': {|
-    +type: 'drop-function',
-    +funcIndex: IndexIntoFuncTable,
-  |},
-
-  /**
    * Collapse resource takes CallNodes that are of a consecutive library, and collapses
    * them into a new collapsed pseudo-stack. Given a call tree like below, where each node
    * is defined by either "function_name" or "function_name:library_name":
@@ -356,3 +336,6 @@ export type TransformType = $Values<$ObjMap<TransformDefinitions, ExtractType>>;
 
 export type TransformStack = Transform[];
 export type TransformStacksPerThread = { [key: ThreadsKey]: TransformStack };
+
+export type DroppedFunctions = IndexIntoFuncTable[];
+export type DroppedFunctionsPerThread = { [key: ThreadsKey]: DroppedFunctions };

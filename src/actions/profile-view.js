@@ -67,6 +67,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
   IndexIntoResourceTable,
+  IndexIntoFuncTable,
   TrackIndex,
   MarkerIndex,
   Transform,
@@ -1907,6 +1908,32 @@ export function addCollapseResourceTransformToStack(
   };
 }
 
+export function dropFunctions(
+  threadsKey: ThreadsKey,
+  functionIndexes: IndexIntoFuncTable[]
+): ThunkAction<void> {
+  return (dispatch) => {
+    dispatch({
+      type: 'DROP_FUNCTIONS',
+      threadsKey,
+      functionIndexes,
+    });
+  };
+}
+
+export function undropFunctions(
+  threadsKey: ThreadsKey,
+  functionIndexes: Set<IndexIntoFuncTable>
+): ThunkAction<void> {
+  return (dispatch) => {
+    dispatch({
+      type: 'UNDROP_FUNCTIONS',
+      threadsKey,
+      functionIndexes,
+    });
+  };
+}
+
 export function popTransformsFromStack(
   firstPoppedFilterIndex: number
 ): ThunkAction<void> {
@@ -2073,12 +2100,7 @@ export function handleCallNodeTransformShortcut(
         );
         break;
       case 'd':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'drop-function',
-            funcIndex,
-          })
-        );
+        dispatch(dropFunctions(threadsKey, [funcIndex]));
         break;
       case 'C': {
         const { funcTable } = unfilteredThread;

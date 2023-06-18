@@ -48,7 +48,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 10;
+export const CURRENT_URL_VERSION = 11;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -176,6 +176,7 @@ type BaseQuery = {|
   thread: string, // "3"
   file: string, // Path into a zip file.
   transforms: string,
+  droppedFunctions: string,
   profiles: string[],
   profileName: string,
   symbolServer: string,
@@ -407,6 +408,14 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
             urlState.profileSpecific.transforms[selectedThreadsKey]
           ) || undefined;
       }
+      if (
+        selectedThreadsKey !== null &&
+        urlState.profileSpecific.droppedFunctions[selectedThreadsKey]
+      ) {
+        query.droppedFunctions = encodeUintArrayForUrlComponent(
+          urlState.profileSpecific.droppedFunctions[selectedThreadsKey]
+        );
+      }
       query.ctSummary =
         urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy ===
         'timing'
@@ -578,6 +587,13 @@ export function stateFromLocation(
     transforms[selectedThreadsKey] = parseTransforms(query.transforms);
   }
 
+  const droppedFunctions = {};
+  if (selectedThreadsKey !== null && query.droppedFunctions) {
+    droppedFunctions[selectedThreadsKey] = decodeUintArrayFromUrlComponent(
+      query.droppedFunctions
+    );
+  }
+
   let tabID = null;
   if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
     tabID = Number(query.ctxId);
@@ -643,6 +659,7 @@ export function stateFromLocation(
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
       transforms,
+      droppedFunctions,
       sourceView,
       assemblyView,
       isBottomBoxOpenPerPanel,
@@ -1229,6 +1246,35 @@ const _upgraders: {|
 
     const transformStrings = query.transforms.split('~');
     query.transforms = transformStrings.map(upgradeTransformString).join('~');
+  },
+  [11]: ({ query }: ProcessedLocationBeforeUpgrade) => {
+    // The "drop function" transform has been turned into a "droppedFunctions"
+    // list that is stored separately from the transform stack.
+    if (query.transforms) {
+      const transformStrings = query.transforms.split('~');
+
+      // Collect dropped functions from the transforms.
+      const droppedFunctions = [];
+      for (const transformString of transformStrings) {
+        if (transformString.startsWith('df-')) {
+          const [, funcIndexRaw] = transformString.split('-');
+          const funcIndex = parseInt(funcIndexRaw, 10);
+          if (!isNaN(funcIndex) && funcIndex >= 0) {
+            droppedFunctions.push(funcIndex);
+          }
+        }
+      }
+      // Remove "drop-function" transforms from the transform stack.
+      query.transforms = transformStrings
+        .filter((ts) => !ts.startsWith('df-'))
+        .join('~');
+
+      // Add the dropped functions with a new droppedFunctions parameter.
+      if (droppedFunctions.length > 0) {
+        query.droppedFunctions =
+          encodeUintArrayForUrlComponent(droppedFunctions);
+      }
+    }
   },
 };
 

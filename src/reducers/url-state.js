@@ -14,6 +14,7 @@ import type {
   TrackIndex,
   StartEndRange,
   TransformStacksPerThread,
+  DroppedFunctionsPerThread,
   DataSource,
   ImplementationFilter,
   CallTreeSummaryStrategy,
@@ -223,6 +224,56 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
         }
       }
       return newTransforms;
+    }
+    default:
+      return state;
+  }
+};
+
+const droppedFunctions: Reducer<DroppedFunctionsPerThread> = (
+  state = {},
+  action
+) => {
+  switch (action.type) {
+    case 'DROP_FUNCTIONS': {
+      const { threadsKey, functionIndexes } = action;
+      if (functionIndexes.length === 0) {
+        return state;
+      }
+      const droppedFunctions = state[threadsKey] || [];
+      const newDroppedFunctions = [...droppedFunctions, ...functionIndexes];
+      return Object.assign({}, state, {
+        [threadsKey]: newDroppedFunctions,
+      });
+    }
+    case 'UNDROP_FUNCTIONS': {
+      const { threadsKey, functionIndexes } = action;
+      const droppedFunctions = state[threadsKey] || [];
+      const newDroppedFunctions = droppedFunctions.filter(
+        (funcIndex) => !functionIndexes.has(funcIndex)
+      );
+      if (newDroppedFunctions.length === droppedFunctions.length) {
+        return state;
+      }
+      return Object.assign({}, state, {
+        [threadsKey]: newDroppedFunctions,
+      });
+    }
+    case 'SANITIZED_PROFILE_PUBLISHED': {
+      const { oldThreadIndexToNew } = action;
+      if (!oldThreadIndexToNew) {
+        // The thread indexes weren't modified, just return the old value here.
+        return state;
+      }
+      // This may no longer be valid because of PII sanitization.
+      const newDroppedFunctions = {};
+      for (const [threadsKey, droppedFunctions] of objectEntries(state)) {
+        const newThreadIndex = oldThreadIndexToNew.get(Number(threadsKey));
+        if (newThreadIndex !== undefined) {
+          newDroppedFunctions[newThreadIndex] = droppedFunctions;
+        }
+      }
+      return newDroppedFunctions;
     }
     default:
       return state;
@@ -699,6 +750,7 @@ const profileSpecific = combineReducers({
   markersSearchString,
   networkSearchString,
   transforms,
+  droppedFunctions,
   sourceView,
   assemblyView,
   isBottomBoxOpenPerPanel,

@@ -22,6 +22,7 @@ import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   addCollapseResourceTransformToStack,
+  dropFunctions,
   expandAllCallNodeDescendants,
   updateBottomBoxContentsAndMaybeOpen,
   setContextMenuVisibility,
@@ -73,6 +74,7 @@ type StateProps = {|
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack,
+  +dropFunctions: typeof dropFunctions,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
   +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
@@ -264,6 +266,9 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       case 'expand-all':
         this.expandAll();
         break;
+      case 'drop-function':
+        this.dropFunction();
+        break;
       default:
         throw new Error(`Unknown type ${type}`);
     }
@@ -321,12 +326,6 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           funcIndex: selectedFunc,
         });
         break;
-      case 'drop-function':
-        addTransformToStack(threadsKey, {
-          type: 'drop-function',
-          funcIndex: selectedFunc,
-        });
-        break;
       case 'collapse-resource': {
         const { funcTable } = thread;
         const resourceIndex = funcTable.resource[selectedFunc];
@@ -373,6 +372,21 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       default:
         assertExhaustiveCheck(type);
     }
+  }
+
+  dropFunction(): void {
+    const { dropFunctions } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
+
+    if (rightClickedCallNodeInfo === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
+    const { threadsKey, callNodePath } = rightClickedCallNodeInfo;
+    const selectedFunc = callNodePath[callNodePath.length - 1];
+    dropFunctions(threadsKey, [selectedFunc]);
   }
 
   expandAll(): void {
@@ -531,6 +545,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               l10nProps: {
                 vars: { fileName },
                 elems: { strong: <strong /> },
+                attrs: { title: false },
               },
               onClick: this._handleClick,
               data: { type: 'show-file' },
@@ -541,54 +556,54 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           </>
         ) : null}
 
-        {this.renderTransformMenuItem({
+        {this.renderMenuItemWithShortcut({
           l10nId: 'CallNodeContextMenu--transform-merge-function',
           shortcut: 'm',
           icon: 'Merge',
           onClick: this._handleClick,
-          transform: 'merge-function',
+          data: { type: 'merge-function' },
           title: '',
           content: 'Merge function',
         })}
 
         {inverted
           ? null
-          : this.renderTransformMenuItem({
+          : this.renderMenuItemWithShortcut({
               l10nId: 'CallNodeContextMenu--transform-merge-call-node',
               shortcut: 'M',
               icon: 'Merge',
               onClick: this._handleClick,
-              transform: 'merge-call-node',
+              data: { type: 'merge-call-node' },
               title: '',
               content: 'Merge node only',
             })}
 
-        {this.renderTransformMenuItem({
+        {this.renderMenuItemWithShortcut({
           l10nId: inverted
             ? 'CallNodeContextMenu--transform-focus-function-inverted'
             : 'CallNodeContextMenu--transform-focus-function',
           shortcut: 'f',
           icon: 'Focus',
           onClick: this._handleClick,
-          transform: 'focus-function',
+          data: { type: 'focus-function' },
           title: '',
           content: inverted
             ? 'Focus on function (inverted)'
             : 'Focus on function',
         })}
 
-        {this.renderTransformMenuItem({
+        {this.renderMenuItemWithShortcut({
           l10nId: 'CallNodeContextMenu--transform-focus-subtree',
           shortcut: 'F',
           icon: 'Focus',
           onClick: this._handleClick,
-          transform: 'focus-subtree',
+          data: { type: 'focus-subtree' },
           title: '',
           content: 'Focus on subtree only',
         })}
 
         {hasCategory
-          ? this.renderTransformMenuItem({
+          ? this.renderMenuItemWithShortcut({
               l10nId: 'CallNodeContextMenu--transform-focus-category',
               l10nProps: {
                 vars: { categoryName },
@@ -597,24 +612,24 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               shortcut: 'g',
               icon: 'Focus',
               onClick: this._handleClick,
-              transform: 'focus-category',
+              data: { type: 'focus-category' },
               title: '',
               content: 'Focus on category',
             })
           : null}
 
-        {this.renderTransformMenuItem({
+        {this.renderMenuItemWithShortcut({
           l10nId: 'CallNodeContextMenu--transform-collapse-function-subtree',
           shortcut: 'c',
           icon: 'Collapse',
           onClick: this._handleClick,
-          transform: 'collapse-function-subtree',
+          data: { type: 'collapse-function-subtree' },
           title: '',
           content: 'Collapse function',
         })}
 
         {nameForResource
-          ? this.renderTransformMenuItem({
+          ? this.renderMenuItemWithShortcut({
               l10nId: 'CallNodeContextMenu--transform-collapse-resource',
               l10nProps: {
                 vars: { nameForResource: nameForResource },
@@ -623,19 +638,19 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               shortcut: 'C',
               icon: 'Collapse',
               onClick: this._handleClick,
-              transform: 'collapse-resource',
+              data: { type: 'collapse-resource' },
               title: '',
               content: `Collapse <strong>${nameForResource}</strong>`,
             })
           : null}
 
         {this.isRecursiveCall(funcHasRecursiveCall)
-          ? this.renderTransformMenuItem({
+          ? this.renderMenuItemWithShortcut({
               l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
               shortcut: 'r',
               icon: 'Collapse',
               onClick: this._handleClick,
-              transform: 'collapse-recursion',
+              data: { type: 'collapse-recursion' },
               title: '',
               content: 'Collapse recursion',
             })
@@ -648,25 +663,24 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             funcIndex
           )
         )
-          ? this.renderTransformMenuItem({
+          ? this.renderMenuItemWithShortcut({
               l10nId:
                 'CallNodeContextMenu--transform-collapse-direct-recursion-only',
               shortcut: 'R',
               icon: 'Collapse',
               onClick: this._handleClick,
-              transform: 'collapse-direct-recursion',
+              data: { type: 'collapse-direct-recursion' },
               title: '',
               content: 'Collapse direct recursion only',
             })
           : null}
 
-        {this.renderTransformMenuItem({
+        {this.renderMenuItemWithShortcut({
           l10nId: 'CallNodeContextMenu--transform-drop-function',
           shortcut: 'd',
           icon: 'Drop',
           onClick: this._handleClick,
-          transform: 'drop-function',
-          title: '',
+          data: { type: 'drop-function' },
           content: 'Drop samples with this function',
         })}
 
@@ -676,6 +690,9 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
           <>
             {this.renderMenuItemWithShortcut({
               l10nId: 'CallNodeContextMenu--expand-all',
+              l10nProps: {
+                attrs: { title: false },
+              },
               onClick: this._handleClick,
               data: { type: 'expand-all' },
               shortcut: '*',
@@ -715,38 +732,6 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     );
   }
 
-  renderTransformMenuItem(props: {|
-    +l10nId: string,
-    +l10nProps?: mixed,
-    +content: React.Node,
-    +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
-    +transform: string,
-    +shortcut: string,
-    +icon: string,
-    +title: string,
-  |}) {
-    return (
-      <MenuItem onClick={props.onClick} data={{ type: props.transform }}>
-        <span
-          className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
-        />
-        <Localized
-          id={props.l10nId}
-          attrs={{ title: true }}
-          {...props.l10nProps}
-        >
-          <DivWithTitle
-            className="react-contextmenu-item-content"
-            title={props.title}
-          >
-            {props.content}
-          </DivWithTitle>
-        </Localized>
-        <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
-      </MenuItem>
-    );
-  }
-
   renderMenuItemWithShortcut(props: {|
     +l10nId: string,
     +l10nProps?: mixed,
@@ -754,11 +739,27 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
     +shortcut: string,
     +data: { type: string },
+    +icon?: string,
+    +title?: string,
   |}) {
+    const l10nProps = {
+      attrs: { title: true },
+      ...props.l10nProps,
+    };
     return (
       <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
-        <Localized id={props.l10nId} {...props.l10nProps}>
-          <div className="react-contextmenu-item-content">{props.content}</div>
+        {props.icon ? (
+          <span
+            className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
+          />
+        ) : null}
+        <Localized id={props.l10nId} {...l10nProps}>
+          <DivWithTitle
+            className="react-contextmenu-item-content"
+            title={props.title ?? ''}
+          >
+            {props.content}
+          </DivWithTitle>
         </Localized>
         <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
       </MenuItem>
@@ -827,6 +828,7 @@ export const CallNodeContextMenu = explicitConnect<
   mapDispatchToProps: {
     addTransformToStack,
     addCollapseResourceTransformToStack,
+    dropFunctions,
     expandAllCallNodeDescendants,
     updateBottomBoxContentsAndMaybeOpen,
     setContextMenuVisibility,

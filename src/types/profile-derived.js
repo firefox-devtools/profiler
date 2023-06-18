@@ -259,6 +259,13 @@ export type ThreadWithReservedFunctions = {|
   >,
 |};
 
+export type FunctionDisplayData = {|
+  funcIndex: IndexIntoFuncTable,
+  name: string,
+  // Library name or source file name
+  originAnnotation: string,
+|};
+
 /**
  * The marker timing contains the necessary information to draw markers very quickly
  * in the marker chart. It represents a single row of markers in the chart.

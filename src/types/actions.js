@@ -14,6 +14,7 @@ import type {
   TabID,
   IndexIntoCategoryList,
   IndexIntoLibs,
+  IndexIntoFuncTable,
 } from './profile';
 import type {
   CallNodePath,
@@ -479,6 +480,16 @@ type UrlStateAction =
       +type: 'POP_TRANSFORMS_FROM_STACK',
       +threadsKey: ThreadsKey,
       +firstPoppedFilterIndex: number,
+    |}
+  | {|
+      +type: 'DROP_FUNCTIONS',
+      +threadsKey: ThreadsKey,
+      +functionIndexes: IndexIntoFuncTable[],
+    |}
+  | {|
+      +type: 'UNDROP_FUNCTIONS',
+      +threadsKey: ThreadsKey,
+      +functionIndexes: Set<IndexIntoFuncTable>,
     |}
   | {|
       +type: 'CHANGE_TIMELINE_TYPE',

@@ -964,12 +964,6 @@ TransformNavigator--merge-call-node = Merge Node: { $item }
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Merge: { $item }
 
-# "Drop function" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--drop-function = Drop: { $item }
-
 # "Collapse recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
@@ -992,6 +986,53 @@ TransformNavigator--collapse-function-subtree = Collapse subtree: { $item }
 # Variables:
 #   $item (String) - Search filter of the markers that transform will apply to.
 TransformNavigator--drop-samples-outside-of-markers-matching = Drop samples outside of markers matching: “{ $item }”
+
+## "Dropped functions" settings UI
+##
+## A "dropped function" is a function which is excluded from the sample data.
+## More precisely, a sample will be excluded if its stack contains at least one
+## stack frame whose function is on the list of dropped functions. The excluded
+## samples are grayed out in the activity timeline, and they don't contribute to
+## the timings shown in the call tree and flame graph.
+## The user can add functions to the list of dropped functions by right-clicking
+## a row in the call tree and choosing "Drop samples with this function" in the
+## context menu.
+## To revert this action, they can open the panel of dropped functions and click
+## the "x" button next to the function that they no longer want to exclude.
+
+# The button which shows how many functions are currently on the list of dropped
+# functions. Clicking this button will open the "dropped functions" panel.
+#
+# Variables:
+#   $numberOfDroppedFunctions - The number of dropped functions, can be zero.
+DroppedFunctions--settings-button =
+    .label =
+        { $numberOfDroppedFunctions ->
+            [one] 1 dropped function
+        *[other] { $numberOfDroppedFunctions } dropped functions
+        }
+    .title = Click to manage dropped functions
+
+# The "clear all" button in the dropped functions panel. Clicking this button
+# will clear the list of dropped functions and no longer exclude samples that
+# were excluded because they contained a function from this list in their stack.
+DroppedFunctions--clear-all-button =
+    .value = Clear all
+    .title = Remove all items from this list so that no functions are dropped
+
+# This message is shown inside the list of dropped functions when the list is empty.
+# It instructs the user about the purpose of the list.
+# The text "Drop samples with this function" should be consistent with the
+# translation of `CallNodeContextMenu--transform-drop-function`.
+DroppedFunctions--empty-list-message =
+    To add functions to this list, right-click a function in the call tree
+    and choose “Drop samples with this function”.
+
+# This button is displayed at the beginning of each list item of the "dropped functions" list.
+# The button label is not shown on the screen, it is only present for accessibility purposes.
+DroppedFunctions--remove-button =
+    .value = Remove
+    .title = Remove this dropped function
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI

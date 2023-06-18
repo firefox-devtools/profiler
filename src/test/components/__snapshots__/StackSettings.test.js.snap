@@ -58,6 +58,22 @@ exports[`StackSettings matches the snapshot 1`] = `
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >

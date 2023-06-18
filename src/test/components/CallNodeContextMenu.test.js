@@ -94,7 +94,6 @@ describe('calltree/CallNodeContextMenu', function () {
         matcher: /Collapse direct recursion/,
         type: 'collapse-direct-recursion',
       },
-      { matcher: /Drop samples/, type: 'drop-function' },
     ];
 
     fixtures.forEach(({ matcher, type }) => {
@@ -184,6 +183,14 @@ describe('calltree/CallNodeContextMenu', function () {
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy stack'));
       expect(copy).toHaveBeenCalledWith(`B\nA\n`);
+    });
+
+    it('can drop a function', function () {
+      const { getState, getByText } = setup();
+      fireFullClick(getByText(/Drop samples/));
+      expect(
+        selectedThreadSelectors.getDroppedFunctions(getState()).length
+      ).toBe(1);
     });
   });
 });

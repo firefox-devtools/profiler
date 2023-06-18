@@ -234,6 +234,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
   >
     <div
       class="react-contextmenu-item-content"
+      title=""
     >
       Expand all
     </div>

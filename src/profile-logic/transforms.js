@@ -63,7 +63,6 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
   'focus-category',
   'merge-call-node',
   'merge-function',
-  'drop-function',
   'collapse-resource',
   'collapse-direct-recursion',
   'collapse-recursion',
@@ -88,9 +87,6 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
       break;
     case 'merge-function':
       shortKey = 'mf';
-      break;
-    case 'drop-function':
-      shortKey = 'df';
       break;
     case 'collapse-resource':
       shortKey = 'cr';
@@ -195,7 +191,6 @@ export function parseTransforms(transformString: string): TransformStack {
       }
       case 'merge-function':
       case 'focus-function':
-      case 'drop-function':
       case 'collapse-function-subtree': {
         // e.g. "mf-325"
         const [, funcIndexRaw] = tuple;
@@ -212,12 +207,6 @@ export function parseTransforms(transformString: string): TransformStack {
             case 'focus-function':
               transforms.push({
                 type: 'focus-function',
-                funcIndex,
-              });
-              break;
-            case 'drop-function':
-              transforms.push({
-                type: 'drop-function',
                 funcIndex,
               });
               break;
@@ -342,7 +331,6 @@ export function stringifyTransforms(transformStack: TransformStack): string {
       // other pieces of data.
       switch (transform.type) {
         case 'merge-function':
-        case 'drop-function':
         case 'collapse-function-subtree':
         case 'focus-function':
           return `${shortKey}-${transform.funcIndex}`;
@@ -439,7 +427,6 @@ export function getTransformLabelL10nIds(
         break;
       case 'focus-function':
       case 'merge-function':
-      case 'drop-function':
       case 'collapse-direct-recursion':
       case 'collapse-recursion':
       case 'collapse-function-subtree':
@@ -463,8 +450,6 @@ export function getTransformLabelL10nIds(
         };
       case 'merge-function':
         return { l10nId: 'TransformNavigator--merge-function', item: funcName };
-      case 'drop-function':
-        return { l10nId: 'TransformNavigator--drop-function', item: funcName };
       case 'collapse-direct-recursion':
         return {
           l10nId: 'TransformNavigator--collapse-direct-recursion-only',
@@ -516,8 +501,6 @@ export function applyTransformToCallNodePath(
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
     case 'merge-function':
       return _mergeFunctionInCallNodePath(transform.funcIndex, callNodePath);
-    case 'drop-function':
-      return _dropFunctionInCallNodePath(transform.funcIndex, callNodePath);
     case 'collapse-resource':
       return _collapseResourceInCallNodePath(
         transform.resourceIndex,
@@ -587,7 +570,7 @@ function _mergeFunctionInCallNodePath(
   return callNodePath.filter((nodeFunc) => nodeFunc !== funcIndex);
 }
 
-function _dropFunctionInCallNodePath(
+export function dropFunctionInCallNodePath(
   funcIndex: IndexIntoFuncTable,
   callNodePath: CallNodePath
 ): CallNodePath {
@@ -897,9 +880,9 @@ export function mergeFunction(
 /**
  * Drop any samples that contain the given function.
  */
-export function dropFunction(
+export function dropFunctions(
   thread: Thread,
-  funcIndexToDrop: IndexIntoFuncTable
+  funcsToDrop: Set<IndexIntoFuncTable>
 ) {
   const { stackTable, frameTable } = thread;
 
@@ -912,8 +895,8 @@ export function dropFunction(
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     if (
-      // This is the function we want to remove.
-      funcIndex === funcIndexToDrop ||
+      // This is one of the functions we want to remove.
+      funcsToDrop.has(funcIndex) ||
       // The parent of this stack contained the function.
       (prefix !== null && stackContainsFunc[prefix] === 1)
     ) {
@@ -1871,8 +1854,6 @@ export function applyTransform(
       );
     case 'merge-function':
       return mergeFunction(thread, transform.funcIndex);
-    case 'drop-function':
-      return dropFunction(thread, transform.funcIndex);
     case 'focus-function':
       return focusFunction(thread, transform.funcIndex);
     case 'focus-category':

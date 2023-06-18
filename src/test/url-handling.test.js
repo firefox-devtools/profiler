@@ -20,6 +20,7 @@ import {
   setDataSource,
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
+  dropFunctions,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -1431,7 +1432,7 @@ describe('url upgrading', function () {
 describe('URL serialization of the transform stack', function () {
   const transformString =
     'f-combined-0w2~mcn-combined-2w4~f-js-3w5-i~mf-6~ff-7~fg-42~cr-combined-8-9~' +
-    'drec-combined-10~rec-11~df-12~cfs-13';
+    'drec-combined-10~rec-11~cfs-13';
   const { getState } = _getStoreWithURL({
     search: '?transforms=' + transformString,
   });
@@ -1488,10 +1489,6 @@ describe('URL serialization of the transform stack', function () {
         funcIndex: 11,
       },
       {
-        type: 'drop-function',
-        funcIndex: 12,
-      },
-      {
         type: 'collapse-function-subtree',
         funcIndex: 13,
       },
@@ -1526,10 +1523,11 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
     );
     dispatch(
       addTransformToStack(getThreadsKey(new Set([0, 2])), {
-        type: 'drop-function',
+        type: 'focus-function',
         funcIndex: 11,
       })
     );
+    dispatch(dropFunctions(getThreadsKey(new Set([0, 2])), [10]));
     return store;
   }
 
@@ -1558,6 +1556,9 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
     const transformStackForDifferentThread =
       selectedThreadSelectors.getTransformStack(newStore.getState());
     expect(transformStackForDifferentThread).toEqual([]);
+    const droppedFunctionsForDifferentThread =
+      selectedThreadSelectors.getDroppedFunctions(newStore.getState());
+    expect(droppedFunctionsForDifferentThread).toEqual([]);
   });
 
   it('persists the transform for thread 1 if thread 1 is selected', function () {
@@ -1611,10 +1612,15 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
     );
     expect(transformStack).toEqual([
       {
-        type: 'drop-function',
+        type: 'focus-function',
         funcIndex: 11,
       },
     ]);
+
+    const droppedFunctions = selectedThreadSelectors.getDroppedFunctions(
+      newStore.getState()
+    );
+    expect(droppedFunctions).toEqual([10]);
   });
 });
 

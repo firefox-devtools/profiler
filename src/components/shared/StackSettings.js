@@ -22,6 +22,7 @@ import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/pro
 import { PanelSearch } from './PanelSearch';
 import { StackImplementationSetting } from './StackImplementationSetting';
 import { CallTreeStrategySetting } from './CallTreeStrategySetting';
+import { DroppedFunctionsSetting } from './DroppedFunctionsSetting';
 
 import explicitConnect, {
   type ConnectedProps,
@@ -88,6 +89,9 @@ class StackSettingsImpl extends PureComponent<Props> {
               <StackImplementationSetting />
             </li>
           ) : null}
+          <li className="panelSettingsListItem">
+            <DroppedFunctionsSetting />
+          </li>
           {hasAllocations ? (
             <li className="panelSettingsListItem">
               <CallTreeStrategySetting />

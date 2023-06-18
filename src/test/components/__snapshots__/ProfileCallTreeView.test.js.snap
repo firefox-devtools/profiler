@@ -63,6 +63,22 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label>
           Data source:
            
@@ -825,6 +841,22 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         >
           Native
         </label>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
       </li>
       <li
         class="panelSettingsListItem"
@@ -1613,6 +1645,22 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label>
           Data source:
            
@@ -2397,6 +2445,22 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label>
           Data source:
            
@@ -3169,6 +3233,22 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label>
           Data source:
            
@@ -3789,6 +3869,22 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
@@ -3930,6 +4026,22 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
@@ -4067,6 +4179,22 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
         >
           Native
         </label>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
       </li>
       <li
         class="panelSettingsListItem"
@@ -4254,6 +4382,22 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
         >
           Native
         </label>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
       </li>
       <li
         class="panelSettingsListItem"
@@ -4998,6 +5142,22 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
@@ -5737,6 +5897,22 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
@@ -6256,6 +6432,22 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           Native
         </label>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
       </li>
       <li
         class="panelSettingsListItem"
@@ -6999,6 +7191,22 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
@@ -7662,6 +7870,22 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           Native
         </label>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
       </li>
       <li
         class="panelSettingsListItem"
@@ -8333,6 +8557,22 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
@@ -8857,6 +9097,22 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       <li
         class="panelSettingsListItem"
       >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
@@ -9377,6 +9633,22 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         >
           Native
         </label>
+      </li>
+      <li
+        class="panelSettingsListItem"
+      >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
       </li>
       <li
         class="panelSettingsListItem"
