@@ -1445,6 +1445,13 @@ const _upgraders = {
     }
     convertToVersion27Recursive(profile);
   },
+  [28]: (_) => {
+    // This version bump added a new marker schema format type, named "unique-string",
+    // which older frontends will not be able to display.
+    // No upgrade is needed, as older versions of firefox would not generate
+    // marker data with unique-string typed data, and no modification is needed in the
+    // frontend to display older formats.
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
