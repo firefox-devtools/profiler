@@ -905,6 +905,10 @@ export type ProfileMeta = {|
   initialSelectedThreads?: ThreadIndex[],
   // Keep the defined thread order
   keepProfileThreadOrder?: boolean,
+
+  // Grams of CO2 equivalent per kWh. Used to display power track tooltips.
+  // Will fallback to the global average if this is missing.
+  gramsOfCO2ePerKWh?: number,
 |};
 
 /**
