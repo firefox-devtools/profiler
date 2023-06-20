@@ -33,6 +33,7 @@ import type {
   ExtraProfileInfoSection,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 import './MetaInfo.css';
 
@@ -148,7 +149,12 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
               <div className="moreInfoRow" key={label}>
                 <span className="metaInfoWideLabel">{label}</span>
                 <div className="moreInfoValue">
-                  {formatFromMarkerSchema('moreInfo', format, value)}
+                  {formatFromMarkerSchema(
+                    'moreInfo',
+                    format,
+                    value,
+                    new UniqueStringArray()
+                  )}
                 </div>
               </div>
             );

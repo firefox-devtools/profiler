@@ -17,11 +17,19 @@ export class UniqueStringArray {
     }
   }
 
-  getString(index: IndexIntoStringTable): string {
-    if (!(index in this._array)) {
+  getString(index: IndexIntoStringTable, els: ?string): string {
+    if (!this.hasIndex(index)) {
+      if (els) {
+        console.warn(`index ${index} not in UniqueStringArray`);
+        return els;
+      }
       throw new Error(`index ${index} not in UniqueStringArray`);
     }
     return this._array[index];
+  }
+
+  hasIndex(i: IndexIntoStringTable): boolean {
+    return i in this._array;
   }
 
   hasString(s: string): boolean {

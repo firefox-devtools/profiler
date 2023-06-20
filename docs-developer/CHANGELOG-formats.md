@@ -66,6 +66,10 @@ Older versions are not documented in this changelog but can be found in [process
 
 ## Gecko profile format
 
+### Version 28
+
+A new `unique-string` marker schema format type has been added, allowing markers to carry unique-strings in their payloads.
+
 ### Version 27
 
 The `optimizations` field is removed from the `frameTable` schema.
