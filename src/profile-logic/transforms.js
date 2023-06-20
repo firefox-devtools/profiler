@@ -1505,45 +1505,38 @@ export function focusFunction(
 ): Thread {
   return timeCode('focusFunction', () => {
     const { stackTable, frameTable } = thread;
-    const oldStackToNewStack: Map<
-      IndexIntoStackTable | null,
-      IndexIntoStackTable | null
-    > = new Map();
-    // A root stack's prefix will be null. Maintain that relationship from old to new
-    // stacks by mapping from null to null.
-    oldStackToNewStack.set(null, null);
-    const newStackTable = getEmptyStackTable();
+    // A map oldStack -> newStack+1, implemented as a Uint32Array for performance.
+    // If newStack+1 is zero it means "null", i.e. this stack was filtered out.
+    // Typed arrays are initialized to zero, which we interpret as null.
+    const oldStackToNewStackPlusOne = new Uint32Array(stackTable.length);
 
+    const newStackTable = getEmptyStackTable();
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
-      const category = stackTable.category[stackIndex];
-      const subcategory = stackTable.subcategory[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
-      const matchesFocusFunc = funcIndex === funcIndexToFocus;
 
-      const newPrefix = oldStackToNewStack.get(prefix);
-      if (newPrefix === undefined) {
-        throw new Error('The prefix should not map to an undefined value');
-      }
-
-      if (newPrefix !== null || matchesFocusFunc) {
+      const newPrefixPlusOne =
+        prefix === null ? 0 : oldStackToNewStackPlusOne[prefix];
+      const newPrefix = newPrefixPlusOne === 0 ? null : newPrefixPlusOne - 1;
+      if (newPrefix !== null || funcIndex === funcIndexToFocus) {
         const newStackIndex = newStackTable.length++;
         newStackTable.prefix[newStackIndex] = newPrefix;
         newStackTable.frame[newStackIndex] = frameIndex;
-        newStackTable.category[newStackIndex] = category;
-        newStackTable.subcategory[newStackIndex] = subcategory;
-        oldStackToNewStack.set(stackIndex, newStackIndex);
-      } else {
-        oldStackToNewStack.set(stackIndex, null);
+        newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
+        newStackTable.subcategory[newStackIndex] =
+          stackTable.subcategory[stackIndex];
+        oldStackToNewStackPlusOne[stackIndex] = newStackIndex + 1;
       }
     }
 
-    return updateThreadStacks(
-      thread,
-      newStackTable,
-      getMapStackUpdater(oldStackToNewStack)
-    );
+    return updateThreadStacks(thread, newStackTable, (oldStack) => {
+      if (oldStack === null) {
+        return null;
+      }
+      const newStackPlusOne = oldStackToNewStackPlusOne[oldStack];
+      return newStackPlusOne === 0 ? null : newStackPlusOne - 1;
+    });
   });
 }
 
