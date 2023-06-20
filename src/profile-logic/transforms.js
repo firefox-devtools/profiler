@@ -11,11 +11,13 @@ import {
   toValidImplementationFilter,
   getCallNodeIndexFromPath,
   updateThreadStacks,
+  updateThreadStacksByGeneratingNewStackColumns,
   getMapStackUpdater,
   getCallNodeIndexFromParentAndFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
+import { canonicalizeRangeSet } from '../utils/range-set';
 import { CallTree } from '../profile-logic/call-tree';
 import { getSearchFilteredMarkerIndexes } from '../profile-logic/marker-data';
 import {
@@ -1799,71 +1801,66 @@ export function filterSamples(
 ): Thread {
   return timeCode('filterSamples', () => {
     // Find the ranges to filter.
-    let ranges: StartEndRange[];
-    switch (filterType) {
-      case 'marker-search':
-        ranges = _findRangesByMarkerFilter(
-          getMarker,
-          markerIndexes,
-          markerSchemaByName,
-          categoryList,
-          filter
-        );
-        break;
-      default:
-        throw assertExhaustiveCheck(filterType);
+    function getFilterRanges(): StartEndRange[] {
+      switch (filterType) {
+        case 'marker-search':
+          return _findRangesByMarkerFilter(
+            getMarker,
+            markerIndexes,
+            markerSchemaByName,
+            categoryList,
+            filter
+          );
+        default:
+          throw assertExhaustiveCheck(filterType);
+      }
     }
 
-    // Now let's go through all the samples and remove the ones that are outside
-    // of the ranges.
-    const { samples, jsAllocations, nativeAllocations } = thread;
+    const ranges = canonicalizeRangeSet(getFilterRanges());
 
-    function filterTable<
-      Table: {
-        stack: Array<IndexIntoStackTable | null>,
-        time: Milliseconds[],
-        length: number,
-      }
-    >(table: Table): Table {
-      const newTable = {
-        ...table,
-        stack: table.stack.slice(),
-      };
+    function computeFilteredStackColumn(
+      originalStackColumn: Array<IndexIntoStackTable | null>,
+      timeColumn: Milliseconds[]
+    ): Array<IndexIntoStackTable | null> {
+      const newStackColumn = originalStackColumn.slice();
 
-      for (let tableIndex = 0; tableIndex < newTable.length; tableIndex++) {
-        const sampleTime = newTable.time[tableIndex];
+      // Walk the ranges and samples in order. Both are sorted by time.
+      // For each range, drop the samples before the range and skip the samples
+      // inside the range.
+      let sampleIndex = 0;
+      const sampleCount = timeColumn.length;
+      for (const range of ranges) {
+        const { start: rangeStart, end: rangeEnd } = range;
+        // Drop samples before the range.
+        for (; sampleIndex < sampleCount; sampleIndex++) {
+          if (timeColumn[sampleIndex] >= rangeStart) {
+            break;
+          }
+          newStackColumn[sampleIndex] = null;
+        }
 
-        let sampleInRange = false;
-        for (const { start, end } of ranges) {
-          if (sampleTime >= start && sampleTime <= end) {
-            sampleInRange = true;
+        // Skip over samples inside the range.
+        for (; sampleIndex < sampleCount; sampleIndex++) {
+          if (timeColumn[sampleIndex] >= rangeEnd) {
             break;
           }
         }
-
-        if (!sampleInRange) {
-          newTable.stack[tableIndex] = null;
-        }
       }
 
-      return newTable;
+      // Drop the remaining samples, i.e. the samples after the last range.
+      while (sampleIndex < sampleCount) {
+        newStackColumn[sampleIndex] = null;
+        sampleIndex++;
+      }
+
+      return newStackColumn;
     }
 
-    const newThread = {
-      ...thread,
-      samples: filterTable(samples),
-    };
-
-    if (jsAllocations) {
-      // Filter the JS allocations if there are any.
-      newThread.jsAllocations = filterTable(jsAllocations);
-    }
-    if (nativeAllocations) {
-      // Filter the native allocations if there are any.
-      newThread.nativeAllocations = filterTable(nativeAllocations);
-    }
-
-    return newThread;
+    return updateThreadStacksByGeneratingNewStackColumns(
+      thread,
+      thread.stackTable,
+      computeFilteredStackColumn
+    );
   });
 }
 

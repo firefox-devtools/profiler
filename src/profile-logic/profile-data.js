@@ -2101,16 +2101,19 @@ export function invertCallstack(
  * out the manipulation of the data structures so that we can properly update
  * the stack table and any possible allocation information.
  */
-export function updateThreadStacks(
+export function updateThreadStacksByGeneratingNewStackColumns(
   thread: Thread,
   newStackTable: StackTable,
-  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+  computeFilteredStackColumn: (
+    Array<IndexIntoStackTable | null>,
+    Array<Milliseconds>
+  ) => Array<IndexIntoStackTable | null>
 ): Thread {
   const { jsAllocations, nativeAllocations, samples } = thread;
 
   const newSamples = {
     ...samples,
-    stack: samples.stack.map((oldStack) => convertStack(oldStack)),
+    stack: computeFilteredStackColumn(samples.stack, samples.time),
   };
 
   const newThread = {
@@ -2120,19 +2123,45 @@ export function updateThreadStacks(
   };
 
   if (jsAllocations) {
+    // Filter the JS allocations if there are any.
     newThread.jsAllocations = {
       ...jsAllocations,
-      stack: jsAllocations.stack.map((oldStack) => convertStack(oldStack)),
+      stack: computeFilteredStackColumn(
+        jsAllocations.stack,
+        jsAllocations.time
+      ),
     };
   }
   if (nativeAllocations) {
+    // Filter the native allocations if there are any.
     newThread.nativeAllocations = {
       ...nativeAllocations,
-      stack: nativeAllocations.stack.map((oldStack) => convertStack(oldStack)),
+      stack: computeFilteredStackColumn(
+        nativeAllocations.stack,
+        nativeAllocations.time
+      ),
     };
   }
 
   return newThread;
+}
+
+/**
+ * A simpler variant of updateThreadStacksByGeneratingNewStackColumns which just
+ * accepts a convertStack function. Use this when you don't need to filter by
+ * sample timestamp.
+ */
+export function updateThreadStacks(
+  thread: Thread,
+  newStackTable: StackTable,
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+): Thread {
+  return updateThreadStacksByGeneratingNewStackColumns(
+    thread,
+    newStackTable,
+    (stackColumn, _timeColumn) =>
+      stackColumn.map((oldStack) => convertStack(oldStack))
+  );
 }
 
 /**
