@@ -33,6 +33,7 @@ import type {
   ExtraProfileInfoSection,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 import './MetaInfo.css';
 
@@ -148,7 +149,12 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
               <div className="moreInfoRow" key={label}>
                 <span className="metaInfoWideLabel">{label}</span>
                 <div className="moreInfoValue">
-                  {formatFromMarkerSchema('moreInfo', format, value)}
+                  {formatFromMarkerSchema(
+                    'moreInfo',
+                    format,
+                    value,
+                    new UniqueStringArray()
+                  )}
                 </div>
               </div>
             );
@@ -218,7 +224,27 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
     return (
       <>
         <div className="metaInfoSection">
-          {meta.startTime ? (
+          {meta.profilingStartTime !== undefined ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--profiling-started">
+                  Recording started:
+                </Localized>
+              </span>
+              {_formatDate(meta.startTime + meta.profilingStartTime)}
+            </div>
+          ) : null}
+          {meta.profilingStartTime !== undefined && meta.profilingEndTime ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--profiling-session">
+                  Recording length:
+                </Localized>
+              </span>
+              {formatTimestamp(meta.profilingEndTime - meta.profilingStartTime)}
+            </div>
+          ) : null}
+          {meta.profilingStartTime === undefined && meta.startTime ? (
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
                 <Localized id="MenuButtons--metaInfo--main-process-started">
@@ -308,6 +334,16 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
                 </Localized>
               </span>
               {formatProductAndVersion(meta)}
+            </div>
+          ) : null}
+          {meta.profilingStartTime ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--application-uptime">
+                  Uptime:
+                </Localized>
+              </span>
+              {formatTimestamp(meta.profilingStartTime)}
             </div>
           ) : null}
           {meta.updateChannel ? (

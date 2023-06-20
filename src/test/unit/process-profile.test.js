@@ -677,6 +677,34 @@ describe('profile meta processing', function () {
     // Checking if it keeps the sampleUnits object.
     expect(processedMeta.sampleUnits).toEqual(geckoMeta.sampleUnits);
   });
+
+  it('keeps the profilingStartTime and profilingEndTime', function () {
+    const geckoProfile = createGeckoProfile();
+    const geckoMeta = geckoProfile.meta;
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedMeta = processedProfile.meta;
+
+    expect(processedMeta.profilingStartTime).toEqual(
+      geckoMeta.profilingStartTime
+    );
+    expect(processedMeta.profilingEndTime).toEqual(geckoMeta.profilingEndTime);
+  });
+
+  it('does not create the profilingStartTime and profilingEndTime fields', function () {
+    const geckoProfile = createGeckoProfile();
+    const geckoMeta = geckoProfile.meta;
+    delete geckoMeta.profilingStartTime;
+    delete geckoMeta.profilingEndTime;
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedMeta = processedProfile.meta;
+
+    expect(processedMeta.profilingStartTime).toEqual(undefined);
+    expect(processedMeta.profilingEndTime).toEqual(undefined);
+  });
 });
 
 describe('visualMetrics processing', function () {

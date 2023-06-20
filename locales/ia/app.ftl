@@ -358,12 +358,23 @@ MarkerContextMenu--select-the-receiver-thread = Selige le argumento destinatario
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Selige le argumento mittente “<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Depone specimens foras del marcatores concordante “<strong>{ $filter }</strong>”
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Marcatores de filtro:
     .title = Solo monstra marcatores que concorda con un certe nomine
+MarkerSettings--marker-filters =
+    .title = Filtros de marcatores
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -445,6 +456,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } nucleo logic
        *[other] { $logicalCPUs } nucleos logic
     }
+MenuButtons--metaInfo--profiling-started = Registration comenciate:
+MenuButtons--metaInfo--profiling-session = Durata de registration
 MenuButtons--metaInfo--main-process-started = Processo principal initiate:
 MenuButtons--metaInfo--main-process-ended = Processo principal finite:
 MenuButtons--metaInfo--interval = Intervallo:
@@ -462,6 +475,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Sin limite
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Nomine e version:
+MenuButtons--metaInfo--application-uptime = Tempore de activitate:
 MenuButtons--metaInfo--update-channel = Canal de actualisation:
 MenuButtons--metaInfo--build-id = ID de version:
 MenuButtons--metaInfo--build-type = Typo de compilation:
@@ -882,6 +896,10 @@ TransformNavigator--collapse-direct-recursion-only = Collaber solo le recursion 
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Collaber sub-arbore: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Depone specimens foras del marcatores concordante: “{ $item }”
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI

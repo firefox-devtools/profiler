@@ -1819,35 +1819,39 @@ describe('symbolServerUrl', function () {
 
   it('will allow an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
-      '?symbolServer=https://symbolication.stage.mozaws.net'
+      '?symbolServer=https://symbolication.services.mozilla.com'
     );
-    expect(symbolServerUrl).toEqual('https://symbolication.stage.mozaws.net');
+    expect(symbolServerUrl).toEqual(
+      'https://symbolication.services.mozilla.com'
+    );
     expect(queryString).toContain(
-      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net'
+      'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
   it('will strip the trailing slash on an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
-      '?symbolServer=https://symbolication.stage.mozaws.net/'
+      '?symbolServer=https://symbolication.services.mozilla.com/'
     );
-    expect(symbolServerUrl).toEqual('https://symbolication.stage.mozaws.net');
+    expect(symbolServerUrl).toEqual(
+      'https://symbolication.services.mozilla.com'
+    );
     expect(queryString).toContain(
-      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net%2F'
+      'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com%2F'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
   it('will allow a a subdirectory path on an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
-      '?symbolServer=https://symbolication.stage.mozaws.net/subdir/'
+      '?symbolServer=https://symbolication.services.mozilla.com/subdir/'
     );
     expect(symbolServerUrl).toEqual(
-      'https://symbolication.stage.mozaws.net/subdir'
+      'https://symbolication.services.mozilla.com/subdir'
     );
     expect(queryString).toContain(
-      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net%2Fsubdir%2F'
+      'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com%2Fsubdir%2F'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
   });

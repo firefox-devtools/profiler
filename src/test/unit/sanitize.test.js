@@ -186,6 +186,12 @@ describe('sanitizePII', function () {
       );
     }
 
+    // Make sure the meta data contains the new profile range
+    expect(sanitizedProfile.meta.profilingStartTime).toEqual(
+      sanitizedRange.start
+    );
+    expect(sanitizedProfile.meta.profilingEndTime).toEqual(sanitizedRange.end);
+
     // Make sure that we still have the same number of counters.
     expect(ensureExists(originalProfile.counters).length).toEqual(1);
     expect(ensureExists(sanitizedProfile.counters).length).toEqual(1);

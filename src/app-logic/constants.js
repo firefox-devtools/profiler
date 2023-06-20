@@ -9,7 +9,7 @@ import type { MarkerPhase } from 'firefox-profiler/types';
 // The current version of the Gecko profile format.
 // Please don't forget to update the gecko profile format changelog in
 // `docs-developer/CHANGELOG-formats.md`.
-export const GECKO_PROFILE_VERSION = 27;
+export const GECKO_PROFILE_VERSION = 28;
 
 // The current version of the "processed" profile format.
 // Please don't forget to update the processed profile format changelog in
@@ -110,8 +110,7 @@ export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
 // SYMBOL_SERVER_URL
 // -----------------
 // Can be overridden with the URL parameter `symbolServer=SERVERURL`.
-// You can change this to the staging server `https://symbolication.stage.mozaws.net`,
-// or run a local symbol server (for example using profiler-symbol-server [1])
+// You can change this to run a local symbol server (for example using profiler-symbol-server [1])
 // and set it to e.g. 'http://localhost:8000/'.
 //
 // [1] https://github.com/mstange/profiler-symbol-server/

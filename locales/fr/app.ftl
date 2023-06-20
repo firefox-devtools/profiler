@@ -295,12 +295,23 @@ MarkerContextMenu--select-the-receiver-thread = Sélectionner le thread destinat
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Sélectionner le thread expéditeur « <strong>{ $threadName }</strong> »
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Abandonner les échantillons en dehors des marqueurs correspondant à « <strong>{ $filter }</strong> »
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Filtre de marqueur :
     .title = Afficher uniquement les marqueurs qui correspondent à un certain nom
+MarkerSettings--marker-filters =
+    .title = Filtres de marqueurs
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -382,6 +393,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } cœur logique
        *[other] { $logicalCPUs } cœurs logiques
     }
+MenuButtons--metaInfo--profiling-started = Enregistrement commencé :
+MenuButtons--metaInfo--profiling-session = Durée d’enregistrement :
 MenuButtons--metaInfo--main-process-started = Processus principal démarré :
 MenuButtons--metaInfo--main-process-ended = Processus principal terminé :
 MenuButtons--metaInfo--interval = Intervalle :
@@ -397,8 +410,9 @@ MenuButtons--metaInfo--buffer-duration-seconds =
     }
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Illimitée
-MenuButtons--metaInfo--application = Applications
+MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Nom et version :
+MenuButtons--metaInfo--application-uptime = Disponibilité :
 MenuButtons--metaInfo--update-channel = Canal de mise à jour :
 MenuButtons--metaInfo--build-id = Identifiant de compilation :
 MenuButtons--metaInfo--build-type = Type de compilation :
@@ -817,6 +831,10 @@ TransformNavigator--collapse-direct-recursion-only = Réduction de la récursivi
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Réduction de la sous-arborescence : { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Abandonner les échantillons en dehors des marqueurs correspondant à : « { $item } »
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
