@@ -24,7 +24,6 @@ import {
 import type {
   Thread,
   ThreadIndex,
-  IndexIntoCategoryList,
   IndexIntoSamplesTable,
   WeightType,
   CallNodeInfo,
@@ -84,20 +83,20 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
+  // A selector for getCallNodeInfo.
+  // getCallNodeInfo can be very expensive, so we want to minimize the number of
+  // times it gets called, in particular when transforms are applied and unapplied
+  // or when the filtered time range changes.
+  // To do this, the memoization cache key is not based on the thread object's
+  // identity (which changes if e.g. only a thread's samples table changes),
+  // but on the identities of just the subset of thread tables that are used by
+  // getCallNodeInfo. This avoids recomputations when samples are dropped.
   const getCallNodeInfo: Selector<CallNodeInfo> = createSelector(
-    threadSelectors.getFilteredThread,
+    (state) => threadSelectors.getFilteredThread(state).stackTable,
+    (state) => threadSelectors.getFilteredThread(state).frameTable,
+    (state) => threadSelectors.getFilteredThread(state).funcTable,
     ProfileSelectors.getDefaultCategory,
-    (
-      { stackTable, frameTable, funcTable }: Thread,
-      defaultCategory: IndexIntoCategoryList
-    ): CallNodeInfo => {
-      return ProfileData.getCallNodeInfo(
-        stackTable,
-        frameTable,
-        funcTable,
-        defaultCategory
-      );
-    }
+    ProfileData.getCallNodeInfo
   );
 
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
