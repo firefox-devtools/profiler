@@ -15,8 +15,6 @@ import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 
-import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
-
 import './PanelSettingsList.css';
 import './StackImplementationSetting.css';
 
@@ -28,7 +26,6 @@ type OwnProps = {|
 
 type StateProps = {|
   +implementationFilter: ImplementationFilter,
-  +allowSwitchingStackType: boolean,
 |};
 
 type DispatchProps = {|
@@ -74,10 +71,10 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
   }
 
   render() {
-    const { allowSwitchingStackType, labelL10nId } = this.props;
+    const { labelL10nId } = this.props;
 
-    return allowSwitchingStackType ? (
-      <li className="panelSettingsListItem">
+    return (
+      <>
         {labelL10nId ? (
           <span className="stackImplementationSettingLabel">
             <Localized id={labelL10nId} />
@@ -95,8 +92,8 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
           'StackSettings--implementation-native2',
           'cpp'
         )}
-      </li>
-    ) : null;
+      </>
+    );
   }
 }
 
@@ -107,7 +104,6 @@ export const StackImplementationSetting = explicitConnect<
 >({
   mapStateToProps: (state) => ({
     implementationFilter: getImplementationFilter(state),
-    allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,

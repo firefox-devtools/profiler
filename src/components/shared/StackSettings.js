@@ -19,6 +19,7 @@ import {
   getShowUserTimings,
   getCurrentSearchString,
 } from 'firefox-profiler/selectors/url-state';
+import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
 import { PanelSearch } from './PanelSearch';
 import { StackImplementationSetting } from './StackImplementationSetting';
 
@@ -40,6 +41,7 @@ type OwnProps = {|
 type StateProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +selectedTab: string,
+  +allowSwitchingStackType: boolean,
   +invertCallstack: boolean,
   +showUserTimings: boolean,
   +currentSearchString: string,
@@ -92,6 +94,7 @@ class StackSettingsImpl extends PureComponent<Props> {
 
   render() {
     const {
+      allowSwitchingStackType,
       invertCallstack,
       selectedTab,
       showUserTimings,
@@ -109,7 +112,11 @@ class StackSettingsImpl extends PureComponent<Props> {
     return (
       <div className="stackSettings">
         <ul className="panelSettingsList">
-          <StackImplementationSetting />
+          {allowSwitchingStackType ? (
+            <li className="panelSettingsListItem">
+              <StackImplementationSetting />
+            </li>
+          ) : null}
           {hasAllocations ? (
             <li className="panelSettingsListItem">
               <label>
@@ -216,6 +223,7 @@ export const StackSettings = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state) => ({
+    allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
     invertCallstack: getInvertCallstack(state),
     selectedTab: getSelectedTab(state),
     showUserTimings: getShowUserTimings(state),
