@@ -5,6 +5,7 @@
 
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
+import { attemptToConvertV8HeapProfile } from './import/v8-heap-profile';
 import { AddressLocator } from './address-locator';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import {
@@ -1773,6 +1774,11 @@ export async function unserializeProfileOfArbitraryFormat(
     const processedDhat = attemptToConvertDhat(json);
     if (processedDhat) {
       return processedDhat;
+    }
+
+    const processedV8HeapProfile = attemptToConvertV8HeapProfile(json);
+    if (processedV8HeapProfile) {
+      return processedV8HeapProfile;
     }
 
     // Else: Treat it as a Gecko profile and just attempt to process it.
