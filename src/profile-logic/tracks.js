@@ -6,7 +6,6 @@
 import type {
   ScreenshotPayload,
   Profile,
-  State,
   Thread,
   ThreadIndex,
   Pid,
@@ -16,6 +15,7 @@ import type {
   Counter,
   Tid,
   TrackReference,
+  MarkerSchemaByName,
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
@@ -24,7 +24,6 @@ import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import { getMarkerSchemaName } from './marker-schema';
-import { getMarkerSchemaByName } from '../selectors/profile';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -254,7 +253,7 @@ export function initializeLocalTrackOrderByPid(
  */
 export function computeLocalTracksByPid(
   profile: Profile,
-  state: State
+  markerSchemaByName: MarkerSchemaByName
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
@@ -262,7 +261,6 @@ export function computeLocalTracksByPid(
   const markerSchemasWithGraphs = (profile.meta.markerSchema || []).filter(
     (schema) => schema.graphs !== undefined
   );
-  const markerSchemaByName = getMarkerSchemaByName(state);
 
   for (
     let threadIndex = 0;
