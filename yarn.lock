@@ -1187,10 +1187,10 @@
   resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-6.2.1.tgz#6dc8d8e5abb26b875e3164191872d69a5e85bd73"
   integrity sha512-RupHSZ8+OjNT38zU9fKH2sv+Dnlr8Eb8sl4NOnnqz95mCFTZUaiRP8Xv5MeeaG0px2b8Bnfe7YGwCV3nsBhbuw==
 
-"@codemirror/view@^6.0.0", "@codemirror/view@^6.12.0":
-  version "6.12.0"
-  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.12.0.tgz#e9d88b82f607373ec6549e38a5a0651325e4eb2f"
-  integrity sha512-xNHvbJBc2v8JuEcIGOck6EUGShpP+TYGCEMVEVQMYxbFXfMhYnoF3znxB/2GgeKR0nrxBs+nhBupiTYQqCp2kw==
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.13.2":
+  version "6.13.2"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.13.2.tgz#bb13e26c0e3ece2f9598d76de9ae9929a658795f"
+  integrity sha512-XA/jUuu1H+eTja49654QkrQwx2CuDMdjciHcdqyasfTVo4HRlvj87rD/Qmm4HfnhwX8234FQSSA8HxEzxihX/Q==
   dependencies:
     "@codemirror/state" "^6.1.4"
     style-mod "^4.0.0"
