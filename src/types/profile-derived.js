@@ -320,7 +320,6 @@ export type AccumulatedCounterSamples = {|
 export type CollectedCustomMarkerSamples = {|
   +minNumber: number,
   +maxNumber: number,
-  // startTime
   markers: Marker[],
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.

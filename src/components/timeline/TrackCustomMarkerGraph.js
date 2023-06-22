@@ -4,8 +4,6 @@
 
 // @flow
 
-// todo: allow to increase the size of the tracks
-
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';

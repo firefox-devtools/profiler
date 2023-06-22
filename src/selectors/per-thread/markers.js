@@ -11,7 +11,10 @@ import * as MarkerData from '../../profile-logic/marker-data';
 import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedMarkerInfo } from '../right-clicked-marker';
-import { getLabelGetter } from '../../profile-logic/marker-schema';
+import {
+  getLabelGetter,
+  getMarkerSchemaName,
+} from '../../profile-logic/marker-schema';
 import { getInclusiveSampleIndexRangeForSelection } from '../../profile-logic/profile-data';
 
 import type { BasicThreadSelectorsPerThread } from './thread';
@@ -667,7 +670,11 @@ export function getMarkerSelectorsPerThread(
             if (
               data &&
               marker.name === name &&
-              data.type === schemaName &&
+              getMarkerSchemaName(
+                ProfileSelectors.getMarkerSchemaByName,
+                marker.name,
+                data
+              ) === schemaName &&
               keys.every((key) => key in data)
             ) {
               indexes.push(index);

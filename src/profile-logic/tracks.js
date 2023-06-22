@@ -6,6 +6,7 @@
 import type {
   ScreenshotPayload,
   Profile,
+  State,
   Thread,
   ThreadIndex,
   Pid,
@@ -22,6 +23,8 @@ import { computeMaxCPUDeltaPerInterval } from './cpu';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
+import { getMarkerSchemaName } from './marker-schema';
+import { getMarkerSchemaByName } from '../selectors/profile';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -250,7 +253,8 @@ export function initializeLocalTrackOrderByPid(
  * Take a profile and figure out all of the local tracks, and organize them by PID.
  */
 export function computeLocalTracksByPid(
-  profile: Profile
+  profile: Profile,
+  state: State
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
@@ -258,6 +262,7 @@ export function computeLocalTracksByPid(
   const markerSchemasWithGraphs = (profile.meta.markerSchema || []).filter(
     (schema) => schema.graphs !== undefined
   );
+  const markerSchemaByName = getMarkerSchemaByName(state);
 
   for (
     let threadIndex = 0;
@@ -288,33 +293,44 @@ export function computeLocalTracksByPid(
       tracks.push({ type: 'ipc', threadIndex });
     }
 
-    const markerTracksBySchemaName = new Map();
-    for (const markerSchema of markerSchemasWithGraphs) {
-      markerTracksBySchemaName.set(markerSchema.name, {
-        markerSchema,
-        keys: (markerSchema.graphs || []).map((graph) => graph.key),
-        markerNames: new Set(),
-      });
-    }
+    if (markerSchemasWithGraphs.length > 0) {
+      const markerTracksBySchemaName = new Map();
+      for (const markerSchema of markerSchemasWithGraphs) {
+        markerTracksBySchemaName.set(markerSchema.name, {
+          markerSchema,
+          keys: (markerSchema.graphs || []).map((graph) => graph.key),
+          markerNames: new Set(),
+        });
+      }
 
-    for (let i = 0; i < markers.length; ++i) {
-      const markerData = markers.data[i];
-      if (markerData && markerData.type !== undefined) {
-        const mapEntry = markerTracksBySchemaName.get(markerData.type);
-        if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
-          mapEntry.markerNames.add(markers.name[i]);
+      for (let i = 0; i < markers.length; ++i) {
+        const markerNameIndex = markers.name[i];
+        const markerData = markers.data[i];
+        const markerSchemaName = getMarkerSchemaName(
+          markerSchemaByName,
+          thread.stringTable.getString(markerNameIndex),
+          markerData
+        );
+        if (markerData && markerSchemaByName) {
+          const mapEntry = markerTracksBySchemaName.get(markerSchemaName);
+          if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
+            mapEntry.markerNames.add(markerNameIndex);
+          }
         }
       }
-    }
 
-    for (const [, { markerSchema, markerNames }] of markerTracksBySchemaName) {
-      for (const markerName of markerNames) {
-        tracks.push({
-          type: 'marker',
-          threadIndex,
-          markerSchema,
-          markerName,
-        });
+      for (const [
+        ,
+        { markerSchema, markerNames },
+      ] of markerTracksBySchemaName) {
+        for (const markerName of markerNames) {
+          tracks.push({
+            type: 'marker',
+            threadIndex,
+            markerSchema,
+            markerName,
+          });
+        }
       }
     }
   }
