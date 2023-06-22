@@ -1,5 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SampleTooltipContents renders the CPU usage only when outside of the activity graph is hovered 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 11px; top: 10px;"
+>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      CPU:
+    </div>
+    <div>
+      28% (average over 1.0ms)
+    </div>
+  </div>
+</div>
+`;
+
 exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
 <div
   class="tooltip"

@@ -124,17 +124,18 @@ describe('SampleTooltipContents', function () {
       `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
     );
 
-    fireEvent(
-      canvas,
-      getMouseEvent('mousemove', {
-        offsetX: getSamplesPixelPosition(
-          hoveredSampleIndex,
-          hoveredSamplePosition
-        ),
-        offsetY: GRAPH_HEIGHT * 0.9,
-      })
-    );
-    flushRafCalls();
+    const fireMouseMove = (mouseEventOptions) => {
+      fireEvent(canvas, getMouseEvent('mousemove', mouseEventOptions));
+      flushRafCalls();
+    };
+
+    fireMouseMove({
+      offsetX: getSamplesPixelPosition(
+        hoveredSampleIndex,
+        hoveredSamplePosition
+      ),
+      offsetY: GRAPH_HEIGHT * 0.9,
+    });
 
     const getTooltip = () =>
       ensureExists(
@@ -151,7 +152,12 @@ describe('SampleTooltipContents', function () {
         (element) => element.textContent
       );
 
-    return { getTooltip, changeImplementationFilter, getBacktrace };
+    return {
+      getTooltip,
+      changeImplementationFilter,
+      getBacktrace,
+      fireMouseMove,
+    };
   }
 
   it('renders the sample tooltip properly', () => {
@@ -341,5 +347,37 @@ describe('SampleTooltipContents', function () {
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
     expect(cpuUsage).toHaveTextContent('58% (average over 1.0ms)');
+  });
+
+  it('renders the CPU usage only when outside of the activity graph is hovered', () => {
+    const profile = getProfileWithCPU([null, 100, 280, 1000], 'µs');
+
+    // Let's check the second threadCPUDelta value. This should show the
+    // We are hovering on top of the sample which should use 280µs. Since the
+    // max value is 1000µs, the CPU usage should be 28%.
+    const hoveredSampleIndex = 1;
+    const hoveredSamplePosition = 'on-top';
+    const { fireMouseMove, getTooltip } = setup(
+      profile,
+      hoveredSampleIndex,
+      hoveredSamplePosition
+    );
+
+    // We want to hover the outside of the activity graph. Let's fire a
+    // mousemove event with offsetY outside of the activity graph.
+    fireMouseMove({
+      offsetX: getSamplesPixelPosition(
+        hoveredSampleIndex,
+        hoveredSamplePosition
+      ),
+      // Intentionally outside of the activity graph.
+      offsetY: GRAPH_HEIGHT * 0.1,
+    });
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('28% (average over 1.0ms)');
+    // We shouldn't have any stack information.
+    expect(screen.queryByText(/Stack:/)).not.toBeInTheDocument();
+    expect(getTooltip()).toMatchSnapshot();
   });
 });
