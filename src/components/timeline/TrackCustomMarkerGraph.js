@@ -72,6 +72,7 @@ type CanvasProps = {|
   +collectedSamples: CollectedCustomMarkerSamples,
   +width: CssPixels,
   +height: CssPixels,
+  +getMarker: (MarkerIndex) => Marker,
 |};
 
 function _calculateUnitValue(
@@ -180,6 +181,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
       collectedSamples,
       height,
       width,
+      getMarker,
     } = this.props;
     if (width === 0) {
       // This is attempting to draw before the canvas was laid out.
@@ -242,11 +244,10 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             ctx.beginPath();
 
             for (let i = sampleStart; i < sampleEnd; i++) {
+              const marker = getMarker(collectedSamples.indexes[i]);
               // Create a path for the top of the chart. This is the line that
               // will have a stroke applied to it.
-              x =
-                (collectedSamples.markers[i].start - rangeStart) *
-                millisecondWidth;
+              x = (marker.start - rangeStart) * millisecondWidth;
               // Add on half the stroke's line width so that it won't be cut
               // off the edge of the graph.
               const unitValue = _calculateUnitValue(
@@ -265,10 +266,8 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               } else {
                 ctx.lineTo(x, y);
               }
-              if (collectedSamples.markers[i].end) {
-                x =
-                  (collectedSamples.markers[i].end - rangeStart) *
-                  millisecondWidth;
+              if (marker.end) {
+                x = (marker.end - rangeStart) * millisecondWidth;
                 ctx.lineTo(x, y);
               }
             }
@@ -302,9 +301,9 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             ctx.fillStyle = ctx.strokeStyle;
 
             for (let i = sampleStart; i < sampleEnd; i++) {
+              const marker = getMarker(collectedSamples.indexes[i]);
               const x = Math.round(
-                (collectedSamples.markers[i].start - rangeStart) *
-                  millisecondWidth
+                (marker.start - rangeStart) * millisecondWidth
               );
 
               const unitValue = _calculateUnitValue(
@@ -316,10 +315,9 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               const y =
                 deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth;
 
-              if (collectedSamples.markers[i].end) {
+              if (marker.end) {
                 const x2 = Math.round(
-                  (collectedSamples.markers[i].end - rangeStart) *
-                    millisecondWidth
+                  (marker.end - rangeStart) * millisecondWidth
                 );
                 if (x2 >= x + 1) {
                   ctx.fillRect(x, y, x2 - x, deviceHeight - y);
@@ -454,17 +452,18 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       rangeEnd,
       markerSampleRanges,
       collectedSamples,
+      getMarker,
     } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
 
-    const times = collectedSamples.markers.map((marker) => marker.start);
+    const markers = collectedSamples.indexes.map((i) => getMarker(i));
+    const times = markers.map((marker) => marker.start);
     if (
       times.length === 0 ||
       timeAtMouse < times[0] ||
       timeAtMouse >
-        times[times.length - 1] +
-          (collectedSamples.markers[times.length - 1].end || 0)
+        times[times.length - 1] + (markers[times.length - 1].end || 0)
     ) {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
@@ -481,7 +480,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       if (bisectionCounter > 0 && bisectionCounter < times.length) {
         const leftDistance = timeAtMouse - times[bisectionCounter - 1];
         const rightDistance = times[bisectionCounter] - timeAtMouse;
-        const leftEnd = collectedSamples.markers[bisectionCounter - 1].end;
+        const leftEnd = markers[bisectionCounter - 1].end;
         if (
           (leftEnd && leftEnd > timeAtMouse) ||
           leftDistance < rightDistance
@@ -522,7 +521,8 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     if (collectedSamples.numbersPerLine.length === 0) {
       throw new Error('No samples for marker ' + markerSchema.name);
     }
-    const marker = collectedSamples.markers[counterIndex];
+    const markerIndex = collectedSamples.indexes[counterIndex];
+    const marker = getMarker(markerIndex);
     const sampleTime = marker.start;
     if ((marker.end || sampleTime) < rangeStart || sampleTime > rangeEnd) {
       // Do not draw the tooltip if it will be rendered outside of the timeline.
@@ -535,8 +535,8 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
         <TooltipMarker
-          markerIndex={collectedSamples.indexes[counterIndex]}
-          marker={getMarker(collectedSamples.indexes[counterIndex])}
+          markerIndex={markerIndex}
+          marker={marker}
           threadsKey={threadIndex}
           restrictHeightWidth={true}
         />
@@ -556,6 +556,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       collectedSamples,
+      getMarker,
     } = this.props;
 
     const { graphs } = markerSchema;
@@ -564,7 +565,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     }
 
     const rangeLength = rangeEnd - rangeStart;
-    const marker = collectedSamples.markers[counterIndex];
+    const marker = getMarker(collectedSamples.indexes[counterIndex]);
     const sampleTime = marker.start;
 
     if ((marker.end || sampleTime) < rangeStart || sampleTime > rangeEnd) {
@@ -644,6 +645,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       collectedSamples,
+      getMarker,
     } = this.props;
 
     return (
@@ -660,6 +662,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
           height={graphHeight}
           width={width}
           collectedSamples={collectedSamples}
+          getMarker={getMarker}
         />
         {hoveredCounter === null ? null : (
           <>

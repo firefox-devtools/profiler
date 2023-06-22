@@ -695,7 +695,6 @@ export function getMarkerSelectorsPerThread(
           return {
             minNumber,
             maxNumber,
-            markers,
             numbersPerLine,
             indexes,
           };
@@ -707,11 +706,12 @@ export function getMarkerSelectorsPerThread(
     > = createSelector(
       getCollectedCustomMarkerSamples,
       ProfileSelectors.getCommittedRange,
-      (collectedSamples, range) =>
+      getMarkerGetter,
+      (collectedSamples, range, getMarker) =>
         getInclusiveSampleIndexRangeForSelection(
           {
-            time: collectedSamples.markers.map((m) => m.start),
-            length: collectedSamples.markers.length,
+            time: collectedSamples.indexes.map((i) => getMarker(i).start),
+            length: collectedSamples.indexes.length,
           },
           range.start,
           range.end
