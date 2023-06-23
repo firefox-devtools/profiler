@@ -654,8 +654,7 @@ export function getMarkerSelectorsPerThread(
               `No graphs for marker ${markerName}. This shouldn't happen.`
             );
           }
-          const indexes = [];
-          const markers = [];
+          const markerIndexes = [];
           let minNumber = Infinity;
           let maxNumber = -Infinity;
           const numbersPerLine = [];
@@ -677,8 +676,7 @@ export function getMarkerSelectorsPerThread(
               ) === schemaName &&
               keys.every((key) => key in data)
             ) {
-              indexes.push(index);
-              markers.push(marker);
+              markerIndexes.push(index);
               for (let i = 0; i < keys.length; ++i) {
                 const val = data[keys[i]];
                 numbersPerLine[i].push(val);
@@ -696,7 +694,7 @@ export function getMarkerSelectorsPerThread(
             minNumber,
             maxNumber,
             numbersPerLine,
-            indexes,
+            markerIndexes,
           };
         }
       );
@@ -710,8 +708,8 @@ export function getMarkerSelectorsPerThread(
       (collectedSamples, range, getMarker) =>
         getInclusiveSampleIndexRangeForSelection(
           {
-            time: collectedSamples.indexes.map((i) => getMarker(i).start),
-            length: collectedSamples.indexes.length,
+            time: collectedSamples.markerIndexes.map((i) => getMarker(i).start),
+            length: collectedSamples.markerIndexes.length,
           },
           range.start,
           range.end

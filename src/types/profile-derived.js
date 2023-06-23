@@ -323,7 +323,7 @@ export type CollectedCustomMarkerSamples = {|
   // This value holds the number per configured line
   // selection. The array will share the indexes of the range filtered marker samples.
   +numbersPerLine: number[][],
-  +indexes: MarkerIndex[],
+  +markerIndexes: MarkerIndex[],
 |};
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';

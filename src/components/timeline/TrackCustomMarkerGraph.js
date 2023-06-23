@@ -244,7 +244,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             ctx.beginPath();
 
             for (let i = sampleStart; i < sampleEnd; i++) {
-              const marker = getMarker(collectedSamples.indexes[i]);
+              const marker = getMarker(collectedSamples.markerIndexes[i]);
               // Create a path for the top of the chart. This is the line that
               // will have a stroke applied to it.
               x = (marker.start - rangeStart) * millisecondWidth;
@@ -301,7 +301,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             ctx.fillStyle = ctx.strokeStyle;
 
             for (let i = sampleStart; i < sampleEnd; i++) {
-              const marker = getMarker(collectedSamples.indexes[i]);
+              const marker = getMarker(collectedSamples.markerIndexes[i]);
               const x = Math.round(
                 (marker.start - rangeStart) * millisecondWidth
               );
@@ -457,7 +457,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
 
-    const markers = collectedSamples.indexes.map((i) => getMarker(i));
+    const markers = collectedSamples.markerIndexes.map((i) => getMarker(i));
     const times = markers.map((marker) => marker.start);
     if (
       times.length === 0 ||
@@ -521,7 +521,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     if (collectedSamples.numbersPerLine.length === 0) {
       throw new Error('No samples for marker ' + markerSchema.name);
     }
-    const markerIndex = collectedSamples.indexes[counterIndex];
+    const markerIndex = collectedSamples.markerIndexes[counterIndex];
     const marker = getMarker(markerIndex);
     const sampleTime = marker.start;
     if ((marker.end || sampleTime) < rangeStart || sampleTime > rangeEnd) {
@@ -565,7 +565,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
     }
 
     const rangeLength = rangeEnd - rangeStart;
-    const marker = getMarker(collectedSamples.indexes[counterIndex]);
+    const marker = getMarker(collectedSamples.markerIndexes[counterIndex]);
     const sampleTime = marker.start;
 
     if ((marker.end || sampleTime) < rangeStart || sampleTime > rangeEnd) {
