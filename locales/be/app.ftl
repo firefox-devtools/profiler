@@ -232,7 +232,7 @@ FullTimeline--tracks-button = Дарожак: <span>{ $visibleTrackCount }</span
 ## Home page
 
 Home--upload-from-file-input-button = Загрузіць профіль з файла
-Home--upload-from-url-button = Загрузіце профіль з URL
+Home--upload-from-url-button = Загрузіць профіль з URL
 Home--load-from-url-submit-button =
     .value = Загрузіць
 Home--documentation-button = Дакументацыя
