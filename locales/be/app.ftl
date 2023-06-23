@@ -345,6 +345,11 @@ MarkerContextMenu--select-the-receiver-thread = Выберыце паток-ат
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Выберыце паток-адпраўнік “<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -457,6 +462,8 @@ MenuButtons--metaInfo--logical-cpu =
         [few] { $logicalCPUs } лагічных ядра
        *[many] { $logicalCPUs } лагічных ядзер
     }
+MenuButtons--metaInfo--profiling-started = Запіс пачаўся:
+MenuButtons--metaInfo--profiling-session = Працягласць запісу:
 MenuButtons--metaInfo--main-process-started = Асноўны працэс пачаўся:
 MenuButtons--metaInfo--main-process-ended = Асноўны працэс скончыўся:
 MenuButtons--metaInfo--interval = Інтэрвал:
@@ -476,6 +483,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
 MenuButtons--metaInfo--name-and-version = Назва і версія:
+MenuButtons--metaInfo--application-uptime = Час працы:
 MenuButtons--metaInfo--update-channel = Канал абнаўлення:
 MenuButtons--metaInfo--build-id = ID зборкі:
 MenuButtons--metaInfo--build-type = Тып зборкі:
