@@ -15,6 +15,7 @@ import type {
   Counter,
   Tid,
   TrackReference,
+  MarkerSchemaByName,
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
@@ -22,6 +23,7 @@ import { computeMaxCPUDeltaPerInterval } from './cpu';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
+import { getMarkerSchemaName } from './marker-schema';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -58,6 +60,7 @@ const LOCAL_TRACK_INDEX_ORDER = {
   'event-delay': 4,
   'process-cpu': 5,
   power: 6,
+  marker: 7,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
@@ -71,6 +74,7 @@ const LOCAL_TRACK_DISPLAY_ORDER = {
   thread: 4,
   'event-delay': 5,
   'process-cpu': 6,
+  marker: 7,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -248,9 +252,15 @@ export function initializeLocalTrackOrderByPid(
  * Take a profile and figure out all of the local tracks, and organize them by PID.
  */
 export function computeLocalTracksByPid(
-  profile: Profile
+  profile: Profile,
+  markerSchemaByName: MarkerSchemaByName
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
+
+  // find markers that might have their own track.
+  const markerSchemasWithGraphs = (profile.meta.markerSchema || []).filter(
+    (schema) => schema.graphs !== undefined
+  );
 
   for (
     let threadIndex = 0;
@@ -258,7 +268,7 @@ export function computeLocalTracksByPid(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid } = thread;
+    const { pid, markers } = thread;
     // Get or create the tracks and trackOrder.
     let tracks = localTracksByPid.get(pid);
     if (tracks === undefined) {
@@ -271,16 +281,55 @@ export function computeLocalTracksByPid(
       tracks.push({ type: 'thread', threadIndex });
     }
 
-    if (
-      thread.markers.data.some((datum) => datum && datum.type === 'Network')
-    ) {
+    if (markers.data.some((datum) => datum && datum.type === 'Network')) {
       // This thread has network markers.
       tracks.push({ type: 'network', threadIndex });
     }
 
-    if (thread.markers.data.some((datum) => datum && datum.type === 'IPC')) {
+    if (markers.data.some((datum) => datum && datum.type === 'IPC')) {
       // This thread has IPC markers.
       tracks.push({ type: 'ipc', threadIndex });
+    }
+
+    if (markerSchemasWithGraphs.length > 0) {
+      const markerTracksBySchemaName = new Map();
+      for (const markerSchema of markerSchemasWithGraphs) {
+        markerTracksBySchemaName.set(markerSchema.name, {
+          markerSchema,
+          keys: (markerSchema.graphs || []).map((graph) => graph.key),
+          markerNames: new Set(),
+        });
+      }
+
+      for (let i = 0; i < markers.length; ++i) {
+        const markerNameIndex = markers.name[i];
+        const markerData = markers.data[i];
+        const markerSchemaName = getMarkerSchemaName(
+          markerSchemaByName,
+          thread.stringTable.getString(markerNameIndex),
+          markerData
+        );
+        if (markerData && markerSchemaByName) {
+          const mapEntry = markerTracksBySchemaName.get(markerSchemaName);
+          if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
+            mapEntry.markerNames.add(markerNameIndex);
+          }
+        }
+      }
+
+      for (const [
+        ,
+        { markerSchema, markerNames },
+      ] of markerTracksBySchemaName) {
+        for (const markerName of markerNames) {
+          tracks.push({
+            type: 'marker',
+            threadIndex,
+            markerSchema,
+            markerName,
+          });
+        }
+      }
     }
   }
 
@@ -848,6 +897,10 @@ export function getLocalTrackName(
       return 'Process CPU';
     case 'power':
       return counters[localTrack.counterIndex].name;
+    case 'marker':
+      return threads[localTrack.threadIndex].stringTable.getString(
+        localTrack.markerName
+      );
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -1221,6 +1274,7 @@ export function getSearchFilteredLocalTracksByPid(
         }
         case 'network':
         case 'memory':
+        case 'marker':
         case 'ipc':
         case 'event-delay':
         case 'power':
@@ -1358,6 +1412,7 @@ function _isLocalTrackVisible(
     case 'thread':
       // Show the local thread if it's included in the visible thread indexes.
       return visibleThreadIndexes.has(localTrack.threadIndex);
+    case 'marker':
     case 'network':
     case 'memory':
     // 'event-delay' and 'process-cpu' tracks are experimental and they should

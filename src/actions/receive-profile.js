@@ -36,6 +36,7 @@ import {
   getRelevantPagesForActiveTab,
   getSymbolServerUrl,
   getActiveTabID,
+  getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
@@ -281,7 +282,10 @@ export function finalizeFullProfileView(
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
-    const localTracksByPid = computeLocalTracksByPid(profile);
+    const localTracksByPid = computeLocalTracksByPid(
+      profile,
+      getMarkerSchemaByName(getState())
+    );
 
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
