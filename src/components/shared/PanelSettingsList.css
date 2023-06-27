@@ -5,14 +5,15 @@
 .panelSettingsList {
   display: flex;
   flex: 1;
-  align-items: flex-start;
+  align-items: stretch;
+  justify-content: flex-start;
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
 .panelSettingsListItem {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   padding: 0;
   margin: 0 5px;
