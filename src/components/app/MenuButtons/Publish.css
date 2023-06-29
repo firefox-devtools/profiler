@@ -30,10 +30,6 @@
   background-image: url(firefox-profiler-res/img/svg/error.svg);
 }
 
-.menuButtonsPublishPanel {
-  --width: 510px;
-}
-
 .menuButtonsPublishContent {
   position: relative;
 
