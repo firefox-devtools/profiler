@@ -6,11 +6,13 @@
 import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
 import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
-  IndexIntoFuncTable,
   ThreadIndex,
+  Thread,
   Pid,
+  IndexIntoFuncTable,
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
+  IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
@@ -248,6 +250,14 @@ export type CallNodeDisplayData = $Exact<
     ariaLabel: string,
   }>
 >;
+
+export type ThreadWithReservedFunctions = {|
+  thread: Thread,
+  reservedFunctionsForResources: Map<
+    IndexIntoResourceTable,
+    IndexIntoFuncTable
+  >,
+|};
 
 /**
  * The marker timing contains the necessary information to draw markers very quickly
