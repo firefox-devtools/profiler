@@ -20,11 +20,7 @@ import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { canonicalizeRangeSet } from '../utils/range-set';
 import { CallTree } from '../profile-logic/call-tree';
 import { getSearchFilteredMarkerIndexes } from '../profile-logic/marker-data';
-import {
-  shallowCloneFrameTable,
-  shallowCloneFuncTable,
-  getEmptyStackTable,
-} from './data-structures';
+import { shallowCloneFrameTable, getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 
@@ -934,13 +930,12 @@ export function dropFunction(
 export function collapseResource(
   thread: Thread,
   resourceIndexToCollapse: IndexIntoResourceTable,
+  collapsedFuncIndex: IndexIntoFuncTable,
   implementation: ImplementationFilter,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const { stackTable, funcTable, frameTable, resourceTable } = thread;
-  const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
+  const { stackTable, funcTable, frameTable } = thread;
   const newFrameTable = shallowCloneFrameTable(frameTable);
-  const newFuncTable = shallowCloneFuncTable(funcTable);
   const newStackTable = getEmptyStackTable();
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
@@ -959,7 +954,6 @@ export function collapseResource(
   // A new func and frame will be created on the first stack that is found that includes
   // the given resource.
   let collapsedFrameIndex;
-  let collapsedFuncIndex;
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
@@ -993,7 +987,6 @@ export function collapseResource(
 
           if (collapsedFrameIndex === undefined) {
             collapsedFrameIndex = newFrameTable.length++;
-            collapsedFuncIndex = newFuncTable.length++;
             // Add the collapsed frame
             newFrameTable.address.push(frameTable.address[frameIndex]);
             newFrameTable.inlineDepth.push(frameTable.inlineDepth[frameIndex]);
@@ -1011,14 +1004,6 @@ export function collapseResource(
             newFrameTable.implementation.push(
               frameTable.implementation[frameIndex]
             );
-
-            // Add the psuedo-func
-            newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
-            newFuncTable.name.push(resourceNameIndex);
-            newFuncTable.resource.push(funcTable.resource[funcIndex]);
-            newFuncTable.fileName.push(funcTable.fileName[funcIndex]);
-            newFuncTable.lineNumber.push(null);
-            newFuncTable.columnNumber.push(null);
           }
 
           // Add the new stack.
@@ -1055,7 +1040,7 @@ export function collapseResource(
         // This function doesn't match the implementation filter.
         const prefixFrame = newStackTable.frame[newStackPrefix];
         const prefixFunc = newFrameTable.func[prefixFrame];
-        const prefixResource = newFuncTable.resource[prefixFunc];
+        const prefixResource = funcTable.resource[prefixFunc];
 
         if (prefixResource === resourceIndexToCollapse) {
           // This stack's prefix did match the collapsed resource, map the stack
@@ -1077,7 +1062,6 @@ export function collapseResource(
   const newThread = {
     ...thread,
     frameTable: newFrameTable,
-    funcTable: newFuncTable,
   };
 
   return updateThreadStacks(
@@ -1897,6 +1881,7 @@ export function applyTransform(
       return collapseResource(
         thread,
         transform.resourceIndex,
+        transform.collapsedFuncIndex,
         transform.implementation,
         defaultCategory
       );

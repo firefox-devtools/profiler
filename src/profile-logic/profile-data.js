@@ -13,6 +13,7 @@ import {
   getEmptyBalancedNativeAllocationsTable,
   getEmptyStackTable,
   shallowCloneFrameTable,
+  shallowCloneFuncTable,
 } from './data-structures';
 import {
   INSTANT,
@@ -79,6 +80,7 @@ import type {
   NativeSymbolInfo,
   BottomBoxInfo,
   Bytes,
+  ThreadWithReservedFunctions,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -2446,6 +2448,53 @@ export function getOriginAnnotationForFunc(
   }
 
   return '';
+}
+
+/**
+ * Reserve functions in the thread's funcTable which may be needed for transforms
+ * in the transform stack, so that transforms can keep the funcTable unchanged.
+ *
+ * This returns a new thread with an extended funcTable.
+ *
+ * At the moment, the only functions we reserve are "collapsed resource" functions.
+ * These are used by the "collapse resource" transform.
+ */
+export function reserveFunctionsInThread(
+  thread: Thread
+): ThreadWithReservedFunctions {
+  const funcTable = shallowCloneFuncTable(thread.funcTable);
+  const reservedFunctionsForResources = new Map();
+  const jsResourceTypes = [
+    resourceTypes.addon,
+    resourceTypes.url,
+    resourceTypes.webhost,
+    resourceTypes.otherhost,
+  ];
+  const { resourceTable } = thread;
+  for (
+    let resourceIndex = 0;
+    resourceIndex < resourceTable.length;
+    resourceIndex++
+  ) {
+    const resourceType = resourceTable.type[resourceIndex];
+    const name = resourceTable.name[resourceIndex];
+    const isJS = jsResourceTypes.includes(resourceType);
+    const fileName = resourceType === resourceTypes.url ? name : null;
+    const funcIndex = funcTable.length;
+    funcTable.isJS.push(isJS);
+    funcTable.relevantForJS.push(isJS);
+    funcTable.name.push(name);
+    funcTable.resource.push(resourceIndex);
+    funcTable.fileName.push(fileName);
+    funcTable.lineNumber.push(null);
+    funcTable.columnNumber.push(null);
+    funcTable.length++;
+    reservedFunctionsForResources.set(resourceIndex, funcIndex);
+  }
+  return {
+    thread: { ...thread, funcTable },
+    reservedFunctionsForResources,
+  };
 }
 
 /**

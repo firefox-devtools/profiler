@@ -40,6 +40,9 @@ import type {
   EventDelayInfo,
   ThreadsKey,
   CallTreeSummaryStrategy,
+  ThreadWithReservedFunctions,
+  IndexIntoResourceTable,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
@@ -119,12 +122,13 @@ export function getBasicThreadSelectorsPerThread(
    *
    * 1. Unfiltered getThread - The first selector gets the unmodified original thread.
    * 2. CPU - New samples table with processed threadCPUDelta values.
-   * 3. Tab - New samples table with only samples that belongs to the active tab.
-   * 4. Range - New samples table with only samples in the committed range.
-   * 5. Transform - Apply the transform stack that modifies the stacks and samples.
-   * 6. Implementation - Modify stacks and samples to only show a single implementation.
-   * 7. Search - Exclude samples that don't include some text in the stack.
-   * 8. Preview - Only include samples that are within a user's preview range selection.
+   * 3. Reserved functions - New funcTable with reserved functions for collapsed resources.
+   * 4. Tab - New samples table with only samples that belong to the active tab.
+   * 5. Range - New samples table with only samples in the committed range.
+   * 6. Transform - Apply the transform stack that modifies the stacks and samples.
+   * 7. Implementation - Modify stacks and samples to only show a single implementation.
+   * 8. Search - Exclude samples that don't include some text in the stack.
+   * 9. Preview - Only include samples that are within a user's preview range selection.
    */
 
   const getCPUProcessedThread: Selector<Thread> = createSelector(
@@ -139,8 +143,19 @@ export function getBasicThreadSelectorsPerThread(
         : Cpu.processThreadCPUDelta(thread, sampleUnits, profileInterval)
   );
 
+  const getThreadWithReservedFunctions: Selector<ThreadWithReservedFunctions> =
+    createSelector(getCPUProcessedThread, ProfileData.reserveFunctionsInThread);
+
+  const getFunctionsReservedThread: Selector<Thread> = (state) =>
+    getThreadWithReservedFunctions(state).thread;
+
+  const getReservedFunctionsForResources: Selector<
+    Map<IndexIntoResourceTable, IndexIntoFuncTable>
+  > = (state) =>
+    getThreadWithReservedFunctions(state).reservedFunctionsForResources;
+
   const getTabFilteredThread: Selector<Thread> = createSelector(
-    getCPUProcessedThread,
+    getFunctionsReservedThread,
     ProfileSelectors.getRelevantInnerWindowIDsForCurrentTab,
     (thread, relevantPages) => {
       if (relevantPages.size === 0) {
@@ -158,7 +173,7 @@ export function getBasicThreadSelectorsPerThread(
    * load time(during viewProfile).
    */
   const getActiveTabFilteredThread: Selector<Thread> = createSelector(
-    getCPUProcessedThread,
+    getFunctionsReservedThread,
     ProfileSelectors.getRelevantInnerWindowIDsForActiveTab,
     (thread, relevantPages) => {
       if (relevantPages.size === 0) {
@@ -358,6 +373,7 @@ export function getBasicThreadSelectorsPerThread(
     getNativeAllocations,
     getJsAllocations,
     getThreadRange,
+    getReservedFunctionsForResources,
     getRangeFilteredThread,
     getUnfilteredSamplesForCallTree,
     getSampleIndexOffsetFromCommittedRange,
@@ -372,6 +388,7 @@ export function getBasicThreadSelectorsPerThread(
     getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
     getCPUProcessedThread,
+    getFunctionsReservedThread,
     getTabFilteredThread,
     getActiveTabFilteredThread,
     getProcessedEventDelays,
