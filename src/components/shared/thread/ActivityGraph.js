@@ -60,7 +60,7 @@ export type Props = {|
 |};
 
 export type HoveredPixelState = {|
-  +sample: IndexIntoSamplesTable,
+  +sample: IndexIntoSamplesTable | null,
   +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
 |};
 
