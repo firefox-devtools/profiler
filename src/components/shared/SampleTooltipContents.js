@@ -36,8 +36,8 @@ type RestProps = {|
 |};
 
 type Props = {|
-  +cpuRatioInTimeRange: CPUProps | null,
   ...RestProps,
+  +cpuRatioInTimeRange: CPUProps | null,
   +sampleIndex: IndexIntoSamplesTable | null,
 |};
 

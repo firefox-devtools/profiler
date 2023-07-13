@@ -427,7 +427,7 @@ export class ActivityFillGraphQuerier {
 
     if (categoryUnderMouse === null) {
       if (cpuRatioInTimeRange === null) {
-        // If there is not CPU ratio values iun that time range, do not show the tooltip.
+        // If there is not CPU ratio values in that time range, do not show the tooltip.
         return null;
       }
       // Show only the CPU ratio in the tooltip.

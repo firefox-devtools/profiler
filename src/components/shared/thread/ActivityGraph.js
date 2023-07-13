@@ -145,10 +145,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
 
   _onClick = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
     const sampleState = this._getSampleAtMouseEvent(event);
-    this.props.onSampleClick(
-      event,
-      sampleState && sampleState.sample ? sampleState.sample : null
-    );
+    this.props.onSampleClick(event, sampleState ? sampleState.sample : null);
   };
 
   _takeContainerRef = (el: HTMLElement | null) => {
