@@ -17,12 +17,16 @@ input[type='image']:focus-visible,
 input[type='range']:focus-visible,
 select:focus-visible,
 button:focus-visible {
-  box-shadow: 0 0 0 1px var(--blue-50) inset, 0 0 0 1px var(--blue-50),
+  box-shadow:
+    0 0 0 1px var(--blue-50) inset,
+    0 0 0 1px var(--blue-50),
     0 0 0 4px var(--blue-50-a30);
   outline: 0;
 }
 
 a:focus-visible {
-  box-shadow: 0 0 0 2px var(--blue-50), 0 0 0 6px var(--blue-50-a30);
+  box-shadow:
+    0 0 0 2px var(--blue-50),
+    0 0 0 6px var(--blue-50-a30);
   outline: 0;
 }

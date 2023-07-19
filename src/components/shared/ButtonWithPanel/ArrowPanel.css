@@ -36,7 +36,9 @@
   pointer-events: none;
 
   /* The visibility is set to hidden after the panel closing transition. */
-  transition: opacity 200ms ease-out, visibility 0s 200ms;
+  transition:
+    opacity 200ms ease-out,
+    visibility 0s 200ms;
 
   /* visibility: hidden hides the panel from the accessibility tree when it's closed */
   visibility: hidden;
