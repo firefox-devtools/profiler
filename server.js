@@ -26,9 +26,6 @@ const argv = yargs(hideBin(process.argv))
   .strict()
   .parseSync();
 
-config.cache = {
-  type: 'filesystem',
-};
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],
   host,

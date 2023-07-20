@@ -26,6 +26,9 @@ const config = {
     publicPath: '/',
   },
   mode: process.env.NODE_ENV,
+  cache: {
+    type: 'filesystem',
+  },
   resolve: {
     alias: {
       // Note: the alias for firefox-profiler is defined at the Babel level, so
