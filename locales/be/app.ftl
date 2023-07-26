@@ -322,7 +322,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
-MarkerContextMenu--set-selection-from-duration = Наладзьце выбарку на аснове працягласці маркера
+MarkerContextMenu--set-selection-from-duration = Наладзіць выбарку на аснове працягласці маркера
 MarkerContextMenu--start-selection-here = Пачаць вылучэнне тут
 MarkerContextMenu--end-selection-here = Скончыць вылучэнне тут
 MarkerContextMenu--start-selection-at-marker-start = Пачаць вылучэнне ад <strong>пачатку</strong> маркера
@@ -910,6 +910,10 @@ TransformNavigator--collapse-direct-recursion-only = Згарнуць тольк
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Згарнуць паддрэва: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Адкідваць сэмплы па-за межамі маркераў, якія адпавядаюць: “{ $item }”
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
