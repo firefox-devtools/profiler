@@ -360,6 +360,8 @@ MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Адкід�
 MarkerSettings--panel-search =
     .label = Фільтр маркераў:
     .title = Паказваць толькі маркеры, якія адпавядаюць пэўнаму імені
+MarkerSettings--marker-filters =
+    .title = Фільтры маркераў
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
