@@ -349,6 +349,10 @@ MarkerContextMenu--select-the-sender-thread = Выберыце паток-адп
 ## This is the menu when filter icon is clicked in Marker Chart and Marker Table
 ## panels.
 
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Адкідваць сэмплы па-за межамі маркераў, якія адпавядаюць «<strong>{ $filter }</strong>»
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -360,7 +364,7 @@ MarkerSettings--panel-search =
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
-MarkerSidebar--select-a-marker = Выберыце маркер, каб паглядзець інфармацыі пра яго.
+MarkerSidebar--select-a-marker = Выберыце маркер, каб паглядзець інфармацыю пра яго.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
