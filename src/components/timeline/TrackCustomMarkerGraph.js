@@ -227,6 +227,22 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         //
         ctx.strokeStyle = _getStrokeColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
+        const getX = (marker) =>
+          Math.round((marker.start - rangeStart) * millisecondWidth);
+        const getY = (i) => {
+          const unitValue = _calculateUnitValue(
+            type,
+            minNumber,
+            maxNumber,
+            samples[i]
+          );
+          // Add on half the stroke's line width so that it won't be cut
+          // off the edge of the graph.
+          return Math.round(
+            deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth
+          );
+        };
+
         switch (type) {
           case 'line':
           case 'line-filled': {
@@ -248,16 +264,8 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               const marker = getMarker(collectedSamples.markerIndexes[i]);
               // Create a path for the top of the chart. This is the line that
               // will have a stroke applied to it.
-              x = (marker.start - rangeStart) * millisecondWidth;
-              // Add on half the stroke's line width so that it won't be cut
-              // off the edge of the graph.
-              const unitValue = _calculateUnitValue(
-                type,
-                minNumber,
-                maxNumber,
-                samples[i]
-              );
-              y = deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth;
+              x = getX(marker);
+              y = getY(i);
               if (i === sampleStart) {
                 // This is the first iteration, only move the line, do not draw it.
                 // Also remember this first X, as the bottom of the graph will need
@@ -302,19 +310,24 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             ctx.fillStyle = ctx.strokeStyle;
 
             for (let i = sampleStart; i < sampleEnd; i++) {
-              const marker = getMarker(collectedSamples.markerIndexes[i]);
-              const x = Math.round(
-                (marker.start - rangeStart) * millisecondWidth
-              );
+              let marker = getMarker(collectedSamples.markerIndexes[i]);
+              const x = getX(marker);
+              let y = getY(i);
 
-              const unitValue = _calculateUnitValue(
-                type,
-                minNumber,
-                maxNumber,
-                samples[i]
-              );
-              const y =
-                deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth;
+              // If we have multiple markers to draw on the same horizontal pixel,
+              // draw only the one with the maximum value to save time.
+              while (i + 1 < sampleEnd) {
+                const nextMarker = getMarker(
+                  collectedSamples.markerIndexes[i + 1]
+                );
+                if (getX(nextMarker) !== x) {
+                  break;
+                }
+
+                marker = nextMarker;
+                y = Math.min(y, getY(++i));
+              }
+
               const x2 = marker.end
                 ? Math.max(
                     x + 1,
