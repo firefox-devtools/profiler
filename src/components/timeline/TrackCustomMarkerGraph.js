@@ -58,6 +58,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { timeCode } from 'firefox-profiler/utils/time-code';
 
 import './TrackCustomMarker.css';
 
@@ -314,19 +315,14 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               );
               const y =
                 deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth;
+              const x2 = marker.end
+                ? Math.max(
+                    x + 1,
+                    Math.round((marker.end - rangeStart) * millisecondWidth)
+                  )
+                : x + 1;
 
-              if (marker.end) {
-                const x2 = Math.round(
-                  (marker.end - rangeStart) * millisecondWidth
-                );
-                if (x2 >= x + 1) {
-                  ctx.fillRect(x, y, x2 - x, deviceHeight - y);
-                  continue;
-                }
-              }
-              ctx.moveTo(x, deviceHeight);
-              ctx.lineTo(x, y);
-              ctx.stroke();
+              ctx.fillRect(x, y, x2 - x, deviceHeight - y);
             }
             break;
           default:
@@ -353,7 +349,9 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         this._requestedAnimationFrame = false;
         const canvas = this._canvas;
         if (canvas) {
-          this.drawCanvas(canvas);
+          timeCode('TrackCustomMarkerCanvas render', () => {
+            this.drawCanvas(canvas);
+          });
         }
       });
     }
