@@ -15,9 +15,11 @@ import {
   funcHasRecursiveCall,
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
-import { getBottomBoxInfoForCallNode } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getBottomBoxInfoForCallNode,
+  getOriginAnnotationForFunc,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
-import { getOriginAnnotationForFunc } from 'firefox-profiler/profile-logic/profile-data';
 
 import copy from 'copy-to-clipboard';
 import {
@@ -133,7 +135,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { funcTable, stringTable },
+      thread: { stringTable, funcTable },
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
@@ -170,7 +172,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { funcTable, stringTable },
+      thread: { stringTable, funcTable },
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
@@ -228,21 +230,19 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     let curCallNodeIndex = callNodeIndex;
 
     do {
-      const funcIndex = callNodeTable.func[curCallNodeIndex];
       // Match the style of MarkerContextMenu.js#convertStackToString which uses
       // square brackets around [file:line:column] info. This isn't provided by
       // getOriginAnnotationForFunc, so build the string in two parts:
-      const stringIndex = funcTable.name[funcIndex];
-      const origin = stringTable.getString(stringIndex);
+      const funcIndex = callNodeTable.func[curCallNodeIndex];
+      const funcNameIndex = funcTable.name[funcIndex];
+      const funcName = stringTable.getString(funcNameIndex);
       const fileNameURL = getOriginAnnotationForFunc(
         funcIndex,
         funcTable,
         resourceTable,
-        stringTable,
-        // Got the origin above already
-        { includeResourceOrigin: false }
+        stringTable
       );
-      stack += origin + (fileNameURL ? ` [${fileNameURL}]\n` : '\n');
+      stack += funcName + (fileNameURL ? ` [${fileNameURL}]\n` : '\n');
       curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
     } while (curCallNodeIndex !== -1);
 
@@ -415,7 +415,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodePath,
-      thread: { funcTable, resourceTable, stringTable },
+      thread: { funcTable, stringTable, resourceTable },
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodePath[callNodePath.length - 1];

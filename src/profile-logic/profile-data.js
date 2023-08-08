@@ -2404,13 +2404,12 @@ export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
-  { includeResourceOrigin = true }: { includeResourceOrigin: boolean } = {}
+  stringTable: UniqueStringArray
 ): string {
   let resourceType = null;
   let origin = null;
   const resourceIndex = funcTable.resource[funcIndex];
-  if (includeResourceOrigin && resourceIndex !== -1) {
+  if (resourceIndex !== -1) {
     resourceType = resourceTable.type[resourceIndex];
     const resourceNameIndex = resourceTable.name[resourceIndex];
     origin = stringTable.getString(resourceNameIndex);
@@ -2439,7 +2438,6 @@ export function getOriginAnnotationForFunc(
 
   if (fileName) {
     if (
-      // If `includeResourceOrigin` is false then `origin` is still null
       origin &&
       _shouldShowBothOriginAndFileName(fileName, origin, resourceType)
     ) {
