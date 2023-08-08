@@ -20,6 +20,7 @@ import { SHORTDATE } from 'firefox-profiler/utils/l10n-ftl-functions';
 // Also note that the order specified here is the order they'll be displayed in the
 // language switcher, so it's important to keep the alphabetical order.
 export const AVAILABLE_LOCALES_TO_LOCALIZED_NAMES = {
+  be: 'Беларуская',
   de: 'Deutsch',
   el: 'Ελληνικά',
   'en-GB': 'English (GB)',

@@ -429,7 +429,7 @@ export class NetworkChartRow extends React.PureComponent<
           <span className="networkChartRowItemUriOptional">
             {uri.protocol + '//'}
           </span>
-          <span className="networkChartRowItemUriRequired">{uri.hostname}</span>
+          <span className="networkChartRowItemUriRequired">{uri.host}</span>
           {uriPath ? (
             <span className="networkChartRowItemUriOptional">{uriPath}</span>
           ) : null}

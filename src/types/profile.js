@@ -31,12 +31,11 @@ export type TabID = number;
 export type InnerWindowID = number;
 
 /**
- * If a pid is a number, then it is the int value that came from the profiler.
- * However, if it is a string, then it is an unique value generated during
- * the profile processing. This happens for older profiles before the pid was
- * collected, or for merged profiles.
+ * Pids are strings, often stringified numbers. Strings allow creating unique
+ * values when multiple processes with the same pid exist in the same profile,
+ * such as during profile merging or diffing.
  */
-export type Pid = number | string;
+export type Pid = string;
 
 /**
  * The stack table stores the tree of stack nodes of a thread.
@@ -332,7 +331,6 @@ export type FrameTable = {|
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
-  optimizations: ({} | null)[],
   length: number,
 |};
 
@@ -630,6 +628,7 @@ export type Thread = {|
   unregisterTime: Milliseconds | null,
   pausedRanges: PausedRange[],
   name: string,
+  isMainThread: boolean,
   // The eTLD+1 of the isolated content process if provided by the back-end.
   // It will be undefined if:
   // - Fission is not enabled.
@@ -751,10 +750,15 @@ export type ExtraProfileInfoSection = {|
 export type ProfileMeta = {|
   // The interval at which the threads are sampled.
   interval: Milliseconds,
-  // The number of milliseconds since midnight January 1, 1970 GMT.
+  // When the main process started. Timestamp expressed in milliseconds since
+  // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
   // The number of milliseconds since midnight January 1, 1970 GMT.
   endTime?: Milliseconds,
+  // When the recording started (in milliseconds after startTime).
+  profilingStartTime?: Milliseconds,
+  // When the recording ended (in milliseconds after startTime).
+  profilingEndTime?: Milliseconds,
   // The process type where the Gecko profiler was started. This is the raw enum
   // numeric value as defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#365
@@ -901,6 +905,10 @@ export type ProfileMeta = {|
   initialSelectedThreads?: ThreadIndex[],
   // Keep the defined thread order
   keepProfileThreadOrder?: boolean,
+
+  // Grams of CO2 equivalent per kWh. Used to display power track tooltips.
+  // Will fallback to the global average if this is missing.
+  gramsOfCO2ePerKWh?: number,
 |};
 
 /**

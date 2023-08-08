@@ -89,6 +89,7 @@ import type {
   ThreadIndex,
   BrowsertimeMarkerPayload,
   MarkerPhase,
+  Pid,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -604,7 +605,6 @@ function _processFrameTable(
     implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
     column: geckoFrameStruct.column,
-    optimizations: geckoFrameStruct.optimizations,
     length: geckoFrameStruct.length,
   };
 }
@@ -908,6 +908,34 @@ function _processMarkerPayload(
           throw new Error('Unknown GCMajor status');
       }
     }
+    case 'IPC': {
+      // Convert otherPid to a string.
+      const {
+        startTime,
+        endTime,
+        otherPid,
+        messageType,
+        messageSeqno,
+        side,
+        direction,
+        phase,
+        sync,
+        threadId,
+      } = payload;
+      return {
+        type: 'IPC',
+        startTime,
+        endTime,
+        otherPid: `${otherPid}`,
+        messageType,
+        messageSeqno,
+        side,
+        direction,
+        phase,
+        sync,
+        threadId,
+      };
+    }
     default:
       // `payload` is currently typed as the result of _convertStackToCause, which
       // is MarkerPayload_Gecko where `stack` has been replaced with `cause`. This
@@ -983,10 +1011,12 @@ function _processCounters(
     return [];
   }
 
+  const mainThreadPid: Pid = `${mainThread.pid}`;
+
   // The gecko profile's process don't map to the final thread list. Use the stable
   // thread list to look up the thread index for the main thread in this profile.
   const mainThreadIndex = stableThreadList.findIndex(
-    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThreadPid
   );
 
   if (mainThreadIndex === -1) {
@@ -1016,7 +1046,7 @@ function _processCounters(
         name,
         category,
         description,
-        pid: mainThread.pid,
+        pid: mainThreadPid,
         mainThreadIndex,
         sampleGroups,
       });
@@ -1051,10 +1081,12 @@ function _processProfilerOverhead(
     return null;
   }
 
+  const mainThreadPid: Pid = `${mainThread.pid}`;
+
   // The gecko profile's process don't map to the final thread list. Use the stable
   // thread list to look up the thread index for the main thread in this profile.
   const mainThreadIndex = stableThreadList.findIndex(
-    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThreadPid
   );
 
   if (mainThreadIndex === -1) {
@@ -1069,7 +1101,7 @@ function _processProfilerOverhead(
       _toStructOfArrays(geckoProfilerOverhead.samples),
       delta
     ),
-    pid: mainThread.pid,
+    pid: mainThreadPid,
     mainThreadIndex,
     statistics: geckoProfilerOverhead.statistics,
   };
@@ -1126,6 +1158,7 @@ function _processThread(
 
   const newThread: Thread = {
     name: thread.name,
+    isMainThread: thread.name === 'GeckoMain',
     'eTLD+1': thread['eTLD+1'],
     processType: thread.processType,
     processName:
@@ -1135,7 +1168,7 @@ function _processThread(
     registerTime: thread.registerTime,
     unregisterTime: thread.unregisterTime,
     tid: thread.tid,
-    pid: thread.pid,
+    pid: `${thread.pid}`,
     pausedRanges: pausedRanges || [],
     frameTable,
     funcTable,
@@ -1475,7 +1508,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     pages = pages.concat(subprocessProfile.pages || []);
   }
 
-  const meta = {
+  const meta: ProfileMeta = {
     interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
     abi: geckoProfile.meta.abi,
@@ -1511,6 +1544,11 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     device: geckoProfile.meta.device,
   };
 
+  if (geckoProfile.meta.profilingStartTime !== undefined) {
+    meta.profilingStartTime = geckoProfile.meta.profilingStartTime;
+    meta.profilingEndTime = geckoProfile.meta.profilingEndTime;
+  }
+
   const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(
     (acc, overhead) => {
       if (overhead !== null) {
@@ -1545,7 +1583,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       const jsTracerThread = convertJsTracerToThread(
         thread,
         jsTracer,
-        meta.categories
+        geckoProfile.meta.categories
       );
       jsTracerThread.isJsTracer = true;
       jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;
@@ -1622,6 +1660,51 @@ function _unserializeProfile({
   };
 }
 
+// If applicable, this function will try to "fix" a processed profile that was
+// copied as is from the UI's console, without passing through the serialization
+// step.
+function attemptToFixProcessedProfileThroughMutation(
+  profile: MixedObject
+): SerializableProfile | null {
+  if (!profile || typeof profile !== 'object') {
+    return profile;
+  }
+  const { meta } = profile;
+  if (!meta || typeof meta !== 'object') {
+    return profile;
+  }
+
+  if (typeof meta.preprocessedProfileVersion !== 'number') {
+    return profile;
+  }
+
+  const { threads } = profile;
+  if (!threads || !Array.isArray(threads) || !threads.length) {
+    // This profile doesn't look well-formed or is empty, let's return it
+    // directly and let the following functions deal with it.
+    return profile;
+  }
+
+  const [firstThread] = threads;
+  if (firstThread.stringArray) {
+    // This looks good, nothing to fix!
+    return profile;
+  }
+
+  if (!firstThread.stringTable) {
+    // The profile didn't have a stringArray, but it doesn't seem to have a
+    // stringTable either. Let's be cautious and just return the profile input.
+    return profile;
+  }
+
+  // We mutate the profile directly, to avoid GC churn at load time.
+  for (const thread of profile.threads) {
+    thread.stringArray = thread.stringTable._array;
+    delete thread.stringTable;
+  }
+  return profile;
+}
+
 /**
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
@@ -1674,8 +1757,10 @@ export async function unserializeProfileOfArbitraryFormat(
     // At this point, we expect arbitraryFormat to contain a JSON object of some profile format.
     const json = arbitraryFormat;
 
+    const possiblyFixedProfile =
+      attemptToFixProcessedProfileThroughMutation(json);
     const processedProfile =
-      attemptToUpgradeProcessedProfileThroughMutation(json);
+      attemptToUpgradeProcessedProfileThroughMutation(possiblyFixedProfile);
     if (processedProfile) {
       return _unserializeProfile(processedProfile);
     }

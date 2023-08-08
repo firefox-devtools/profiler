@@ -336,10 +336,12 @@ describe('ordering and hiding', function () {
         profile.threads.push(getEmptyThread());
         const [threadA, threadB] = profile.threads;
         threadA.name = 'GeckoMain';
+        threadA.isMainThread = true;
         threadB.name = 'GeckoMain';
+        threadB.isMainThread = true;
         threadA.processType = 'tab';
-        threadA.pid = 1;
-        threadA.pid = 2;
+        threadA.pid = '1';
+        threadA.pid = '2';
         const { getState } = storeWithProfile(profile);
         return {
           globalTracks: ProfileViewSelectors.getGlobalTracks(getState()),
@@ -607,7 +609,7 @@ describe('ordering and hiding', function () {
 
       function setup() {
         const profile = getNetworkTrackProfile();
-        const pid = 1;
+        const pid = '1';
         profile.threads[0].pid = pid;
         const { getState } = storeWithProfile(profile);
         return {
@@ -669,10 +671,10 @@ describe('ordering and hiding', function () {
         'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         // Belongs to the global tab track.
-        '  - show [ipc GeckoMain] SELECTED',
+        '  - hide [ipc GeckoMain] SELECTED',
         '  - show [thread DOM Worker]',
         // Belongs to the DOM Worker local track.
-        '  - show [ipc DOM Worker]',
+        '  - hide [ipc DOM Worker]',
         '  - show [thread Style]',
       ]);
     });

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.sourceView {
+.codeView {
   display: flex;
   min-height: 0;
   flex: 1;
@@ -24,7 +24,7 @@
   --theme-highlight-punctuation: var(--grey-70);
 }
 
-.sourceViewHeader {
+.codeViewHeader {
   display: flex;
   height: 16px;
   flex-flow: row;
@@ -55,11 +55,11 @@
   background-color: white !important;
 }
 
-.sourceViewHeaderMainColumn {
+.codeViewHeaderMainColumn {
   flex: 1;
 }
 
-.sourceViewHeaderColumn {
+.codeViewHeaderColumn {
   position: relative;
   box-sizing: border-box;
   padding: 1px 5px;
@@ -68,7 +68,7 @@
 }
 
 /* A small vertical separator line */
-.sourceViewHeaderColumn.sourceViewFixedColumn::after {
+.codeViewHeaderColumn.codeViewFixedColumn::after {
   position: absolute;
   top: 3px;
   right: 0;
@@ -78,8 +78,8 @@
   content: '';
 }
 
-.sourceViewHeaderColumn.total,
-.sourceViewHeaderColumn.self,
+.codeViewHeaderColumn.total,
+.codeViewHeaderColumn.self,
 .cm-total-timings-gutter,
 .cm-self-timings-gutter {
   width: 50px;
@@ -101,6 +101,17 @@
   min-width: 45px !important;
 }
 
+.cm-instruction-address-gutter {
+  color: #aaa;
+  font-family: ui-monospace, 'Roboto Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.cm-instruction-address-gutter .cm-gutterElement {
+  min-width: 45px !important;
+  padding: 0 8px;
+}
+
 .cm-total-timings-gutter .cm-gutterElement,
 .cm-self-timings-gutter .cm-gutterElement {
   overflow: hidden;
@@ -110,57 +121,7 @@
   text-overflow: ellipsis;
 }
 
-.sourceViewBody {
-  position: relative;
-  z-index: 0;
-  overflow: auto;
-  flex: 1;
-  line-height: 16px;
-  outline: 0;
-  will-change: scroll-position;
-}
-
-.sourceViewBodyInnerWrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
-  min-width: 100%;
-  flex-flow: row;
-}
-
-.sourceViewBodyInner0 {
-  position: sticky;
-  z-index: 2;
-  left: 0;
-}
-
-.sourceViewBodyInner1 {
-  /* This allows the right column to expand more than its content, so that the
-  * background always extends to the right edge. */
-  flex-grow: 1;
-}
-
-.sourceViewBodyInner {
-  overflow: hidden;
-  background: white;
-}
-
-.sourceViewRowFixedColumns {
-  display: flex;
-  flex-flow: row;
-  align-items: stretch;
-  justify-content: flex-start;
-  white-space: nowrap;
-}
-
-.sourceViewRowScrolledColumns {
-  padding-left: 3px;
-  white-space: pre;
-}
-
-.cm-nonZeroLine,
-.sourceViewRowNonZero {
+.cm-nonZeroLine {
   background-color: #edf6ff;
 }
 

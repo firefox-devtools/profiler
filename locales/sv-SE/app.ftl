@@ -51,6 +51,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Visa <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Sammanfogningsfunktion
     .title =
         Sammanfoga en funktion tar bort det från profilen och tilldelar sin tid till
@@ -86,26 +89,26 @@ CallNodeContextMenu--transform-focus-category = Fokus på kategori <strong>{ $ca
     .title =
         Fokusera på noderna som tillhör samma kategori som den valda noden och
         därmed slå samman alla noder som tillhör en annan kategori.
-CallNodeContextMenu--transform-collapse-function-subtree = Fäll ihop funktion
+CallNodeContextMenu--transform-collapse-function-subtree = Komprimera funktion
     .title =
-        Att fälla ihop en funktion kommer ta bort allt som anropas, och tilldela
-        all tid till funktionen. Detta kan förenkla en profilering som
-        anropar kod som inte behöver analyseras.
+        Att komprimera en funktion kommer att ta bort allt den anropade och all tid
+        tilldelas funktionen. Detta kan hjälpa till att förenkla en profil som anropar kod
+        som inte behöver analyseras.
 # This is used as the context menu item to apply the "Collapse resource" transform.
 # Variables:
 #   $nameForResource (String) - Name of the resource to collapse.
-CallNodeContextMenu--transform-collapse-resource = Fäll ihop <strong> { $nameForResource } </strong>
+CallNodeContextMenu--transform-collapse-resource = Komprimera <strong> { $nameForResource } </strong>
     .title =
-        Att fälla ihop en resurs plattar ut alla anrop till den
-        resursen till en enda ihopfälld anropsnod.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Komprimera direkt rekursion
+        Att komprimera en resurs kommer att plana ut alla anrop till den
+        resursen till en enda komprimerad anropsnod.
+CallNodeContextMenu--transform-collapse-recursion = Komprimera rekursion
     .title =
-        Att komprimera direkt rekursion tar bort anrop som upprepade gånger
-        återkommer till samma funktion utan några mellanliggande funktioner i stacken.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Kollaps indirekt rekursion
+        Komprimering av rekursion tar bort anrop som upprepade gånger återkommer
+        till samma funktion, även med mellanliggande funktioner i stacken.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Komprimera endast direkt rekursion
     .title =
-        Att komprimera indirekt rekursion tar bort anrop som upprepade gånger
-        återkommer till samma funktion, även med mellanliggande funktioner i stacken.
+        Att komprimera direkt rekursion tar bort anrop som upprepade gånger återkommer
+        till samma funktion utan några mellanliggande funktioner i stacken.
 CallNodeContextMenu--transform-drop-function = Ta bort prover med denna funktion
     .title = Genom att ta bort proverna kommer de tillhörande körtiderna att tas bort från profilen. Detta är användbart för att eliminera tidsinformation som inte är relevant för analysen.
 CallNodeContextMenu--expand-all = Expandera alla
@@ -209,6 +212,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Oj, några okända fel inträffade i den här panelen.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Rapportera problemet till utvecklarna, inklusive hela
+    felet som visas i webbkonsolen för utvecklarverktygen.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Rapportera felet på GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Juridisk information
@@ -276,11 +290,12 @@ Home--compare-recordings-info = Du kan också jämföra inspelningar.<a>Öppna g
 Home--your-recent-uploaded-recordings-title = Dina senaste uppladdade inspelningar
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     { -profiler-brand-name } kan också importera profiler från andra profilerare, t.ex
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
     Chrome prestandapanel, <androidstudio>Android Studio</androidstudio> eller
-    vilken fil som helst som använder <dhat>dhat-formatet</dhat>. <write>Lär dig hur du skriver din
+    vilken fil som helst som använder <dhat>dhat-formatet</dhat> eller <traceevent>Googles spårningshändelse
+    Format</traceevent>. <write>Lär dig hur du skriver din
     egen importör</write>.
 
 ## IdleSearchField
@@ -347,12 +362,23 @@ MarkerContextMenu--select-the-receiver-thread = Välj mottagartråden "<strong>{
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Välj avsändartråden "<strong>{ $threadName }</strong>"
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Kasta prover utanför markörer som matchar "<strong>{ $filter }</strong>"
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Filtermarkörer:
     .title = Visa endast markörer som matchar ett visst namn
+MarkerSettings--marker-filters =
+    .title = Markörfilter
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -434,6 +460,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logisk kärna
        *[other] { $logicalCPUs } logiska kärnor
     }
+MenuButtons--metaInfo--profiling-started = Inspelningen startade:
+MenuButtons--metaInfo--profiling-session = Inspelningslängd:
 MenuButtons--metaInfo--main-process-started = Huvudprocessen startade:
 MenuButtons--metaInfo--main-process-ended = Huvudprocessen avslutad:
 MenuButtons--metaInfo--interval = Intervall:
@@ -451,6 +479,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Obegränsat
 MenuButtons--metaInfo--application = Applikation
 MenuButtons--metaInfo--name-and-version = Namn och version:
+MenuButtons--metaInfo--application-uptime = Drifttid:
 MenuButtons--metaInfo--update-channel = Uppdateringskanal:
 MenuButtons--metaInfo--build-id = Bygg-ID:
 MenuButtons--metaInfo--build-type = Byggtyp:
@@ -526,6 +555,7 @@ MenuButtons--publish--message-something-went-wrong = Hoppsan, något gick fel n�
 MenuButtons--publish--message-try-again = Försök igen
 MenuButtons--publish--download = Hämta
 MenuButtons--publish--compressing = Komprimerar…
+MenuButtons--publish--error-while-compressing = Fel vid komprimering, försök avmarkera några kryssrutor för att minska profilstorleken.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -613,6 +643,11 @@ ProfileLoaderAnimation--loading-view-not-found = Vy hittades inte
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Tillbaka till hem
 
+## Root
+
+Root--error-boundary-message =
+    .message = Åh, något okänt fel inträffade i profiler.firefox.com.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -632,9 +667,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Alla stackar
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Ursprunglig
+StackSettings--implementation-all-frames = Alla ramar
+    .title = Filtrera inte stackramar
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Visa endast stackramar relaterade till JavaScript-körning
+StackSettings--implementation-native2 = Intern
+    .title = Visa bara stackramar för intern kod
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtrera stackar:
 StackSettings--use-data-source-label = Datakälla:
 StackSettings--call-tree-strategy-timing = Tidpunkter
     .title = Sammanfatta med hjälp av samplade stackar av exekverad kod över tid
@@ -718,6 +758,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = operationer sedan före
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Effekt
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -728,6 +773,13 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Effekt
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energi som används i det synliga området
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -749,6 +801,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh (
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energi som används i det synliga området
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energi som används i det aktuella urvalet
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -797,7 +856,7 @@ TransformNavigator--complete = Slutförd “{ $item }”
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
-TransformNavigator--collapse-resource = Fäll ihop: { $item }
+TransformNavigator--collapse-resource = Komprimera: { $item }
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
@@ -828,40 +887,64 @@ TransformNavigator--merge-function = Sammanfoga: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Släpp: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Komprimera rekursion: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Komprimera direkt rekursion: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Komprimera indirekt rekursion: { $item }
+TransformNavigator--collapse-direct-recursion-only = Komprimera endast direkt rekursion: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-function-subtree = Dölj underträd: { $item }
+TransformNavigator--collapse-function-subtree = Komprimera underträd: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Kasta prover utanför markörer som matchar: "{ $item }"
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Väntar på { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Väntar på { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Källa inte tillgänglig
+BottomBox--source-code-not-available-title = Källkoden är inte tillgänglig
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Se <a>problem #3741</a> för scenarier som stöds och planerade förbättringar.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Assembly-koden inte tillgänglig
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Se <a>problem #4520</a> för scenarier som stöds och planerade förbättringar.
+SourceView--close-button =
+    .title = Stäng källvyn
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Det finns ingen tillgänglig webbadress för den här filen.
@@ -887,6 +970,17 @@ SourceView--browser-api-error-when-obtaining-source = Webbläsarens symboliserin
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = Den lokala symbolserverns symboliserings-API returnerade ett fel: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = Webbläsarens symboliserings-API returnerade ett felaktigt svar: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = Den lokala symbolserverns symboliserings-API returnerade ett felaktigt svar: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
@@ -900,8 +994,17 @@ SourceView--not-in-archive-error-when-obtaining-source = Filen { $pathInArchive 
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Arkivet på { $url } kunde inte analyseras: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Stäng källvyn
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Visa assembly-vyn
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Dölj assembly-vyn
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

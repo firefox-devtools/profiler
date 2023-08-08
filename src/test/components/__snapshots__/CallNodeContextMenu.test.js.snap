@@ -171,9 +171,9 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     />
     <div
       class="react-contextmenu-item-content"
-      title="Collapsing direct recursion removes calls that repeatedly recurse into the same function with no intermediate functions on the stack."
+      title="Collapsing recursion removes calls that repeatedly recurse into the same function, even with intermediate functions on the stack."
     >
-      Collapse direct recursion
+      Collapse recursion
     </div>
     <kbd
       class="callNodeContextMenuShortcut"
@@ -192,9 +192,9 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     />
     <div
       class="react-contextmenu-item-content"
-      title="Collapsing indirect recursion removes calls that repeatedly recurse into the same function, even with intermediate functions on the stack."
+      title="Collapsing direct recursion removes calls that repeatedly recurse into the same function with no intermediate functions on the stack."
     >
-      Collapse indirect recursion
+      Collapse direct recursion only
     </div>
     <kbd
       class="callNodeContextMenuShortcut"

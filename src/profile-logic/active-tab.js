@@ -4,7 +4,6 @@
 // @flow
 
 import { getThreadSelectors } from '../selectors/per-thread';
-import { isMainThread } from './tracks';
 import { getThreadsKey } from './profile-data';
 import { ensureExists } from '../utils/flow';
 
@@ -76,7 +75,7 @@ export function computeActiveTabTracks(
     const thread = profile.threads[threadIndex];
     const { markers, stringTable } = thread;
 
-    if (isMainThread(thread)) {
+    if (thread.isMainThread) {
       // This is a main thread, there is a possibility that it can be a global
       // track, check if the thread contains active tab data and add it to candidates if it does.
 
@@ -195,7 +194,7 @@ function _getActiveTabResourceName(
   thread: Thread,
   innerWindowIDToPageMap: Map<InnerWindowID, Page>
 ): string {
-  if (isMainThread(thread)) {
+  if (thread.isMainThread) {
     // This is a sub-frame.
     // Get the first innerWindowID inside the thread that's also present of innerWindowIDToPageMap.
     let firstInnerWindowID = ensureExists(thread.frameTable.innerWindowID).find(

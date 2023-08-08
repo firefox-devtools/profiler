@@ -8,6 +8,7 @@ import {
   getProfileWithUnbalancedNativeAllocations,
   getProfileWithBalancedNativeAllocations,
   getProfileWithJsAllocations,
+  addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
@@ -19,6 +20,7 @@ import {
 
 import {
   addTransformToStack,
+  addCollapseResourceTransformToStack,
   popTransformsFromStack,
   changeInvertCallstack,
   changeImplementationFilter,
@@ -843,12 +845,6 @@ describe('"collapse-resource" transform', function () {
     if (firefoxResourceIndex === -1) {
       throw new Error('Unable to find the firefox resource');
     }
-    const collapseTransform = {
-      type: 'collapse-resource',
-      resourceIndex: firefoxResourceIndex,
-      collapsedFuncIndex: thread.funcTable.length,
-      implementation: 'combined',
-    };
 
     it('starts as an unfiltered call tree', function () {
       const { getState } = storeWithProfile(profile);
@@ -866,7 +862,13 @@ describe('"collapse-resource" transform', function () {
 
     it('can collapse the "firefox" library', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseTransform));
+      dispatch(
+        addCollapseResourceTransformToStack(
+          threadIndex,
+          firefoxResourceIndex,
+          'combined'
+        )
+      );
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
@@ -886,7 +888,13 @@ describe('"collapse-resource" transform', function () {
           ['A', 'B', 'C', 'D'].map((name) => collapsedFuncNames.indexOf(name))
         )
       );
-      dispatch(addTransformToStack(threadIndex, collapseTransform));
+      dispatch(
+        addCollapseResourceTransformToStack(
+          threadIndex,
+          firefoxResourceIndex,
+          'combined'
+        )
+      );
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(
@@ -1317,11 +1325,11 @@ describe('"collapse-direct-recursion" transform', function () {
   });
 });
 
-describe('"collapse-indirect-recursion" transform', function () {
-  describe('direct combined implementation', function () {
+describe('"collapse-recursion" transform', function () {
+  describe('basic', function () {
     // Same test case as collapse-direct-recursion combined implementation.
     /**
-     *              A    Collapse indirect recursion   A
+     *              A        Collapse recursion        A
      *            ↙   ↘            Func B            ↙   ↘
      *          B       F            ->             B     F
      *        ↙   ↘                              ↙  ↓  ↘
@@ -1343,10 +1351,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     `);
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'combined',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1367,7 +1374,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
@@ -1382,7 +1389,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       const filteredThread = selectedThreadSelectors.getFilteredThread(
         getState()
       );
@@ -1424,23 +1431,23 @@ describe('"collapse-indirect-recursion" transform', function () {
           ['A', 'B', 'B', 'B', 'C'].map((name) => funcNames.indexOf(name))
         )
       );
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(['A', 'B', 'C'].map((name) => funcNames.indexOf(name)));
     });
   });
 
-  describe('small indirect combined implementation', function () {
+  describe('advanced', function () {
     // Like direct combined implementation, but with one indirect recursive call.
     /**
-     *              A    Collapse indirect recursion   A
+     *              A        Collapse recursion        A
      *            ↙   ↘            Func B            ↙   ↘
      *          B       G            ->             B     G
      *        ↙   ↘                              ↙  ↓  ↘
-     *       C     F                            D   E   F
-     *     ↙   ↘
-     *    B     E
+     *       C     F                            C   D   F
+     *     ↙   ↘                                ↓
+     *    B     E                               E
      *    ↓
      *    D
      */
@@ -1456,10 +1463,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     `);
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'combined',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1480,14 +1486,15 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A (total: 4, self: —)',
         '  - B (total: 3, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - E (total: 1, self: 1)',
         '    - D (total: 1, self: 1)',
-        '    - E (total: 1, self: 1)',
         '    - F (total: 1, self: 1)',
         '  - G (total: 1, self: 1)',
       ]);
@@ -1495,7 +1502,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       const filteredThread = selectedThreadSelectors.getFilteredThread(
         getState()
       );
@@ -1537,26 +1544,26 @@ describe('"collapse-indirect-recursion" transform', function () {
           ['A', 'B', 'C', 'B', 'D'].map((name) => funcNames.indexOf(name))
         )
       );
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(['A', 'B', 'D'].map((name) => funcNames.indexOf(name)));
     });
   });
 
-  describe('big indirect combined implementation', function () {
-    // Extension of small indirect combined implementation with
+  describe('super advanced', function () {
+    // Extension of "advanced" with
     // multiple indirect calls, multiple intermediate functions and direct calls.
     /**
-     *                    A    Collapse indirect recursion      A
+     *                    A        Collapse recursion           A
      *                  ↙   ↘            Func B              ↙    ↘
      *                B       K            ->             B         K
-     *              ↙   ↘                           ↙  ↙  ↓  ↘  ↘
-     *             C     J                         F  G   H   I  J
-     *           ↙   ↘
-     *          B     I
-     *          ↓
-     *          D
+     *              ↙   ↘                            ↙  ↙   ↘  ↘
+     *             C     J                          F  D     C  J
+     *           ↙   ↘                               ↙   ↘   ↓
+     *          B     I                             E     H  I
+     *          ↓                                   ↓
+     *          D                                   G
      *        ↙   ↘
      *       E     H
      *     ↙   ↘
@@ -1582,10 +1589,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     `);
     const B = funcNames.indexOf('B');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'combined',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1612,16 +1618,19 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A (total: 6, self: —)',
         '  - B (total: 5, self: —)',
+        '    - D (total: 2, self: —)',
+        '      - E (total: 1, self: —)',
+        '        - G (total: 1, self: 1)',
+        '      - H (total: 1, self: 1)',
+        '    - C (total: 1, self: —)',
+        '      - I (total: 1, self: 1)',
         '    - F (total: 1, self: 1)',
-        '    - G (total: 1, self: 1)',
-        '    - H (total: 1, self: 1)',
-        '    - I (total: 1, self: 1)',
         '    - J (total: 1, self: 1)',
         '  - K (total: 1, self: 1)',
       ]);
@@ -1629,7 +1638,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       const filteredThread = selectedThreadSelectors.getFilteredThread(
         getState()
       );
@@ -1674,17 +1683,17 @@ describe('"collapse-indirect-recursion" transform', function () {
           )
         )
       );
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(['A', 'B', 'F'].map((name) => funcNames.indexOf(name)));
     });
   });
 
-  describe('direct filtered implementation', function () {
+  describe('incredibly advanced', function () {
     // Same test case as collapse-direct-recursion filtered implementation.
     /**
-     *                   A.js      Collapse indirect recursion      A.js
+     *                   A.js          Collapse recursion           A.js
      *                 ↙     ↘             Func B.js              ↙     ↘
      *               B.js     G.js            ->               B.js      G.js
      *             ↙    ↘                                    ↙   ↓   ↘
@@ -1712,10 +1721,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     // a recursion collapse.
     const B = funcNames.indexOf('B.js');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'js',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1737,7 +1745,7 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
@@ -1752,18 +1760,18 @@ describe('"collapse-indirect-recursion" transform', function () {
     });
   });
 
-  describe('indirect filtered implementation', function () {
+  describe('unbelievably advanced', function () {
     // Like direct filtered implementation, but with one indirect recursive call.
     /**
-     *                   A.js      Collapse indirect recursion      A.js
+     *                   A.js          Collapse recursion           A.js
      *                 ↙     ↘             Func B.js              ↙     ↘
      *               B.js     H.js            ->               B.js      H.js
      *             ↙    ↘                                    ↙   ↓   ↘
-     *         C.js      G.js                            E.js   F.js   G.js
-     *          ↓
-     *        D.cpp
-     *        ↙     ↘
-     *    B.js       F.js
+     *         C.js      G.js                            C.js   E.js   G.js
+     *          ↓                                         ↓
+     *        D.cpp                                     D.cpp
+     *        ↙     ↘                                     ↓
+     *    B.js       F.js                                F.js
      *     ↓
      *    E.js
      */
@@ -1783,10 +1791,9 @@ describe('"collapse-indirect-recursion" transform', function () {
     // a recursion collapse.
     const B = funcNames.indexOf('B.js');
     const threadIndex = 0;
-    const collapseIndirectRecursion = {
-      type: 'collapse-indirect-recursion',
+    const collapseRecursion = {
+      type: 'collapse-recursion',
       funcIndex: B,
-      implementation: 'js',
     };
 
     it('starts as an unfiltered call tree', function () {
@@ -1808,18 +1815,210 @@ describe('"collapse-indirect-recursion" transform', function () {
 
     it('can collapse the B function', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseIndirectRecursion));
+      dispatch(addTransformToStack(threadIndex, collapseRecursion));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A.js (total: 5, self: —)',
         '  - B.js (total: 4, self: —)',
-        '    - D.cpp (total: 2, self: 1)',
-        '      - F.js (total: 1, self: 1)',
+        '    - C.js (total: 2, self: —)',
+        '      - D.cpp (total: 2, self: 1)',
+        '        - F.js (total: 1, self: 1)',
         '    - E.js (total: 1, self: 1)',
         '    - G.js (total: 1, self: 1)',
         '  - H.js (total: 1, self: 1)',
       ]);
+    });
+  });
+});
+
+describe('"filter-samples" transform', function () {
+  describe('on a call tree', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A  A  A
+      B  B  C  B  F
+      C  C     E
+         D
+    `);
+    const threadIndex = 0;
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[threadIndex], [
+      [
+        'DOMEvent',
+        0,
+        0.5,
+        {
+          type: 'DOMEvent',
+          latency: 7,
+          eventType: 'click',
+        },
+      ],
+      [
+        'Log',
+        0.5,
+        1.5,
+        {
+          type: 'Log',
+          name: 'Random log message',
+          module: 'RandomModule',
+        },
+      ],
+      [
+        'UserTiming',
+        1.5,
+        2.5,
+        {
+          type: 'UserTiming',
+          name: 'measure-2',
+          entryType: 'measure',
+        },
+      ],
+      [
+        'UserTiming',
+        2.5,
+        3.5,
+        {
+          type: 'UserTiming',
+          name: 'measure-2',
+          entryType: 'measure',
+        },
+      ],
+    ]);
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    it('starts as an unfiltered call tree', function () {
+      expect(formatTree(originalCallTree)).toEqual([
+        '- A (total: 5, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 2, self: 1)',
+        '      - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+        '  - C (total: 1, self: 1)',
+        '  - F (total: 1, self: 1)',
+      ]);
+    });
+
+    it('filters to range of "DOMEvent"', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'DOMEvent',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to range of "DOMEvent" by looking at its searchable fields', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'click', // This is the `eventType` field.
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('does not filter to range of "DOMEvent" by looking at its unsearchable fields', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: '7', // This is the `latency` field.
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      // It should show an empty array because there is no match.
+      expect(formatTree(callTree)).toEqual([]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to range of "Log"', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'Log',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to range of "Log" by looking at its searchable fields', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'Random log message', // This is the `name` of the log message.
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to multiple ranges of "UserTiming"', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'UserTiming',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 2, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - E (total: 1, self: 1)',
+        '  - C (total: 1, self: 1)',
+      ]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('filters to a non-existent marker name', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'marker-search',
+          filter: 'non-existent',
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([]);
+      // Reset the transform stack.
+      dispatch(popTransformsFromStack(0));
     });
   });
 });

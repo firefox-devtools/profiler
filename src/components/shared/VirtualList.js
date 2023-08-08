@@ -36,6 +36,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import range from 'array-range';
+import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
@@ -154,21 +155,6 @@ type VirtualListInnerProps<Item> = {|
 class VirtualListInner<Item> extends React.PureComponent<
   VirtualListInnerProps<Item>
 > {
-  _container: ?HTMLElement;
-
-  _takeContainerRef = (element: ?HTMLDivElement) => {
-    this._container = element;
-  };
-
-  /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
-  getBoundingClientRect() {
-    if (this._container) {
-      return this._container.getBoundingClientRect();
-    }
-    return new DOMRect(0, 0, 0, 0);
-  }
-
   render() {
     const {
       itemHeight,
@@ -194,7 +180,6 @@ class VirtualListInner<Item> extends React.PureComponent<
     return (
       <div
         className={className}
-        ref={this._takeContainerRef}
         // Add padding to list height to account for overlay scrollbars.
         style={{
           height: `${(items.length + 1) * itemHeight}px`,
@@ -261,21 +246,19 @@ type VirtualListProps<Item> = {|
   +ariaActiveDescendant?: null | string,
 |};
 
-type Geometry = {
-  // getBoundingClientRect in the Flow definitions is wrong, and labels the return values
-  // as a ClientRect, and not a DOMRect. https://github.com/facebook/flow/issues/5475
-  //
-  // Account for that here:
-  outerRect: DOMRect | ClientRect,
-  innerRectY: CssPixels,
-};
+type VirtualListState = {|
+  // This value is updated from the scroll event.
+  scrollTop: CssPixels,
+  // This is updated from a resize observer.
+  containerHeight: CssPixels,
+|};
 
 export class VirtualList<Item> extends React.PureComponent<
-  VirtualListProps<Item>
+  VirtualListProps<Item>,
+  VirtualListState
 > {
   _container: {| current: HTMLDivElement | null |} = React.createRef();
-  _inner: {| current: VirtualListInner<Item> | null |} = React.createRef();
-  _geometry: ?Geometry;
+  state = { scrollTop: 0, containerHeight: 0 };
 
   componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
@@ -285,8 +268,8 @@ export class VirtualList<Item> extends React.PureComponent<
         'The container was assumed to exist while mounting The VirtualList.'
       );
     }
-    container.addEventListener('scroll', this._onScroll);
-    this._onScroll(); // for initial size
+
+    getResizeObserverWrapper().subscribe(container, this._resizeListener);
   }
 
   componentWillUnmount() {
@@ -297,12 +280,18 @@ export class VirtualList<Item> extends React.PureComponent<
         'The container was assumed to exist while unmounting The VirtualList.'
       );
     }
-    container.removeEventListener('scroll', this._onScroll);
+    getResizeObserverWrapper().unsubscribe(container, this._resizeListener);
   }
 
-  _onScroll = () => {
-    this._geometry = this._queryGeometry();
-    this.forceUpdate();
+  // The listener is only called when the document is visible.
+  _resizeListener = (contentRect: DOMRectReadOnly) => {
+    this.setState({ containerHeight: contentRect.height });
+  };
+
+  _onScroll = (event: SyntheticEvent<HTMLElement>) => {
+    this.setState({
+      scrollTop: event.currentTarget.scrollTop,
+    });
   };
 
   _onCopy = (event: ClipboardEvent) => {
@@ -312,29 +301,14 @@ export class VirtualList<Item> extends React.PureComponent<
     }
   };
 
-  _queryGeometry(): Geometry | void {
-    const container = this._container.current;
-    const inner = this._inner.current;
-    if (!container || !inner) {
-      return undefined;
-    }
-    const outerRect = container.getBoundingClientRect();
-    const innerRectY = inner.getBoundingClientRect().top;
-    return { outerRect, innerRectY };
-  }
-
   computeVisibleRange() {
     const { itemHeight, disableOverscan } = this.props;
-    if (!this._geometry) {
-      return { visibleRangeStart: 0, visibleRangeEnd: 100 };
-    }
-    const { outerRect, innerRectY } = this._geometry;
+    const { scrollTop, containerHeight } = this.state;
     const overscan = disableOverscan ? 0 : 25;
     const chunkSize = 16;
-    let visibleRangeStart =
-      Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
+    let visibleRangeStart = Math.floor(scrollTop / itemHeight) - overscan;
     let visibleRangeEnd =
-      Math.ceil((outerRect.bottom - innerRectY) / itemHeight) + overscan;
+      Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan;
     if (!disableOverscan) {
       visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
       visibleRangeEnd = Math.ceil(visibleRangeEnd / chunkSize) * chunkSize;
@@ -343,19 +317,52 @@ export class VirtualList<Item> extends React.PureComponent<
   }
 
   /**
-   * Scroll the container horizontally if necessary
+   * Scroll the container horizontally if necessary.
+   *
+   * - container is the container to be scrolled.
+   * - itemX is the horizontal position of the item.
+   * - offsetX is the offset at the left of the scrolled column, if there are
+   *   sticky columns at the left. This is basically the width of the sticky
+   *   elements.
+   *
+   * Here is a diagram showing this visually:
+   *
+   * |------|---------------item---------|
+   *                  itemX ^
+   *        ^ offsetX
+   *         <-------------------------->   The part that will be scrolled.
+   *  <--------------------------------->   The container.
+   *
+   * The gotcha here is that scrollLeft applies to the container, but only the
+   * right part is scrolled, because of the sticky positioning for the offset
+   * part.
    */
-  _scrollContainerHorizontally(container: HTMLDivElement, offsetX: CssPixels) {
+  _scrollContainerHorizontally(
+    container: HTMLDivElement,
+    itemX: CssPixels,
+    offsetX: CssPixels
+  ) {
     const interestingWidth = 400;
-    const itemLeft = offsetX;
-    const itemRight = itemLeft + interestingWidth;
+    const itemLeft = itemX;
+    const itemRight = itemX + interestingWidth;
+    const scrollingColumnWidth = container.clientWidth - offsetX;
 
     if (container.scrollLeft > itemLeft) {
+      // Is the item scrolled to much towards the left (which means the
+      // container is scrolled to the right too much, scrollLeft is too high)?
+      // If yes, scroll so that its left edge is visible.
       container.scrollLeft = itemLeft;
-    } else if (container.scrollLeft + container.clientWidth < itemRight) {
+    } else if (container.scrollLeft + scrollingColumnWidth < itemRight) {
+      // Is the item scrolled to much towards the right (which means the
+      // container is scrolled too much to the left, scrollLeft is too small)?
+      // If yes, scroll so that its right edge is visible.
+
+      // The Math.min operation accounts for the case where the
+      // scrollingColumnWidth is smaller than interestingWidth. In that case we
+      // want to align with the left edge.
       container.scrollLeft = Math.min(
         itemLeft,
-        itemRight - container.clientWidth
+        itemRight - scrollingColumnWidth
       );
     }
   }
@@ -366,10 +373,17 @@ export class VirtualList<Item> extends React.PureComponent<
    * it'll be shown near one of the edges of the viewport.
    * We're keeping a margin of a few items after and before the intended item,
    * if there are any.
+   * * itemIndex is the index for the item to scroll to
+   * * itemX is it's horizontal position in its column
+   * * offsetX is how much the horizontal position is offset by fixed columns, if applicable.
    */
   /* This method is used by users of this component. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
-  scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
+  scrollItemIntoView(
+    itemIndex: number,
+    itemX: CssPixels,
+    offsetX: CssPixels = 0
+  ) {
     const container = this._container.current;
     if (!container) {
       return;
@@ -418,7 +432,7 @@ export class VirtualList<Item> extends React.PureComponent<
       );
     }
 
-    this._scrollContainerHorizontally(container, offsetX);
+    this._scrollContainerHorizontally(container, itemX, offsetX);
   }
 
   /* This method is used by users of this component. */
@@ -462,6 +476,7 @@ export class VirtualList<Item> extends React.PureComponent<
         role={ariaRole}
         aria-label={ariaLabel}
         aria-activedescendant={ariaActiveDescendant}
+        onScroll={this._onScroll}
       >
         <div
           className={`${className}InnerWrapper`}
@@ -483,7 +498,6 @@ export class VirtualList<Item> extends React.PureComponent<
               containerWidth={containerWidth}
               forceRender={forceRender}
               key={columnIndex}
-              ref={columnIndex === 0 ? this._inner : undefined}
             />
           ))}
         </div>

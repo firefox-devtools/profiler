@@ -43,7 +43,9 @@ import type {
   ThreadCPUDeltaUnit,
   LineNumber,
   Address,
+  Bytes,
   CallNodePath,
+  Pid,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -386,7 +388,7 @@ export function getMarkerTableProfile() {
           type: 'IPC',
           startTime: 120,
           endTime: 120,
-          otherPid: 2222,
+          otherPid: '2222',
           messageType: 'PContent::Msg_PreferenceUpdate',
           messageSeqno: 1,
           side: 'parent',
@@ -503,14 +505,14 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
  *  - [line:*] - The line, affects frameTable.line
  *  - [address:*] - The frame address, affects frameTable.address
  *  - [inl:*] - The inline depth, affects frameTable.inlineDepth
- *  - [sym:*] - The native symbol, affects frameTable.nativeSymbol
+ *  - [sym:<name>:<hex_address>:<hex_size>] - The native symbol, affects frameTable.nativeSymbol (keyed on <name>)
 
 ```js
 // Execute the code below in the web console in the profiler to get a stack that's
 // ready to be pasted into getProfileFromTextSamples.
 
 function getFrame(
-  { stackTable, frameTable, funcTable, stringTable, resourceTable, libs },
+  { stackTable, frameTable, funcTable, stringTable, resourceTable, nativeSymbols, libs },
   frameIndex
 ) {
   const funcIndex = frameTable.func[frameIndex];
@@ -530,7 +532,15 @@ function getFrame(
   }
   const address = frameTable.address[frameIndex];
   if (address !== -1) {
-    s += `[address:0x${address.toString(16)}]`;
+    s += `[address:${address.toString(16)}]`;
+  }
+  const nativeSymbol = frameTable.nativeSymbol[frameIndex];
+  if (nativeSymbol !== null) {
+    const symName = stringTable.getString(nativeSymbols.name[nativeSymbol]);
+    const symAddrStr = nativeSymbols.address[nativeSymbol].toString(16);
+    const functionSize = nativeSymbols.functionSize[nativeSymbol];
+    cost symSizeStr = functionSize !== null ? functionSize.toString(16) : '';
+    s += `[sym:${symName}:${symAddrStr}:${symSizeStr}]`;
   }
   const inlineDepth = frameTable.inlineDepth[frameIndex];
   if (inlineDepth !== 0) {
@@ -802,7 +812,7 @@ function _findLineNumberFromFuncName(
 function _findAddressFromFuncName(
   funcNameWithModifier: string
 ): Address | null {
-  const findAddressResult = /\[address:0x([0-9a-f]+)\]/.exec(
+  const findAddressResult = /\[address:([0-9a-f]+)\]/.exec(
     funcNameWithModifier
   );
   if (findAddressResult) {
@@ -825,10 +835,20 @@ function _findInlineDepthFromFuncName(
 
 function _findNativeSymbolNameFromFuncName(
   funcNameWithModifier: string
-): string | null {
+): {| name: string, address: Address, functionSize: Bytes | null |} | null {
   const findNativeSymbolResult = /\[sym:([^\]]+)\]/.exec(funcNameWithModifier);
   if (findNativeSymbolResult) {
-    return findNativeSymbolResult[1];
+    const s = findNativeSymbolResult[1];
+    const symbolInfoResult = /([^:]+):([0-9a-f]+):([0-9a-f]*)/.exec(s);
+    if (!symbolInfoResult) {
+      throw new Error(`Incorrect [sym:...] syntax: ${s}`);
+    }
+    return {
+      name: symbolInfoResult[1],
+      address: parseInt(symbolInfoResult[2], 16),
+      functionSize:
+        symbolInfoResult[3] !== '' ? parseInt(symbolInfoResult[3], 16) : null,
+    };
   }
 
   return null;
@@ -932,11 +952,12 @@ function _buildThreadFromTextOnlyStacks(
         (funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1);
 
       let nativeSymbol = null;
-      const nativeSymbolName =
+      const nativeSymbolInfo =
         _findNativeSymbolNameFromFuncName(funcNameWithModifier);
-      if (nativeSymbolName) {
-        const nativeSymbolNameStringIndex =
-          stringTable.indexForString(nativeSymbolName);
+      if (nativeSymbolInfo) {
+        const nativeSymbolNameStringIndex = stringTable.indexForString(
+          nativeSymbolInfo.name
+        );
         const nativeSymbolIndex = nativeSymbols.name.indexOf(
           nativeSymbolNameStringIndex
         );
@@ -945,9 +966,9 @@ function _buildThreadFromTextOnlyStacks(
         } else if (libIndex !== null) {
           nativeSymbol = nativeSymbols.length++;
           nativeSymbols.libIndex.push(libIndex);
-          nativeSymbols.address.push(0); // todo
+          nativeSymbols.address.push(nativeSymbolInfo.address);
           nativeSymbols.name.push(nativeSymbolNameStringIndex);
-          nativeSymbols.functionSize.push(null);
+          nativeSymbols.functionSize.push(nativeSymbolInfo.functionSize);
         } else {
           throw new Error(
             `[sym:] has to be used together with [lib:] - missing lib in "${funcNameWithModifier}"`
@@ -986,7 +1007,6 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(lineNumber);
         frameTable.column.push(null);
-        frameTable.optimizations.push(null);
         frameIndex = frameTable.length++;
       }
 
@@ -1214,7 +1234,7 @@ export function getNetworkTrackProfile() {
 type IPCMarkersOptions = {|
   startTime: number,
   endTime: number,
-  otherPid: number,
+  otherPid: Pid,
   messageType: string,
   messageSeqno: number,
   side: 'parent' | 'child',
@@ -1230,7 +1250,7 @@ function _getIPCMarkers(
     type: 'IPC',
     startTime: 0,
     endTime: (options.startTime || 0) + 0.1,
-    otherPid: 1234,
+    otherPid: '1234',
     messageType: 'PContent::Msg_PreferenceUpdate',
     messageSeqno: 0,
     side: 'parent',
@@ -1993,7 +2013,6 @@ export function addInnerWindowIdToStacks(
       );
       frameTable.line.push(frameTable.line[foundFrameIndex]);
       frameTable.column.push(frameTable.column[foundFrameIndex]);
-      frameTable.optimizations.push(frameTable.optimizations[foundFrameIndex]);
 
       // And that one comes from the second tab.
       frameTable.innerWindowID.push(listOfOperations[1].innerWindowID);

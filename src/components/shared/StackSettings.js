@@ -8,83 +8,52 @@ import React, { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 
 import {
-  changeImplementationFilter,
   changeInvertCallstack,
   changeCallTreeSearchString,
-  changeCallTreeSummaryStrategy,
   changeShowUserTimings,
 } from 'firefox-profiler/actions/profile-view';
 import {
-  getImplementationFilter,
   getInvertCallstack,
   getSelectedTab,
   getShowUserTimings,
   getCurrentSearchString,
 } from 'firefox-profiler/selectors/url-state';
+import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
 import { PanelSearch } from './PanelSearch';
+import { StackImplementationSetting } from './StackImplementationSetting';
+import { CallTreeStrategySetting } from './CallTreeStrategySetting';
 
-import {
-  toValidImplementationFilter,
-  toValidCallTreeSummaryStrategy,
-} from 'firefox-profiler/profile-logic/profile-data';
 import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
-import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
-
+import './PanelSettingsList.css';
 import './StackSettings.css';
-
-import type {
-  ImplementationFilter,
-  CallTreeSummaryStrategy,
-} from 'firefox-profiler/types';
 
 type OwnProps = {|
   +hideInvertCallstack?: true,
 |};
 
 type StateProps = {|
-  +implementationFilter: ImplementationFilter,
-  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +selectedTab: string,
+  +allowSwitchingStackType: boolean,
   +invertCallstack: boolean,
   +showUserTimings: boolean,
   +currentSearchString: string,
-  +hasJsAllocations: boolean,
-  +hasNativeAllocations: boolean,
-  +canShowRetainedMemory: boolean,
-  +allowSwitchingStackType: boolean,
+  +hasUsefulJsAllocations: boolean,
+  +hasUsefulNativeAllocations: boolean,
 |};
 
 type DispatchProps = {|
-  +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
   +changeShowUserTimings: typeof changeShowUserTimings,
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
-  +changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class StackSettingsImpl extends PureComponent<Props> {
-  _onImplementationFilterChange = (e: SyntheticEvent<HTMLInputElement>) => {
-    this.props.changeImplementationFilter(
-      // This function is here to satisfy Flow that we are getting a valid
-      // implementation filter.
-      toValidImplementationFilter(e.currentTarget.value)
-    );
-  };
-
-  _onCallTreeSummaryStrategyChange = (e: SyntheticEvent<HTMLInputElement>) => {
-    this.props.changeCallTreeSummaryStrategy(
-      // This function is here to satisfy Flow that we are getting a valid
-      // implementation filter.
-      toValidCallTreeSummaryStrategy(e.currentTarget.value)
-    );
-  };
-
   _onInvertCallstackClick = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
   };
@@ -97,150 +66,64 @@ class StackSettingsImpl extends PureComponent<Props> {
     this.props.changeCallTreeSearchString(value);
   };
 
-  _renderImplementationRadioButton(
-    labelL10Id: string,
-    implementationFilter: ImplementationFilter
-  ) {
-    return (
-      <label className="photon-label photon-label-micro stackSettingsFilterLabel">
-        <input
-          type="radio"
-          className="photon-radio photon-radio-micro stackSettingsFilterInput"
-          value={implementationFilter}
-          name="stack-settings-filter"
-          title="Filter stack frames to a type."
-          onChange={this._onImplementationFilterChange}
-          checked={this.props.implementationFilter === implementationFilter}
-        />
-        <Localized id={labelL10Id}></Localized>
-      </label>
-    );
-  }
-
-  _renderCallTreeStrategyOption(
-    labelL10nId: string,
-    strategy: CallTreeSummaryStrategy
-  ) {
-    return (
-      <Localized id={labelL10nId} attrs={{ title: true }}>
-        <option key={strategy} value={strategy}></option>
-      </Localized>
-    );
-  }
-
   render() {
     const {
+      allowSwitchingStackType,
       invertCallstack,
       selectedTab,
       showUserTimings,
       hideInvertCallstack,
       currentSearchString,
-      hasJsAllocations,
-      hasNativeAllocations,
-      canShowRetainedMemory,
-      callTreeSummaryStrategy,
-      allowSwitchingStackType,
+      hasUsefulJsAllocations,
+      hasUsefulNativeAllocations,
     } = this.props;
 
-    const hasAllocations = hasJsAllocations || hasNativeAllocations;
+    const hasAllocations = hasUsefulJsAllocations || hasUsefulNativeAllocations;
 
     return (
       <div className="stackSettings">
-        <ul className="stackSettingsList">
+        <ul className="panelSettingsList">
           {allowSwitchingStackType ? (
-            <li className="stackSettingsListItem stackSettingsFilter">
-              {this._renderImplementationRadioButton(
-                'StackSettings--implementation-all-stacks',
-                'combined'
-              )}
-              {this._renderImplementationRadioButton(
-                'StackSettings--implementation-javascript',
-                'js'
-              )}
-              {this._renderImplementationRadioButton(
-                'StackSettings--implementation-native',
-                'cpp'
-              )}
+            <li className="panelSettingsListItem">
+              <StackImplementationSetting />
             </li>
           ) : null}
           {hasAllocations ? (
-            <li className="stackSettingsListItem stackSettingsFilter">
-              <label>
-                <Localized id="StackSettings--use-data-source-label" />{' '}
-                <select
-                  className="stackSettingsSelect"
-                  onChange={this._onCallTreeSummaryStrategyChange}
-                  value={callTreeSummaryStrategy}
-                >
-                  {this._renderCallTreeStrategyOption(
-                    'StackSettings--call-tree-strategy-timing',
-                    'timing'
-                  )}
-                  {hasJsAllocations
-                    ? this._renderCallTreeStrategyOption(
-                        'StackSettings--call-tree-strategy-js-allocations',
-                        'js-allocations'
-                      )
-                    : null}
-                  {canShowRetainedMemory
-                    ? this._renderCallTreeStrategyOption(
-                        'StackSettings--call-tree-strategy-native-retained-allocations',
-                        'native-retained-allocations'
-                      )
-                    : null}
-                  {hasNativeAllocations
-                    ? this._renderCallTreeStrategyOption(
-                        'StackSettings--call-tree-native-allocations',
-                        'native-allocations'
-                      )
-                    : null}
-                  {canShowRetainedMemory
-                    ? this._renderCallTreeStrategyOption(
-                        'StackSettings--call-tree-strategy-native-deallocations-memory',
-                        'native-deallocations-memory'
-                      )
-                    : null}
-                  {hasNativeAllocations
-                    ? this._renderCallTreeStrategyOption(
-                        'StackSettings--call-tree-strategy-native-deallocations-sites',
-                        'native-deallocations-sites'
-                      )
-                    : null}
-                </select>
-              </label>
+            <li className="panelSettingsListItem">
+              <CallTreeStrategySetting />
             </li>
           ) : null}
-          {hideInvertCallstack ? null : (
-            <li className="stackSettingsListItem">
-              <label className="photon-label photon-label-micro stackSettingsLabel">
-                <input
-                  type="checkbox"
-                  className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-                  onChange={this._onInvertCallstackClick}
-                  checked={invertCallstack}
-                />
-                <Localized
-                  id="StackSettings--invert-call-stack"
-                  attrs={{ title: true }}
-                >
-                  <span>Invert call stack</span>
-                </Localized>
-              </label>
-            </li>
-          )}
-          {selectedTab !== 'stack-chart' ? null : (
-            <li className="stackSettingsListItem">
-              <label className="photon-label photon-label-micro stackSettingsLabel">
-                <input
-                  type="checkbox"
-                  className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-                  onChange={this._onShowUserTimingsClick}
-                  checked={showUserTimings}
-                />
-                <Localized id="StackSettings--show-user-timing">
-                  Show user timing
-                </Localized>
-              </label>
+          {hideInvertCallstack && selectedTab !== 'stack-chart' ? null : (
+            <li className="panelSettingsListItem">
+              {hideInvertCallstack ? null : (
+                <label className="photon-label photon-label-micro photon-label-horiz-padding">
+                  <input
+                    type="checkbox"
+                    className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                    onChange={this._onInvertCallstackClick}
+                    checked={invertCallstack}
+                  />
+                  <Localized
+                    id="StackSettings--invert-call-stack"
+                    attrs={{ title: true }}
+                  >
+                    <span>Invert call stack</span>
+                  </Localized>
+                </label>
+              )}
+              {selectedTab !== 'stack-chart' ? null : (
+                <label className="photon-label photon-label-micro photon-label-horiz-padding">
+                  <input
+                    type="checkbox"
+                    className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                    onChange={this._onShowUserTimingsClick}
+                    checked={showUserTimings}
+                  />
+                  <Localized id="StackSettings--show-user-timing">
+                    Show user timing
+                  </Localized>
+                </label>
+              )}
             </li>
           )}
         </ul>
@@ -267,25 +150,19 @@ export const StackSettings = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state) => ({
+    allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
     invertCallstack: getInvertCallstack(state),
     selectedTab: getSelectedTab(state),
     showUserTimings: getShowUserTimings(state),
-    implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
-    hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
-    hasNativeAllocations:
-      selectedThreadSelectors.getHasNativeAllocations(state),
-    canShowRetainedMemory:
-      selectedThreadSelectors.getCanShowRetainedMemory(state),
-    callTreeSummaryStrategy:
-      selectedThreadSelectors.getCallTreeSummaryStrategy(state),
-    allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
+    hasUsefulJsAllocations:
+      selectedThreadSelectors.getHasUsefulJsAllocations(state),
+    hasUsefulNativeAllocations:
+      selectedThreadSelectors.getHasUsefulNativeAllocations(state),
   }),
   mapDispatchToProps: {
-    changeImplementationFilter,
     changeInvertCallstack,
     changeCallTreeSearchString,
-    changeCallTreeSummaryStrategy,
     changeShowUserTimings,
   },
   component: StackSettingsImpl,

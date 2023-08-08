@@ -330,7 +330,7 @@ describe('actions/ProfileView', function () {
      */
     const parentTrackReference = { type: 'global', trackIndex: 0 };
     const tabTrackReference = { type: 'global', trackIndex: 1 };
-    const workerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
+    const workerTrackReference = { type: 'local', trackIndex: 0, pid: '222' };
 
     function storeWithTab(tabSlug: TabSlug) {
       const profile = getProfileWithNiceTracks();
@@ -408,12 +408,12 @@ describe('actions/ProfileView', function () {
       const threadTrack: TrackReference = {
         type: 'local',
         trackIndex: 0,
-        pid: 0,
+        pid: '0',
       };
       const networkTrack: TrackReference = {
         type: 'local',
         trackIndex: 1,
-        pid: 0,
+        pid: '0',
       };
 
       it('starts out with the thread track and call tree selected', function () {
@@ -467,7 +467,7 @@ describe('actions/ProfileView', function () {
     });
 
     describe('with a memory track', function () {
-      const memoryTrackReference = { type: 'local', trackIndex: 0, pid: 111 };
+      const memoryTrackReference = { type: 'local', trackIndex: 0, pid: '111' };
 
       function setup() {
         const profile = getProfileWithNiceTracks();
@@ -573,7 +573,7 @@ describe('actions/ProfileView', function () {
         );
 
         for (const thread of profile.threads) {
-          thread.pid = 0;
+          thread.pid = '0';
         }
 
         // Create some references in the same order that the threads were created
@@ -581,17 +581,17 @@ describe('actions/ProfileView', function () {
         const nativeAllocationsThread: TrackReference = {
           type: 'local',
           trackIndex: 0,
-          pid: 0,
+          pid: '0',
         };
         const jsAllocationsThread: TrackReference = {
           type: 'local',
           trackIndex: 1,
-          pid: 0,
+          pid: '0',
         };
         const timingOnlyThread: TrackReference = {
           type: 'local',
           trackIndex: 2,
-          pid: 0,
+          pid: '0',
         };
 
         return {
@@ -974,7 +974,7 @@ describe('actions/ProfileView', function () {
             sendEndTime: undefined,
             recvEndTime: undefined,
             endTime: 1031,
-            otherPid: 3333,
+            otherPid: '3333',
             sendTid: 3333,
             recvTid: 1111,
             sendThreadName: 'Parent Process (Thread ID: 3333)',
@@ -1000,7 +1000,7 @@ describe('actions/ProfileView', function () {
             sendEndTime: undefined,
             recvEndTime: undefined,
             endTime: 40,
-            otherPid: 9999,
+            otherPid: '9999',
             messageSeqno: 2,
             messageType: 'PContent::Msg_PreferenceUpdate',
             side: 'parent',
@@ -3146,7 +3146,7 @@ describe('counter selectors', function () {
 
   it('can get the counter pid', function () {
     const { getState } = setup();
-    expect(getCounterSelectors(0).getPid(getState())).toBe(0);
+    expect(getCounterSelectors(0).getPid(getState())).toBe('0');
   });
 
   it('can accumulate samples', function () {

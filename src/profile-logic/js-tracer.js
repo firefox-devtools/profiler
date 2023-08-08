@@ -640,7 +640,6 @@ export function convertJsTracerToThreadWithoutSamples(
     frameTable.implementation.push(implementation);
     frameTable.line.push(line);
     frameTable.column.push(column);
-    frameTable.optimizations.push(null);
 
     // Each event gets a stack table entry.
     const stackIndex = stackTable.length++;

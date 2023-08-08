@@ -14,7 +14,6 @@ import { Provider } from 'react-redux';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { MenuButtons } from 'firefox-profiler/components/app/MenuButtons';
 import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
-import { TextEncoder } from 'util';
 
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { processGeckoProfile } from 'firefox-profiler/profile-logic/process-profile';
@@ -64,8 +63,20 @@ const { UploadAbortedError } = jest.requireActual(
 import sha1 from '../../utils/sha1';
 jest.mock('../../utils/sha1');
 
-// Mocking compress
-jest.mock('../../utils/gz');
+// We want this module to have mocks so that we can change the return values in
+// tests. But in beforeEach below, we return the real implementation by default.
+// Note that we can't do it using the factory function because of this Jest issue:
+// https://github.com/facebook/jest/issues/14080
+jest.mock('firefox-profiler/utils/gz');
+
+beforeEach(() => {
+  const realModule = jest.requireActual('firefox-profiler/utils/gz');
+  const { compress, decompress } = require('firefox-profiler/utils/gz');
+  // $FlowExpectError Flow doesn't know about Jest mocks.
+  compress.mockImplementation(realModule.compress);
+  // $FlowExpectError Flow doesn't know about Jest mocks.
+  decompress.mockImplementation(realModule.decompress);
+});
 
 // Mocking shortenUrl
 import { shortenUrl } from '../../utils/shorten-url';
@@ -233,17 +244,9 @@ describe('app/MenuButtons', function () {
       };
     }
 
-    beforeAll(function () {
-      if ((window: any).TextEncoder) {
-        throw new Error('A TextEncoder was already on the window object.');
-      }
-      (window: any).TextEncoder = TextEncoder;
-    });
-
     afterAll(async function () {
       delete URL.createObjectURL;
       delete URL.revokeObjectURL;
-      delete (window: any).TextEncoder;
     });
 
     beforeEach(function () {
@@ -271,6 +274,7 @@ describe('app/MenuButtons', function () {
       const { profile } = createSimpleProfile('nightly');
       const { getPanel, openPublishPanel } = setupForPublish(profile);
       await openPublishPanel();
+      await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -278,6 +282,7 @@ describe('app/MenuButtons', function () {
       const { profile } = createSimpleProfile('release');
       const { getPanel, openPublishPanel } = setupForPublish(profile);
       await openPublishPanel();
+      await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -288,6 +293,7 @@ describe('app/MenuButtons', function () {
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
       await openPublishPanel();
+      await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -400,7 +406,7 @@ describe('app/MenuButtons', function () {
       expect(await findPublishButton()).toBeTruthy();
     });
 
-    it('matches the snapshot for an error', async () => {
+    it('matches the snapshot for an upload error', async () => {
       const { getPanel, getPanelForm, rejectUpload, openPublishPanel } =
         setupForPublish();
 
@@ -414,6 +420,24 @@ describe('app/MenuButtons', function () {
       // Now click the error button, and get a snapshot of the panel.
       fireFullClick(errorButton);
       await screen.findByText(/something went wrong/);
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for a compression error', async () => {
+      const { compress } = require('firefox-profiler/utils/gz');
+      // $FlowExpectError Flow doesn't know about Jest mocks
+      compress.mockRejectedValue(new Error('Compression error'));
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { getPanel, openPublishPanel } = setupForPublish();
+
+      await openPublishPanel();
+      expect(
+        await screen.findByText(/Error while compressing/)
+      ).toBeInTheDocument();
+      expect(console.error).toHaveBeenCalledWith(
+        'Error while compressing the profile data',
+        expect.any(Error)
+      );
       expect(getPanel()).toMatchSnapshot();
     });
   });
@@ -497,6 +521,21 @@ describe('app/MenuButtons', function () {
        * https://github.com/testing-library/jest-dom/issues/306 */
       /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
       expect(renderedDevice.textContent).toBe('Android Device');
+      expect(getMetaInfoPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot with uptime', async () => {
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processGeckoProfile(createGeckoProfile());
+      // The profiler was started 500ms after the parent process.
+      profile.meta.profilingStartTime = 500;
+
+      const { displayMetaInfoPanel, getMetaInfoPanel } =
+        await setupForMetaInfoPanel(profile);
+      await displayMetaInfoPanel();
+
+      const uptime = ensureExists(screen.getByText(/Uptime:/).nextSibling);
+      expect(uptime).toHaveTextContent('500ms');
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 

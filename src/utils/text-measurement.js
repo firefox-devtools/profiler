@@ -8,6 +8,11 @@
  * Measure the size of text for drawing within a 2d context. This will allow text
  * to be drawn in a constrained space. This class uses a variety of heuristics and
  * caching to make this process fast.
+ *
+ * All measurements are in user space coordinates of the context. When the
+ * context transform changes, these user space coordinates remain valid. They
+ * only become invalid when the context's font or font size changes. When this
+ * happens, a new TextMeasurement instance should be created.
  */
 class TextMeasurement {
   _ctx: CanvasRenderingContext2D;
@@ -57,17 +62,6 @@ class TextMeasurement {
   }
 
   /**
-   * Gets an approximate width of the specified text. This is much faster
-   * than `_getTextWidth`, but inexact.
-   *
-   * @param {string} text - The text to analyze.
-   * @return {number} The approximate text width.
-   */
-  getTextWidthApprox(text: string): number {
-    return text.length * this._averageCharWidth;
-  }
-
-  /**
    * Massage a text to fit inside a given width. This clamps the string
    * at the end to avoid overflowing.
    *
@@ -76,21 +70,20 @@ class TextMeasurement {
    * @return {string} The fitted text.
    */
   getFittedText(text: string, maxWidth: number): string {
-    if (this.minWidth > maxWidth) {
-      return '';
-    }
-    const textWidth = this.getTextWidth(text);
-    if (textWidth < maxWidth) {
+    if (this.getTextWidth(text) < maxWidth) {
       return text;
     }
-    for (let i = 1, len = text.length; i <= len; i++) {
-      const trimmedText = text.substring(0, len - i);
-      const trimmedWidth = this.getTextWidthApprox(trimmedText) + this.minWidth;
-      if (trimmedWidth < maxWidth) {
-        return trimmedText + this.overflowChar;
-      }
+
+    // Approximate the number of characters to truncate to,
+    // using avg character width as reference.
+    const f = (maxWidth - this.minWidth) / this._averageCharWidth;
+    let n = Math.floor(f);
+    if (n === f) {
+      // The approximate width of `n` characters is exactly max width,
+      // so take one character less just in case.
+      n -= 1;
     }
-    return '';
+    return n > 0 ? text.substring(0, n) + this.overflowChar : '';
   }
 }
 

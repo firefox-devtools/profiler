@@ -16,6 +16,7 @@ import {
   getCommittedRange,
   getPreviewSelection,
   getProfileInterval,
+  getMeta,
 } from 'firefox-profiler/selectors/profile';
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 
@@ -26,6 +27,7 @@ import type {
   Milliseconds,
   PreviewSelection,
   StartEndRange,
+  ProfileMeta,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -37,6 +39,7 @@ type OwnProps = {|
 
 type StateProps = {|
   interval: Milliseconds,
+  meta: ProfileMeta,
   committedRange: StartEndRange,
   previewSelection: PreviewSelection,
 |};
@@ -68,8 +71,9 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
   _computeCO2eFromPower(power: number): number {
     // total energy Wh to kWh
     const energy = power / 1000;
-    const { WORLD } = averageIntensity.data;
-    return energy * WORLD;
+    const intensity =
+      this.props.meta.gramsOfCO2ePerKWh || averageIntensity.data.WORLD;
+    return energy * intensity;
   }
 
   _computePowerSumForCommittedRange = memoize(
@@ -90,13 +94,18 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 
   _formatPowerValue(
     power: number,
+    l10nIdKiloUnit,
     l10nIdUnit,
     l10nIdMilliUnit,
     l10nIdMicroUnit
   ): Localized {
     let value, l10nId, carbonValue;
     const carbon = this._computeCO2eFromPower(power);
-    if (power > 1) {
+    if (power > 1000) {
+      value = formatNumber(power / 1000, 3);
+      carbonValue = formatNumber(carbon / 1000, 2);
+      l10nId = l10nIdKiloUnit;
+    } else if (power > 1) {
       value = formatNumber(power, 3);
       carbonValue = formatNumber(carbon, 3);
       l10nId = l10nIdUnit;
@@ -153,12 +162,14 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
         <TooltipDetails>
           {this._formatPowerValue(
             power,
+            'TrackPower--tooltip-power-kilowatt',
             'TrackPower--tooltip-power-watt',
             'TrackPower--tooltip-power-milliwatt'
           )}
           {previewSelection.hasSelection
             ? this._formatPowerValue(
                 this._computePowerSumForPreviewRange(previewSelection),
+                'TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour',
                 'TrackPower--tooltip-energy-carbon-used-in-preview-watthour',
                 'TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour',
                 'TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour'
@@ -166,6 +177,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
             : null}
           {this._formatPowerValue(
             this._computePowerSumForCommittedRange(committedRange),
+            'TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour',
             'TrackPower--tooltip-energy-carbon-used-in-range-watthour',
             'TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour',
             'TrackPower--tooltip-energy-carbon-used-in-range-microwatthour'
@@ -179,6 +191,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 export const TooltipTrackPower = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state) => ({
     interval: getProfileInterval(state),
+    meta: getMeta(state),
     committedRange: getCommittedRange(state),
     previewSelection: getPreviewSelection(state),
   }),

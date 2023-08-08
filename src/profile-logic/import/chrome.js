@@ -40,7 +40,8 @@ export type TracingEventUnion =
   | ProcessLabelsEvent
   | ProcessSortIndexEvent
   | ThreadSortIndexEvent
-  | ScreenshotEvent;
+  | ScreenshotEvent
+  | FallbackEndEvent;
 
 type TracingEvent<Event> = {|
   cat: string,
@@ -50,10 +51,23 @@ type TracingEvent<Event> = {|
   pid: number, // Process ID
   tid: number, // Thread ID
   ts: number, // Timestamp
+  tts?: number, // Thread Timestamp
   tdur?: number, // Time duration
   dur?: number, // Time duration
   ...Event,
 |};
+
+// V8 can generate this backward compatible event.
+// See https://github.com/firefox-devtools/profiler/issues/4308#issuecomment-1303551614
+type FallbackEndEvent = TracingEvent<{|
+  name: 'ProfileChunk',
+  id: string,
+  args: {|
+    data: {|
+      endTime: number,
+    |},
+  |},
+|}>;
 
 type ProfileEvent = TracingEvent<{|
   name: 'Profile',
@@ -212,6 +226,13 @@ export function attemptToConvertChromeProfile(
     events.push(
       wrapCpuProfileInEvent(coerce<MixedObject, CpuProfileData>(json))
     );
+  } else if (
+    typeof json === 'object' &&
+    'traceEvents' in json &&
+    Array.isArray(json.traceEvents)
+  ) {
+    // This is Google Tracing Event format, for example from chrome://tracing.
+    events = coerce<mixed, TracingEventUnion[]>(json.traceEvents);
   }
 
   if (!events) {
@@ -297,11 +318,11 @@ function getThreadInfo(
     return cachedThreadInfo;
   }
   const thread = getEmptyThread();
-  thread.pid = chunk.pid;
+  thread.pid = `${chunk.pid}`;
   // It looks like the TID information in Chrome's data isn't the system's TID
   // but some internal values only unique for a pid. Therefore let's generate a
   // proper unique value.
-  thread.tid = `${chunk.pid},${chunk.tid}`;
+  thread.tid = pidAndTid;
 
   // Set the process type to something non-"Gecko". If this is left at
   // "default", threads + processes without samples will not be auto-hidden in
@@ -317,15 +338,8 @@ function getThreadInfo(
   );
   if (threadNameEvent) {
     thread.name = threadNameEvent.args.name;
-    if (thread.name.startsWith('Cr') && thread.name.endsWith('Main')) {
-      // Hack: Rename this thread to "GeckoMain" so that it gets detected as the
-      // main thread for the globalTrack of its process, and so that the UI
-      // displays a marker timeline.
-      // TODO (issue #2508): Replace the name detection with an isMainThread
-      // field on the thread. This would require a version bump for the
-      // processed profile format.
-      thread.name = 'GeckoMain';
-    }
+    thread.isMainThread =
+      thread.name.startsWith('Cr') && thread.name.endsWith('Main');
   }
 
   const processNameEvent = findEvent<ProcessNameEvent>(
@@ -532,6 +546,11 @@ async function processTracingEvents(
     }
 
     for (const profileChunk of profileChunks) {
+      if (!profileChunk.args.data || !profileChunk.args.data.cpuProfile) {
+        // This is probably a FallbackEndEvent, ignore it instead of crashing.
+        continue;
+      }
+
       const { cpuProfile } = profileChunk.args.data;
       const { nodes, samples } = cpuProfile;
       const timeDeltas = getTimeDeltas(profileChunk);
@@ -647,7 +666,6 @@ async function processTracingEvents(
             lineNumber === undefined ? null : lineNumber;
           frameTable.column[frameIndex] =
             columnNumber === undefined ? null : columnNumber;
-          frameTable.optimizations[frameIndex] = null;
           frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
           stackTable.frame.push(frameIndex);
@@ -843,6 +861,26 @@ function extractMarkers(
     throw new Error('No "Other" category in empty profile category list');
   }
 
+  profile.meta.markerSchema = [
+    {
+      name: 'EventDispatch',
+      chartLabel: '{marker.data.type2}',
+      tooltipLabel: '{marker.data.type2} - EventDispatch',
+      tableLabel: '{marker.data.type2}',
+      display: ['marker-chart', 'marker-table', 'timeline-overview'],
+      data: [
+        {
+          // In the original chrome profile, the key is `type`, but we rename it
+          // so that it doesn't clash with our internal `type` property.
+          key: 'type2',
+          label: 'Event Type',
+          format: 'string',
+          searchable: true,
+        },
+      ],
+    },
+  ];
+
   for (const [name, events] of eventsByName.entries()) {
     if (
       name === 'Profile' ||
@@ -861,15 +899,24 @@ function extractMarkers(
       }
 
       // For Complete ('X') events, require a duration.
-      // Duration events ('B' and 'E') as well as Instant events ('I') do not
-      // require any extra fields.
+      // Other events do not require any extra fields.
       if (
+        // Complete events
         (event.ph === 'X' &&
           event.dur !== undefined &&
           Number.isFinite(event.dur)) ||
+        // Duration events
         event.ph === 'B' ||
         event.ph === 'E' ||
-        event.ph === 'I'
+        // Async events
+        event.ph === 'b' ||
+        event.ph === 'n' ||
+        event.ph === 'e' ||
+        // Instant events
+        event.ph === 'i' ||
+        event.ph === 'I' ||
+        // Mark events
+        event.ph === 'R'
       ) {
         const time: number = (event.ts: any) / 1000;
         const threadInfo = getThreadInfo(
@@ -887,6 +934,23 @@ function extractMarkers(
         }
         markers.name.push(stringTable.indexForString(name));
         markers.category.push(otherCategoryIndex);
+
+        if (argData && 'type' in argData) {
+          argData.type2 = argData.type;
+        }
+        if (argData && 'category' in argData) {
+          argData.category2 = argData.category;
+        }
+
+        const newData = {
+          ...argData,
+          type: name,
+          category: event.cat,
+        };
+
+        // $FlowExpectError Opt out of Flow checking for this one.
+        markers.data.push(newData);
+
         if (event.ph === 'X') {
           // Complete Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lpfof2aylapb
@@ -894,45 +958,28 @@ function extractMarkers(
           markers.phase.push(INTERVAL);
           markers.startTime.push(time);
           markers.endTime.push(time + duration);
-
-          markers.data.push({
-            type: 'CompleteTraceEvent',
-            category: event.cat,
-            data: argData,
-          });
-        } else if (event.ph === 'B' || event.ph === 'E') {
-          if (event.ph === 'B') {
-            // The 'B' phase stand for "begin", and is the Chrome equivalent of IntervalStart.
-            markers.startTime.push(time);
-            markers.endTime.push(null);
-            markers.phase.push(INTERVAL_START);
-          } else {
-            // The 'E' phase stand for "end", and is the Chrome equivalent of IntervalEnd.
-            markers.startTime.push(null);
-            markers.endTime.push(time);
-            markers.phase.push(INTERVAL_END);
-          }
-
-          // Duration Event
+        } else if (event.ph === 'B' || event.ph === 'b') {
+          // Duration or Async Event Begin
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
-          markers.data.push({
-            type: 'tracing',
-            category: event.cat,
-            data: argData,
-          });
+          // The 'B' and 'b' phases stand for "begin", and is the Chrome equivalent of IntervalStart.
+          markers.startTime.push(time);
+          markers.endTime.push(null);
+          markers.phase.push(INTERVAL_START);
+        } else if (event.ph === 'E' || event.ph === 'e') {
+          // Duration or Async Event End
+          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
+          // The 'E' and 'e' phase stand for "end", and is the Chrome equivalent of IntervalEnd.
+          markers.startTime.push(null);
+          markers.endTime.push(time);
+          markers.phase.push(INTERVAL_END);
         } else {
-          // This assumes the phase is 'I', or Instant.
+          // Instant Event
+          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
+          // This assumes the phase is 'I' or 'i' (Instant), 'n' (Async Instant)
+          // or 'R' (Mark events)
           markers.startTime.push(time);
           markers.endTime.push(null);
           markers.phase.push(INSTANT);
-
-          // Instant Event
-          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
-          markers.data.push({
-            type: 'InstantTraceEvent',
-            category: event.cat,
-            data: argData,
-          });
         }
         markers.length++;
       }

@@ -5,7 +5,7 @@ The Firefox Profiler supports a few [external profile formats](../src/profile-lo
 ## Useful Docs
 
  * [Gecko profile format docs](./gecko-profile-format.md)
- * [processed profile format](./process-profile-format)
+ * [processed profile format](./processed-profile-format.md)
 
 ## Useful code links
 
@@ -60,8 +60,7 @@ It is probably a good iea to read up some on profile format docs for more inform
 
 ## Tips
 
- * Use `{ name: 'GeckoMain' }` for the main thread.
- * Ensure that the `pid` value is numeric, and points to the proper threads to nest threads in the timeline.
+ * Ensure that the `pid` value points to the proper threads to nest threads in the timeline.
  * Processed profiles have their timestamps adjusted so that all processes use the same timeline.
  * Make sure and adjust the timing for child processes. During profile processing, the Firefox Profiler adjusts Gecko profiles timings, so that markers and samples take into account the differences in start time (via `geckoProfile.meta.startTime`). See [src/profile-logic/process-profile.js](https://github.com/firefox-devtools/profiler/blob/3067dda9cbf5807948aef149e18caf4e8870ed25/src/profile-logic/process-profile.js#L997-L1010) for some examples.
 

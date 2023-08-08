@@ -7,6 +7,7 @@ import type {
   Pid,
   Bytes,
   IndexIntoFuncTable,
+  IndexIntoStackTable,
 } from 'firefox-profiler/types';
 
 import {
@@ -253,9 +254,12 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const bytesAtGmax: Bytes[] = [];
   const endBytes: Bytes[] = [];
 
+  // Maps prefixes to their descendents (more specific prefixes).
+  const postfix: Map<IndexIntoStackTable | null, IndexIntoStackTable[]> =
+    new Map();
+
   for (const pp of dhat.pps) {
-    // Never reset the stackIndex, stack indexes always growing larger.
-    let stackIndex = -1;
+    let stackIndex = 0;
     let prefix = null;
 
     // Go from root to tip on the backtrace.
@@ -267,20 +271,21 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
         'Expected to find a funcIndex from a frameIndex'
       );
 
-      // Case 1: The stack index starts at -1, increment by 1 to start searching stacks
-      //         at index 0.
-      // Case 2: This is the previously matched stack index, increment it by 1 to continue
-      //         searching at the next stack index.
-      stackIndex++;
+      // We want this to be the fallback, so that a stack index gets created when the 'if' below fails,
+      // or when we don't find a matching frame inside that loop.
+      stackIndex = stackTable.length;
 
-      // Start searching for a stack index.
-      for (; stackIndex < stackTable.length; stackIndex++) {
-        const nextFrameIndex = stackTable.frame[stackIndex];
-        if (
-          frameTable.func[nextFrameIndex] === funcIndex &&
-          stackTable.prefix[stackIndex] === prefix
-        ) {
-          break;
+      // List of possible stack indexes to look for.
+      const candidateStackTables = postfix.get(prefix);
+      if (candidateStackTables) {
+        // Start searching for a stack index.
+        for (const sliceStackIndex of candidateStackTables) {
+          const nextFrameIndex = stackTable.frame[sliceStackIndex];
+          // No need to look for the prefix, since candidateStackTables already takes that into account.
+          if (frameTable.func[nextFrameIndex] === funcIndex) {
+            stackIndex = sliceStackIndex;
+            break;
+          }
         }
       }
 
@@ -290,6 +295,15 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
         stackTable.category.push(otherCategory);
         stackTable.category.push(otherSubCategory);
         stackTable.prefix.push(prefix);
+
+        if (candidateStackTables) {
+          // Append us to the list of possible stack indexes of our parent.
+          candidateStackTables.push(stackIndex);
+        } else {
+          // We are the first descendents of our parent.
+          postfix.set(prefix, [stackIndex]);
+        }
+
         // The stack index already points to this spot.
         stackTable.length++;
       }

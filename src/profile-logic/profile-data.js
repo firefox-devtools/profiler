@@ -13,6 +13,7 @@ import {
   getEmptyBalancedNativeAllocationsTable,
   getEmptyStackTable,
   shallowCloneFrameTable,
+  shallowCloneFuncTable,
 } from './data-structures';
 import {
   INSTANT,
@@ -37,6 +38,7 @@ import type {
   StackTable,
   FrameTable,
   FuncTable,
+  NativeSymbolTable,
   ResourceTable,
   CategoryList,
   IndexIntoCategoryList,
@@ -75,6 +77,10 @@ import type {
   Address,
   AddressProof,
   TimelineType,
+  NativeSymbolInfo,
+  BottomBoxInfo,
+  Bytes,
+  ThreadWithReservedFunctions,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -915,6 +921,15 @@ export function getTimeRangeIncludingAllThreads(
   profile: Profile
 ): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
+  if (
+    profile.meta.profilingStartTime !== undefined &&
+    profile.meta.profilingEndTime
+  ) {
+    return {
+      start: profile.meta.profilingStartTime,
+      end: profile.meta.profilingEndTime,
+    };
+  }
   profile.threads.forEach((thread) => {
     const threadRange = memoizedGetTimeRangeForThread(
       thread,
@@ -1272,6 +1287,40 @@ export function filterThreadByTab(
 }
 
 /**
+ * Checks if a sample table has any useful samples.
+ * A useful sample being one that isn't a "(root)" sample.
+ */
+export function hasUsefulSamples(
+  table?: SamplesLikeTable,
+  thread: Thread
+): boolean {
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
+  if (table === undefined || table.length === 0 || stackTable.length === 0) {
+    return false;
+  }
+  const stackIndex = table.stack.find((stack) => stack !== null);
+  if (
+    stackIndex === undefined ||
+    stackIndex === null // We know that it can't be null at this point, but Flow doesn't.
+  ) {
+    // All samples were null.
+    return false;
+  }
+  if (stackTable.prefix[stackIndex] === null) {
+    // There's only a single stack frame, check if it's '(root)'.
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const stringIndex = funcTable.name[funcIndex];
+    if (stringTable.getString(stringIndex) === '(root)') {
+      // If the first sample's stack is only the root, check if any other
+      // sample is different.
+      return table.stack.some((s) => s !== null && s !== stackIndex);
+    }
+  }
+  return true;
+}
+
+/**
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
@@ -1427,6 +1476,49 @@ export function filterThreadSamplesToRange(
   }
 
   return newThread;
+}
+
+/**
+ * Filter the counter samples to the given range by iterating all of their sample groups.
+ */
+export function filterCounterSamplesToRange(
+  counter: Counter,
+  rangeStart: number,
+  rangeEnd: number
+): Counter {
+  const newCounter = { ...counter };
+  newCounter.sampleGroups = [...newCounter.sampleGroups];
+  const { sampleGroups } = newCounter;
+
+  for (
+    let sampleGroupIdx = 0;
+    sampleGroupIdx < sampleGroups.length;
+    sampleGroupIdx++
+  ) {
+    sampleGroups[sampleGroupIdx] = { ...sampleGroups[sampleGroupIdx] };
+    const sampleGroup = sampleGroups[sampleGroupIdx];
+    // Intentionally get the inclusive sample indexes with this one instead of
+    // getSampleIndexRangeForSelection because graphs like memory graph requires
+    // one sample before and after to be in the sample range so the graph doesn't
+    // look cut off.
+    const [beginSampleIndex, endSampleIndex] =
+      getInclusiveSampleIndexRangeForSelection(
+        sampleGroup.samples,
+        rangeStart,
+        rangeEnd
+      );
+
+    sampleGroup.samples = {
+      length: endSampleIndex - beginSampleIndex,
+      time: sampleGroup.samples.time.slice(beginSampleIndex, endSampleIndex),
+      count: sampleGroup.samples.count.slice(beginSampleIndex, endSampleIndex),
+      number: sampleGroup.samples.number
+        ? sampleGroup.samples.number.slice(beginSampleIndex, endSampleIndex)
+        : undefined,
+    };
+  }
+
+  return newCounter;
 }
 
 /**
@@ -2011,16 +2103,19 @@ export function invertCallstack(
  * out the manipulation of the data structures so that we can properly update
  * the stack table and any possible allocation information.
  */
-export function updateThreadStacks(
+export function updateThreadStacksByGeneratingNewStackColumns(
   thread: Thread,
   newStackTable: StackTable,
-  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+  computeFilteredStackColumn: (
+    Array<IndexIntoStackTable | null>,
+    Array<Milliseconds>
+  ) => Array<IndexIntoStackTable | null>
 ): Thread {
   const { jsAllocations, nativeAllocations, samples } = thread;
 
   const newSamples = {
     ...samples,
-    stack: samples.stack.map((oldStack) => convertStack(oldStack)),
+    stack: computeFilteredStackColumn(samples.stack, samples.time),
   };
 
   const newThread = {
@@ -2030,19 +2125,45 @@ export function updateThreadStacks(
   };
 
   if (jsAllocations) {
+    // Filter the JS allocations if there are any.
     newThread.jsAllocations = {
       ...jsAllocations,
-      stack: jsAllocations.stack.map((oldStack) => convertStack(oldStack)),
+      stack: computeFilteredStackColumn(
+        jsAllocations.stack,
+        jsAllocations.time
+      ),
     };
   }
   if (nativeAllocations) {
+    // Filter the native allocations if there are any.
     newThread.nativeAllocations = {
       ...nativeAllocations,
-      stack: nativeAllocations.stack.map((oldStack) => convertStack(oldStack)),
+      stack: computeFilteredStackColumn(
+        nativeAllocations.stack,
+        nativeAllocations.time
+      ),
     };
   }
 
   return newThread;
+}
+
+/**
+ * A simpler variant of updateThreadStacksByGeneratingNewStackColumns which just
+ * accepts a convertStack function. Use this when you don't need to filter by
+ * sample timestamp.
+ */
+export function updateThreadStacks(
+  thread: Thread,
+  newStackTable: StackTable,
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+): Thread {
+  return updateThreadStacksByGeneratingNewStackColumns(
+    thread,
+    newStackTable,
+    (stackColumn, _timeColumn) =>
+      stackColumn.map((oldStack) => convertStack(oldStack))
+  );
 }
 
 /**
@@ -2332,6 +2453,53 @@ export function getOriginAnnotationForFunc(
   }
 
   return '';
+}
+
+/**
+ * Reserve functions in the thread's funcTable which may be needed for transforms
+ * in the transform stack, so that transforms can keep the funcTable unchanged.
+ *
+ * This returns a new thread with an extended funcTable.
+ *
+ * At the moment, the only functions we reserve are "collapsed resource" functions.
+ * These are used by the "collapse resource" transform.
+ */
+export function reserveFunctionsInThread(
+  thread: Thread
+): ThreadWithReservedFunctions {
+  const funcTable = shallowCloneFuncTable(thread.funcTable);
+  const reservedFunctionsForResources = new Map();
+  const jsResourceTypes = [
+    resourceTypes.addon,
+    resourceTypes.url,
+    resourceTypes.webhost,
+    resourceTypes.otherhost,
+  ];
+  const { resourceTable } = thread;
+  for (
+    let resourceIndex = 0;
+    resourceIndex < resourceTable.length;
+    resourceIndex++
+  ) {
+    const resourceType = resourceTable.type[resourceIndex];
+    const name = resourceTable.name[resourceIndex];
+    const isJS = jsResourceTypes.includes(resourceType);
+    const fileName = resourceType === resourceTypes.url ? name : null;
+    const funcIndex = funcTable.length;
+    funcTable.isJS.push(isJS);
+    funcTable.relevantForJS.push(isJS);
+    funcTable.name.push(name);
+    funcTable.resource.push(resourceIndex);
+    funcTable.fileName.push(fileName);
+    funcTable.lineNumber.push(null);
+    funcTable.columnNumber.push(null);
+    funcTable.length++;
+    reservedFunctionsForResources.set(resourceIndex, funcIndex);
+  }
+  return {
+    thread: { ...thread, funcTable },
+    reservedFunctionsForResources,
+  };
 }
 
 /**
@@ -3217,7 +3385,6 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       newFrameTable.implementation.push(frameTable.implementation[frame]);
       newFrameTable.line.push(frameTable.line[frame]);
       newFrameTable.column.push(frameTable.column[frame]);
-      newFrameTable.optimizations.push(frameTable.optimizations[frame]);
       newFrameTable.length++;
       oldIpFrameToNewIpFrame[frame] = newIpFrame;
       // Note: The duplicated frame uses the same func as the original frame.
@@ -3332,6 +3499,138 @@ export function findAddressProofForFile(
     };
   }
   return null;
+}
+
+/**
+ * Calculate a lower bound for the function size, in bytes, of a native symbol.
+ * This is used when the symbol server does not return a size for a function.
+ * We need to know the size when we want to show assembly code for the function,
+ * in order to know how many bytes to disassemble.
+ * We estimate the size by finding the highest known address for this symbol in
+ * the frame table, and adding one byte (because the instruction at that address
+ * is at least one byte long).
+ */
+export function calculateFunctionSizeLowerBound(
+  frameTable: FrameTable,
+  nativeSymbolAddress: Address,
+  nativeSymbolIndex: IndexIntoNativeSymbolTable
+): Bytes {
+  let maxFrameAddress = nativeSymbolAddress;
+  for (let i = 0; i < frameTable.length; i++) {
+    if (frameTable.nativeSymbol[i] === nativeSymbolIndex) {
+      const frameAddress = frameTable.address[i];
+      if (frameAddress > maxFrameAddress) {
+        maxFrameAddress = frameAddress;
+      }
+    }
+  }
+  return maxFrameAddress + 1 - nativeSymbolAddress;
+}
+
+/**
+ * Gathers the native symbols for a given call node. In most cases, a call node
+ * just has one native symbol (or zero if it's not native code). But in some
+ * cases, a call node can have its native code in multiple different functions,
+ * for example in the inverted tree if it was inlined into multiple different
+ * functions.
+ */
+export function getNativeSymbolsForCallNode(
+  callNodeIndex: IndexIntoCallNodeTable,
+  { stackIndexToCallNodeIndex }: CallNodeInfo,
+  stackTable: StackTable,
+  frameTable: FrameTable
+): IndexIntoNativeSymbolTable[] {
+  const set = new Set();
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
+      const frame = stackTable.frame[stackIndex];
+      const nativeSymbol = frameTable.nativeSymbol[frame];
+      if (nativeSymbol !== null) {
+        set.add(nativeSymbol);
+      }
+    }
+  }
+  return [...set];
+}
+
+/**
+ * Convert a native symbol index into a NativeSymbolInfo object, to create
+ * something that's meaningful outside of its associated thread.
+ */
+export function getNativeSymbolInfo(
+  nativeSymbol: IndexIntoNativeSymbolTable,
+  nativeSymbols: NativeSymbolTable,
+  frameTable: FrameTable,
+  stringTable: UniqueStringArray
+): NativeSymbolInfo {
+  const functionSizeOrNull = nativeSymbols.functionSize[nativeSymbol];
+  const functionSize =
+    functionSizeOrNull ??
+    calculateFunctionSizeLowerBound(
+      frameTable,
+      nativeSymbols.address[nativeSymbol],
+      nativeSymbol
+    );
+  return {
+    libIndex: nativeSymbols.libIndex[nativeSymbol],
+    address: nativeSymbols.address[nativeSymbol],
+    name: stringTable.getString(nativeSymbols.name[nativeSymbol]),
+    functionSize,
+    functionSizeIsKnown: functionSizeOrNull !== null,
+  };
+}
+
+/**
+ * Calculate the BottomBoxInfo for a call node, i.e. information about which
+ * things should be shown in the profiler UI's "bottom box" when this call node
+ * is double-clicked.
+ *
+ * We always want to update all panes in the bottom box when a new call node is
+ * double-clicked, so that we don't show inconsistent information side-by-side.
+ */
+export function getBottomBoxInfoForCallNode(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  thread: Thread
+): BottomBoxInfo {
+  const {
+    stackTable,
+    frameTable,
+    funcTable,
+    stringTable,
+    resourceTable,
+    nativeSymbols,
+  } = thread;
+
+  const funcIndex = callNodeInfo.callNodeTable.func[callNodeIndex];
+  const fileName = funcTable.fileName[funcIndex];
+  const sourceFile = fileName !== null ? stringTable.getString(fileName) : null;
+  const resource = funcTable.resource[funcIndex];
+  const libIndex =
+    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
+      ? resourceTable.lib[resource]
+      : null;
+  const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
+    callNodeIndex,
+    callNodeInfo,
+    stackTable,
+    frameTable
+  );
+  const nativeSymbolInfosForCallNode = nativeSymbolsForCallNode.map(
+    (nativeSymbolIndex) =>
+      getNativeSymbolInfo(
+        nativeSymbolIndex,
+        nativeSymbols,
+        frameTable,
+        stringTable
+      )
+  );
+
+  return {
+    libIndex,
+    sourceFile,
+    nativeSymbols: nativeSymbolInfosForCallNode,
+  };
 }
 
 /**

@@ -27,7 +27,10 @@ export type MarkerFormatType =
   // sanitized. Please be careful with including other types of PII here as well.
   // e.g. "Label: Some String"
   | 'string'
-
+  /// An index into a (currently) thread-local string table, aka UniqueStringArray
+  /// This is effectively an integer, so wherever we need to display this value, we
+  /// must first perform a lookup into the appropriate string table.
+  | 'unique-string'
   // ----------------------------------------------------
   // Numeric types
 
@@ -86,6 +89,25 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
+export type MarkerGraphColor =
+  | 'blue'
+  | 'green'
+  | 'grey'
+  | 'ink'
+  | 'magenta'
+  | 'orange'
+  | 'purple'
+  | 'red'
+  | 'teal'
+  | 'yellow';
+
+export type MarkerGraphType = 'bar' | 'line' | 'line-filled';
+export type MarkerGraph = {|
+  key: string,
+  type: MarkerGraphType,
+  color?: MarkerGraphColor,
+|};
+
 export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
@@ -120,6 +142,9 @@ export type MarkerSchema = {|
         value: string,
       |}
   >,
+
+  // if present, give the marker its own local track
+  graphs?: Array<MarkerGraph>,
 |};
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
@@ -548,26 +573,11 @@ export type TextMarkerPayload = {|
   innerWindowID?: number,
 |};
 
-// ph: 'X' in the Trace Event Format
-export type ChromeCompleteTraceEventPayload = {|
-  type: 'CompleteTraceEvent',
+// Any import from a Chrome profile
+export type ChromeEventPayload = {|
+  type: string,
   category: string,
   data: MixedObject | null,
-|};
-
-// ph: 'I' in the Trace Event Format
-export type ChromeInstantTraceEventPayload = {|
-  type: 'InstantTraceEvent',
-  category: string,
-  data: MixedObject | null,
-|};
-
-// ph: 'B' | 'E' in the Trace Event Format
-export type ChromeDurationTraceEventPayload = {|
-  type: 'tracing',
-  category: 'FromChrome',
-  data: MixedObject | null,
-  cause?: CauseBacktrace,
 |};
 
 /**
@@ -677,7 +687,8 @@ export type IPCMarkerPayload_Gecko = {|
   type: 'IPC',
   startTime: Milliseconds,
   endTime: Milliseconds,
-  otherPid: Pid,
+  // otherPid is a number in the Gecko format.
+  otherPid: number,
   messageType: string,
   messageSeqno: number,
   side: 'parent' | 'child',
@@ -692,23 +703,39 @@ export type IPCMarkerPayload_Gecko = {|
 |};
 
 export type IPCMarkerPayload = {|
-  ...IPCMarkerPayload_Gecko,
+  type: 'IPC',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  // otherPid is a string in the processed format.
+  otherPid: Pid,
+  messageType: string,
+  messageSeqno: number,
+  side: 'parent' | 'child',
+  direction: 'sending' | 'receiving',
+  // Phase is not present in older profiles (in this case the phase is "endpoint").
+  phase?: 'endpoint' | 'transferStart' | 'transferEnd',
+  sync: boolean,
+  // `tid` of the thread that this marker is originated from. It is undefined
+  // when the IPC marker is originated from the same thread. Also, this field is
+  // added in Firefox 100. It will always be undefined for the older profiles.
+  threadId?: Tid,
 
   // These fields are added in the deriving process from `IPCSharedData`, and
   // correspond to data from all the markers associated with a particular IPC
   // message.
-  startTime?: Milliseconds,
+  // We mark these fields as optional because we represent non-derived markers
+  // and derived markers with the same type. These fields are always present on
+  // derived markers and never present on non-derived markers.
   sendStartTime?: Milliseconds,
   sendEndTime?: Milliseconds,
   recvEndTime?: Milliseconds,
-  endTime?: Milliseconds,
   sendTid?: Tid,
   recvTid?: Tid,
   sendThreadName?: string,
   recvThreadName?: string,
 
   // This field is a nicely formatted field for the direction.
-  niceDirection: string,
+  niceDirection?: string,
 |};
 
 export type MediaSampleMarkerPayload = {|
@@ -763,9 +790,6 @@ export type MarkerPayload =
   | NavigationMarkerPayload
   | PrefMarkerPayload
   | IPCMarkerPayload
-  | ChromeCompleteTraceEventPayload
-  | ChromeDurationTraceEventPayload
-  | ChromeInstantTraceEventPayload
   | MediaSampleMarkerPayload
   | JankPayload
   | BrowsertimeMarkerPayload

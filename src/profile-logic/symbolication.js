@@ -802,12 +802,10 @@ export function applySymbolicationStep(
         const subcategory = frameTable.subcategory[frameIndex];
         const innerWindowID = frameTable.innerWindowID[frameIndex];
         const implementation = frameTable.implementation[frameIndex];
-        const optimizations = frameTable.optimizations[frameIndex];
         frameTable.category[expansionFrameIndex] = category;
         frameTable.subcategory[expansionFrameIndex] = subcategory;
         frameTable.innerWindowID[expansionFrameIndex] = innerWindowID;
         frameTable.implementation[expansionFrameIndex] = implementation;
-        frameTable.optimizations[expansionFrameIndex] = optimizations;
         frameTable.address[expansionFrameIndex] = address;
         frameTable.nativeSymbol[expansionFrameIndex] = nativeSymbolIndex;
 

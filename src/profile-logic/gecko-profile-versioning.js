@@ -9,6 +9,9 @@
  * run profiler.firefox.com on non-Nightly versions of Firefox, and we want
  * to be able to load old saved profiles, so this file upgrades old profiles
  * to the current format.
+ *
+ * Please don't forget to update the gecko profile format changelog in
+ * `docs-developer/CHANGELOG-formats.md`.
  */
 
 import { UniqueStringArray } from '../utils/unique-string-array';
@@ -1429,5 +1432,27 @@ const _upgraders = {
 
     convertToVersion26Recursive(profile);
   },
+  [27]: (profile) => {
+    // The "optimizations" column was removed from the frame table.
+    function convertToVersion27Recursive(p) {
+      for (const thread of p.threads) {
+        delete thread.frameTable.schema.optimizations;
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion27Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion27Recursive(profile);
+  },
+  [28]: (_) => {
+    // This version bump added a new marker schema format type, named "unique-string",
+    // which older frontends will not be able to display.
+    // No upgrade is needed, as older versions of firefox would not generate
+    // marker data with unique-string typed data, and no modification is needed in the
+    // frontend to display older formats.
+  },
+  // If you add a new upgrader here, please document the change in
+  // `docs-developer/CHANGELOG-formats.md`.
 };
 /* eslint-enable no-useless-computed-key */

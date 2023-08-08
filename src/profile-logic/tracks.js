@@ -15,6 +15,7 @@ import type {
   Counter,
   Tid,
   TrackReference,
+  MarkerSchemaByName,
 } from 'firefox-profiler/types';
 
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
@@ -22,6 +23,7 @@ import { computeMaxCPUDeltaPerInterval } from './cpu';
 import { intersectSets, subtractSets } from '../utils/set';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
+import { getMarkerSchemaName } from './marker-schema';
 
 export type TracksWithOrder = {|
   +globalTracks: GlobalTrack[],
@@ -58,19 +60,21 @@ const LOCAL_TRACK_INDEX_ORDER = {
   'event-delay': 4,
   'process-cpu': 5,
   power: 6,
+  marker: 7,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
   memory: 1,
+  power: 2,
   // IPC tracks that belong to the global track will appear right after network
-  // and memory tracks. But we want to show the IPC tracks that belong to the
+  // and counter tracks. But we want to show the IPC tracks that belong to the
   // local threads right after their track. This special handling happens inside
   // the sort function.
-  ipc: 2,
-  thread: 3,
-  'event-delay': 4,
-  'process-cpu': 5,
-  power: 6,
+  ipc: 3,
+  thread: 4,
+  'event-delay': 5,
+  'process-cpu': 6,
+  marker: 7,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -111,6 +115,22 @@ function _getDefaultLocalTrackOrder(tracks: LocalTrack[], profile: ?Profile) {
       // If the IPC track belongs to that local thread, put the IPC tracks right
       // after it.
       return 1;
+    }
+
+    if (
+      profile &&
+      profile.counters &&
+      tracks[a].type === 'power' &&
+      tracks[b].type === 'power'
+    ) {
+      const idxA = tracks[a].counterIndex;
+      const idxB = tracks[b].counterIndex;
+      if (profile.meta.keepProfileThreadOrder) {
+        return idxA - idxB;
+      }
+      const nameA = profile.counters[idxA].name;
+      const nameB = profile.counters[idxB].name;
+      return naturalSort.compare(nameA, nameB);
     }
 
     // If the tracks are both threads, sort them by thread name, and then by
@@ -232,9 +252,15 @@ export function initializeLocalTrackOrderByPid(
  * Take a profile and figure out all of the local tracks, and organize them by PID.
  */
 export function computeLocalTracksByPid(
-  profile: Profile
+  profile: Profile,
+  markerSchemaByName: MarkerSchemaByName
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
+
+  // find markers that might have their own track.
+  const markerSchemasWithGraphs = (profile.meta.markerSchema || []).filter(
+    (schema) => schema.graphs !== undefined
+  );
 
   for (
     let threadIndex = 0;
@@ -242,7 +268,7 @@ export function computeLocalTracksByPid(
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid } = thread;
+    const { pid, markers } = thread;
     // Get or create the tracks and trackOrder.
     let tracks = localTracksByPid.get(pid);
     if (tracks === undefined) {
@@ -250,21 +276,60 @@ export function computeLocalTracksByPid(
       localTracksByPid.set(pid, tracks);
     }
 
-    if (!isMainThread(thread)) {
+    if (!thread.isMainThread) {
       // This thread has not been added as a GlobalTrack, so add it as a local track.
       tracks.push({ type: 'thread', threadIndex });
     }
 
-    if (
-      thread.markers.data.some((datum) => datum && datum.type === 'Network')
-    ) {
+    if (markers.data.some((datum) => datum && datum.type === 'Network')) {
       // This thread has network markers.
       tracks.push({ type: 'network', threadIndex });
     }
 
-    if (thread.markers.data.some((datum) => datum && datum.type === 'IPC')) {
+    if (markers.data.some((datum) => datum && datum.type === 'IPC')) {
       // This thread has IPC markers.
       tracks.push({ type: 'ipc', threadIndex });
+    }
+
+    if (markerSchemasWithGraphs.length > 0) {
+      const markerTracksBySchemaName = new Map();
+      for (const markerSchema of markerSchemasWithGraphs) {
+        markerTracksBySchemaName.set(markerSchema.name, {
+          markerSchema,
+          keys: (markerSchema.graphs || []).map((graph) => graph.key),
+          markerNames: new Set(),
+        });
+      }
+
+      for (let i = 0; i < markers.length; ++i) {
+        const markerNameIndex = markers.name[i];
+        const markerData = markers.data[i];
+        const markerSchemaName = getMarkerSchemaName(
+          markerSchemaByName,
+          thread.stringTable.getString(markerNameIndex),
+          markerData
+        );
+        if (markerData && markerSchemaByName) {
+          const mapEntry = markerTracksBySchemaName.get(markerSchemaName);
+          if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
+            mapEntry.markerNames.add(markerNameIndex);
+          }
+        }
+      }
+
+      for (const [
+        ,
+        { markerSchema, markerNames },
+      ] of markerTracksBySchemaName) {
+        for (const markerName of markerNames) {
+          tracks.push({
+            type: 'marker',
+            threadIndex,
+            markerSchema,
+            markerName,
+          });
+        }
+      }
     }
   }
 
@@ -390,7 +455,7 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
   ) {
     const thread = profile.threads[threadIndex];
     const { pid, markers, stringTable } = thread;
-    if (isMainThread(thread)) {
+    if (thread.isMainThread) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
       let globalTrack = globalTracksByPid.get(pid);
@@ -700,11 +765,7 @@ function _computeHiddenTracksForVisibleThreads(
     const hiddenLocalTracks = new Set(
       localTrackOrder.filter((localTrackIndex) => {
         const localTrack = localTracks[localTrackIndex];
-        if (localTrack.type !== 'thread') {
-          // Keep non-thread local tracks visible.
-          return false;
-        }
-        return !visibleThreadIndexes.has(localTrack.threadIndex);
+        return !_isLocalTrackVisible(localTrack, visibleThreadIndexes);
       })
     );
     hiddenLocalTracksByPid.set(pid, hiddenLocalTracks);
@@ -785,11 +846,6 @@ export function getGlobalTrackName(
         }
 
         // Fallback: Use the PID.
-        if (typeof pid === 'string') {
-          // The pid is a unique string label, use that.
-          return pid;
-        }
-        // The pid is a number, make a label for it.
         return `Process ${pid}`;
       }
 
@@ -841,6 +897,10 @@ export function getLocalTrackName(
       return 'Process CPU';
     case 'power':
       return counters[localTrack.counterIndex].name;
+    case 'marker':
+      return threads[localTrack.threadIndex].stringTable.getString(
+        localTrack.markerName
+      );
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -1029,18 +1089,6 @@ function _findDefaultThread(threads: Thread[]): Thread | null {
   return threads[defaultThreadIndex];
 }
 
-export function isMainThread(thread: Thread): boolean {
-  return (
-    thread.name === 'GeckoMain' ||
-    // If the pid is a string, then it's not one that came from the system.
-    // These threads should all be treated as main threads.
-    typeof thread.pid === 'string' ||
-    // On Linux the tid of the main thread is the pid. This is useful for
-    // profiles imported from the Linux 'perf' tool.
-    String(thread.pid) === thread.tid
-  );
-}
-
 function _indexesAreValid(listLength: number, indexes: number[]) {
   return (
     // The item length is valid.
@@ -1226,6 +1274,7 @@ export function getSearchFilteredLocalTracksByPid(
         }
         case 'network':
         case 'memory':
+        case 'marker':
         case 'ipc':
         case 'event-delay':
         case 'power':
@@ -1345,4 +1394,41 @@ export function getTrackReferenceFromThreadIndex(
 
   // Failed to find the thread from its thread index.
   return null;
+}
+
+/*
+ * Returns whether the local track should be visible or not.
+ * If the track is not a thread, some of them can be visible by default and some
+ * of them can be hidden to reduce the noise. This mostly depends on either the
+ * usefulness or the activity of that track.
+ *
+ * TODO: Check the memory track activity here to decide if it should be visible.
+ */
+function _isLocalTrackVisible(
+  localTrack: LocalTrack,
+  visibleThreadIndexes: Set<ThreadIndex>
+): boolean {
+  switch (localTrack.type) {
+    case 'thread':
+      // Show the local thread if it's included in the visible thread indexes.
+      return visibleThreadIndexes.has(localTrack.threadIndex);
+    case 'marker':
+    case 'network':
+    case 'memory':
+    // 'event-delay' and 'process-cpu' tracks are experimental and they should
+    // be visible by default whenever they are included in a profile. (fallthrough)
+    case 'event-delay':
+    case 'process-cpu':
+    // Power tracks are there only if the power feature is enabled. So they should
+    // be visible by default whenever they're included in a profile. (fallthrough)
+    case 'power':
+      // Keep non-thread local tracks visible.
+      return true;
+    case 'ipc':
+      // IPC tracks are not always useful to the users. So we are making them hidden
+      // by default to reduce the noise.
+      return false;
+    default:
+      throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
+  }
 }

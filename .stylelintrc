@@ -5,7 +5,6 @@
   "extends": [
     "stylelint-config-standard",
     "stylelint-config-idiomatic-order",
-    "stylelint-config-prettier"
   ],
   "rules": {
     "prettier/prettier": [
@@ -18,5 +17,6 @@
     "length-zero-no-unit": null,
     "selector-class-pattern": null,
     "import-notation": null,
+    "media-feature-range-notation": "prefix",
   }
 }

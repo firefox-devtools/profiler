@@ -51,6 +51,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Показати <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Об'єднати функцію
     .title =
         Об’єднання функції вилучає її з профілю та призначає її час для
@@ -98,10 +101,14 @@ CallNodeContextMenu--transform-collapse-resource = Згорнути <strong>{ $n
     .title =
         Згортання ресурсу згладить усі виклики до того
         ресурсу в єдиний згорнутий вузол виклику.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Згорнути пряму рекурсію
-    .title = Згортання прямої рекурсії вилучає виклики, які постійно рекурсуються в ту саму функцію без посередницьких функцій у стеку.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Згорнути непряму рекурсію
-    .title = Згортання непрямої рекурсії вилучає виклики, які постійно рекурсуються в ту саму функцію, навіть із посередницькими функціями у стеку.
+CallNodeContextMenu--transform-collapse-recursion = Згорнути рекурсію
+    .title =
+        Згортання рекурсії вилучає виклики, які повторювано звертаються
+        до тієї самої функції, навіть з проміжними функціями у стеку.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Згорнути лише пряму рекурсію
+    .title =
+        Згортання прямої рекурсії вилучає виклики, які повторювано звертаються
+        до тієї самої функції без проміжних функцій у стеку.
 CallNodeContextMenu--transform-drop-function = Покинути зразки з цією функцією
     .title =
         Якщо покинути зразки, їх час вилучається з профілю. Це корисно для
@@ -206,6 +213,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Йой, на цій панелі сталася невідома помилка.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Будь ласка, повідомте про цю проблему розробникам, додавши
+    усю помилку, показану у вебконсолі Інструментів розробника.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Повідомити про помилку на GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Правові положення
@@ -273,12 +291,12 @@ Home--compare-recordings-info = Ви також можете порівняти 
 Home--your-recent-uploaded-recordings-title = Ваші недавно вивантажені записи
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
-    { -profiler-brand-name } також може імпортувати профілі з інших профайлерів, наприклад
+Home--load-files-from-other-tools2 =
+    { -profiler-brand-name } також може імпортувати профілі з інших профайлерів, як-от
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
-    Панель швидкодії Chrome, <androidstudio>Android Studio</androidstudio> або
-    будь-який файл у <dhat>форматі dhat</dhat>. <write>Навчіться записувати свій
-    власний імпортер</write>.
+    Панель швидкодії Chrome, <androidstudio>Android Studio</androidstudio>, або
+    з будь-якого файлу в форматі <dhat>dhat</dhat> чи <traceevent>Google’s Trace Event</traceevent>.
+    <write>Навчіться записувати власний імпортер</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -345,12 +363,23 @@ MarkerContextMenu--select-the-receiver-thread = Виберіть потік-од
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Виберіть потік-відправник “<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Перетягніть зразки за межі маркерів, що відповідають “<strong>{ $filter }</strong>”
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Фільтр маркерів:
     .title = Показувати лише маркери, що відповідають певній назві
+MarkerSettings--marker-filters =
+    .title = Фільтр маркерів
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -436,6 +465,8 @@ MenuButtons--metaInfo--logical-cpu =
         [few] { $logicalCPUs } логічні ядра
        *[many] { $logicalCPUs } логічних ядер
     }
+MenuButtons--metaInfo--profiling-started = Запис розпочато:
+MenuButtons--metaInfo--profiling-session = Тривалість запису:
 MenuButtons--metaInfo--main-process-started = Основний процес розпочато:
 MenuButtons--metaInfo--main-process-ended = Основний процес завершено:
 MenuButtons--metaInfo--interval = Інтервал:
@@ -454,6 +485,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Необмежено
 MenuButtons--metaInfo--application = Застосунок
 MenuButtons--metaInfo--name-and-version = Назва та версія:
+MenuButtons--metaInfo--application-uptime = Час роботи:
 MenuButtons--metaInfo--update-channel = Канал оновлень:
 MenuButtons--metaInfo--build-id = ID збірки:
 MenuButtons--metaInfo--build-type = Тип збірки:
@@ -529,6 +561,7 @@ MenuButtons--publish--message-something-went-wrong = Йой, під час ви�
 MenuButtons--publish--message-try-again = Повторити спробу
 MenuButtons--publish--download = Завантажити
 MenuButtons--publish--compressing = Стиснення…
+MenuButtons--publish--error-while-compressing = Помилка під час стиснення, спробуйте прибрати прапорці біля деяких полів, щоб зменшити розмір профілю.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -616,6 +649,11 @@ ProfileLoaderAnimation--loading-view-not-found = Перегляд не знай�
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Повернутися на початок
 
+## Root
+
+Root--error-boundary-message =
+    .message = Йой, на profiler.firefox.com сталася невідома помилка.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -635,9 +673,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Усі стеки
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Нативні
+StackSettings--implementation-all-frames = Усі фрейми
+    .title = Не фільтрувати фрейми стека
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Показувати лише фрейми стека, пов'язані з виконанням JavaScript
+StackSettings--implementation-native2 = Вбудовані
+    .title = Показувати лише фрейми стека для власного коду
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Фільтр стеків:
 StackSettings--use-data-source-label = Джерело даних:
 StackSettings--call-tree-strategy-timing = Таймінги
     .title = Створити підсумок окремих стеків виконаного впродовж певного часу коду
@@ -721,6 +764,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = операції, по�
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } кВт
+    .label = Потужність
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -731,6 +779,13 @@ TrackPower--tooltip-power-watt = { $value } Вт
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } мВт
     .label = Потужність
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } кВт·год ({ $carbonValue } кг CO₂e)
+    .label = Використана у видимому діапазоні енергія
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -752,6 +807,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } мВ�
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } мкВт·год ({ $carbonValue } мг CO₂e)
     .label = Спожита у видимому діапазоні енергія
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } кВт·год ({ $carbonValue } кг CO₂e)
+    .label = Використана у поточній вибірці енергія
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -831,40 +893,64 @@ TransformNavigator--merge-function = Об’єднати: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Відкинуто: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Згорнути рекурсію: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Згорнути пряму рекурсію: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Згорнути непряму рекурсію: { $item }
+TransformNavigator--collapse-direct-recursion-only = Згорнути лише пряму рекурсію: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Згорнути піддерево: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Перетягніть зразки за межі маркерів, що відповідають: “{ $item }”
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Очікування відповіді з { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Очікування { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Джерельний код недоступний
+BottomBox--source-code-not-available-title = Програмний код недоступний
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Перегляньте <a>обговорення #3741</a>, щоб дізнатися про підтримувані сценарії та заплановані вдосконалення.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Код асемблера недоступний
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Перегляньте <a>обговорення #4520</a>, щоб дізнатися про підтримувані сценарії та заплановані вдосконалення.
+SourceView--close-button =
+    .title = Закрити вікно з кодом
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Для цього файлу немає відомої cross-origin-accessible URL-адреси.
@@ -890,6 +976,17 @@ SourceView--browser-api-error-when-obtaining-source = API символізаці
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = API символізації локального сервера символів повернув помилку: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = API символізації браузера повернув неправильну відповідь: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = API символізації локального сервера символів повернув неправильну відповідь: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
@@ -903,8 +1000,17 @@ SourceView--not-in-archive-error-when-obtaining-source = Файл { $pathInArchi
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Не вдалося проаналізувати архів за адресою { $url }: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Закрити вікно з кодом
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Показати перегляд асемблера
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Сховати перегляд асемблера
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

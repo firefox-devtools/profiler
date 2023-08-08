@@ -260,12 +260,16 @@ describe('MarkerTable', function () {
      */
     const parentTrackReference = { type: 'global', trackIndex: 0 };
     const tabTrackReference = { type: 'global', trackIndex: 1 };
-    const domWorkerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
-    const styleTrackReference = { type: 'local', trackIndex: 1, pid: 222 };
+    const domWorkerTrackReference = {
+      type: 'local',
+      trackIndex: 0,
+      pid: '222',
+    };
+    const styleTrackReference = { type: 'local', trackIndex: 1, pid: '222' };
     const parentThreadIndex = 0;
     const domWorkerThreadIndex = 2;
     const styleThreadIndex = 3;
-    const tabPid = 222;
+    const tabPid = '222';
     function setupWithTracksAndIPCMarker() {
       const profile = getProfileWithNiceTracks();
       addIPCMarkerPairToThreads(
@@ -299,7 +303,7 @@ describe('MarkerTable', function () {
             type: 'IPC',
             startTime: 20,
             endTime: 25,
-            otherPid: 444,
+            otherPid: '444',
             messageSeqno: 3,
             messageType: 'PContent::Msg_PreferenceUpdate',
             side: 'parent',
@@ -330,13 +334,13 @@ describe('MarkerTable', function () {
       // Make sure that it's hidden.
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain default]',
-        '  - show [ipc GeckoMain]',
+        '  - hide [ipc GeckoMain]',
         'show [thread GeckoMain tab] SELECTED',
-        '  - show [ipc GeckoMain] SELECTED',
+        '  - hide [ipc GeckoMain] SELECTED',
         '  - show [thread DOM Worker]',
-        '  - show [ipc DOM Worker]',
+        '  - hide [ipc DOM Worker]',
         '  - show [thread Style]',
-        '  - show [ipc Style]',
+        '  - hide [ipc Style]',
       ]);
 
       // Check the actual behavior now.
@@ -348,13 +352,13 @@ describe('MarkerTable', function () {
       // Make sure that it's not hidden anymore.
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
-        '  - show [ipc GeckoMain] SELECTED',
+        '  - hide [ipc GeckoMain] SELECTED',
         'show [thread GeckoMain tab]',
-        '  - show [ipc GeckoMain]',
+        '  - hide [ipc GeckoMain]',
         '  - show [thread DOM Worker]',
-        '  - show [ipc DOM Worker]',
+        '  - hide [ipc DOM Worker]',
         '  - show [thread Style]',
-        '  - show [ipc Style]',
+        '  - hide [ipc Style]',
       ]);
     });
 
@@ -388,13 +392,13 @@ describe('MarkerTable', function () {
       // Make sure that they are hidden.
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
-        '  - show [ipc GeckoMain] SELECTED',
+        '  - hide [ipc GeckoMain] SELECTED',
         'hide [thread GeckoMain tab]',
-        '  - show [ipc GeckoMain]',
+        '  - hide [ipc GeckoMain]',
         '  - hide [thread DOM Worker]',
-        '  - show [ipc DOM Worker]',
+        '  - hide [ipc DOM Worker]',
         '  - show [thread Style]',
-        '  - show [ipc Style]',
+        '  - hide [ipc Style]',
       ]);
 
       // Check the actual behavior now.
@@ -406,13 +410,13 @@ describe('MarkerTable', function () {
       // Make sure that they are not hidden anymore.
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain default]',
-        '  - show [ipc GeckoMain]',
+        '  - hide [ipc GeckoMain]',
         'show [thread GeckoMain tab]',
-        '  - show [ipc GeckoMain]',
+        '  - hide [ipc GeckoMain]',
         '  - show [thread DOM Worker] SELECTED',
-        '  - show [ipc DOM Worker] SELECTED',
+        '  - hide [ipc DOM Worker] SELECTED',
         '  - show [thread Style]',
-        '  - show [ipc Style]',
+        '  - hide [ipc Style]',
       ]);
     });
 

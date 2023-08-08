@@ -6,24 +6,15 @@
 import { unserializeProfileOfArbitraryFormat } from '../../profile-logic/process-profile';
 import { isPerfScriptFormat } from '../../profile-logic/import/linux-perf';
 import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
+
+import { storeWithProfile } from '../fixtures/stores';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors';
+
 import type {
   TracingEventUnion,
   CpuProfileEvent,
 } from '../../profile-logic/import/chrome';
 import type { Profile } from 'firefox-profiler/types';
-
-import { TextDecoder } from 'util';
-
-beforeAll(function () {
-  if ((window: any).TextDecoder) {
-    throw new Error('A TextDecoder was already on the window object.');
-  }
-  (window: any).TextDecoder = TextDecoder;
-});
-
-afterAll(async function () {
-  delete (window: any).TextDecoder;
-});
 
 function checkProfileContainsUniqueTid(profile: Profile) {
   const foundTids = new Set();
@@ -140,9 +131,9 @@ describe('converting Google Chrome profile', function () {
     expect(profile).toMatchSnapshot();
   });
 
-  it('successfully imports a non-chunked profile (one that uses a CpuProfile trace event)', async function () {
-    // As in the previous test, mock out image loading behavior as the screenshots
-    // rely on the Image loading behavior.
+  it('successfully imports a chrome profile with an invalid "endTime" entry', async () => {
+    // Mock out image loading behavior as the screenshots rely on the Image loading
+    // behavior.
     jest
       .spyOn(Image.prototype, 'addEventListener')
       .mockImplementation((name: string, callback) => {
@@ -151,6 +142,36 @@ describe('converting Google Chrome profile', function () {
         }
       });
 
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const compressedBuffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/test.chrome.gz'
+    );
+    const buffer = zlib.gunzipSync(compressedBuffer);
+    const events: TracingEventUnion[] = JSON.parse(buffer.toString('utf8'));
+    events.push({
+      args: { data: { endTime: 300269884209 } },
+      cat: 'disabled-by-default-v8.cpu_profiler',
+      id: '0x2', // same id than in the original profile
+      name: 'ProfileChunk',
+      ph: 'P',
+      pid: 88999, // same pid than in the original profile
+      tid: 1,
+      ts: 300269884230,
+      tts: 24162,
+    });
+
+    const text = JSON.stringify(events);
+    const profile = await unserializeProfileOfArbitraryFormat(text);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a non-chunked profile (one that uses a CpuProfile trace event)', async function () {
     const fs = require('fs');
     const buffer = fs.readFileSync(
       'src/test/fixtures/upgrades/test.chrome-unchunked.json'
@@ -198,6 +219,167 @@ describe('converting Google Chrome profile', function () {
 
     checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a profile using the chrome tracing format', async function () {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const compressedBuffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/chrome-tracing.json.gz'
+    );
+    const decompressedBuffer = zlib.gunzipSync(compressedBuffer);
+    const profile = await unserializeProfileOfArbitraryFormat(
+      decompressedBuffer.buffer
+    );
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a chrome profile using markers of different types', async function () {
+    const chromeProfile = {
+      traceEvents: [
+        {
+          cat: 'RunTask',
+          name: 'RunTask',
+          ph: 'B',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 1,
+        },
+        {
+          cat: 'RunTask',
+          name: 'RunTask',
+          ph: 'E',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 2,
+        },
+        {
+          args: {},
+          cat: 'disabled-by-default-devtools.timeline',
+          dur: 2,
+          name: 'RunTask Complete',
+          ph: 'X',
+          pid: 54782,
+          tdur: 1,
+          tid: 259,
+          ts: 3,
+          tts: 2522144,
+        },
+        {
+          cat: 'Instant',
+          name: 'Instant 1',
+          ph: 'i',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 7,
+        },
+        {
+          cat: 'Instant',
+          name: 'Instant 2',
+          ph: 'I',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 8,
+        },
+        {
+          args: { startTime: 3907.5999999940395 },
+          cat: 'blink.user_timing',
+          id: '0x2981878b',
+          name: 'async event',
+          ph: 'b',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 10,
+        },
+        {
+          args: {},
+          cat: 'blink.user_timing',
+          id: '0x2981878b',
+          name: 'async event',
+          ph: 'e',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 11,
+        },
+        {
+          args: {},
+          cat: 'blink.user_timing',
+          id: '0x2981878b',
+          name: 'async event instant',
+          ph: 'n',
+          pid: 54782,
+          scope: 'blink.user_timing',
+          tid: 259,
+          ts: 12,
+        },
+        {
+          args: {
+            data: {
+              stackTrace: [
+                {
+                  columnNumber: 38358,
+                  functionName: 'buildFragment',
+                  lineNumber: 40,
+                  scriptId: '117',
+                  url: 'https://journals.physiology.org/products/physio/releasedAssets/js/main.bundle-1bbca34150268d61be9d.js',
+                },
+              ],
+              type: 'DOMSubtreeModified',
+            },
+          },
+          cat: 'devtools.timeline',
+          dur: 51,
+          name: 'EventDispatch',
+          ph: 'X',
+          pid: 54782,
+          tdur: 4,
+          tid: 259,
+          ts: 13,
+          tts: 3934607,
+        },
+      ],
+    };
+    const strChromeProfile = JSON.stringify(chromeProfile);
+    const profile = await unserializeProfileOfArbitraryFormat(strChromeProfile);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    const state = storeWithProfile(profile).getState();
+    const mainGetMarker = selectedThreadSelectors.getMarkerGetter(state);
+    const markers = selectedThreadSelectors
+      .getFullMarkerListIndexes(state)
+      .map(mainGetMarker);
+
+    checkProfileContainsUniqueTid(profile);
+    expect(markers.map(({ name }) => name)).toEqual([
+      'RunTask',
+      'RunTask Complete',
+      'Instant 1',
+      'Instant 2',
+      'async event',
+      'async event instant',
+      'EventDispatch',
+    ]);
+    expect(markers[6]).toMatchObject({
+      name: 'EventDispatch',
+      data: {
+        type: 'EventDispatch',
+        type2: 'DOMSubtreeModified',
+      },
+    });
+    expect(markers).toMatchSnapshot();
   });
 });
 

@@ -18,8 +18,14 @@ import type {
   LastNonShiftClickInformation,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { StartEndRange, CssPixels, Milliseconds } from './units';
-import type { Profile, ThreadIndex, Pid, TabID } from './profile';
+import type { StartEndRange, CssPixels, Milliseconds, Address } from './units';
+import type {
+  Profile,
+  ThreadIndex,
+  Pid,
+  TabID,
+  IndexIntoLibs,
+} from './profile';
 
 import type {
   CallNodePath,
@@ -30,6 +36,7 @@ import type {
   ActiveTabTimeline,
   OriginsTimeline,
   ThreadsKey,
+  NativeSymbolInfo,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -239,26 +246,91 @@ export type ZippedProfilesState = {
 };
 
 export type SourceViewState = {|
-  activationGeneration: number,
-  file: string | null,
+  scrollGeneration: number,
+  // Non-null if this source file was opened for a function from native code.
+  // In theory, multiple different libraries can have source files with the same
+  // path but different content.
+  // Null if the source file is not for native code or if the lib is not known,
+  // for example if the source view was opened via the URL (the source URL param
+  // currently discards the libIndex).
+  libIndex: IndexIntoLibs | null,
+  // The path to the source file. Null if a function without a file path was
+  // double clicked.
+  sourceFile: string | null,
 |};
 
-export type FileSourceStatus =
-  | {| type: 'LOADING', source: FileSourceLoadingSource |}
-  | {| type: 'ERROR', errors: SourceLoadingError[] |}
-  | {| type: 'AVAILABLE', source: string |};
+export type AssemblyViewState = {|
+  // Whether the assembly view panel is open within the bottom box. This can be
+  // true even if the bottom box itself is closed.
+  isOpen: boolean,
+  // When this is incremented, the assembly view scrolls to the "hotspot" line.
+  scrollGeneration: number,
+  // The native symbol for which the assembly code is being shown at the moment.
+  // Null if the initiating call node did not have a native symbol.
+  nativeSymbol: NativeSymbolInfo | null,
+  // The set of native symbols which contributed samples to the initiating call
+  // node. Often, this will just be one element (the same as `nativeSymbol`),
+  // but it can also be multiple elements, for example when double-clicking a
+  // function like `Vec::push` in an inverted call tree, if that function has
+  // been inlined into multiple different callers.
+  allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
+|};
 
-export type FileSourceLoadingSource =
+export type DecodedInstruction = {|
+  address: Address,
+  decodedString: string,
+|};
+
+export type SourceCodeStatus =
+  | {| type: 'LOADING', source: CodeLoadingSource |}
+  | {| type: 'ERROR', errors: SourceCodeLoadingError[] |}
+  | {| type: 'AVAILABLE', code: string |};
+
+export type AssemblyCodeStatus =
+  | {| type: 'LOADING', source: CodeLoadingSource |}
+  | {| type: 'ERROR', errors: ApiQueryError[] |}
+  | {| type: 'AVAILABLE', instructions: DecodedInstruction[] |};
+
+export type CodeLoadingSource =
   | {| type: 'URL', url: string |}
   | {| type: 'BROWSER_CONNECTION' |};
 
-export type SourceLoadingError =
-  | {| type: 'NO_KNOWN_CORS_URL' |}
+export type ApiQueryError =
   | {|
       type: 'NETWORK_ERROR',
       url: string,
       networkErrorMessage: string,
     |}
+  // Used when the symbol server reported an error, for example because our
+  // request was bad.
+  | {|
+      type: 'SYMBOL_SERVER_API_ERROR',
+      apiErrorMessage: string,
+    |}
+  // Used when the symbol server's response was bad.
+  | {|
+      type: 'SYMBOL_SERVER_API_MALFORMED_RESPONSE',
+      errorMessage: string,
+    |}
+  // Used when the browser API reported an error, for example because our
+  // request was bad.
+  | {|
+      type: 'BROWSER_CONNECTION_ERROR',
+      browserConnectionErrorMessage: string,
+    |}
+  // Used when the browser's response was bad.
+  | {|
+      type: 'BROWSER_API_ERROR',
+      apiErrorMessage: string,
+    |}
+  | {|
+      type: 'BROWSER_API_MALFORMED_RESPONSE',
+      errorMessage: string,
+    |};
+
+export type SourceCodeLoadingError =
+  | ApiQueryError
+  | {| type: 'NO_KNOWN_CORS_URL' |}
   | {|
       type: 'NOT_PRESENT_IN_ARCHIVE',
       url: string,
@@ -268,18 +340,6 @@ export type SourceLoadingError =
       type: 'ARCHIVE_PARSING_ERROR',
       url: string,
       parsingErrorMessage: string,
-    |}
-  | {|
-      type: 'SYMBOL_SERVER_API_ERROR',
-      apiErrorMessage: string,
-    |}
-  | {|
-      type: 'BROWSER_CONNECTION_ERROR',
-      browserConnectionErrorMessage: string,
-    |}
-  | {|
-      type: 'BROWSER_API_ERROR',
-      apiErrorMessage: string,
     |};
 
 /**
@@ -318,6 +378,7 @@ export type ProfileSpecificUrlState = {|
   transforms: TransformStacksPerThread,
   timelineType: TimelineType,
   sourceView: SourceViewState,
+  assemblyView: AssemblyViewState,
   isBottomBoxOpenPerPanel: IsOpenPerPanelState,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
@@ -361,6 +422,11 @@ export type L10nState = {|
 
 export type IconState = Set<string>;
 
+export type CodeState = {|
+  +sourceCodeCache: Map<string, SourceCodeStatus>,
+  +assemblyCodeCache: Map<string, AssemblyCodeStatus>,
+|};
+
 export type State = {|
   +app: AppState,
   +profileView: ProfileViewState,
@@ -369,7 +435,7 @@ export type State = {|
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
   +l10n: L10nState,
-  +sources: Map<string, FileSourceStatus>,
+  +code: CodeState,
 |};
 
 export type IconWithClassName = {|

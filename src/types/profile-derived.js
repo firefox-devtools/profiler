@@ -3,19 +3,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Milliseconds, StartEndRange, Address } from './units';
-import type { MarkerPayload } from './markers';
+import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
+import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
-  IndexIntoFuncTable,
   ThreadIndex,
+  Thread,
   Pid,
+  IndexIntoFuncTable,
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
+  IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
+  IndexIntoLibs,
   CounterIndex,
   InnerWindowID,
   Page,
   IndexIntoRawMarkerTable,
+  IndexIntoStringTable,
   TabID,
   Tid,
 } from './profile';
@@ -247,6 +251,14 @@ export type CallNodeDisplayData = $Exact<
   }>
 >;
 
+export type ThreadWithReservedFunctions = {|
+  thread: Thread,
+  reservedFunctionsForResources: Map<
+    IndexIntoResourceTable,
+    IndexIntoFuncTable
+  >,
+|};
+
 /**
  * The marker timing contains the necessary information to draw markers very quickly
  * in the marker chart. It represents a single row of markers in the chart.
@@ -312,6 +324,18 @@ export type AccumulatedCounterSamples = {|
   +accumulatedCounts: number[],
 |};
 
+/**
+ * A collection of the data for all configured lines for a given marker
+ */
+export type CollectedCustomMarkerSamples = {|
+  +minNumber: number,
+  +maxNumber: number,
+  // This value holds the number per configured line
+  // selection. The array will share the indexes of the range filtered marker samples.
+  +numbersPerLine: number[][],
+  +markerIndexes: MarkerIndex[],
+|};
+
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
@@ -330,7 +354,13 @@ export type LocalTrack =
   | {| +type: 'ipc', +threadIndex: ThreadIndex |}
   | {| +type: 'event-delay', +threadIndex: ThreadIndex |}
   | {| +type: 'process-cpu', +counterIndex: CounterIndex |}
-  | {| +type: 'power', +counterIndex: CounterIndex |};
+  | {| +type: 'power', +counterIndex: CounterIndex |}
+  | {|
+      +type: 'marker',
+      +threadIndex: ThreadIndex,
+      +markerSchema: MarkerSchema,
+      +markerName: IndexIntoStringTable,
+    |};
 
 export type Track = GlobalTrack | LocalTrack;
 
@@ -531,3 +561,30 @@ export type EventDelayInfo = {|
  * comma separated thread indexes, e.g. "5,7,10"
  */
 export type ThreadsKey = string | number;
+
+/**
+ * A representation of a native symbol which is independent from a thread.
+ * This is used for storing the global state of the assembly view, which needs
+ * to be independent from the selected thread. An IndexIntoNativeSymbolTable
+ * would only be meaningful within a thread.
+ * This can be removed if the native symbol table ever becomes global.
+ */
+export type NativeSymbolInfo = {|
+  name: string,
+  address: Address,
+  // The number of bytes belonging to this function, starting at the symbol address.
+  // If functionSizeIsKnown is false, then this is a minimum size.
+  functionSize: Bytes,
+  functionSizeIsKnown: boolean,
+  libIndex: IndexIntoLibs,
+|};
+
+/**
+ * Information about the initiating call node when the bottom box (source view +
+ * assembly view) is updated.
+ */
+export type BottomBoxInfo = {|
+  libIndex: IndexIntoLibs | null,
+  sourceFile: string | null,
+  nativeSymbols: NativeSymbolInfo[],
+|};

@@ -51,6 +51,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = <strong>{ $fileName }</strong> tonen
 CallNodeContextMenu--transform-merge-function = Functie samenvoegen
     .title =
         Als u een functie samenvoegt, wordt deze uit het profiel verwijderd en wordt de tijd toegewezen aan
@@ -98,10 +101,14 @@ CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }<
     .title =
         Als u een bron samenvouwt, worden alle aanroepen van die bron
         afgevlakt tot een enkele samengevouwen aanroepnode.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Directe recursie samenvouwen
-    .title = Als directe recursie wordt samengevouwen, worden aanroepen die bij herhaling recursie hebben naar dezelfde functie zonder tussentijdse functies in de stack verwijderd.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Indirecte recursie samenvouwen
-    .title = Het samenvouwen van indirecte recursie verwijdert aanroepen die bij herhaling recursie hebben naar dezelfde functie, zelfs met tussentijdse functie in de stack.
+CallNodeContextMenu--transform-collapse-recursion = Recursie samenvouwen
+    .title =
+        Het samenvouwen van recursie verwijdert aanroepen die bij herhaling recurseren naar
+        dezelfde functie, zelfs met tussentijdse functies op de stack.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Alleen directe recursie samenvouwen
+    .title =
+        Het samenvouwen van directe recursie verwijdert aanroepen die bij herhaling recurseren naar
+        dezelfde functie zonder tussentijdse functies op de stack.
 CallNodeContextMenu--transform-drop-function = Monsters met deze functie weglaten
     .title =
         Als u monsters weglaat, wordt hun tijd uit het profiel verwijderd. Dit is nuttig om
@@ -210,6 +217,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Oh-oh, er is een onbekende fout in dit paneel opgetreden.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Dit probleem aan de ontwikkelaars melden, inclusief de volledige
+    foutmelding zoals getoond in de webconsole van de Ontwikkelaarshulpmiddelen.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = De fout op GitHub melden
+
 ## Footer Links
 
 FooterLinks--legal = Juridisch
@@ -277,12 +295,13 @@ Home--compare-recordings-info = U kunt ook opnamen vergelijken. <a>De vergelijki
 Home--your-recent-uploaded-recordings-title = Uw onlangs geüploade opnamen
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools =
+Home--load-files-from-other-tools2 =
     De { -profiler-brand-name } kan ook profielen van andere profilers importeren, zoals
     <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, het
     Chrome-prestatiepaneel, <androidstudio>Android Studio</androidstudio> of
-    elk bestand dat de <dhat>dhat-indeling</dhat> gebruikt. <write>Ontdek hoe u uw
-    eigen importroutine schrijft</write>.
+    elk bestand dat de <dhat>dhat-indeling</dhat> of de <traceevent>Trace Event-indeling
+    van Google</traceevent> gebruikt. <write>Ontdek hoe u uw eigen
+    importroutine schrijft</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -348,12 +367,23 @@ MarkerContextMenu--select-the-receiver-thread = Selecteer de ontvangerthread ‘
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Selecteer de afzenderthread ‘<strong>{ $threadName }</strong>’
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Samples buiten markeringen overeenkomend met ‘<strong>{ $filter }</strong>’ buiten beschouwing laten
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Markeringen filteren:
     .title = Alleen markeringen tonen die overeenkomen met een bepaalde naam
+MarkerSettings--marker-filters =
+    .title = Markeringsfilters
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -435,6 +465,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logische kern
        *[other] { $logicalCPUs } logische kernen
     }
+MenuButtons--metaInfo--profiling-started = Opname gestart:
+MenuButtons--metaInfo--profiling-session = Opnameduur:
 MenuButtons--metaInfo--main-process-started = Hoofdproces gestart:
 MenuButtons--metaInfo--main-process-ended = Hoofdproces beëindigd:
 MenuButtons--metaInfo--interval = Interval:
@@ -452,6 +484,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Onbeperkt
 MenuButtons--metaInfo--application = Toepassing
 MenuButtons--metaInfo--name-and-version = Naam en versie:
+MenuButtons--metaInfo--application-uptime = Uptime:
 MenuButtons--metaInfo--update-channel = Updatekanaal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Buildtype:
@@ -527,6 +560,7 @@ MenuButtons--publish--message-something-went-wrong = O jee, er is iets misgegaan
 MenuButtons--publish--message-try-again = Opnieuw proberen
 MenuButtons--publish--download = Downloaden
 MenuButtons--publish--compressing = Comprimeren…
+MenuButtons--publish--error-while-compressing = Fout bij comprimeren. Probeer enkele selectievakjes uit te schakelen om de profielgrootte te verkleinen.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -614,6 +648,11 @@ ProfileLoaderAnimation--loading-view-not-found = Weergave niet gevonden
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Terug naar startpagina
 
+## Root
+
+Root--error-boundary-message =
+    .message = Oh-oh, er is een onbekende fout op profiler.firefox.com opgetreden.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -633,9 +672,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Alle stacks
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Ingebouwd
+StackSettings--implementation-all-frames = Alle frames
+    .title = De stackframes niet filteren
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Alleen de stackframes gerelateerd aan uitvoering van JavaScript tonen
+StackSettings--implementation-native2 = Ingebouwd
+    .title = Alleen de stackframes voor ingebouwde code tonen
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Stacks filteren:
 StackSettings--use-data-source-label = Gegevensbron:
 StackSettings--call-tree-strategy-timing = Timings
     .title = Samenvatting over de tijd met gebruikmaking van bemonsterde stacks van uitgevoerde code
@@ -719,6 +763,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = bewerkingen sinds de vo
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Vermogen
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -729,6 +778,13 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Vermogen
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energie gebruikt in het zichtbare gebied
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -750,6 +806,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh (
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energie gebruikt in het zichtbare bereik
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energie gebruikt in de huidige selectie
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -829,40 +892,64 @@ TransformNavigator--merge-function = Samenvoegen: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Droppen: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Recursie samenvouwen: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Directe recursie samenvouwen: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Indirecte recursie samenvouwen: { $item }
+TransformNavigator--collapse-direct-recursion-only = Alleen directe recursie samenvouwen: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Subtree samenvouwen: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Samples buiten markeringen overeenkomend met ‘{ $item }’ buiten beschouwing laten
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Wachten op { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Wachten op { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Bron niet beschikbaar
+BottomBox--source-code-not-available-title = Broncode niet beschikbaar
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Zie <a>issue #3741</a> voor ondersteunde scenario’s en geplande verbeteringen.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Samenstellingscode niet beschikbaar
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Zie <a>issue #4520</a> voor ondersteunde scenario’s en geplande verbeteringen.
+SourceView--close-button =
+    .title = Bronweergave sluiten
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Er is geen bekende cross-origin-toegankelijke URL voor dit bestand.
@@ -888,6 +975,17 @@ SourceView--browser-api-error-when-obtaining-source = De symboliserings-API van 
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = De symboliserings-API van de lokale symboolserver heeft een fout teruggestuurd: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = De symboliserings-API van de browser heeft een misvormd antwoord teruggestuurd: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = De symboliserings-API van de lokale symboolserver heeft een misvormd antwoord teruggestuurd: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
@@ -901,8 +999,17 @@ SourceView--not-in-archive-error-when-obtaining-source = Het bestand { $pathInAr
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Het archief op { $url } kan niet worden ontleed: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Bronweergave sluiten
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = De samenstellingsweergave tonen
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = De samenstellingsweergave verbergen
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

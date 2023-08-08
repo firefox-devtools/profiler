@@ -16,18 +16,24 @@ import {
   getStackLineInfo,
   getLineTimings,
 } from '../../profile-logic/line-timings';
+import {
+  getStackAddressInfo,
+  getAddressTimings,
+} from '../../profile-logic/address-timings';
 
 import type {
   Thread,
   ThreadIndex,
-  IndexIntoCategoryList,
   IndexIntoSamplesTable,
   WeightType,
   CallNodeInfo,
   CallNodePath,
   StackLineInfo,
+  StackAddressInfo,
   LineTimings,
+  AddressTimings,
   IndexIntoCallNodeTable,
+  IndexIntoNativeSymbolTable,
   SelectedState,
   StartEndRange,
   Selector,
@@ -37,6 +43,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { ThreadSelectorsPerThread } from './thread';
+import type { MarkerSelectorsPerThread } from './markers';
 
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
@@ -47,11 +54,16 @@ export type StackAndSampleSelectorsPerThread = $ReturnType<
   typeof getStackAndSampleSelectorsPerThread
 >;
 
+type ThreadAndMarkerSelectorsPerThread = {|
+  ...ThreadSelectorsPerThread,
+  ...MarkerSelectorsPerThread,
+|};
+
 /**
  * Create the selectors for a thread that have to do with either stacks or samples.
  */
 export function getStackAndSampleSelectorsPerThread(
-  threadSelectors: ThreadSelectorsPerThread,
+  threadSelectors: ThreadAndMarkerSelectorsPerThread,
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
@@ -71,20 +83,20 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
+  // A selector for getCallNodeInfo.
+  // getCallNodeInfo can be very expensive, so we want to minimize the number of
+  // times it gets called, in particular when transforms are applied and unapplied
+  // or when the filtered time range changes.
+  // To do this, the memoization cache key is not based on the thread object's
+  // identity (which changes if e.g. only a thread's samples table changes),
+  // but on the identities of just the subset of thread tables that are used by
+  // getCallNodeInfo. This avoids recomputations when samples are dropped.
   const getCallNodeInfo: Selector<CallNodeInfo> = createSelector(
-    threadSelectors.getFilteredThread,
+    (state) => threadSelectors.getFilteredThread(state).stackTable,
+    (state) => threadSelectors.getFilteredThread(state).frameTable,
+    (state) => threadSelectors.getFilteredThread(state).funcTable,
     ProfileSelectors.getDefaultCategory,
-    (
-      { stackTable, frameTable, funcTable }: Thread,
-      defaultCategory: IndexIntoCategoryList
-    ): CallNodeInfo => {
-      return ProfileData.getCallNodeInfo(
-        stackTable,
-        frameTable,
-        funcTable,
-        defaultCategory
-      );
-    }
+    ProfileData.getCallNodeInfo
   );
 
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
@@ -105,6 +117,46 @@ export function getStackAndSampleSelectorsPerThread(
           frameTable,
           funcTable,
           stringTable.indexForString(sourceViewFile),
+          invertCallStack
+        );
+      }
+    );
+
+  // Converts the global NativeSymbolInfo into an index into selectedFilteredThread.nativeSymbols.
+  const getAssemblyViewNativeSymbolIndex: Selector<IndexIntoNativeSymbolTable | null> =
+    createSelector(
+      threadSelectors.getFilteredThread,
+      UrlState.getAssemblyViewNativeSymbol,
+      ({ nativeSymbols }: Thread, nativeSymbolInfo) => {
+        if (nativeSymbolInfo === null) {
+          return null;
+        }
+        return nativeSymbols.address.findIndex(
+          (address, i) =>
+            address === nativeSymbolInfo.address &&
+            nativeSymbols.libIndex[i] === nativeSymbolInfo.libIndex
+        );
+      }
+    );
+
+  const getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null> =
+    createSelector(
+      threadSelectors.getFilteredThread,
+      getAssemblyViewNativeSymbolIndex,
+      UrlState.getInvertCallstack,
+      (
+        { stackTable, frameTable, funcTable }: Thread,
+        nativeSymbolIndex,
+        invertCallStack
+      ): StackAddressInfo | null => {
+        if (nativeSymbolIndex === null) {
+          return null;
+        }
+        return getStackAddressInfo(
+          stackTable,
+          frameTable,
+          funcTable,
+          nativeSymbolIndex,
           invertCallStack
         );
       }
@@ -248,6 +300,13 @@ export function getStackAndSampleSelectorsPerThread(
     getLineTimings
   );
 
+  const getAssemblyViewAddressTimings: Selector<AddressTimings> =
+    createSelector(
+      getAssemblyViewStackAddressInfo,
+      threadSelectors.getPreviewFilteredSamplesForCallTree,
+      getAddressTimings
+    );
+
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
     threadSelectors.getFilteredSamplesForCallTree,
     getCallNodeInfo,
@@ -297,6 +356,8 @@ export function getStackAndSampleSelectorsPerThread(
     getWeightTypeForCallTree,
     getCallNodeInfo,
     getSourceViewStackLineInfo,
+    getAssemblyViewNativeSymbolIndex,
+    getAssemblyViewStackAddressInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
@@ -305,6 +366,7 @@ export function getStackAndSampleSelectorsPerThread(
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
     getSourceViewLineTimings,
+    getAssemblyViewAddressTimings,
     getTracedTiming,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepth,

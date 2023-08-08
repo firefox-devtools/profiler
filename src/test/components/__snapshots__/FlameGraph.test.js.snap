@@ -320,46 +320,52 @@ exports[`FlameGraph matches the snapshot 1`] = `
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
+        <input
+          checked=""
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-combined"
+          title="Do not filter the stack frames"
+          type="radio"
+          value="combined"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-combined"
+          title="Do not filter the stack frames"
         >
-          <input
-            checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="combined"
-          />
-          All stacks
+          All frames
         </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-js"
+          title="Show only the stack frames related to JavaScript execution"
+          type="radio"
+          value="js"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-js"
+          title="Show only the stack frames related to JavaScript execution"
         >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="js"
-          />
           JavaScript
         </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
+          type="radio"
+          value="cpp"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
         >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="cpp"
-          />
           Native
         </label>
       </li>
@@ -389,12 +395,12 @@ exports[`FlameGraph matches the snapshot 1`] = `
             type="reset"
           />
         </form>
-        <div
-          class="panelSearchFieldIntroduction isHidden"
-        >
-          Did you know you can use the comma (,) to search using several terms?
-        </div>
       </label>
+      <div
+        class="panelSearchFieldIntroduction isHidden"
+      >
+        Did you know you can use the comma (,) to search using several terms?
+      </div>
     </div>
   </div>
   <ol
@@ -453,9 +459,8 @@ exports[`FlameGraph matches the snapshot 1`] = `
 exports[`FlameGraph matches the snapshot 2`] = `
 Array [
   Array [
-    "scale",
-    1,
-    1,
+    "set font",
+    "10px sans-serif",
   ],
   Array [
     "measureText",
@@ -484,18 +489,7 @@ Array [
     "fillRect",
     0,
     284,
-    200,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    284,
-    1,
+    199.2,
     15,
   ],
   Array [
@@ -520,18 +514,7 @@ Array [
     "fillRect",
     0,
     268,
-    200,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    268,
-    1,
+    199.2,
     15,
   ],
   Array [
@@ -556,18 +539,7 @@ Array [
     "fillRect",
     0,
     252,
-    133.33333333333331,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    252,
-    1,
+    133.2,
     15,
   ],
   Array [
@@ -590,20 +562,9 @@ Array [
   ],
   Array [
     "fillRect",
-    133.33333333333331,
+    134,
     252,
-    66.66666666666667,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    133.33333333333331,
-    252,
-    1,
+    65.19999999999999,
     15,
   ],
   Array [
@@ -617,7 +578,7 @@ Array [
   Array [
     "fillText",
     "H",
-    136.33333333333331,
+    137,
     263,
   ],
   Array [
@@ -628,18 +589,7 @@ Array [
     "fillRect",
     0,
     236,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    236,
-    1,
+    65.2,
     15,
   ],
   Array [
@@ -662,20 +612,9 @@ Array [
   ],
   Array [
     "fillRect",
-    66.66666666666666,
+    66,
     236,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    66.66666666666666,
-    236,
-    1,
+    67.19999999999999,
     15,
   ],
   Array [
@@ -689,7 +628,7 @@ Array [
   Array [
     "fillText",
     "F",
-    69.66666666666666,
+    69,
     247,
   ],
   Array [
@@ -698,20 +637,9 @@ Array [
   ],
   Array [
     "fillRect",
-    133.33333333333331,
+    134,
     236,
-    66.66666666666667,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    133.33333333333331,
-    236,
-    1,
+    65.19999999999999,
     15,
   ],
   Array [
@@ -725,7 +653,7 @@ Array [
   Array [
     "fillText",
     "I",
-    136.33333333333331,
+    137,
     247,
   ],
   Array [
@@ -736,18 +664,7 @@ Array [
     "fillRect",
     0,
     220,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    220,
-    1,
+    65.2,
     15,
   ],
   Array [
@@ -770,20 +687,9 @@ Array [
   ],
   Array [
     "fillRect",
-    66.66666666666666,
+    66,
     220,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    66.66666666666666,
-    220,
-    1,
+    67.19999999999999,
     15,
   ],
   Array [
@@ -797,7 +703,7 @@ Array [
   Array [
     "fillText",
     "G",
-    69.66666666666666,
+    69,
     231,
   ],
   Array [
@@ -806,20 +712,9 @@ Array [
   ],
   Array [
     "fillRect",
-    66.66666666666666,
+    66,
     204,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    66.66666666666666,
-    204,
-    1,
+    67.19999999999999,
     15,
   ],
   Array [
@@ -833,7 +728,7 @@ Array [
   Array [
     "fillText",
     "J",
-    69.66666666666666,
+    69,
     215,
   ],
 ]
@@ -843,7 +738,7 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 80.66666666666666px; top: 226px;"
+  style="left: 80px; top: 226px;"
 >
   <div
     class="tooltipCallNode"
@@ -995,7 +890,7 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 80.66666666666666px; top: 226px;"
+  style="left: 80px; top: 226px;"
 >
   <div
     class="tooltipCallNode"

@@ -48,6 +48,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Mostrar <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Merge de função
     .title = Fazer merge de uma função a remove do profile e atribui seu tempo à função que a chamou. Isso acontece na árvore em qualquer lugar onde a função foi chamada.
 CallNodeContextMenu--transform-merge-call-node = Merge de node apenas
@@ -73,10 +76,14 @@ CallNodeContextMenu--transform-collapse-function-subtree = Recolher função
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Recolher <strong>{ $nameForResource }</strong>
     .title = Recolher um recurso achata todas as chamadas àquele recurso em um único node de chamadas recolhido.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Recolher recursão direta
-    .title = Recolher recursão direta remove chamadas que recorrem repetidamente para a mesma função sem funções intermediárias na pilha.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Recolher recursão indireta
-    .title = Recolher recursão indireta remove chamadas que recorrem repetidamente para a mesma função, mesmo com funções intermediárias na pilha.
+CallNodeContextMenu--transform-collapse-recursion = Recolher recursão
+    .title =
+        Recolher recursão remove chamadas que voltam repetidamente
+        à mesma função, mesmo com funções intermediárias na pilha.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Só recolher recursão direta
+    .title =
+        Recolher recursão direta remove chamadas que voltam repetidamente
+        à mesma função sem funções intermediárias na pilha.
 CallNodeContextMenu--transform-drop-function = Descartar amostras com esta função
     .title = Descartar amostras remove o tempo delas do profile. Útil para eliminar informação de tempo que não é relevante para a análise.
 CallNodeContextMenu--expand-all = Expandir tudo
@@ -155,6 +162,15 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Ops, ocorreu um erro desconhecido neste painel.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description = Relate este problema aos desenvolvedores, incluindo o erro completo exibido no console web das ferramentas de desenvolvimento.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Relatar o erro no GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Jurídico
@@ -214,7 +230,7 @@ Home--compare-recordings-info = Você também pode comparar gravações. <a>Abra
 Home--your-recent-uploaded-recordings-title = Suas gravações enviadas recentemente
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
-Home--load-files-from-other-tools = O { -profiler-brand-name } também pode importar profiles de outros criadores de profile, como o <perf>Linux perf</perf>, o <simpleperf>Android SimplePerf</simpleperf>, o painel de desempenho do Chrome, o <androidstudio>Android Studio</androidstudio> ou qualquer arquivo no <dhat>formato dhat</dhat>. <write>Saiba como escrever seu próprio importador</write>.
+Home--load-files-from-other-tools2 = O { -profiler-brand-name } também pode importar profiles de outros criadores de profile, como o <perf>Linux perf</perf>, o <simpleperf>Android SimplePerf</simpleperf>, o painel de desempenho do Chrome, o <androidstudio>Android Studio</androidstudio>, ou qualquer arquivo nos formatos <dhat>dhat</dhat> ou <traceevent>Trace Event do Google</traceevent>. <write>Saiba como criar seu próprio importador</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -280,12 +296,23 @@ MarkerContextMenu--select-the-receiver-thread = Selecionar o thread receptor “
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Selecionar o thread remetente “<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Descartar amostras fora dos marcadores correspondentes a “<strong>{ $filter }</strong>”
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Filtrar marcadores:
     .title = Só exibir marcadores que correspondem a um determinado nome
+MarkerSettings--marker-filters =
+    .title = Filtros de marcação
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -367,6 +394,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } core lógico
        *[other] { $logicalCPUs } cores lógicos
     }
+MenuButtons--metaInfo--profiling-started = Gravação iniciada:
+MenuButtons--metaInfo--profiling-session = Duração da gravação:
 MenuButtons--metaInfo--main-process-started = Processo principal iniciado:
 MenuButtons--metaInfo--main-process-ended = Processo principal finalizado:
 MenuButtons--metaInfo--interval = Intervalo:
@@ -384,6 +413,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitado
 MenuButtons--metaInfo--application = Aplicativo
 MenuButtons--metaInfo--name-and-version = Nome e versão:
+MenuButtons--metaInfo--application-uptime = Tempo de atividade:
 MenuButtons--metaInfo--update-channel = Canal de atualização:
 MenuButtons--metaInfo--build-id = ID da compilação:
 MenuButtons--metaInfo--build-type = Tipo de compilação:
@@ -459,6 +489,7 @@ MenuButtons--publish--message-something-went-wrong = Ops, algo deu errado ao env
 MenuButtons--publish--message-try-again = Tentar novamente
 MenuButtons--publish--download = Baixar
 MenuButtons--publish--compressing = Compactando…
+MenuButtons--publish--error-while-compressing = Erro ao compactar, experimente desmarcar algumas opções para reduzir o tamanho do profile.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -546,6 +577,11 @@ ProfileLoaderAnimation--loading-view-not-found = Vista não encontrada
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Voltar ao início
 
+## Root
+
+Root--error-boundary-message =
+    .message = Ops, aconteceu algum erro desconhecido em profiler.firefox.com.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -565,9 +601,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Todas as pilhas
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Nativo
+StackSettings--implementation-all-frames = Todos os frames
+    .title = Não filtrar frames de pilha
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Mostrar apenas os frames de pilha relacionados à execução JavaScript
+StackSettings--implementation-native2 = Nativo
+    .title = Mostrar apenas os frames de pilha de código nativo
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtrar pilhas:
 StackSettings--use-data-source-label = Origem de dados:
 StackSettings--call-tree-strategy-timing = Tempos
     .title = Resumir usando pilhas de amostras de código executado ao longo do tempo
@@ -651,6 +692,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = operações desde a amo
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Energia
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -661,6 +707,13 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Potência
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energia usada no intervalo visível
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -682,6 +735,13 @@ TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh (
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energia usada no intervalo visível
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energia usada na seleção atual
 # This is used in the tooltip when the energy used in the current preview
 # selection uses the watt-hour unit.
 # Variables:
@@ -761,40 +821,64 @@ TransformNavigator--merge-function = Merge: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Descartar: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Recolher recursão: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Recolher recursão direta: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Recolher recursão indireta: { $item }
+TransformNavigator--collapse-direct-recursion-only = Recolher só recursão direta: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Recolher subárvore: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Descartar amostras fora dos marcadores correspondentes: “{ $item }”
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Aguardando { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Aguardando { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Informação não disponível
+BottomBox--source-code-not-available-title = Código-fonte não disponível
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Consulte <a>issue #3741</a> para ver cenários suportados e melhorias planejadas.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Código assembly não disponível
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Consulte <a>issue #4520</a> para ver cenários suportados e melhorias planejadas.
+SourceView--close-button =
+    .title = Fechar visão de código-fonte
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Não há nenhuma URL de origem cruzada conhecida para este arquivo.
@@ -820,6 +904,17 @@ SourceView--browser-api-error-when-obtaining-source = A API de simbolização do
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = A API de simbolização do servidor local de símbolos retornou um erro: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = A API de simbolização do navegador retornou uma resposta com erro no formato: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = A API de simbolização do servidor local de símbolos retornou uma resposta com erro no formato: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
@@ -833,8 +928,17 @@ SourceView--not-in-archive-error-when-obtaining-source = O arquivo { $pathInArch
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = O pacote em { $url } não pôde ser analisado: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Fechar visão de código-fonte
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Mostrar a exibição em assembly
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Ocultar a exibição em assembly
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

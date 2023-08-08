@@ -11,54 +11,60 @@ exports[`CombinedChart renders combined stack chart 1`] = `
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
+        <input
+          checked=""
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-combined"
+          title="Do not filter the stack frames"
+          type="radio"
+          value="combined"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-combined"
+          title="Do not filter the stack frames"
         >
-          <input
-            checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="combined"
-          />
-          All stacks
+          All frames
         </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-js"
+          title="Show only the stack frames related to JavaScript execution"
+          type="radio"
+          value="js"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-js"
+          title="Show only the stack frames related to JavaScript execution"
         >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="js"
-          />
           JavaScript
         </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
+          type="radio"
+          value="cpp"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
         >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="cpp"
-          />
           Native
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -70,12 +76,8 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             Invert call stack
           </span>
         </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -110,12 +112,12 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             type="reset"
           />
         </form>
-        <div
-          class="panelSearchFieldIntroduction isHidden"
-        >
-          Did you know you can use the comma (,) to search using several terms?
-        </div>
       </label>
+      <div
+        class="panelSearchFieldIntroduction isHidden"
+      >
+        Did you know you can use the comma (,) to search using several terms?
+      </div>
     </div>
   </div>
   <ol
@@ -176,14 +178,6 @@ Array [
   Array [
     "set font",
     "10px sans-serif",
-  ],
-  Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
   ],
   Array [
     "set fillStyle",
@@ -283,10 +277,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "A",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -306,10 +296,6 @@ Array [
     80,
     199.4,
     15,
-  ],
-  Array [
-    "measureText",
-    "B",
   ],
   Array [
     "set fillStyle",
@@ -333,10 +319,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "C",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -356,10 +338,6 @@ Array [
     96,
     65.4,
     15,
-  ],
-  Array [
-    "measureText",
-    "H",
   ],
   Array [
     "set fillStyle",
@@ -383,10 +361,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "D",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -406,10 +380,6 @@ Array [
     112,
     66.4,
     15,
-  ],
-  Array [
-    "measureText",
-    "F",
   ],
   Array [
     "set fillStyle",
@@ -433,10 +403,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "I",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -458,10 +424,6 @@ Array [
     15,
   ],
   Array [
-    "measureText",
-    "E",
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -481,10 +443,6 @@ Array [
     128,
     66.4,
     15,
-  ],
-  Array [
-    "measureText",
-    "G",
   ],
   Array [
     "set fillStyle",
@@ -528,54 +486,60 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
+        <input
+          checked=""
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-combined"
+          title="Do not filter the stack frames"
+          type="radio"
+          value="combined"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-combined"
+          title="Do not filter the stack frames"
         >
-          <input
-            checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="combined"
-          />
-          All stacks
+          All frames
         </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-js"
+          title="Show only the stack frames related to JavaScript execution"
+          type="radio"
+          value="js"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-js"
+          title="Show only the stack frames related to JavaScript execution"
         >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="js"
-          />
           JavaScript
         </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
+          type="radio"
+          value="cpp"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
         >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="cpp"
-          />
           Native
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -587,12 +551,8 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             Invert call stack
           </span>
         </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -627,12 +587,12 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             type="reset"
           />
         </form>
-        <div
-          class="panelSearchFieldIntroduction isHidden"
-        >
-          Did you know you can use the comma (,) to search using several terms?
-        </div>
       </label>
+      <div
+        class="panelSearchFieldIntroduction isHidden"
+      >
+        Did you know you can use the comma (,) to search using several terms?
+      </div>
     </div>
   </div>
   <ol
@@ -693,14 +653,6 @@ Array [
   Array [
     "set font",
     "10px sans-serif",
-  ],
-  Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
   ],
   Array [
     "set fillStyle",
@@ -999,54 +951,60 @@ exports[`StackChart matches the snapshot 1`] = `
     class="stackSettings"
   >
     <ul
-      class="stackSettingsList"
+      class="panelSettingsList"
     >
       <li
-        class="stackSettingsListItem stackSettingsFilter"
+        class="panelSettingsListItem"
       >
+        <input
+          checked=""
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-combined"
+          title="Do not filter the stack frames"
+          type="radio"
+          value="combined"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-combined"
+          title="Do not filter the stack frames"
         >
-          <input
-            checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="combined"
-          />
-          All stacks
+          All frames
         </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-js"
+          title="Show only the stack frames related to JavaScript execution"
+          type="radio"
+          value="js"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-js"
+          title="Show only the stack frames related to JavaScript execution"
         >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="js"
-          />
           JavaScript
         </label>
+        <input
+          class="photon-radio photon-radio-micro"
+          id="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
+          type="radio"
+          value="cpp"
+        />
         <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+          for="implementation-radio-cpp"
+          title="Show only the stack frames for native code"
         >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="cpp"
-          />
           Native
         </label>
       </li>
       <li
-        class="stackSettingsListItem"
+        class="panelSettingsListItem"
       >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -1058,12 +1016,8 @@ exports[`StackChart matches the snapshot 1`] = `
             Invert call stack
           </span>
         </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
         <label
-          class="photon-label photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
@@ -1098,12 +1052,12 @@ exports[`StackChart matches the snapshot 1`] = `
             type="reset"
           />
         </form>
-        <div
-          class="panelSearchFieldIntroduction isHidden"
-        >
-          Did you know you can use the comma (,) to search using several terms?
-        </div>
       </label>
+      <div
+        class="panelSearchFieldIntroduction isHidden"
+      >
+        Did you know you can use the comma (,) to search using several terms?
+      </div>
     </div>
   </div>
   <ol

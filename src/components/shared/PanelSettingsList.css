@@ -1,0 +1,25 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.panelSettingsList {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.panelSettingsListItem {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0 5px;
+}
+
+.panelSettingsListItem:not(:first-child) {
+  padding-left: 10px;
+  border-left: 1px solid var(--grey-20);
+}

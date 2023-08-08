@@ -5,6 +5,7 @@
 // @flow
 import { oneLine } from 'common-tags';
 import queryString from 'query-string';
+import JSZip from 'jszip';
 import {
   processGeckoProfile,
   unserializeProfileOfArbitraryFormat,
@@ -19,7 +20,7 @@ import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-co
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { expandUrl } from 'firefox-profiler/utils/shorten-url';
 import { TemporaryError } from 'firefox-profiler/utils/errors';
-import JSZip from 'jszip';
+import { isLocalURL } from 'firefox-profiler/utils/url';
 import {
   getSelectedThreadIndexesOrNull,
   getGlobalTrackOrder,
@@ -35,6 +36,7 @@ import {
   getRelevantPagesForActiveTab,
   getSymbolServerUrl,
   getActiveTabID,
+  getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
@@ -280,7 +282,10 @@ export function finalizeFullProfileView(
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
-    const localTracksByPid = computeLocalTracksByPid(profile);
+    const localTracksByPid = computeLocalTracksByPid(
+      profile,
+      getMarkerSchemaByName(getState())
+    );
 
     const legacyThreadOrder = getLegacyThreadOrder(getState());
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -1072,9 +1077,7 @@ function _loadProbablyFailedDueToSafariLocalhostHTTPRestriction(
   return (
     error.name === 'TypeError' &&
     parsedUrl.protocol === 'http:' &&
-    (parsedUrl.hostname === 'localhost' ||
-      parsedUrl.hostname === '127.0.0.1' ||
-      parsedUrl.hostname === '::1') &&
+    isLocalURL(parsedUrl) &&
     location.protocol === 'https:'
   );
 }

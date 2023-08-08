@@ -7,7 +7,8 @@ import memoize from 'memoize-immutable';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
 import {
-  getThreadSelectorsPerThread,
+  getThreadSelectorsWithMarkersPerThread,
+  getBasicThreadSelectorsPerThread,
   type ThreadSelectorsPerThread,
 } from './thread';
 import {
@@ -26,6 +27,10 @@ import {
   getStackLineInfoForCallNode,
   getLineTimings,
 } from '../../profile-logic/line-timings';
+import {
+  getStackAddressInfoForCallNode,
+  getAddressTimings,
+} from '../../profile-logic/address-timings';
 import * as ProfileSelectors from '../profile';
 import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
@@ -36,6 +41,8 @@ import type {
   ThreadsKey,
   StackLineInfo,
   LineTimings,
+  StackAddressInfo,
+  AddressTimings,
 } from 'firefox-profiler/types';
 
 import type { TimingsForPath } from '../../profile-logic/profile-data';
@@ -146,12 +153,26 @@ function _buildThreadSelectors(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey = ProfileData.getThreadsKey(threadIndexes)
 ) {
-  // We define the thread selectors in 3 steps to ensure clarity in the
+  // We define the thread selectors in 5 steps to ensure clarity in the
   // separate files.
-  // 1. The basic selectors.
-  let selectors = getThreadSelectorsPerThread(threadIndexes, threadsKey);
-  // 2. Stack, sample and marker selectors that need the previous basic
-  // selectors for their own definition.
+  // 1. The basic thread selectors.
+  let selectors = getBasicThreadSelectorsPerThread(threadIndexes, threadsKey);
+  // 2. The marker selectors.
+  selectors = {
+    ...selectors,
+    ...getMarkerSelectorsPerThread(selectors, threadIndexes, threadsKey),
+  };
+  // 3. The thread selectors that need marker selectors.
+  selectors = {
+    ...selectors,
+    ...getThreadSelectorsWithMarkersPerThread(
+      selectors,
+      threadIndexes,
+      threadsKey
+    ),
+  };
+  // 4. Stack, sample selectors that need the previous selectors for their
+  // own definition.
   selectors = {
     ...selectors,
     ...getStackAndSampleSelectorsPerThread(
@@ -159,9 +180,8 @@ function _buildThreadSelectors(
       threadIndexes,
       threadsKey
     ),
-    ...getMarkerSelectorsPerThread(selectors, threadIndexes, threadsKey),
   };
-  // 3. Other selectors that need selectors from different files to be defined.
+  // 5. Other selectors that need selectors from different files to be defined.
   selectors = {
     ...selectors,
     ...getComposedSelectorsPerThread(selectors),
@@ -191,6 +211,8 @@ export type NodeSelectors = {|
   +getTimingsForSidebar: Selector<TimingsForPath>,
   +getSourceViewStackLineInfo: Selector<StackLineInfo | null>,
   +getSourceViewLineTimings: Selector<LineTimings>,
+  +getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null>,
+  +getAssemblyViewAddressTimings: Selector<AddressTimings>,
 |};
 
 export const selectedNodeSelectors: NodeSelectors = (() => {
@@ -294,6 +316,41 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     getLineTimings
   );
 
+  const getAssemblyViewStackAddressInfo: Selector<StackAddressInfo | null> =
+    createSelector(
+      selectedThreadSelectors.getFilteredThread,
+      selectedThreadSelectors.getAssemblyViewNativeSymbolIndex,
+      selectedThreadSelectors.getCallNodeInfo,
+      selectedThreadSelectors.getSelectedCallNodeIndex,
+      UrlState.getInvertCallstack,
+      (
+        { stackTable, frameTable }: Thread,
+        nativeSymbolIndex,
+        callNodeInfo,
+        selectedCallNodeIndex,
+        invertCallStack
+      ): StackAddressInfo | null => {
+        if (nativeSymbolIndex === null || selectedCallNodeIndex === null) {
+          return null;
+        }
+        return getStackAddressInfoForCallNode(
+          stackTable,
+          frameTable,
+          selectedCallNodeIndex,
+          callNodeInfo,
+          nativeSymbolIndex,
+          invertCallStack
+        );
+      }
+    );
+
+  const getAssemblyViewAddressTimings: Selector<AddressTimings> =
+    createSelector(
+      getAssemblyViewStackAddressInfo,
+      selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+      getAddressTimings
+    );
+
   return {
     getName,
     getIsJS,
@@ -301,5 +358,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     getTimingsForSidebar,
     getSourceViewStackLineInfo,
     getSourceViewLineTimings,
+    getAssemblyViewStackAddressInfo,
+    getAssemblyViewAddressTimings,
   };
 })();

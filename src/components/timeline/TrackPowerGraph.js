@@ -33,6 +33,7 @@ import type {
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { timeCode } from 'firefox-profiler/utils/time-code';
 
 import './TrackPower.css';
 
@@ -124,38 +125,80 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
       // power graph.
 
       ctx.lineWidth = deviceLineWidth;
+      ctx.lineJoin = 'bevel';
       ctx.strokeStyle = GREY_50;
       ctx.fillStyle = '#73737388'; // Grey 50 with transparency.
       ctx.beginPath();
 
-      // The x and y are used after the loop.
-      let x = 0;
-      let y = 0;
-      let firstX = 0;
-      for (let i = sampleStart; i < sampleEnd; i++) {
-        // Create a path for the top of the chart. This is the line that will have
-        // a stroke applied to it.
-        x = (samples.time[i] - rangeStart) * millisecondWidth;
+      const getX = (i) =>
+        Math.round((samples.time[i] - rangeStart) * millisecondWidth);
+      const getPower = (i) => {
         const sampleTimeDeltaInMs =
           i === 0 ? interval : samples.time[i] - samples.time[i - 1];
-        const unitGraphCount =
-          samples.count[i] / sampleTimeDeltaInMs / countRangePerMs;
+        return samples.count[i] / sampleTimeDeltaInMs;
+      };
+      const getY = (rawY) => {
+        const unitGraphCount = rawY / countRangePerMs;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
-        y =
+        return Math.round(
           innerDeviceHeight -
-          innerDeviceHeight * unitGraphCount +
-          deviceLineHalfWidth;
-        if (i === 0) {
-          // This is the first iteration, only move the line, do not draw it. Also
-          // remember this first X, as the bottom of the graph will need to connect
-          // back up to it.
-          firstX = x;
-          ctx.moveTo(x, y);
-        } else {
+            innerDeviceHeight * unitGraphCount +
+            deviceLineHalfWidth
+        );
+      };
+
+      // The x and y are used after the loop.
+      const firstX = getX(sampleStart);
+      let x = firstX;
+      let y = getY(getPower(sampleStart));
+
+      // For the first sample, only move the line, do not draw it. Also
+      // remember this first X, as the bottom of the graph will need to connect
+      // back up to it.
+      ctx.moveTo(x, y);
+
+      // Create a path for the top of the chart. This is the line that will have
+      // a stroke applied to it.
+      for (let i = sampleStart + 1; i < sampleEnd; i++) {
+        const powerValues = [getPower(i)];
+        x = getX(i);
+        y = getY(powerValues[0]);
+        ctx.lineTo(x, y);
+
+        // If we have multiple samples to draw on the same horizontal pixel,
+        // we process all of them together with a max-min decimation algorithm
+        // to save time:
+        // - We draw the first and last samples to ensure the display is
+        //   correct if there are sampling gaps.
+        // - For the values in between, we only draw the min and max values,
+        //   to draw a vertical line covering all the other sample values.
+        while (i + 1 < sampleEnd && getX(i + 1) === x) {
+          powerValues.push(getPower(++i));
+        }
+
+        // Looking for the min and max only makes sense if we have more than 2
+        // samples to draw.
+        if (powerValues.length > 2) {
+          const minY = getY(Math.min(...powerValues));
+          if (minY !== y) {
+            y = minY;
+            ctx.lineTo(x, y);
+          }
+          const maxY = getY(Math.max(...powerValues));
+          if (maxY !== y) {
+            y = maxY;
+            ctx.lineTo(x, y);
+          }
+        }
+
+        const lastY = getY(powerValues[powerValues.length - 1]);
+        if (lastY !== y) {
+          y = lastY;
           ctx.lineTo(x, y);
         }
       }
+
       // The samples range ends at the time of the last sample, plus the interval.
       // Draw this last bit.
       ctx.lineTo(x + intervalWidth, y);
@@ -191,7 +234,9 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
 
     const canvas = this._canvas;
     if (canvas) {
-      this.drawCanvas(canvas);
+      timeCode('TrackPowerCanvas render', () => {
+        this.drawCanvas(canvas);
+      });
     }
   }
 
@@ -316,6 +361,32 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
         } else {
           // Right point is closer
           hoveredCounter = bisectionCounter;
+        }
+
+        // If there are samples before or after hoveredCounter that fall
+        // horizontally on the same pixel, move hoveredCounter to the sample
+        // with the highest power value.
+        const mouseAtTime = (t) =>
+          Math.round(((t - rangeStart) / rangeLength) * width + left);
+        for (
+          let currentIndex = hoveredCounter - 1;
+          mouseAtTime(samples.time[currentIndex]) === mouseX &&
+          currentIndex > 0;
+          --currentIndex
+        ) {
+          if (samples.count[currentIndex] > samples.count[hoveredCounter]) {
+            hoveredCounter = currentIndex;
+          }
+        }
+        for (
+          let currentIndex = hoveredCounter + 1;
+          mouseAtTime(samples.time[currentIndex]) === mouseX &&
+          currentIndex < samples.time.length;
+          ++currentIndex
+        ) {
+          if (samples.count[currentIndex] > samples.count[hoveredCounter]) {
+            hoveredCounter = currentIndex;
+          }
         }
       } else {
         hoveredCounter = bisectionCounter;

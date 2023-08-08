@@ -12,17 +12,19 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   funcHasDirectRecursiveCall,
-  funcHasIndirectRecursiveCall,
+  funcHasRecursiveCall,
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
+import { getBottomBoxInfoForCallNode } from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
 import { getOriginAnnotationForFunc } from 'firefox-profiler/profile-logic/profile-data';
 
 import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
+  addCollapseResourceTransformToStack,
   expandAllCallNodeDescendants,
-  openSourceView,
+  updateBottomBoxContentsAndMaybeOpen,
   setContextMenuVisibility,
 } from 'firefox-profiler/actions/profile-view';
 import {
@@ -71,8 +73,9 @@ type StateProps = {|
 
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
+  +addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
-  +openSourceView: typeof openSourceView,
+  +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
@@ -180,11 +183,23 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   }
 
   showFile(): void {
-    const filePath = this._getFilePath();
-    if (filePath) {
-      const { openSourceView, selectedTab } = this.props;
-      openSourceView(filePath, selectedTab);
+    const { updateBottomBoxContentsAndMaybeOpen, selectedTab } = this.props;
+
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
+
+    if (rightClickedCallNodeInfo === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
     }
+
+    const { callNodeIndex, thread, callNodeInfo } = rightClickedCallNodeInfo;
+    const bottomBoxInfo = getBottomBoxInfoForCallNode(
+      callNodeIndex,
+      callNodeInfo,
+      thread
+    );
+    updateBottomBoxContentsAndMaybeOpen(selectedTab, bottomBoxInfo);
   }
 
   copyUrl(): void {
@@ -268,7 +283,12 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   };
 
   addTransformToStack(type: TransformType): void {
-    const { addTransformToStack, implementation, inverted } = this.props;
+    const {
+      addTransformToStack,
+      addCollapseResourceTransformToStack,
+      implementation,
+      inverted,
+    } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -323,15 +343,11 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       case 'collapse-resource': {
         const { funcTable } = thread;
         const resourceIndex = funcTable.resource[selectedFunc];
-        // A new collapsed func will be inserted into the table at the end. Deduce
-        // the index here.
-        const collapsedFuncIndex = funcTable.length;
-        addTransformToStack(threadsKey, {
-          type: 'collapse-resource',
+        addCollapseResourceTransformToStack(
+          threadsKey,
           resourceIndex,
-          collapsedFuncIndex,
-          implementation,
-        });
+          implementation
+        );
         break;
       }
       case 'collapse-direct-recursion': {
@@ -342,11 +358,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         });
         break;
       }
-      case 'collapse-indirect-recursion': {
+      case 'collapse-recursion': {
         addTransformToStack(threadsKey, {
-          type: 'collapse-indirect-recursion',
+          type: 'collapse-recursion',
           funcIndex: selectedFunc,
-          implementation,
         });
         break;
       }
@@ -364,6 +379,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         });
         break;
       }
+      case 'filter-samples':
+        throw new Error(
+          "Filter samples transform can't be applied from the call node context menu."
+        );
       default:
         assertExhaustiveCheck(type);
     }
@@ -423,13 +442,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
    * Determine if this CallNode represent a recursive function call.
    */
   isRecursiveCall(
-    funcHasRecursiveCall: (
-      Thread,
-      ImplementationFilter,
-      IndexIntoFuncTable
-    ) => boolean
+    funcHasRecursiveCall: (Thread, IndexIntoFuncTable) => boolean
   ): boolean {
-    const { implementation } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -452,7 +466,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     }
 
     // Do a full check of the stackTable for recursion.
-    return funcHasRecursiveCall(thread, implementation, funcIndex);
+    return funcHasRecursiveCall(thread, funcIndex);
   }
 
   getRightClickedCallNodeInfo(): null | {|
@@ -628,29 +642,34 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             })
           : null}
 
-        {this.isRecursiveCall(funcHasDirectRecursiveCall)
+        {this.isRecursiveCall(funcHasRecursiveCall)
+          ? this.renderTransformMenuItem({
+              l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
+              shortcut: 'r',
+              icon: 'Collapse',
+              onClick: this._handleClick,
+              transform: 'collapse-recursion',
+              title: '',
+              content: 'Collapse recursion',
+            })
+          : null}
+
+        {this.isRecursiveCall((thread, funcIndex) =>
+          funcHasDirectRecursiveCall(
+            thread,
+            this.props.implementation,
+            funcIndex
+          )
+        )
           ? this.renderTransformMenuItem({
               l10nId:
-                'CallNodeContextMenu--transform-collapse-direct-recursion2',
-              shortcut: 'r',
+                'CallNodeContextMenu--transform-collapse-direct-recursion-only',
+              shortcut: 'R',
               icon: 'Collapse',
               onClick: this._handleClick,
               transform: 'collapse-direct-recursion',
               title: '',
-              content: 'Collapse direct recursion',
-            })
-          : null}
-
-        {this.isRecursiveCall(funcHasIndirectRecursiveCall)
-          ? this.renderTransformMenuItem({
-              l10nId:
-                'CallNodeContextMenu--transform-collapse-indirect-recursion',
-              shortcut: 'R',
-              icon: 'Collapse',
-              onClick: this._handleClick,
-              transform: 'collapse-indirect-recursion',
-              title: '',
-              content: 'Collapse indirect recursion',
+              content: 'Collapse direct recursion only',
             })
           : null}
 
@@ -820,8 +839,9 @@ export const CallNodeContextMenu = explicitConnect<
   },
   mapDispatchToProps: {
     addTransformToStack,
+    addCollapseResourceTransformToStack,
     expandAllCallNodeDescendants,
-    openSourceView,
+    updateBottomBoxContentsAndMaybeOpen,
     setContextMenuVisibility,
   },
   component: CallNodeContextMenuImpl,

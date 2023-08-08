@@ -101,7 +101,6 @@ export function getEmptyFrameTable(): FrameTable {
     implementation: [],
     line: [],
     column: [],
-    optimizations: [],
     length: 0,
   };
 }
@@ -122,7 +121,6 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     implementation: frameTable.implementation.slice(),
     line: frameTable.line.slice(),
     column: frameTable.column.slice(),
-    optimizations: frameTable.optimizations.slice(),
     length: frameTable.length,
   };
 }
@@ -365,7 +363,8 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     unregisterTime: null,
     pausedRanges: [],
     name: 'Empty',
-    pid: 0,
+    isMainThread: false,
+    pid: '0',
     tid: 0,
     // Creating samples with event delay since it's the new samples table.
     samples: getEmptySamplesTableWithEventDelay(),

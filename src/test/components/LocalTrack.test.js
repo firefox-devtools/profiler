@@ -18,6 +18,7 @@ import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeSelectedThreads,
   hideLocalTrack,
+  showLocalTrack,
 } from '../../actions/profile-view';
 import { TimelineLocalTrack } from '../../components/timeline/LocalTrack';
 import {
@@ -45,7 +46,7 @@ import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-obs
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
 // local tracks.
-const PID = 222;
+const PID = '222';
 
 describe('timeline/LocalTrack', function () {
   autoMockCanvasContext();
@@ -130,13 +131,37 @@ describe('timeline/LocalTrack', function () {
   });
 
   describe('with an IPC track', function () {
+    it('appears hidden by default', function () {
+      const { container } = setupWithIPC();
+      expect(container.querySelector('.timelineTrackHidden')).toBeTruthy();
+      expect(container.querySelector('.timelineTrack')).toBeFalsy();
+    });
+
+    it('can be shown', function () {
+      const { dispatch, pid, trackReference, container } = setupWithIPC();
+
+      // First check that the IPC track is hidden by default.
+      expect(container.querySelector('.timelineTrackHidden')).toBeTruthy();
+      expect(container.querySelector('.timelineTrack')).toBeFalsy();
+
+      // Now make it visible and check it.
+      dispatch(showLocalTrack(pid, trackReference.trackIndex));
+      expect(container.querySelector('.timelineTrackHidden')).toBeFalsy();
+      expect(container.querySelector('.timelineTrack')).toBeTruthy();
+    });
+
     it('correctly renders the IPC label', function () {
-      const { getLocalTrackLabel } = setupWithIPC();
+      const { dispatch, pid, trackReference, getLocalTrackLabel } =
+        setupWithIPC();
+      dispatch(showLocalTrack(pid, trackReference.trackIndex));
       expect(getLocalTrackLabel()).toHaveTextContent('IPC — Empty');
     });
 
     it('matches the snapshot of the IPC track', () => {
-      const { container } = setupWithIPC();
+      const { pid, dispatch, trackReference, container, flushRafCalls } =
+        setupWithIPC();
+      dispatch(showLocalTrack(pid, trackReference.trackIndex));
+      flushRafCalls();
       expect(container.firstChild).toMatchSnapshot();
     });
   });
@@ -191,6 +216,7 @@ function setup(
     pid: PID,
     getLocalTrackLabel,
     getLocalTrackRow,
+    flushRafCalls,
   };
 }
 

@@ -5,17 +5,8 @@
 // @flow
 
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
-import { TextDecoder } from 'util';
 
 describe('fetchSource', function () {
-  beforeEach(function () {
-    window.TextDecoder = TextDecoder;
-  });
-
-  afterEach(function () {
-    delete window.TextDecoder;
-  });
-
   it('fetches single files', async function () {
     expect(
       await fetchSource(
@@ -420,6 +411,91 @@ describe('fetchSource', function () {
     ).toEqual({
       type: 'ERROR',
       errors: [{ type: 'NO_KNOWN_CORS_URL' }],
+    });
+  });
+
+  it('reports appropriate errors when the API response is not valid JSON', async function () {
+    expect(
+      await fetchSource(
+        '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        'https://symbolication.services.mozilla.com',
+        {
+          debugName: 'FAKE_DEBUGNAME',
+          breakpadId: 'FAKE_DEBUGID',
+          address: 0x1234,
+        },
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+            throw new Error('Some network error');
+          },
+          queryBrowserSymbolicationApi: async (
+            path: string,
+            _requestJson: string
+          ) => {
+            if (path !== '/source/v1') {
+              throw new Error(`Unrecognized API path ${path}`);
+            }
+            return '[Invalid \\ JSON}';
+          },
+        }
+      )
+    ).toEqual({
+      type: 'ERROR',
+      errors: [
+        {
+          type: 'BROWSER_API_MALFORMED_RESPONSE',
+          errorMessage: 'SyntaxError: Unexpected token I in JSON at position 1',
+        },
+        {
+          type: 'NO_KNOWN_CORS_URL',
+        },
+      ],
+    });
+  });
+
+  it('reports appropriate errors when the API response is malformed', async function () {
+    expect(
+      await fetchSource(
+        '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+        'https://symbolication.services.mozilla.com',
+        {
+          debugName: 'FAKE_DEBUGNAME',
+          breakpadId: 'FAKE_DEBUGID',
+          address: 0x1234,
+        },
+        new Map(),
+        {
+          fetchUrlResponse: async (_url: string, _postData?: MixedObject) => {
+            throw new Error('Some network error');
+          },
+          queryBrowserSymbolicationApi: async (
+            path: string,
+            _requestJson: string
+          ) => {
+            if (path !== '/source/v1') {
+              throw new Error(`Unrecognized API path ${path}`);
+            }
+            return JSON.stringify({
+              symbolsLastModified: null,
+              sourceLastModified: null,
+              file: '/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs',
+              hahaYouThoughtThereWouldBeSourceHereButNo: 42,
+            });
+          },
+        }
+      )
+    ).toEqual({
+      type: 'ERROR',
+      errors: [
+        {
+          type: 'BROWSER_API_MALFORMED_RESPONSE',
+          errorMessage: 'Error: No string "source" property on API response',
+        },
+        {
+          type: 'NO_KNOWN_CORS_URL',
+        },
+      ],
     });
   });
 });

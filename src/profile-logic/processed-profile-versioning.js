@@ -10,6 +10,9 @@
  * want to be able to display profiles that were saved at any point in the
  * past, regardless of their version. So this file upgrades old profiles to
  * the current format.
+ *
+ * Please don't forget to update the processed profile format changelog in
+ * `docs-developer/CHANGELOG-formats.md`.
  */
 
 import { sortDataTable } from '../utils/data-table-utils';
@@ -2198,5 +2201,60 @@ const _upgraders = {
       }
     }
   },
+  [45]: (profile) => {
+    // The "optimizations" column was removed from the frame table.
+    for (const thread of profile.threads) {
+      delete thread.frameTable.optimizations;
+    }
+  },
+  [46]: (profile) => {
+    // An `isMainThread` field was added to the Thread type.
+    //
+    // This replaces the following function:
+    //
+    // export function isMainThread(thread: Thread): boolean {
+    //   return (
+    //     thread.name === 'GeckoMain' ||
+    //     // If the pid is a string, then it's not one that came from the system.
+    //     // These threads should all be treated as main threads.
+    //     typeof thread.pid === 'string' ||
+    //     // On Linux the tid of the main thread is the pid. This is useful for
+    //     // profiles imported from the Linux 'perf' tool.
+    //     String(thread.pid) === thread.tid
+    //   );
+    // }
+    for (const thread of profile.threads) {
+      thread.isMainThread =
+        thread.name === 'GeckoMain' ||
+        typeof thread.pid === 'string' ||
+        String(thread.pid) === thread.tid;
+    }
+  },
+  [47]: (profile) => {
+    // The `pid` field of the Thread type was changed from `string | number` to `string`.
+    // The same happened to the data.otherPid field of IPC markers, and to the
+    // pid fields in the profiler.counters and profile.profilerOverhead lists.
+    for (const thread of profile.threads) {
+      thread.pid = `${thread.pid}`;
+
+      for (const data of thread.markers.data) {
+        if (data && data.type === 'IPC') {
+          data.otherPid = `${data.otherPid}`;
+        }
+      }
+    }
+    if (profile.counters) {
+      for (const counter of profile.counters) {
+        counter.pid = `${counter.pid}`;
+      }
+    }
+    if (profile.profilerOverhead) {
+      for (const overhead of profile.profilerOverhead) {
+        overhead.pid = `${overhead.pid}`;
+      }
+    }
+  },
+  // If you add a new upgrader here, please document the change in
+  // `docs-developer/CHANGELOG-formats.md`.
 };
 /* eslint-enable no-useless-computed-key */

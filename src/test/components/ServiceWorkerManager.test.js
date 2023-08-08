@@ -121,6 +121,15 @@ describe('app/ServiceWorkerManager', () => {
       store.dispatch(updateUrlState(newUrlState));
     }
 
+    function navigateToFromUrlLoadingPage(url: string) {
+      const newUrlState = stateFromLocation({
+        pathname: `/from-url/${encodeURIComponent(url)}/`,
+        search: '',
+        hash: '',
+      });
+      store.dispatch(updateUrlState(newUrlState));
+    }
+
     function getWorkboxInstance() {
       // WorkboxModule.Workbox is a mock but Flow doesn't know about that.
       const instance = (WorkboxModule.Workbox: any).mock.results[0].value;
@@ -142,6 +151,7 @@ describe('app/ServiceWorkerManager', () => {
       navigateToStoreLoadingPage,
       navigateToFromBrowserProfileLoadingPage,
       navigateToFileLoadingPage,
+      navigateToFromUrlLoadingPage,
       dispatch: store.dispatch,
       getWorkboxInstance,
     };
@@ -205,6 +215,48 @@ describe('app/ServiceWorkerManager', () => {
   });
 
   describe('with the `public` datasource', () => {
+    it('shows a notice when the SW is updated', async () => {
+      process.env.NODE_ENV = 'production';
+
+      const {
+        dispatch,
+        getReloadButton,
+        getWorkboxInstance,
+        navigateToStoreLoadingPage,
+      } = setup();
+      navigateToStoreLoadingPage();
+      await dispatch(viewProfile(_getSimpleProfile()));
+
+      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
+        updateViaCache: 'none',
+      });
+
+      const instance = getWorkboxInstance();
+      expect(instance.register).toHaveBeenCalled();
+
+      // There's a new update!
+      instance.dispatchEvent('installing');
+      instance.dispatchEvent('installed');
+      instance.dispatchEvent('waiting');
+
+      expect(getReloadButton()).toHaveTextContent('Apply and reload');
+      expect(document.body).toMatchSnapshot();
+
+      // Until now, we didn't try to update from this tab.
+      expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
+
+      // But let's do it now.
+      const reloadButton = getReloadButton();
+      fireFullClick(reloadButton);
+
+      expect(instance.messageSkipWaiting).toHaveBeenCalled();
+      expect(reloadButton).toHaveTextContent('Applying…');
+
+      // And we should now reload automatically when the SW is fully updated.
+      instance.dispatchEvent('controlling');
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
+    });
+
     it(`doesn't show a notice until a profile is fully loaded`, async () => {
       process.env.NODE_ENV = 'production';
 
@@ -358,6 +410,76 @@ describe('app/ServiceWorkerManager', () => {
       // The notice stays if we're getting ready after that.
       await dispatch(viewProfile(_getSimpleProfile()));
       expect(container).not.toBeEmptyDOMElement();
+    });
+  });
+
+  describe('with the `from-url` datasource', () => {
+    it('shows a notice when the SW is updated', async () => {
+      process.env.NODE_ENV = 'production';
+
+      const {
+        dispatch,
+        getReloadButton,
+        getWorkboxInstance,
+        navigateToFromUrlLoadingPage,
+      } = setup();
+      navigateToFromUrlLoadingPage(
+        'https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task…DbtMVxw/runs/0/artifacts/public/test_info/profile_amazon.zip'
+      );
+      await dispatch(viewProfile(_getSimpleProfile()));
+
+      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
+        updateViaCache: 'none',
+      });
+
+      const instance = getWorkboxInstance();
+      expect(instance.register).toHaveBeenCalled();
+
+      // There's a new update!
+      instance.dispatchEvent('installing');
+      instance.dispatchEvent('installed');
+      instance.dispatchEvent('waiting');
+
+      expect(getReloadButton()).toHaveTextContent('Apply and reload');
+      expect(document.body).toMatchSnapshot();
+
+      // Until now, we didn't try to update from this tab.
+      expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
+
+      // But let's do it now.
+      const reloadButton = getReloadButton();
+      fireFullClick(reloadButton);
+
+      expect(instance.messageSkipWaiting).toHaveBeenCalled();
+      expect(reloadButton).toHaveTextContent('Applying…');
+
+      // And we should now reload automatically when the SW is fully updated.
+      instance.dispatchEvent('controlling');
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
+    });
+
+    it(`doesn't show a notice when the profile url is on localhost`, async () => {
+      process.env.NODE_ENV = 'production';
+
+      const { dispatch, getWorkboxInstance, navigateToFromUrlLoadingPage } =
+        setup();
+      navigateToFromUrlLoadingPage('http://localhost:5656/profile_amazon.zip');
+      await dispatch(viewProfile(_getSimpleProfile()));
+
+      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
+        updateViaCache: 'none',
+      });
+
+      const instance = getWorkboxInstance();
+      expect(instance.register).toHaveBeenCalled();
+
+      // There's a new update!
+      instance.dispatchEvent('installing');
+      instance.dispatchEvent('installed');
+      instance.dispatchEvent('waiting');
+
+      // There's no reload button.
+      expect(screen.queryByText(/reload/i)).not.toBeInTheDocument();
     });
   });
 

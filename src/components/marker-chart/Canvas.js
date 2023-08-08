@@ -8,6 +8,7 @@ import * as React from 'react';
 import {
   withChartViewport,
   type WithChartViewport,
+  type Viewport,
 } from 'firefox-profiler/components/shared/chart/Viewport';
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
@@ -31,7 +32,11 @@ import type {
 } from 'firefox-profiler/types';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 
-import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
+import type {
+  ChartCanvasScale,
+  ChartCanvasHoverInfo,
+} from '../shared/chart/Canvas';
+
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type MarkerDrawingInformation = {|
@@ -99,9 +104,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItems: HoveredMarkerChartItems | null,
-    prevHoveredItems: HoveredMarkerChartItems | null,
-    isHoveredOnlyDifferent: boolean
+    scale: ChartCanvasScale,
+    hoverInfo: ChartCanvasHoverInfo<HoveredMarkerChartItems>
   ) => {
     const {
       rowHeight,
@@ -120,6 +124,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     let prevHoveredMarker = null;
     let prevHoveredLabel = null;
 
+    const {
+      hoveredItem: hoveredItems,
+      prevHoveredItem: prevHoveredItems,
+      isHoveredOnlyDifferent,
+    } = hoverInfo;
+
     if (hoveredItems) {
       hoveredMarker = hoveredItems.markerIndex;
       hoveredLabel = hoveredItems.rowIndexOfLabel;
@@ -127,6 +137,13 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     if (prevHoveredItems) {
       prevHoveredMarker = prevHoveredItems.markerIndex;
       prevHoveredLabel = prevHoveredItems.rowIndexOfLabel;
+    }
+
+    const { cssToUserScale } = scale;
+    if (cssToUserScale !== 1) {
+      throw new Error(
+        'StackChartCanvasImpl sets scaleCtxToCssPixels={true}, so canvas user space units should be equal to CSS pixels.'
+      );
     }
 
     // Convert CssPixels to Stack Depth

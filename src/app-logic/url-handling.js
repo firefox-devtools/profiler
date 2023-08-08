@@ -38,6 +38,8 @@ import type {
   ThreadIndex,
   TimelineType,
   SourceViewState,
+  AssemblyViewState,
+  NativeSymbolInfo,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -46,7 +48,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 8;
+export const CURRENT_URL_VERSION = 10;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -181,6 +183,7 @@ type BaseQuery = {|
   implementation: string,
   timelineType: string,
   sourceView: string,
+  assemblyView: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -409,11 +412,19 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         'timing'
           ? undefined
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
-      const { sourceView, isBottomBoxOpenPerPanel } = urlState.profileSpecific;
-      query.sourceView =
-        sourceView.file !== null && isBottomBoxOpenPerPanel[selectedTab]
-          ? sourceView.file
-          : undefined;
+      const { sourceView, assemblyView, isBottomBoxOpenPerPanel } =
+        urlState.profileSpecific;
+
+      if (isBottomBoxOpenPerPanel[selectedTab]) {
+        if (sourceView.sourceFile !== null) {
+          query.sourceView = sourceView.sourceFile;
+        }
+        if (assemblyView.isOpen && assemblyView.nativeSymbol !== null) {
+          query.assemblyView = stringifyAssemblyViewSymbol(
+            assemblyView.nativeSymbol
+          );
+        }
+      }
       break;
     }
     case 'marker-table':
@@ -575,14 +586,30 @@ export function stateFromLocation(
   const selectedTab =
     toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree';
   const sourceView: SourceViewState = {
-    activationGeneration: 0,
-    file: null,
+    scrollGeneration: 0,
+    libIndex: null,
+    sourceFile: null,
+  };
+  const assemblyView: AssemblyViewState = {
+    isOpen: false,
+    scrollGeneration: 0,
+    nativeSymbol: null,
+    allNativeSymbolsForInitiatingCallNode: [],
   };
   const isBottomBoxOpenPerPanel = {};
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
   if (query.sourceView) {
-    sourceView.file = query.sourceView;
+    sourceView.sourceFile = query.sourceView;
     isBottomBoxOpenPerPanel[selectedTab] = true;
+  }
+  if (query.assemblyView) {
+    const symbol = parseAssemblyViewSymbol(query.assemblyView);
+    if (symbol !== null) {
+      assemblyView.nativeSymbol = symbol;
+      assemblyView.allNativeSymbolsForInitiatingCallNode = [symbol];
+      assemblyView.isOpen = true;
+      isBottomBoxOpenPerPanel[selectedTab] = true;
+    }
   }
 
   const localTrackOrderByPid = convertLocalTrackOrderByPidFromString(
@@ -617,6 +644,7 @@ export function stateFromLocation(
       networkSearchString: query.networkSearch || '',
       transforms,
       sourceView,
+      assemblyView,
       isBottomBoxOpenPerPanel,
       timelineType: validateTimelineType(query.timelineType),
       full: {
@@ -699,11 +727,11 @@ function convertHiddenLocalTracksByPidFromString(
     if (!stringPart.includes('-')) {
       continue;
     }
-    const pidString = stringPart.slice(0, stringPart.indexOf('-'));
-    const hiddenTracksString = stringPart.slice(pidString.length + 1);
-    const pid = Number(pidString);
+    // TODO: handle escaped dashes and tildes in pid strings (#4512)
+    const pid = stringPart.slice(0, stringPart.indexOf('-'));
+    const hiddenTracksString = stringPart.slice(pid.length + 1);
     const indexes = decodeUintArrayFromUrlComponent(hiddenTracksString);
-    if (!isNaN(pid) && indexes.every((n) => !isNaN(n))) {
+    if (indexes.every((n) => !isNaN(n))) {
       hiddenLocalTracksByPid.set(pid, new Set(indexes));
     }
   }
@@ -716,6 +744,7 @@ function convertHiddenLocalTracksByPidToString(
   const strings = [];
   for (const [pid, tracks] of hiddenLocalTracksByPid) {
     if (tracks.size > 0) {
+      // TODO: escaped dashes and tildes in pids (#4512)
       strings.push(`${pid}-${encodeUintSetForUrlComponent(tracks)}`);
     }
   }
@@ -744,11 +773,11 @@ function convertLocalTrackOrderByPidFromString(
       // default value.
       continue;
     }
-    const pidString = stringPart.slice(0, stringPart.indexOf('-'));
-    const trackOrderString = stringPart.slice(pidString.length + 1);
-    const pid = Number(pidString);
+    // TODO: handle escaped dashes and tildes in pid strings (#4512)
+    const pid = stringPart.slice(0, stringPart.indexOf('-'));
+    const trackOrderString = stringPart.slice(pid.length + 1);
     const indexes = decodeUintArrayFromUrlComponent(trackOrderString);
-    if (!isNaN(pid) && indexes.every((n) => !isNaN(n))) {
+    if (indexes.every((n) => !isNaN(n))) {
       localTrackOrderByPid.set(pid, indexes);
     }
   }
@@ -767,9 +796,8 @@ function convertLocalTrackOrderByPidToString(
       continue;
     }
     if (trackOrder.length > 0) {
-      strings.push(
-        `${String(pid)}-${encodeUintArrayForUrlComponent(trackOrder)}`
-      );
+      // TODO: escaped dashes and tildes in pids (#4512)
+      strings.push(`${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`);
     }
   }
   return strings.join('~') || undefined;
@@ -942,6 +970,10 @@ const _upgraders: {|
       return;
     }
 
+    // Parse the transforms. NOTE: This is parsing according to today's transform
+    // URL encoding, which is different from the V3 transform encoding!
+    // Some transforms, such as the former "collapse-direct-recursion" transform,
+    // will not be preserved.
     const transforms = parseTransforms(query.transforms);
 
     if (!transforms || transforms.length === 0) {
@@ -965,6 +997,12 @@ const _upgraders: {|
         continue;
       }
 
+      // Find a stack in `thread` which matches the JS-only call node path.
+      // NOTE: We're checking the stack table in the original, unfiltered thread.
+      // However, if this transform is not the first transform in the transform
+      // stack, the given call node path may not be valid in the original thread!
+      // To be correct, we would need to apply all previous transforms and find
+      // the right stack in the filtered thread.
       const callNodeStackIndex = getStackIndexFromVersion3JSCallNodePath(
         thread,
         transform.callNodePath
@@ -980,6 +1018,9 @@ const _upgraders: {|
       );
     }
 
+    // Stringify the transforms.
+    // NOTE: This is stringifying according to today's transform encoding! It
+    // would be more correct to stringify according to the V4 encoding.
     processedLocation.query.transforms = stringifyTransforms(transforms);
   },
   [5]: ({ query }: ProcessedLocationBeforeUpgrade) => {
@@ -1041,6 +1082,7 @@ const _upgraders: {|
       query.hiddenLocalTracksByPid = (query.hiddenLocalTracksByPid: string)
         .split('~')
         .map((pidAndTracks) => {
+          // TODO: handle escaped dashes and tildes in pid strings (#4512)
           const [pid, ...tracks] = pidAndTracks.split('-');
           const hiddenTracks = new Set(tracks.map((s) => +s));
           return `${pid}-${encodeUintSetForUrlComponent(hiddenTracks)}`;
@@ -1051,6 +1093,7 @@ const _upgraders: {|
       query.localTrackOrderByPid = (query.localTrackOrderByPid: string)
         .split('~')
         .map((pidAndTracks) => {
+          // TODO: handle escaped dashes and tildes in pid strings (#4512)
           const [pid, ...tracks] = pidAndTracks.split('-');
           const trackOrder = tracks.map((s) => +s);
           return `${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`;
@@ -1065,7 +1108,7 @@ const _upgraders: {|
     // In this version, uintarray-encoding started supporting a range syntax:
     // Instead of "abcd" we now support "awd" as a shortcut.
     // This is not only used for the track index properties that we converted
-    // above, it also affects any cell tree transforms stored in the URL.
+    // above, it also affects any call tree transforms stored in the URL.
     // However, the change to the uintarray encoding is backwards compatible in
     // such a way that old encodings can still be decoded with the new version,
     // without any change in meaning.
@@ -1109,6 +1152,83 @@ const _upgraders: {|
   },
   [8]: (_) => {
     // just added the focus-category transform
+  },
+  [9]: ({ query }: ProcessedLocationBeforeUpgrade) => {
+    // The "collapse recursion" transforms have been renamed:
+    // irec-{implementation}-{funcIndex} -> rec-{funcIndex}
+    // rec-{implementation}-{funcIndex} -> drec-{implementation}-{funcIndex}
+    function upgradeTransformString(transformString) {
+      // Collapse recursion (formerly "collapse indirect recursion")
+      if (transformString.startsWith('irec-')) {
+        // irec-{implementation}-{funcIndex} -> rec-{funcIndex}
+        const [, , funcIndex] = transformString.split('-');
+        return `rec-${funcIndex}`;
+      }
+
+      // Collapse direct recursion only
+      if (transformString.startsWith('rec-')) {
+        // rec-{implementation}-{funcIndex} -> drec-{implementation}-{funcIndex}
+        return 'd' + transformString;
+      }
+
+      return transformString;
+    }
+
+    if (query.transforms) {
+      const transformStrings = query.transforms.split('~');
+      query.transforms = transformStrings.map(upgradeTransformString).join('~');
+    }
+  },
+  [10]: ({ query }: ProcessedLocationBeforeUpgrade, profile?: Profile) => {
+    // This version changes the "collapse resource" transform to have a different
+    // collapsedFuncIndex: In version 9, "collapsed resource" functions were
+    // added to the funcTable by the transform as needed. In version 10, the
+    // "collapsed resource" functions are reserved at the beginning of the
+    // profile processing pipeline and instead get the following funcIndex:
+    // funcTable.length + resourceIndex.
+    // This was done so that funcIndexes are unaffected by the transform stack.
+    //
+    // The "collapse resource" transform is not used a lot, and there are
+    // probably not a lot of URLs with it in circulation, so we just do the bare
+    // minimum here: If a single thread is selected, and we have access to the
+    // funcTable for that thread, then we compute the correct collapsed funcIndex.
+    // Otherwise we don't bother and leave incorrect funcIndexes in the URL.
+    // These funcIndexes will match *some* reserved resource func, so the UI
+    // shouldn't break in that case.
+    //
+    // Furthermore, we're not fixing up any subsequent transforms that may be
+    // referring to the funcIndex. For example, if you collapse a resource and
+    // then drop or merge the collapsed function, this upgrader will not adjust
+    // the drop or merge transform. This could be added if it seems worth doing.
+
+    if (!query.transforms || !query.thread || !profile) {
+      return;
+    }
+
+    const selectedThreads = decodeUintArrayFromUrlComponent(query.thread);
+    if (selectedThreads.length !== 1) {
+      return;
+    }
+
+    const threadIndex = selectedThreads[0];
+    const funcTableLength = profile.threads[threadIndex].funcTable.length;
+
+    //     cr-{implementation}-{resourceIndex}-{wrongFuncIndex}
+    //  -> cr-{implementation}-{resourceIndex}-{correctFuncIndex}
+    function upgradeTransformString(transformString) {
+      if (transformString.startsWith('cr-')) {
+        const [, implementation, resourceIndex] = transformString.split('-');
+        const funcIndex = funcTableLength + +resourceIndex;
+        if (!isNaN(funcIndex)) {
+          return `cr-${implementation}-${resourceIndex}-${funcIndex}`;
+        }
+      }
+
+      return transformString;
+    }
+
+    const transformStrings = query.transforms.split('~');
+    query.transforms = transformStrings.map(upgradeTransformString).join('~');
   },
 };
 
@@ -1237,4 +1357,45 @@ function validateTimelineType(type: ?string): TimelineType {
       (timelineType: empty);
       return 'cpu-category';
   }
+}
+
+/**
+ * Parses the value of the `assemblyView` parameter in the URL.
+ * This parameter has the following form:
+ *   <libIndex> '~' <hexAddress> '~' <hexSize> '_'? '~' <symbolName>
+ */
+function parseAssemblyViewSymbol(value: string): NativeSymbolInfo | null {
+  const [libIndexStr, hexAddress, sizeStr, name] = value.split('~');
+  const libIndex = parseInt(libIndexStr, 10);
+  const address = parseInt(hexAddress, 16);
+  // sizeStr is `b7c` or `b7c_`, the trailing underscore means "or more".
+  const [functionSizeStr, functionSizeIsKnown] = sizeStr.endsWith('_')
+    ? [sizeStr.slice(0, -1), false]
+    : [sizeStr, true];
+  const functionSize = parseInt(functionSizeStr, 16);
+  if (isNaN(libIndex) || isNaN(address) || isNaN(functionSize)) {
+    return null;
+  }
+  return {
+    libIndex,
+    address,
+    name,
+    functionSize,
+    functionSizeIsKnown,
+  };
+}
+
+/**
+ * Serializes the value of the `assemblyView` parameter in the URL.
+ * This parameter has the following form:
+ *   <libIndex> '~' <hexAddress> '~' <hexSize> '_'? '~' <symbolName>
+ */
+function stringifyAssemblyViewSymbol(symbol: NativeSymbolInfo): string {
+  const { libIndex, address, name, functionSize, functionSizeIsKnown } = symbol;
+  const addressStr = address.toString(16);
+  let functionSizeStr = functionSize.toString(16);
+  if (!functionSizeIsKnown) {
+    functionSizeStr += '_';
+  }
+  return `${libIndex}~${addressStr}~${functionSizeStr}~${name}`;
 }

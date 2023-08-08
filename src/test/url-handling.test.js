@@ -18,6 +18,8 @@ import {
   changeLocalTrackOrder,
   commitRange,
   setDataSource,
+  updateBottomBoxContentsAndMaybeOpen,
+  closeBottomBox,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -161,21 +163,21 @@ describe('selectedThread', function () {
     const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
     Object.assign(profile.threads[0], {
       name: 'GeckoMain',
-      pid: 123,
+      pid: '123',
     });
     Object.assign(profile.threads[1], {
       name: 'Compositor',
-      pid: 123,
+      pid: '123',
     });
     Object.assign(profile.threads[2], {
       name: 'GeckoMain',
       processType: 'tab',
-      pid: 246,
+      pid: '246',
     });
     Object.assign(profile.threads[3], {
       name: 'GeckoMain',
       processType: 'tab',
-      pid: 789,
+      pid: '789',
     });
 
     store.dispatch(viewProfile(profile));
@@ -266,7 +268,7 @@ describe('url handling tracks', function () {
 
       // Set a different pid for each thread, so that they're only global tracks.
       profile.threads.forEach((thread, i) => {
-        thread.pid = i;
+        thread.pid = `${i}`;
       });
 
       const store = _getStoreWithURL({}, profile);
@@ -306,7 +308,7 @@ describe('url handling tracks', function () {
       );
 
       // Change the order of Style and DOM Worker
-      dispatch(changeLocalTrackOrder(222, [1, 0]));
+      dispatch(changeLocalTrackOrder('222', [1, 0]));
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain tab]',
@@ -357,15 +359,16 @@ describe('url handling tracks', function () {
       const { profile } = getProfileFromTextSamples('A', 'B', 'C');
       const [thread1, thread2, thread3] = profile.threads;
       thread1.name = 'GeckoMain';
-      thread1.pid = 111;
+      thread1.isMainThread = true;
+      thread1.pid = '111';
 
       thread2.name = 'DOM Worker';
       thread2.processType = 'tab';
-      thread2.pid = 111;
+      thread2.pid = '111';
 
       thread3.name = 'Style';
       thread3.processType = 'tab';
-      thread3.pid = 111;
+      thread3.pid = '111';
 
       const { getState } = _getStoreWithURL(
         // In this search query, we want to hide the second local track of the
@@ -1301,18 +1304,18 @@ describe('url upgrading', function () {
       );
       expect(urlStateSelectors.getLocalTrackOrderByPid(state)).toEqual(
         new Map([
-          [1234, [1, 0]],
-          [345, [2, 0, 1]],
+          ['1234', [1, 0]],
+          ['345', [2, 0, 1]],
         ])
       );
       expect(urlStateSelectors.getLocalTrackOrderByPid(state)).toEqual(
         new Map([
-          [1234, [1, 0]],
-          [345, [2, 0, 1]],
+          ['1234', [1, 0]],
+          ['345', [2, 0, 1]],
         ])
       );
       expect(urlStateSelectors.getHiddenLocalTracksByPid(state)).toEqual(
-        new Map([[678, new Set([0, 2, 3])]])
+        new Map([['678', new Set([0, 2, 3])]])
       );
       expect(urlStateSelectors.getSelectedThreadIndexesOrNull(state)).toEqual(
         new Set([12])
@@ -1428,7 +1431,7 @@ describe('url upgrading', function () {
 describe('URL serialization of the transform stack', function () {
   const transformString =
     'f-combined-0w2~mcn-combined-2w4~f-js-3w5-i~mf-6~ff-7~fg-42~cr-combined-8-9~' +
-    'rec-combined-10~irec-combined-11~df-12~cfs-13';
+    'drec-combined-10~rec-11~df-12~cfs-13';
   const { getState } = _getStoreWithURL({
     search: '?transforms=' + transformString,
   });
@@ -1481,9 +1484,8 @@ describe('URL serialization of the transform stack', function () {
         implementation: 'combined',
       },
       {
-        type: 'collapse-indirect-recursion',
+        type: 'collapse-recursion',
         funcIndex: 11,
-        implementation: 'combined',
       },
       {
         type: 'drop-function',
@@ -1817,36 +1819,176 @@ describe('symbolServerUrl', function () {
 
   it('will allow an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
-      '?symbolServer=https://symbolication.stage.mozaws.net'
+      '?symbolServer=https://symbolication.services.mozilla.com'
     );
-    expect(symbolServerUrl).toEqual('https://symbolication.stage.mozaws.net');
+    expect(symbolServerUrl).toEqual(
+      'https://symbolication.services.mozilla.com'
+    );
     expect(queryString).toContain(
-      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net'
+      'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
   it('will strip the trailing slash on an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
-      '?symbolServer=https://symbolication.stage.mozaws.net/'
+      '?symbolServer=https://symbolication.services.mozilla.com/'
     );
-    expect(symbolServerUrl).toEqual('https://symbolication.stage.mozaws.net');
+    expect(symbolServerUrl).toEqual(
+      'https://symbolication.services.mozilla.com'
+    );
     expect(queryString).toContain(
-      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net%2F'
+      'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com%2F'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
   it('will allow a a subdirectory path on an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
-      '?symbolServer=https://symbolication.stage.mozaws.net/subdir/'
+      '?symbolServer=https://symbolication.services.mozilla.com/subdir/'
     );
     expect(symbolServerUrl).toEqual(
-      'https://symbolication.stage.mozaws.net/subdir'
+      'https://symbolication.services.mozilla.com/subdir'
     );
     expect(queryString).toContain(
-      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net%2Fsubdir%2F'
+      'symbolServer=https%3A%2F%2Fsymbolication.services.mozilla.com%2Fsubdir%2F'
     );
     expect(console.error.mock.calls).toMatchSnapshot();
+  });
+});
+
+describe('URL persistence of bottom box (source view and assembly view)', function () {
+  function setup() {
+    const store = _getStoreWithURL();
+    return store;
+  }
+
+  it('persists the source file shown in the source view to the URL', function () {
+    const { dispatch, getState } = setup();
+    expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
+    expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
+    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+
+    // Open the source view for 'xpcom/threads/nsThread.cpp'.
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const bottomBoxInfo = {
+      libIndex: 0,
+      sourceFile,
+      nativeSymbols: [],
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
+    ).toBeTrue();
+    expect(urlStateSelectors.getSourceViewFile(newStore.getState())).toBe(
+      sourceFile
+    );
+    expect(
+      urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())
+    ).toBeFalse();
+    expect(
+      urlStateSelectors.getAssemblyViewNativeSymbol(newStore.getState())
+    ).toBeNull();
+  });
+
+  it('keeps a closed bottom box closed, even if a source file was loaded before', function () {
+    const { dispatch, getState } = setup();
+    expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
+    expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
+    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+
+    // Open the source view for 'xpcom/threads/nsThread.cpp'.
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const bottomBoxInfo = {
+      libIndex: 0,
+      sourceFile,
+      nativeSymbols: [],
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    dispatch(closeBottomBox());
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
+    ).toBeFalse();
+  });
+
+  it('persists the native symbol shown in the assembly view to the URL', function () {
+    const { dispatch, getState } = setup();
+    expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
+    expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
+    expect(urlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
+
+    // Open the assembly view for 'MySymbol'.
+    const nativeSymbolInfo = {
+      libIndex: 0,
+      name: 'MySymbol',
+      address: 12345,
+      functionSize: 14,
+      functionSizeIsKnown: false,
+    };
+    const bottomBoxInfo = {
+      libIndex: 0,
+      sourceFile: null,
+      nativeSymbols: [nativeSymbolInfo],
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
+    ).toBeTrue();
+    expect(
+      urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())
+    ).toBeTrue();
+    expect(
+      urlStateSelectors.getAssemblyViewNativeSymbol(newStore.getState())
+    ).toEqual(nativeSymbolInfo);
+  });
+
+  it('only opens the assembly view on reload if it was open before', function () {
+    const { dispatch, getState } = setup();
+    expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
+    expect(urlStateSelectors.getIsBottomBoxOpen(getState())).toBeFalse();
+    expect(urlStateSelectors.getSourceViewFile(getState())).toBeNull();
+    expect(urlStateSelectors.getAssemblyViewIsOpen(getState())).toBeFalse();
+
+    // Open the source view for 'xpcom/threads/nsThread.cpp' and initialize the
+    // assembly view for 'MySymbol', but keep the assembly view closed.
+    // The decision to keep the assembly view closed happens in
+    // updateBottomBoxContentsAndMaybeOpen: If we have a non-null sourceFile,
+    // and the assembly view isn't open already, then we keep the assembly view
+    // closed even if we have a native symbol.
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const nativeSymbolInfo = {
+      libIndex: 0,
+      name: 'MySymbol',
+      address: 12345,
+      functionSize: 14,
+      functionSizeIsKnown: false,
+    };
+    const bottomBoxInfo = {
+      libIndex: 0,
+      sourceFile: sourceFile,
+      nativeSymbols: [nativeSymbolInfo],
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getIsBottomBoxOpen(newStore.getState())
+    ).toBeTrue();
+    expect(urlStateSelectors.getSourceViewFile(newStore.getState())).toBe(
+      sourceFile
+    );
+    // The assembly view should remain closed.
+    expect(
+      urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())
+    ).toBeFalse();
   });
 });

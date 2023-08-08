@@ -27,7 +27,7 @@ exports[`TrackPower has a tooltip that matches the snapshot 1`] = `
       Energy used in the visible range
       :
     </div>
-    ⁨7.2⁩ µWh (⁨0.003⁩ mg CO₂e)
+    ⁨8.4⁩ µWh (⁨0.004⁩ mg CO₂e)
   </div>
 </div>
 `;
@@ -38,12 +38,16 @@ Array [
     "clearRect",
     0,
     0,
-    80,
+    120,
     25,
   ],
   Array [
     "set lineWidth",
     2,
+  ],
+  Array [
+    "set lineJoin",
+    "bevel",
   ],
   Array [
     "set strokeStyle",
@@ -64,22 +68,22 @@ Array [
   Array [
     "lineTo",
     15,
-    23.877333333333333,
+    24,
   ],
   Array [
     "lineTo",
     20,
-    23.54,
+    24,
   ],
   Array [
     "lineTo",
     30,
-    23.54,
+    24,
   ],
   Array [
     "lineTo",
     40,
-    14.799999999999999,
+    15,
   ],
   Array [
     "lineTo",
@@ -89,24 +93,44 @@ Array [
   Array [
     "lineTo",
     60,
-    23.862,
+    24,
   ],
   Array [
     "lineTo",
-    70,
-    23.954,
+    71,
+    20,
   ],
   Array [
     "lineTo",
-    80,
-    23.954,
+    71,
+    24,
+  ],
+  Array [
+    "lineTo",
+    71,
+    15,
+  ],
+  Array [
+    "lineTo",
+    71,
+    18,
+  ],
+  Array [
+    "lineTo",
+    110,
+    24,
+  ],
+  Array [
+    "lineTo",
+    120,
+    24,
   ],
   Array [
     "stroke",
   ],
   Array [
     "lineTo",
-    80,
+    120,
     25,
   ],
   Array [
@@ -132,7 +156,7 @@ exports[`TrackPower matches the component snapshot 1`] = `
       <canvas
         class="timelineTrackPowerCanvas"
         height="25"
-        width="80"
+        width="120"
       />
     </div>
     <div

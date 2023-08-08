@@ -88,18 +88,16 @@ export class VerticalIndicators extends React.PureComponent<Props> {
         innerWindowIDToPageMap &&
         data &&
         data.type === 'tracing' &&
-        data.category === 'Navigation'
+        data.category === 'Navigation' &&
+        data.innerWindowID
       ) {
-        const innerWindowID = data.innerWindowID;
-        if (innerWindowID) {
-          const page = innerWindowIDToPageMap.get(innerWindowID);
-          if (page) {
-            url = (
-              <div className="timelineVerticalIndicatorsUrl">
-                {displayNiceUrl(page.url)}
-              </div>
-            );
-          }
+        const page = innerWindowIDToPageMap.get(data.innerWindowID);
+        if (page) {
+          url = (
+            <div className="timelineVerticalIndicatorsUrl">
+              {displayNiceUrl(page.url)}
+            </div>
+          );
         }
       }
 

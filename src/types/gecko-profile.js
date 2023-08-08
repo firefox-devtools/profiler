@@ -17,7 +17,6 @@ import type {
 } from './profile';
 import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
 import type { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
-import type { MixedObject } from './utils';
 
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
@@ -158,11 +157,10 @@ export type GeckoFrameTable = {|
     relevantForJS: 1,
     innerWindowID: 2,
     implementation: 3,
-    optimizations: 4,
-    line: 5,
-    column: 6,
-    category: 7,
-    subcategory: 8,
+    line: 4,
+    column: 5,
+    category: 6,
+    subcategory: 7,
   |},
   data: Array<
     [
@@ -185,8 +183,6 @@ export type GeckoFrameTable = {|
       null | number,
       // for JS frames, an index into the string table, usually "Baseline" or "Ion"
       null | IndexIntoStringTable,
-      // JSON info about JIT optimizations.
-      null | MixedObject,
       // The line of code
       null | number,
       // The column of code
@@ -203,7 +199,6 @@ export type GeckoFrameStruct = {|
   location: IndexIntoStringTable[],
   relevantForJS: Array<boolean>,
   implementation: Array<null | IndexIntoStringTable>,
-  optimizations: Array<null | MixedObject>,
   line: Array<null | number>,
   column: Array<null | number>,
   category: Array<null | number>,
@@ -308,6 +303,8 @@ export type GeckoProfilerOverhead = {|
  * */
 export type GeckoProfileShortMeta = {|
   version: number,
+  // When the main process started. Timestamp expressed in milliseconds since
+  // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
   shutdownTime: Milliseconds | null,
   categories: CategoryList,
@@ -320,6 +317,10 @@ export type GeckoProfileShortMeta = {|
  * */
 export type GeckoProfileFullMeta = {|
   ...GeckoProfileShortMeta,
+  // When the recording started (in milliseconds after startTime).
+  profilingStartTime?: Milliseconds,
+  // When the recording ended (in milliseconds after startTime).
+  profilingEndTime?: Milliseconds,
   interval: Milliseconds,
   stackwalk: 0 | 1,
   // This value represents a boolean, but for some reason is written out as an int

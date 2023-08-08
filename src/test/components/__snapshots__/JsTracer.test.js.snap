@@ -158,14 +158,6 @@ Array [
     "10px sans-serif",
   ],
   Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
-  ],
-  Array [
     "set fillStyle",
     "#ffffff",
   ],
@@ -188,10 +180,6 @@ Array [
     13,
   ],
   Array [
-    "measureText",
-    "https://mozilla.org",
-  ],
-  Array [
     "set fillStyle",
     "white",
   ],
@@ -211,10 +199,6 @@ Array [
     17,
     179,
     13,
-  ],
-  Array [
-    "measureText",
-    "Interpreter",
   ],
   Array [
     "set fillStyle",
@@ -243,10 +227,6 @@ Array [
     33,
     160,
     13,
-  ],
-  Array [
-    "measureText",
-    "IonMonkey",
   ],
   Array [
     "set fillStyle",
@@ -293,10 +273,6 @@ Array [
   Array [
     "set fillStyle",
     "#000000",
-  ],
-  Array [
-    "measureText",
-    "Tracing Information",
   ],
   Array [
     "fillText",
@@ -465,14 +441,6 @@ Array [
     "10px sans-serif",
   ],
   Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
-  ],
-  Array [
     "set fillStyle",
     "#ffffff",
   ],
@@ -495,10 +463,6 @@ Array [
     13,
   ],
   Array [
-    "measureText",
-    "https://mozilla.org",
-  ],
-  Array [
     "set fillStyle",
     "white",
   ],
@@ -518,10 +482,6 @@ Array [
     17,
     179,
     13,
-  ],
-  Array [
-    "measureText",
-    "Interpreter",
   ],
   Array [
     "set fillStyle",
@@ -550,10 +510,6 @@ Array [
     33,
     160,
     13,
-  ],
-  Array [
-    "measureText",
-    "IonMonkey",
   ],
   Array [
     "set fillStyle",
@@ -600,10 +556,6 @@ Array [
   Array [
     "set fillStyle",
     "#000000",
-  ],
-  Array [
-    "measureText",
-    "Tracing Information",
   ],
   Array [
     "fillText",

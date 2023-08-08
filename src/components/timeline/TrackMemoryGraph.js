@@ -138,6 +138,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // memory graph.
 
       ctx.lineWidth = deviceLineWidth;
+      ctx.lineJoin = 'bevel';
       ctx.strokeStyle = ORANGE_50;
       ctx.fillStyle = '#ff940088'; // Orange 50 with transparency.
       ctx.beginPath();

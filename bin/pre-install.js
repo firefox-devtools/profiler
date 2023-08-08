@@ -60,7 +60,7 @@ function checkNode(agents /*: AgentsVersion */) {
       'You can use a tool like `nvm` to install and manage installed node versions.'
     );
     console.error(
-      'You can look at https://github.com/creationix/nvm to install this tool.\n'
+      'You can look at https://github.com/nvm-sh/nvm to install this tool.\n'
     );
     console.error(
       'Once `nvm` is installed you can use the following commands to upgrade:\n' +

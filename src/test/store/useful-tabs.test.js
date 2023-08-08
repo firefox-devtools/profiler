@@ -13,9 +13,11 @@ import {
   getNetworkMarkers,
   getProfileWithJsTracerEvents,
   getMergedProfileFromTextSamples,
+  getProfileWithUnbalancedNativeAllocations,
   addActiveTabInformationToProfile,
 } from '../fixtures/profiles/processed-profile';
 import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
+import { getEmptySamplesTableWithEventDelay } from '../../profile-logic/data-structures';
 
 describe('getUsefulTabs', function () {
   it('hides the network chart and JS tracer when no data is in the thread', function () {
@@ -99,6 +101,21 @@ describe('getUsefulTabs', function () {
     ]);
   });
 
+  it('shows sample related tabs even when there are only allocation samples in the profile', function () {
+    const { profile } = getProfileWithUnbalancedNativeAllocations();
+    for (const thread of profile.threads) {
+      thread.samples = getEmptySamplesTableWithEventDelay();
+    }
+    const { getState } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'calltree',
+      'flame-graph',
+      'stack-chart',
+      'marker-chart',
+      'marker-table',
+    ]);
+  });
+
   it('hides sample related tabs when there is no sample data in the profile', function () {
     const profile = getMarkerTableProfile();
     const { getState } = storeWithProfile(profile);
@@ -112,6 +129,20 @@ describe('getUsefulTabs', function () {
     const { profile } = getProfileFromTextSamples('(root)');
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'marker-chart',
+      'marker-table',
+    ]);
+  });
+
+  it('works when the first sample is null', () => {
+    const { profile } = getProfileFromTextSamples('A  B');
+    profile.threads[0].samples.stack[0] = null;
+
+    const { getState } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'calltree',
+      'flame-graph',
+      'stack-chart',
       'marker-chart',
       'marker-table',
     ]);

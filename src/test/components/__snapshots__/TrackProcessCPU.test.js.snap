@@ -39,6 +39,10 @@ Array [
     2,
   ],
   Array [
+    "set lineJoin",
+    "bevel",
+  ],
+  Array [
     "set strokeStyle",
     "#737373",
   ],

@@ -164,6 +164,62 @@ describe('sanitizePII', function () {
     expect(ensureExists(sanitizedProfile.counters).length).toEqual(1);
   });
 
+  it('should sanitize the counter range if range is filtered', function () {
+    const originalProfile = processGeckoProfile(createGeckoProfile());
+    const timeRangeForThread = getTimeRangeForThread(
+      originalProfile.threads[0],
+      originalProfile.meta.interval
+    );
+    // Make sure that the original time range is 0-7.
+    expect(timeRangeForThread).toEqual({ start: 0, end: 7 });
+    const sanitizedRange = { start: 3, end: 5 };
+    const { sanitizedProfile } = setup(
+      {
+        shouldFilterToCommittedRange: sanitizedRange,
+      },
+      originalProfile
+    );
+
+    if (ensureExists(originalProfile.counters)[0].mainThreadIndex !== 0) {
+      throw new Error(
+        'This test assumes the the counters mainThreadIndex is 0'
+      );
+    }
+
+    // Make sure the meta data contains the new profile range
+    expect(sanitizedProfile.meta.profilingStartTime).toEqual(
+      sanitizedRange.start
+    );
+    expect(sanitizedProfile.meta.profilingEndTime).toEqual(sanitizedRange.end);
+
+    // Make sure that we still have the same number of counters.
+    expect(ensureExists(originalProfile.counters).length).toEqual(1);
+    expect(ensureExists(sanitizedProfile.counters).length).toEqual(1);
+    const counterSamples = ensureExists(sanitizedProfile.counters)[0]
+      .sampleGroups[0].samples;
+
+    // Make sure that all the table fields are consistent.
+    expect(counterSamples.time).toHaveLength(counterSamples.length);
+    expect(counterSamples.count).toHaveLength(counterSamples.length);
+    expect(counterSamples.number).toHaveLength(counterSamples.length);
+
+    // Make sure that all the samples are between the sanitized time range.
+    for (
+      let sampleIndex = 0;
+      sampleIndex < counterSamples.length;
+      sampleIndex++
+    ) {
+      // We are using inclusive range, so we need to add 1 and subtract 1 to the
+      // start and end ranges.
+      expect(counterSamples.time[sampleIndex]).toBeGreaterThanOrEqual(
+        sanitizedRange.start - 1
+      );
+      expect(counterSamples.time[sampleIndex]).toBeLessThanOrEqual(
+        sanitizedRange.end + 1
+      );
+    }
+  });
+
   it('should sanitize profiler overhead if its thread is deleted', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveThreads: new Set([0]),

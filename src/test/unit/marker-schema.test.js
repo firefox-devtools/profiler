@@ -14,6 +14,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
+import { UniqueStringArray } from '../../utils/unique-string-array';
 
 /**
  * Generally, higher level type of testing is preferred to detailed unit tests of
@@ -35,6 +36,10 @@ describe('marker schema labels', function () {
   function applyLabel(options: LabelOptions): string {
     const { schemaData, label, payload } = options;
     const categories = getDefaultCategories();
+    const stringTable = new UniqueStringArray([
+      'IPC Message',
+      'MouseDown Event',
+    ]);
 
     const schema = {
       name: 'TestDefinedMarker',
@@ -50,7 +55,7 @@ describe('marker schema labels', function () {
       threadId: 1,
       data: payload,
     };
-    const getter = parseLabel(schema, categories, label);
+    const getter = parseLabel(schema, categories, stringTable, label);
 
     // There is only one marker, marker 0
     return getter(marker);
@@ -140,6 +145,23 @@ describe('marker schema labels', function () {
     expect(console.error).toHaveBeenCalledTimes(0);
   });
 
+  it('can parse labels with unique strings', function () {
+    expect(
+      applyLabel({
+        label: '{marker.data.message} happened because of {marker.data.event}',
+        schemaData: [
+          { key: 'message', label: 'Message', format: 'unique-string' },
+          { key: 'event', label: 'Event', format: 'unique-string' },
+        ],
+        payload: {
+          message: 0,
+          event: 1,
+        },
+      })
+    ).toEqual('IPC Message happened because of MouseDown Event');
+    expect(console.error).toHaveBeenCalledTimes(0);
+  });
+
   describe('parseErrors', function () {
     function testParseError(label: string) {
       expect(
@@ -192,7 +214,19 @@ describe('marker schema formatting', function () {
       ['duration', 10],
       ['duration', 12.3456789],
       ['duration', 123456.789],
+      ['duration', 23456789],
+      ['duration', 50000],
+      ['duration', 2000000],
+      ['duration', 50000000],
+      ['duration', 123456789],
       ['duration', 0.000123456],
+      ['duration', 1000 * 60 - 0.01], // slightly less than 1min, should not be shown as '60s'
+      ['duration', 1000 * 60 + 1], // slightly more than 1min, should not be shown as '1min0s'
+      ['duration', 779873.639], // '13min60s' should be rounded to '14min'
+      ['duration', 1000 * 3600 - 0.01], // slightly less than 1h, should not be shown as '0h60min'
+      ['duration', 1000 * 3600 + 1], // slightly more than 1h, should not be shown as '1h0min'
+      ['duration', 1000 * 3600 * 24 - 0.01], // slightly less than 1 day, should not be shown as '0d24h'
+      ['duration', 1000 * 3600 * 24 + 1], // slightly more than 1 day, should not be shown as '1min0s'
       ['time', 12.3456789],
       ['seconds', 0],
       ['seconds', 10],
@@ -234,12 +268,24 @@ describe('marker schema formatting', function () {
       ['percentage', 0.123456789],
       ['percentage', 1234.56789],
       ['percentage', 0.000123456],
+      ['unique-string', 0], // Should be "IPC Message", see "stringTable" in "applyLabel" fn
+      ['unique-string', 1], // Should be "MouseDown Event", see "stringTable" in "applyLabel" fn
+      ['unique-string', null], // Should be "(empty)"
+      ['unique-string', undefined], // Should be "(empty)"
+      ['unique-string', 42], // Should be "(empty)"
     ];
 
     expect(
       entries.map(
         ([format, value]) =>
-          format + ' - ' + formatFromMarkerSchema('none', format, value)
+          format +
+          ' - ' +
+          formatFromMarkerSchema(
+            'none',
+            format,
+            value,
+            new UniqueStringArray(['IPC Message', 'MouseDown Event'])
+          )
       )
     ).toMatchInlineSnapshot(`
       Array [
@@ -250,8 +296,20 @@ describe('marker schema formatting', function () {
         "duration - 0s",
         "duration - 10ms",
         "duration - 12.346ms",
-        "duration - 123.46s",
+        "duration - 2min3s",
+        "duration - 6h31min",
+        "duration - 50s",
+        "duration - 33min20s",
+        "duration - 13h53min",
+        "duration - 1d10h",
         "duration - 123.46ns",
+        "duration - 1min",
+        "duration - 1min",
+        "duration - 13min",
+        "duration - 1h",
+        "duration - 1h",
+        "duration - 1d",
+        "duration - 1d",
         "time - 12.346ms",
         "seconds - 0.000s",
         "seconds - 0.010s",
@@ -293,6 +351,11 @@ describe('marker schema formatting', function () {
         "percentage - 12%",
         "percentage - 123,457%",
         "percentage - 0.0%",
+        "unique-string - IPC Message",
+        "unique-string - MouseDown Event",
+        "unique-string - (empty)",
+        "unique-string - (empty)",
+        "unique-string - (empty)",
       ]
     `);
   });
@@ -341,8 +404,13 @@ describe('marker schema formatting', function () {
       entries.map(([format, value]) => [
         format,
         value,
-        formatMarkupFromMarkerSchema('none', format, value),
-        formatFromMarkerSchema('none', format, value),
+        formatMarkupFromMarkerSchema(
+          'none',
+          format,
+          value,
+          new UniqueStringArray()
+        ),
+        formatFromMarkerSchema('none', format, value, new UniqueStringArray()),
       ])
     ).toMatchSnapshot();
   });

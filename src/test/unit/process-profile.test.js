@@ -22,10 +22,14 @@ import { ensureExists } from '../../utils/flow';
 import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
+  GeckoProfile,
   GeckoThread,
+  GeckoCounter,
+  GeckoProfilerOverhead,
   IndexIntoGeckoStackTable,
   Milliseconds,
   Thread,
+  Pid,
 } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function () {
@@ -163,9 +167,15 @@ describe('extract functions and resource from location strings', function () {
 });
 
 describe('gecko counters processing', function () {
-  function setup() {
+  function setup(): {|
+    parentGeckoProfile: GeckoProfile,
+    parentPid: Pid,
+    childPid: Pid,
+    parentCounter: GeckoCounter,
+    childCounter: GeckoCounter,
+  |} {
     // Create a gecko profile with counters.
-    const findMainThread = (profile) =>
+    const findMainThread = (profile): GeckoThread =>
       ensureExists(
         profile.threads.find((thread) => thread.name === 'GeckoMain'),
         'There should be a GeckoMain thread in the Gecko profile'
@@ -197,8 +207,8 @@ describe('gecko counters processing', function () {
     childGeckoProfile.counters = [childCounter];
     return {
       parentGeckoProfile,
-      parentPid,
-      childPid,
+      parentPid: `${parentPid}`,
+      childPid: `${childPid}`,
       parentCounter,
       childCounter,
     };
@@ -215,7 +225,7 @@ describe('gecko counters processing', function () {
     expect(counters[0].pid).toBe(parentPid);
     expect(counters[1].pid).toBe(childPid);
 
-    const findMainThreadIndexByPid = (pid: number): number =>
+    const findMainThreadIndexByPid = (pid: Pid): number =>
       processedProfile.threads.findIndex(
         (thread) => thread.name === 'GeckoMain' && thread.pid === pid
       );
@@ -258,7 +268,13 @@ describe('gecko counters processing', function () {
 });
 
 describe('gecko profilerOverhead processing', function () {
-  function setup() {
+  function setup(): {|
+    parentGeckoProfile: GeckoProfile,
+    parentPid: Pid,
+    childPid: Pid,
+    parentOverhead: GeckoProfilerOverhead,
+    childOverhead: GeckoProfilerOverhead,
+  |} {
     // Create a gecko profile with profilerOverhead.
     const findMainThread = (profile) =>
       ensureExists(
@@ -284,8 +300,8 @@ describe('gecko profilerOverhead processing', function () {
     childGeckoProfile.profilerOverhead = childOverhead;
     return {
       parentGeckoProfile,
-      parentPid,
-      childPid,
+      parentPid: `${parentPid}`,
+      childPid: `${childPid}`,
       parentOverhead,
       childOverhead,
     };
@@ -302,7 +318,7 @@ describe('gecko profilerOverhead processing', function () {
     expect(overhead[0].pid).toBe(parentPid);
     expect(overhead[1].pid).toBe(childPid);
 
-    const findMainThreadIndexByPid = (pid: number): number =>
+    const findMainThreadIndexByPid = (pid: Pid): number =>
       processedProfile.threads.findIndex(
         (thread) => thread.name === 'GeckoMain' && thread.pid === pid
       );
@@ -660,6 +676,34 @@ describe('profile meta processing', function () {
 
     // Checking if it keeps the sampleUnits object.
     expect(processedMeta.sampleUnits).toEqual(geckoMeta.sampleUnits);
+  });
+
+  it('keeps the profilingStartTime and profilingEndTime', function () {
+    const geckoProfile = createGeckoProfile();
+    const geckoMeta = geckoProfile.meta;
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedMeta = processedProfile.meta;
+
+    expect(processedMeta.profilingStartTime).toEqual(
+      geckoMeta.profilingStartTime
+    );
+    expect(processedMeta.profilingEndTime).toEqual(geckoMeta.profilingEndTime);
+  });
+
+  it('does not create the profilingStartTime and profilingEndTime fields', function () {
+    const geckoProfile = createGeckoProfile();
+    const geckoMeta = geckoProfile.meta;
+    delete geckoMeta.profilingStartTime;
+    delete geckoMeta.profilingEndTime;
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedMeta = processedProfile.meta;
+
+    expect(processedMeta.profilingStartTime).toEqual(undefined);
+    expect(processedMeta.profilingEndTime).toEqual(undefined);
   });
 });
 

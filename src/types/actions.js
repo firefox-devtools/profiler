@@ -13,6 +13,7 @@ import type {
   Pid,
   TabID,
   IndexIntoCategoryList,
+  IndexIntoLibs,
 } from './profile';
 import type {
   CallNodePath,
@@ -24,6 +25,7 @@ import type {
   OriginsTimeline,
   ActiveTabTimeline,
   ThreadsKey,
+  NativeSymbolInfo,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -36,8 +38,10 @@ import type {
   UploadState,
   State,
   UploadedProfileInformation,
-  SourceLoadingError,
+  SourceCodeLoadingError,
+  ApiQueryError,
   TableViewOptions,
+  DecodedInstruction,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -349,9 +353,20 @@ type ProfileAction =
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     |}
   | {|
-      +type: 'OPEN_SOURCE_VIEW',
-      +file: string,
+      +type: 'UPDATE_BOTTOM_BOX',
+      +libIndex: IndexIntoLibs | null,
+      +sourceFile: string | null,
+      +nativeSymbol: NativeSymbolInfo | null,
+      +allNativeSymbolsForInitiatingCallNode: NativeSymbolInfo[],
       +currentTab: TabSlug,
+      +shouldOpenBottomBox: boolean,
+      +shouldOpenAssemblyView: boolean,
+    |}
+  | {|
+      +type: 'OPEN_ASSEMBLY_VIEW',
+    |}
+  | {|
+      +type: 'CLOSE_ASSEMBLY_VIEW',
     |}
   | {|
       +type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
@@ -616,13 +631,36 @@ type L10nAction =
     |};
 
 type SourcesAction =
-  | {| +type: 'SOURCE_LOADING_BEGIN_URL', file: string, url: string |}
-  | {| +type: 'SOURCE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
-  | {| +type: 'SOURCE_LOADING_SUCCESS', file: string, source: string |}
+  | {| +type: 'SOURCE_CODE_LOADING_BEGIN_URL', file: string, url: string |}
+  | {| +type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', file: string |}
+  | {| +type: 'SOURCE_CODE_LOADING_SUCCESS', file: string, code: string |}
   | {|
-      +type: 'SOURCE_LOADING_ERROR',
+      +type: 'SOURCE_CODE_LOADING_ERROR',
       file: string,
-      errors: SourceLoadingError[],
+      errors: SourceCodeLoadingError[],
+    |};
+
+// nativeSymbolKey == `${lib.debugName}/${lib.breakpadID}/${nativeSymbolInfo.address.toString(16)}`
+
+type AssemblyAction =
+  | {|
+      +type: 'ASSEMBLY_CODE_LOADING_BEGIN_URL',
+      nativeSymbolKey: string,
+      url: string,
+    |}
+  | {|
+      +type: 'ASSEMBLY_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
+      nativeSymbolKey: string,
+    |}
+  | {|
+      +type: 'ASSEMBLY_CODE_LOADING_SUCCESS',
+      nativeSymbolKey: string,
+      instructions: DecodedInstruction[],
+    |}
+  | {|
+      +type: 'ASSEMBLY_CODE_LOADING_ERROR',
+      nativeSymbolKey: string,
+      errors: ApiQueryError[],
     |};
 
 type AppAction = {|
@@ -642,4 +680,5 @@ export type Action =
   | CurrentProfileUploadedInformationAction
   | L10nAction
   | SourcesAction
+  | AssemblyAction
   | AppAction;

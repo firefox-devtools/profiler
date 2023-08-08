@@ -5,11 +5,11 @@
 // @flow
 import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
-import memoize from 'memoize-immutable';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import {
   withChartViewport,
   type WithChartViewport,
+  type Viewport,
 } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
@@ -40,10 +40,14 @@ import type {
 } from 'firefox-profiler/types';
 
 import type {
+  ChartCanvasScale,
+  ChartCanvasHoverInfo,
+} from '../shared/chart/Canvas';
+
+import type {
   StackTimingDepth,
   IndexIntoStackTiming,
 } from '../../profile-logic/stack-timing';
-import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {|
@@ -90,6 +94,9 @@ const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
 
 class StackChartCanvasImpl extends React.PureComponent<Props> {
+  _textMeasurement: null | TextMeasurement;
+  _textMeasurementCssToDeviceScale: number = 1;
+
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
     // is mounted, but using componentDidMount won't work here as the
@@ -144,7 +151,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
    */
   _drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: HoveredStackTiming | null
+    scale: ChartCanvasScale,
+    hoverInfo: ChartCanvasHoverInfo<HoveredStackTiming>
   ) => {
     const {
       thread,
@@ -166,16 +174,37 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         viewportBottom,
       },
     } = this.props;
+    const { hoveredItem } = hoverInfo;
+
     const fastFillStyle = new FastFillStyle(ctx);
 
-    const { devicePixelRatio } = window;
+    const { cssToDeviceScale, cssToUserScale } = scale;
+    if (cssToDeviceScale !== cssToUserScale) {
+      throw new Error(
+        'StackChartCanvasImpl sets scaleCtxToCssPixels={false}, so canvas user space units should be equal to device pixels.'
+      );
+    }
 
-    // Set the font size before creating a text measurer.
-    ctx.font = `${FONT_SIZE * devicePixelRatio}px sans-serif`;
-    const textMeasurement = new TextMeasurement(ctx);
+    // Set the font before creating the text renderer. The font property resets
+    // automatically whenever the canvas size is changed, so we set it on every
+    // call.
+    ctx.font = `${FONT_SIZE * cssToDeviceScale}px sans-serif`;
 
-    const devicePixelsWidth = containerWidth * devicePixelRatio;
-    const devicePixelsHeight = containerHeight * devicePixelRatio;
+    // Ensure the text measurement tool is created, since this is the first time
+    // this class has access to a ctx. We also need to recreate it when the scale
+    // changes because we are working with device coordinates.
+    if (
+      !this._textMeasurement ||
+      this._textMeasurementCssToDeviceScale !== cssToDeviceScale
+    ) {
+      this._textMeasurement = new TextMeasurement(ctx);
+      this._textMeasurementCssToDeviceScale = cssToDeviceScale;
+    }
+
+    const textMeasurement = this._textMeasurement;
+
+    const devicePixelsWidth = containerWidth * cssToDeviceScale;
+    const devicePixelsHeight = containerHeight * cssToDeviceScale;
 
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
@@ -183,7 +212,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
-    const viewportDevicePixelsTop = viewportTop * devicePixelRatio;
+    const viewportDevicePixelsTop = viewportTop * cssToDeviceScale;
 
     // Convert CssPixels to Stack Depth
     const startDepth = Math.floor(viewportTop / stackFrameHeight);
@@ -191,24 +220,24 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     const innerContainerWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
-    const innerDevicePixelsWidth = innerContainerWidth * devicePixelRatio;
+    const innerDevicePixelsWidth = innerContainerWidth * cssToDeviceScale;
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
     ): DevicePixels =>
-      devicePixelRatio *
+      cssToDeviceScale *
       // The right hand side of this formula is all in CSS pixels.
       (marginLeft +
         ((viewportPosition - viewportLeft) * innerContainerWidth) /
           viewportLength);
 
     // Apply the device pixel ratio to various CssPixel constants.
-    const rowDevicePixelsHeight = ROW_CSS_PIXELS_HEIGHT * devicePixelRatio;
-    const oneCssPixelInDevicePixels = 1 * devicePixelRatio;
+    const rowDevicePixelsHeight = ROW_CSS_PIXELS_HEIGHT * cssToDeviceScale;
+    const oneCssPixelInDevicePixels = 1 * cssToDeviceScale;
     const textDevicePixelsOffsetStart =
-      TEXT_CSS_PIXELS_OFFSET_START * devicePixelRatio;
+      TEXT_CSS_PIXELS_OFFSET_START * cssToDeviceScale;
     const textDevicePixelsOffsetTop =
-      TEXT_CSS_PIXELS_OFFSET_TOP * devicePixelRatio;
+      TEXT_CSS_PIXELS_OFFSET_TOP * cssToDeviceScale;
     let categoryForUserTiming = categories.findIndex(
       (category) => category.name === 'JavaScript'
     );
@@ -333,7 +362,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             depth === hoveredItem.depth &&
             i === hoveredItem.stackTimingIndex;
 
-          const colorStyles = this._mapCategoryColorNameToStyles(
+          const colorStyles = mapCategoryColorNameToStackChartStyles(
             category.color
           );
           // Draw the box.
@@ -395,16 +424,6 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       devicePixelsHeight
     );
   };
-
-  // Provide a memoized function that maps the category color names to specific color
-  // choices that are used across this project's charts.
-  _mapCategoryColorNameToStyles = memoize(
-    mapCategoryColorNameToStackChartStyles,
-    {
-      // Memoize every color that is seen.
-      limit: Infinity,
-    }
-  );
 
   _getHoveredStackInfo = ({
     depth,

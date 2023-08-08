@@ -17,7 +17,10 @@ import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
-import { getThreadSelectors } from '../../selectors/per-thread';
+import {
+  getThreadSelectors,
+  selectedThreadSelectors,
+} from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
 import { urlFromState } from '../../app-logic/url-handling';
 import { createBrowserConnection } from '../../app-logic/browser-connection';
@@ -73,7 +76,6 @@ jest.mock('../../profile-logic/symbol-store-db');
 import { expandUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
-import { TextEncoder, TextDecoder } from 'util';
 import {
   simulateOldWebChannelAndFrameScript,
   simulateWebChannel,
@@ -201,9 +203,11 @@ describe('actions/receive-profile', function () {
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
-      idleThread.pid = 0;
+      idleThread.isMainThread = true;
+      idleThread.pid = '0';
       workThread.name = 'GeckoMain';
-      idleThread.pid = 1;
+      workThread.isMainThread = true;
+      idleThread.pid = '1';
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -217,9 +221,11 @@ describe('actions/receive-profile', function () {
       const { profile, idleThread, workThread } =
         getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
-      idleThread.pid = 0;
+      idleThread.isMainThread = true;
+      idleThread.pid = '0';
       workThread.name = 'GeckoMain';
-      workThread.pid = 1;
+      workThread.isMainThread = true;
+      workThread.pid = '1';
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -236,10 +242,11 @@ describe('actions/receive-profile', function () {
       );
       const [threadA, threadB] = profile.threads;
       threadA.name = 'GeckoMain';
+      threadA.isMainThread = true;
       threadA.processType = 'tab';
-      threadA.pid = 111;
+      threadA.pid = '111';
       threadB.name = 'Other';
-      threadB.pid = 111;
+      threadB.pid = '111';
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -258,8 +265,9 @@ describe('actions/receive-profile', function () {
 
       profile.threads.forEach((thread, threadIndex) => {
         thread.name = 'GeckoMain';
+        thread.isMainThread = true;
         thread.processType = 'tab';
-        thread.pid = threadIndex;
+        thread.pid = `${threadIndex}`;
       });
 
       store.dispatch(viewProfile(profile));
@@ -280,8 +288,9 @@ describe('actions/receive-profile', function () {
 
       profile.threads.forEach((thread, threadIndex) => {
         thread.name = 'GeckoMain';
+        thread.isMainThread = true;
         thread.processType = 'tab';
-        thread.pid = threadIndex;
+        thread.pid = `${threadIndex}`;
       });
 
       store.dispatch(viewProfile(profile));
@@ -306,10 +315,10 @@ describe('actions/receive-profile', function () {
       profile.threads[2].name = 'Idle C';
       profile.threads[3].name = 'Work E';
 
-      profile.threads[0].pid = 1;
-      profile.threads[1].pid = 1;
-      profile.threads[2].pid = 2;
-      profile.threads[3].pid = 3;
+      profile.threads[0].pid = '1';
+      profile.threads[1].pid = '1';
+      profile.threads[2].pid = '2';
+      profile.threads[3].pid = '3';
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -387,8 +396,9 @@ describe('actions/receive-profile', function () {
 
       profile.threads.forEach((thread, threadIndex) => {
         thread.name = 'GeckoMain';
+        thread.isMainThread = true;
         thread.processType = 'tab';
-        thread.pid = threadIndex;
+        thread.pid = `${threadIndex}`;
       });
 
       store.dispatch(viewProfile(profile));
@@ -425,8 +435,8 @@ describe('actions/receive-profile', function () {
         ]);
         profile.threads[0].name = 'Thread with 100% CPU';
         profile.threads[1].name = 'Thread with 13% CPU';
-        profile.threads[0].pid = 1;
-        profile.threads[1].pid = 1;
+        profile.threads[0].pid = '1';
+        profile.threads[1].pid = '1';
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -446,8 +456,8 @@ describe('actions/receive-profile', function () {
         ]);
         profile.threads[0].name = 'Thread with 100% CPU';
         profile.threads[1].name = 'Thread with 4% CPU';
-        profile.threads[0].pid = 1;
-        profile.threads[1].pid = 1;
+        profile.threads[0].pid = '1';
+        profile.threads[1].pid = '1';
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -465,8 +475,8 @@ describe('actions/receive-profile', function () {
         ]);
         profile.threads[0].name = 'Thread with a very short burst of > 90% CPU';
         profile.threads[1].name = 'Thread with sustained 9% CPU';
-        profile.threads[0].pid = 1;
-        profile.threads[1].pid = 1;
+        profile.threads[0].pid = '1';
+        profile.threads[1].pid = '1';
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -483,7 +493,7 @@ describe('actions/receive-profile', function () {
           [1, 2, 100, 4, 1, 2, 6, 8, 6, 9],
         ]);
         profile.threads[0].name = 'Thread with 10% CPU';
-        profile.threads[0].pid = 1;
+        profile.threads[0].pid = '1';
 
         store.dispatch(viewProfile(profile));
         expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -551,7 +561,7 @@ describe('actions/receive-profile', function () {
             thread.samples.threadCPUDelta
           ).reduce((accum, delta) => accum + (delta ?? 0), 0);
           thread.processName = 'Single Process';
-          thread.pid = 0;
+          thread.pid = '0';
           thread.name = `Thread with ${cpuDeltaSum} CPU`;
           thread.tid = i;
         }
@@ -611,7 +621,7 @@ describe('actions/receive-profile', function () {
             thread.samples.threadCPUDelta
           ).reduce((accum, delta) => accum + (delta ?? 0), 0);
           thread.processName = 'Single Process';
-          thread.pid = 0;
+          thread.pid = '0';
           thread.name = `Thread with ${cpuDeltaSum} CPU`;
           thread.tid = i;
         }
@@ -671,7 +681,7 @@ describe('actions/receive-profile', function () {
       if (!profile) {
         profile = getEmptyProfile();
         profile.threads.push(
-          getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 1 })
+          getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: '1' })
         );
       }
 
@@ -795,8 +805,6 @@ describe('actions/receive-profile', function () {
 
       simulateSymbolStoreHasNoCache();
 
-      window.TextDecoder = TextDecoder;
-
       // Silence the warnings coming from the failed symbolication attempts, and
       // make sure that the logged error contains our error messages.
       jest.spyOn(console, 'warn').mockImplementation((error) => {
@@ -853,7 +861,6 @@ describe('actions/receive-profile', function () {
 
     afterEach(function () {
       delete window.geckoProfilerPromise;
-      delete window.TextDecoder;
     });
 
     for (const setupWith of ['frame-script', 'web-channel']) {
@@ -928,7 +935,6 @@ describe('actions/receive-profile', function () {
 
   describe('retrieveProfileFromStore', function () {
     beforeEach(function () {
-      window.TextDecoder = TextDecoder;
       window.fetch.catch(403);
 
       // Call the argument of setTimeout asynchronously right away
@@ -936,10 +942,6 @@ describe('actions/receive-profile', function () {
       jest
         .spyOn(window, 'setTimeout')
         .mockImplementation((callback) => process.nextTick(callback));
-    });
-
-    afterEach(function () {
-      delete window.TextDecoder;
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
@@ -1082,8 +1084,6 @@ describe('actions/receive-profile', function () {
 
   describe('retrieveProfileOrZipFromUrl', function () {
     beforeEach(function () {
-      window.TextDecoder = TextDecoder;
-      (window: any).TextEncoder = TextEncoder;
       window.fetch.catch(403);
 
       // Call the argument of setTimeout asynchronously right away
@@ -1091,11 +1091,6 @@ describe('actions/receive-profile', function () {
       jest
         .spyOn(window, 'setTimeout')
         .mockImplementation((callback) => process.nextTick(callback));
-    });
-
-    afterEach(function () {
-      delete window.TextDecoder;
-      delete (window: any).TextEncoder;
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
@@ -1221,14 +1216,6 @@ describe('actions/receive-profile', function () {
    * and zip file is sent, and what happens when things fail.
    */
   describe('_fetchProfile', function () {
-    beforeEach(function () {
-      window.TextDecoder = TextDecoder;
-    });
-
-    afterEach(function () {
-      delete window.TextDecoder;
-    });
-
     /**
      * This helper function encapsulates various configurations for the type of content
      * as well and response headers.
@@ -1411,16 +1398,6 @@ describe('actions/receive-profile', function () {
   });
 
   describe('retrieveProfileFromFile', function () {
-    beforeEach(function () {
-      if ((window: any).TextEncoder) {
-        throw new Error('A TextEncoder was already on the window object.');
-      }
-      (window: any).TextEncoder = TextEncoder;
-    });
-
-    afterEach(async function () {
-      delete (window: any).TextEncoder;
-    });
     /**
      * Bypass all of Flow's checks, and mock out the file interface.
      */
@@ -1467,6 +1444,31 @@ describe('actions/receive-profile', function () {
       );
     });
 
+    it(`can load a processed profile that didn't go through serializeProfile`, async function () {
+      const profile = _getSimpleProfile();
+      profile.meta.product = 'JSON Test';
+      // Add a marker to be able to exercize the stringTable easily.
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+        ['A', 1, 3],
+      ]);
+
+      const { getState, view } = await setupTestWithFile({
+        type: 'application/json',
+        payload: JSON.stringify(profile), // Note: No serializeProfile call!
+      });
+
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
+
+      expect(
+        selectedThreadSelectors.getFullMarkerListIndexes(getState())
+      ).toEqual([0]);
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      expect(getMarker(0).name).toBe('A');
+    });
+
     it('symbolicates unsymbolicated profiles', async function () {
       simulateSymbolStoreHasNoCache();
 
@@ -1505,7 +1507,6 @@ describe('actions/receive-profile', function () {
     });
 
     it('can load gzipped json with an empty mime type', async function () {
-      window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
@@ -1538,7 +1539,6 @@ describe('actions/receive-profile', function () {
     });
 
     it('can load gzipped json', async function () {
-      window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
@@ -1553,7 +1553,6 @@ describe('actions/receive-profile', function () {
     });
 
     it('can load gzipped json even with incorrect mime type', async function () {
-      window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
@@ -1568,7 +1567,6 @@ describe('actions/receive-profile', function () {
     });
 
     it('will give an error when unable to parse gzipped profiles', async function () {
-      window.TextDecoder = TextDecoder;
       const consoleErrorSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
@@ -1832,6 +1830,7 @@ describe('actions/receive-profile', function () {
           ...profile1.threads[0],
           pid: '0 from profile 1',
           tid: '0 from profile 1',
+          isMainThread: true,
           processName: 'name 1: Empty',
           unregisterTime: getTimeRangeForThread(profile1.threads[0], 1).end,
         },
@@ -1839,6 +1838,7 @@ describe('actions/receive-profile', function () {
           ...profile2.threads[1],
           pid: '0 from profile 2',
           tid: '1 from profile 2',
+          isMainThread: true,
           processName: 'Profile 2: Empty',
           unregisterTime: getTimeRangeForThread(profile2.threads[1], 1).end,
         },

@@ -116,12 +116,12 @@ describe('calltree/CallNodeContextMenu', function () {
       { matcher: /Collapse function/, type: 'collapse-function-subtree' },
       { matcher: /XUL/, type: 'collapse-resource' },
       {
-        matcher: /Collapse direct recursion/,
-        type: 'collapse-direct-recursion',
+        matcher: /Collapse recursion/,
+        type: 'collapse-recursion',
       },
       {
-        matcher: /Collapse indirect recursion/,
-        type: 'collapse-indirect-recursion',
+        matcher: /Collapse direct recursion/,
+        type: 'collapse-direct-recursion',
       },
       { matcher: /Drop samples/, type: 'drop-function' },
     ];

@@ -15,6 +15,7 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Android 版 Firefox
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
@@ -47,6 +48,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = 显示 <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = 合并函数
     .title = 将函数折叠后，其会从分析记录移除，并将所有时间归予调用该函数的函数。在树中调用该函数的任何地方都会如此。
 CallNodeContextMenu--transform-merge-call-node = 只合并节点
@@ -60,6 +64,11 @@ CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反�
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = 聚集于分类 <strong>{ $categoryName }</strong>
+    .title = 聚焦于与选择的节点相同的分类，因此会将属于其他分类的节点合并。
 CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
     .title = 将函数折叠后，会移除其所有调用内容，并将所有时间归予该函数。此举可避免对不需要分析的代码进行调用，简化分析记录本身。
 # This is used as the context menu item to apply the "Collapse resource" transform.
@@ -67,6 +76,10 @@ CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = 折叠 <strong>{ $nameForResource }</strong>
     .title = 折叠资源可将所有对该资源的调用，扁平化为已折叠的单个调用节点。
+CallNodeContextMenu--transform-collapse-recursion = 取消递归
+    .title = 取消递归会删除同一函数的重复递归调用，也适用于栈上立即调用的函数
+CallNodeContextMenu--transform-collapse-direct-recursion-only = 仅取消直接递归
+    .title = 取消直接递归会删除同一函数的重复递归调用，不适用于栈上立即调用的函数
 CallNodeContextMenu--transform-drop-function = 丢弃与此函数相关的样本
     .title = 将样本丢弃后，会从分析记录移除这些样本的时间。在需要清除与分析无关的计时信息时，十分有用。
 CallNodeContextMenu--expand-all = 全部展开
@@ -143,6 +156,15 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = 啊哦，此面板发生某些未知错误。
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description = 请将此问题报告给开发者，包含开发者工具的 Web 控制台中显示的完整错误。
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = 到 GitHub 报告错误
+
 ## Footer Links
 
 FooterLinks--legal = 法律
@@ -175,6 +197,10 @@ Home--load-from-url-submit-button =
 Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--menu-button-instructions = 启用分析器菜单按钮，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
+Home--profile-firefox-android-instructions =
+    您还可以分析 { -firefox-android-brand-name }。
+    有关更多信息，请查阅此文档：
+    <a>直接在设备上分析 { -firefox-android-brand-name }</a>。
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
@@ -192,6 +218,9 @@ Home--additional-content-title = 加载现有分析记录
 Home--additional-content-content = 您可以将分析记录<strong>拖放</strong>至此处，或：
 Home--compare-recordings-info = 您也可以比较记录内容。<a>打开比较界面。</a>
 Home--your-recent-uploaded-recordings-title = 您最近上传的记录
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 = { -profiler-brand-name } 也可以从其他分析器导入记录，例如 <perf>Linux perf</perf>、<simpleperf>Android SimplePerf</simpleperf>、Chrome 性能面板、<androidstudio>Android Studio</androidstudio>，支持直接导入 <dhat>dhat</dhat>、<traceevent>Google 的 Trace Event</traceevent> 格式保存的分析记录。<write>点此了解如何编写您自己的导入程序</write>。
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -257,12 +286,23 @@ MarkerContextMenu--select-the-receiver-thread = 选择 Receiver 线程“<strong
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = 选择 Sender 线程“<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = 不用标记过滤器“<strong>{ $filter }</strong>”标记此样本
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = 过滤标记：
     .title = 只显示匹配特定名称的标记
+MarkerSettings--marker-filters =
+    .title = 标记过滤器
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -340,6 +380,8 @@ MenuButtons--metaInfo--logical-cpu =
     { $logicalCPUs ->
        *[other] 逻辑核心 × { $logicalCPUs }
     }
+MenuButtons--metaInfo--profiling-started = 记录开始于：
+MenuButtons--metaInfo--profiling-session = 记录长度：
 MenuButtons--metaInfo--main-process-started = 主进程开始：
 MenuButtons--metaInfo--main-process-ended = 主进程结束：
 MenuButtons--metaInfo--interval = 间隔：
@@ -356,6 +398,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = 无限制
 MenuButtons--metaInfo--application = 应用程序
 MenuButtons--metaInfo--name-and-version = 名称和版本：
+MenuButtons--metaInfo--application-uptime = 运行时间：
 MenuButtons--metaInfo--update-channel = 更新通道:
 MenuButtons--metaInfo--build-id = 构建 ID：
 MenuButtons--metaInfo--build-type = 构建类型：
@@ -431,6 +474,7 @@ MenuButtons--publish--message-something-went-wrong = 啊哦，上传分析记录
 MenuButtons--publish--message-try-again = 再试一次
 MenuButtons--publish--download = 下载
 MenuButtons--publish--compressing = 正在压缩…
+MenuButtons--publish--error-while-compressing = 压缩时出错，请尝试取消选中某些复选框以减小配置文件大小。
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -516,6 +560,11 @@ ProfileLoaderAnimation--loading-view-not-found = 找不到视图
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = 返回主页
 
+## Root
+
+Root--error-boundary-message =
+    .message = 啊哦，profiler.firefox.com 发生某些未知错误。
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -536,9 +585,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = 所有栈
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = 原生
+StackSettings--implementation-all-frames = 所有帧
+    .title = 不过滤栈上的帧
+StackSettings--implementation-javascript2 = JavaScript
+    .title = 仅显示栈上需要执行的 JavaScript 帧
+StackSettings--implementation-native2 = 原生
+    .title = 仅显示栈上的原生代码帧
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = 过滤栈：
 StackSettings--use-data-source-label = 数据源：
 StackSettings--call-tree-strategy-timing = 计时
     .title = 使用时间推移下已执行代码的采样栈进行汇总
@@ -584,6 +638,7 @@ TrackContextMenu--hide-other-screenshots-tracks = 隐藏其他快照轨
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = 隐藏“{ $trackName }”
 TrackContextMenu--show-all-tracks = 显示所有轨道
+TrackContextMenu--show-local-tracks-in-process = 显示此进程中的所有轨道
 # This is used in the tracks context menu as a button to show all the tracks
 # that match the search filter.
 TrackContextMenu--show-all-matching-tracks = 显示所有匹配的轨道
@@ -621,6 +676,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = 自前一次采样以�
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = 功率
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -631,6 +691,62 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = 功率
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh（{ $carbonValue } kg CO₂e）
+    .label = 可见范围内的能耗
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh（{ $carbonValue } g CO₂e）
+    .label = 可见范围内的能耗
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO2e)
+    .label = 可见范围内的能耗
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO2e)
+    .label = 可见范围内的能耗
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh（{ $carbonValue } kg CO₂e）
+    .label = 当前选择范围内的能耗
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh ({ $carbonValue } g CO2e)
+    .label = 当前选择范围内的能耗
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh ({ $carbonValue } mg CO2e)
+    .label = 当前选择范围内的能耗
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO2e)
+    .label = 当前选择范围内的能耗
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -669,6 +785,11 @@ TransformNavigator--focus-subtree = 聚焦节点：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = 聚焦：{ $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = 聚焦分类：{ $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -684,40 +805,64 @@ TransformNavigator--merge-function = 合并：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = 丢弃：{ $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = 取消递归：{ $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = 折叠直接递归：{ $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = 折叠间接递归：{ $item }
+TransformNavigator--collapse-direct-recursion-only = 仅取消直接递归：{ $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = 不用过滤器 “{ $item }” 标记该样本
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = 等待 { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = 正在等待 { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = 源代码不可用
+BottomBox--source-code-not-available-title = 源代码不可用
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #3741</a>。
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = 汇编代码不可用
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #4520</a>。
+SourceView--close-button =
+    .title = 关闭源代码视图
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = 此文件没有已知的 cross-origin-accessible 网址。
@@ -743,6 +888,17 @@ SourceView--browser-api-error-when-obtaining-source = 浏览器的符号化 API 
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = 本地符号服务器的符号化 API 返回错误：{ $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = 浏览器的符号化 API 返回异常响应：{ $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = 本地符号服务器的符号化 API 返回异常响应：{ $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
@@ -756,8 +912,17 @@ SourceView--not-in-archive-error-when-obtaining-source = { $url } 处的存档�
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = 无法解析 { $url } 处的存档：{ $parsingErrorMessage }
-SourceView--close-button =
-    .title = 关闭源代码视图
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = 显示汇编代码视图
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = 隐藏汇编代码视图
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

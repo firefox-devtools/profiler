@@ -586,10 +586,9 @@ export const TimelineMarkersOverview = explicitConnect<
     const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
-      additionalClassName:
-        selectors.getThread(state).name === 'GeckoMain'
-          ? 'timelineMarkersGeckoMain'
-          : null,
+      additionalClassName: selectors.getThread(state).isMainThread
+        ? 'timelineMarkersGeckoMain'
+        : null,
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineOverviewMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),

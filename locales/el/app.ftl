@@ -51,6 +51,9 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Εμφάνιση <strong>{ $fileName }</strong>
 CallNodeContextMenu--transform-merge-function = Συγχώνευση συνάρτησης
     .title =
         Η συγχώνευση μιας συνάρτησης την αφαιρεί από το προφίλ και αναθέτει το χρόνο της στη
@@ -98,14 +101,14 @@ CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $n
     .title =
         Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
         τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
-CallNodeContextMenu--transform-collapse-direct-recursion2 = Σύμπτυξη άμεσης επανάληψης
+CallNodeContextMenu--transform-collapse-recursion = Σύμπτυξη αναδρομής
     .title =
-        Η σύμπτυξη άμεσης επανάληψης αφαιρεί τις κλήσεις που συνεχώς επαναλαμβάνονται στην
-        ίδια συνάρτηση, χωρίς ενδιάμεσες συναρτήσεις στη στοίβα.
-CallNodeContextMenu--transform-collapse-indirect-recursion = Σύμπτυξη έμμεσης επανάληψης
+        Η σύμπτυξη αναδρομής αφαιρεί κλήσεις που κάνουν επαναλαμβανόμενα αναδρομή
+        στην ίδια συνάρτηση, ακόμα και με ενδιάμεσες συναρτήσεις στη στοίβα.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Σύμπτυξη μόνο των άμεσων αναδρομών
     .title =
-        Η σύμπτυξη έμμεσης επανάληψης αφαιρεί τις κλήσεις που συνεχώς επαναλαμβάνονται στην
-        ίδια συνάρτηση, ακόμη και με ενδιάμεσες συναρτήσεις στη στοίβα.
+        Η σύμπτυξη άμεσης αναδρομής αφαιρεί κλήσεις που κάνουν επαναλαμβανόμενα αναδρομή
+        στην ίδια συνάρτηση, χωρίς ενδιάμεσες συναρτήσεις στη στοίβα.
 CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
     .title =
         Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
@@ -210,6 +213,17 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Ωχ, προέκυψε άγνωστο σφάλμα σε αυτόν τον πίνακα.
 
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Παρακαλώ αναφέρετε αυτό το ζήτημα στους προγραμματιστές, μαζί με το
+    πλήρες σφάλμα, όπως εμφανίζεται στην κονσόλα ιστού των εργαλείων ανάπτυξης.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο GitHub
+
 ## Footer Links
 
 FooterLinks--legal = Νομικά
@@ -275,6 +289,14 @@ Home--additional-content-title = Φόρτωση υπαρχόντων προφί�
 Home--additional-content-content = Μπορείτε να <strong>σύρετε και να εναποθέσετε</strong> ένα αρχείο προφίλ εδώ για φόρτωση, ή:
 Home--compare-recordings-info = Μπορείτε επίσης να συγκρίνετε καταγραφές. <a>Άνοιγμα περιβάλλοντος σύγκρισης.</a>
 Home--your-recent-uploaded-recordings-title = Πρόσφατα μεταφορτωμένες καταγραφές
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 =
+    Το { -profiler-brand-name } μπορεί επίσης να εισαγάγει προφίλ από άλλα εργαλεία καταγραφής, όπως
+    το <perf>Linux perf</perf>, το <simpleperf>Android SimplePerf</simpleperf>, ο πίνακας
+    επιδόσεων του Chrome, το <androidstudio>Android Studio</androidstudio> ή οποιοδήποτε
+    αρχείο των μορφών <dhat>dhat</dhat> ή <traceevent>Trace Event της Google</traceevent>.
+    <write>Μάθετε πώς να γράψετε το δικό σας εργαλείο εισαγωγής</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -340,12 +362,23 @@ MarkerContextMenu--select-the-receiver-thread = Επιλέξτε το νήμα �
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Επιλέξτε το νήμα αποστολέα «<strong>{ $threadName }</strong>»
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Απόρριψη δειγμάτων εκτός των δεικτών που αντιστοιχούν στο «<strong>{ $filter }</strong>»
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Φιλτράρισμα σημαδιών:
     .title = Εμφάνιση μόνο των σημαδιών που αντιστοιχούν σε ένα συγκεκριμένο όνομα
+MarkerSettings--marker-filters =
+    .title = Φίλτρα δείκτη
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -427,6 +460,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } λογικός πυρήνας
        *[other] { $logicalCPUs } λογικοί πυρήνες
     }
+MenuButtons--metaInfo--profiling-started = Έναρξη καταγραφής:
+MenuButtons--metaInfo--profiling-session = Διάρκεια καταγραφής:
 MenuButtons--metaInfo--main-process-started = Έναρξη κύριας διεργασίας:
 MenuButtons--metaInfo--main-process-ended = Τέλος κύριας διεργασίας:
 MenuButtons--metaInfo--interval = Διάστημα:
@@ -444,6 +479,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Απεριόριστη
 MenuButtons--metaInfo--application = Εφαρμογή
 MenuButtons--metaInfo--name-and-version = Όνομα και έκδοση:
+MenuButtons--metaInfo--application-uptime = Χρόνος λειτουργίας:
 MenuButtons--metaInfo--update-channel = Κανάλι ενημερώσεων:
 MenuButtons--metaInfo--build-id = ID δομής:
 MenuButtons--metaInfo--build-type = Τύπος δομής:
@@ -519,6 +555,7 @@ MenuButtons--publish--message-something-went-wrong = Ωχ όχι, κάτι πή�
 MenuButtons--publish--message-try-again = Δοκιμή ξανά
 MenuButtons--publish--download = Λήψη
 MenuButtons--publish--compressing = Συμπίεση…
+MenuButtons--publish--error-while-compressing = Σφάλμα κατά τη συμπίεση, δοκιμάστε να καταργήσετε μερικές επιλογές για να μειώσετε το μέγεθος του προφίλ.
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -606,6 +643,11 @@ ProfileLoaderAnimation--loading-view-not-found = Η προβολή δεν βρέ
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Πίσω στην αρχική
 
+## Root
+
+Root--error-boundary-message =
+    .message = Ωχ, προέκυψε κάποιο άγνωστο σφάλμα στο profiler.firefox.com.
+
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
@@ -625,9 +667,14 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
-StackSettings--implementation-all-stacks = Όλες οι στοίβες
-StackSettings--implementation-javascript = JavaScript
-StackSettings--implementation-native = Εγγενές
+StackSettings--implementation-all-frames = Όλα τα καρέ
+    .title = Να μην γίνεται φιλτράρισμα των καρέ στοίβας
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Εμφάνιση μόνο των καρέ στοίβας που σχετίζονται με την εκτέλεση της JavaScript
+StackSettings--implementation-native2 = Εγγενές
+    .title = Εμφάνιση μόνο των καρέ στοίβας για εγγενή κώδικα
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Φιλτράρισμα στοιβών:
 StackSettings--use-data-source-label = Πηγή δεδομένων:
 StackSettings--call-tree-strategy-timing = Χρονισμοί
     .title = Περίληψη με δειγματοληπτικές στοίβες σταδιακά εκτελεσμένου κώδικα
@@ -711,6 +758,11 @@ TrackMemoryGraph--operations-since-the-previous-sample = λειτουργίες 
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Ισχύς
 # This is used in the tooltip when the power value uses the watt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -721,6 +773,13 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Ισχύς
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Ενέργεια που χρησιμοποιείται στο ορατό εύρος
 # This is used in the tooltip when the energy used in the current range uses the
 # watt-hour unit.
 # Variables:
@@ -735,6 +794,41 @@ TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh ({ $car
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
     .label = Η ενέργεια που χρησιμοποιείται στο ορατό εύρος
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στο ορατό εύρος
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
+    .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -793,40 +887,64 @@ TransformNavigator--merge-function = Συγχώνευση: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = Απόρριψη: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Σύμπτυξη αναδρομής: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-direct-recursion2 = Σύμπτυξη άμεσης αναδρομής: { $item }
-# "Collapse indirect recursion" transform.
-# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
-# Variables:
-#   $item (String) - Name of the function that transform applied to.
-TransformNavigator--collapse-indirect-recursion = Σύμπτυξη έμμεσης αναδρομής: { $item }
+TransformNavigator--collapse-direct-recursion-only = Σύμπτυξη μόνο άμεσης αναδρομής: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Σύμπτυξη υπόδεντρου: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Απόρριψη δειγμάτων εκτός των δεικτών που αντιστοιχούν στο: «{ $item }»
 
-## Source code view in a box at the bottom of the UI.
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
 
-# Displayed while the source view is waiting for the network request which
-# delivers the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
 # Variables:
 #   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
 SourceView--loading-url = Αναμονή για { $host }…
-# Displayed while the source view is waiting for the browser to deliver
-# the source code.
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
 SourceView--loading-browser-connection = Αναμονή για { -firefox-brand-name }…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
-SourceView--source-not-available-title = Μη διαθέσιμη πηγή
+BottomBox--source-code-not-available-title = Ο πηγαίος κώδικας δεν είναι διαθέσιμος
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 SourceView--source-not-available-text = Δείτε το <a>ζήτημα #3741</a> για υποστηριζόμενα σενάρια και προγραμματισμένες βελτιώσεις.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Ο κώδικας assembly δεν είναι διαθέσιμος
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Δείτε το <a>ζήτημα #4520</a> για υποστηριζόμενα σενάρια και προγραμματισμένες βελτιώσεις.
+SourceView--close-button =
+    .title = Κλείσιμο προβολής πηγής
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
 # Displayed below SourceView--cannot-obtain-source, if the profiler does not
 # know which URL to request source code from.
 SourceView--no-known-cors-url = Δεν υπάρχει γνωστό URL με δυνατότητα πρόσβασης από πολλαπλές προελεύσεις για αυτό το αρχείο.
@@ -852,6 +970,17 @@ SourceView--browser-api-error-when-obtaining-source = Το API συμβολισ�
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--local-symbol-server-api-error-when-obtaining-source = Το API συμβολισμού του διακομιστή τοπικών συμβόλων επέστρεψε σφάλμα: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = Το API συμβολισμού του προγράμματος περιήγησης επέστρεψε απάντηση με εσφαλμένη μορφή: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = Το API συμβολισμού του διακομιστή τοπικών συμβόλων επέστρεψε απάντηση με εσφαλμένη μορφή: { $apiErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
@@ -865,8 +994,17 @@ SourceView--not-in-archive-error-when-obtaining-source = Το αρχείο «{ $
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Δεν ήταν δυνατή η ανάλυση του αρχείου στο { $url }: { $parsingErrorMessage }
-SourceView--close-button =
-    .title = Κλείσιμο προβολής πηγής
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Εμφάνιση προβολής assembly
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Απόκρυψη προβολής assembly
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

@@ -114,7 +114,7 @@ export function computeActivityGraphFills(
     mutableFills
   );
 
-  const upperGraphEdge = activityGraphFills.run();
+  const { averageCPUPerPixel, upperGraphEdge } = activityGraphFills.run();
   // We're done mutating the fills' Float32Array buffers.
   const fills = mutableFills;
 
@@ -123,6 +123,7 @@ export function computeActivityGraphFills(
     fillsQuerier: new ActivityFillGraphQuerier(
       renderedComponentSettings,
       fills,
+      averageCPUPerPixel,
       upperGraphEdge
     ),
   };
@@ -152,10 +153,17 @@ export class ActivityGraphFillComputer {
    * Run the computation to compute a list of the fills that need to be drawn for the
    * ThreadActivityGraph.
    */
-  run(): Float32Array {
+  run(): {|
+    +averageCPUPerPixel: Float32Array,
+    +upperGraphEdge: Float32Array,
+  |} {
     // First go through each sample, and set the buffers that contain the percentage
     // that a category contributes to a given place in the X axis of the chart.
     this._accumulateSampleCategories();
+
+    // First get the average CPU in each pixel, and then accumulate the upper edge
+    // of the graph after applying the blur.
+    const averageCPUPerPixel = this._accumulateUpperEdge().slice();
 
     // Smooth the graphs by applying a 1D gaussian blur to the per-pixel
     // contribution of each fill.
@@ -165,7 +173,7 @@ export class ActivityGraphFillComputer {
 
     const upperGraphEdge = this._accumulateUpperEdge();
 
-    return upperGraphEdge;
+    return { averageCPUPerPixel, upperGraphEdge };
   }
 
   /**
@@ -383,15 +391,18 @@ export class ActivityGraphFillComputer {
 export class ActivityFillGraphQuerier {
   renderedComponentSettings: RenderedComponentSettings;
   fills: CategoryFill[];
+  averageCPUPerPixel: Float32Array;
   upperGraphEdge: Float32Array;
 
   constructor(
     renderedComponentSettings: RenderedComponentSettings,
     fills: CategoryFill[],
+    averageCPUPerPixel: Float32Array,
     upperGraphEdge: Float32Array
   ) {
     this.renderedComponentSettings = renderedComponentSettings;
     this.fills = fills;
+    this.averageCPUPerPixel = averageCPUPerPixel;
     this.upperGraphEdge = upperGraphEdge;
   }
 
@@ -410,16 +421,22 @@ export class ActivityFillGraphQuerier {
     const deviceX = Math.round(cssX * devicePixelRatio);
     const deviceY = Math.round(cssY * devicePixelRatio);
     const categoryUnderMouse = this._categoryAtDevicePixel(deviceX, deviceY);
+
+    const candidateSamples = this._getSamplesAtTime(time);
+    const cpuRatioInTimeRange = this._getCPURatioAtX(deviceX, candidateSamples);
+
     if (categoryUnderMouse === null) {
-      return null;
+      if (cpuRatioInTimeRange === null) {
+        // If there is not CPU ratio values in that time range, do not show the tooltip.
+        return null;
+      }
+      // Show only the CPU ratio in the tooltip.
+      return { sample: null, cpuRatioInTimeRange };
     }
 
     // Get all samples that contribute pixels to the clicked category in this
     // pixel column of the graph.
     const { category, categoryLowerEdge, yPercentage } = categoryUnderMouse;
-    const candidateSamples = this._getSamplesAtTime(time);
-
-    const cpuRatioInTimeRange = this._getCPURatioAtX(deviceX, candidateSamples);
 
     // The candidate samples are sorted by gravity, bottom to top.
     // Each sample occupies a non-empty subrange of the [0, 1] range. The height
@@ -485,9 +502,7 @@ export class ActivityFillGraphQuerier {
       return null;
     }
 
-    // This is the height of the graph and it directly corresponds to the average
-    // CPU usage number.
-    const cpuRatio = this.upperGraphEdge[deviceX];
+    const cpuRatio = this.averageCPUPerPixel[deviceX];
 
     // Get the time range of the contributed samples to the average CPU usage value.
     let timeRange = 0;
