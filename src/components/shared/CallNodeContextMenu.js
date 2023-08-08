@@ -15,7 +15,10 @@ import {
   funcHasRecursiveCall,
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
-import { getBottomBoxInfoForCallNode } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getBottomBoxInfoForCallNode,
+  getOriginAnnotationForFunc,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
 
 import copy from 'copy-to-clipboard';
@@ -219,7 +222,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { stringTable, funcTable },
+      thread: { funcTable, resourceTable, stringTable },
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
@@ -227,9 +230,19 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     let curCallNodeIndex = callNodeIndex;
 
     do {
+      // Match the style of MarkerContextMenu.js#convertStackToString which uses
+      // square brackets around [file:line:column] info. This isn't provided by
+      // getOriginAnnotationForFunc, so build the string in two parts:
       const funcIndex = callNodeTable.func[curCallNodeIndex];
-      const stringIndex = funcTable.name[funcIndex];
-      stack += stringTable.getString(stringIndex) + '\n';
+      const funcNameIndex = funcTable.name[funcIndex];
+      const funcName = stringTable.getString(funcNameIndex);
+      const fileNameURL = getOriginAnnotationForFunc(
+        funcIndex,
+        funcTable,
+        resourceTable,
+        stringTable
+      );
+      stack += funcName + (fileNameURL ? ` [${fileNameURL}]\n` : '\n');
       curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
     } while (curCallNodeIndex !== -1);
 

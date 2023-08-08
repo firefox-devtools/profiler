@@ -2420,7 +2420,10 @@ export function getOriginAnnotationForFunc(
   if (fileNameIndex !== null) {
     fileName = stringTable.getString(fileNameIndex);
 
-    // Strip off any filename decorations from symbolication.
+    // Strip off any filename decorations from symbolication. It could be a path
+    // (potentially using "special path" syntax, e.g. hg:...), or it could be a
+    // URL, if the function is a JS function. If it's a path from symbolication,
+    // strip it down to just the actual path.
     fileName = parseFileNameFromSymbolication(fileName).path;
 
     const lineNumber = funcTable.lineNumber[funcIndex];
