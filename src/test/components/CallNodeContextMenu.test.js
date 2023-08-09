@@ -44,6 +44,35 @@ describe('calltree/CallNodeContextMenu', function () {
     return store;
   }
 
+  function createStoreWithJsCallStack() {
+    // Create a new profile that has JavaScript in it.
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A.js
+      B.js
+    `);
+    const [thread] = profile.threads;
+    const fileNameIndex = thread.stringTable.indexForString(
+      'https://example.com/script.js'
+    );
+
+    const funcIndexA = funcNames.indexOf('A.js');
+    thread.funcTable.fileName[funcIndexA] = fileNameIndex;
+    thread.funcTable.lineNumber[funcIndexA] = 1;
+    thread.funcTable.columnNumber[funcIndexA] = 111;
+
+    const funcIndexB = funcNames.indexOf('B.js');
+    thread.funcTable.fileName[funcIndexB] = fileNameIndex;
+    thread.funcTable.lineNumber[funcIndexB] = 2;
+    thread.funcTable.columnNumber[funcIndexB] = 222;
+
+    const store = storeWithProfile(profile);
+    store.dispatch(changeRightClickedCallNode(0, [funcIndexA, funcIndexB]));
+    return store;
+  }
+
   function setup(store = createStore(), openMenuState = true) {
     store.dispatch(setContextMenuVisibility(openMenuState));
 
@@ -157,33 +186,19 @@ describe('calltree/CallNodeContextMenu', function () {
     });
 
     it('can copy a script URL', function () {
-      // Create a new profile that has JavaScript in it.
-      const {
-        profile,
-        funcNamesPerThread: [funcNames],
-      } = getProfileFromTextSamples(`
-        A.js
-      `);
-      const funcIndex = funcNames.indexOf('A.js');
-      const [thread] = profile.threads;
-      thread.funcTable.fileName[funcIndex] = thread.stringTable.indexForString(
-        'https://example.com/script.js'
-      );
-
-      const store = storeWithProfile(profile);
-      store.dispatch(changeRightClickedCallNode(0, [funcIndex]));
-      const { getByText } = setup(store);
-
+      const { getByText } = setup(createStoreWithJsCallStack());
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy script URL'));
       expect(copy).toHaveBeenCalledWith('https://example.com/script.js');
     });
 
     it('can copy a stack', function () {
-      const { getByText } = setup();
+      const { getByText } = setup(createStoreWithJsCallStack());
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy stack'));
-      expect(copy).toHaveBeenCalledWith(`B\nA\n`);
+      expect(copy).toHaveBeenCalledWith(
+        `B.js [https://example.com/script.js:2:222]\nA.js [https://example.com/script.js:1:111]\n`
+      );
     });
   });
 });
