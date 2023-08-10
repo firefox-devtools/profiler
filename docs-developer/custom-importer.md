@@ -5,7 +5,7 @@ The Firefox Profiler supports a few [external profile formats](../src/profile-lo
 ## Useful Docs
 
  * [Gecko profile format docs](./gecko-profile-format.md)
- * [processed profile format](./process-profile-format)
+ * [processed profile format](./processed-profile-format.md)
 
 ## Useful code links
 

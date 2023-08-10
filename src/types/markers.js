@@ -89,6 +89,25 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
+export type MarkerGraphColor =
+  | 'blue'
+  | 'green'
+  | 'grey'
+  | 'ink'
+  | 'magenta'
+  | 'orange'
+  | 'purple'
+  | 'red'
+  | 'teal'
+  | 'yellow';
+
+export type MarkerGraphType = 'bar' | 'line' | 'line-filled';
+export type MarkerGraph = {|
+  key: string,
+  type: MarkerGraphType,
+  color?: MarkerGraphColor,
+|};
+
 export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
@@ -123,6 +142,9 @@ export type MarkerSchema = {|
         value: string,
       |}
   >,
+
+  // if present, give the marker its own local track
+  graphs?: Array<MarkerGraph>,
 |};
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;

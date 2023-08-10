@@ -232,7 +232,7 @@ FullTimeline--tracks-button = Дарожак: <span>{ $visibleTrackCount }</span
 ## Home page
 
 Home--upload-from-file-input-button = Загрузіць профіль з файла
-Home--upload-from-url-button = Загрузіце профіль з URL
+Home--upload-from-url-button = Загрузіць профіль з URL
 Home--load-from-url-submit-button =
     .value = Загрузіць
 Home--documentation-button = Дакументацыя
@@ -322,7 +322,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
-MarkerContextMenu--set-selection-from-duration = Наладзьце выбарку на аснове працягласці маркера
+MarkerContextMenu--set-selection-from-duration = Наладзіць выбарку на аснове працягласці маркера
 MarkerContextMenu--start-selection-here = Пачаць вылучэнне тут
 MarkerContextMenu--end-selection-here = Скончыць вылучэнне тут
 MarkerContextMenu--start-selection-at-marker-start = Пачаць вылучэнне ад <strong>пачатку</strong> маркера
@@ -345,17 +345,28 @@ MarkerContextMenu--select-the-receiver-thread = Выберыце паток-ат
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Выберыце паток-адпраўнік “<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Адкідваць сэмплы па-за межамі маркераў, якія адпавядаюць «<strong>{ $filter }</strong>»
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Фільтр маркераў:
     .title = Паказваць толькі маркеры, якія адпавядаюць пэўнаму імені
+MarkerSettings--marker-filters =
+    .title = Фільтры маркераў
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
-MarkerSidebar--select-a-marker = Выберыце маркер, каб паглядзець інфармацыі пра яго.
+MarkerSidebar--select-a-marker = Выберыце маркер, каб паглядзець інфармацыю пра яго.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -457,6 +468,8 @@ MenuButtons--metaInfo--logical-cpu =
         [few] { $logicalCPUs } лагічных ядра
        *[many] { $logicalCPUs } лагічных ядзер
     }
+MenuButtons--metaInfo--profiling-started = Запіс пачаўся:
+MenuButtons--metaInfo--profiling-session = Працягласць запісу:
 MenuButtons--metaInfo--main-process-started = Асноўны працэс пачаўся:
 MenuButtons--metaInfo--main-process-ended = Асноўны працэс скончыўся:
 MenuButtons--metaInfo--interval = Інтэрвал:
@@ -476,6 +489,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Неабмежавана
 MenuButtons--metaInfo--application = Праграма
 MenuButtons--metaInfo--name-and-version = Назва і версія:
+MenuButtons--metaInfo--application-uptime = Час працы:
 MenuButtons--metaInfo--update-channel = Канал абнаўлення:
 MenuButtons--metaInfo--build-id = ID зборкі:
 MenuButtons--metaInfo--build-type = Тып зборкі:
@@ -896,6 +910,10 @@ TransformNavigator--collapse-direct-recursion-only = Згарнуць тольк
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Згарнуць паддрэва: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Адкідваць сэмплы па-за межамі маркераў, якія адпавядаюць: “{ $item }”
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI

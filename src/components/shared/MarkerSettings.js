@@ -12,6 +12,7 @@ import { showMenu } from '@firefox-devtools/react-contextmenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
 import { getMarkersSearchString } from 'firefox-profiler/selectors/url-state';
+import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
 import { PanelSearch } from './PanelSearch';
 import { StackImplementationSetting } from 'firefox-profiler/components/shared/StackImplementationSetting';
 import { MarkerFiltersContextMenu } from './MarkerFiltersContextMenu';
@@ -23,6 +24,7 @@ import './MarkerSettings.css';
 
 type StateProps = {|
   +searchString: string,
+  +allowSwitchingStackType: boolean,
 |};
 
 type DispatchProps = {|
@@ -87,14 +89,18 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
   };
 
   render() {
-    const { searchString } = this.props;
+    const { searchString, allowSwitchingStackType } = this.props;
     const { isMarkerFiltersMenuVisible } = this.state;
 
     return (
       <div className="markerSettings">
-        <ul className="panelSettingsList">
-          <StackImplementationSetting labelL10nId="StackSettings--stack-implementation-label" />
-        </ul>
+        {allowSwitchingStackType ? (
+          <ul className="panelSettingsList">
+            <li className="panelSettingsListItem">
+              <StackImplementationSetting labelL10nId="StackSettings--stack-implementation-label" />
+            </li>
+          </ul>
+        ) : null}
         <Localized
           id="MarkerSettings--panel-search"
           attrs={{ label: true, title: true }}
@@ -136,6 +142,7 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
 export const MarkerSettings = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     searchString: getMarkersSearchString(state),
+    allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
   }),
   mapDispatchToProps: { changeMarkersSearchString },
   component: MarkerSettingsImpl,

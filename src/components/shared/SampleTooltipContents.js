@@ -36,8 +36,9 @@ type RestProps = {|
 |};
 
 type Props = {|
-  +cpuRatioInTimeRange: CPUProps | null,
   ...RestProps,
+  +cpuRatioInTimeRange: CPUProps | null,
+  +sampleIndex: IndexIntoSamplesTable | null,
 |};
 
 /**
@@ -122,19 +123,22 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       implementationFilter,
     } = this.props;
 
-    const { samples, stackTable } = rangeFilteredThread;
-    const stackIndex = samples.stack[sampleIndex];
-    const hasSamples = samples.length > 0 && stackTable.length > 1;
     let hasStack = false;
-    if (hasSamples) {
-      const stack = getFuncNamesAndOriginsForPath(
-        convertStackToCallNodeAndCategoryPath(
-          rangeFilteredThread,
-          ensureExists(stackIndex)
-        ),
-        rangeFilteredThread
-      );
-      hasStack = stack.length > 1 || stack[0].funcName !== '(root)';
+    if (sampleIndex !== null) {
+      const { samples, stackTable } = rangeFilteredThread;
+      const stackIndex = samples.stack[sampleIndex];
+      const hasSamples = samples.length > 0 && stackTable.length > 1;
+
+      if (hasSamples) {
+        const stack = getFuncNamesAndOriginsForPath(
+          convertStackToCallNodeAndCategoryPath(
+            rangeFilteredThread,
+            ensureExists(stackIndex)
+          ),
+          rangeFilteredThread
+        );
+        hasStack = stack.length > 1 || stack[0].funcName !== '(root)';
+      }
     }
 
     return (
@@ -148,7 +152,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
         {hasStack && cpuRatioInTimeRange !== null ? (
           <TooltipDetailSeparator />
         ) : null}
-        {!hasStack ? null : (
+        {!hasStack || sampleIndex === null ? null : (
           <SampleTooltipRestContents
             sampleIndex={sampleIndex}
             rangeFilteredThread={rangeFilteredThread}

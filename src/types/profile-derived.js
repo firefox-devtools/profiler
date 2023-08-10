@@ -4,19 +4,22 @@
 
 // @flow
 import type { Milliseconds, StartEndRange, Address, Bytes } from './units';
-import type { MarkerPayload } from './markers';
+import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
-  IndexIntoFuncTable,
   ThreadIndex,
+  Thread,
   Pid,
+  IndexIntoFuncTable,
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
+  IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
   InnerWindowID,
   Page,
   IndexIntoRawMarkerTable,
+  IndexIntoStringTable,
   TabID,
   Tid,
 } from './profile';
@@ -248,6 +251,14 @@ export type CallNodeDisplayData = $Exact<
   }>
 >;
 
+export type ThreadWithReservedFunctions = {|
+  thread: Thread,
+  reservedFunctionsForResources: Map<
+    IndexIntoResourceTable,
+    IndexIntoFuncTable
+  >,
+|};
+
 /**
  * The marker timing contains the necessary information to draw markers very quickly
  * in the marker chart. It represents a single row of markers in the chart.
@@ -313,6 +324,18 @@ export type AccumulatedCounterSamples = {|
   +accumulatedCounts: number[],
 |};
 
+/**
+ * A collection of the data for all configured lines for a given marker
+ */
+export type CollectedCustomMarkerSamples = {|
+  +minNumber: number,
+  +maxNumber: number,
+  // This value holds the number per configured line
+  // selection. The array will share the indexes of the range filtered marker samples.
+  +numbersPerLine: number[][],
+  +markerIndexes: MarkerIndex[],
+|};
+
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
@@ -331,7 +354,13 @@ export type LocalTrack =
   | {| +type: 'ipc', +threadIndex: ThreadIndex |}
   | {| +type: 'event-delay', +threadIndex: ThreadIndex |}
   | {| +type: 'process-cpu', +counterIndex: CounterIndex |}
-  | {| +type: 'power', +counterIndex: CounterIndex |};
+  | {| +type: 'power', +counterIndex: CounterIndex |}
+  | {|
+      +type: 'marker',
+      +threadIndex: ThreadIndex,
+      +markerSchema: MarkerSchema,
+      +markerName: IndexIntoStringTable,
+    |};
 
 export type Track = GlobalTrack | LocalTrack;
 

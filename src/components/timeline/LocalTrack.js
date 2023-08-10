@@ -42,6 +42,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { TrackCustomMarker } from './TrackCustomMarker';
 
 type OwnProps = {|
   +pid: Pid,
@@ -117,6 +118,14 @@ class LocalTrackComponent extends PureComponent<Props> {
         return <TrackProcessCPU counterIndex={localTrack.counterIndex} />;
       case 'power':
         return <TrackPower counterIndex={localTrack.counterIndex} />;
+      case 'marker':
+        return (
+          <TrackCustomMarker
+            threadIndex={localTrack.threadIndex}
+            markerSchema={localTrack.markerSchema}
+            markerName={localTrack.markerName}
+          />
+        );
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
@@ -216,6 +225,7 @@ export const TimelineLocalTrack = explicitConnect<
         );
         break;
       }
+      case 'marker':
       case 'ipc': {
         const threadIndex = localTrack.threadIndex;
         const selectedTab = getSelectedTab(state);

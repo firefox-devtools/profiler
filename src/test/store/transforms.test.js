@@ -20,6 +20,7 @@ import {
 
 import {
   addTransformToStack,
+  addCollapseResourceTransformToStack,
   popTransformsFromStack,
   changeInvertCallstack,
   changeImplementationFilter,
@@ -844,12 +845,6 @@ describe('"collapse-resource" transform', function () {
     if (firefoxResourceIndex === -1) {
       throw new Error('Unable to find the firefox resource');
     }
-    const collapseTransform = {
-      type: 'collapse-resource',
-      resourceIndex: firefoxResourceIndex,
-      collapsedFuncIndex: thread.funcTable.length,
-      implementation: 'combined',
-    };
 
     it('starts as an unfiltered call tree', function () {
       const { getState } = storeWithProfile(profile);
@@ -867,7 +862,13 @@ describe('"collapse-resource" transform', function () {
 
     it('can collapse the "firefox" library', function () {
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(addTransformToStack(threadIndex, collapseTransform));
+      dispatch(
+        addCollapseResourceTransformToStack(
+          threadIndex,
+          firefoxResourceIndex,
+          'combined'
+        )
+      );
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
@@ -887,7 +888,13 @@ describe('"collapse-resource" transform', function () {
           ['A', 'B', 'C', 'D'].map((name) => collapsedFuncNames.indexOf(name))
         )
       );
-      dispatch(addTransformToStack(threadIndex, collapseTransform));
+      dispatch(
+        addCollapseResourceTransformToStack(
+          threadIndex,
+          firefoxResourceIndex,
+          'combined'
+        )
+      );
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(
