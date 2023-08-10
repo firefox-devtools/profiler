@@ -9,7 +9,6 @@ esproposal.optional_chaining=enable
 
 [ignore]
 <PROJECT_ROOT>/node_modules/.*
-<PROJECT_ROOT>/res/before-load\.js
 <PROJECT_ROOT>/dist/.*
 
 [libs]

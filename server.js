@@ -53,8 +53,7 @@ const serverConfig = {
       default-src 'self';
       script-src
         'self'
-        'wasm-unsafe-eval'
-        https://www.google-analytics.com;
+        'wasm-unsafe-eval';
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com;
       img-src http: https: data:;
