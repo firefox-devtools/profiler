@@ -152,7 +152,7 @@
     "open": "^9.1.0",
     "postcss": "^8.4.27",
     "postcss-loader": "^7.3.3",
-    "prettier": "^2.8.8",
+    "prettier": "^3.0.1",
     "raw-loader": "^4.0.2",
     "rimraf": "^5.0.1",
     "style-loader": "^3.3.3",
