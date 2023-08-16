@@ -29,6 +29,8 @@ import { ensureExists } from './utils/flow';
 
 // Mock out Google Analytics for anything that's not production so that we have run-time
 // code coverage in development and testing.
+// Note that ga isn't included nowadays. We still keep this code because we
+// intend to replace ga with Glean in the future, and this will still be useful.
 if (process.env.NODE_ENV === 'development') {
   window.ga = (event: string, ...payload: mixed[]) => {
     const style = 'color: #FF6D00; font-weight: bold';
