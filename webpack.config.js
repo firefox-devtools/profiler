@@ -98,7 +98,6 @@ const config = {
         'res/_headers',
         'res/_redirects',
         'res/zee-worker.js',
-        'res/before-load.js',
         'res/contribute.json',
         'res/service-worker-compat.js',
         { from: 'docs-user', to: 'docs' },
