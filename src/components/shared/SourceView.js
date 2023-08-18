@@ -160,6 +160,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       this._editor.updateLanguageForFilePath(this.props.filePath);
     }
 
+    let contentsChanged = false;
     if (
       this.props.sourceCode !== prevProps.sourceCode ||
       (this.props.sourceCode === '' &&
@@ -167,11 +168,13 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         this.props.timings !== prevProps.timings)
     ) {
       this._editor.setContents(this._getSourceCodeOrFallback());
+      contentsChanged = true;
     }
 
     if (
+      contentsChanged ||
       this.props.scrollToHotSpotGeneration !==
-      prevProps.scrollToHotSpotGeneration
+        prevProps.scrollToHotSpotGeneration
     ) {
       this._scrollToHotSpot(this.props.hotSpotTimings);
     }
