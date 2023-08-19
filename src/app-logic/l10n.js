@@ -61,7 +61,21 @@ const RTL_LOCALES = ['ar', 'he', 'fa', 'ps', 'ur'];
  * Returns the locale and the ftl string grouped as an Array.
  */
 export async function fetchMessages(locale: string): Promise<[string, string]> {
-  const response = await fetch(`/locales/${locale}/app.ftl`);
+  const response = await fetch(`/locales/${locale}/app.ftl`, {
+    // We want to be able to preload some files. However there are some
+    // browser limitations when using preloading for fetched resources:
+    // * ideally we'd just use "crossorigin" on the <link rel="preload">
+    //   element, but this doesn't work in Safari (I think this is
+    //   https://bugs.webkit.org/show_bug.cgi?id=236009)
+    // * instead we use this mode. This works because we're in
+    //   same-origin and therefore we can still access the response.
+    mode: 'no-cors',
+    // Chrome also needs this value for "credentials" instead of the default
+    // "same-origin". This should have the same behavior because we're
+    // requesting the file on the same server, but this is likely a bug in Chrome.
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=1473611
+    credentials: 'include',
+  });
   const messages = await response.text();
   return [locale, messages];
 }
