@@ -1,16 +1,9 @@
 {
-  "plugins": [
-    "stylelint-prettier"
-  ],
   "extends": [
     "stylelint-config-standard",
     "stylelint-config-idiomatic-order",
   ],
   "rules": {
-    "prettier/prettier": [
-      true,
-      { "parser": "css" }
-    ],
     "alpha-value-notation": null,
     "function-url-quotes": null,
     "keyframes-name-pattern": null,
