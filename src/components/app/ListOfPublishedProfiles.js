@@ -44,7 +44,7 @@ type PublishedProfileState = {|
  */
 class PublishedProfile extends React.PureComponent<
   PublishedProfileProps,
-  PublishedProfileState
+  PublishedProfileState,
 > {
   state = {
     confirmDialogIsOpen: false,

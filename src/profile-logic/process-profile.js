@@ -219,7 +219,7 @@ type ExtractionInfo = {
   libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable>,
   stringToNewFuncIndexAndFrameAddress: Map<
     string,
-    { funcIndex: IndexIntoFuncTable, frameAddress: Address | null }
+    { funcIndex: IndexIntoFuncTable, frameAddress: Address | null },
   >,
   globalDataCollector: GlobalDataCollector,
 };
@@ -1282,7 +1282,7 @@ function _adjustJsTracerTimestamps(
  * into milliseconds.
  */
 export function adjustProfilerOverheadTimestamps<
-  Table: { time: Microseconds[] }
+  Table: { time: Microseconds[] },
 >(table: Table, delta: Milliseconds): Table {
   return {
     ...table,

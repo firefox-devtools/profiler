@@ -33,11 +33,11 @@ export type SizeProps = $ReadOnly<State>;
 export function withSize<
   // The SizeProps act as a bounds on the generic props. This ensures that the props
   // that passed in take into account they are being given the width and height.
-  Props: $ReadOnly<{ ...SizeProps }>
+  Props: $ReadOnly<{ ...SizeProps }>,
 >(Wrapped: React.ComponentType<Props>): React.ComponentType<
   // The component that is returned does not accept width and height parameters, as
   // they are injected by this higher order component.
-  $ReadOnly<$Diff<Props, SizeProps>>
+  $ReadOnly<$Diff<Props, SizeProps>>,
 > {
   // An existential type in a generic is a bit tricky to remove. Perhaps this can
   // use a hook instead.

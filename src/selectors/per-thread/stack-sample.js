@@ -55,7 +55,7 @@ import type { MarkerSelectorsPerThread } from './markers';
  * definition for the type of the selector.
  */
 export type StackAndSampleSelectorsPerThread = $ReturnType<
-  typeof getStackAndSampleSelectorsPerThread
+  typeof getStackAndSampleSelectorsPerThread,
 >;
 
 type ThreadAndMarkerSelectorsPerThread = {|
@@ -199,7 +199,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getExpandedCallNodeIndexes: Selector<
-    Array<IndexIntoCallNodeTable | null>
+    Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
     getCallNodeInfo,
     getExpandedCallNodePaths,
@@ -211,7 +211,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getSamplesSelectedStatesInFilteredThread: Selector<
-    null | SelectedState[]
+    null | SelectedState[],
   > = createSelector(
     threadSelectors.getFilteredThread,
     threadSelectors.getTabFilteredThread,
@@ -247,7 +247,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getTreeOrderComparatorInFilteredThread: Selector<
-    (IndexIntoSamplesTable, IndexIntoSamplesTable) => number
+    (IndexIntoSamplesTable, IndexIntoSamplesTable) => number,
   > = createSelector(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,

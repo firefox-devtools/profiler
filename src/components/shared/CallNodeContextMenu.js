@@ -801,7 +801,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 export const CallNodeContextMenu = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => {
     const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);

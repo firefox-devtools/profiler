@@ -191,7 +191,7 @@ export type DerivedMarkerInfo = {|
   markers: Marker[],
   markerIndexToRawMarkerIndexes: IndexedArray<
     MarkerIndex,
-    IndexIntoRawMarkerTable[]
+    IndexIntoRawMarkerTable[],
   >,
 |};
 
@@ -248,14 +248,14 @@ export type CallNodeDisplayData = $Exact<
     badge?: ExtraBadgeInfo,
     icon: string | null,
     ariaLabel: string,
-  }>
+  }>,
 >;
 
 export type ThreadWithReservedFunctions = {|
   thread: Thread,
   reservedFunctionsForResources: Map<
     IndexIntoResourceTable,
-    IndexIntoFuncTable
+    IndexIntoFuncTable,
   >,
 |};
 
@@ -414,7 +414,7 @@ export type OriginsTimelineTrack =
   | OriginsTimelineNoOrigin;
 
 export type OriginsTimeline = Array<
-  OriginsTimelineNoOrigin | OriginsTimelineRoot
+  OriginsTimelineNoOrigin | OriginsTimelineRoot,
 >;
 
 /**

@@ -117,7 +117,7 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
 export const SourceCodeFetcher = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     sourceViewFile: getSourceViewFile(state),

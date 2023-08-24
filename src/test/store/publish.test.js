@@ -879,9 +879,8 @@ describe('attemptToPublish', function () {
 
       // This is the first request, it hasn't been added because the request was
       // aborted before the end.
-      const firstRequestData = await retrieveUploadedProfileInformationFromDb(
-        BARE_PROFILE_TOKEN
-      );
+      const firstRequestData =
+        await retrieveUploadedProfileInformationFromDb(BARE_PROFILE_TOKEN);
       expect(firstRequestData).toBe(null);
 
       // And now, checking that we can retrieve this data when retrieving the

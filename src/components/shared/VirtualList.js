@@ -69,7 +69,7 @@ type VirtualListRowProps<Item> = {|
 |};
 
 class VirtualListRow<Item> extends React.PureComponent<
-  VirtualListRowProps<Item>
+  VirtualListRowProps<Item>,
 > {
   render() {
     const { renderItem, item, index, columnIndex } = this.props;
@@ -89,7 +89,7 @@ type VirtualListInnerChunkProps<Item> = {|
 |};
 
 class VirtualListInnerChunk<Item> extends React.PureComponent<
-  VirtualListInnerChunkProps<Item>
+  VirtualListInnerChunkProps<Item>,
 > {
   render() {
     const {
@@ -153,7 +153,7 @@ type VirtualListInnerProps<Item> = {|
 |};
 
 class VirtualListInner<Item> extends React.PureComponent<
-  VirtualListInnerProps<Item>
+  VirtualListInnerProps<Item>,
 > {
   render() {
     const {
@@ -255,7 +255,7 @@ type VirtualListState = {|
 
 export class VirtualList<Item> extends React.PureComponent<
   VirtualListProps<Item>,
-  VirtualListState
+  VirtualListState,
 > {
   _container: {| current: HTMLDivElement | null |} = React.createRef();
   state = { scrollTop: 0, containerHeight: 0 };

@@ -194,7 +194,7 @@ type ProviderDispatchProps = {|
 type ProviderProps = ConnectedProps<
   ProviderOwnProps,
   ProviderStateProps,
-  ProviderDispatchProps
+  ProviderDispatchProps,
 >;
 
 /**
@@ -257,7 +257,7 @@ class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
 export const AppLocalizationProvider = explicitConnect<
   ProviderOwnProps,
   ProviderStateProps,
-  ProviderDispatchProps
+  ProviderDispatchProps,
 >({
   mapStateToProps: (state) => ({
     localization: getLocalization(state),

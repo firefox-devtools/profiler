@@ -23,7 +23,7 @@ type StateProps = $Diff<Props, DispatchProps>;
 export const TransformNavigator = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state: State) => {
     const items = selectedThreadSelectors.getLocalizedTransformLabels(state);

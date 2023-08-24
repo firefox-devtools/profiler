@@ -350,7 +350,7 @@ const _getTimelineIsSelected = memoize(
 export const TimelineTrackThread = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadsKey } = ownProps;

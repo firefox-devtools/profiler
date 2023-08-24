@@ -70,7 +70,7 @@ const MOUSE_CLICK_MAX_MOVEMENT_DELTA: CssPixels = 5;
 // But we still conditionally update the canvas itself, see componentDidUpdate.
 export class ChartCanvas<HoveredItem> extends React.Component<
   Props<HoveredItem>,
-  State<HoveredItem>
+  State<HoveredItem>,
 > {
   _devicePixelRatio: number = 1;
   // The current mouse position. Needs to be stored for tooltip

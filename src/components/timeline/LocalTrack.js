@@ -189,7 +189,7 @@ class LocalTrackComponent extends PureComponent<Props> {
 export const TimelineLocalTrack = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, { pid, localTrack, trackIndex }) => {
     // These get assigned based on the track type.
