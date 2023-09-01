@@ -4,16 +4,16 @@ The Firefox Profiler supports a few [external profile formats](../src/profile-lo
 
 ## Useful Docs
 
- * [Gecko profile format docs](./gecko-profile-format.md)
- * [processed profile format](./processed-profile-format.md)
+- [Gecko profile format docs](./gecko-profile-format.md)
+- [processed profile format](./processed-profile-format.md)
 
 ## Useful code links
 
- * [Gecko profile format type definition](../src/types/gecko-profile.js)
- * [processed profile format type definition](../src/types/profile.js)
- * [marker payload type definitions](../src/types/markers.js)
- * [profiler data structure utilities](../src/profile-logic/data-structures.js)
- * [existing importers](../src/profile-logic/import)
+- [Gecko profile format type definition](../src/types/gecko-profile.js)
+- [processed profile format type definition](../src/types/profile.js)
+- [marker payload type definitions](../src/types/markers.js)
+- [profiler data structure utilities](../src/profile-logic/data-structures.js)
+- [existing importers](../src/profile-logic/import)
 
 ## How to write a profile converter
 
@@ -35,19 +35,19 @@ The profile format uses a lot of indexes into other data structures. For instanc
 
   // Look up the stack index from the samples table.
   const stackIndex = thread.samples.stack[sampleIndex];
-  console.log({stackIndex})
+  console.log({ stackIndex });
 
   // Look up the frame from the stack table.
   const frameIndex = thread.stackTable.frame[stackIndex];
-  console.log({frameIndex})
+  console.log({ frameIndex });
 
   // Look up the function from the frame table.
   const funcIndex = thread.frameTable.func[frameIndex];
-  console.log({funcIndex})
+  console.log({ funcIndex });
 
   // Look up the string index from the func table.
   const stringIndex = thread.funcTable.name[funcIndex];
-  console.log({stringIndex})
+  console.log({ stringIndex });
 
   console.log(
     'Function name of the first sample:',
@@ -60,9 +60,9 @@ It is probably a good iea to read up some on profile format docs for more inform
 
 ## Tips
 
- * Ensure that the `pid` value points to the proper threads to nest threads in the timeline.
- * Processed profiles have their timestamps adjusted so that all processes use the same timeline.
- * Make sure and adjust the timing for child processes. During profile processing, the Firefox Profiler adjusts Gecko profiles timings, so that markers and samples take into account the differences in start time (via `geckoProfile.meta.startTime`). See [src/profile-logic/process-profile.js](https://github.com/firefox-devtools/profiler/blob/3067dda9cbf5807948aef149e18caf4e8870ed25/src/profile-logic/process-profile.js#L997-L1010) for some examples.
+- Ensure that the `pid` value points to the proper threads to nest threads in the timeline.
+- Processed profiles have their timestamps adjusted so that all processes use the same timeline.
+- Make sure and adjust the timing for child processes. During profile processing, the Firefox Profiler adjusts Gecko profiles timings, so that markers and samples take into account the differences in start time (via `geckoProfile.meta.startTime`). See [src/profile-logic/process-profile.js](https://github.com/firefox-devtools/profiler/blob/3067dda9cbf5807948aef149e18caf4e8870ed25/src/profile-logic/process-profile.js#L997-L1010) for some examples.
 
 ## Samples
 

@@ -1,4 +1,5 @@
 # Firefox Profiler
+
 [![Matrix][matrix-badge]][matrix]
 
 The [Firefox Profiler] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is a web application built using [React] and [Redux] and runs entirely client-side.
@@ -50,18 +51,18 @@ Please look at our [gitpod documentation](./docs-user/gitpod.md) for more inform
 
 For more detailed information on getting started contributing. We have plenty of docs available to get you started.
 
-| | |
-| ---- | --- |
-|[Contributing](./CONTRIBUTING.md)| Find out in detail how to get started and get your local development environment configured. |
-|[Code of Conduct](./CODE_OF_CONDUCT.md)| We want to create an open and inclusive community, we have a few guidelines to help us out. |
-|[Developer Documentation](./docs-developer)| Want to know how this whole thing works? Get started here. |
-|[Source Files](./src)| Dive into the inner workings of the code. Most folders have a `README.md` providing more information. |
-|[End-User Documentation](https://profiler.firefox.com/docs/#/)| These docs are customized for actual users of the profiler, not just folks contributing. |
-|[Gitpod documentatation](./docs-user/gitpod.md)| Start here if you want to set up a work space on gitpod. |
+|                                                                |                                                                                                       |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [Contributing](./CONTRIBUTING.md)                              | Find out in detail how to get started and get your local development environment configured.          |
+| [Code of Conduct](./CODE_OF_CONDUCT.md)                        | We want to create an open and inclusive community, we have a few guidelines to help us out.           |
+| [Developer Documentation](./docs-developer)                    | Want to know how this whole thing works? Get started here.                                            |
+| [Source Files](./src)                                          | Dive into the inner workings of the code. Most folders have a `README.md` providing more information. |
+| [End-User Documentation](https://profiler.firefox.com/docs/#/) | These docs are customized for actual users of the profiler, not just folks contributing.              |
+| [Gitpod documentatation](./docs-user/gitpod.md)                | Start here if you want to set up a work space on gitpod.                                              |
 
 ### Discussion
 
-Say hello on Matrix in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)][matrix].
+Say hello on Matrix in the [_Firefox Profiler_ channel (_#profiler:mozilla.org_)][matrix].
 
 ### License
 
@@ -70,11 +71,13 @@ Say hello on Matrix in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)
 We are very grateful to the the **zlib compression library (Jean-loup Gailly, Mark Adler and team)** for their contribution to the project.
 
 [matrix]: https://chat.mozilla.org/#/room/#profiler:mozilla.org
+
 <!-- chat.mozilla.org's "real" server is mozilla.modular.im. -->
+
 [matrix-badge]: https://img.shields.io/matrix/profiler:mozilla.org?server_fqdn=mozilla.modular.im&label=matrix
-[Firefox Profiler]:https://profiler.firefox.com/
-[React]:https://facebook.github.io/react/
-[Redux]:http://redux.js.org/
-[Mozilla]:https://www.mozilla.org/
-[Firefox]:https://www.mozilla.org/firefox/
+[Firefox Profiler]: https://profiler.firefox.com/
+[React]: https://facebook.github.io/react/
+[Redux]: http://redux.js.org/
+[Mozilla]: https://www.mozilla.org/
+[Firefox]: https://www.mozilla.org/firefox/
 [zlib]: http://www.zlib.net/

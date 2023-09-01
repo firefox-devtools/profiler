@@ -1,0 +1,5 @@
+src/types/libdef/npm
+docs-user
+src/test/fixtures/
+res/zee-worker.js
+dist
