@@ -19,7 +19,7 @@ Changes in Pontoon are being pushed into the `l10n` branch. They should be merge
 into `main` before the deployment.
 
 The easiest way is to
-[create a pull request on GitHub](<https://github.com/firefox-devtools/profiler/compare/main...l10n?expand=1&title=🔃%20Sync:%20l10n%20->%20main%20(DATE)>).
+[create a pull request on GitHub](<https://github.com/firefox-devtools/profiler/compare/main...l10n?expand=1&title=🔃%20Sync:%20l10n%20-%3E%20main%20(DATE)>).
 It would be nice to list down the locales that are changed in the PR description.
 To be able to get the changed locales quickly, this command can be used
 (assuming that `upstream` is the remote you use for this repository):
