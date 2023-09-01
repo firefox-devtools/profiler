@@ -347,7 +347,7 @@ export class SymbolStore {
     // Kick off the requests to the symbolication API, and create a list of
     // promises, one promise per chunk.
     const symbolicationApiRequestsAndResponsesPerChunk: Array<
-      [LibSymbolicationRequest[], Promise<LibSymbolicationResponse[]>]
+      [LibSymbolicationRequest[], Promise<LibSymbolicationResponse[]>],
     > = chunks.map((requests) => [
       requests,
       this._symbolProvider.requestSymbolsFromServer(requests),

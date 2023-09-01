@@ -435,7 +435,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
 export const TimelineSelection = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     previewSelection: getPreviewSelection(state),

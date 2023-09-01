@@ -371,9 +371,8 @@ describe('serializeProfile', function () {
     // expect(profile).toEqual(roundtrip);
 
     const secondSerialized = serializeProfile(roundtrip);
-    const secondRountrip = await unserializeProfileOfArbitraryFormat(
-      secondSerialized
-    );
+    const secondRountrip =
+      await unserializeProfileOfArbitraryFormat(secondSerialized);
     expect(roundtrip).toEqual(secondRountrip);
   });
 });

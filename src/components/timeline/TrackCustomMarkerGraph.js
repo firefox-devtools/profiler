@@ -689,7 +689,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 export const TrackCustomMarkerGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex, markerSchema, markerName } = ownProps;

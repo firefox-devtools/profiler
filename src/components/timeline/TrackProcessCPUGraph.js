@@ -473,7 +473,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
 export const TrackProcessCPUGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;

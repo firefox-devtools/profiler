@@ -232,13 +232,13 @@ type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
 // Full profile view and active tab profile view query shapes are for also
 // typechecking during the query object initialization.
 type FullProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>
+  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>,
 >;
 type ActiveTabProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>
+  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>,
 >;
 type OriginsProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>
+  $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>,
 >;
 
 // Query shapes for individual query paths. These are needed for QueryShape union type.

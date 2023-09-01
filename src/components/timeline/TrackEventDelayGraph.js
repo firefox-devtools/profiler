@@ -363,7 +363,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
 export const TrackEventDelayGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex } = ownProps;

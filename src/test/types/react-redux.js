@@ -90,7 +90,7 @@ declare var validDispatchToProps: {|
 const ConnectedExampleComponent = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: validMapStateToProps,
   mapDispatchToProps: validDispatchToProps,

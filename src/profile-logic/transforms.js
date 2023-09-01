@@ -764,7 +764,7 @@ export function mergeCallNode(
     const depthAtCallNodePathLeaf = callNodePath.length - 1;
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null
+      IndexIntoStackTable | null,
     > = new Map();
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
@@ -855,7 +855,7 @@ export function mergeFunction(
   const { stackTable, frameTable } = thread;
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > = new Map();
   // A root stack's prefix will be null. Maintain that relationship from old to new
   // stacks by mapping from null to null.
@@ -939,11 +939,11 @@ export function collapseResource(
   const newStackTable = getEmptyStackTable();
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > = new Map();
   const prefixStackToCollapsedStack: Map<
     IndexIntoStackTable | null, // prefix stack index
-    IndexIntoStackTable | null // collapsed stack index
+    IndexIntoStackTable | null, // collapsed stack index
   > = new Map();
   const collapsedStacks: Set<IndexIntoStackTable | null> = new Set();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
@@ -1119,7 +1119,7 @@ export function collapseDirectRecursion(
   // E.g. B3 -> A1 in the example.
   const recursionChainPrefixForStack = new Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   >();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
   const newStackTablePrefixColumn = stackTable.prefix.slice();
@@ -1215,7 +1215,7 @@ export function collapseRecursion(
   // B1's prefix A1.
   const funcToCollapseSubtreePrefixForStack = new Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   >();
   const newStackTablePrefixColumn = stackTable.prefix.slice();
 
@@ -1292,7 +1292,7 @@ export function collapseFunctionSubtree(
   const { stackTable, frameTable } = thread;
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > = new Map();
   // A root stack's prefix will be null. Maintain that relationship from old to new
   // stacks by mapping from null to null.
@@ -1384,7 +1384,7 @@ export function focusSubtree(
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null
+      IndexIntoStackTable | null,
     > = new Map();
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
@@ -1529,7 +1529,7 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
     const { stackTable } = thread;
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null
+      IndexIntoStackTable | null,
     > = new Map();
     oldStackToNewStack.set(null, null);
 

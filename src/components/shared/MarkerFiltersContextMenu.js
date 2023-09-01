@@ -74,7 +74,7 @@ class MarkerFiltersContextMenuImpl extends PureComponent<Props> {
 export const MarkerFiltersContextMenu = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     searchString: getMarkersSearchString(state),

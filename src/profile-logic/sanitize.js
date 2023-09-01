@@ -454,7 +454,7 @@ function sanitizeThreadPII(
     // all frames if we need to.
     const sanitizedFuncIndexesToFrameIndex: Map<
       IndexIntoFuncTable,
-      IndexIntoFrameTable[]
+      IndexIntoFrameTable[],
     > = new Map();
     // This set holds all func indexes that shouldn't be sanitized. This will be
     // intersected with the previous map's keys to know which functions need to

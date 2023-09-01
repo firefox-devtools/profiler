@@ -338,7 +338,7 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
 export const TrackVisualProgressGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => {
     const { start, end } = getCommittedRange(state);

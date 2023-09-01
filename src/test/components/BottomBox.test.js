@@ -132,9 +132,8 @@ describe('BottomBox', () => {
     expect(assemblyView()).not.toBeInTheDocument();
 
     const sourceViewElement = ensureExists(sourceView());
-    const sourceViewContent = await within(sourceViewElement).findByRole(
-      'textbox'
-    );
+    const sourceViewContent =
+      await within(sourceViewElement).findByRole('textbox');
 
     // Because numbers and strings are split in several element, we're matching
     // on the string "line" only.
@@ -162,9 +161,8 @@ describe('BottomBox', () => {
     expect(assemblyView()).toBeInTheDocument();
 
     const assemblyViewElement = ensureExists(assemblyView());
-    const assemblyViewContent = await within(assemblyViewElement).findByRole(
-      'textbox'
-    );
+    const assemblyViewContent =
+      await within(assemblyViewElement).findByRole('textbox');
 
     // Find one of the instructions. Once we have assembly syntax highlighting,
     // we'll probably have to match on a smaller string.

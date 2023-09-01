@@ -94,7 +94,7 @@ export const getOriginsProfileView: Selector<OriginsViewState> = (state) =>
  * Profile View Options
  */
 export const getProfileViewOptions: Selector<
-  $PropertyType<ProfileViewState, 'viewOptions'>
+  $PropertyType<ProfileViewState, 'viewOptions'>,
 > = (state) => getProfileView(state).viewOptions;
 export const getCurrentTableViewOptions: Selector<TableViewOptions> = (state) =>
   getProfileViewOptions(state).perTab[UrlState.getSelectedTab(state)] ||
@@ -176,7 +176,7 @@ export const getThreads: Selector<Thread[]> = (state) =>
 export const getThreadNames: Selector<string[]> = (state) =>
   getProfile(state).threads.map((t) => t.name);
 export const getLastNonShiftClick: Selector<
-  LastNonShiftClickInformation | null
+  LastNonShiftClickInformation | null,
 > = (state) => getProfileViewOptions(state).lastNonShiftClick;
 export const getRightClickedTrack: Selector<TrackReference | null> = (state) =>
   getProfileViewOptions(state).rightClickedTrack;
@@ -194,10 +194,10 @@ export const getVisualProgress: Selector<ProgressGraphData[] | null> = (
   state
 ) => getVisualMetrics(state).VisualProgress;
 export const getPerceptualSpeedIndexProgress: Selector<
-  ProgressGraphData[] | null
+  ProgressGraphData[] | null,
 > = (state) => getVisualMetrics(state).PerceptualSpeedIndexProgress ?? null;
 export const getContentfulSpeedIndexProgress: Selector<
-  ProgressGraphData[] | null
+  ProgressGraphData[] | null,
 > = (state) => getVisualMetrics(state).ContentfulSpeedIndexProgress ?? null;
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = (
   state
@@ -297,7 +297,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
   const getPid: Selector<Pid> = (state) => getCounter(state).pid;
 
   const getCommittedRangeCounterSampleRanges: Selector<
-    Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>
+    Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>,
   > = createSelector(getCounter, getCommittedRange, (counter, range) =>
     counter.sampleGroups.map((group) =>
       getInclusiveSampleIndexRangeForSelection(
@@ -309,7 +309,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
   );
 
   const getAccumulateCounterSamples: Selector<
-    Array<AccumulatedCounterSamples>
+    Array<AccumulatedCounterSamples>,
   > = createSelector(
     getCounter,
     getCommittedRangeCounterSampleRanges,
@@ -398,7 +398,7 @@ export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
  */
 export const getGlobalTrackFromReference: DangerousSelectorWithArguments<
   GlobalTrack,
-  GlobalTrackReference
+  GlobalTrackReference,
 > = (state, trackReference) =>
   getGlobalTracks(state)[trackReference.trackIndex];
 
@@ -410,7 +410,7 @@ export const getGlobalTrackFromReference: DangerousSelectorWithArguments<
  */
 export const getGlobalTrackAndIndexByPid: DangerousSelectorWithArguments<
   {| +globalTrackIndex: TrackIndex, +globalTrack: GlobalTrack |},
-  Pid
+  Pid,
 > = (state, pid) => {
   const globalTracks = getGlobalTracks(state);
   const globalTrackIndex = globalTracks.findIndex(
@@ -439,7 +439,7 @@ export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = (state) =>
  */
 export const getLocalTracks: DangerousSelectorWithArguments<
   LocalTrack[],
-  Pid
+  Pid,
 > = (state, pid) =>
   ensureExists(
     getFullProfileView(state).localTracksByPid.get(pid),
@@ -452,7 +452,7 @@ export const getLocalTracks: DangerousSelectorWithArguments<
  */
 export const getLocalTrackFromReference: DangerousSelectorWithArguments<
   LocalTrack,
-  LocalTrackReference
+  LocalTrackReference,
 > = (state, trackReference) =>
   getLocalTracks(state, trackReference.pid)[trackReference.trackIndex];
 
@@ -508,7 +508,7 @@ export const getGlobalTrackNames: Selector<string[]> = createSelector(
 
 export const getGlobalTrackName: DangerousSelectorWithArguments<
   string,
-  TrackIndex
+  TrackIndex,
 > = (state, trackIndex) => getGlobalTrackNames(state)[trackIndex];
 
 export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
@@ -574,7 +574,7 @@ export const getActiveTabResourcesThreadsKey: Selector<ThreadsKey> = (state) =>
  * This returns all TrackReferences for global tracks.
  */
 export const getActiveTabGlobalTrackReferences: Selector<
-  GlobalTrackReference[]
+  GlobalTrackReference[],
 > = createSelector(getActiveTabGlobalTracks, (globalTracks) =>
   globalTracks.map((globalTrack, trackIndex) => ({
     type: 'global',
@@ -588,7 +588,7 @@ export const getActiveTabGlobalTrackReferences: Selector<
  */
 export const getActiveTabGlobalTrackFromReference: DangerousSelectorWithArguments<
   ActiveTabGlobalTrack,
-  ActiveTabGlobalTrackReference
+  ActiveTabGlobalTrackReference,
 > = (state, trackReference) =>
   getActiveTabGlobalTracks(state)[trackReference.trackIndex];
 
@@ -598,7 +598,7 @@ export const getActiveTabGlobalTrackFromReference: DangerousSelectorWithArgument
  */
 export const getActiveTabResourceTrackFromReference: DangerousSelectorWithArguments<
   ActiveTabResourceTrack,
-  ActiveTabResourceTrackReference
+  ActiveTabResourceTrackReference,
 > = (state, trackReference) =>
   getActiveTabResourceTracks(state)[trackReference.trackIndex];
 
@@ -670,7 +670,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
  */
 export const getInnerWindowIDToPageMap: Selector<Map<
   InnerWindowID,
-  Page
+  Page,
 > | null> = createSelector(getPageList, (pages) => {
   if (!pages) {
     // Return null if there are no pages.
@@ -774,7 +774,7 @@ export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
  */
 export const getInnerWindowIDSetByTabID: Selector<Map<
   TabID,
-  Set<InnerWindowID>
+  Set<InnerWindowID>,
 > | null> = createSelector(getPagesMap, (pagesMap) => {
   if (pagesMap === null || pagesMap.size === 0) {
     // There is no data, return null
@@ -804,7 +804,7 @@ export const getInnerWindowIDSetByTabID: Selector<Map<
  * active tab view.
  */
 export const getRelevantInnerWindowIDsForActiveTab: Selector<
-  Set<InnerWindowID>
+  Set<InnerWindowID>,
 > = createSelector(
   getInnerWindowIDSetByTabID,
   getActiveTabID,
@@ -827,7 +827,7 @@ export const getRelevantInnerWindowIDsForActiveTab: Selector<
  * tracks by active tab view during the first page load(inside viewProfile function).
  */
 export const getRelevantInnerWindowIDsForCurrentTab: Selector<
-  Set<InnerWindowID>
+  Set<InnerWindowID>,
 > = createSelector(
   UrlState.getTimelineTrackOrganization,
   getRelevantInnerWindowIDsForActiveTab,

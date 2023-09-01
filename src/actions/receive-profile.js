@@ -1022,9 +1022,8 @@ export function retrieveProfileFromBrowser(
           );
         },
       });
-      const unpackedProfile = await _unpackGeckoProfileFromBrowser(
-        rawGeckoProfile
-      );
+      const unpackedProfile =
+        await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
       const profile = processGeckoProfile(unpackedProfile);
       await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
     } catch (error) {
@@ -1337,9 +1336,8 @@ export function retrieveProfileOrZipFromUrl(
       switch (response.responseType) {
         case 'PROFILE': {
           const serializedProfile = response.profile;
-          const profile = await unserializeProfileOfArbitraryFormat(
-            serializedProfile
-          );
+          const profile =
+            await unserializeProfileOfArbitraryFormat(serializedProfile);
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }

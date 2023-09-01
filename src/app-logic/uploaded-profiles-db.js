@@ -153,7 +153,7 @@ export async function persistUploadedProfileInformationToDb(
  * This returns the list of all the stored data.
  */
 export async function listAllUploadedProfileInformationFromDb(): Promise<
-  UploadedProfileInformation[]
+  UploadedProfileInformation[],
 > {
   const db = await open();
   return db.getAllFromIndex(OBJECTSTORE_NAME, 'publishedDate');
@@ -195,9 +195,8 @@ export async function changeStoredProfileNameInDb(
   profileToken: string,
   profileName: string
 ): Promise<void> {
-  const storedProfile = await retrieveUploadedProfileInformationFromDb(
-    profileToken
-  );
+  const storedProfile =
+    await retrieveUploadedProfileInformationFromDb(profileToken);
   if (storedProfile && storedProfile.name !== profileName) {
     // We need to update the name, but also the urlPath. For this we'll convert
     // the old one to a state, and convert it back to a url string, so that

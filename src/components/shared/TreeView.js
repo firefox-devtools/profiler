@@ -81,7 +81,7 @@ type TreeViewHeaderProps<DisplayData: Object> = {|
 |};
 
 class TreeViewHeader<DisplayData: Object> extends React.PureComponent<
-  TreeViewHeaderProps<DisplayData>
+  TreeViewHeaderProps<DisplayData>,
 > {
   _onDividerMouseDown = (event: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onColumnWidthChangeStart(
@@ -192,7 +192,7 @@ type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
 |};
 
 class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
-  TreeViewRowFixedColumnsProps<DisplayData>
+  TreeViewRowFixedColumnsProps<DisplayData>,
 > {
   _onClick = (event: SyntheticMouseEvent<>) => {
     const { nodeId, onClick } = this.props;
@@ -275,7 +275,7 @@ type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
 
 // This is a false-positive, as it's used as a generic trait bounds.
 class TreeViewRowScrolledColumns<
-  DisplayData: Object
+  DisplayData: Object,
 > extends React.PureComponent<TreeViewRowScrolledColumnsProps<DisplayData>> {
   /**
    * In this mousedown handler, we use event delegation so we have to use
@@ -472,7 +472,7 @@ type TreeViewState = {|
 
 export class TreeView<DisplayData: Object> extends React.PureComponent<
   TreeViewProps<DisplayData>,
-  TreeViewState
+  TreeViewState,
 > {
   _list: VirtualList<NodeIndex> | null = null;
   _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
