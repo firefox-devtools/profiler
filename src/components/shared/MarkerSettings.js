@@ -94,13 +94,13 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
 
     return (
       <div className="markerSettings">
-        {allowSwitchingStackType ? (
-          <ul className="panelSettingsList">
+        <ul className="panelSettingsList">
+          {allowSwitchingStackType ? (
             <li className="panelSettingsListItem">
               <StackImplementationSetting labelL10nId="StackSettings--stack-implementation-label" />
             </li>
-          </ul>
-        ) : null}
+          ) : null}
+        </ul>
         <Localized
           id="MarkerSettings--panel-search"
           attrs={{ label: true, title: true }}
