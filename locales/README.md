@@ -6,6 +6,7 @@ Please change only the locale content in the `en-US`
 directory. The other directories are changed using [Pontoon](https://pontoon.mozilla.org/projects/firefox-profiler/).
 
 Here are the most important rules:
+
 1. If you change the string in a way that changes the meaning, you need to
    change the string key as well. If that doesn't change the meaning (for
    example, if that's a typo fix), then the string key can stay the same. You

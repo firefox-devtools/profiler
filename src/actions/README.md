@@ -8,9 +8,9 @@ All actions in the Firefox Profiler are fully typed using [Flow](https://flow.or
 
 # Preferred practices for actions
 
-Actions in the profiler are kept relatively simple. There are two types of action creators in this project–action creators that return an `Action` or an action creator that returns a `ThunkAction` (see [Redux Thunk](https://github.com/gaearon/redux-thunk) for additional reading.) If an action creator needs access to different parts of the state, we strongly recommend you use the `getState` parameter from a `ThunkAction`. If you need an alternative method to directly access the state in a `ThunkAction`, you can look up the value using a selector within the connected component. You can then pass it into the action creator as a parameter. 
+Actions in the profiler are kept relatively simple. There are two types of action creators in this project–action creators that return an `Action` or an action creator that returns a `ThunkAction` (see [Redux Thunk](https://github.com/gaearon/redux-thunk) for additional reading.) If an action creator needs access to different parts of the state, we strongly recommend you use the `getState` parameter from a `ThunkAction`. If you need an alternative method to directly access the state in a `ThunkAction`, you can look up the value using a selector within the connected component. You can then pass it into the action creator as a parameter.
 
-### Accessing getState in ThunkAction creators. 
+### Accessing getState in ThunkAction creators.
 
 ```js
 export function doThunkAction() {
@@ -19,7 +19,7 @@ export function doThunkAction() {
     const requiredData = getState().requiredData;
 
     myAction(requiredData).then(() => {
-      dispatch({ type: "ACTION_PERFORMED" })
+      dispatch({ type: 'ACTION_PERFORMED' });
     });
   };
 }
@@ -29,9 +29,9 @@ export function doThunkAction() {
 
 ```js
 export function doThunkAction(requiredData) {
-  return dispatch => {
+  return (dispatch) => {
     myAction(requiredData).then(() => {
-      dispatch({ type: "ACTION_PERFORMED" });
+      dispatch({ type: 'ACTION_PERFORMED' });
     });
   };
 }

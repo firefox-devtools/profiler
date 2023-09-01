@@ -18,16 +18,16 @@ So the profiler gets the rest of the call stack frames by finding addresses to c
 
 In order to translate these addresses into symbols, a few things need to happen:
 
- 1. For each address, identify the binary that occupies that area of memory, if any.
- 2. Translate the address into a binary-relative offset, by subtracting the address in memory where the mapping of the binary starts.
- 3. Consult a symbol table which maps binary-relative offsets to strings.
+1.  For each address, identify the binary that occupies that area of memory, if any.
+2.  Translate the address into a binary-relative offset, by subtracting the address in memory where the mapping of the binary starts.
+3.  Consult a symbol table which maps binary-relative offsets to strings.
 
 ## Where symbol tables come from
 
 There are fundamentally two classes of binaries that we need to symbolicate:
 
- - Binaries we create ourselves, by compiling our own code
- - Existing binaries from other sources, most notably system libraries from the operating system that we run on
+- Binaries we create ourselves, by compiling our own code
+- Existing binaries from other sources, most notably system libraries from the operating system that we run on
 
 For binaries that we create ourselves, the compiler automatically creates symbol information and debug information. On Linux and macOS, the symbol information is embedded in the resulting binary itself, and on Windows, it is stored in a separate .pdb file.
 
@@ -41,26 +41,26 @@ The following is an example breakpad entry for a function symbol. More informati
 FUNC c184 30 0 nsQueryInterfaceWithError::operator()(nsID const&, void**) const
 ```
 
-| Text | Explanation |
-| ---- | ----------- |
-| FUNC | Indicates that this is a function record. |
+| Text | Explanation                                                            |
+| ---- | ---------------------------------------------------------------------- |
+| FUNC | Indicates that this is a function record.                              |
 | c184 | The hexadecimal memory location relative to the module's load address. |
-| 30   | The hexadecimal length of bytes in the function. |
-| 0    | The hexadecimal length of bytes of the size of the parameters. |
-| ...  | The remaining `nsQueryInterfaceWithError` text is the actual symbol. |
+| 30   | The hexadecimal length of bytes in the function.                       |
+| 0    | The hexadecimal length of bytes of the size of the parameters.         |
+| ...  | The remaining `nsQueryInterfaceWithError` text is the actual symbol.   |
 
 A binary is identified by its debugName and by an identifier. The identifier is its breakpadId, which is a string of 33 hex characters.
 
 The Mozilla symbol server makes symbol information from the breakpad symbol files available in two forms:
 
- 1. It serves the raw breakpad symbol files at `https://symbols.mozilla.org/debugName/breakpadId/debugName.sym`, for example  at [https://symbols.mozilla.org/firefox/5147A2EC44F038CCB9DE2D0AC50A15E30/firefox.sym](https://symbols.mozilla.org/firefox/5147A2EC44F038CCB9DE2D0AC50A15E30/firefox.sym).
- 2. It has a [publicly accessible API to obtain symbol information for only certain addresses](https://tecken.readthedocs.io/en/latest/symbolication.html).
+1.  It serves the raw breakpad symbol files at `https://symbols.mozilla.org/debugName/breakpadId/debugName.sym`, for example at [https://symbols.mozilla.org/firefox/5147A2EC44F038CCB9DE2D0AC50A15E30/firefox.sym](https://symbols.mozilla.org/firefox/5147A2EC44F038CCB9DE2D0AC50A15E30/firefox.sym).
+2.  It has a [publicly accessible API to obtain symbol information for only certain addresses](https://tecken.readthedocs.io/en/latest/symbolication.html).
 
 These breakpad symbol files are also used for symbolicating crash reports.
 
 Breakpad is the name of the crash reporting system that Firefox uses.
 
-Windows system libraries do not contain symbol information in the binary file, and Windows does not ship with pdb files for any system libraries. Instead, [Microsoft has a symbol server](https://msdn.microsoft.com/en-us/library/windows/desktop/ee416588\(v=vs.85\).aspx#symbol_servers) that provides the pdb files (?) for all their system libraries.
+Windows system libraries do not contain symbol information in the binary file, and Windows does not ship with pdb files for any system libraries. Instead, [Microsoft has a symbol server](<https://msdn.microsoft.com/en-us/library/windows/desktop/ee416588(v=vs.85).aspx#symbol_servers>) that provides the pdb files (?) for all their system libraries.
 The Mozilla symbol server is somehow connected to the Microsoft symbol server, and automatically creates breakpad symbol files for all the libraries that Microsoft's symbol server provides symbol information for.
 
 On macOS, system libraries contain symbol information in the binary files. It can be extracted using command line tools like `nm`.
@@ -73,10 +73,9 @@ The utility that the build process uses to create breakpad symbol files is calle
 
 For local Firefox builds, symbol information can be extracted the following ways:
 
- * On Windows, you can extract it from the pdb file that the compiler produced for that library. The easiest way to do that is to run dump_syms on the pdb file.
+- On Windows, you can extract it from the pdb file that the compiler produced for that library. The easiest way to do that is to run dump_syms on the pdb file.
 
- * On macOS and Linux, you can run dump_syms on the binary itself. Or you can run "nm" on the binary itself.
-
+- On macOS and Linux, you can run dump_syms on the binary itself. Or you can run "nm" on the binary itself.
 
 ## How the profiler does symbolication
 
@@ -86,19 +85,19 @@ When [profiler.firefox.com] receives the profile from the gecko profiler add-on,
 
 Then, the following things happen:
 
- 1. [profiler.firefox.com] iterates over all addresses in the profile's call stacks, finds which binary they came from by comparing them to the library information stored in the profile, and converts them into binary-relative offsets.
+1.  [profiler.firefox.com] iterates over all addresses in the profile's call stacks, finds which binary they came from by comparing them to the library information stored in the profile, and converts them into binary-relative offsets.
 
- 2. [profiler.firefox.com] checks for which of these libraries it has cached symbol tables in IndexedDB.
+2.  [profiler.firefox.com] checks for which of these libraries it has cached symbol tables in IndexedDB.
 
     1. For libraries with cached symbol tables, it uses those symbol tables to map the addresses to symbols.
 
- 3. For all other libraries, it requests symbols for the collected addresses using the Mozilla symbolication API. The results of this are *not* cached.
+3.  For all other libraries, it requests symbols for the collected addresses using the Mozilla symbolication API. The results of this are _not_ cached.
 
     1. The Mozilla symbolication API will be able to symbolicate any libraries for which there exist breakpad symbol files on the Mozilla symbol server, so: official Firefox builds, most of Windows system libraries, some macOS system libraries.
 
- 4. For any libraries which the Mozilla symbolication API was not able to find symbols, [profiler.firefox.com] requests a symbol table from the add-on, which will forward the request to the geckoProfiler WebExtension API.
+4.  For any libraries which the Mozilla symbolication API was not able to find symbols, [profiler.firefox.com] requests a symbol table from the add-on, which will forward the request to the geckoProfiler WebExtension API.
 
-     1. The WebExtension API will try multiple methods to obtain symbol information. The code for this is at https://searchfox.org/mozilla-central/rev/7e663b9fa578d425684ce2560e5fa2464f504b34/browser/components/extensions/ext-geckoProfiler.js#409-473 .
+    1.  The WebExtension API will try multiple methods to obtain symbol information. The code for this is at https://searchfox.org/mozilla-central/rev/7e663b9fa578d425684ce2560e5fa2464f504b34/browser/components/extensions/ext-geckoProfiler.js#409-473 .
 
         1. First, it will try to find a breakpad symbol file for the library in the objdir, if the Firefox build that is being symbolicated is a local build. These symbol files only exist if the user has run "mach buildsymbols" after compiling.
 
@@ -108,8 +107,8 @@ Then, the following things happen:
 
         4. On Windows, if this is a local build, it'll try to find "dump_syms.exe" in the objdir and run it on the pdb file.
 
- 5. Symbol tables that were obtained in step 4 are sent to [profiler.firefox.com] and the page caches them in the IndexedDB table. The relevant addresses are symbolicated using the symbol table.
+5.  Symbol tables that were obtained in step 4 are sent to [profiler.firefox.com] and the page caches them in the IndexedDB table. The relevant addresses are symbolicated using the symbol table.
 
- 6. Libraries for which no symbol information could be obtained stay unsymbolicated.
+6.  Libraries for which no symbol information could be obtained stay unsymbolicated.
 
 [profiler.firefox.com]: https://profiler.firefox.com

@@ -19,7 +19,7 @@ Changes in Pontoon are being pushed into the `l10n` branch. They should be merge
 into `main` before the deployment.
 
 The easiest way is to
-[create a pull request on GitHub](https://github.com/firefox-devtools/profiler/compare/main...l10n?expand=1&title=🔃%20Sync:%20l10n%20->%20main%20(DATE)).
+[create a pull request on GitHub](<https://github.com/firefox-devtools/profiler/compare/main...l10n?expand=1&title=🔃%20Sync:%20l10n%20->%20main%20(DATE)>).
 It would be nice to list down the locales that are changed in the PR description.
 To be able to get the changed locales quickly, this command can be used
 (assuming that `upstream` is the remote you use for this repository):
@@ -29,7 +29,7 @@ git fetch upstream && git diff --name-only upstream/main...upstream/l10n | awk -
 ```
 
 Be careful to always use the **create a merge commit** functionality, not
-*squash* or *rebase*, to keep a better history.
+_squash_ or _rebase_, to keep a better history.
 
 ## How to deploy main to production
 
@@ -44,7 +44,7 @@ It would be nice to write down the main changes in the PR description.
 
 After the PR is created all checks should run. When it's ready the PR can be
 merged. Be careful to always use the **create a merge commit** functionality,
-not *squash* or *rebase*, to keep a better history.
+not _squash_ or _rebase_, to keep a better history.
 
 Once it's done the new version should be deployed automatically. You can follow the
 process on [Netlify's dashboard](https://app.netlify.com/sites/perf-html/deploys)
@@ -57,6 +57,7 @@ force push it. You'll need to enable force-pushing for the branch production,
 using the [Branch Settings on GitHub](https://github.com/firefox-devtools/profiler/settings/branches).
 
 You can use the following script:
+
 ```
 sh bin/revert-last-deployment.sh
 ```

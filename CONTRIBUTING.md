@@ -6,22 +6,23 @@ First off, thanks for taking the time to contribute to Mozilla and the Firefox P
 
 This project is made up of a cross section of different parts of Mozilla, including people from Firefox DevTools and from Firefox's platform team who are working on the C++ and Rust internals of Firefox. Some core Mozillians on the team are:
 
-| - | Name | Github Handle | Position |
-| - | ---- | ------------- | -------- |
-| ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox Frontend Engineer |
-| ![][canova] | Nazim Can Altinova| [@canova](https://github.com/canova) | Firefox Platform and Frontend Engineer |
-| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
-| ![][AdamHarries] | Adam Harries | [@AdamHarries](https://github.com/AdamHarries) | Firefox Platform Engineer |
-| ![][davehunt]| Dave Hunt | [@davehunt](https://github.com/davehunt) | Firefox Profiler Team Manager |
+| -                                                                                          | Name               | Github Handle                                  | Position                               |
+| ------------------------------------------------------------------------------------------ | ------------------ | ---------------------------------------------- | -------------------------------------- |
+| ![][julienw]                                                                               | Julien Wajsberg    | [@julienw](https://github.com/julienw)         | Firefox Frontend Engineer              |
+| ![][canova]                                                                                | Nazim Can Altinova | [@canova](https://github.com/canova)           | Firefox Platform and Frontend Engineer |
+| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange      | [@mstange](https://github.com/mstange)         | Firefox Platform Engineer              |
+| ![][AdamHarries]                                                                           | Adam Harries       | [@AdamHarries](https://github.com/AdamHarries) | Firefox Platform Engineer              |
+| ![][davehunt]                                                                              | Dave Hunt          | [@davehunt](https://github.com/davehunt)       | Firefox Profiler Team Manager          |
+
 <!-- mstange's image is differently inserted because its size isn't properly controlled by the size parameter, strangely -->
 
-[mstange]:https://avatars.githubusercontent.com/mstange?size=56
-[julienw]:https://avatars.githubusercontent.com/julienw?size=56
-[canova]:https://avatars.githubusercontent.com/canova?size=56
-[davehunt]:https://avatars.githubusercontent.com/davehunt?size=56
-[AdamHarries]:https://avatars.githubusercontent.com/AdamHarries?size=56
+[mstange]: https://avatars.githubusercontent.com/mstange?size=56
+[julienw]: https://avatars.githubusercontent.com/julienw?size=56
+[canova]: https://avatars.githubusercontent.com/canova?size=56
+[davehunt]: https://avatars.githubusercontent.com/davehunt?size=56
+[AdamHarries]: https://avatars.githubusercontent.com/AdamHarries?size=56
 
-We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
+We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [_Firefox Profiler_ channel (_#profiler:mozilla.org_)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
 
 ## Getting started with development
 
@@ -33,12 +34,12 @@ You can install it using `npm install -g yarn`. Please refer to [its documentati
 
 To get started clone the repo and get the web application started.
 
- 1. Run `git clone git@github.com:firefox-devtools/profiler.git`
- 2. Run `cd profiler`
- 3. Run `yarn install`, this will install all of the dependencies.
- 4. Run `yarn start`, this will start up the webpack server.
- 5. Point your browser to [http://localhost:4242](http://localhost:4242).
- 6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
+1.  Run `git clone git@github.com:firefox-devtools/profiler.git`
+2.  Run `cd profiler`
+3.  Run `yarn install`, this will install all of the dependencies.
+4.  Run `yarn start`, this will start up the webpack server.
+5.  Point your browser to [http://localhost:4242](http://localhost:4242).
+6.  If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
 
 Other [webpack](https://webpack.js.org/configuration/) and [webpack server](https://webpack.js.org/configuration/dev-server/) options can be set in a `webpack.local-config.js` file at the repo root. For example, if you want to disable caching and the server to automatically open the home page, put in there the following code:
 
@@ -63,16 +64,18 @@ Gitpod will automatically install all dependencies; start the webpack server for
 
 The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running, and then try one of the following:
 
- #### 1. Record a profile: 
- - Open `about:config` in Firefox.
- - Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242`. Or to the localhost with the proper port you have configured.
- - Ensure the profiler menu button is active by clicking the button on your local profiler deployment homepage, usually http://localhost:4242, to enable it.
- - Record a profile using the menu button, and it should open up in your local environment automatically.
+#### 1. Record a profile:
 
- #### 2. Use an existing profile:
- - On the web, replace the https://profiler.firefox.com with your local server, usually `http://localhost:4242`. Be sure that that the protocol is `http` and not `https` when running the server locally.
- - Alternatively, if a profile has been previously downloaded, drag and drop it to the loading screen. Compared to the previous solution, refreshing won't work with this particular solution.
- - A third alternative on Linux is to run the provided [fp.sh](./bin/fp.sh) script, giving the profile file as the first argument. Both refreshing and symlinking to the script are supported.
+- Open `about:config` in Firefox.
+- Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242`. Or to the localhost with the proper port you have configured.
+- Ensure the profiler menu button is active by clicking the button on your local profiler deployment homepage, usually http://localhost:4242, to enable it.
+- Record a profile using the menu button, and it should open up in your local environment automatically.
+
+#### 2. Use an existing profile:
+
+- On the web, replace the https://profiler.firefox.com with your local server, usually `http://localhost:4242`. Be sure that that the protocol is `http` and not `https` when running the server locally.
+- Alternatively, if a profile has been previously downloaded, drag and drop it to the loading screen. Compared to the previous solution, refreshing won't work with this particular solution.
+- A third alternative on Linux is to run the provided [fp.sh](./bin/fp.sh) script, giving the profile file as the first argument. Both refreshing and symlinking to the script are supported.
 
 For more information on loading a profile, visit its [documentation](./docs-developer/loading-in-profiles.md).
 
@@ -80,17 +83,17 @@ For more information on loading a profile, visit its [documentation](./docs-deve
 
 When working on a new feature and code changes, it's important that things work correctly. We have a suite of automated tests and various automated checks to test that things are working the way we expect. These checks are run frequently, and will block certain parts of the process if they do not pass. The tests run:
 
- * Locally when running
-   - `yarn test-all` - Test all the things!
-   - `yarn test` - Run the tests in [`./src/test/`](./src/test/).
-   - `yarn lint` - Run prettier, stylelint, and eslint to check for correct code formatting.
-   - `yarn flow` - Check the [Flow types](https://flow.org/) for correctness.
-   - `yarn license-check` - Check the dependencies' licenses.
- * `git push` and `git commit`
-   - We have [husky](https://www.npmjs.com/package/husky) installed to run automated checks when committing and pushing.
-   - Run git commands with `--no-verify` to skip this step. This is useful for submitting broken PRs for feedback.
- * Continuous integration for pull requests
-   - We use CircleCI to run our tests for every PR that is submitted. This gives reviewers a great way to know if things are still working as expected.
+- Locally when running
+  - `yarn test-all` - Test all the things!
+  - `yarn test` - Run the tests in [`./src/test/`](./src/test/).
+  - `yarn lint` - Run prettier, stylelint, and eslint to check for correct code formatting.
+  - `yarn flow` - Check the [Flow types](https://flow.org/) for correctness.
+  - `yarn license-check` - Check the dependencies' licenses.
+- `git push` and `git commit`
+  - We have [husky](https://www.npmjs.com/package/husky) installed to run automated checks when committing and pushing.
+  - Run git commands with `--no-verify` to skip this step. This is useful for submitting broken PRs for feedback.
+- Continuous integration for pull requests
+  - We use CircleCI to run our tests for every PR that is submitted. This gives reviewers a great way to know if things are still working as expected.
 
 ### Updating snapshots
 
@@ -126,7 +129,6 @@ the team will answer and assign the issue to you. If you're commenting during
 week-ends be aware that our team is working mostly on week days,
 therefore please be patient :-)
 
-
 Feel free to [chat with us on Matrix](https://chat.mozilla.org/#/room/#profiler:mozilla.org)
 if you need help finding something you might be interested to work on or have any question.
 You'll need to login first, and possibly click on the link again to access our
@@ -147,7 +149,7 @@ For PRs to be accepted, they go through a review process. Generally there is a f
 ## Merging Pull Requests
 
 Pull Requests should be merged with either option `Create a merge commit` or
-`Squash and merge`, but __not__ with `Rebase and merge`.
+`Squash and merge`, but **not** with `Rebase and merge`.
 
 ### Create a merge commit
 
