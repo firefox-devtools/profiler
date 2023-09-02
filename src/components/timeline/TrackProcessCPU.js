@@ -69,7 +69,7 @@ export class TrackProcessCPUImpl extends React.PureComponent<Props, State> {
 export const TrackProcessCPU = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;

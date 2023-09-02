@@ -188,14 +188,14 @@ export type WithChartViewport<
   ChartProps: $ReadOnly<{|
     ...ChartOwnProps,
     viewport: Viewport,
-  |}>
+  |}>,
 > = (
   // Take as input a React component whose props accept the { +viewport: Viewport }.
   ChartComponent: React.ComponentType<ChartProps>
 ) => React.ComponentType<
   // Finally the returned component takes as input the InternalViewportProps, and
   // the ChartProps, but NOT { +viewport: Viewport }.
-  ViewportOwnProps<ChartOwnProps>
+  ViewportOwnProps<ChartOwnProps>,
 >;
 
 // Create the implementation of the WithChartViewport type, but let flow infer the
@@ -209,13 +209,13 @@ export const withChartViewport: WithChartViewport<*, *> =
     type ViewportProps = ConnectedProps<
       ViewportOwnProps<ChartOwnProps>,
       ViewportStateProps,
-      ViewportDispatchProps
+      ViewportDispatchProps,
     >;
 
     class ChartViewport extends React.PureComponent<ViewportProps, State> {
       zoomScrollId: number = 0;
       _pendingPreviewSelectionUpdates: Array<
-        (HorizontalViewport) => PreviewSelection
+        (HorizontalViewport) => PreviewSelection,
       > = [];
       _container: HTMLElement | null = null;
       _takeContainerRef = (container) => {
@@ -859,7 +859,7 @@ export const withChartViewport: WithChartViewport<*, *> =
     return explicitConnect<
       ViewportOwnProps<ChartOwnProps>,
       ViewportStateProps,
-      ViewportDispatchProps
+      ViewportDispatchProps,
     >({
       mapStateToProps: (state) => ({
         panelLayoutGeneration: getPanelLayoutGeneration(state),

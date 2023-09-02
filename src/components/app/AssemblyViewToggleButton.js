@@ -74,7 +74,7 @@ class AssemblyViewToggleButtonImpl extends React.PureComponent<Props> {
 export const AssemblyViewToggleButton = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     assemblyViewIsOpen: getAssemblyViewIsOpen(state),

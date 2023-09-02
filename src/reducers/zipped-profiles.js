@@ -200,7 +200,7 @@ const selectedZipFileIndex: Reducer<null | ZipFiles.IndexIntoZipFileTable> = (
 };
 
 const expandedZipFileIndexes: Reducer<
-  Array<ZipFiles.IndexIntoZipFileTable | null>
+  Array<ZipFiles.IndexIntoZipFileTable | null>,
 > = (
   // In practice this should never contain null, but needs to support the
   // TreeView interface.

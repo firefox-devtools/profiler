@@ -151,7 +151,7 @@ const EMPTY_RESOURCE_TRACKS = [];
 export const TimelineActiveTabGlobalTrack = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getActiveTabGlobalTracks(state);

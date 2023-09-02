@@ -140,7 +140,7 @@ export type MarkerSchema = {|
         // This type is a static bit of text that will be displayed
         label: string,
         value: string,
-      |}
+      |},
   >,
 
   // if present, give the marker its own local track
@@ -190,12 +190,12 @@ export type IPCSharedData = {|
 export type $ReplaceCauseWithStack<
   // False positive, generic type bounds are alright:
   // eslint-disable-next-line flowtype/no-weak-types
-  T: Object
+  T: Object,
 > = {|
   ...$Diff<
     T,
     // Remove the cause property.
-    {| cause: any |}
+    {| cause: any |},
   >,
   // Add on the stack property:
   stack?: GeckoMarkerStack,

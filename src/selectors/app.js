@@ -97,7 +97,7 @@ export const getIsDragAndDropOverlayRegistered: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropOverlayRegistered;
 
 export const getCurrentProfileUploadedInformation: Selector<
-  UploadedProfileInformation | null
+  UploadedProfileInformation | null,
 > = (state) => getApp(state).currentProfileUploadedInformation;
 
 /**

@@ -59,7 +59,7 @@ class JsTracerSettingsImpl extends PureComponent<Props> {
 export const JsTracerSettings = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     showJsTracerSummary: getShowJsTracerSummary(state),

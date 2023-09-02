@@ -3,7 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { createSelector } from 'reselect';
+import {
+  createSelector,
+  createSelectorCreator,
+  defaultMemoize,
+} from 'reselect';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
 import * as StackTiming from '../../profile-logic/stack-timing';
@@ -51,13 +55,19 @@ import type { MarkerSelectorsPerThread } from './markers';
  * definition for the type of the selector.
  */
 export type StackAndSampleSelectorsPerThread = $ReturnType<
-  typeof getStackAndSampleSelectorsPerThread
+  typeof getStackAndSampleSelectorsPerThread,
 >;
 
 type ThreadAndMarkerSelectorsPerThread = {|
   ...ThreadSelectorsPerThread,
   ...MarkerSelectorsPerThread,
 |};
+
+// A variant of createSelector which caches the value for two most recent keys,
+// not just for the single most recent key.
+const createSelectorWithTwoCacheSlots = createSelectorCreator(defaultMemoize, {
+  maxSize: 2,
+});
 
 /**
  * Create the selectors for a thread that have to do with either stacks or samples.
@@ -91,13 +101,17 @@ export function getStackAndSampleSelectorsPerThread(
   // identity (which changes if e.g. only a thread's samples table changes),
   // but on the identities of just the subset of thread tables that are used by
   // getCallNodeInfo. This avoids recomputations when samples are dropped.
-  const getCallNodeInfo: Selector<CallNodeInfo> = createSelector(
-    (state) => threadSelectors.getFilteredThread(state).stackTable,
-    (state) => threadSelectors.getFilteredThread(state).frameTable,
-    (state) => threadSelectors.getFilteredThread(state).funcTable,
-    ProfileSelectors.getDefaultCategory,
-    ProfileData.getCallNodeInfo
-  );
+  // In addition, we use createSelectorWithTwoCacheSlots so that removing the last
+  // transform is fast. This lets you quickly go back and forth between a focused
+  // function and the whole profile.
+  const getCallNodeInfo: Selector<CallNodeInfo> =
+    createSelectorWithTwoCacheSlots(
+      (state) => threadSelectors.getFilteredThread(state).stackTable,
+      (state) => threadSelectors.getFilteredThread(state).frameTable,
+      (state) => threadSelectors.getFilteredThread(state).funcTable,
+      ProfileSelectors.getDefaultCategory,
+      ProfileData.getCallNodeInfo
+    );
 
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
     createSelector(
@@ -185,7 +199,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getExpandedCallNodeIndexes: Selector<
-    Array<IndexIntoCallNodeTable | null>
+    Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
     getCallNodeInfo,
     getExpandedCallNodePaths,
@@ -197,7 +211,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getSamplesSelectedStatesInFilteredThread: Selector<
-    null | SelectedState[]
+    null | SelectedState[],
   > = createSelector(
     threadSelectors.getFilteredThread,
     threadSelectors.getTabFilteredThread,
@@ -233,7 +247,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getTreeOrderComparatorInFilteredThread: Selector<
-    (IndexIntoSamplesTable, IndexIntoSamplesTable) => number
+    (IndexIntoSamplesTable, IndexIntoSamplesTable) => number,
   > = createSelector(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,

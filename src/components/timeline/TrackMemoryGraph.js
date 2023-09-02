@@ -530,7 +530,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
 export const TrackMemoryGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;

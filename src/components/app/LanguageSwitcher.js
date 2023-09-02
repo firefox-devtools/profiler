@@ -64,7 +64,7 @@ class LanguageSwitcherImpl extends React.PureComponent<Props> {
 export const LanguageSwitcher = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   component: LanguageSwitcherImpl,
   mapStateToProps: (state) => ({

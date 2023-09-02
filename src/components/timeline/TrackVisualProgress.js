@@ -69,7 +69,7 @@ export class TrackVisualProgressImpl extends React.PureComponent<Props, State> {
 export const TrackVisualProgress = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => {
     const { start, end } = getCommittedRange(state);

@@ -1,37 +1,33 @@
 {
-    "name": "Firefox profiler",
-      "description": "Web app for Firefox performance analysis",
-      "repository": {
-        "url": "https://github.com/firefox-devtools/profiler",
-        "license": "MPL2",
-        "tests": "https://circleci.com/gh/firefox-devtools/profiler"
-      },
-      "participate": {
-        "home": "https://github.com/firefox-devtools/profiler/blob/main/CONTRIBUTING.md",
-        "docs": "https://github.com/firefox-devtools/profiler/tree/main/docs-developer",
-        "matrix": "https://chat.mozilla.org/#/room/#profiler:mozilla.org",
-        "chat": {
-          "url": "https://chat.mozilla.org/#/room/#profiler:mozilla.org",
-          "contacts": [
-            "@julienw:mozilla.org",
-            "@canova:mozilla.org",
-            "@mstange:mozilla.org",
-            "@davehunt:mozilla.org"
-          ]
-        }
-      },
-      "bugs": {
-        "list": "https://github.com/firefox-devtools/profiler/issues",
-        "report": "https://github.com/firefox-devtools/profiler/issues/new",
-        "mentored": "https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22"
-      },
-      "urls": {
-        "prod": "https://profiler.firefox.com",
-        "stage": "https://main--perf-html.netlify.app/"
-      },
-      "keywords": [
-        "performance",
-        "firefox",
-        "web"
+  "name": "Firefox profiler",
+  "description": "Web app for Firefox performance analysis",
+  "repository": {
+    "url": "https://github.com/firefox-devtools/profiler",
+    "license": "MPL2",
+    "tests": "https://circleci.com/gh/firefox-devtools/profiler"
+  },
+  "participate": {
+    "home": "https://github.com/firefox-devtools/profiler/blob/main/CONTRIBUTING.md",
+    "docs": "https://github.com/firefox-devtools/profiler/tree/main/docs-developer",
+    "matrix": "https://chat.mozilla.org/#/room/#profiler:mozilla.org",
+    "chat": {
+      "url": "https://chat.mozilla.org/#/room/#profiler:mozilla.org",
+      "contacts": [
+        "@julienw:mozilla.org",
+        "@canova:mozilla.org",
+        "@mstange:mozilla.org",
+        "@davehunt:mozilla.org"
       ]
-  }
+    }
+  },
+  "bugs": {
+    "list": "https://github.com/firefox-devtools/profiler/issues",
+    "report": "https://github.com/firefox-devtools/profiler/issues/new",
+    "mentored": "https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22"
+  },
+  "urls": {
+    "prod": "https://profiler.firefox.com",
+    "stage": "https://main--perf-html.netlify.app/"
+  },
+  "keywords": ["performance", "firefox", "web"]
+}

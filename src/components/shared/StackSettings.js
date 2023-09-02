@@ -147,7 +147,7 @@ class StackSettingsImpl extends PureComponent<Props> {
 export const StackSettings = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),

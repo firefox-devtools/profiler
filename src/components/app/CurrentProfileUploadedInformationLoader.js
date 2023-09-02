@@ -69,7 +69,7 @@ class CurrentProfileUploadedInformationLoaderImpl extends PureComponent<Props> {
 export const CurrentProfileUploadedInformationLoader = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     hash: getHash(state),

@@ -166,7 +166,7 @@ type CategoryBreakdownDispatchProps = {|
 type CategoryBreakdownAllProps = ConnectedProps<
   CategoryBreakdownOwnProps,
   CategoryBreakdownStateProps,
-  CategoryBreakdownDispatchProps
+  CategoryBreakdownDispatchProps,
 >;
 
 class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProps> {
@@ -273,7 +273,7 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
 export const CategoryBreakdown = explicitConnect<
   CategoryBreakdownOwnProps,
   CategoryBreakdownStateProps,
-  CategoryBreakdownDispatchProps
+  CategoryBreakdownDispatchProps,
 >({
   mapStateToProps: (state) => {
     return {

@@ -59,7 +59,7 @@ import { defaultThreadViewOptions } from '../../reducers/profile-view';
  * the type of the selector.
  */
 export type BasicThreadSelectorsPerThread = $ReturnType<
-  typeof getBasicThreadSelectorsPerThread
+  typeof getBasicThreadSelectorsPerThread,
 >;
 export type ThreadSelectorsPerThread = {|
   ...BasicThreadSelectorsPerThread,
@@ -150,7 +150,7 @@ export function getBasicThreadSelectorsPerThread(
     getThreadWithReservedFunctions(state).thread;
 
   const getReservedFunctionsForResources: Selector<
-    Map<IndexIntoResourceTable, IndexIntoFuncTable>
+    Map<IndexIntoResourceTable, IndexIntoFuncTable>,
   > = (state) =>
     getThreadWithReservedFunctions(state).reservedFunctionsForResources;
 

@@ -94,7 +94,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
 export const TimelineActiveTabResourcesPanel = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     isActiveTabResourcesPanelOpen: getIsActiveTabResourcesPanelOpen(state),

@@ -44,7 +44,7 @@ import type {
  * definition for the type of the selector.
  */
 export type MarkerSelectorsPerThread = $ReturnType<
-  typeof getMarkerSelectorsPerThread
+  typeof getMarkerSelectorsPerThread,
 >;
 
 /**
@@ -105,7 +105,7 @@ export function getMarkerSelectorsPerThread(
   );
 
   const getMarkerIndexToRawMarkerIndexes: Selector<
-    IndexedArray<MarkerIndex, IndexIntoRawMarkerTable[]>
+    IndexedArray<MarkerIndex, IndexIntoRawMarkerTable[]>,
   > = createSelector(
     getDerivedMarkerInfo,
     ({ markerIndexToRawMarkerIndexes }) => markerIndexToRawMarkerIndexes
@@ -246,7 +246,7 @@ export function getMarkerSelectorsPerThread(
    * so we can hide it inside active tab view.
    */
   const getActiveTabFilteredMarkerIndexesWithoutGlobals: Selector<
-    MarkerIndex[]
+    MarkerIndex[],
   > = createSelector(
     getMarkerGetter,
     getFullMarkerListIndexes,
@@ -700,7 +700,7 @@ export function getMarkerSelectorsPerThread(
       );
 
     const getCommittedRangeMarkerSampleRange: Selector<
-      [IndexIntoSamplesTable, IndexIntoSamplesTable]
+      [IndexIntoSamplesTable, IndexIntoSamplesTable],
     > = createSelector(
       getCollectedCustomMarkerSamples,
       ProfileSelectors.getCommittedRange,
