@@ -22,7 +22,6 @@ module.exports = {
       { includeFindQueries: false },
     ],
     'testing-library/prefer-presence-queries': 'error',
-    'testing-library/prefer-wait-for': 'error',
 
     // Disable some rules that are in the "recommended" part.
     // This is a purely stylistic rule
