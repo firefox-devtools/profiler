@@ -262,6 +262,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     }
   };
 
+  _onMouseLeave = () => {
+    this.props.changeMouseTimePosition(null);
+  };
+
   _makeOnMove =
     (fun: (number) => { startDelta: number, endDelta: number }) =>
     (
@@ -412,6 +416,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
         ref={this._containerCreated}
         onMouseDown={this._onMouseDown}
         onMouseMove={this._onMouseMove}
+        onMouseLeave={this._onMouseLeave}
       >
         {children}
         {previewSelection.hasSelection

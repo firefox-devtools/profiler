@@ -697,7 +697,6 @@ const hoveredMarker: Reducer<MarkerReference | null> = (
 };
 
 /**
- * TODO: This is not used yet, see issue #222
  * This is for tracking mouse position in timeline-axis
  */
 const mouseTimePosition: Reducer<Milliseconds | null> = (

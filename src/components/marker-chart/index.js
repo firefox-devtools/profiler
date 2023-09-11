@@ -23,6 +23,7 @@ import { getTimelineMarginLeft } from 'firefox-profiler/selectors/app';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
+  changeMouseTimePosition,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
@@ -47,6 +48,7 @@ const ROW_HEIGHT = 16;
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
+  +changeMouseTimePosition: typeof changeMouseTimePosition,
 |};
 
 type StateProps = {|
@@ -106,6 +108,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
       getMarker,
       previewSelection,
       updatePreviewSelection,
+      changeMouseTimePosition,
       changeRightClickedMarker,
       rightClickedMarkerIndex,
       timelineMarginLeft,
@@ -150,6 +153,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 getMarker,
                 // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 updatePreviewSelection,
+                changeMouseTimePosition,
                 changeRightClickedMarker,
                 rangeStart: timeRange.start,
                 rangeEnd: timeRange.end,
@@ -194,6 +198,10 @@ export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
       timelineTrackOrganization: getTimelineTrackOrganization(state),
     };
   },
-  mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },
+  mapDispatchToProps: {
+    updatePreviewSelection,
+    changeMouseTimePosition,
+    changeRightClickedMarker,
+  },
   component: MarkerChartImpl,
 });
