@@ -38,12 +38,14 @@ import {
   getActiveTabID,
   getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
+import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
 import {
   withHistoryReplaceStateAsync,
   withHistoryReplaceStateSync,
   stateFromLocation,
   ensureIsValidDataSource,
 } from 'firefox-profiler/app-logic/url-handling';
+import { tabsShowingSampleData } from 'firefox-profiler/app-logic/tabs-handling';
 import {
   initializeLocalTrackOrderByPid,
   computeLocalTracksByPid,
@@ -59,7 +61,10 @@ import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-ta
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
-import { determineTimelineType } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  determineTimelineType,
+  hasUsefulSamples,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   RequestedLib,
@@ -345,10 +350,32 @@ export function finalizeFullProfileView(
       timelineType = determineTimelineType(profile);
     }
 
+    // If the currently selected tab is only visible when the selected track
+    // has samples, verify that the selected track has samples, and if not
+    // select the marker chart.
+    let selectedTab = getSelectedTab(getState());
+    if (tabsShowingSampleData.includes(selectedTab)) {
+      let hasSamples = false;
+      for (const threadIndex of selectedThreadIndexes) {
+        const thread = profile.threads[threadIndex];
+        const { samples, jsAllocations, nativeAllocations } = thread;
+        hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
+          hasUsefulSamples(table, thread)
+        );
+        if (hasSamples) {
+          break;
+        }
+      }
+      if (!hasSamples) {
+        selectedTab = 'marker-chart';
+      }
+    }
+
     withHistoryReplaceStateSync(() => {
       dispatch({
         type: 'VIEW_FULL_PROFILE',
         selectedThreadIndexes,
+        selectedTab,
         globalTracks,
         globalTrackOrder,
         localTracksByPid,
