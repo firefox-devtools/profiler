@@ -60,7 +60,10 @@ const options = {
 // The server must be "https"
 const server = https.createServer(options, (request, response) => {
   // You must give access to profiler.firefox.com
-  response.setHeader('Access-Control-Allow-Origin', 'https://profiler.firefox.com');
+  response.setHeader(
+    'Access-Control-Allow-Origin',
+    'https://profiler.firefox.com'
+  );
 
   // You could also do * to allow anyone to load it:
   // response.setHeader('Access-Control-Allow-Origin', "*");
@@ -74,7 +77,7 @@ const server = https.createServer(options, (request, response) => {
 });
 
 // Start listening on the port.
-server.listen(PORT, err => {
+server.listen(PORT, (err) => {
   if (err) {
     return console.log('Error starting server', err);
   }

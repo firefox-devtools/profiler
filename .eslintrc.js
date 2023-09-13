@@ -7,14 +7,12 @@ module.exports = {
     node: true,
   },
   parser: '@babel/eslint-parser',
-  plugins: ['@babel', 'react', 'flowtype', 'import', 'prettier'],
+  plugins: ['@babel', 'react', 'flowtype', 'import'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:flowtype/recommended',
-    // This works with the prettier plugin, this needs to be at the end always.
-    // Replace it with the "prettier" config if we remove the plugin.
-    'plugin:prettier/recommended',
+    'prettier',
   ],
   parserOptions: {
     ecmaVersion: '2017',

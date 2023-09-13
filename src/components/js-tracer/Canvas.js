@@ -48,7 +48,7 @@ type OwnProps = {|
   +threadsKey: ThreadsKey,
   +doFadeIn: boolean,
   +updatePreviewSelection: WrapFunctionInDispatch<
-    typeof updatePreviewSelection
+    typeof updatePreviewSelection,
   >,
 |};
 
@@ -659,5 +659,5 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
 
 export const JsTracerCanvas = (withChartViewport: WithChartViewport<
   OwnProps,
-  Props
+  Props,
 >)(JsTracerCanvasImpl);

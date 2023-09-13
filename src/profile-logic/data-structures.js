@@ -308,7 +308,7 @@ export function getResourceTypes() {
  * Export a read-only copy of the resource types.
  */
 export const resourceTypes = (getResourceTypes(): $Exact<
-  $ReadOnly<$Call<typeof getResourceTypes>>
+  $ReadOnly<$Call<typeof getResourceTypes>>,
 >);
 
 export function getEmptyExtensions(): ExtensionTable {

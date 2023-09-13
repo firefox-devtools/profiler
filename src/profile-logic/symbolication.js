@@ -397,7 +397,7 @@ function _removeFramesFromStackTable(
   stackTable: StackTable,
   oldStackToNewStack: Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > | null,
 } {
   if (framesToRemove.size === 0) {
@@ -406,7 +406,7 @@ function _removeFramesFromStackTable(
   const newStackTable = getEmptyStackTable();
   const oldStackToNewStack: Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > = new Map();
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
@@ -461,13 +461,13 @@ function _addExpansionStacksToStackTable(
   stackTable: StackTable,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
-    IndexIntoFrameTable[]
+    IndexIntoFrameTable[],
   >
 ): {
   stackTable: StackTable,
   oldStackToNewStack: Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > | null,
 } {
   if (frameIndexToInlineExpansionFrames.size === 0) {
@@ -549,7 +549,7 @@ export function applySymbolicationStep(
   const symbolAddressToInfoMap: Map<Address, AddressResult> = new Map();
   const symbolAddressToCanonicalSymbolIndexMap: Map<
     Address,
-    IndexIntoNativeSymbolTable
+    IndexIntoNativeSymbolTable,
   > = new Map();
 
   // If this profile was symbolicated before, we may have frames for inlined functions
@@ -711,7 +711,7 @@ export function applySymbolicationStep(
   const availableFrameIter = inlinedFrames.values();
   const frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
-    IndexIntoFrameTable[]
+    IndexIntoFrameTable[],
   > = new Map();
   const oldFuncToNewFuncsEntries: Array<[IndexIntoFuncTable, string]> = [];
 

@@ -1,9 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8'>
-    <title>Firefox Profiler example &mdash; Garbage Collection With Merge Sort</title>
-    <link rel='stylesheet' href='examples.css'>
+    <meta charset="utf-8" />
+    <title>
+      Firefox Profiler example &mdash; Garbage Collection With Merge Sort
+    </title>
+    <link rel="stylesheet" href="examples.css" />
     <style>
       #container p {
         white-space: nowrap;
@@ -15,15 +17,16 @@
   <body>
     <h1>Firefox Profiler example &mdash; Garbage Collection With Merge Sort</h1>
     <p>
-      This example runs two different implementations of the merge sort algorithm. The
-      first button runs an implementation that creates lots of small arrays. All of these
-      small arrays must be cleaned up. The second implementation pre-allocates a single
-      array, and operates within two arrays. It avoids the problem of making the garbage
-      collector work too hard.
+      This example runs two different implementations of the merge sort
+      algorithm. The first button runs an implementation that creates lots of
+      small arrays. All of these small arrays must be cleaned up. The second
+      implementation pre-allocates a single array, and operates within two
+      arrays. It avoids the problem of making the garbage collector work too
+      hard.
     </p>
     <p>
-      <label for='number'>Array size:</label>
-      <input id='number' type='number' value='1000000' />
+      <label for="number">Array size:</label>
+      <input id="number" type="number" value="1000000" />
     </p>
     <p>
       <button id="button1">Sort randomized array</button>
@@ -32,21 +35,22 @@
       <button id="button2">Sort randomized array (GC Optimized)</button>
     </p>
 
-    <div id='container'>
-    </div>
+    <div id="container"></div>
 
     <script>
-      const container = document.querySelector("#container");
-      const numberEl = document.querySelector("#number");
+      const container = document.querySelector('#container');
+      const numberEl = document.querySelector('#number');
       let randomNumbers = generateRandomArray();
 
-      numberEl.addEventListener("change", () => {
-        randomNumbers = generateRandomArray()
+      numberEl.addEventListener('change', () => {
+        randomNumbers = generateRandomArray();
       });
-      document.querySelector("#button1")
-        .addEventListener("click", () => runSort(mergeSort), false);
-      document.querySelector("#button2")
-        .addEventListener("click", () => runSort(mergeSortOptimized), false);
+      document
+        .querySelector('#button1')
+        .addEventListener('click', () => runSort(mergeSort), false);
+      document
+        .querySelector('#button2')
+        .addEventListener('click', () => runSort(mergeSortOptimized), false);
 
       function runSort(fn) {
         // Measure the timing with the User Timings API.
@@ -59,7 +63,9 @@
         // Get the timing information.
         performance.mark(`${name}-end`);
         performance.measure(name, `${name}-start`, `${name}-end`);
-        const duration = performance.getEntriesByName(name)[0].duration.toFixed(2);
+        const duration = performance
+          .getEntriesByName(name)[0]
+          .duration.toFixed(2);
         performance.clearMarks();
         performance.clearMeasures();
 
@@ -104,7 +110,12 @@
        * and expensive operations such as concatenation are not needed. In addition,
        * there is no garbage collection pressure of cleaning up lots of small arrays.
        */
-      function mergeSortOptimized(A, B = Array(A.length), p = 0, r = A.length - 1) {
+      function mergeSortOptimized(
+        A,
+        B = Array(A.length),
+        p = 0,
+        r = A.length - 1
+      ) {
         if (p < r) {
           const q = Math.floor((p + r) / 2);
           mergeSortOptimized(A, B, p, q);

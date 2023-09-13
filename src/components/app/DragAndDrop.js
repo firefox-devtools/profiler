@@ -226,7 +226,7 @@ type OverlayDispatchProps = {|
 type OverlayProps = ConnectedProps<
   OverlayOwnProps,
   OverlayStateProps,
-  OverlayDispatchProps
+  OverlayDispatchProps,
 >;
 
 /**
@@ -268,7 +268,7 @@ class DragAndDropOverlayImpl extends React.PureComponent<OverlayProps> {
 export const DragAndDropOverlay = explicitConnect<
   OverlayOwnProps,
   OverlayStateProps,
-  OverlayDispatchProps
+  OverlayDispatchProps,
 >({
   mapStateToProps: (state) => ({
     isDragging: getIsDragAndDropDragging(state),

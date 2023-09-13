@@ -33,7 +33,7 @@ type MergeProps<
   StateProps,
   DispatchProps: Object,
   OwnProps: Object,
-  Props: Object
+  Props: Object,
 > = (
   stateProps: StateProps,
   dispatchProps: DispatchProps,
@@ -83,7 +83,7 @@ type WrapThunkActionCreator<Args, Returns> = (
  */
 export type WrapDispatchProps<DispatchProps: Object> = $ObjMap<
   DispatchProps,
-  WrapActionCreator<*> & WrapThunkActionCreator<*, *>
+  WrapActionCreator<*> & WrapThunkActionCreator<*, *>,
 >;
 
 /**
@@ -93,13 +93,13 @@ export type WrapDispatchProps<DispatchProps: Object> = $ObjMap<
  */
 export type WrapFunctionInDispatch<Fn: Function> = $Call<
   WrapActionCreator<*> & WrapThunkActionCreator<*, *>,
-  Fn
+  Fn,
 >;
 
 type ExplicitConnectOptions<
   OwnProps: Object,
   StateProps: Object,
-  DispatchProps: Object
+  DispatchProps: Object,
 > = {|
   mapStateToProps?: MapStateToProps<OwnProps, StateProps>,
   mapDispatchToProps?: MapDispatchToProps<OwnProps, DispatchProps>,
@@ -107,18 +107,18 @@ type ExplicitConnectOptions<
     StateProps,
     DispatchProps,
     OwnProps,
-    ConnectedProps<OwnProps, StateProps, DispatchProps>
+    ConnectedProps<OwnProps, StateProps, DispatchProps>,
   >,
   options?: ConnectOptions,
   component: React.ComponentType<
-    ConnectedProps<OwnProps, StateProps, DispatchProps>
+    ConnectedProps<OwnProps, StateProps, DispatchProps>,
   >,
 |};
 
 export type ConnectedProps<
   OwnProps: Object,
   StateProps: Object,
-  DispatchProps: Object
+  DispatchProps: Object,
 > = $ReadOnly<{|
   ...OwnProps,
   ...StateProps,
@@ -128,11 +128,11 @@ export type ConnectedProps<
 export type ConnectedComponent<
   OwnProps: Object,
   StateProps: Object,
-  DispatchProps: Object
+  DispatchProps: Object,
 > =
   | React.ComponentType<ConnectedProps<OwnProps, StateProps, DispatchProps>>
   | React.StatelessFunctionalComponent<
-      ConnectedProps<OwnProps, StateProps, DispatchProps>
+      ConnectedProps<OwnProps, StateProps, DispatchProps>,
     >;
 
 /**
@@ -143,7 +143,7 @@ export type ConnectedComponent<
 export default function explicitConnect<
   OwnProps: Object,
   StateProps: Object,
-  DispatchProps: Object
+  DispatchProps: Object,
 >(
   connectOptions: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps>
 ): React.ComponentType<OwnProps> {

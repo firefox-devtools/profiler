@@ -1,22 +1,12 @@
 {
-  "plugins": [
-    "stylelint-prettier"
-  ],
-  "extends": [
-    "stylelint-config-standard",
-    "stylelint-config-idiomatic-order",
-  ],
+  "extends": ["stylelint-config-standard", "stylelint-config-idiomatic-order"],
   "rules": {
-    "prettier/prettier": [
-      true,
-      { "parser": "css" }
-    ],
     "alpha-value-notation": null,
     "function-url-quotes": null,
     "keyframes-name-pattern": null,
     "length-zero-no-unit": null,
     "selector-class-pattern": null,
     "import-notation": null,
-    "media-feature-range-notation": "prefix",
+    "media-feature-range-notation": "prefix"
   }
 }

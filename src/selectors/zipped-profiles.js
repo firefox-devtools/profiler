@@ -26,7 +26,7 @@ export const getSelectedZipFileIndex: Selector<IndexIntoZipFileTable | null> = (
   state
 ) => getZippedProfilesState(state).selectedZipFileIndex;
 export const getExpandedZipFileIndexes: Selector<
-  Array<IndexIntoZipFileTable | null>
+  Array<IndexIntoZipFileTable | null>,
 > = (state) => getZippedProfilesState(state).expandedZipFileIndexes;
 export const getZipFileState: Selector<ZipFileState> = (state) =>
   getZippedProfilesState(state).zipFile;

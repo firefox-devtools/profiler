@@ -519,5 +519,5 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
 export const FlameGraphCanvas = (withChartViewport: WithChartViewport<
   OwnProps,
-  Props
+  Props,
 >)(FlameGraphCanvasImpl);

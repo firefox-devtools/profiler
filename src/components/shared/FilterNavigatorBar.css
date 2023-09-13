@@ -29,7 +29,8 @@
   border-right-color: transparent !important;
   background-clip: padding-box;
   line-height: 24px;
-  transition: opacity 250ms var(--animation-curve),
+  transition:
+    opacity 250ms var(--animation-curve),
     transform 250ms var(--animation-curve);
 }
 

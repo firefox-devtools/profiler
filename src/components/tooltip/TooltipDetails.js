@@ -49,7 +49,7 @@ export function TooltipDetailSeparator() {
 }
 
 export type TooltipDetailComponent = React.Element<
-  typeof TooltipDetail | typeof TooltipDetailSeparator
+  typeof TooltipDetail | typeof TooltipDetailSeparator,
 > | null;
 type Props = {|
   // This component accepts only TooltipDetail children.

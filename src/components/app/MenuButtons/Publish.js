@@ -84,7 +84,7 @@ type PublishState = {|
 
 class MenuButtonsPublishImpl extends React.PureComponent<
   PublishProps,
-  PublishState
+  PublishState,
 > {
   state = { compressError: null, prevCompressedPromise: null };
   _toggles: { [$Keys<CheckedSharingOptions>]: () => mixed } = {
@@ -390,7 +390,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
 export const MenuButtonsPublish = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     profile: getProfile(state),
@@ -434,7 +434,7 @@ type DownloadButtonState = {|
  */
 class DownloadButton extends React.PureComponent<
   DownloadButtonProps,
-  DownloadButtonState
+  DownloadButtonState,
 > {
   _isMounted: boolean = false;
   state = {

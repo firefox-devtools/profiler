@@ -180,7 +180,7 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
 export const TimelineOrigins = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     threads: getThreads(state),

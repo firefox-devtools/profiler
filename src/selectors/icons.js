@@ -24,7 +24,7 @@ export const getIcons: Selector<IconState> = (state) => state.icons;
  */
 export const getIconClassName: DangerousSelectorWithArguments<
   string,
-  string | null
+  string | null,
 > = (state, icon) => {
   const icons = getIcons(state);
   return icon !== null && icons.has(icon) ? _classNameFromUrl(icon) : '';

@@ -125,7 +125,7 @@ class CallTreeStrategySettingImpl extends PureComponent<Props> {
 export const CallTreeStrategySetting = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     hasUsefulTimingSamples:

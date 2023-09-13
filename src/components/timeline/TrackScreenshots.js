@@ -191,7 +191,7 @@ const EMPTY_SCREENSHOTS_TRACK = [];
 export const TimelineTrackScreenshots = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex, windowId } = ownProps;

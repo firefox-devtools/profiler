@@ -61,7 +61,7 @@ type OwnProps = {|
   +combinedTimingRows: CombinedTimingRows,
   +stackFrameHeight: CssPixels,
   +updatePreviewSelection: WrapFunctionInDispatch<
-    typeof updatePreviewSelection
+    typeof updatePreviewSelection,
   >,
   +getMarker: (MarkerIndex) => Marker,
   +categories: CategoryList,
@@ -602,5 +602,5 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
 export const StackChartCanvas = (withChartViewport: WithChartViewport<
   OwnProps,
-  Props
+  Props,
 >)(StackChartCanvasImpl);

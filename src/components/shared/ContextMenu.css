@@ -11,7 +11,9 @@
   border-radius: 3px;
   margin: 2px 0 0;
   background-color: #fff;
-  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 10px 12px rgb(0 0 0 / 0.3);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.1),
+    0 10px 12px rgb(0 0 0 / 0.3);
   color: #000;
   font-size: 12px;
   text-align: left;

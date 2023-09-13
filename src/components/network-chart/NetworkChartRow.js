@@ -338,7 +338,7 @@ type State = {|
 
 export class NetworkChartRow extends React.PureComponent<
   NetworkChartRowProps,
-  State
+  State,
 > {
   state = {
     pageX: 0,
