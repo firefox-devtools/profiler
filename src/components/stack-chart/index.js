@@ -35,6 +35,7 @@ import {
   changeRightClickedCallNode,
   handleCallNodeTransformShortcut,
   updateBottomBoxContentsAndMaybeOpen,
+  changeMouseTimePosition,
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
@@ -94,6 +95,7 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
   +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
+  +changeMouseTimePosition: typeof changeMouseTimePosition,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -209,6 +211,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       interval,
       previewSelection,
       updatePreviewSelection,
+      changeMouseTimePosition,
       callNodeInfo,
       categories,
       selectedCallNodeIndex,
@@ -263,6 +266,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
+                  changeMouseTimePosition,
                   rangeStart: timeRange.start,
                   rangeEnd: timeRange.end,
                   stackFrameHeight: STACK_FRAME_HEIGHT,
@@ -324,6 +328,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
     updatePreviewSelection,
     handleCallNodeTransformShortcut,
     updateBottomBoxContentsAndMaybeOpen,
+    changeMouseTimePosition,
   },
   component: StackChartImpl,
 });
