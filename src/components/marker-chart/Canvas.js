@@ -18,6 +18,7 @@ import memoize from 'memoize-immutable';
 import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
+  typeof changeMouseTimePosition as ChangeMouseTimePosition,
 } from 'firefox-profiler/actions/profile-view';
 import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
@@ -79,6 +80,7 @@ type OwnProps = {|
   +getMarker: (MarkerIndex) => Marker,
   +threadsKey: ThreadsKey,
   +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
+  +changeMouseTimePosition: ChangeMouseTimePosition,
   +changeRightClickedMarker: ChangeRightClickedMarker,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
@@ -757,6 +759,37 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     return { markerIndex, rowIndexOfLabel };
   };
 
+  onMouseMove = (event: { nativeEvent: MouseEvent }) => {
+    const {
+      changeMouseTimePosition,
+      rangeStart,
+      rangeEnd,
+      marginLeft,
+      marginRight,
+      viewport: { viewportLeft, viewportRight, containerWidth },
+    } = this.props;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const markerContainerWidth = containerWidth - marginLeft - marginRight;
+    // This is the x position in terms of unit interval (so, between 0 and 1).
+    const xInUnitInterval: UnitIntervalOfProfileRange =
+      viewportLeft +
+      viewportLength *
+        ((event.nativeEvent.offsetX - marginLeft) / markerContainerWidth);
+
+    if (xInUnitInterval < 0 || xInUnitInterval > 1) {
+      changeMouseTimePosition(null);
+    } else {
+      const rangeLength: Milliseconds = rangeEnd - rangeStart;
+      const xInTime: Milliseconds = rangeStart + xInUnitInterval * rangeLength;
+      changeMouseTimePosition(xInTime);
+    }
+  };
+
+  onMouseLeave = () => {
+    this.props.changeMouseTimePosition(null);
+  };
+
   onDoubleClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
     const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
     if (markerIndex === null) {
@@ -818,6 +851,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         getHoveredItemInfo={this.getHoveredMarkerInfo}
         drawCanvas={this.drawCanvas}
         hitTest={this.hitTest}
+        onMouseMove={this.onMouseMove}
+        onMouseLeave={this.onMouseLeave}
       />
     );
   }
