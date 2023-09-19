@@ -4,7 +4,7 @@
 // @noflow
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const http = require('node:http');
+const profileServer = require('./profile-server');
 const config = require('./webpack.config');
 const { oneLine, stripIndent } = require('common-tags');
 const port = process.env.FX_PROFILER_PORT || 4242;
@@ -102,17 +102,6 @@ if (argv.profile) {
   // Needed because of a later working directory change.
   argv.profile = path.resolve(argv.profile);
 
-  // Spin up a simple http server serving the profile file.
-  const profileServer = http.createServer((req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', profilerUrl);
-    const fileStream = fs.createReadStream(argv.profile);
-    fileStream.pipe(res);
-  });
-
-  // Close the profile server on CTRL-C.
-  process.on('SIGINT', () => profileServer.close());
-  process.on('SIGTERM', () => profileServer.close());
-
   // Delete "open" target (if any) in serverConfig.
   if (
     typeof serverConfig.open === 'object' &&
@@ -129,13 +118,8 @@ if (argv.profile) {
   const openOptions = serverConfig.open;
   delete serverConfig.open;
 
-  // Open on profile.
-  profileServer.listen(0, host, () => {
-    const profileFromUrl = `${profilerUrl}/from-url/${encodeURIComponent(
-      `http://${host}:${profileServer.address().port}/${encodeURIComponent(
-        path.basename(argv.profile)
-      )}`
-    )}`;
+  // Start profile server and open on profile.
+  profileServer.start(host, profilerUrl, argv.profile, (profileFromUrl) => {
     import('open').then((open) => open.default(profileFromUrl, openOptions));
   });
 }
