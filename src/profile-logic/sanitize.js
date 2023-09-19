@@ -191,6 +191,12 @@ export function sanitizePII(
       : undefined,
   };
 
+  if (PIIToBeRemoved.shouldFilterToCommittedRange !== null) {
+    const { start, end } = PIIToBeRemoved.shouldFilterToCommittedRange;
+    newProfile.meta.profilingStartTime = start;
+    newProfile.meta.profilingEndTime = end;
+  }
+
   return {
     profile: newProfile,
     // Note that the profile was sanitized.
@@ -448,7 +454,7 @@ function sanitizeThreadPII(
     // all frames if we need to.
     const sanitizedFuncIndexesToFrameIndex: Map<
       IndexIntoFuncTable,
-      IndexIntoFrameTable[]
+      IndexIntoFrameTable[],
     > = new Map();
     // This set holds all func indexes that shouldn't be sanitized. This will be
     // intersected with the previous map's keys to know which functions need to

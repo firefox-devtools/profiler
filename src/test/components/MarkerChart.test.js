@@ -328,6 +328,58 @@ describe('MarkerChart', function () {
     expect(drawLogBefore.length > drawLogAfter.length * 2).toBe(true);
   });
 
+  it('changes the mouse time position when the mouse moves', () => {
+    window.devicePixelRatio = 1;
+
+    const profile = getProfileWithMarkers(MARKERS);
+    const { flushRafCalls, getState, dispatch, fireMouseEvent } =
+      setupWithProfile(profile);
+
+    dispatch(changeSelectedTab('marker-chart'));
+    flushRafCalls();
+
+    const drawLogBefore = flushDrawLog();
+
+    // Expect the mouseTimePosition to not be set at the beginning of the test.
+    expect(getState().profileView.viewOptions.mouseTimePosition).toBeNull();
+
+    // Move the mouse on top of an item, ensure mouseTimePosition is set.
+    const { x, y } = findFillTextPositionFromDrawLog(drawLogBefore, 'Marker B');
+    fireMouseEvent('mousemove', {
+      offsetX: x,
+      offsetY: y,
+      pageX: x,
+      pageY: y,
+    });
+    const mouseTimePosition =
+      getState().profileView.viewOptions.mouseTimePosition;
+    expect(typeof mouseTimePosition).toEqual('number');
+
+    // Move the mouse on top of another item, ensure mouseTimePosition changed.
+    const { x: x2, y: y2 } = findFillTextPositionFromDrawLog(
+      drawLogBefore,
+      'Marker A'
+    );
+    expect(x2).not.toEqual(x);
+    fireMouseEvent('mousemove', {
+      offsetX: x2,
+      offsetY: y2,
+      pageX: x2,
+      pageY: y2,
+    });
+    expect(getState().profileView.viewOptions.mouseTimePosition).not.toEqual(
+      mouseTimePosition
+    );
+
+    // Move the mouse out of the marker chart, ensure mouseTimePosition is no
+    // longer set.
+    // React uses mouseover/mouseout events to implement mouseenter/mouseleave.
+    // See https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/react-dom/src/events/EnterLeaveEventPlugin.js#L24-L31
+    fireMouseEvent('mouseout', {});
+
+    expect(getState().profileView.viewOptions.mouseTimePosition).toBeNull();
+  });
+
   describe('context menus', () => {
     beforeEach(() => {
       // Always use fake timers when dealing with context menus.

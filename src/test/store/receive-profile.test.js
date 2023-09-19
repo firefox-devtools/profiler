@@ -871,9 +871,8 @@ describe('actions/receive-profile', function () {
             'web-channel': setupWithWebChannel,
           }[setupWith];
           const { dispatch, getState } = setupFn(profileAs);
-          const browserConnectionStatus = await createBrowserConnection(
-            'Firefox/123.0'
-          );
+          const browserConnectionStatus =
+            await createBrowserConnection('Firefox/123.0');
           await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
           expect(console.warn).toHaveBeenCalledTimes(2);
 
@@ -898,9 +897,8 @@ describe('actions/receive-profile', function () {
     it('tries to symbolicate the received profile, frame script version', async () => {
       const { dispatch, geckoProfiler } = setupWithFrameScript();
 
-      const browserConnectionStatus = await createBrowserConnection(
-        'Firefox/123.0'
-      );
+      const browserConnectionStatus =
+        await createBrowserConnection('Firefox/123.0');
       await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
 
       expect(geckoProfiler.getSymbolTable).toHaveBeenCalledWith(
@@ -919,9 +917,8 @@ describe('actions/receive-profile', function () {
     it('tries to symbolicate the received profile, webchannel version', async () => {
       const { dispatch } = setupWithWebChannel();
 
-      const browserConnectionStatus = await createBrowserConnection(
-        'Firefox/123.0'
-      );
+      const browserConnectionStatus =
+        await createBrowserConnection('Firefox/123.0');
       await dispatch(retrieveProfileFromBrowser(browserConnectionStatus));
 
       expect(window.fetch).toHaveBeenCalledWith(
@@ -2047,9 +2044,8 @@ describe('actions/receive-profile', function () {
       jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
-      const browserConnectionStatus = await createBrowserConnection(
-        'Firefox/123.0'
-      );
+      const browserConnectionStatus =
+        await createBrowserConnection('Firefox/123.0');
       const browserConnection =
         browserConnectionStatus.status === 'ESTABLISHED'
           ? browserConnectionStatus.browserConnection

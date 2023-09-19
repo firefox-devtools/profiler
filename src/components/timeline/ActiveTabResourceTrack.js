@@ -191,7 +191,7 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
 export const TimelineActiveTabResourceTrack = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, { resourceTrack }) => {
     const threadIndex = resourceTrack.threadIndex;

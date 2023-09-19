@@ -11,18 +11,16 @@ import {
   toValidImplementationFilter,
   getCallNodeIndexFromPath,
   updateThreadStacks,
+  updateThreadStacksByGeneratingNewStackColumns,
   getMapStackUpdater,
   getCallNodeIndexFromParentAndFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
+import { canonicalizeRangeSet } from '../utils/range-set';
 import { CallTree } from '../profile-logic/call-tree';
 import { getSearchFilteredMarkerIndexes } from '../profile-logic/marker-data';
-import {
-  shallowCloneFrameTable,
-  shallowCloneFuncTable,
-  getEmptyStackTable,
-} from './data-structures';
+import { shallowCloneFrameTable, getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 
@@ -766,7 +764,7 @@ export function mergeCallNode(
     const depthAtCallNodePathLeaf = callNodePath.length - 1;
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null
+      IndexIntoStackTable | null,
     > = new Map();
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
@@ -857,7 +855,7 @@ export function mergeFunction(
   const { stackTable, frameTable } = thread;
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > = new Map();
   // A root stack's prefix will be null. Maintain that relationship from old to new
   // stacks by mapping from null to null.
@@ -906,7 +904,9 @@ export function dropFunction(
   const { stackTable, frameTable } = thread;
 
   // Go through each stack, and label it as containing the function or not.
-  const stackContainsFunc: Array<void | true> = [];
+  // stackContainsFunc is a stackIndex => bool map, implemented as a U8 typed
+  // array for better performance. 0 means false, 1 means true.
+  const stackContainsFunc = new Uint8Array(stackTable.length);
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
@@ -915,36 +915,35 @@ export function dropFunction(
       // This is the function we want to remove.
       funcIndex === funcIndexToDrop ||
       // The parent of this stack contained the function.
-      (prefix !== null && stackContainsFunc[prefix])
+      (prefix !== null && stackContainsFunc[prefix] === 1)
     ) {
-      stackContainsFunc[stackIndex] = true;
+      stackContainsFunc[stackIndex] = 1;
     }
   }
 
   return updateThreadStacks(thread, stackTable, (stack) =>
     // Drop the stacks that contain that function.
-    stack !== null && stackContainsFunc[stack] ? null : stack
+    stack !== null && stackContainsFunc[stack] === 1 ? null : stack
   );
 }
 
 export function collapseResource(
   thread: Thread,
   resourceIndexToCollapse: IndexIntoResourceTable,
+  collapsedFuncIndex: IndexIntoFuncTable,
   implementation: ImplementationFilter,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const { stackTable, funcTable, frameTable, resourceTable } = thread;
-  const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
+  const { stackTable, funcTable, frameTable } = thread;
   const newFrameTable = shallowCloneFrameTable(frameTable);
-  const newFuncTable = shallowCloneFuncTable(funcTable);
   const newStackTable = getEmptyStackTable();
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > = new Map();
   const prefixStackToCollapsedStack: Map<
     IndexIntoStackTable | null, // prefix stack index
-    IndexIntoStackTable | null // collapsed stack index
+    IndexIntoStackTable | null, // collapsed stack index
   > = new Map();
   const collapsedStacks: Set<IndexIntoStackTable | null> = new Set();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
@@ -955,7 +954,6 @@ export function collapseResource(
   // A new func and frame will be created on the first stack that is found that includes
   // the given resource.
   let collapsedFrameIndex;
-  let collapsedFuncIndex;
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
@@ -989,7 +987,6 @@ export function collapseResource(
 
           if (collapsedFrameIndex === undefined) {
             collapsedFrameIndex = newFrameTable.length++;
-            collapsedFuncIndex = newFuncTable.length++;
             // Add the collapsed frame
             newFrameTable.address.push(frameTable.address[frameIndex]);
             newFrameTable.inlineDepth.push(frameTable.inlineDepth[frameIndex]);
@@ -1007,14 +1004,6 @@ export function collapseResource(
             newFrameTable.implementation.push(
               frameTable.implementation[frameIndex]
             );
-
-            // Add the psuedo-func
-            newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
-            newFuncTable.name.push(resourceNameIndex);
-            newFuncTable.resource.push(funcTable.resource[funcIndex]);
-            newFuncTable.fileName.push(funcTable.fileName[funcIndex]);
-            newFuncTable.lineNumber.push(null);
-            newFuncTable.columnNumber.push(null);
           }
 
           // Add the new stack.
@@ -1051,7 +1040,7 @@ export function collapseResource(
         // This function doesn't match the implementation filter.
         const prefixFrame = newStackTable.frame[newStackPrefix];
         const prefixFunc = newFrameTable.func[prefixFrame];
-        const prefixResource = newFuncTable.resource[prefixFunc];
+        const prefixResource = funcTable.resource[prefixFunc];
 
         if (prefixResource === resourceIndexToCollapse) {
           // This stack's prefix did match the collapsed resource, map the stack
@@ -1073,7 +1062,6 @@ export function collapseResource(
   const newThread = {
     ...thread,
     frameTable: newFrameTable,
-    funcTable: newFuncTable,
   };
 
   return updateThreadStacks(
@@ -1131,7 +1119,7 @@ export function collapseDirectRecursion(
   // E.g. B3 -> A1 in the example.
   const recursionChainPrefixForStack = new Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   >();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
   const newStackTablePrefixColumn = stackTable.prefix.slice();
@@ -1227,7 +1215,7 @@ export function collapseRecursion(
   // B1's prefix A1.
   const funcToCollapseSubtreePrefixForStack = new Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   >();
   const newStackTablePrefixColumn = stackTable.prefix.slice();
 
@@ -1304,7 +1292,7 @@ export function collapseFunctionSubtree(
   const { stackTable, frameTable } = thread;
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   > = new Map();
   // A root stack's prefix will be null. Maintain that relationship from old to new
   // stacks by mapping from null to null.
@@ -1396,7 +1384,7 @@ export function focusSubtree(
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null
+      IndexIntoStackTable | null,
     > = new Map();
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
@@ -1501,45 +1489,38 @@ export function focusFunction(
 ): Thread {
   return timeCode('focusFunction', () => {
     const { stackTable, frameTable } = thread;
-    const oldStackToNewStack: Map<
-      IndexIntoStackTable | null,
-      IndexIntoStackTable | null
-    > = new Map();
-    // A root stack's prefix will be null. Maintain that relationship from old to new
-    // stacks by mapping from null to null.
-    oldStackToNewStack.set(null, null);
-    const newStackTable = getEmptyStackTable();
+    // A map oldStack -> newStack+1, implemented as a Uint32Array for performance.
+    // If newStack+1 is zero it means "null", i.e. this stack was filtered out.
+    // Typed arrays are initialized to zero, which we interpret as null.
+    const oldStackToNewStackPlusOne = new Uint32Array(stackTable.length);
 
+    const newStackTable = getEmptyStackTable();
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
-      const category = stackTable.category[stackIndex];
-      const subcategory = stackTable.subcategory[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
-      const matchesFocusFunc = funcIndex === funcIndexToFocus;
 
-      const newPrefix = oldStackToNewStack.get(prefix);
-      if (newPrefix === undefined) {
-        throw new Error('The prefix should not map to an undefined value');
-      }
-
-      if (newPrefix !== null || matchesFocusFunc) {
+      const newPrefixPlusOne =
+        prefix === null ? 0 : oldStackToNewStackPlusOne[prefix];
+      const newPrefix = newPrefixPlusOne === 0 ? null : newPrefixPlusOne - 1;
+      if (newPrefix !== null || funcIndex === funcIndexToFocus) {
         const newStackIndex = newStackTable.length++;
         newStackTable.prefix[newStackIndex] = newPrefix;
         newStackTable.frame[newStackIndex] = frameIndex;
-        newStackTable.category[newStackIndex] = category;
-        newStackTable.subcategory[newStackIndex] = subcategory;
-        oldStackToNewStack.set(stackIndex, newStackIndex);
-      } else {
-        oldStackToNewStack.set(stackIndex, null);
+        newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
+        newStackTable.subcategory[newStackIndex] =
+          stackTable.subcategory[stackIndex];
+        oldStackToNewStackPlusOne[stackIndex] = newStackIndex + 1;
       }
     }
 
-    return updateThreadStacks(
-      thread,
-      newStackTable,
-      getMapStackUpdater(oldStackToNewStack)
-    );
+    return updateThreadStacks(thread, newStackTable, (oldStack) => {
+      if (oldStack === null) {
+        return null;
+      }
+      const newStackPlusOne = oldStackToNewStackPlusOne[oldStack];
+      return newStackPlusOne === 0 ? null : newStackPlusOne - 1;
+    });
   });
 }
 
@@ -1548,7 +1529,7 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
     const { stackTable } = thread;
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
-      IndexIntoStackTable | null
+      IndexIntoStackTable | null,
     > = new Map();
     oldStackToNewStack.set(null, null);
 
@@ -1797,71 +1778,66 @@ export function filterSamples(
 ): Thread {
   return timeCode('filterSamples', () => {
     // Find the ranges to filter.
-    let ranges: StartEndRange[];
-    switch (filterType) {
-      case 'marker-search':
-        ranges = _findRangesByMarkerFilter(
-          getMarker,
-          markerIndexes,
-          markerSchemaByName,
-          categoryList,
-          filter
-        );
-        break;
-      default:
-        throw assertExhaustiveCheck(filterType);
+    function getFilterRanges(): StartEndRange[] {
+      switch (filterType) {
+        case 'marker-search':
+          return _findRangesByMarkerFilter(
+            getMarker,
+            markerIndexes,
+            markerSchemaByName,
+            categoryList,
+            filter
+          );
+        default:
+          throw assertExhaustiveCheck(filterType);
+      }
     }
 
-    // Now let's go through all the samples and remove the ones that are outside
-    // of the ranges.
-    const { samples, jsAllocations, nativeAllocations } = thread;
+    const ranges = canonicalizeRangeSet(getFilterRanges());
 
-    function filterTable<
-      Table: {
-        stack: Array<IndexIntoStackTable | null>,
-        time: Milliseconds[],
-        length: number,
-      }
-    >(table: Table): Table {
-      const newTable = {
-        ...table,
-        stack: table.stack.slice(),
-      };
+    function computeFilteredStackColumn(
+      originalStackColumn: Array<IndexIntoStackTable | null>,
+      timeColumn: Milliseconds[]
+    ): Array<IndexIntoStackTable | null> {
+      const newStackColumn = originalStackColumn.slice();
 
-      for (let tableIndex = 0; tableIndex < newTable.length; tableIndex++) {
-        const sampleTime = newTable.time[tableIndex];
+      // Walk the ranges and samples in order. Both are sorted by time.
+      // For each range, drop the samples before the range and skip the samples
+      // inside the range.
+      let sampleIndex = 0;
+      const sampleCount = timeColumn.length;
+      for (const range of ranges) {
+        const { start: rangeStart, end: rangeEnd } = range;
+        // Drop samples before the range.
+        for (; sampleIndex < sampleCount; sampleIndex++) {
+          if (timeColumn[sampleIndex] >= rangeStart) {
+            break;
+          }
+          newStackColumn[sampleIndex] = null;
+        }
 
-        let sampleInRange = false;
-        for (const { start, end } of ranges) {
-          if (sampleTime >= start && sampleTime <= end) {
-            sampleInRange = true;
+        // Skip over samples inside the range.
+        for (; sampleIndex < sampleCount; sampleIndex++) {
+          if (timeColumn[sampleIndex] >= rangeEnd) {
             break;
           }
         }
-
-        if (!sampleInRange) {
-          newTable.stack[tableIndex] = null;
-        }
       }
 
-      return newTable;
+      // Drop the remaining samples, i.e. the samples after the last range.
+      while (sampleIndex < sampleCount) {
+        newStackColumn[sampleIndex] = null;
+        sampleIndex++;
+      }
+
+      return newStackColumn;
     }
 
-    const newThread = {
-      ...thread,
-      samples: filterTable(samples),
-    };
-
-    if (jsAllocations) {
-      // Filter the JS allocations if there are any.
-      newThread.jsAllocations = filterTable(jsAllocations);
-    }
-    if (nativeAllocations) {
-      // Filter the native allocations if there are any.
-      newThread.nativeAllocations = filterTable(nativeAllocations);
-    }
-
-    return newThread;
+    return updateThreadStacksByGeneratingNewStackColumns(
+      thread,
+      thread.stackTable,
+      computeFilteredStackColumn
+    );
   });
 }
 
@@ -1905,6 +1881,7 @@ export function applyTransform(
       return collapseResource(
         thread,
         transform.resourceIndex,
+        transform.collapsedFuncIndex,
         transform.implementation,
         defaultCategory
       );

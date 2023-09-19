@@ -68,7 +68,7 @@ type ZipFileRowOwnProps = {|
 type ZipFileRowProps = ConnectedProps<
   ZipFileRowOwnProps,
   {||},
-  ZipFileRowDispatchProps
+  ZipFileRowDispatchProps,
 >;
 
 class ZipFileRowImpl extends React.PureComponent<ZipFileRowProps> {
@@ -102,7 +102,7 @@ class ZipFileRowImpl extends React.PureComponent<ZipFileRowProps> {
 const ZipFileRow = explicitConnect<
   ZipFileRowOwnProps,
   {||},
-  ZipFileRowDispatchProps
+  ZipFileRowDispatchProps,
 >({
   // ZipFileRow is implemented as a connected component, only to provide access to
   // dispatch-wrapped actions. Please consider the performance impact of using

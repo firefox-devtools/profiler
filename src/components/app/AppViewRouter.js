@@ -148,7 +148,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
 export const AppViewRouter = explicitConnect<
   {||},
   AppViewRouterStateProps,
-  {||}
+  {||},
 >({
   mapStateToProps: (state: State) => ({
     view: getView(state),

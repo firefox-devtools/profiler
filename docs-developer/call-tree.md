@@ -41,7 +41,7 @@ This structure makes it much easier to tell where time is being spent in differe
 
 # Self and running time
 
-With the above graph, we know that the functions at the leaf of the graph were the actual functions that were running when we took the samples. So for the leaf functions `E`, `G`, and `F`, their self times are 1ms. Their running times will be the same as their self time. Now walking up the stack, respectively the function `D`, `F`, and `H` called those functions. Since we never actually observed those functions directly running (they weren't at the end of the stack), then the self times for all of those functions would be 0ms. However, because the functions they called *did* in fact run, then the running times would be 1ms each. Walking all the way up to root of the graph we get to function `A`. This node on the call tree would have a self time of 0ms as we never actually directly observed it running, but it includes every other function that we did observe, so the running time would be 3ms. The following is a graph of all the running and self times where the first number is the running time, and the second is the self time. So `A:3,0` would be the function `A` with the running time of 3ms, and the self time of 0ms.
+With the above graph, we know that the functions at the leaf of the graph were the actual functions that were running when we took the samples. So for the leaf functions `E`, `G`, and `F`, their self times are 1ms. Their running times will be the same as their self time. Now walking up the stack, respectively the function `D`, `F`, and `H` called those functions. Since we never actually observed those functions directly running (they weren't at the end of the stack), then the self times for all of those functions would be 0ms. However, because the functions they called _did_ in fact run, then the running times would be 1ms each. Walking all the way up to root of the graph we get to function `A`. This node on the call tree would have a self time of 0ms as we never actually directly observed it running, but it includes every other function that we did observe, so the running time would be 3ms. The following is a graph of all the running and self times where the first number is the running time, and the second is the self time. So `A:3,0` would be the function `A` with the running time of 3ms, and the self time of 0ms.
 
 ```
              A:3,0
@@ -61,41 +61,41 @@ With the above graph, we know that the functions at the leaf of the graph were t
 
 # Functions are important not stacks and frames
 
-One key point of the aggregation done in the call tree is that it's focused on what *functions* are called, and the relationships between them. In the profiler we collect frames, that give details about that specific frame of execution. Those are then organized using stacks. Each stack points to a frame, and its prefix (parent) stack. In C++ code a single function can have multiple frames depending on which part of the function was being executed. In JavaScript a function may suddenly be optimized and JITed midway through a series of runs. When the JIT process happens there will be new frames generated for these different implementations of the same function. The stacks in the profile describe the relationship between these individual frames. However, naively using only the frames and stacks will often not produce a particularly useful tree. So when referring to anything in the tree, what we care about is the relationship of functions called, not the individual frames and stacks from the profile. For a detailed explanation of how C++ generates multiple frames for a single function, please read [Frames, funcs, stacks and CallNodes in C++](call-nodes-in-cpp.md).
+One key point of the aggregation done in the call tree is that it's focused on what _functions_ are called, and the relationships between them. In the profiler we collect frames, that give details about that specific frame of execution. Those are then organized using stacks. Each stack points to a frame, and its prefix (parent) stack. In C++ code a single function can have multiple frames depending on which part of the function was being executed. In JavaScript a function may suddenly be optimized and JITed midway through a series of runs. When the JIT process happens there will be new frames generated for these different implementations of the same function. The stacks in the profile describe the relationship between these individual frames. However, naively using only the frames and stacks will often not produce a particularly useful tree. So when referring to anything in the tree, what we care about is the relationship of functions called, not the individual frames and stacks from the profile. For a detailed explanation of how C++ generates multiple frames for a single function, please read [Frames, funcs, stacks and CallNodes in C++](call-nodes-in-cpp.md).
 
 ## Frames and stacks in JavaScript
 
 Imagine this simplified example of 3 samples of mixed C++, JavaScript Code (js), and JIT optimized JavaScript (JIT). The functions are all labeled as to their implementation.
 
-| Sample index | Sample's stack |
-| ------------ | ---------------|
-| 0 | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  a [js]  ➡  b [js]` |
-| 1 | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  js::jit::IonCannon [c++]  ➡  a [JIT]  ➡  b [JIT]` |
-| 2 | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  js::jit::IonCannon [c++]  ➡  a [JIT]  ➡  b [JIT]` |
+| Sample index | Sample's stack                                                                                 |
+| ------------ | ---------------------------------------------------------------------------------------------- |
+| 0            | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  a [js]  ➡  b [js]`                                 |
+| 1            | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  js::jit::IonCannon [c++]  ➡  a [JIT]  ➡  b [JIT]` |
+| 2            | `JS::RunScript [c++]  ➡  onLoad [js]  ➡  js::jit::IonCannon [c++]  ➡  a [JIT]  ➡  b [JIT]` |
 
 This example produces the following frames:
 
-| Frame index | Function name | Implementation |
-| ----------- | ------------- | -------------- |
-| 0 | `JS::RunScript` | C++ |
-| 1 | `onLoad` | JavaScript |
-| 2 | `a` | JavaScript |
-| 3 | `b` | JavaScript |
-| 4 | `js::jit::IonCannon` | C++ |
-| 5 | `a` | JIT |
-| 6 | `b` | JIT |
+| Frame index | Function name        | Implementation |
+| ----------- | -------------------- | -------------- |
+| 0           | `JS::RunScript`      | C++            |
+| 1           | `onLoad`             | JavaScript     |
+| 2           | `a`                  | JavaScript     |
+| 3           | `b`                  | JavaScript     |
+| 4           | `js::jit::IonCannon` | C++            |
+| 5           | `a`                  | JIT            |
+| 6           | `b`                  | JIT            |
 
 For completeness, here is the stack table. It would only contain the frame index, and a stack prefix index, but it can be filled out with a little bit more information:
 
-| Stack index | Frame index | Prefix | Frame's function | Prefix's function |
-| ----------- | ----------- | ------ | ---------------- | ----------------- |
-| 0 | 0 | null | `JS::RunScript` | null |
-| 1 | 1 | 0    | `onLoad` | `JS::RunScript` |
-| 2 | 2 | 1    | `a` | `onLoad` |
-| 3 | 3 | 2    | `b` | `a` |
-| 4 | 4 | 1    | `js::jit::IonCannon` | `onLoad` |
-| 5 | 5 | 4    | `a` | `js::jit::IonCannon` |
-| 6 | 6 | 5    | `b` | `a` |
+| Stack index | Frame index | Prefix | Frame's function     | Prefix's function    |
+| ----------- | ----------- | ------ | -------------------- | -------------------- |
+| 0           | 0           | null   | `JS::RunScript`      | null                 |
+| 1           | 1           | 0      | `onLoad`             | `JS::RunScript`      |
+| 2           | 2           | 1      | `a`                  | `onLoad`             |
+| 3           | 3           | 2      | `b`                  | `a`                  |
+| 4           | 4           | 1      | `js::jit::IonCannon` | `onLoad`             |
+| 5           | 5           | 4      | `a`                  | `js::jit::IonCannon` |
+| 6           | 6           | 5      | `b`                  | `a`                  |
 
 Now, taking the stacks and building a call tree produces the following:
 
@@ -113,27 +113,27 @@ Now, taking the stacks and building a call tree produces the following:
 
 This is the correct tree of what you would want to see. But since we are mixing languages together into the same stack system, it might be nice to view only JS functions. In order to do that we hide any C++ stacks, and assign them to the nearest JS stack. Our tables would be updated to look like the following.
 
-| Sample index | Sample's stack |
-| ------------ | ---------------|
-| 0 | `onLoad [js]  ➡  a [js]  ➡  b [js]` |
-| 1 | `onLoad [js]  ➡  a [JIT]  ➡  b [JIT]` |
-| 2 | `onLoad [js]  ➡  a [JIT]  ➡  b [JIT]` |
+| Sample index | Sample's stack                          |
+| ------------ | --------------------------------------- |
+| 0            | `onLoad [js]  ➡  a [js]  ➡  b [js]`   |
+| 1            | `onLoad [js]  ➡  a [JIT]  ➡  b [JIT]` |
+| 2            | `onLoad [js]  ➡  a [JIT]  ➡  b [JIT]` |
 
 | Frame index | Function name | Implementation |
 | ----------- | ------------- | -------------- |
-| 0 | onLoad | JavaScript |
-| 1 | a | JavaScript |
-| 2 | b | JavaScript |
-| 3 | a | JIT |
-| 4 | b | JIT |
+| 0           | onLoad        | JavaScript     |
+| 1           | a             | JavaScript     |
+| 2           | b             | JavaScript     |
+| 3           | a             | JIT            |
+| 4           | b             | JIT            |
 
 | Stack index | Frame index | Prefix | Frame's function | Prefix's function |
-| ------------ | ----------- | ------ | ---------------- | ----------------- |
-| 0 | 0 | null | onLoad | null |
-| 1 | 1 | 0    | a | onLoad |
-| 2 | 2 | 1    | b | a |
-| 3 | 3 | 0    | a | onLoad |
-| 4 | 4 | 1    | b | a |
+| ----------- | ----------- | ------ | ---------------- | ----------------- |
+| 0           | 0           | null   | onLoad           | null              |
+| 1           | 1           | 0      | a                | onLoad            |
+| 2           | 2           | 1      | b                | a                 |
+| 3           | 3           | 0      | a                | onLoad            |
+| 4           | 4           | 1      | b                | a                 |
 
 With this data if we build a call tree it now looks like this.
 
@@ -204,19 +204,19 @@ Call trees are interesting for the information they provide, but they can be qui
 ## Would produce this call tree
 
 ```
-                  A:3,0            
-                    |              
-                    v              
-                  B:3,0            
-                  /    \           
-                 v      v          
-             C:2,0     H:1,0       
-            /      \         \     
-           v        v         v    
+                  A:3,0
+                    |
+                    v
+                  B:3,0
+                  /    \
+                 v      v
+             C:2,0     H:1,0
+            /      \         \
+           v        v         v
          D:1,0     F:1,0     F:1,1
-         |           |             
-         v           v             
-       E:1,1       G:1,1           
+         |           |
+         v           v
+       E:1,1       G:1,1
 ```
 
 ## Merge (charge to caller)
@@ -234,8 +234,8 @@ Merging involves removing a single CallNode from the call tree, and then assigni
              /      \         \                 |       |        |
             v        v         v                v       v        v
           D:1,0     F:1,0     F:1,1          E:1,1    G:1,1    F:1,1
-          |           |             
-          v           v             
+          |           |
+          v           v
         E:1,1       G:1,1
 ```
 
@@ -272,9 +272,9 @@ The self time of an entire subtree is placed to the parent CallNode. In the case
             /      \         \                        |
            v        v         v                       v
          D:1,0     F:1,0     F:1,1                  F:1,1
-         |           |             
-         v           v             
-       E:1,1       G:1,1                            
+         |           |
+         v           v
+       E:1,1       G:1,1
 ```
 
 ### Hide
@@ -292,9 +292,9 @@ If CallNode C is hidden, then 2 samples are removed because they contain that Ca
             /      \         \                        |
            v        v         v                       v
          D:1,0     F:1,0     F:1,1                 F:1,1
-         |           |             
-         v           v             
-       E:1,1       G:1,1                            
+         |           |
+         v           v
+       E:1,1       G:1,1
 ```
 
 ### Focus on subtree
@@ -309,12 +309,12 @@ Only CallNodes that contain CallNode C are retained, and C is made as root.
                   /    \                    |           |
                  v      v                   v           v
              C:2,0     H:1,0              E:1,1       G:1,1
-            /      \         \     
-           v        v         v    
+            /      \         \
+           v        v         v
          D:1,0     F:1,0     F:1,1
-         |           |             
-         v           v             
-       E:1,1       G:1,1           
+         |           |
+         v           v
+       E:1,1       G:1,1
 ```
 
 # How call tree modifications affect function paths

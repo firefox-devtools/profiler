@@ -84,7 +84,8 @@
   line-height: 1.5;
   text-align: center;
   text-decoration: none;
-  transition: background-color 250ms var(--animation-curve),
+  transition:
+    background-color 250ms var(--animation-curve),
     color 250ms var(--animation-curve);
 }
 
@@ -179,7 +180,9 @@
   .homeTransition-enter.homeTransition-enter-active {
     opacity: 1;
     transform: translateX(0);
-    transition: opacity 300ms ease-out, transform 300ms ease-out;
+    transition:
+      opacity 300ms ease-out,
+      transform 300ms ease-out;
   }
 }
 

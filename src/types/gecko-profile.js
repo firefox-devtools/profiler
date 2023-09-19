@@ -43,7 +43,7 @@ export type GeckoMarkerTuple = [
   Milliseconds | null,
   MarkerPhase,
   IndexIntoCategoryList,
-  MarkerPayload_Gecko | null
+  MarkerPayload_Gecko | null,
 ];
 
 export type GeckoMarkers = {
@@ -104,7 +104,7 @@ export type GeckoSamples = {|
         Milliseconds, // since profile.meta.startTime
         // milliseconds since the last event was processed in this
         // thread's event loop at the time that the sample was taken
-        Milliseconds
+        Milliseconds,
       ]
     | [
         null | IndexIntoGeckoStackTable,
@@ -114,8 +114,8 @@ export type GeckoSamples = {|
         Milliseconds,
         // CPU usage value of the current thread.
         // It's present only when the CPU Utilization feature is enabled in Firefox.
-        number | null
-      ]
+        number | null,
+      ],
   >,
 |};
 
@@ -190,8 +190,8 @@ export type GeckoFrameTable = {|
       // index into profile.meta.categories
       null | number,
       // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
-      null | number
-    ]
+      null | number,
+    ],
   >,
 |};
 
@@ -290,7 +290,7 @@ export type GeckoProfilerOverhead = {|
       threads: 4,
     |},
     data: Array<
-      [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds]
+      [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds],
     >,
   |},
   // There is no statistics object if there is no sample.
@@ -303,6 +303,8 @@ export type GeckoProfilerOverhead = {|
  * */
 export type GeckoProfileShortMeta = {|
   version: number,
+  // When the main process started. Timestamp expressed in milliseconds since
+  // midnight January 1, 1970 GMT.
   startTime: Milliseconds,
   shutdownTime: Milliseconds | null,
   categories: CategoryList,
@@ -315,6 +317,10 @@ export type GeckoProfileShortMeta = {|
  * */
 export type GeckoProfileFullMeta = {|
   ...GeckoProfileShortMeta,
+  // When the recording started (in milliseconds after startTime).
+  profilingStartTime?: Milliseconds,
+  // When the recording ended (in milliseconds after startTime).
+  profilingEndTime?: Milliseconds,
   interval: Milliseconds,
   stackwalk: 0 | 1,
   // This value represents a boolean, but for some reason is written out as an int

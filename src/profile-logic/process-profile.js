@@ -219,7 +219,7 @@ type ExtractionInfo = {
   libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable>,
   stringToNewFuncIndexAndFrameAddress: Map<
     string,
-    { funcIndex: IndexIntoFuncTable, frameAddress: Address | null }
+    { funcIndex: IndexIntoFuncTable, frameAddress: Address | null },
   >,
   globalDataCollector: GlobalDataCollector,
 };
@@ -1282,7 +1282,7 @@ function _adjustJsTracerTimestamps(
  * into milliseconds.
  */
 export function adjustProfilerOverheadTimestamps<
-  Table: { time: Microseconds[] }
+  Table: { time: Microseconds[] },
 >(table: Table, delta: Milliseconds): Table {
   return {
     ...table,
@@ -1508,7 +1508,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     pages = pages.concat(subprocessProfile.pages || []);
   }
 
-  const meta = {
+  const meta: ProfileMeta = {
     interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
     abi: geckoProfile.meta.abi,
@@ -1544,6 +1544,11 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     device: geckoProfile.meta.device,
   };
 
+  if (geckoProfile.meta.profilingStartTime !== undefined) {
+    meta.profilingStartTime = geckoProfile.meta.profilingStartTime;
+    meta.profilingEndTime = geckoProfile.meta.profilingEndTime;
+  }
+
   const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(
     (acc, overhead) => {
       if (overhead !== null) {
@@ -1578,7 +1583,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       const jsTracerThread = convertJsTracerToThread(
         thread,
         jsTracer,
-        meta.categories
+        geckoProfile.meta.categories
       );
       jsTracerThread.isJsTracer = true;
       jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;

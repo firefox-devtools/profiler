@@ -40,22 +40,38 @@ const GRAPH_WIDTH = Math.floor(PIXELS_PER_SAMPLE * SAMPLE_COUNT);
 const GRAPH_HEIGHT = 10;
 function getSamplesPixelPosition(
   sampleIndex: IndexIntoSamplesTable,
-  samplePosition: 'before' | 'after' = 'before'
+  samplePosition: 'before' | 'after' | 'on-top' = 'before'
 ): CssPixels {
   const quarterSample = PIXELS_PER_SAMPLE / 4;
   // Compute the pixel position of either first or the second part of the sample.
   // "sampleIndex * PIXELS_PER_SAMPLE" corresponds to the center of the sample,
   //  we need to +/- quarter sample to find these places in the sample:
   //
-  //                       before     after
-  //                       50% CPU    100% CPU
-  //                           v         v
+  //                              on-top
+  //                              100% CPU
+  //                                 |
+  //                       before    | after
+  //                       50% CPU   | 100% CPU
+  //                           v     v   v
   // +--------------------+--------------------+--------------------+
   // |                    |          //////////|                    |
   // +--------------------+////////////////////+--------------------+
-  const beforeOrAfter =
-    samplePosition === 'before' ? -quarterSample : +quarterSample;
-  return sampleIndex * PIXELS_PER_SAMPLE + beforeOrAfter;
+  let sampleOffset;
+  switch (samplePosition) {
+    case 'before':
+      sampleOffset = -quarterSample;
+      break;
+    case 'after':
+      sampleOffset = +quarterSample;
+      break;
+    case 'on-top':
+      sampleOffset = 0;
+      break;
+
+    default:
+      break;
+  }
+  return sampleIndex * PIXELS_PER_SAMPLE + sampleOffset;
 }
 
 describe('SampleTooltipContents', function () {
@@ -85,7 +101,7 @@ describe('SampleTooltipContents', function () {
   function setup(
     profile: Profile,
     hoveredSampleIndex: number,
-    hoveredSamplePosition: 'before' | 'after' = 'before'
+    hoveredSamplePosition: 'before' | 'after' | 'on-top' = 'before'
   ) {
     const store = storeWithProfile(profile);
     const threadsKey = 0;
@@ -108,17 +124,18 @@ describe('SampleTooltipContents', function () {
       `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
     );
 
-    fireEvent(
-      canvas,
-      getMouseEvent('mousemove', {
-        offsetX: getSamplesPixelPosition(
-          hoveredSampleIndex,
-          hoveredSamplePosition
-        ),
-        offsetY: GRAPH_HEIGHT * 0.9,
-      })
-    );
-    flushRafCalls();
+    const fireMouseMove = (mouseEventOptions) => {
+      fireEvent(canvas, getMouseEvent('mousemove', mouseEventOptions));
+      flushRafCalls();
+    };
+
+    fireMouseMove({
+      offsetX: getSamplesPixelPosition(
+        hoveredSampleIndex,
+        hoveredSamplePosition
+      ),
+      offsetY: GRAPH_HEIGHT * 0.9,
+    });
 
     const getTooltip = () =>
       ensureExists(
@@ -135,7 +152,12 @@ describe('SampleTooltipContents', function () {
         (element) => element.textContent
       );
 
-    return { getTooltip, changeImplementationFilter, getBacktrace };
+    return {
+      getTooltip,
+      changeImplementationFilter,
+      getBacktrace,
+      fireMouseMove,
+    };
   }
 
   it('renders the sample tooltip properly', () => {
@@ -311,5 +333,51 @@ describe('SampleTooltipContents', function () {
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
     expect(cpuUsage).toHaveTextContent('45% (average over 1.0ms)');
+  });
+
+  it('renders the CPU usage properly in the areas where blur is applied', () => {
+    const profile = getProfileWithCPU([null, 400, 580, 1000], 'µs');
+
+    // Let's check the second threadCPUDelta value. This should show the
+    // We are hovering on top of the sample which should use 580µs. Since the
+    // max value is 1000µs, the CPU usage should be 58%.
+    const hoveredSampleIndex = 1;
+    // Hovering on top of the sample.
+    setup(profile, hoveredSampleIndex, 'on-top');
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('58% (average over 1.0ms)');
+  });
+
+  it('renders the CPU usage only when outside of the activity graph is hovered', () => {
+    const profile = getProfileWithCPU([null, 100, 280, 1000], 'µs');
+
+    // Let's check the second threadCPUDelta value. This should show the
+    // We are hovering on top of the sample which should use 280µs. Since the
+    // max value is 1000µs, the CPU usage should be 28%.
+    const hoveredSampleIndex = 1;
+    const hoveredSamplePosition = 'on-top';
+    const { fireMouseMove, getTooltip } = setup(
+      profile,
+      hoveredSampleIndex,
+      hoveredSamplePosition
+    );
+
+    // We want to hover the outside of the activity graph. Let's fire a
+    // mousemove event with offsetY outside of the activity graph.
+    fireMouseMove({
+      offsetX: getSamplesPixelPosition(
+        hoveredSampleIndex,
+        hoveredSamplePosition
+      ),
+      // Intentionally outside of the activity graph.
+      offsetY: GRAPH_HEIGHT * 0.1,
+    });
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('28% (average over 1.0ms)');
+    // We shouldn't have any stack information.
+    expect(screen.queryByText(/Stack:/)).not.toBeInTheDocument();
+    expect(getTooltip()).toMatchSnapshot();
   });
 });

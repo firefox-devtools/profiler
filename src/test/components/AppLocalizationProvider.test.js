@@ -188,11 +188,14 @@ describe('AppLocalizationProvider', () => {
 
     expect(await screen.findByText(translatedText('de'))).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    expect(window.fetch).toHaveBeenCalledWith('/locales/de/app.ftl', undefined);
-    expect(window.fetch).toHaveBeenCalledWith(
-      '/locales/en-US/app.ftl',
-      undefined
-    );
+    expect(window.fetch).toHaveBeenCalledWith('/locales/de/app.ftl', {
+      credentials: 'include',
+      mode: 'no-cors',
+    });
+    expect(window.fetch).toHaveBeenCalledWith('/locales/en-US/app.ftl', {
+      credentials: 'include',
+      mode: 'no-cors',
+    });
     expect(window.fetch).toHaveBeenCalledTimes(2);
   });
 
@@ -217,11 +220,14 @@ describe('AppLocalizationProvider', () => {
       await screen.findByText(translatedText('en-US'))
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'de');
-    expect(window.fetch).toHaveBeenCalledWith('/locales/de/app.ftl', undefined);
-    expect(window.fetch).toHaveBeenCalledWith(
-      '/locales/en-US/app.ftl',
-      undefined
-    );
+    expect(window.fetch).toHaveBeenCalledWith('/locales/de/app.ftl', {
+      credentials: 'include',
+      mode: 'no-cors',
+    });
+    expect(window.fetch).toHaveBeenCalledWith('/locales/en-US/app.ftl', {
+      credentials: 'include',
+      mode: 'no-cors',
+    });
     expect(window.fetch).toHaveBeenCalledTimes(2);
   });
 });

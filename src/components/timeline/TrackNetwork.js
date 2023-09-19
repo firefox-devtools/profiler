@@ -418,7 +418,7 @@ class Network extends PureComponent<Props, State> {
 export const TrackNetwork = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex } = ownProps;

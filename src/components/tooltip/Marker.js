@@ -251,7 +251,12 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                     key={schema.name + '-' + key}
                     label={label || key}
                   >
-                    {formatMarkupFromMarkerSchema(schema.name, format, value)}
+                    {formatMarkupFromMarkerSchema(
+                      schema.name,
+                      format,
+                      value,
+                      thread.stringTable
+                    )}
                   </TooltipDetail>
                 );
               }

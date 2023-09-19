@@ -49,10 +49,10 @@ export const getProfileSpecificState: Selector<ProfileSpecificUrlState> = (
   state
 ) => getUrlState(state).profileSpecific;
 export const getFullProfileSpecificState: Selector<
-  FullProfileSpecificUrlState
+  FullProfileSpecificUrlState,
 > = (state) => getProfileSpecificState(state).full;
 export const getActiveTabProfileSpecificState: Selector<
-  ActiveTabSpecificProfileUrlState
+  ActiveTabSpecificProfileUrlState,
 > = (state) => getProfileSpecificState(state).activeTab;
 
 export const getDataSource: Selector<DataSource> = (state) =>
@@ -70,7 +70,7 @@ export const getImplementationFilter: Selector<ImplementationFilter> = (
   state
 ) => getProfileSpecificState(state).implementation;
 export const getLastSelectedCallTreeSummaryStrategy: Selector<
-  CallTreeSummaryStrategy
+  CallTreeSummaryStrategy,
 > = (state) =>
   getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
 export const getInvertCallstack: Selector<boolean> = (state) =>
@@ -91,7 +91,7 @@ export const getAssemblyViewScrollGeneration: Selector<number> = (state) =>
 export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<
-  TimelineTrackOrganization
+  TimelineTrackOrganization,
 > = (state) => getUrlState(state).timelineTrackOrganization;
 
 /**
@@ -113,7 +113,7 @@ export const getNetworkSearchString: Selector<string> = (state) =>
 export const getSelectedTab: Selector<TabSlug> = (state) =>
   getUrlState(state).selectedTab;
 export const getSelectedThreadIndexesOrNull: Selector<
-  Set<ThreadIndex> | null
+  Set<ThreadIndex> | null,
 > = (state) => getProfileSpecificState(state).selectedThreads;
 export const getSelectedThreadIndexes: Selector<Set<ThreadIndex>> = (state) =>
   ensureExists(
@@ -159,7 +159,7 @@ export const getLocalTrackOrderByPid: Selector<Map<Pid, TrackIndex[]>> = (
  */
 export const getHiddenLocalTracks: DangerousSelectorWithArguments<
   Set<TrackIndex>,
-  Pid
+  Pid,
 > = (state, pid) =>
   ensureExists(
     getHiddenLocalTracksByPid(state).get(pid),
@@ -172,7 +172,7 @@ export const getHiddenLocalTracks: DangerousSelectorWithArguments<
  */
 export const getLocalTrackOrder: DangerousSelectorWithArguments<
   TrackIndex[],
-  Pid
+  Pid,
 > = (state, pid) =>
   ensureExists(
     getLocalTrackOrderByPid(state).get(pid),
@@ -212,7 +212,7 @@ const EMPTY_TRANSFORM_STACK = [];
 
 export const getTransformStack: DangerousSelectorWithArguments<
   TransformStack,
-  ThreadsKey
+  ThreadsKey,
 > = (state, threadsKey) => {
   return (
     getProfileSpecificState(state).transforms[threadsKey] ||
@@ -342,7 +342,6 @@ function _shouldAllowSymbolServerUrl(symbolServerUrl) {
     const otherAllowedHostnames = [
       'symbols.mozilla.org',
       'symbolication.services.mozilla.com',
-      'symbolication.stage.mozaws.net',
     ];
     if (!otherAllowedHostnames.includes(url.hostname)) {
       console.error(

@@ -152,7 +152,7 @@ export async function getSymbolTableViaWebChannel(
 }
 
 export async function getProfileViaWebChannel(): Promise<
-  ArrayBuffer | MixedObject
+  ArrayBuffer | MixedObject,
 > {
   return _sendMessageWithResponse({
     type: 'GET_PROFILE',

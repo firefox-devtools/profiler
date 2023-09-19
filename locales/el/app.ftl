@@ -362,12 +362,23 @@ MarkerContextMenu--select-the-receiver-thread = Επιλέξτε το νήμα �
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Επιλέξτε το νήμα αποστολέα «<strong>{ $threadName }</strong>»
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Απόρριψη δειγμάτων εκτός των δεικτών που αντιστοιχούν στο «<strong>{ $filter }</strong>»
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Φιλτράρισμα σημαδιών:
     .title = Εμφάνιση μόνο των σημαδιών που αντιστοιχούν σε ένα συγκεκριμένο όνομα
+MarkerSettings--marker-filters =
+    .title = Φίλτρα δείκτη
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -449,6 +460,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } λογικός πυρήνας
        *[other] { $logicalCPUs } λογικοί πυρήνες
     }
+MenuButtons--metaInfo--profiling-started = Έναρξη καταγραφής:
+MenuButtons--metaInfo--profiling-session = Διάρκεια καταγραφής:
 MenuButtons--metaInfo--main-process-started = Έναρξη κύριας διεργασίας:
 MenuButtons--metaInfo--main-process-ended = Τέλος κύριας διεργασίας:
 MenuButtons--metaInfo--interval = Διάστημα:
@@ -466,6 +479,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Απεριόριστη
 MenuButtons--metaInfo--application = Εφαρμογή
 MenuButtons--metaInfo--name-and-version = Όνομα και έκδοση:
+MenuButtons--metaInfo--application-uptime = Χρόνος λειτουργίας:
 MenuButtons--metaInfo--update-channel = Κανάλι ενημερώσεων:
 MenuButtons--metaInfo--build-id = ID δομής:
 MenuButtons--metaInfo--build-type = Τύπος δομής:
@@ -888,6 +902,10 @@ TransformNavigator--collapse-direct-recursion-only = Σύμπτυξη μόνο �
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Σύμπτυξη υπόδεντρου: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Απόρριψη δειγμάτων εκτός των δεικτών που αντιστοιχούν στο: «{ $item }»
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI

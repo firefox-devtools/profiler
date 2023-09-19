@@ -16,6 +16,7 @@ import {
   getCommittedRange,
   getPreviewSelection,
   getProfileInterval,
+  getMeta,
 } from 'firefox-profiler/selectors/profile';
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 
@@ -26,6 +27,7 @@ import type {
   Milliseconds,
   PreviewSelection,
   StartEndRange,
+  ProfileMeta,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -37,6 +39,7 @@ type OwnProps = {|
 
 type StateProps = {|
   interval: Milliseconds,
+  meta: ProfileMeta,
   committedRange: StartEndRange,
   previewSelection: PreviewSelection,
 |};
@@ -68,8 +71,9 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
   _computeCO2eFromPower(power: number): number {
     // total energy Wh to kWh
     const energy = power / 1000;
-    const { WORLD } = averageIntensity.data;
-    return energy * WORLD;
+    const intensity =
+      this.props.meta.gramsOfCO2ePerKWh || averageIntensity.data.WORLD;
+    return energy * intensity;
   }
 
   _computePowerSumForCommittedRange = memoize(
@@ -187,6 +191,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
 export const TooltipTrackPower = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state) => ({
     interval: getProfileInterval(state),
+    meta: getMeta(state),
     committedRange: getCommittedRange(state),
     previewSelection: getPreviewSelection(state),
   }),

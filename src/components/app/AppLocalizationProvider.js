@@ -117,8 +117,15 @@ class AppLocalizationInit extends React.PureComponent<InitProps> {
   }
 
   _getPersistedLocale(): string[] | null {
-    const strPreviouslyRequestedLocales =
-      localStorage.getItem('requestedLocales');
+    let strPreviouslyRequestedLocales;
+    try {
+      strPreviouslyRequestedLocales = localStorage.getItem('requestedLocales');
+    } catch (err) {
+      console.warn(
+        'We got an error while trying to retrieve the previously requested locale. Cookies might be blocked in this browser.',
+        err
+      );
+    }
 
     if (strPreviouslyRequestedLocales) {
       try {
@@ -187,7 +194,7 @@ type ProviderDispatchProps = {|
 type ProviderProps = ConnectedProps<
   ProviderOwnProps,
   ProviderStateProps,
-  ProviderDispatchProps
+  ProviderDispatchProps,
 >;
 
 /**
@@ -250,7 +257,7 @@ class AppLocalizationProviderImpl extends React.PureComponent<ProviderProps> {
 export const AppLocalizationProvider = explicitConnect<
   ProviderOwnProps,
   ProviderStateProps,
-  ProviderDispatchProps
+  ProviderDispatchProps,
 >({
   mapStateToProps: (state) => ({
     localization: getLocalization(state),

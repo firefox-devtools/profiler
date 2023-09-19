@@ -535,7 +535,7 @@ export function convertJsTracerToThreadWithoutSamples(
   // implementation. e.g. the number 132 which maps to the string "IonMonkey".
   const implementationMap: Map<
     IndexIntoJsTracerEvents,
-    IndexIntoStringTable | null
+    IndexIntoStringTable | null,
   > = new Map();
 
   // Get some computed values before entering the loop.

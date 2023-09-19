@@ -42,12 +42,16 @@
   padding: 3px 10px;
   border-radius: 0 5px 0 0;
   background: rgb(0 0 0 / 0.07);
-  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 2px 4px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.1),
+    0 2px 4px rgb(0 0 0 / 0.1);
   line-height: 20px;
   opacity: 1;
   pointer-events: none;
   text-overflow: ellipsis;
-  transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
   white-space: nowrap;
   will-change: opacity, transform;
 }

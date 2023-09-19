@@ -6,23 +6,23 @@ The state management of [profiler.firefox.com](https://profiler.firefox.com) hap
 
 For maintainability and making complex interactions sane, Redux state management is broken up into different parts.
 
- * *Reducers* care about how the canonical representation of the app state is stored. Actions come in, and a single state is retained.
- * *Actions* describe desired changes to the state, and provide the payload of information to do the changing, but ignore how this is actually done.
- * *Selectors* provide a functional interface for selecting information within the data. They also map the data into derived states based on the canonical representation. These derivations are cached through memoization.
+- _Reducers_ care about how the canonical representation of the app state is stored. Actions come in, and a single state is retained.
+- _Actions_ describe desired changes to the state, and provide the payload of information to do the changing, but ignore how this is actually done.
+- _Selectors_ provide a functional interface for selecting information within the data. They also map the data into derived states based on the canonical representation. These derivations are cached through memoization.
 
 ## How to test the Redux store
 
-The reducer, actions, and selectors each do a small part of the functionality of state management, and are decoupled so they can evolve separately over time. However the  tests care about how the state management works together as a single unit. Redux store tests should use the same APIs that are being used by the rest of the application, and should not know about implementation details or the internals of reducers and actions. This differs from the canonical testing examples from the Redux documentation which individually assert that action creators produce specifically shaped actions, and reducers correctly reduce actions.
+The reducer, actions, and selectors each do a small part of the functionality of state management, and are decoupled so they can evolve separately over time. However the tests care about how the state management works together as a single unit. Redux store tests should use the same APIs that are being used by the rest of the application, and should not know about implementation details or the internals of reducers and actions. This differs from the canonical testing examples from the Redux documentation which individually assert that action creators produce specifically shaped actions, and reducers correctly reduce actions.
 
 ## Testing steps
 
- 1. Create a new blank store.
- 2. Use a selector to grab the data that is being tested.
- 3. Assert the initial state.
- 4. Dispatch an action to affect the desired change.
- 3. Re-run the selector.
- 5. Assert the modified state.
- 6. Repeat as needed.
+1.  Create a new blank store.
+2.  Use a selector to grab the data that is being tested.
+3.  Assert the initial state.
+4.  Dispatch an action to affect the desired change.
+5.  Re-run the selector.
+6.  Assert the modified state.
+7.  Repeat as needed.
 
 These tests are typically short and easy to read, especially when written in a behavior-driven testing style, using plain language (BDD). They use the public-facing APIs that the rest of the application is designed with. They provide a large amount of coverage with minimal lines of code. They allow for easy refactors of the internals of the state representation and action shapes, while actually providing coverage for how the state actually behaves.
 

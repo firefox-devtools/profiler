@@ -93,7 +93,7 @@ type DispatchProps = {|
 type TimelineTrackContextMenuProps = ConnectedProps<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >;
 
 type TimelineTrackContextMenuState = {|
@@ -102,7 +102,7 @@ type TimelineTrackContextMenuState = {|
 
 class TimelineTrackContextMenuImpl extends PureComponent<
   TimelineTrackContextMenuProps,
-  TimelineTrackContextMenuState
+  TimelineTrackContextMenuState,
 > {
   state = { searchFilter: '' };
   _globalTrackClickTimeout: TimeoutID | null = null;
@@ -1203,7 +1203,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 export const TimelineTrackContextMenu = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state: State) => ({
     threads: getThreads(state),

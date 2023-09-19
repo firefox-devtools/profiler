@@ -9,7 +9,7 @@ import type { MarkerPhase } from 'firefox-profiler/types';
 // The current version of the Gecko profile format.
 // Please don't forget to update the gecko profile format changelog in
 // `docs-developer/CHANGELOG-formats.md`.
-export const GECKO_PROFILE_VERSION = 27;
+export const GECKO_PROFILE_VERSION = 28;
 
 // The current version of the "processed" profile format.
 // Please don't forget to update the processed profile format changelog in
@@ -47,6 +47,11 @@ export const TRACK_EVENT_DELAY_LINE_WIDTH = 2;
 // The following values are for IPC track.
 export const TRACK_IPC_MARKERS_HEIGHT = 25;
 export const TRACK_IPC_HEIGHT = TRACK_IPC_MARKERS_HEIGHT;
+
+// The following values are the defaults for marker tracks
+export const TRACK_MARKER_HEIGHT = 25;
+export const TRACK_MARKER_LINE_WIDTH = 2;
+export const TRACK_MARKER_DEFAULT_COLOR = 'grey';
 
 // Height of the blank area in process track.
 export const TRACK_PROCESS_BLANK_HEIGHT = 30;
@@ -110,8 +115,7 @@ export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
 // SYMBOL_SERVER_URL
 // -----------------
 // Can be overridden with the URL parameter `symbolServer=SERVERURL`.
-// You can change this to the staging server `https://symbolication.stage.mozaws.net`,
-// or run a local symbol server (for example using profiler-symbol-server [1])
+// You can change this to run a local symbol server (for example using profiler-symbol-server [1])
 // and set it to e.g. 'http://localhost:8000/'.
 //
 // [1] https://github.com/mstange/profiler-symbol-server/

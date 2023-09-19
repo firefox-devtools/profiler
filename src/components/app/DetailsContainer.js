@@ -53,7 +53,7 @@ function DetailsContainerImpl({
 export const DetailsContainer = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     selectedTab: getSelectedTab(state),

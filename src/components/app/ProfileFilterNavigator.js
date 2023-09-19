@@ -102,7 +102,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
 export const ProfileFilterNavigator = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => {
     const items = getCommittedRangeLabels(state);

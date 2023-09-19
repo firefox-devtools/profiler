@@ -48,7 +48,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
-export const CURRENT_URL_VERSION = 9;
+export const CURRENT_URL_VERSION = 10;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -232,13 +232,13 @@ type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
 // Full profile view and active tab profile view query shapes are for also
 // typechecking during the query object initialization.
 type FullProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>
+  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>,
 >;
 type ActiveTabProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>
+  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>,
 >;
 type OriginsProfileSpecificBaseQueryShape = $Shape<
-  $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>
+  $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>,
 >;
 
 // Query shapes for individual query paths. These are needed for QueryShape union type.
@@ -1178,6 +1178,57 @@ const _upgraders: {|
       const transformStrings = query.transforms.split('~');
       query.transforms = transformStrings.map(upgradeTransformString).join('~');
     }
+  },
+  [10]: ({ query }: ProcessedLocationBeforeUpgrade, profile?: Profile) => {
+    // This version changes the "collapse resource" transform to have a different
+    // collapsedFuncIndex: In version 9, "collapsed resource" functions were
+    // added to the funcTable by the transform as needed. In version 10, the
+    // "collapsed resource" functions are reserved at the beginning of the
+    // profile processing pipeline and instead get the following funcIndex:
+    // funcTable.length + resourceIndex.
+    // This was done so that funcIndexes are unaffected by the transform stack.
+    //
+    // The "collapse resource" transform is not used a lot, and there are
+    // probably not a lot of URLs with it in circulation, so we just do the bare
+    // minimum here: If a single thread is selected, and we have access to the
+    // funcTable for that thread, then we compute the correct collapsed funcIndex.
+    // Otherwise we don't bother and leave incorrect funcIndexes in the URL.
+    // These funcIndexes will match *some* reserved resource func, so the UI
+    // shouldn't break in that case.
+    //
+    // Furthermore, we're not fixing up any subsequent transforms that may be
+    // referring to the funcIndex. For example, if you collapse a resource and
+    // then drop or merge the collapsed function, this upgrader will not adjust
+    // the drop or merge transform. This could be added if it seems worth doing.
+
+    if (!query.transforms || !query.thread || !profile) {
+      return;
+    }
+
+    const selectedThreads = decodeUintArrayFromUrlComponent(query.thread);
+    if (selectedThreads.length !== 1) {
+      return;
+    }
+
+    const threadIndex = selectedThreads[0];
+    const funcTableLength = profile.threads[threadIndex].funcTable.length;
+
+    //     cr-{implementation}-{resourceIndex}-{wrongFuncIndex}
+    //  -> cr-{implementation}-{resourceIndex}-{correctFuncIndex}
+    function upgradeTransformString(transformString) {
+      if (transformString.startsWith('cr-')) {
+        const [, implementation, resourceIndex] = transformString.split('-');
+        const funcIndex = funcTableLength + +resourceIndex;
+        if (!isNaN(funcIndex)) {
+          return `cr-${implementation}-${resourceIndex}-${funcIndex}`;
+        }
+      }
+
+      return transformString;
+    }
+
+    const transformStrings = query.transforms.split('~');
+    query.transforms = transformStrings.map(upgradeTransformString).join('~');
   },
 };
 

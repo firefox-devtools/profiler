@@ -15,12 +15,16 @@ import {
   funcHasRecursiveCall,
 } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
-import { getBottomBoxInfoForCallNode } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getBottomBoxInfoForCallNode,
+  getOriginAnnotationForFunc,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
 
 import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
+  addCollapseResourceTransformToStack,
   expandAllCallNodeDescendants,
   updateBottomBoxContentsAndMaybeOpen,
   setContextMenuVisibility,
@@ -71,6 +75,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
+  +addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
   +updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
@@ -217,7 +222,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { stringTable, funcTable },
+      thread: { funcTable, resourceTable, stringTable },
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
@@ -225,9 +230,19 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     let curCallNodeIndex = callNodeIndex;
 
     do {
+      // Match the style of MarkerContextMenu.js#convertStackToString which uses
+      // square brackets around [file:line:column] info. This isn't provided by
+      // getOriginAnnotationForFunc, so build the string in two parts:
       const funcIndex = callNodeTable.func[curCallNodeIndex];
-      const stringIndex = funcTable.name[funcIndex];
-      stack += stringTable.getString(stringIndex) + '\n';
+      const funcNameIndex = funcTable.name[funcIndex];
+      const funcName = stringTable.getString(funcNameIndex);
+      const fileNameURL = getOriginAnnotationForFunc(
+        funcIndex,
+        funcTable,
+        resourceTable,
+        stringTable
+      );
+      stack += funcName + (fileNameURL ? ` [${fileNameURL}]\n` : '\n');
       curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
     } while (curCallNodeIndex !== -1);
 
@@ -268,7 +283,12 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   };
 
   addTransformToStack(type: TransformType): void {
-    const { addTransformToStack, implementation, inverted } = this.props;
+    const {
+      addTransformToStack,
+      addCollapseResourceTransformToStack,
+      implementation,
+      inverted,
+    } = this.props;
     const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
@@ -323,15 +343,11 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       case 'collapse-resource': {
         const { funcTable } = thread;
         const resourceIndex = funcTable.resource[selectedFunc];
-        // A new collapsed func will be inserted into the table at the end. Deduce
-        // the index here.
-        const collapsedFuncIndex = funcTable.length;
-        addTransformToStack(threadsKey, {
-          type: 'collapse-resource',
+        addCollapseResourceTransformToStack(
+          threadsKey,
           resourceIndex,
-          collapsedFuncIndex,
-          implementation,
-        });
+          implementation
+        );
         break;
       }
       case 'collapse-direct-recursion': {
@@ -785,7 +801,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 export const CallNodeContextMenu = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => {
     const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
@@ -823,6 +839,7 @@ export const CallNodeContextMenu = explicitConnect<
   },
   mapDispatchToProps: {
     addTransformToStack,
+    addCollapseResourceTransformToStack,
     expandAllCallNodeDescendants,
     updateBottomBoxContentsAndMaybeOpen,
     setContextMenuVisibility,

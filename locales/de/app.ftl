@@ -343,12 +343,23 @@ MarkerContextMenu--select-the-receiver-thread = Empfänger-Thread „<strong>{ $
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Absender-Thread „<strong>{ $threadName }</strong>“ auswählen
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Stichproben außerhalb der Markierungen verwerfen, die mit „<strong>{ $filter }</strong>“ übereinstimmen
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Markierungen filtern:
     .title = Nur Markierungen anzeigen, die zu einem bestimmten Namen passen
+MarkerSettings--marker-filters =
+    .title = Filter für Markierungen
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -430,6 +441,8 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logischer Kern
        *[other] { $logicalCPUs } logische Kerne
     }
+MenuButtons--metaInfo--profiling-started = Aufzeichnungsbeginn:
+MenuButtons--metaInfo--profiling-session = Aufzeichnungslänge:
 MenuButtons--metaInfo--main-process-started = Hauptprozess gestartet:
 MenuButtons--metaInfo--main-process-ended = Hauptprozess beendet:
 MenuButtons--metaInfo--interval = Intervall:
@@ -447,6 +460,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Unbegrenzt
 MenuButtons--metaInfo--application = Anwendung
 MenuButtons--metaInfo--name-and-version = Name und Version:
+MenuButtons--metaInfo--application-uptime = Uptime:
 MenuButtons--metaInfo--update-channel = Update-Kanal:
 MenuButtons--metaInfo--build-id = Build-ID:
 MenuButtons--metaInfo--build-type = Build-Typ:
@@ -869,6 +883,10 @@ TransformNavigator--collapse-direct-recursion-only = Nur direkte Rekursion einkl
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Unterbaum einklappen: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Stichproben außerhalb der Markierungen verwerfen, die mit „{ $item }“ übereinstimmen
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI

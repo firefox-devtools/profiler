@@ -40,6 +40,7 @@ import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile
 import {
   assertExhaustiveCheck,
   getFirstItemFromSet,
+  ensureExists,
 } from 'firefox-profiler/utils/flow';
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import { objectShallowEquals } from 'firefox-profiler/utils/index';
@@ -65,6 +66,7 @@ import type {
   CallNodePath,
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  IndexIntoResourceTable,
   TrackIndex,
   MarkerIndex,
   Transform,
@@ -345,6 +347,7 @@ function getInformationFromTrackReference(
             relatedThreadIndex: localTrack.threadIndex,
             relatedTab: 'network-chart',
           };
+        case 'marker':
         case 'ipc':
           return {
             ...commonLocalProperties,
@@ -1880,6 +1883,30 @@ export function addTransformToStack(
   };
 }
 
+export function addCollapseResourceTransformToStack(
+  threadsKey: ThreadsKey,
+  resourceIndex: IndexIntoResourceTable,
+  implementation: ImplementationFilter
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const reservedFunctionsForResources =
+      threadSelectors.getReservedFunctionsForResources(getState());
+    const collapsedFuncIndex = ensureExists(
+      ensureExists(reservedFunctionsForResources).get(resourceIndex)
+    );
+
+    dispatch(
+      addTransformToStack(threadsKey, {
+        type: 'collapse-resource',
+        resourceIndex,
+        collapsedFuncIndex,
+        implementation,
+      })
+    );
+  };
+}
+
 export function popTransformsFromStack(
   firstPoppedFilterIndex: number
 ): ThunkAction<void> {
@@ -2056,16 +2083,12 @@ export function handleCallNodeTransformShortcut(
       case 'C': {
         const { funcTable } = unfilteredThread;
         const resourceIndex = funcTable.resource[funcIndex];
-        // A new collapsed func will be inserted into the table at the end. Deduce
-        // the index here.
-        const collapsedFuncIndex = funcTable.length;
         dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'collapse-resource',
+          addCollapseResourceTransformToStack(
+            threadsKey,
             resourceIndex,
-            collapsedFuncIndex,
-            implementation,
-          })
+            implementation
+          )
         );
         break;
       }

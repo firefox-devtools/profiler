@@ -34,6 +34,7 @@ import {
   TIMELINE_MARGIN_LEFT,
   ACTIVE_TAB_TIMELINE_MARGIN_LEFT,
   TRACK_PROCESS_CPU_HEIGHT,
+  TRACK_MARKER_HEIGHT,
 } from '../app-logic/constants';
 
 import type {
@@ -96,7 +97,7 @@ export const getIsDragAndDropOverlayRegistered: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropOverlayRegistered;
 
 export const getCurrentProfileUploadedInformation: Selector<
-  UploadedProfileInformation | null
+  UploadedProfileInformation | null,
 > = (state) => getApp(state).currentProfileUploadedInformation;
 
 /**
@@ -296,6 +297,9 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                 case 'process-cpu':
                 case 'power':
                   height += TRACK_PROCESS_CPU_HEIGHT + border;
+                  break;
+                case 'marker':
+                  height += TRACK_MARKER_HEIGHT + border;
                   break;
                 default:
                   throw assertExhaustiveCheck(localTrack);

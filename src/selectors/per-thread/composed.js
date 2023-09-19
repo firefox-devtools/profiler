@@ -34,7 +34,7 @@ import { hasUsefulSamples } from '../../profile-logic/profile-data';
  * definition for the type of the selector.
  */
 export type ComposedSelectorsPerThread = $ReturnType<
-  typeof getComposedSelectorsPerThread
+  typeof getComposedSelectorsPerThread,
 >;
 
 /**

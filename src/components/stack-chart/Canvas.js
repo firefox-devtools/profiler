@@ -15,7 +15,10 @@ import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  updatePreviewSelection,
+  typeof changeMouseTimePosition as ChangeMouseTimePosition,
+} from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
@@ -61,8 +64,9 @@ type OwnProps = {|
   +combinedTimingRows: CombinedTimingRows,
   +stackFrameHeight: CssPixels,
   +updatePreviewSelection: WrapFunctionInDispatch<
-    typeof updatePreviewSelection
+    typeof updatePreviewSelection,
   >,
+  +changeMouseTimePosition: ChangeMouseTimePosition,
   +getMarker: (MarkerIndex) => Marker,
   +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
@@ -579,6 +583,36 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     return null;
   };
 
+  onMouseMove = (event: { nativeEvent: MouseEvent }) => {
+    const {
+      changeMouseTimePosition,
+      rangeStart,
+      rangeEnd,
+      marginLeft,
+      viewport: { viewportLeft, viewportRight, containerWidth },
+    } = this.props;
+
+    const innerDevicePixelsWidth =
+      containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const unitIntervalTime: UnitIntervalOfProfileRange =
+      viewportLeft +
+      viewportLength *
+        ((event.nativeEvent.offsetX - marginLeft) / innerDevicePixelsWidth);
+    if (unitIntervalTime < 0 || unitIntervalTime > 1) {
+      changeMouseTimePosition(null);
+    } else {
+      const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
+      changeMouseTimePosition(time);
+    }
+  };
+
+  onMouseLeave = () => {
+    this.props.changeMouseTimePosition(null);
+  };
+
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
@@ -593,6 +627,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
+        onMouseMove={this.onMouseMove}
+        onMouseLeave={this.onMouseLeave}
         onSelectItem={this._onSelectItem}
         onRightClick={this._onRightClick}
       />
@@ -602,5 +638,5 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
 export const StackChartCanvas = (withChartViewport: WithChartViewport<
   OwnProps,
-  Props
+  Props,
 >)(StackChartCanvasImpl);
