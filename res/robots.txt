@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /public/
+Disallow: /from-url/
+Disallow: /compare/
