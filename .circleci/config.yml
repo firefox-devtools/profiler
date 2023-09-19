@@ -13,7 +13,7 @@ orbs:
 
 commands:
   checkout-and-dependencies:
-    description: "Checkout and install dependencies, managing a cache"
+    description: 'Checkout and install dependencies, managing a cache'
     steps:
       - checkout
       - restore_cache:
@@ -96,7 +96,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "92:e1:5d:84:70:96:c5:19:76:55:1c:b1:7a:12:9e:53"
+            - '92:e1:5d:84:70:96:c5:19:76:55:1c:b1:7a:12:9e:53'
       - checkout
       - run: git config user.email "perf-html@mozilla.com"
       - run: git config user.name "Firefox Profiler [bot]"
@@ -118,8 +118,8 @@ workflows:
   l10n-sync:
     triggers:
       - schedule:
-        # CircleCI is using UTC timezone. So, this will be triggered at 8 AM UTC every day.
-          cron: "0 8 * * *"
+          # CircleCI is using UTC timezone. So, this will be triggered at 8 AM UTC every day.
+          cron: '0 8 * * *'
           filters:
             branches:
               only:

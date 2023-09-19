@@ -58,7 +58,7 @@ export class TrackCustomMarkerImpl extends React.PureComponent<Props> {
 export const TrackCustomMarker = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, _ownProps) => {
     const { start, end } = getCommittedRange(state);

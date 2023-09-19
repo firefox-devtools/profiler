@@ -119,7 +119,7 @@ export function getCallNodeInfo(
     const innerWindowID: Array<InnerWindowID> = [];
     const depth: Array<number> = [];
     const sourceFramesInlinedIntoSymbol: Array<
-      IndexIntoNativeSymbolTable | -1 | null
+      IndexIntoNativeSymbolTable | -1 | null,
     > = [];
     let length = 0;
 
@@ -2174,7 +2174,7 @@ export function updateThreadStacks(
 export function getMapStackUpdater(
   oldStackToNewStack: Map<
     null | IndexIntoStackTable,
-    null | IndexIntoStackTable
+    null | IndexIntoStackTable,
   >
 ): (IndexIntoStackTable | null) => IndexIntoStackTable | null {
   return (oldStack: IndexIntoStackTable | null) => {
@@ -3098,11 +3098,11 @@ export function replaceStackReferences(
   thread: Thread,
   mapForSamplingSelfStacks: Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   >,
   mapForBacktraceSelfStacks: Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable | null,
   >
 ): Thread {
   const {

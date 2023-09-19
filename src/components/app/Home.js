@@ -52,7 +52,7 @@ type LoadFromUrlState = {
 
 class ActionButtons extends React.PureComponent<
   ActionButtonsProps,
-  ActionButtonsState
+  ActionButtonsState,
 > {
   _fileInput: HTMLInputElement | null;
 
@@ -129,7 +129,7 @@ class ActionButtons extends React.PureComponent<
 
 class LoadFromUrl extends React.PureComponent<
   LoadFromUrlProps,
-  LoadFromUrlState
+  LoadFromUrlState,
 > {
   state = {
     value: '',
@@ -211,7 +211,7 @@ type DispatchHomeProps = {|
 type HomeProps = ConnectedProps<
   OwnHomeProps,
   StateHomeProps,
-  DispatchHomeProps
+  DispatchHomeProps,
 >;
 
 type HomeState = {
@@ -630,7 +630,7 @@ function _isFirefox(): boolean {
 export const Home = explicitConnect<
   OwnHomeProps,
   StateHomeProps,
-  DispatchHomeProps
+  DispatchHomeProps,
 >({
   mapStateToProps: (state) => ({
     browserConnection: getBrowserConnection(state),

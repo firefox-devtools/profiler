@@ -8,10 +8,10 @@ The Firefox Profiler is committed to maintaining support for loading profiles fo
 
 Changes to the profile format need to happen in this order:
 
- 1. The format change needs to be proposed and agreed upon.
- 2. [profiler.firefox.com] needs to be updated to be able to deal with that new format, and an upgrader from the current format to the new format needs to be added.
- 3. Usually there needs to be a corresponding change to the "processed profile" format, which is used in [profiler.firefox.com] internally. If that's the case, the processed profile format version needs to be incremented, an upgrader for old processed profiles needs to be added, and processProfile needs to be changed to output the new version of the processed profile format.
- 4. Once the [profiler.firefox.com] update is rolled out, the actual Firefox change can land.
+1.  The format change needs to be proposed and agreed upon.
+2.  [profiler.firefox.com] needs to be updated to be able to deal with that new format, and an upgrader from the current format to the new format needs to be added.
+3.  Usually there needs to be a corresponding change to the "processed profile" format, which is used in [profiler.firefox.com] internally. If that's the case, the processed profile format version needs to be incremented, an upgrader for old processed profiles needs to be added, and processProfile needs to be changed to output the new version of the processed profile format.
+4.  Once the [profiler.firefox.com] update is rolled out, the actual Firefox change can land.
 
 ## Background on upgrading
 
@@ -37,9 +37,9 @@ The setup described above only solves one direction of compatibility: You can ru
 
 That means that profile format changes need to be made in this order:
 
- 1. The format change needs to be proposed and agreed upon.
- 2. [profiler.firefox.com] needs to be updated to be able to deal with that new format, and an upgrader from the current format to the new format needs to be added to it.
- 3. *After* the [profiler.firefox.com] update is rolled out, the actual Firefox change can land.
+1.  The format change needs to be proposed and agreed upon.
+2.  [profiler.firefox.com] needs to be updated to be able to deal with that new format, and an upgrader from the current format to the new format needs to be added to it.
+3.  _After_ the [profiler.firefox.com] update is rolled out, the actual Firefox change can land.
 
 We'll see how this works out. It might be annoying for users who have updated their Firefox Nightly but not opened up [profiler.firefox.com] between (2) and (3), and then try to load a new profile into an old version of [profiler.firefox.com] from their service worker cache. They're only one page refresh away from success, though.
 
@@ -63,14 +63,14 @@ The processed profile version is stored in the field `profile.meta.preprocessedP
 
 When the Gecko profile format changes (due to a change in Gecko):
 
- - The version number (`profile.meta.version`) needs to be incremented in Gecko.
- - In [app-logic/constants.js](../src/app-logic/constants.js), `GECKO_PROFILE_VERSION` needs to be set to that new version number, and a conversion function from the old to the new version needs to be added to `_updaters`.
- - Profile processing may need to be adjusted to parse the new Gecko profile format version.
+- The version number (`profile.meta.version`) needs to be incremented in Gecko.
+- In [app-logic/constants.js](../src/app-logic/constants.js), `GECKO_PROFILE_VERSION` needs to be set to that new version number, and a conversion function from the old to the new version needs to be added to `_updaters`.
+- Profile processing may need to be adjusted to parse the new Gecko profile format version.
 
 When the processed profile format changes (e.g. because a different data format seems adequate, or because new data from the Gecko profile needs to be accommodated):
 
- - `processProfile` needs to be changed to output the new format.
- - In [app-logic/constants.js](../src/app-logic/constants.js), `PROCESSED_PROFILE_VERSION` needs to be incremented and an update function needs to be added to `_updaters`.
+- `processProfile` needs to be changed to output the new format.
+- In [app-logic/constants.js](../src/app-logic/constants.js), `PROCESSED_PROFILE_VERSION` needs to be incremented and an update function needs to be added to `_updaters`.
 
 At all times, `processProfile` only has code that converts the latest version
 of the Gecko profile format into the latest version of the processed profile

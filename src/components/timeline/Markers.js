@@ -551,7 +551,7 @@ const _getTimelineMarkersIsSelected = memoize(
 export const TimelineMarkersJank = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
@@ -578,7 +578,7 @@ export const TimelineMarkersJank = explicitConnect<
 export const TimelineMarkersOverview = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
@@ -607,7 +607,7 @@ export const TimelineMarkersOverview = explicitConnect<
 export const TimelineMarkersFileIo = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
@@ -633,7 +633,7 @@ export const TimelineMarkersFileIo = explicitConnect<
 export const TimelineMarkersMemory = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;
@@ -660,7 +660,7 @@ export const TimelineMarkersMemory = explicitConnect<
 export const TimelineMarkersIPC = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, props) => {
     const { threadsKey } = props;

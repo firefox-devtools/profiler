@@ -28,21 +28,21 @@ Coming soon
 
 ## Paint markers
 
-| Category     | Type               | Explanation |
-| ------------ | ------------------ | ----------- |
-| Paint        | RefreshDriverTick  | This is a container marker that wraps all phases of a refresh tick. |
-| Paint        | FireScrollEvent    | The time it took call event listeners for “scroll” events after the scroll position in a scrollable frame changed. |
-| Paint        | requestAnimationFrame callbacks | The time it takes to call JavaScript requestAnimationFrame callbacks during a refresh tick. |
-| Paint        | Styles             | The time it takes to recompute CSS style information on any changed elements in the document. |
-| Paint        | Reflow             | The time it took to recompute layout. |
-| Paint        | DispatchSynthMouseMove | The time it takes to fire mouseover and mouseout events (and running any JS event handlers) after a layout change or scroll caused the mouse to be over a different element. |
-| Paint        | DisplayList        | The time it takes to build a DisplayList for the window, which is a list of primives that need to be rendered. |
-| Paint        | LayerBuilding      | The time it took to generate a new layer tree based on the new display list. |
-| Paint        | Rasterize          | The time it takes to turn the display items that were assigned to a PaintedLayer into pixels in that layer’s buffer. |
-| Paint        | ForwardTransaction | The time it takes to forward changes to the layer tree to the compositor. |
-| Paint        | NotifyDidPaint     | The time it takes for a post-refresh garbage collection to run. (The refresh driver notifies the JS engine that it painted, and the JS engine reacts by running GC for a brief time.) |
-| Paint        | LayerTransaction   | The time it takes on the compositor thread to process the list of changes that is contained in a layer transaction. This includes texture upload. |
-| Paint        | Composite          | The time it takes to combine layers, on the compositor thread, and display them in the window. |
+| Category | Type                            | Explanation                                                                                                                                                                           |
+| -------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Paint    | RefreshDriverTick               | This is a container marker that wraps all phases of a refresh tick.                                                                                                                   |
+| Paint    | FireScrollEvent                 | The time it took call event listeners for “scroll” events after the scroll position in a scrollable frame changed.                                                                    |
+| Paint    | requestAnimationFrame callbacks | The time it takes to call JavaScript requestAnimationFrame callbacks during a refresh tick.                                                                                           |
+| Paint    | Styles                          | The time it takes to recompute CSS style information on any changed elements in the document.                                                                                         |
+| Paint    | Reflow                          | The time it took to recompute layout.                                                                                                                                                 |
+| Paint    | DispatchSynthMouseMove          | The time it takes to fire mouseover and mouseout events (and running any JS event handlers) after a layout change or scroll caused the mouse to be over a different element.          |
+| Paint    | DisplayList                     | The time it takes to build a DisplayList for the window, which is a list of primives that need to be rendered.                                                                        |
+| Paint    | LayerBuilding                   | The time it took to generate a new layer tree based on the new display list.                                                                                                          |
+| Paint    | Rasterize                       | The time it takes to turn the display items that were assigned to a PaintedLayer into pixels in that layer’s buffer.                                                                  |
+| Paint    | ForwardTransaction              | The time it takes to forward changes to the layer tree to the compositor.                                                                                                             |
+| Paint    | NotifyDidPaint                  | The time it takes for a post-refresh garbage collection to run. (The refresh driver notifies the JS engine that it painted, and the JS engine reacts by running GC for a brief time.) |
+| Paint    | LayerTransaction                | The time it takes on the compositor thread to process the list of changes that is contained in a layer transaction. This includes texture upload.                                     |
+| Paint    | Composite                       | The time it takes to combine layers, on the compositor thread, and display them in the window.                                                                                        |
 
 ### Additional context information for paint markers
 

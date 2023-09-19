@@ -10,7 +10,7 @@ The updated snapshot should be manually inspected by both the author and code
 reviewer to ensure that the changes that were made are intentional and correct.
 
 Care should be taken when writing snapshot tests, as they fail quite easily, and
-only show that *something* has changed. Generally one snapshot test for a
+only show that _something_ has changed. Generally one snapshot test for a
 component is pretty good, while the larger component behavior should be asserted
 using more specific expectations.
 
@@ -35,8 +35,9 @@ the returned object contains these functions along with useful values that tests
 can make use of.
 
 Here is a full example:
+
 ```js
-describe('app/Details', function() {
+describe('app/Details', function () {
   function setup() {
     const { profile } = getProfileFromTextSamples(`
       A  A  A
@@ -77,9 +78,11 @@ In our case we use [jsdom](https://github.com/jsdom/jsdom) which is excellent
 but has a few shortcomings.
 
 ### `MouseEvent` lacks some properties
+
 The event object `MouseEvent` lacks some properties that we use, namely `offsetX`,
 `offsetY`, `pageX`, `pageY`. We have a utility called `getMouseEvent` that we
 can use in this case:
+
 ```js
 import { getMouseEvent } from '../fixtures/utils';
 ...
@@ -90,8 +93,10 @@ fireEvent(target, getMouseEvent({ pageX: 5 }));
 ```
 
 ### Canvas doesn't have a Context API
+
 A lot of our components use the Canvas Context API to draw graphs and display
 data. To test this properly we developed a mock that can be used in this way:
+
 ```js
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 ...
@@ -108,6 +113,7 @@ The `render` calls return a useful utility `debug` that can be called in tests,
 that will output the result of the render to the console. This is extremely
 useful to better know how to target elements. This utility is also returned by
 all `setup` functions, so it's very easy to use it when needed:
+
 ```js
 it('renders a lot of things', () => {
   const { container, debug } = setup()

@@ -99,6 +99,7 @@ type StateProps = {|
   +isExperimentalCPUGraphsEnabled: boolean,
   +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
+  +callTreeVisible: boolean,
 |};
 
 type DispatchProps = {|
@@ -137,6 +138,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       focusCallTree,
       invertCallstack,
       selectedThreadIndexes,
+      callTreeVisible,
     } = this.props;
 
     // Sample clicking only works for one thread. See issue #2709
@@ -149,7 +151,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
         selectLeafCallNode(threadsKey, sampleIndex);
       }
 
-      if (sampleIndex !== null) {
+      if (sampleIndex !== null && callTreeVisible) {
         // If the user clicked outside of the activity graph (sampleIndex === null),
         // then we don't need to focus the call tree. This action also selects
         // the call tree panel, which we don't want either in this case.
@@ -350,7 +352,7 @@ const _getTimelineIsSelected = memoize(
 export const TimelineTrackThread = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadsKey } = ownProps;
@@ -396,6 +398,7 @@ export const TimelineTrackThread = explicitConnect<
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
       maxThreadCPUDeltaPerMs: getMaxThreadCPUDeltaPerMs(state),
       implementationFilter: getImplementationFilter(state),
+      callTreeVisible: selectors.getUsefulTabs(state).includes('calltree'),
     };
   },
   mapDispatchToProps: {

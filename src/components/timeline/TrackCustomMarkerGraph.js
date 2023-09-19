@@ -227,8 +227,8 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         //
         ctx.strokeStyle = _getStrokeColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
-        const getX = (marker) =>
-          Math.round((marker.start - rangeStart) * millisecondWidth);
+        const getX = (time) =>
+          Math.round((time - rangeStart) * millisecondWidth);
         const getY = (i) => {
           const unitValue = _calculateUnitValue(
             type,
@@ -264,7 +264,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               const marker = getMarker(collectedSamples.markerIndexes[i]);
               // Create a path for the top of the chart. This is the line that
               // will have a stroke applied to it.
-              x = getX(marker);
+              x = getX(marker.start);
               y = getY(i);
               if (i === sampleStart) {
                 // This is the first iteration, only move the line, do not draw it.
@@ -276,7 +276,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
                 ctx.lineTo(x, y);
               }
               if (marker.end) {
-                x = (marker.end - rangeStart) * millisecondWidth;
+                x = getX(marker.end);
                 ctx.lineTo(x, y);
               }
             }
@@ -311,7 +311,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 
             for (let i = sampleStart; i < sampleEnd; i++) {
               let marker = getMarker(collectedSamples.markerIndexes[i]);
-              const x = getX(marker);
+              const x = getX(marker.start);
               let y = getY(i);
 
               // If we have multiple markers to draw on the same horizontal pixel,
@@ -320,21 +320,19 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
                 const nextMarker = getMarker(
                   collectedSamples.markerIndexes[i + 1]
                 );
-                if (getX(nextMarker) !== x) {
+
+                if (
+                  getX(nextMarker.start) !== x ||
+                  getX(nextMarker.end || nextMarker.start) !==
+                    getX(marker.end || marker.start)
+                ) {
                   break;
                 }
-
                 marker = nextMarker;
                 y = Math.min(y, getY(++i));
               }
 
-              const x2 = marker.end
-                ? Math.max(
-                    x + 1,
-                    Math.round((marker.end - rangeStart) * millisecondWidth)
-                  )
-                : x + 1;
-
+              const x2 = marker.end ? Math.max(x + 1, getX(marker.end)) : x + 1;
               ctx.fillRect(x, y, x2 - x, deviceHeight - y);
             }
             break;
@@ -689,7 +687,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
 export const TrackCustomMarkerGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex, markerSchema, markerName } = ownProps;

@@ -9,20 +9,20 @@ This document pertains to how C++ samples are captured, and how they are process
 0x02    for (int i = 0; i < 10; i++) {
 0x03      doSomething(i);
 0x04    }
-0x05  
+0x05
 0x06    someInterlude();
-0x07  
+0x07
 0x08    for (int i = 10; i < 20; i++) {
 0x09      doSomething(i);
 0x0A    }
-0x0B  
+0x0B
 0x0C    return 0;
 0x0D  }
-0x0E  
+0x0E
 0x0F  void doSomething(int i) {
 0x11    // do something
 0x12  }
-0x13  
+0x13
 0x14  void someInterlude() {
 0x15    // do something else
 0x16  }
@@ -38,9 +38,9 @@ We'll have a frame for every line of the script above that was on the stack duri
 
 We have three funcs in the code above, each of them has a start address
 
-  - `main()` has address `0x01`
-  - `doSomething(int)` has address `0x0F`
-  - `someInterlude()` has address `0x14`
+- `main()` has address `0x01`
+- `doSomething(int)` has address `0x0F`
+- `someInterlude()` has address `0x14`
 
 Each frame is assigned to one of these funcs. (We pick the func with the highest address among funcs with start address <= frame address.)
 
@@ -48,8 +48,8 @@ Each frame is assigned to one of these funcs. (We pick the func with the highest
 
 In the first line of the `main()` function, there's only one frame on the stack: `0x02`. So we'll have a stack object with:
 
- - frame: `0x02`
- - prefix: null
+- frame: `0x02`
+- prefix: null
 
 When the CPU is executing `doSomething()` during the first loop, the stack will have these frames on it:
 
@@ -60,10 +60,10 @@ When the CPU is executing `doSomething()` during the first loop, the stack will 
 
 So we'll have a stack object with
 
- - frame: `0x11`
- - prefix: a stack with
-   - frame: `0x03`
-   - prefix: null
+- frame: `0x11`
+- prefix: a stack with
+  - frame: `0x03`
+  - prefix: null
 
 If the CPU is executing `doSomething()` from the second loop, the stack will be
 
@@ -117,8 +117,8 @@ The takeaway here is: The symbolication process doesn't only give us strings, it
 
 In the Firefox Profiler, we want to be fully interactive before any symbol information has arrived, and stay interactive while it's arriving. That means that we need to handle collapsing of funcs gracefully without destroying any state, as far as that can be done. Here's how this works:
 
- 1. When loading a Gecko profile, we naively create a func for every single frame.
- 2. When a symbol table arrives:
+1.  When loading a Gecko profile, we naively create a func for every single frame.
+2.  When a symbol table arrives:
     1. Every address that has a symbol is treated as the start of a function.
     2. For each symbol, we pick one func object, and combine the func objects that we created for all frames in that address range into that one func.
     3. We have a map, `oldFuncToNewFuncMap`, that records these collapsed funcs and the func they were collapsed into.

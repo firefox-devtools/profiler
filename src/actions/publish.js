@@ -248,9 +248,8 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       dispatch(uploadCompressionStarted(abortfunction));
 
       const sanitizedInformation = getSanitizedProfile(prePublishedState);
-      const gzipData: Uint8Array = await getSanitizedProfileData(
-        prePublishedState
-      );
+      const gzipData: Uint8Array =
+        await getSanitizedProfileData(prePublishedState);
 
       // The previous line was async, check to make sure that this request is still valid.
       // The upload could have been aborted while we were compressing the data.

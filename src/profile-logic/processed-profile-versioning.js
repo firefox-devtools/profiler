@@ -1998,10 +1998,11 @@ const _upgraders = {
         );
       }
       if (nativeAllocations !== undefined) {
-        nativeAllocations.stack = nativeAllocations.stack.map((oldStackIndex) =>
-          oldStackIndex === null
-            ? null
-            : mapForSyncBacktraces.get(oldStackIndex) ?? null
+        nativeAllocations.stack = nativeAllocations.stack.map(
+          (oldStackIndex) =>
+            oldStackIndex === null
+              ? null
+              : mapForSyncBacktraces.get(oldStackIndex) ?? null
         );
       }
     }

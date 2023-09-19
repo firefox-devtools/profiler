@@ -40,7 +40,7 @@ export function objectShallowEquals<
   // eslint-disable-next-line flowtype/no-weak-types
   A: Object,
   // eslint-disable-next-line flowtype/no-weak-types
-  B: Object
+  B: Object,
 >(a: A, b: B): boolean {
   let aLength = 0;
   let bLength = 0;

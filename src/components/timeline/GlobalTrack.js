@@ -313,7 +313,7 @@ const EMPTY_LOCAL_TRACKS = [];
 export const TimelineGlobalTrack = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getGlobalTracks(state);

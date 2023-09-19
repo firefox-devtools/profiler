@@ -545,7 +545,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
 export const TrackPowerGraph = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;

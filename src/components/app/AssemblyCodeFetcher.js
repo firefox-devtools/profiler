@@ -129,7 +129,7 @@ class AssemblyCodeFetcherImpl extends React.PureComponent<Props> {
 export const AssemblyCodeFetcher = explicitConnect<
   {||},
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),

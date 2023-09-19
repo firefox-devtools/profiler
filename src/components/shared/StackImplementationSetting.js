@@ -100,7 +100,7 @@ class StackImplementationSettingImpl extends PureComponent<Props> {
 export const StackImplementationSetting = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state) => ({
     implementationFilter: getImplementationFilter(state),

@@ -92,9 +92,8 @@ describe('app/DragAndDrop', () => {
 
     const store = createStore();
 
-    const browserConnectionStatus = await createBrowserConnection(
-      'Firefox/123.0'
-    );
+    const browserConnectionStatus =
+      await createBrowserConnection('Firefox/123.0');
     store.dispatch(updateBrowserConnectionStatus(browserConnectionStatus));
 
     const { container } = render(

@@ -299,23 +299,23 @@ function filterThreadToRange(
 
 type TranslationMapForCategories = Map<
   IndexIntoCategoryList,
-  IndexIntoCategoryList
+  IndexIntoCategoryList,
 >;
 type TranslationMapForFuncs = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
 type TranslationMapForResources = Map<
   IndexIntoResourceTable,
-  IndexIntoResourceTable
+  IndexIntoResourceTable,
 >;
 type TranslationMapForNativeSymbols = Map<
   IndexIntoNativeSymbolTable,
-  IndexIntoNativeSymbolTable
+  IndexIntoNativeSymbolTable,
 >;
 type TranslationMapForFrames = Map<IndexIntoFrameTable, IndexIntoFrameTable>;
 type TranslationMapForStacks = Map<IndexIntoStackTable, IndexIntoStackTable>;
 type TranslationMapForLibs = Map<IndexIntoLibs, IndexIntoLibs>;
 type TranslationMapForSamples = Map<
   IndexIntoSamplesTable,
-  IndexIntoSamplesTable
+  IndexIntoSamplesTable,
 >;
 
 /**
@@ -851,7 +851,7 @@ function combineSamplesDiffing(
   translationMapsForStacks: TranslationMapForStacks[],
   threadsAndWeightMultipliers: [
     ThreadAndWeightMultiplier,
-    ThreadAndWeightMultiplier
+    ThreadAndWeightMultiplier,
   ]
 ): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
   const translationMaps = [new Map(), new Map()];
@@ -962,7 +962,7 @@ function getComparisonThread(
   translationMapsForCategories: TranslationMapForCategories[],
   threadsAndWeightMultipliers: [
     ThreadAndWeightMultiplier,
-    ThreadAndWeightMultiplier
+    ThreadAndWeightMultiplier,
   ]
 ): Thread {
   const newStringTable = new UniqueStringArray();

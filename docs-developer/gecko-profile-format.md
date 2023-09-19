@@ -11,8 +11,8 @@ The Gecko Profiler can be run on its own by executing the following code from a 
   const settings = {
     entries: 1000000,
     interval: 0.4,
-    features: ["js", "stackwalk", "threads", "leaf"],
-    threads: ["GeckoMain", "Compositor"]
+    features: ['js', 'stackwalk', 'threads', 'leaf'],
+    threads: ['GeckoMain', 'Compositor'],
   };
 
   Services.profiler.StartProfiler(
@@ -25,7 +25,7 @@ The Gecko Profiler can be run on its own by executing the following code from a 
   );
 
   setTimeout(() => {
-    Services.profiler.getProfileDataAsync().then(profile => {
+    Services.profiler.getProfileDataAsync().then((profile) => {
       for (let i = 0; i < profile.threads.length; i++) {
         const thread = profile.threads[i];
       }
@@ -297,22 +297,22 @@ The threads of the processed profile use the above format and include the follow
 
 Profile data:
 
- * samples
- * markers
+- samples
+- markers
 
 Index-based table data:
 
- * resourceTable
- * frameTable
- * funcTable
- * stackTable
- * stringTable
+- resourceTable
+- frameTable
+- funcTable
+- stackTable
+- stringTable
 
 Miscellaneous data:
 
- * name
- * libs
- * tid
+- name
+- libs
+- tid
 
 Different frames can be created from the same function, and thus do not represent the unique set of functions. This function table is generated during [profiler.firefox.com]'s pre-processing step. Frames can provide additional information about the various ways the function was executed, while it's also useful to have a list of only the functions, so both types of information are retained.
 

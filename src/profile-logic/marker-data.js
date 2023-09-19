@@ -346,7 +346,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
   // this processing later.
   const markersByKey: Map<
     string,
-    Array<{ tid: number, index: number, data: IPCMarkerPayload } | void>
+    Array<{ tid: number, index: number, data: IPCMarkerPayload } | void>,
   > = new Map();
   const threadNames: Map<number, string> = new Map();
   for (const thread of threads) {
@@ -475,7 +475,7 @@ export function deriveMarkersFromRawMarkerTable(
   const markers: Marker[] = [];
   const markerIndexToRawMarkerIndexes: IndexedArray<
     MarkerIndex,
-    IndexIntoRawMarkerTable[]
+    IndexIntoRawMarkerTable[],
   > = [];
 
   // These maps contain the start markers we find while looping the marker
@@ -1006,7 +1006,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   }
   const oldMarkerIndexToNew: Map<
     IndexIntoRawMarkerTable,
-    IndexIntoRawMarkerTable
+    IndexIntoRawMarkerTable,
   > = new Map();
   const addMarkerIndexIfIncluded = (index: IndexIntoRawMarkerTable) => {
     if (markersToDelete.has(index)) {

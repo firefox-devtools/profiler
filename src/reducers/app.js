@@ -295,7 +295,7 @@ const processCPUTracks: Reducer<boolean> = (state = false, action) => {
  * its uploaded information in the IndexedDB.
  */
 const currentProfileUploadedInformation: Reducer<
-  UploadedProfileInformation | null
+  UploadedProfileInformation | null,
 > = (state = null, action) => {
   switch (action.type) {
     case 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION':

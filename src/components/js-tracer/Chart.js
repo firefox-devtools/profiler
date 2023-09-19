@@ -132,7 +132,7 @@ function viewportNeedsUpdate(
 const JsTracerExpensiveChart = explicitConnect<
   OwnProps,
   StateProps,
-  DispatchProps
+  DispatchProps,
 >({
   mapStateToProps: (state, ownProps) => ({
     timeRange: getCommittedRange(state),
@@ -175,7 +175,7 @@ const _seenChartKeysPerProfile: WeakMap<Profile, Set<string>> = new WeakMap();
  */
 class JsTracerChartLoader extends React.PureComponent<
   ChartLoaderProps,
-  ChartLoaderState
+  ChartLoaderState,
 > {
   state = {
     // The loader needs to be mounted before rendering the chart, as it has expensive

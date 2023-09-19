@@ -35,7 +35,9 @@
   cursor: default;
   font-size: 12px;
   text-align: center;
-  transition: background-color 200ms, border-color 200ms;
+  transition:
+    background-color 200ms,
+    border-color 200ms;
   transition-timing-function: var(--animation-timing);
   user-select: none;
   white-space: nowrap;
@@ -50,7 +52,9 @@
   height: 2px;
   background-color: transparent;
   content: '';
-  transition: background-color 200ms, border-color 200ms;
+  transition:
+    background-color 200ms,
+    border-color 200ms;
   transition-timing-function: var(--animation-timing);
 }
 
