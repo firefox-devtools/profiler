@@ -71,7 +71,7 @@
     "classnames": "^2.3.2",
     "common-tags": "^1.8.2",
     "copy-to-clipboard": "^3.3.3",
-    "core-js": "^3.32.1",
+    "core-js": "^3.32.2",
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.3.3",
     "idb": "^7.1.1",
@@ -92,7 +92,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.4.2",
     "reselect": "^4.1.8",
-    "url": "^0.11.1",
+    "url": "^0.11.3",
     "weaktuplemap": "^1.0.0",
     "workbox-window": "^7.0.0"
   },
