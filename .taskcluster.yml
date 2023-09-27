@@ -13,6 +13,7 @@ tasks:
     - $let:
           trustDomain: "mozilla"
           level: "1"
+          project: "firefox-profiler"
           ownerEmail:
               $switch:
                   'tasks_for == "github-push"': '${event.pusher.email}'
@@ -28,11 +29,6 @@ tasks:
                   'tasks_for == "github-push"': '${event.repository.html_url}'
                   'tasks_for[:19] == "github-pull-request"': '${event.pull_request.head.repo.html_url}'
                   'tasks_for in ["cron", "action"]': '${repository.url}'
-          project:
-              $switch:
-                  'tasks_for == "github-push"': '${event.repository.name}'
-                  'tasks_for[:19] == "github-pull-request"': '${event.pull_request.head.repo.name}'
-                  'tasks_for in ["cron", "action"]': '${repository.project}'
           head_branch:
               $switch:
                   'tasks_for[:19] == "github-pull-request"': ${event.pull_request.head.ref}
