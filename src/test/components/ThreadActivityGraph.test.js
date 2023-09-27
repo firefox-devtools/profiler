@@ -266,6 +266,7 @@ describe('ThreadActivityGraph', function () {
   it('when clicking a stack, this selects the call tree panel', function () {
     const { dispatch, getState, clickActivityGraph } = setup();
 
+    expect(getSelectedTab(getState())).toBe('calltree');
     dispatch(changeSelectedTab('marker-chart'));
 
     // The full call node at this sample is:
@@ -278,12 +279,23 @@ describe('ThreadActivityGraph', function () {
   it(`when clicking outside of the graph, this doesn't select the call tree panel`, function () {
     const { dispatch, getState, clickActivityGraph } = setup();
 
+    expect(getSelectedTab(getState())).toBe('calltree');
     dispatch(changeSelectedTab('marker-chart'));
 
     // There's no sample at this location.
     clickActivityGraph(0, 1);
     expect(getSelectedTab(getState())).toBe('marker-chart');
     expect(getLastVisibleThreadTabSlug(getState())).toBe('marker-chart');
+  });
+
+  it("when clicking a sample in a track with only '(root)' samples, this doesn't select the hidden call tree panel", function () {
+    const { profile } = getProfileFromTextSamples('(root)');
+    const { getState, clickActivityGraph } = setup(profile);
+
+    expect(getSelectedTab(getState())).toBe('marker-chart');
+
+    clickActivityGraph(1, 0.2);
+    expect(getSelectedTab(getState())).toBe('marker-chart');
   });
 
   it('will redraw even when there are no samples in range', function () {

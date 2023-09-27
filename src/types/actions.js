@@ -407,6 +407,7 @@ type ReceiveProfileAction =
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +timelineType: TimelineType | null,
+      +selectedTab: TabSlug,
     |}
   | {|
       +type: 'VIEW_ORIGINS_PROFILE',

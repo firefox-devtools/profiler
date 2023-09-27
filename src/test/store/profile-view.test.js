@@ -416,14 +416,16 @@ describe('actions/ProfileView', function () {
         pid: '0',
       };
 
-      it('starts out with the thread track and call tree selected', function () {
+      it('starts out with the thread track and marker chart selected', function () {
         const profile = getNetworkTrackProfile();
         const { getState } = storeWithProfile(profile);
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
         );
+        // The profile contains only markers, so the default tab is the
+        // marker-chart rather than the calltree.
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
+          'marker-chart'
         );
       });
 

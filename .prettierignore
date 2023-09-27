@@ -4,3 +4,5 @@ src/test/fixtures/
 res/zee-worker.js
 dist
 coverage
+taskcluster/
+.taskcluster.yml
