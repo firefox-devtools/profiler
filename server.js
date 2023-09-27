@@ -119,9 +119,7 @@ if (argv.profile) {
   delete serverConfig.open;
 
   // Start profile server and open on profile.
-  profileServer.start(host, profilerUrl, argv.profile, (profileFromUrl) => {
-    import('open').then((open) => open.default(profileFromUrl, openOptions));
-  });
+  profileServer.serveAndOpen(host, profilerUrl, argv.profile, openOptions);
 }
 
 process.chdir(__dirname); // Allow server.js to be run from anywhere.

@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-  start(host, profilerUrl, profilePath, callback) {
+  serveAndOpen(host, profilerUrl, profilePath, openOptions) {
     // Create a simple http server serving the profile file.
     const profileServer = http.createServer((req, res) => {
       res.setHeader('Access-Control-Allow-Origin', profilerUrl);
@@ -26,9 +26,7 @@ module.exports = {
           path.basename(profilePath)
         )}`
       )}`;
-      if (callback) {
-        callback(profileFromUrl);
-      }
+      import('open').then((open) => open.default(profileFromUrl, openOptions));
     });
   },
 };
