@@ -253,7 +253,13 @@ Process: \\"default\\" (0)"
       <div
         class="timelineSelectionHoverLine"
         style="left: 120px;"
-      />
+      >
+        <span
+          class="timelineSelectionOverlayTime"
+        >
+          3ms
+        </span>
+      </div>
     </div>
     <nav
       class="react-contextmenu timelineTrackContextMenu"
