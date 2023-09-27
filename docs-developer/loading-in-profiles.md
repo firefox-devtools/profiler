@@ -4,13 +4,14 @@ Profiles can be loaded into the Firefox Profiler from many different sources.
 
 ### Online Storage
 
-> `https://profiler.firefox.com/public/{HASH}`
+> `https://profiler.firefox.com/public/{TOKEN}`
 
-Profiles can be stored in online data store. The hash is used to retrieve it. This is where profiles go when clicking the "Share..." button. Here is an example bash script to programmatically upload profiles:
+Profiles can be stored in online data store. The token is used to retrieve it. This is where profiles go when clicking the "Share..." button. Here is an example bash script to programmatically upload profiles:
 
 ```bash
 uploadprofile() {
-  gzip -c "$1" | curl 'https://profile-store.appspot.com/compressed-store' --compressed --data-binary @- | awk '{print "Hosted at: https://profiler.firefox.com/public/"$1}'
+  # decode_jwt_payload.py is in https://raw.githubusercontent.com/firefox-devtools/profiler-server/master/tools/decode_jwt_payload.py
+  gzip -c "$1" | curl 'https://api.profiler.firefox.com/compressed-store' -X POST -H 'Accept: application/vnd.firefox-profiler+json;version=1.0' --data-binary @- | decode_jwt_payload.py | awk '{print "Hosted at: https://profiler.firefox.com/public/"$1}'
 }
 
 # Execute with the following command:
