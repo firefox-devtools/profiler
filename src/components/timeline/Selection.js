@@ -243,6 +243,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
       return;
     }
     const { width, committedRange, changeMouseTimePosition } = this.props;
+    if (width === 0) {
+      // This can happen when hovering before the profile is fully loaded.
+      return;
+    }
 
     const rect = getContentRect(this._container);
     if (
@@ -399,6 +403,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
       mouseTimePosition,
       width,
       committedRange,
+      zeroAt,
     } = this.props;
 
     let hoverLocation = null;
@@ -431,7 +436,16 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
                 : undefined,
             left: hoverLocation === null ? '0' : `${hoverLocation}px`,
           }}
-        />
+        >
+          <span className="timelineSelectionOverlayTime">
+            {mouseTimePosition !== null
+              ? getFormattedTimeLength(
+                  mouseTimePosition - zeroAt,
+                  (committedRange.end - committedRange.start) / width
+                )
+              : null}
+          </span>
+        </div>
       </div>
     );
   }
