@@ -6,7 +6,6 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import memoize from 'memoize-immutable';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   withSize,
@@ -43,7 +42,6 @@ import {
   selectRootCallNode,
 } from 'firefox-profiler/actions/profile-view';
 import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
-import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import './TrackThread.css';
@@ -77,9 +75,7 @@ type StateProps = {|
   +fullThread: Thread,
   +rangeFilteredThread: Thread,
   +filteredThread: Thread,
-  +tabFilteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +unfilteredSamplesRange: StartEndRange | null,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
@@ -89,6 +85,7 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
+  +sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   +invertCallstack: boolean,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
@@ -190,19 +187,18 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       fullThread,
       filteredThread,
       rangeFilteredThread,
-      tabFilteredThread,
       threadsKey,
       interval,
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
       callNodeInfo,
-      selectedCallNodeIndex,
       unfilteredSamplesRange,
       categories,
       timelineType,
       hasFileIoMarkers,
       showMemoryMarkers,
+      sampleCallNodes,
       samplesSelectedStates,
       treeOrderSampleComparator,
       trackType,
@@ -287,11 +283,11 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 trackName={trackName}
                 interval={interval}
                 thread={filteredThread}
-                tabFilteredThread={tabFilteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
                 callNodeInfo={callNodeInfo}
-                selectedCallNodeIndex={selectedCallNodeIndex}
+                sampleCallNodes={sampleCallNodes}
+                samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
               />
@@ -303,11 +299,11 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 trackName={trackName}
                 interval={interval}
                 thread={filteredThread}
-                tabFilteredThread={tabFilteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
                 callNodeInfo={callNodeInfo}
-                selectedCallNodeIndex={selectedCallNodeIndex}
+                sampleCallNodes={sampleCallNodes}
+                samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
                 maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
@@ -320,11 +316,11 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
             trackName={trackName}
             interval={interval}
             thread={filteredThread}
-            tabFilteredThread={tabFilteredThread}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
-            selectedCallNodeIndex={selectedCallNodeIndex}
+            sampleCallNodes={sampleCallNodes}
+            samplesSelectedStates={samplesSelectedStates}
             categories={categories}
             onSampleClick={this._onSampleClick}
           />
@@ -341,14 +337,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
   }
 }
 
-/**
- * Memoize the hasThreadKeys to not compute it all the time.
- */
-const _getTimelineIsSelected = memoize(
-  (selectedThreads, threadsKey) => hasThreadKeys(selectedThreads, threadsKey),
-  { limit: 1 }
-);
-
 export const TimelineTrackThread = explicitConnect<
   OwnProps,
   StateProps,
@@ -359,12 +347,6 @@ export const TimelineTrackThread = explicitConnect<
     const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const selectedCallNodeIndex = _getTimelineIsSelected(
-      selectedThreadIndexes,
-      threadsKey
-    )
-      ? selectors.getSelectedCallNodeIndex(state)
-      : null;
     const fullThread = selectors.getCPUProcessedThread(state);
     const timelineType = getTimelineType(state);
     const enableCPUUsage =
@@ -376,9 +358,9 @@ export const TimelineTrackThread = explicitConnect<
       fullThread,
       filteredThread: selectors.getFilteredThread(state),
       rangeFilteredThread: selectors.getRangeFilteredThread(state),
-      tabFilteredThread: selectors.getTabFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
-      selectedCallNodeIndex,
+      sampleCallNodes:
+        selectors.getSampleIndexToCallNodeIndexForFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,

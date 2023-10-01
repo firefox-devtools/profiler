@@ -8,7 +8,7 @@ import {
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
-import { getCallNodeInfo } from 'firefox-profiler/profile-logic/profile-data';
+import { getCallNodeInfo, getSampleIndexToCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   IndexIntoCallNodeTable,
@@ -127,6 +127,7 @@ export function callTreeFromProfile(
   );
   const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
     thread.samples,
+    getSampleIndexToCallNodeIndex(thread.samples.stack, callNodeInfo.stackIndexToCallNodeIndex),
     callNodeInfo,
     interval,
     false
