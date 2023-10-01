@@ -245,15 +245,208 @@ export function getSampleIndexToCallNodeIndex(
 }
 
 /**
- * Go through the samples, and determine their current state.
+ * This is an implementation of getSamplesSelectedStates for just the case where
+ * no call node is selected.
+ */
+function getSamplesSelectedStatesForNoSelection(
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>
+): SelectedState[] {
+  const result = new Array(sampleCallNodes.length);
+  for (
+    let sampleIndex = 0;
+    sampleIndex < sampleCallNodes.length;
+    sampleIndex++
+  ) {
+    // When there's no selected call node, we don't want to shadow everything
+    // because everything is unselected. So let's pretend that
+    // everything is selected so that anything not filtered out will be nicely
+    // visible.
+    let sampleSelectedState = 'SELECTED';
+
+    // But we still want to display filtered-out samples differently.
+    const callNodeIndex = sampleCallNodes[sampleIndex];
+    if (callNodeIndex === null) {
+      sampleSelectedState =
+        activeTabFilteredCallNodes[sampleIndex] === null
+          ? // This sample was not part of the active tab.
+            'FILTERED_OUT_BY_ACTIVE_TAB'
+          : // This sample was filtered out in the transform pipeline.
+            'FILTERED_OUT_BY_TRANSFORM';
+    }
+
+    result[sampleIndex] = sampleSelectedState;
+  }
+  return result;
+}
+
+/**
+ * Compute a Map<IndexIntoCallNodeTable, CallNodeFlag>, represented as a
+ * Uint8Array, which describes the relation of each call node with respect to
+ * the selected call node:
  *
- * For samples that are neither 'FILTERED_OUT_*' nor 'SELECTED', this function compares
- * the sample's call node to the selected call node, in tree order. It uses the same
- * ordering as the function compareCallNodes in getTreeOrderComparator. But it does not
- * call compareCallNodes with the selected node for each sample's call node, because doing
- * so would recompute information about the selected call node on every call. Instead, it
- * has an equivalent implementation that is faster because it only computes information
- * about the selected call node's ancestors once.
+ * ```typescript
+ * const enum CallNodeFlag {
+ *   Unvisited = 0,
+ *   InsideSelectedSubtree = 1,
+ *   AncestorOfSelectedNode = 2,
+ *   BeforeSelected = 3,
+ *   AfterSelected = 4,
+ * }
+ * ```
+ *
+ * The ordering BeforeSelected / AfterSelected is determined in the same way
+ * as in the function compareCallNodes in getTreeOrderComparator: Any nodes that
+ * would be visited before the selected subtree in a depth-first traversal are
+ * "before", and sibling nodes are ordered by call node index.
+ *
+ * Example:
+ *
+ * Here's an example tree where each node is represented as [flag], [callNodeIndex].
+ * The tree nodes are written down in depth-first traversal order, but their call
+ * node indexes are not in that order. The only guaranteed relationship between
+ * call node indexes is, as usual, that every node has a higher index than its
+ * prefix node.
+ *
+ * In this example, call node 14 is the selected call node. All descendants of
+ * that node (including the selected node itself) are InsideSelectedSubtree.
+ *
+ * ```
+ * BeforeSelected, 0
+ *   BeforeSelected, 1
+ *     BeforeSelected, 3
+ *   BeforeSelected, 4
+ * AncestorOfSelectedNode, 2
+ *   BeforeSelected, 6
+ *     BeforeSelected, 10
+ *     BeforeSelected, 11
+ *       BeforeSelected, 12
+ *   AncestorOfSelectedNode, 7
+ *     BeforeSelected, 13
+ *       BeforeSelected, 22
+ *     BeforeSelected, 23
+ *     InsideSelectedSubtree, 14
+ *       InsideSelectedSubtree, 15
+ *         InsideSelectedSubtree, 17
+ *           InsideSelectedSubtree, 18
+ *         InsideSelectedSubtree, 20
+ *       InsideSelectedSubtree, 16
+ *         InsideSelectedSubtree, 19
+ *         InsideSelectedSubtree, 27
+ *     AfterSelected, 21
+ *       AfterSelected, 24
+ *     AfterSelected, 25
+ *   AfterSelected, 8
+ *     AfterSelected, 9
+ * AfterSelected, 5
+ *   AfterSelected, 26
+ * ```
+ *
+ * The activity graph treats AncestorOfSelectedNode and BeforeSelected the
+ * same; both are "before the selection". They just have two different flag values
+ * here because the loop in this function needs to treat them differently.
+ */
+function getCallNodeSelectedStates(
+  callNodeTable: CallNodeTable,
+  selectedCallNodeIndex: IndexIntoCallNodeTable
+): Uint8Array {
+  // Precompute an array containing the call node indexes for the selected call
+  // node and its ancestors.
+  const selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
+  const selectionAncestorAtDepth: IndexIntoCallNodeTable[] = new Array(
+    selectedCallNodeDepth
+  );
+  for (
+    let callNodeIndex = selectedCallNodeIndex, depth = selectedCallNodeDepth;
+    depth >= 0;
+    depth--, callNodeIndex = callNodeTable.prefix[callNodeIndex]
+  ) {
+    selectionAncestorAtDepth[depth] = callNodeIndex;
+  }
+
+  // Do a single pass over the call nodes and compute each node's selected state.
+  const callNodeCount = callNodeTable.length;
+  const callNodePrefixes = callNodeTable.prefix;
+  const callNodeDepths = callNodeTable.depth;
+  const callNodeSelectedStates = new Uint8Array(callNodeCount);
+  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
+    const prefix = callNodePrefixes[callNodeIndex];
+    let callNodeFlag = prefix !== -1 ? callNodeSelectedStates[prefix] : 2;
+    if (callNodeFlag === 2 /* CallNodeFlag.AncestorOfSelectedNode */) {
+      const depth = callNodeDepths[callNodeIndex];
+      // assert(depth <= selectedCallNodeDepth);
+      const selectionAncestorAtThisDepth = selectionAncestorAtDepth[depth];
+      if (callNodeIndex === selectionAncestorAtThisDepth) {
+        if (depth === selectedCallNodeDepth) {
+          callNodeFlag = 1 /* CallNodeFlag.InsideSelectedSubtree */;
+        } else {
+          callNodeFlag = 2 /* CallNodeFlag.AncestorOfSelectedNode */;
+        }
+      } else if (callNodeIndex < selectionAncestorAtThisDepth) {
+        callNodeFlag = 3 /* CallNodeFlag.BeforeSelected */;
+      } else {
+        callNodeFlag = 4 /* CallNodeFlag.AfterSelected */;
+      }
+    } else {
+      // All other flags are inherited. For example, if the parent is
+      // BeforeSelected, then so is its entire subtree. Do nothing.
+    }
+    callNodeSelectedStates[callNodeIndex] = callNodeFlag;
+  }
+  return callNodeSelectedStates;
+}
+
+/**
+ * Given the call node for each sample and the call node selected states,
+ * compute each sample's selected state.
+ */
+function mapCallNodeSelectedStatesToSamples(
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
+  callNodeSelectedStates: Uint8Array
+): SelectedState[] {
+  const sampleCount = sampleCallNodes.length;
+  const samplesSelectedStates = new Array(sampleCount);
+  for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
+    let sampleSelectedState: SelectedState = 'SELECTED';
+    const callNodeIndex = sampleCallNodes[sampleIndex];
+    if (callNodeIndex !== null) {
+      switch (callNodeSelectedStates[callNodeIndex]) {
+        case 1 /* CallNodeFlags.InsideSelectedSubtree */:
+          sampleSelectedState = 'SELECTED';
+          break;
+        case 2 /* CallNodeFlags.AncestorOfSelectedNode */:
+        case 3 /* CallNodeFlags.BeforeSelected */:
+          sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+          break;
+        case 4 /* CallNodeFlags.AfterSelected */:
+          sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+          break;
+        default:
+          throw new Error(
+            `Unexpected value ${callNodeSelectedStates[callNodeIndex]} at callNodeSelectedStates[${callNodeIndex}]`
+          );
+      }
+    } else {
+      // This sample was filtered out.
+      sampleSelectedState =
+        activeTabFilteredCallNodes[sampleIndex] === null
+          ? // This sample was not part of the active tab.
+            'FILTERED_OUT_BY_ACTIVE_TAB'
+          : // This sample was filtered out in the transform pipeline.
+            'FILTERED_OUT_BY_TRANSFORM';
+    }
+    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+  }
+  return samplesSelectedStates;
+}
+
+/**
+ * Go through the samples, and determine their current state with respect to
+ * the selection.
+ *
+ * This is used in the activity graph. The "ordering" is used so that samples
+ * from the same subtree (in the call tree) "clump together" in the graph.
  */
 export function getSamplesSelectedStates(
   callNodeTable: CallNodeTable,
@@ -261,110 +454,22 @@ export function getSamplesSelectedStates(
   activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
 ): SelectedState[] {
-  const result = new Array(sampleCallNodes.length);
-
-  // Precompute an array containing the call node indexes for the selected call
-  // node and its parents up to the root.
-  // The case of when we have no selected call node is a special case: we won't
-  // use these values but we still compute them to make the code simpler later.
-  const selectedCallNodeDepth =
-    selectedCallNodeIndex === -1 || selectedCallNodeIndex === null
-      ? 0
-      : callNodeTable.depth[selectedCallNodeIndex];
-
-  const selectedCallNodeAtDepth: IndexIntoCallNodeTable[] = new Array(
-    selectedCallNodeDepth
-  );
-
-  for (
-    let callNodeIndex = selectedCallNodeIndex, depth = selectedCallNodeDepth;
-    depth >= 0 && callNodeIndex !== null;
-    depth--, callNodeIndex = callNodeTable.prefix[callNodeIndex]
-  ) {
-    selectedCallNodeAtDepth[depth] = callNodeIndex;
-  }
-
-  /**
-   * Take a call node, and compute its selected state.
-   */
-  function getSelectedStateFromCallNode(
-    callNode: IndexIntoCallNodeTable | null,
-    activeTabFilteredCallNode: IndexIntoCallNodeTable | null
-  ): SelectedState {
-    let callNodeIndex = callNode;
-    if (callNodeIndex === null) {
-      return activeTabFilteredCallNode === null
-        ? // This sample was not part of the active tab.
-          'FILTERED_OUT_BY_ACTIVE_TAB'
-        : // This sample was filtered out in the transform pipeline.
-          'FILTERED_OUT_BY_TRANSFORM';
-    }
-
-    // When there's no selected call node, we don't want to shadow everything
-    // because everything is unselected. So let's decide this is as if
-    // everything is selected so that anything not filtered out will be nicely
-    // visible.
-    if (selectedCallNodeIndex === null) {
-      return 'SELECTED';
-    }
-
-    // Walk the call nodes toward the root, and get the call node at the depth
-    // of the selected call node.
-    let depth = callNodeTable.depth[callNodeIndex];
-    while (depth > selectedCallNodeDepth) {
-      callNodeIndex = callNodeTable.prefix[callNodeIndex];
-      depth--;
-    }
-
-    if (callNodeIndex === selectedCallNodeIndex) {
-      // This sample's call node at the depth matches the selected call node.
-      return 'SELECTED';
-    }
-
-    // If we're here, it means that callNode is not selected, because it's not
-    // an ancestor of selectedCallNodeIndex.
-    // Determine if it's ordered "before" or "after" the selected call node,
-    // in order to provide a stable ordering when rendering visualizations.
-    // Walk the call nodes towards the root, until we find the common ancestor.
-    // Once we've found the common ancestor, compare the order of the two
-    // child nodes that we passed through, which are siblings.
-    while (true) {
-      const prevCallNodeIndex = callNodeIndex;
-      callNodeIndex = callNodeTable.prefix[callNodeIndex];
-      depth--;
-      if (
-        callNodeIndex === -1 ||
-        callNodeIndex === selectedCallNodeAtDepth[depth]
-      ) {
-        // callNodeIndex is the lowest common ancestor of selectedCallNodeIndex
-        // and callNode. Compare the order of the two children that we passed
-        // through on the way up to the ancestor. These nodes are siblings, so
-        // their order is defined by the numerical order of call node indexes.
-        return prevCallNodeIndex <= selectedCallNodeAtDepth[depth + 1]
-          ? 'UNSELECTED_ORDERED_BEFORE_SELECTED'
-          : 'UNSELECTED_ORDERED_AFTER_SELECTED';
-      }
-    }
-
-    // This code is unreachable, but Flow doesn't know that and thinks this
-    // function could return undefined. So throw an error.
-    /* eslint-disable no-unreachable */
-    throw new Error('unreachable');
-    /* eslint-enable no-unreachable */
-  }
-
-  // Go through each sample, and label its state.
-  for (
-    let sampleIndex = 0;
-    sampleIndex < sampleCallNodes.length;
-    sampleIndex++
-  ) {
-    result[sampleIndex] = getSelectedStateFromCallNode(
-      sampleCallNodes[sampleIndex],
-      activeTabFilteredCallNodes[sampleIndex]
+  if (selectedCallNodeIndex === null || selectedCallNodeIndex === -1) {
+    return getSamplesSelectedStatesForNoSelection(
+      sampleCallNodes,
+      activeTabFilteredCallNodes
     );
   }
-  return result;
+
+  const callNodeSelectedStates = getCallNodeSelectedStates(
+    callNodeTable,
+    selectedCallNodeIndex
+  );
+  return mapCallNodeSelectedStatesToSamples(
+    sampleCallNodes,
+    activeTabFilteredCallNodes,
+    callNodeSelectedStates
+  );
 }
 
 /**
