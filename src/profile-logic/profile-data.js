@@ -726,11 +726,11 @@ export function getTimingsForCallNodeIndex(
     // Step 1: increment the total value
     timings.value += duration;
 
-    // Step 2: find the implementation value for this sample
-    const implementation = getImplementationForStack(sampleIndex);
-
-    // Step 3: increment the right value in the implementation breakdown
     if (displayImplementation) {
+      // Step 2: find the implementation value for this sample
+      const implementation = getImplementationForStack(sampleIndex);
+
+      // Step 3: increment the right value in the implementation breakdown
       if (timings.breakdownByImplementation === null) {
         timings.breakdownByImplementation = {};
       }
