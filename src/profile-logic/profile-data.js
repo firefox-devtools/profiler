@@ -521,8 +521,8 @@ export type TimingsForPath = {|
 |};
 
 /**
- * This function is the same as getTimingsForPath, but accepts an IndexIntoCallNodeTable
- * instead of a CallNodePath.
+ * This function is the same as getTimingsForCallNodeIndex, but accepts a CallNodePath
+ * instead of an IndexIntoCallNodeTable.
  */
 export function getTimingsForPath(
   needlePath: CallNodePath,
@@ -553,7 +553,7 @@ export function getTimingsForPath(
 }
 
 /**
- * This function returns the timings for a specific path. The algorithm is
+ * This function returns the timings for a specific call node. The algorithm is
  * adjusted when the call tree is inverted.
  * Note that the unfilteredThread should be the original thread before any filtering
  * (by range or other) happens. Also sampleIndexOffset needs to be properly
