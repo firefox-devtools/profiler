@@ -502,6 +502,10 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
   <div
     class="timelineSelectionHoverLine"
     style="visibility: hidden; left: 0px;"
-  />
+  >
+    <span
+      class="timelineSelectionOverlayTime"
+    />
+  </div>
 </div>
 `;
