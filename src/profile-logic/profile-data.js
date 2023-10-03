@@ -515,8 +515,6 @@ export type ItemTimings = {|
 export type TimingsForPath = {|
   // timings for this path
   forPath: ItemTimings,
-  // timings for this func across the tree
-  forFunc: ItemTimings,
   rootTime: Milliseconds, // time for all the samples in the current tree
 |};
 
@@ -562,7 +560,7 @@ export function getTimingsForPath(
  */
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
-  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
+  { stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: Milliseconds,
   isInvertedTree: boolean,
   thread: Thread,
@@ -596,21 +594,6 @@ export function getTimingsForCallNodeIndex(
   // This object holds the timings for the current call node path, specified by
   // needleNodeIndex.
   const pathTimings: ItemTimings = {
-    selfTime: {
-      value: 0,
-      breakdownByImplementation: null,
-      breakdownByCategory: null,
-    },
-    totalTime: {
-      value: 0,
-      breakdownByImplementation: null,
-      breakdownByCategory: null,
-    },
-  };
-
-  // This object holds the timings for the function (all occurrences) pointed by
-  // the specified call node.
-  const funcTimings: ItemTimings = {
     selfTime: {
       value: 0,
       breakdownByImplementation: null,
@@ -710,8 +693,6 @@ export function getTimingsForCallNodeIndex(
 
   /**
    * This is a small utility function to more easily add data to breakdowns.
-   * The funcIndex could be computed from the stackIndex but is provided as an
-   * argument because it's been already computed when this function is called.
    */
   function accumulateDataToTimings(
     timings: {
@@ -770,11 +751,8 @@ export function getTimingsForCallNodeIndex(
   /* ------------ Start of the algorithm itself ------------ */
   if (needleNodeIndex === null) {
     // No index was provided, return empty timing information.
-    return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+    return { forPath: pathTimings, rootTime };
   }
-
-  // This is the function index for this call node.
-  const needleFuncIndex = callNodeTable.func[needleNodeIndex];
 
   // Loop over each sample and accumulate the self time, running time, and
   // the implementation breakdown.
@@ -789,22 +767,12 @@ export function getTimingsForCallNodeIndex(
     rootTime += Math.abs(weight);
 
     const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
-    const thisFunc = callNodeTable.func[thisNodeIndex];
 
     if (!isInvertedTree) {
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
         accumulateDataToTimings(
           pathTimings.selfTime,
-          sampleIndex,
-          thisStackIndex,
-          weight
-        );
-      }
-
-      if (thisFunc === needleFuncIndex) {
-        accumulateDataToTimings(
-          funcTimings.selfTime,
           sampleIndex,
           thisStackIndex,
           weight
@@ -817,7 +785,6 @@ export function getTimingsForCallNodeIndex(
     // We don't use getCallNodePathFromIndex because we don't need the result
     // itself, and it's costly to get. Moreover we can break out of the loop
     // early if necessary.
-    let funcFound = false;
     let pathFound = false;
     let nextStackIndex;
     for (
@@ -826,7 +793,6 @@ export function getTimingsForCallNodeIndex(
       currentStackIndex = nextStackIndex
     ) {
       const currentNodeIndex = stackIndexToCallNodeIndex[currentStackIndex];
-      const currentFuncIndex = callNodeTable.func[currentNodeIndex];
       nextStackIndex = stackTable.prefix[currentStackIndex];
 
       if (currentNodeIndex === needleNodeIndex) {
@@ -847,29 +813,12 @@ export function getTimingsForCallNodeIndex(
         pathFound = true;
       }
 
-      if (!funcFound && currentFuncIndex === needleFuncIndex) {
-        // One of the parents' func is the same function as the passed path.
-        // Note we could have the same function several times in the stack, so
-        // we need a boolean variable to prevent adding it more than once.
-        // The boolean variable will also be used to accumulate timings for
-        // inverted trees below.
-        if (!isInvertedTree) {
-          accumulateDataToTimings(
-            funcTimings.totalTime,
-            sampleIndex,
-            thisStackIndex,
-            weight
-          );
-        }
-        funcFound = true;
-      }
-
       // When the tree isn't inverted, we don't need to move further up the call
       // node if we already found all the data.
       // But for inverted trees, the selfTime is counted on the root node so we
       // need to go on looping the stack until we find it.
 
-      if (!isInvertedTree && funcFound && pathFound) {
+      if (!isInvertedTree && pathFound) {
         // As explained above, for non-inverted trees, we can break here if we
         // found everything already.
         break;
@@ -885,16 +834,6 @@ export function getTimingsForCallNodeIndex(
           pathTimings.selfTime.value += weight;
         }
 
-        if (currentFuncIndex === needleFuncIndex) {
-          // This root node is the same function as the passed call node path.
-          accumulateDataToTimings(
-            funcTimings.selfTime,
-            sampleIndex,
-            currentStackIndex,
-            weight
-          );
-        }
-
         if (pathFound) {
           // We contribute the implementation information if the passed path was
           // found in this stack earlier.
@@ -905,22 +844,11 @@ export function getTimingsForCallNodeIndex(
             weight
           );
         }
-
-        if (funcFound) {
-          // We contribute the implementation information if the leaf function
-          // of the passed path was found in this stack earlier.
-          accumulateDataToTimings(
-            funcTimings.totalTime,
-            sampleIndex,
-            currentStackIndex,
-            weight
-          );
-        }
       }
     }
   }
 
-  return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+  return { forPath: pathTimings, rootTime };
 }
 
 // This function computes the time range for a thread, using both its samples
