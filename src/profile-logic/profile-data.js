@@ -574,7 +574,7 @@ export function getTimingsForCallNodeIndex(
   /* ------------ Variables definitions ------------*/
 
   // This is the data from the filtered thread that we'll loop over.
-  const { stackTable, stringTable } = thread;
+  const { stringTable } = thread;
 
   // This is the data from the unfiltered thread that we'll use to gather
   // category and JS implementation information. Note that samples are offset by
@@ -759,16 +759,18 @@ export function getTimingsForCallNodeIndex(
   // Loop over each sample and accumulate the self time, running time, and
   // the implementation breakdown.
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    // Get the call node for this sample.
+    // TODO: Consider using sampleCallNodes for this, to save one indirection on
+    // a hot path.
     const thisStackIndex = samples.stack[sampleIndex];
     if (thisStackIndex === null) {
       continue;
     }
+    const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
 
     const weight = samples.weight ? samples.weight[sampleIndex] : 1;
 
     rootTime += Math.abs(weight);
-
-    const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
 
     if (!isInvertedTree) {
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
@@ -777,20 +779,13 @@ export function getTimingsForCallNodeIndex(
       }
     }
 
-    // Use the stackTable to traverse the call node path and get various
+    // Use the call node table to traverse the call node path and get various
     // measurements.
-    // We don't use getCallNodePathFromIndex because we don't need the result
-    // itself, and it's costly to get. Moreover we can break out of the loop
-    // early if necessary.
-    let nextStackIndex;
     for (
-      let currentStackIndex = thisStackIndex;
-      currentStackIndex !== null;
-      currentStackIndex = nextStackIndex
+      let currentNodeIndex = thisNodeIndex;
+      currentNodeIndex !== -1;
+      currentNodeIndex = callNodeTable.prefix[currentNodeIndex]
     ) {
-      const currentNodeIndex = stackIndexToCallNodeIndex[currentStackIndex];
-      nextStackIndex = stackTable.prefix[currentStackIndex];
-
       if (currentNodeIndex === needleNodeIndex) {
         // One of the parents is the exact passed path.
         accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
