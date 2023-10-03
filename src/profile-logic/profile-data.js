@@ -560,7 +560,7 @@ export function getTimingsForPath(
  */
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
-  { stackIndexToCallNodeIndex }: CallNodeInfo,
+  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: Milliseconds,
   isInvertedTree: boolean,
   thread: Thread,
@@ -753,6 +753,9 @@ export function getTimingsForCallNodeIndex(
     return { forPath: pathTimings, rootTime };
   }
 
+  const needleNodeIsRootOfInvertedTree =
+    isInvertedTree && callNodeTable.prefix[needleNodeIndex] === -1;
+
   // Loop over each sample and accumulate the self time, running time, and
   // the implementation breakdown.
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
@@ -779,7 +782,6 @@ export function getTimingsForCallNodeIndex(
     // We don't use getCallNodePathFromIndex because we don't need the result
     // itself, and it's costly to get. Moreover we can break out of the loop
     // early if necessary.
-    let pathFound = false;
     let nextStackIndex;
     for (
       let currentStackIndex = thisStackIndex;
@@ -792,29 +794,14 @@ export function getTimingsForCallNodeIndex(
       if (currentNodeIndex === needleNodeIndex) {
         // One of the parents is the exact passed path.
         accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
-        pathFound = true;
-      }
 
-      // When the tree isn't inverted, we don't need to move further up the call
-      // node if we already found all the data.
-      // But for inverted trees, the selfTime is counted on the root node so we
-      // need to go on looping the stack until we find it.
-
-      if (!isInvertedTree && pathFound) {
-        // As explained above, for non-inverted trees, we can break here if we
-        // found everything already.
-        break;
-      }
-
-      if (isInvertedTree && nextStackIndex === null) {
-        // This is an inverted tree, and we're at the root node because its
-        // prefix is `null`.
-        if (currentNodeIndex === needleNodeIndex) {
+        if (needleNodeIsRootOfInvertedTree) {
           // This root node matches the passed call node path.
           // This is the only place where we don't accumulate timings, mainly
           // because this would be the same as for the total time.
           pathTimings.selfTime.value += weight;
         }
+        break;
       }
     }
   }
