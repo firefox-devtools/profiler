@@ -7,11 +7,7 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import {
-  getSampleIndexToCallNodeIndex,
-  getSamplesSelectedStates,
-  getSampleIndexClosestToStartTime,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getSampleIndexClosestToStartTime } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './HeightGraph.css';
@@ -21,8 +17,8 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
+  SelectedState,
 } from 'firefox-profiler/types';
 
 /**
@@ -47,12 +43,11 @@ type Props = {|
   +maxValue: number,
   +className: string,
   +thread: Thread,
-  +tabFilteredThread: Thread,
+  +samplesSelectedStates: null | SelectedState[],
+  +sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
@@ -90,12 +85,11 @@ export class ThreadHeightGraph extends PureComponent<Props> {
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       thread,
-      tabFilteredThread,
+      samplesSelectedStates,
+      sampleCallNodes,
       interval,
       rangeStart,
       rangeEnd,
-      callNodeInfo,
-      selectedCallNodeIndex,
       categories,
       stacksGrowFromCeiling,
       maxValue,
@@ -109,24 +103,6 @@ export class ThreadHeightGraph extends PureComponent<Props> {
     canvas.width = Math.round(rect.width * devicePixelRatio);
     canvas.height = Math.round(rect.height * devicePixelRatio);
     const ctx = canvas.getContext('2d');
-    const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-    const sampleCallNodes = getSampleIndexToCallNodeIndex(
-      thread.samples.stack,
-      stackIndexToCallNodeIndex
-    );
-    const tabFilteredSampleCallNodes = getSampleIndexToCallNodeIndex(
-      tabFilteredThread.samples.stack,
-      stackIndexToCallNodeIndex
-    );
-    // This is currently too slow to compute for the JS Tracer threads.
-    const samplesSelectedStates = thread.isJsTracer
-      ? null
-      : getSamplesSelectedStates(
-          callNodeTable,
-          sampleCallNodes,
-          tabFilteredSampleCallNodes,
-          selectedCallNodeIndex
-        );
     const range = [rangeStart, rangeEnd];
     const rangeLength = range[1] - range[0];
     const xPixelsPerMs = canvas.width / rangeLength;
