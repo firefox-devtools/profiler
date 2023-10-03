@@ -416,10 +416,23 @@ export class ActivityFillGraphQuerier {
   ): HoveredPixelState | null {
     const {
       rangeFilteredThread: { samples, stackTable },
+      canvasPixelWidth,
+      canvasPixelHeight,
     } = this.renderedComponentSettings;
+
     const { devicePixelRatio } = window;
-    const deviceX = Math.round(cssX * devicePixelRatio);
-    const deviceY = Math.round(cssY * devicePixelRatio);
+    const deviceX = Math.floor(cssX * devicePixelRatio);
+    const deviceY = Math.floor(cssY * devicePixelRatio);
+
+    if (
+      deviceX < 0 ||
+      deviceX >= canvasPixelWidth ||
+      deviceY < 0 ||
+      deviceY >= canvasPixelHeight
+    ) {
+      return null;
+    }
+
     const categoryUnderMouse = this._categoryAtDevicePixel(deviceX, deviceY);
 
     const candidateSamples = this._getSamplesAtTime(time);
@@ -533,17 +546,7 @@ export class ActivityFillGraphQuerier {
     categoryLowerEdge: number,
     yPercentage: number,
   } {
-    const { canvasPixelWidth, canvasPixelHeight } =
-      this.renderedComponentSettings;
-
-    if (
-      deviceX < 0 ||
-      deviceX >= canvasPixelWidth ||
-      deviceY < 0 ||
-      deviceY >= canvasPixelHeight
-    ) {
-      return null;
-    }
+    const { canvasPixelHeight } = this.renderedComponentSettings;
 
     // Convert the device pixel position into the range [0, 1], with 0 being
     // the *lower* edge of the canvas.

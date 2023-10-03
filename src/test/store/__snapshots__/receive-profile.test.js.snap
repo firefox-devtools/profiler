@@ -156,59 +156,6 @@ Array [
 ]
 `;
 
-exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 1`] = `[Error: The profile could not be downloaded and decoded. This does not look like a supported file type. The full error information has been printed out to the DevTool’s console.]`;
-
-exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 2`] = `
-Array [
-  Array [
-    "The profile could not be downloaded and decoded. This does not look like a supported file type.",
-  ],
-  Array [
-    "JSON parsing error:",
-    [SyntaxError: Unexpected token i in JSON at position 0],
-  ],
-  Array [
-    "Fetch response:",
-    Response {
-      "_fmResults": Object {
-        "arrayBuffer": Promise {},
-      },
-      "size": 0,
-      "timeout": 0,
-      Symbol(Body internals): Object {
-        "body": Object {
-          "data": Array [
-            105,
-            110,
-            118,
-            97,
-            108,
-            105,
-            100,
-          ],
-          "type": "Buffer",
-        },
-        "disturbed": true,
-        "error": null,
-      },
-      Symbol(Response internals): Object {
-        "counter": undefined,
-        "headers": Headers {
-          Symbol(map): Object {
-            "content-type": Array [
-              "undefined",
-            ],
-          },
-        },
-        "status": 200,
-        "statusText": "OK",
-        "url": "https://example.com/profile.unknown",
-      },
-    },
-  ],
-]
-`;
-
 exports[`actions/receive-profile retrieveProfileFromFile will be an error to view a profile with no threads 1`] = `"No threads were captured in this profile, there is nothing to display."`;
 
 exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to decompress a zipped profile 1`] = `[Error: Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html]`;
