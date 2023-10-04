@@ -17,6 +17,7 @@ import {
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
   filterThreadSamplesToRange,
+  getSampleIndexToCallNodeIndex,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -72,6 +73,10 @@ describe('unfiltered call tree', function () {
       expect(
         computeCallTreeCountsAndSummary(
           thread.samples,
+          getSampleIndexToCallNodeIndex(
+            thread.samples.stack,
+            callNodeInfo.stackIndexToCallNodeIndex
+          ),
           callNodeInfo,
           profile.meta.interval,
           false
@@ -115,6 +120,10 @@ describe('unfiltered call tree', function () {
       const { callNodeChildCount, callNodeSummary } =
         computeCallTreeCountsAndSummary(
           thread.samples,
+          getSampleIndexToCallNodeIndex(
+            thread.samples.stack,
+            callNodeInfo.stackIndexToCallNodeIndex
+          ),
           callNodeInfo,
           profile.meta.interval,
           false /* inverted */
@@ -454,6 +463,10 @@ describe('inverted call tree', function () {
     );
     const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       thread.samples,
+      getSampleIndexToCallNodeIndex(
+        thread.samples.stack,
+        callNodeInfo.stackIndexToCallNodeIndex
+      ),
       callNodeInfo,
       interval,
       true
@@ -494,6 +507,10 @@ describe('inverted call tree', function () {
     );
     const invertedCallTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       invertedThread.samples,
+      getSampleIndexToCallNodeIndex(
+        invertedThread.samples.stack,
+        invertedCallNodeInfo.stackIndexToCallNodeIndex
+      ),
       invertedCallNodeInfo,
       interval,
       true
@@ -631,6 +648,10 @@ describe('diffing trees', function () {
     );
     const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       thread.samples,
+      getSampleIndexToCallNodeIndex(
+        thread.samples.stack,
+        callNodeInfo.stackIndexToCallNodeIndex
+      ),
       callNodeInfo,
       interval,
       false

@@ -1996,9 +1996,6 @@ describe('getTimingsForSidebar', () => {
       } = setup();
 
       // This is a root node: it should have no self time but all the total time.
-      // Also, because the function is only present once in the tree, forPath
-      // and forFunc timings are the same, so we're extracting them in one
-      // object for a better readability.
       const timings = getTimingsForPath([A]);
 
       const expectedTiming = {
@@ -2020,7 +2017,6 @@ describe('getTimingsForSidebar', () => {
       };
       expect(timings).toEqual({
         forPath: expectedTiming,
-        forFunc: expectedTiming,
         rootTime: 5,
       });
     });
@@ -2036,9 +2032,6 @@ describe('getTimingsForSidebar', () => {
       //
       // This is also a JS node so it should have some js engine implementation
       // implementations.
-      //
-      // The same func is also present in 2 different stacks so it should have
-      // different timings for the `forFunc` property.
       const timings = getTimingsForPath([A, B, Cjs, D, Ejs]);
       expect(timings).toEqual({
         forPath: {
@@ -2071,36 +2064,6 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
-        forFunc: {
-          selfTime: {
-            value: 3,
-            breakdownByImplementation: { ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              0,
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 3,
-            breakdownByImplementation: { ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              0,
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
         rootTime: 5,
       });
     });
@@ -2115,9 +2078,6 @@ describe('getTimingsForSidebar', () => {
       // have some running time that's different than the self time.
       const timings = getTimingsForPath([A, B, H]);
 
-      // This node is present only once in the tree, so its forPath and forFunc
-      // timing values are identical. Extracting them provides a better
-      // readability.
       const expectedTiming = {
         selfTime: {
           value: 1,
@@ -2152,7 +2112,6 @@ describe('getTimingsForSidebar', () => {
 
       expect(timings).toEqual({
         forPath: expectedTiming,
-        forFunc: expectedTiming,
         rootTime: 5,
       });
     });
@@ -2215,9 +2174,6 @@ describe('getTimingsForSidebar', () => {
         // This is a root node: it should have no self time but all the total time.
         const timings = getTimingsForPath([A]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. So we extract the
-        // expectation to make this a bit more readable.
         const expectedTiming = {
           selfTime: EMPTY_TIMING,
           totalTime: {
@@ -2242,7 +2198,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
-          forFunc: expectedTiming,
           rootTime: 4,
         });
       });
@@ -2255,9 +2210,6 @@ describe('getTimingsForSidebar', () => {
 
         const timings = getTimingsForPath([A, Bjs]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. So we extract the
-        // expectation to make this a bit more readable.
         const expectedTiming = {
           selfTime: {
             value: 1,
@@ -2295,7 +2247,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
-          forFunc: expectedTiming,
           rootTime: 4,
         });
       });
@@ -2309,8 +2260,7 @@ describe('getTimingsForSidebar', () => {
         // This node is a native stack inhering the ion jit information.
         const timings = getTimingsForPath([A, Bjs, E]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. Also it only has a self
+        // This function has a self
         // time occurrence, so selfTime and totalTime show the same timing.
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
@@ -2329,7 +2279,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
-          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
           rootTime: 4,
         });
       });
@@ -2342,9 +2291,6 @@ describe('getTimingsForSidebar', () => {
 
         const timings = getTimingsForPath([A, Bjs, C]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. So we extract the
-        // expectation to make this a bit more readable.
         const expectedTiming = {
           selfTime: {
             value: 1,
@@ -2380,7 +2326,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
-          forFunc: expectedTiming,
           rootTime: 4,
         });
       });
@@ -2394,8 +2339,7 @@ describe('getTimingsForSidebar', () => {
         // This node is a native stack inhering the ion jit information.
         const timings = getTimingsForPath([A, Bjs, C, D]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. Also it only has a self
+        // This function only has a self
         // time occurrence, so selfTime and totalTime show the same timing.
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
@@ -2414,7 +2358,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
-          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
           rootTime: 4,
         });
       });
@@ -2445,9 +2388,7 @@ describe('getTimingsForSidebar', () => {
       } = setupForInvertedTree();
       const timings = getTimingsForPath([Ejs]);
 
-      // A root node will have the same values for total and selftime. Also this
-      // function is present once so forPath and forFunc will have the same
-      // values.
+      // A root node will have the same values for total and selftime.
       const expectedTiming = {
         value: 3,
         breakdownByImplementation: { ion: 2, baseline: 1 },
@@ -2473,7 +2414,6 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: expectedTiming,
         },
-        forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
         rootTime: 5,
       });
     });
@@ -2495,27 +2435,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               2, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
-        forFunc: {
-          selfTime: EMPTY_TIMING,
-          totalTime: {
-            value: 5,
-            breakdownByImplementation: {
-              ion: 2,
-              baseline: 1,
-              native: 2,
-            },
-            breakdownByCategory: withSingleSubcategory([
-              0, // Other
-              1, // Idle
-              1, // Layout
-              3, // JavaScript
               0,
               0,
               0,
@@ -2556,36 +2475,6 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
-        forFunc: {
-          selfTime: {
-            value: 1,
-            breakdownByImplementation: { native: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 2,
-            breakdownByImplementation: { native: 2 },
-            breakdownByCategory: withSingleSubcategory([
-              0, // Other
-              1, // Idle
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
         rootTime: 5,
       });
 
@@ -2601,36 +2490,6 @@ describe('getTimingsForSidebar', () => {
               0,
               1, // Idle
               0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
-        forFunc: {
-          selfTime: {
-            value: 1,
-            breakdownByImplementation: { native: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 2,
-            breakdownByImplementation: { native: 2 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              1, // Idle
-              1, // Layout
               0,
               0,
               0,
@@ -2665,23 +2524,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
             ]),
-          },
-        },
-        forFunc: {
-          selfTime: EMPTY_TIMING,
-          totalTime: {
-            value: 5,
-            breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0, // Other
-              1, // Idle
-              1, // Layout
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]), // [Idle, Other, Layout, JavaScript]
           },
         },
         rootTime: 5,
@@ -2753,8 +2595,7 @@ describe('getTimingsForSidebar', () => {
         // This is a root node: it should have all self time.
         const timings = getTimingsForPath([D]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. Also it's a root node in
+        // This function is a root node in
         // an inverted tree, so selfTime and totalTime show the same timing.
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
@@ -2782,7 +2623,6 @@ describe('getTimingsForSidebar', () => {
             },
             totalTime: expectedTiming,
           },
-          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
           rootTime: 4,
         });
       });
@@ -2796,8 +2636,7 @@ describe('getTimingsForSidebar', () => {
         // This is a root node: it should have all self time.
         const timings = getTimingsForPath([E]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. Also it's a root node in
+        // This function is a root node in
         // an inverted tree, so selfTime and totalTime show the same timing.
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
@@ -2825,7 +2664,6 @@ describe('getTimingsForSidebar', () => {
             },
             totalTime: expectedTiming,
           },
-          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
           rootTime: 4,
         });
       });
@@ -2851,41 +2689,6 @@ describe('getTimingsForSidebar', () => {
                 0,
                 1, // Layout
                 0,
-                0,
-                0,
-                0,
-                0,
-              ]),
-            },
-          },
-          forFunc: {
-            selfTime: {
-              value: 1,
-              breakdownByImplementation: { blinterp: 1 },
-              breakdownByCategory: withSingleSubcategory([
-                0,
-                0,
-                0,
-                1, // JavaScript
-                0,
-                0,
-                0,
-                0,
-              ]),
-            },
-            totalTime: {
-              value: 4,
-              breakdownByImplementation: {
-                ion: 1,
-                blinterp: 1,
-                interpreter: 1,
-                native: 1,
-              },
-              breakdownByCategory: withSingleSubcategory([
-                0,
-                0,
-                1, // Layout
-                3, // JavaScript
                 0,
                 0,
                 0,

@@ -469,14 +469,11 @@ function _getStackSelf(
  */
 export function computeCallTreeCountsAndSummary(
   samples: SamplesLikeTable,
-  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
+  sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
+  { callNodeTable }: CallNodeInfo,
   interval: Milliseconds,
   invertCallstack: boolean
 ): CallTreeCountsAndSummary {
-  const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
-    samples.stack,
-    stackIndexToCallNodeIndex
-  );
   // Inverted trees need a different method for computing the timing.
   const { callNodeSelf, callNodeLeaf } = invertCallstack
     ? _getInvertedStackSelf(samples, callNodeTable, sampleIndexToCallNodeIndex)

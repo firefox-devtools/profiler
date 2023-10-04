@@ -1294,9 +1294,11 @@ async function _extractJsonFromResponse(
   reportError: (...data: Array<any>) => void,
   fileType: 'application/json' | null
 ): Promise<MixedObject> {
+  let arrayBuffer: ArrayBuffer | null = null;
   try {
     // await before returning so that we can catch JSON parse errors.
-    return await _extractJsonFromArrayBuffer(await response.arrayBuffer());
+    arrayBuffer = await response.arrayBuffer();
+    return await _extractJsonFromArrayBuffer(arrayBuffer);
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
@@ -1304,6 +1306,10 @@ async function _extractJsonFromResponse(
       message = 'The network request to load the profile was aborted.';
     } else if (fileType === 'application/json') {
       message = 'The profile’s JSON could not be decoded.';
+    } else if (fileType === null && arrayBuffer !== null) {
+      // If the content type is not specified, use a raw array buffer
+      // to fallback to other supported profile formats.
+      return arrayBuffer;
     } else {
       message = oneLine`
         The profile could not be downloaded and decoded. This does not look like a supported file
