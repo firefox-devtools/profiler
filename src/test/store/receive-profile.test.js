@@ -1375,22 +1375,25 @@ describe('actions/receive-profile', function () {
       expect(reportError.mock.calls).toMatchSnapshot();
     });
 
-    it('fails if a completely unknown file is passed in', async function () {
+    it('fallback behavior if a completely unknown file is passed in', async function () {
       const invalidJSON = 'invalid';
-      const { args, reportError } = await configureFetch({
+      const profile = encode(invalidJSON);
+      const { args } = await configureFetch({
         url: 'https://example.com/profile.unknown',
-        content: encode(invalidJSON),
+        content: profile,
       });
 
-      let userFacingError;
+      let userFacingError = null;
       try {
-        await _fetchProfile(args);
+        const profileOrZip = await _fetchProfile(args);
+        expect(profileOrZip).toEqual({
+          responseType: 'PROFILE',
+          profile: profile.buffer,
+        });
       } catch (error) {
         userFacingError = error;
       }
-      expect(userFacingError).toMatchSnapshot();
-      expect(reportError.mock.calls.length).toBeGreaterThan(0);
-      expect(reportError.mock.calls).toMatchSnapshot();
+      expect(userFacingError).toBeNull();
     });
   });
 

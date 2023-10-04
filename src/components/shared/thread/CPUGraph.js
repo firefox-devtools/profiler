@@ -15,18 +15,19 @@ import type {
   Milliseconds,
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  SelectedState,
 } from 'firefox-profiler/types';
 import type { HeightFunctionParams } from './HeightGraph';
 
 type Props = {|
   +className: string,
   +thread: Thread,
-  +tabFilteredThread: Thread,
+  +samplesSelectedStates: null | SelectedState[],
+  +sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
@@ -62,12 +63,11 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     const {
       className,
       thread,
-      tabFilteredThread,
+      sampleCallNodes,
+      samplesSelectedStates,
       interval,
       rangeStart,
       rangeEnd,
-      callNodeInfo,
-      selectedCallNodeIndex,
       categories,
       trackName,
       maxThreadCPUDeltaPerMs,
@@ -85,11 +85,10 @@ export class ThreadCPUGraph extends PureComponent<Props> {
         trackName={trackName}
         interval={interval}
         thread={thread}
-        tabFilteredThread={tabFilteredThread}
+        sampleCallNodes={sampleCallNodes}
+        samplesSelectedStates={samplesSelectedStates}
         rangeStart={rangeStart}
         rangeEnd={rangeEnd}
-        callNodeInfo={callNodeInfo}
-        selectedCallNodeIndex={selectedCallNodeIndex}
         categories={categories}
         onSampleClick={onSampleClick}
       />

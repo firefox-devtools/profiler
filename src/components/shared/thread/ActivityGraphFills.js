@@ -416,10 +416,23 @@ export class ActivityFillGraphQuerier {
   ): HoveredPixelState | null {
     const {
       rangeFilteredThread: { samples, stackTable },
+      canvasPixelWidth,
+      canvasPixelHeight,
     } = this.renderedComponentSettings;
+
     const { devicePixelRatio } = window;
-    const deviceX = Math.round(cssX * devicePixelRatio);
-    const deviceY = Math.round(cssY * devicePixelRatio);
+    const deviceX = Math.floor(cssX * devicePixelRatio);
+    const deviceY = Math.floor(cssY * devicePixelRatio);
+
+    if (
+      deviceX < 0 ||
+      deviceX >= canvasPixelWidth ||
+      deviceY < 0 ||
+      deviceY >= canvasPixelHeight
+    ) {
+      return null;
+    }
+
     const categoryUnderMouse = this._categoryAtDevicePixel(deviceX, deviceY);
 
     const candidateSamples = this._getSamplesAtTime(time);
@@ -533,17 +546,7 @@ export class ActivityFillGraphQuerier {
     categoryLowerEdge: number,
     yPercentage: number,
   } {
-    const { canvasPixelWidth, canvasPixelHeight } =
-      this.renderedComponentSettings;
-
-    if (
-      deviceX < 0 ||
-      deviceX >= canvasPixelWidth ||
-      deviceY < 0 ||
-      deviceY >= canvasPixelHeight
-    ) {
-      return null;
-    }
+    const { canvasPixelHeight } = this.renderedComponentSettings;
 
     // Convert the device pixel position into the range [0, 1], with 0 being
     // the *lower* edge of the canvas.
@@ -857,15 +860,16 @@ function _accumulateInBuffer(
     (sampleCategoryStartTime - bufferTimeRangeStart) * xPixelsPerMs;
   let sampleCategoryEndPixel =
     (sampleCategoryEndTime - bufferTimeRangeStart) * xPixelsPerMs;
-  sampleCategoryStartPixel = Math.max(0, sampleCategoryStartPixel);
-  sampleCategoryEndPixel = Math.min(
-    percentageBuffer.length - 1,
-    sampleCategoryEndPixel
-  );
+  if (sampleCategoryStartPixel < 0) {
+    sampleCategoryStartPixel = 0;
+  }
+  if (sampleCategoryEndPixel > percentageBuffer.length - 1) {
+    sampleCategoryEndPixel = percentageBuffer.length - 1;
+  }
   const samplePixel = (sampleTime - bufferTimeRangeStart) * xPixelsPerMs;
-  const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
-  const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
-  const intSamplePixel = Math.floor(samplePixel);
+  const intCategoryStartPixel = sampleCategoryStartPixel | 0;
+  const intCategoryEndPixel = sampleCategoryEndPixel | 0;
+  const intSamplePixel = samplePixel | 0;
   const sampleTimeDeltaBefore = sampleTime - prevSampleTime;
   const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
 

@@ -210,33 +210,43 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
+  const getSampleIndexToCallNodeIndexForFilteredThread: Selector<
+    Array<IndexIntoCallNodeTable | null>,
+  > = createSelector(
+    (state) => threadSelectors.getFilteredThread(state).samples.stack,
+    getCallNodeInfo,
+    (filteredThreadSampleStacks, { stackIndexToCallNodeIndex }) =>
+      ProfileData.getSampleIndexToCallNodeIndex(
+        filteredThreadSampleStacks,
+        stackIndexToCallNodeIndex
+      )
+  );
+
+  const getSampleIndexToCallNodeIndexForTabFilteredThread: Selector<
+    Array<IndexIntoCallNodeTable | null>,
+  > = createSelector(
+    (state) => threadSelectors.getTabFilteredThread(state).samples.stack,
+    getCallNodeInfo,
+    (tabFilteredThreadSampleStacks, { stackIndexToCallNodeIndex }) =>
+      ProfileData.getSampleIndexToCallNodeIndex(
+        tabFilteredThreadSampleStacks,
+        stackIndexToCallNodeIndex
+      )
+  );
+
   const getSamplesSelectedStatesInFilteredThread: Selector<
     null | SelectedState[],
   > = createSelector(
-    threadSelectors.getFilteredThread,
-    threadSelectors.getTabFilteredThread,
+    getSampleIndexToCallNodeIndexForFilteredThread,
+    getSampleIndexToCallNodeIndexForTabFilteredThread,
     getCallNodeInfo,
     getSelectedCallNodeIndex,
     (
-      thread,
-      tabFilteredThread,
-      { callNodeTable, stackIndexToCallNodeIndex },
+      sampleIndexToCallNodeIndex,
+      activeTabFilteredCallNodeIndex,
+      { callNodeTable },
       selectedCallNode
     ) => {
-      if (thread.isJsTracer) {
-        // This is currently to slow to compute in JS Tracer threads.
-        return null;
-      }
-      const sampleIndexToCallNodeIndex =
-        ProfileData.getSampleIndexToCallNodeIndex(
-          thread.samples.stack,
-          stackIndexToCallNodeIndex
-        );
-      const activeTabFilteredCallNodeIndex =
-        ProfileData.getSampleIndexToCallNodeIndex(
-          tabFilteredThread.samples.stack,
-          stackIndexToCallNodeIndex
-        );
       return ProfileData.getSamplesSelectedStates(
         callNodeTable,
         sampleIndexToCallNodeIndex,
@@ -294,7 +304,20 @@ export function getStackAndSampleSelectorsPerThread(
       getCallNodeInfo,
       ProfileSelectors.getProfileInterval,
       UrlState.getInvertCallstack,
-      CallTree.computeCallTreeCountsAndSummary
+      (samples, callNodeInfo, interval, invertCallStack) => {
+        const sampleIndexToCallNodeIndex =
+          ProfileData.getSampleIndexToCallNodeIndex(
+            samples.stack,
+            callNodeInfo.stackIndexToCallNodeIndex
+          );
+        return CallTree.computeCallTreeCountsAndSummary(
+          samples,
+          sampleIndexToCallNodeIndex,
+          callNodeInfo,
+          interval,
+          invertCallStack
+        );
+      }
     );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
@@ -376,6 +399,8 @@ export function getStackAndSampleSelectorsPerThread(
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
+    getSampleIndexToCallNodeIndexForFilteredThread,
+    getSampleIndexToCallNodeIndexForTabFilteredThread,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,

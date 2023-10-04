@@ -4,7 +4,7 @@
 // @flow
 
 import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
-import type { StartEndRange } from 'firefox-profiler/types';
+import type { Milliseconds, StartEndRange } from 'firefox-profiler/types';
 
 /**
  * Users can make preview range selections on the profile, and then can commit these
@@ -164,11 +164,15 @@ export function stringifyCommittedRanges(
   return arrayValue.map(stringifyStartEnd).join('~');
 }
 
-export function getFormattedTimeLength(length: number): string {
+export function getFormattedTimeLength(
+  length: Milliseconds,
+  precision: Milliseconds = Infinity
+): string {
   return formatTimestamp(
     length,
     /*significantdigits*/ 2,
-    /*maxFractionalDigits*/ 2
+    /*maxFractionalDigits*/ 2,
+    precision
   );
 }
 
