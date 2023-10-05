@@ -39,6 +39,7 @@ export const TRACK_MEMORY_MARKERS_HEIGHT = 15;
 export const TRACK_MEMORY_HEIGHT =
   TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT;
 export const TRACK_MEMORY_LINE_WIDTH = 2;
+export const TRACK_MEMORY_COLOR = 'orange';
 
 // The following values are for experimental event delay track.
 export const TRACK_EVENT_DELAY_HEIGHT = 40;
@@ -62,6 +63,7 @@ export const TIMELINE_RULER_HEIGHT = 20;
 // Height of the power track.
 export const TRACK_POWER_HEIGHT = 25;
 export const TRACK_POWER_LINE_WIDTH = 2;
+export const TRACK_POWER_DEFAULT_COLOR = 'grey';
 
 // Height of the process cpu track.
 export const TRACK_PROCESS_CPU_HEIGHT = 25;

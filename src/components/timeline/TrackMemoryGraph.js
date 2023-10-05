@@ -8,6 +8,10 @@ import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import {
+  getStrokeColor,
+  getFillColor,
+} from 'firefox-profiler/profile-logic/graph-color';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   formatBytes,
@@ -20,9 +24,9 @@ import {
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { ORANGE_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
+import { TRACK_MEMORY_COLOR } from 'firefox-profiler/app-logic/constants';
 
 import type {
   CounterIndex,
@@ -139,8 +143,8 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = ORANGE_50;
-      ctx.fillStyle = '#ff940088'; // Orange 50 with transparency.
+      ctx.strokeStyle = getStrokeColor(TRACK_MEMORY_COLOR);
+      ctx.fillStyle = getFillColor(TRACK_MEMORY_COLOR);
       ctx.beginPath();
 
       // The x and y are used after the loop.
