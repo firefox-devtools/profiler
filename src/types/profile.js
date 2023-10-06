@@ -514,10 +514,23 @@ export type CounterSamplesTable = {|
   length: number,
 |};
 
+export type GraphColor =
+  | 'blue'
+  | 'green'
+  | 'grey'
+  | 'ink'
+  | 'magenta'
+  | 'orange'
+  | 'purple'
+  | 'red'
+  | 'teal'
+  | 'yellow';
+
 export type Counter = {|
   name: string,
   category: string,
   description: string,
+  color?: GraphColor,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
   sampleGroups: $ReadOnlyArray<{|

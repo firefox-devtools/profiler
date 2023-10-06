@@ -7,6 +7,11 @@
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import {
+  getStrokeColor,
+  getFillColor,
+  getDotColor,
+} from 'firefox-profiler/profile-logic/graph-color';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { getCommittedRange } from 'firefox-profiler/selectors/profile';
@@ -17,28 +22,6 @@ import {
   TRACK_MARKER_DEFAULT_COLOR,
   TRACK_MARKER_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
-import {
-  BLUE_50,
-  BLUE_60,
-  GREEN_50,
-  GREEN_60,
-  GREY_50,
-  GREY_60,
-  INK_50,
-  INK_60,
-  MAGENTA_50,
-  MAGENTA_60,
-  ORANGE_50,
-  ORANGE_60,
-  PURPLE_50,
-  PURPLE_60,
-  RED_50,
-  RED_60,
-  TEAL_50,
-  TEAL_60,
-  YELLOW_50,
-  YELLOW_60,
-} from 'photon-colors';
 
 import type {
   ThreadIndex,
@@ -48,7 +31,6 @@ import type {
   IndexIntoStringTable,
   MarkerSchema,
   CollectedCustomMarkerSamples,
-  MarkerGraphColor,
   MarkerGraphType,
   MarkerIndex,
   Marker,
@@ -99,65 +81,6 @@ function _calculateUnitValue(
   }
   // Ensure we keep 15% of padding above the graph.
   return scaled * 0.85;
-}
-
-function _getStrokeColor(color: MarkerGraphColor) {
-  switch (color) {
-    case 'magenta':
-      return MAGENTA_50;
-    case 'purple':
-      return PURPLE_50;
-    case 'blue':
-      return BLUE_50;
-    case 'teal':
-      return TEAL_50;
-    case 'green':
-      return GREEN_50;
-    case 'yellow':
-      return YELLOW_50;
-    case 'red':
-      return RED_50;
-    case 'orange':
-      return ORANGE_50;
-    case 'grey':
-      return GREY_50;
-    case 'ink':
-      return INK_50;
-    default:
-      throw new Error('Unexpected marker track stroke color: ' + color);
-  }
-}
-
-function _getFillColor(color: MarkerGraphColor) {
-  // Same as stroke color with transparency.
-  return _getStrokeColor(color) + '88';
-}
-
-function _getDotColor(color: MarkerGraphColor) {
-  switch (color) {
-    case 'magenta':
-      return MAGENTA_60;
-    case 'purple':
-      return PURPLE_60;
-    case 'blue':
-      return BLUE_60;
-    case 'teal':
-      return TEAL_60;
-    case 'green':
-      return GREEN_60;
-    case 'yellow':
-      return YELLOW_60;
-    case 'red':
-      return RED_60;
-    case 'orange':
-      return ORANGE_60;
-    case 'grey':
-      return GREY_60;
-    case 'ink':
-      return INK_60;
-    default:
-      throw new Error('Unexpected marker track stroke color: ' + color);
-  }
 }
 
 /**
@@ -225,7 +148,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         const samples = collectedSamples.numbersPerLine[graphIndex];
         // Draw the chart.
         //
-        ctx.strokeStyle = _getStrokeColor(color || TRACK_MARKER_DEFAULT_COLOR);
+        ctx.strokeStyle = getStrokeColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
         const getX = (time) =>
           Math.round((time - rangeStart) * millisecondWidth);
@@ -297,9 +220,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               ctx.lineTo(firstX, deviceHeight);
 
               // The line from 4 to 1 will be implicitly filled in.
-              ctx.fillStyle = _getFillColor(
-                color || TRACK_MARKER_DEFAULT_COLOR
-              );
+              ctx.fillStyle = getFillColor(color || TRACK_MARKER_DEFAULT_COLOR);
               ctx.fill();
               ctx.closePath();
             }
@@ -606,7 +527,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
         innerTrackHeight - unitValue * innerTrackHeight - halfLineWidth;
       // eslint-disable-next-line flowtype/no-weak-types
       const style: Object = { left, top };
-      style.backgroundColor = _getDotColor(color || TRACK_MARKER_DEFAULT_COLOR);
+      style.backgroundColor = getDotColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
       if (marker.end) {
         let screenWidth = (width * (marker.end - marker.start)) / rangeLength;
