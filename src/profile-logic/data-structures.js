@@ -25,6 +25,7 @@ import type {
   ExtensionTable,
   CategoryList,
   JsTracerTable,
+  CallNodeTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -411,5 +412,24 @@ export function getEmptyProfile(): Profile {
     libs: [],
     pages: [],
     threads: [],
+  };
+}
+
+export function getEmptyCallNodeTable(): CallNodeTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    prefix: new Int32Array(0),
+    firstChild: new Int32Array(0),
+    nextSibling: new Int32Array(0),
+    func: new Int32Array(0),
+    category: new Int32Array(0),
+    subcategory: new Int32Array(0),
+    innerWindowID: new Float64Array(0),
+    sourceFramesInlinedIntoSymbol: [],
+    depth: [],
+    length: 0,
   };
 }
