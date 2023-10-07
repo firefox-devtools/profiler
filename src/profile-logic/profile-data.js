@@ -12,6 +12,7 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
   getEmptyStackTable,
+  getEmptyCallNodeTable,
   shallowCloneFrameTable,
   shallowCloneFuncTable,
 } from './data-structures';
@@ -105,6 +106,13 @@ export function getCallNodeInfo(
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   return timeCode('getCallNodeInfo', () => {
+    if (stackTable.length === 0) {
+      return {
+        callNodeTable: getEmptyCallNodeTable(),
+        stackIndexToCallNodeIndex: new Uint32Array(0),
+      };
+    }
+
     const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
     const funcCount = funcTable.length;
     // Maps can't key off of two items, so combine the prefixCallNode and the funcIndex
@@ -234,6 +242,9 @@ export function getCallNodeInfo(
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
+
+    // We know that the result is non-empty, because the stackTable was non-empty.
+    // assert(length !== 0);
 
     const callNodeTable: CallNodeTable = {
       prefix: new Int32Array(prefix),
