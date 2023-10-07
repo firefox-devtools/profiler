@@ -113,6 +113,8 @@ export function getCallNodeInfo(
 
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
+    const firstChild: Array<IndexIntoCallNodeTable> = [];
+    const nextSibling: Array<IndexIntoCallNodeTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
     const category: Array<IndexIntoCategoryList> = [];
     const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
@@ -122,6 +124,9 @@ export function getCallNodeInfo(
       IndexIntoNativeSymbolTable | -1 | null,
     > = [];
     let length = 0;
+
+    const currentLastChild: Array<IndexIntoCallNodeTable> = [];
+    let currentLastRoot = -1;
 
     function addCallNode(
       prefixIndex: IndexIntoCallNodeTable,
@@ -138,9 +143,34 @@ export function getCallNodeInfo(
       subcategory[index] = subcategoryIndex;
       innerWindowID[index] = windowID;
       sourceFramesInlinedIntoSymbol[index] = inlinedIntoSymbol;
+
+      // Initialize these firstChild and nextSibling to -1. They will be updated
+      // once this node's first child or next sibling gets created.
+      firstChild[index] = -1;
+      nextSibling[index] = -1;
+      currentLastChild[index] = -1;
+
+      // Update the next sibling of our previous sibling, and the first child of
+      // our prefix (if we're the first child).
+      // Also set this node's depth.
       if (prefixIndex === -1) {
+        // This node is a root. Just update the previous root's nextSibling; we have
+        // no prefix whose firstChild would need to be updated.
+        const prevSiblingIndex = currentLastRoot;
+        if (prevSiblingIndex !== -1) {
+          nextSibling[prevSiblingIndex] = index;
+        }
+        currentLastRoot = index;
         depth[index] = 0;
       } else {
+        // This node is not a root.
+        const prevSiblingIndex = currentLastChild[prefixIndex];
+        if (prevSiblingIndex === -1) {
+          firstChild[prefixIndex] = index;
+        } else {
+          nextSibling[prevSiblingIndex] = index;
+        }
+        currentLastChild[prefixIndex] = index;
         depth[index] = depth[prefixIndex] + 1;
       }
     }
@@ -217,6 +247,8 @@ export function getCallNodeInfo(
 
     const callNodeTable: CallNodeTable = {
       prefix: new Int32Array(prefix),
+      firstChild: new Int32Array(firstChild),
+      nextSibling: new Int32Array(nextSibling),
       func: new Int32Array(func),
       category: new Int32Array(category),
       subcategory: new Int32Array(subcategory),
