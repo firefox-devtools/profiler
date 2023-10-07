@@ -156,7 +156,6 @@ export function getCallNodeInfo(
       const frameIndex = stackTable.frame[stackIndex];
       const categoryIndex = stackTable.category[stackIndex];
       const subcategoryIndex = stackTable.subcategory[stackIndex];
-      const windowID = frameTable.innerWindowID[frameIndex] || 0;
       const inlinedIntoSymbol =
         frameTable.inlineDepth[frameIndex] > 0
           ? frameTable.nativeSymbol[frameIndex]
@@ -169,6 +168,8 @@ export function getCallNodeInfo(
         prefixCallNodeAndFuncIndex
       );
       if (callNodeIndex === undefined) {
+        const windowID = frameTable.innerWindowID[frameIndex] || 0;
+
         // New call node.
         callNodeIndex = length;
         addCallNode(
