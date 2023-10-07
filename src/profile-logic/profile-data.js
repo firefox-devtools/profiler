@@ -113,6 +113,8 @@ export function getCallNodeInfo(
 
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
+    const firstChild: Array<IndexIntoFuncTable> = [];
+    const nextSibling: Array<IndexIntoFuncTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
     const category: Array<IndexIntoCategoryList> = [];
     const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
@@ -122,6 +124,9 @@ export function getCallNodeInfo(
       IndexIntoNativeSymbolTable | -1 | null,
     > = [];
     let length = 0;
+
+    const currentLastChild: Array<IndexIntoFuncTable> = [];
+    let currentLastRoot = -1;
 
     function addCallNode(
       prefixIndex: IndexIntoCallNodeTable,
@@ -138,9 +143,24 @@ export function getCallNodeInfo(
       subcategory[index] = subcategoryIndex;
       innerWindowID[index] = windowID;
       sourceFramesInlinedIntoSymbol[index] = inlinedIntoSymbol;
+      currentLastChild[index] = -1;
+      nextSibling[index] = -1;
+      firstChild[index] = -1;
       if (prefixIndex === -1) {
+        const prevSiblingIndex = currentLastRoot;
+        if (prevSiblingIndex !== -1) {
+          nextSibling[prevSiblingIndex] = index;
+        }
+        currentLastRoot = index;
         depth[index] = 0;
       } else {
+        const prevSiblingIndex = currentLastChild[prefixIndex];
+        if (prevSiblingIndex === -1) {
+          firstChild[prefixIndex] = index;
+        } else {
+          nextSibling[prevSiblingIndex] = index;
+        }
+        currentLastChild[prefixIndex] = index;
         depth[index] = depth[prefixIndex] + 1;
       }
     }
@@ -217,6 +237,8 @@ export function getCallNodeInfo(
 
     const callNodeTable: CallNodeTable = {
       prefix: new Int32Array(prefix),
+      firstChild: new Int32Array(firstChild),
+      nextSibling: new Int32Array(nextSibling),
       func: new Int32Array(func),
       category: new Int32Array(category),
       subcategory: new Int32Array(subcategory),

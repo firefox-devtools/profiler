@@ -107,6 +107,15 @@ export class CallTree {
     this._weightType = weightType;
   }
 
+  _getFirstChildIndex(
+    callNodeIndex: IndexIntoCallNodeTable | -1
+  ): IndexIntoCallNodeTable | -1 {
+    if (callNodeIndex === -1) {
+      return this._callNodeTable.length !== 0 ? 0 : -1;
+    }
+    return this._callNodeTable.firstChild[callNodeIndex];
+  }
+
   getRoots() {
     return this.getChildren(-1);
   }
@@ -114,26 +123,18 @@ export class CallTree {
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
     let children = this._children[callNodeIndex];
     if (children === undefined) {
-      const childCount =
-        callNodeIndex === -1
-          ? this._rootCount
-          : this._callNodeChildCount[callNodeIndex];
       children = [];
+      const firstChild = this._getFirstChildIndex(callNodeIndex);
       for (
-        let childCallNodeIndex = callNodeIndex + 1;
-        childCallNodeIndex < this._callNodeTable.length &&
-        children.length < childCount;
-        childCallNodeIndex++
+        let childCallNodeIndex = firstChild;
+        childCallNodeIndex !== -1;
+        childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
       ) {
-        const childPrefixIndex = this._callNodeTable.prefix[childCallNodeIndex];
         const childTotalSummary =
           this._callNodeSummary.total[childCallNodeIndex];
         const childChildCount = this._callNodeChildCount[childCallNodeIndex];
 
-        if (
-          childPrefixIndex === callNodeIndex &&
-          (childTotalSummary !== 0 || childChildCount !== 0)
-        ) {
+        if (childTotalSummary !== 0 || childChildCount !== 0) {
           children.push(childCallNodeIndex);
         }
       }
