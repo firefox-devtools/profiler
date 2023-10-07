@@ -106,13 +106,6 @@ export function getCallNodeInfo(
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   return timeCode('getCallNodeInfo', () => {
-    if (stackTable.length === 0) {
-      return {
-        callNodeTable: getEmptyCallNodeTable(),
-        stackIndexToCallNodeIndex: new Uint32Array(0),
-      };
-    }
-
     const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
     const funcCount = funcTable.length;
     // Maps can't key off of two items, so combine the prefixCallNode and the funcIndex
@@ -127,7 +120,6 @@ export function getCallNodeInfo(
     const category: Array<IndexIntoCategoryList> = [];
     const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
     const innerWindowID: Array<InnerWindowID> = [];
-    const depth: Array<number> = [];
     const sourceFramesInlinedIntoSymbol: Array<
       IndexIntoNativeSymbolTable | -1 | null,
     > = [];
@@ -160,7 +152,6 @@ export function getCallNodeInfo(
           nextSibling[prevSiblingIndex] = index;
         }
         currentLastRoot = index;
-        depth[index] = 0;
       } else {
         const prevSiblingIndex = currentLastChild[prefixIndex];
         if (prevSiblingIndex === -1) {
@@ -169,7 +160,6 @@ export function getCallNodeInfo(
           nextSibling[prevSiblingIndex] = index;
         }
         currentLastChild[prefixIndex] = index;
-        depth[index] = depth[prefixIndex] + 1;
       }
     }
 
@@ -242,24 +232,154 @@ export function getCallNodeInfo(
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
+    return _createCallNodeInfoFromUnorderedComponents(
+      prefix,
+      firstChild,
+      nextSibling,
+      func,
+      category,
+      subcategory,
+      innerWindowID,
+      sourceFramesInlinedIntoSymbol,
+      length,
+      stackIndexToCallNodeIndex
+    );
+  });
+}
+
+/**
+ * Create a CallNodeInfo with an ordered call node table based on the pieces of
+ * an unordered call node table.
+ *
+ * The order of siblings is maintained.
+ * If a node A has children, its first child B directly follows A.
+ * Otherwise, the node following A is A's next sibling (if it has one), or the
+ * next sibling of the closest ancestor which has a next sibling.
+ * This means that any node and all its descendants are laid out contiguously.
+ */
+function _createCallNodeInfoFromUnorderedComponents(
+  prefix: Array<IndexIntoCallNodeTable>,
+  firstChild: Array<IndexIntoFuncTable>,
+  nextSibling: Array<IndexIntoFuncTable>,
+  func: Array<IndexIntoFuncTable>,
+  category: Array<IndexIntoCategoryList>,
+  subcategory: Array<IndexIntoSubcategoryListForCategory>,
+  innerWindowID: Array<InnerWindowID>,
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  length: number,
+  stackIndexToCallNodeIndex: Uint32Array
+): CallNodeInfo {
+  return timeCode('createCallNodeInfoFromUnorderedComponents', () => {
+    if (length === 0) {
+      return {
+        callNodeTable: getEmptyCallNodeTable(),
+        stackIndexToCallNodeIndex: new Uint32Array(0),
+      };
+    }
 
     // We know that the result is non-empty, because the stackTable was non-empty.
     // assert(length !== 0);
 
+    const {
+      oldIndexToNewIndex,
+      newIndexToOldIndex,
+      depthSorted,
+      firstChildSorted,
+    } = (function computeTreeOrderPermutationAndExtraColumns(
+      nextSibling,
+      firstChild
+    ) {
+      if (nextSibling.length === 0) {
+        throw new Error('Empty call node table');
+      }
+      const oldIndexToNewIndex = new Uint32Array(nextSibling.length);
+      const newIndexToOldIndex = new Uint32Array(nextSibling.length);
+      const depthSorted = new Array(nextSibling.length);
+      const firstChildSorted = new Int32Array(nextSibling.length);
+      let nextNewIndex = 0;
+      let currentDepth = 0;
+      const currentStackOld = [];
+      const currentStackNew = [];
+      let currentOldIndex = 0;
+      while (true) {
+        const newIndex = nextNewIndex++;
+        oldIndexToNewIndex[currentOldIndex] = newIndex;
+        newIndexToOldIndex[newIndex] = currentOldIndex;
+        depthSorted[newIndex] = currentDepth;
+        const firstChildIndex = firstChild[currentOldIndex];
+        if (firstChildIndex !== -1) {
+          firstChildSorted[newIndex] = nextNewIndex;
+          currentStackOld[currentDepth] = currentOldIndex;
+          currentStackNew[currentDepth] = newIndex;
+          currentDepth++;
+          currentOldIndex = firstChildIndex;
+          continue;
+        }
+        firstChildSorted[newIndex] = -1;
+        let nextSiblingIndex = nextSibling[currentOldIndex];
+        while (nextSiblingIndex === -1 && currentDepth !== 0) {
+          currentDepth--;
+          nextSiblingIndex = nextSibling[currentStackOld[currentDepth]];
+        }
+        if (nextSiblingIndex !== -1) {
+          currentOldIndex = nextSiblingIndex;
+          continue;
+        }
+        break;
+      }
+      return {
+        oldIndexToNewIndex,
+        newIndexToOldIndex,
+        depthSorted,
+        firstChildSorted,
+      };
+    })(nextSibling, firstChild);
+
+    const prefixSorted = new Int32Array(length);
+    const nextSiblingSorted = new Int32Array(length);
+    const funcSorted = new Int32Array(length);
+    const categorySorted = new Int32Array(length);
+    const subcategorySorted = new Int32Array(length);
+    const innerWindowIDSorted = new Float64Array(length);
+    const sourceFramesInlinedIntoSymbolSorted = new Array(length);
+    for (let newIndex = 0; newIndex < length; newIndex++) {
+      const oldIndex = newIndexToOldIndex[newIndex];
+      categorySorted[newIndex] = category[oldIndex];
+      const prefixOldIndex = prefix[oldIndex];
+      prefixSorted[newIndex] =
+        prefixOldIndex === -1 ? -1 : oldIndexToNewIndex[prefixOldIndex];
+      const nextSiblingOldIndex = nextSibling[oldIndex];
+      nextSiblingSorted[newIndex] =
+        nextSiblingOldIndex === -1
+          ? -1
+          : oldIndexToNewIndex[nextSiblingOldIndex];
+      funcSorted[newIndex] = func[oldIndex];
+      categorySorted[newIndex] = category[oldIndex];
+      subcategorySorted[newIndex] = subcategory[oldIndex];
+      innerWindowIDSorted[newIndex] = innerWindowID[oldIndex];
+      sourceFramesInlinedIntoSymbolSorted[newIndex] =
+        sourceFramesInlinedIntoSymbol[oldIndex];
+    }
+
     const callNodeTable: CallNodeTable = {
-      prefix: new Int32Array(prefix),
-      firstChild: new Int32Array(firstChild),
-      nextSibling: new Int32Array(nextSibling),
-      func: new Int32Array(func),
-      category: new Int32Array(category),
-      subcategory: new Int32Array(subcategory),
-      innerWindowID: new Float64Array(innerWindowID),
-      sourceFramesInlinedIntoSymbol,
-      depth,
+      prefix: prefixSorted,
+      firstChild: firstChildSorted,
+      nextSibling: nextSiblingSorted,
+      func: funcSorted,
+      category: categorySorted,
+      subcategory: subcategorySorted,
+      innerWindowID: innerWindowIDSorted,
+      sourceFramesInlinedIntoSymbol: sourceFramesInlinedIntoSymbolSorted,
+      depth: depthSorted,
       length,
     };
 
-    return { callNodeTable, stackIndexToCallNodeIndex };
+    return {
+      callNodeTable,
+      stackIndexToCallNodeIndex: stackIndexToCallNodeIndex.map(
+        (oldIndex) => oldIndexToNewIndex[oldIndex]
+      ),
+    };
   });
 }
 
