@@ -676,6 +676,14 @@ async function processTracingEvents(
         }
       }
 
+      if (profileEvent.name === 'CpuProfile') {
+        // Add a pseudo-sample for the profile start.
+        if (timeDeltas[0] !== 0) {
+          samples.unshift(1); // (root)
+          timeDeltas.unshift(0);
+        }
+      }
+
       // Chrome profiles sample much more frequently than Gecko ones do, and they store
       // the time delta between each sampling event. In order to properly reconstruct
       // the data using our fixed-time intervals, sample the data at a fixed rate that
