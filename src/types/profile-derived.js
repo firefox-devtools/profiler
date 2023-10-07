@@ -53,7 +53,12 @@ export type IndexIntoCallNodeTable = number;
  * `docs-developer/call-nodes-in-cpp.md`.
  */
 export type CallNodeTable = {
+  // The index of the parent call node, or -1 for root nodes.
   prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+  // The index of this node's first child, or -1 if this node has no children.
+  firstChild: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+  // The index of this node's next sibling, or -1 if this node is the last child / last root.
+  nextSibling: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
@@ -62,6 +67,7 @@ export type CallNodeTable = {
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
   sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // The depth of the call node. Roots have depth 0.
   depth: number[],
   length: number,
 };
