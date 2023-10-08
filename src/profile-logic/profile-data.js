@@ -2596,60 +2596,12 @@ export function getFuncNamesAndOriginsForPath(
 
 /**
  * Return a function that can compare two samples' call nodes, and determine a sort order.
- *
- * The order is determined as follows:
- *  - Ancestor call nodes are ordered before their descendants.
- *  - Sibling call nodes are ordered by their call node index.
- * This order can be different than the order of the rows that are displayed in the
- * call tree, because it does not take any sample information into account. This
- * makes it independent of any range selection and cheaper to compute.
+ * Call nodes are ordered by their index.
+ * "Ordered after" means "swims on top in the activity graph"
  */
 export function getTreeOrderComparator(
-  callNodeTable: CallNodeTable,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
-  /**
-   * Determine the ordering of two non-null call nodes.
-   */
-  function compareCallNodes(
-    callNodeA: IndexIntoCallNodeTable,
-    callNodeB: IndexIntoCallNodeTable
-  ): number {
-    const initialDepthA = callNodeTable.depth[callNodeA];
-    const initialDepthB = callNodeTable.depth[callNodeB];
-    let depthA = initialDepthA;
-    let depthB = initialDepthB;
-
-    // Walk call tree towards the roots until the call nodes are at the same depth.
-    while (depthA > depthB) {
-      callNodeA = callNodeTable.prefix[callNodeA];
-      depthA--;
-    }
-    while (depthB > depthA) {
-      callNodeB = callNodeTable.prefix[callNodeB];
-      depthB--;
-    }
-
-    // Sort the call nodes by the initial depth.
-    if (callNodeA === callNodeB) {
-      return initialDepthA - initialDepthB;
-    }
-
-    // The call nodes are at the same depth, walk towards the roots until a match is
-    // is found, then sort them based on stack order.
-    while (true) {
-      const parentNodeA = callNodeTable.prefix[callNodeA];
-      const parentNodeB = callNodeTable.prefix[callNodeB];
-      if (parentNodeA === parentNodeB) {
-        break;
-      }
-      callNodeA = parentNodeA;
-      callNodeB = parentNodeB;
-    }
-
-    return callNodeA - callNodeB;
-  }
-
   /**
    * Determine the ordering of (possibly null) call nodes for two given samples.
    * Returns a value < 0 if sampleA is ordered before sampleB,
@@ -2677,7 +2629,7 @@ export function getTreeOrderComparator(
       // B filtered out, A not filtered out. B goes after A.
       return -1;
     }
-    return compareCallNodes(callNodeA, callNodeB);
+    return callNodeA - callNodeB;
   };
 }
 

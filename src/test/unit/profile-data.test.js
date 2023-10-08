@@ -965,7 +965,7 @@ describe('getSamplesSelectedStates', function () {
   });
 
   it('can sort the samples based on their selection status', function () {
-    const comparator = getTreeOrderComparator(callNodeTable, sampleCallNodes);
+    const comparator = getTreeOrderComparator(sampleCallNodes);
     const samples = [4, 1, 3, 0, 2]; // some random order
     samples.sort(comparator);
     expect(samples).toEqual([0, 2, 4, 1, 3]);
