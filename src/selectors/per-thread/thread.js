@@ -473,7 +473,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     ProfileSelectors.getDefaultCategory,
     (thread, shouldInvertCallstack, defaultCategory) => {
       return shouldInvertCallstack
-        ? ProfileData.invertCallstack(thread, defaultCategory)
+        ? ProfileData.computeThreadWithInvertedStackTable(thread, defaultCategory)
         : thread;
     }
   );

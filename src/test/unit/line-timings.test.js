@@ -11,7 +11,7 @@ import {
   getLineTimings,
 } from 'firefox-profiler/profile-logic/line-timings';
 import {
-  invertCallstack,
+  computeThreadWithInvertedStackTable,
   getCallNodeInfo,
   getCallNodeIndexFromPath,
 } from '../../profile-logic/profile-data';
@@ -129,7 +129,7 @@ describe('getLineTimings for getStackLineInfo', function () {
 
     const [thread] = profile.threads;
     const defaultCategory = categories.findIndex((c) => c.color === 'grey');
-    const invertedThread = invertCallstack(thread, defaultCategory);
+    const invertedThread = computeThreadWithInvertedStackTable(thread, defaultCategory);
 
     const lineTimingsOne = getTimings(thread, 'one.js', false);
     const lineTimingsInvertedOne = getTimings(invertedThread, 'one.js', true);
@@ -271,7 +271,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
 
     const [{ C, D }] = funcNamesDictPerThread;
     const [thread] = profile.threads;
-    const invertedThread = invertCallstack(thread, defaultCat);
+    const invertedThread = computeThreadWithInvertedStackTable(thread, defaultCat);
 
     // For the root D of the inverted tree, we have 3 self line hits.
     const lineTimingsD = getTimings(invertedThread, [D], defaultCat, true);
