@@ -11,7 +11,7 @@ import {
   getAddressTimings,
 } from 'firefox-profiler/profile-logic/address-timings';
 import {
-  invertCallstack,
+  computeThreadWithInvertedStackTable,
   getCallNodeInfo,
   getCallNodeIndexFromPath,
 } from '../../profile-logic/profile-data';
@@ -170,7 +170,7 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     const [thread] = profile.threads;
     const [{ Asym, Bsym, Csym, Dsym }] = nativeSymbolsDictPerThread;
     const defaultCategory = categories.findIndex((c) => c.color === 'grey');
-    const invertedThread = invertCallstack(thread, defaultCategory);
+    const invertedThread = computeThreadWithInvertedStackTable(thread, defaultCategory);
 
     const addressTimingsA = getTimings(thread, Asym, false);
     const addressTimingsInvertedA = getTimings(invertedThread, Asym, true);
@@ -348,7 +348,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     const [{ C, D }] = funcNamesDictPerThread;
     const [{ Csym, Dsym }] = nativeSymbolsDictPerThread;
     const [thread] = profile.threads;
-    const invertedThread = invertCallstack(thread, defaultCat);
+    const invertedThread = computeThreadWithInvertedStackTable(thread, defaultCat);
 
     // For the root D of the inverted tree, we have 3 self address hits.
     const addressTimingsD = getTimings(

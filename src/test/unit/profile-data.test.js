@@ -13,7 +13,7 @@ import {
 } from '../../profile-logic/process-profile';
 import {
   getCallNodeInfo,
-  invertCallstack,
+  computeThreadWithInvertedStackTable,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
   getSampleIndexClosestToStartTime,
@@ -1200,7 +1200,7 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const invertedThread = invertCallstack(thread, defaultCategory);
+    const invertedThread = computeThreadWithInvertedStackTable(thread, defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       invertedThread.stackTable,
       invertedThread.frameTable,

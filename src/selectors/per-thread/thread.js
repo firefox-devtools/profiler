@@ -469,7 +469,7 @@ export function getThreadSelectorsWithMarkersPerThread(
   const _getInvertedThread: Selector<Thread> = createSelector(
     _getImplementationAndSearchFilteredThread,
     ProfileSelectors.getDefaultCategory,
-    ProfileData.invertCallstack
+    ProfileData.computeThreadWithInvertedStackTable
   );
 
   const getFilteredThread: Selector<Thread> = (state) => {

@@ -2018,11 +2018,11 @@ export function computeCallNodeMaxDepthPlusOne(
   return maxDepth + 1;
 }
 
-export function invertCallstack(
+export function computeThreadWithInvertedStackTable(
   thread: Thread,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  return timeCode('invertCallstack', () => {
+  return timeCode('computeThreadWithInvertedStackTable', () => {
     const { stackTable, frameTable } = thread;
 
     const newStackTable = {
