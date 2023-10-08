@@ -1928,6 +1928,7 @@ function _getCallNodeIndexFromPathWithCache(
   // start from the start, and use `-1` which is the prefix we use to indicate
   // the root node.
   if (index === undefined) {
+    // assert(i === 0);
     index = -1;
   }
 
@@ -1961,23 +1962,29 @@ function _getCallNodeIndexFromPathWithCache(
 // Returns the CallNodeIndex that matches the function `func` and whose parent's
 // CallNodeIndex is `parent`.
 export function getCallNodeIndexFromParentAndFunc(
-  parent: IndexIntoCallNodeTable,
+  parent: IndexIntoCallNodeTable | -1,
   func: IndexIntoFuncTable,
   callNodeTable: CallNodeTable
 ): IndexIntoCallNodeTable | null {
+  if (parent === -1) {
+    if (callNodeTable.length === 0) {
+      return null;
+    }
+  } else if (callNodeTable.nextAfterDescendants[parent] === parent + 1) {
+    // parent has no children.
+    return null;
+  }
   // Node children always come after their parents in the call node table,
   // that's why we start looping at `parent + 1`.
   // Note that because the root parent is `-1`, we correctly start at `0` when
-  // we look for a top-level item.
+  // we look for a root.
+  const firstChild = parent + 1;
   for (
-    let callNodeIndex = parent + 1; // the root parent is -1
-    callNodeIndex < callNodeTable.length;
-    callNodeIndex++
+    let callNodeIndex = firstChild;
+    callNodeIndex !== -1;
+    callNodeIndex = callNodeTable.nextSibling[callNodeIndex]
   ) {
-    if (
-      callNodeTable.prefix[callNodeIndex] === parent &&
-      callNodeTable.func[callNodeIndex] === func
-    ) {
+    if (callNodeTable.func[callNodeIndex] === func) {
       return callNodeIndex;
     }
   }
