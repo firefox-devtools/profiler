@@ -280,13 +280,11 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
       UrlState.getSourceViewFile,
       selectedThreadSelectors.getCallNodeInfo,
       selectedThreadSelectors.getSelectedCallNodeIndex,
-      UrlState.getInvertCallstack,
       (
         { stackTable, frameTable, funcTable, stringTable }: Thread,
         sourceViewFile,
         callNodeInfo,
-        selectedCallNodeIndex,
-        invertCallStack
+        selectedCallNodeIndex
       ): StackLineInfo | null => {
         if (sourceViewFile === null || selectedCallNodeIndex === null) {
           return null;
@@ -304,8 +302,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
           stackTable,
           frameTable,
           selectedCallNodeIndex,
-          callNodeInfo,
-          invertCallStack
+          callNodeInfo
         );
       }
     );
@@ -322,13 +319,11 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
       selectedThreadSelectors.getAssemblyViewNativeSymbolIndex,
       selectedThreadSelectors.getCallNodeInfo,
       selectedThreadSelectors.getSelectedCallNodeIndex,
-      UrlState.getInvertCallstack,
       (
         { stackTable, frameTable }: Thread,
         nativeSymbolIndex,
         callNodeInfo,
-        selectedCallNodeIndex,
-        invertCallStack
+        selectedCallNodeIndex
       ): StackAddressInfo | null => {
         if (nativeSymbolIndex === null || selectedCallNodeIndex === null) {
           return null;
@@ -338,8 +333,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
           frameTable,
           selectedCallNodeIndex,
           callNodeInfo,
-          nativeSymbolIndex,
-          invertCallStack
+          nativeSymbolIndex
         );
       }
     );
