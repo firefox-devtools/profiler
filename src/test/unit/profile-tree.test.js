@@ -13,7 +13,7 @@ import {
 import { computeOrderedCallNodeRows } from '../../profile-logic/flame-graph';
 import {
   getCallNodeInfo,
-  computeThreadWithInvertedStackTable,
+  getInvertedCallNodeInfo,
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
   filterThreadSamplesToRange,
@@ -469,24 +469,21 @@ describe('inverted call tree', function () {
     });
 
     // Now compute the inverted tree and check it.
-    const invertedThread = computeThreadWithInvertedStackTable(thread, defaultCategory);
-    const invertedCallNodeInfo = getCallNodeInfo(
-      invertedThread.stackTable,
-      invertedThread.frameTable,
-      invertedThread.funcTable,
+    const invertedCallNodeInfo = getInvertedCallNodeInfo(
+      thread,
       defaultCategory
     );
     const invertedCallTreeCountsAndSummary = computeCallTreeCountsAndSummary(
-      invertedThread.samples,
+      thread.samples,
       getSampleIndexToCallNodeIndex(
-        invertedThread.samples.stack,
+        thread.samples.stack,
         invertedCallNodeInfo.stackIndexToCallNodeIndex
       ),
       invertedCallNodeInfo,
       true
     );
     const invertedCallTree = getCallTree(
-      invertedThread,
+      thread,
       invertedCallNodeInfo,
       categories,
       invertedCallTreeCountsAndSummary,

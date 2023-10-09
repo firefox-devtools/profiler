@@ -154,18 +154,19 @@ export function selectLeafCallNode(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const filteredThread = threadSelectors.getFilteredThread(getState());
+    const sampleCallNodes =
+      threadSelectors.getSampleIndexToCallNodeIndexForFilteredThread(
+        getState()
+      );
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
     let newSelectedCallNode = -1;
-    if (sampleIndex !== null) {
-      // The newSelectedStack could be undefined if there are 0 samples.
-      const newSelectedStack = filteredThread.samples.stack[sampleIndex];
-
-      if (newSelectedStack !== null && newSelectedStack !== undefined) {
-        newSelectedCallNode =
-          callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
-      }
+    if (
+      sampleIndex !== null &&
+      sampleIndex >= 0 &&
+      sampleIndex < sampleCallNodes.length
+    ) {
+      newSelectedCallNode = sampleCallNodes[sampleIndex] ?? -1;
     }
 
     dispatch(

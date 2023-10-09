@@ -74,8 +74,14 @@ export type CallNodeTable = {
  */
 export type CallNodeInfo = {
   callNodeTable: CallNodeTable,
-  // IndexIntoStackTable -> IndexIntoCallNodeTable
-  stackIndexToCallNodeIndex: Uint32Array,
+  // IndexIntoStackTable -> IndexIntoCallNodeTable | -1
+  // If this CallNodeInfo is inverted, this maps the uninverted stack to
+  // the inverted call node. For stacks which aren't used as self stacks, this
+  // is -1. In the non-inverted case, all entries are >= 0.
+  stackIndexToCallNodeIndex: Int32Array,
+  // Whether the call node table in this call node info describes the inverted
+  // call tree.
+  isInverted: boolean,
 };
 
 export type LineNumber = number;

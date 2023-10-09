@@ -11,8 +11,8 @@ import {
   getLineTimings,
 } from 'firefox-profiler/profile-logic/line-timings';
 import {
-  computeThreadWithInvertedStackTable,
   getCallNodeInfo,
+  getInvertedCallNodeInfo,
   getCallNodeIndexFromPath,
 } from '../../profile-logic/profile-data';
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -38,8 +38,7 @@ describe('getStackLineInfo', function () {
       stackTable,
       frameTable,
       funcTable,
-      fileOne,
-      false
+      fileOne
     );
 
     // Expect the returned arrays to have the same length as the stackTable.
@@ -50,15 +49,14 @@ describe('getStackLineInfo', function () {
 });
 
 describe('getLineTimings for getStackLineInfo', function () {
-  function getTimings(thread: Thread, file: string, isInverted: boolean) {
+  function getTimings(thread: Thread, file: string) {
     const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
     const fileStringIndex = stringTable.indexForString(file);
     const stackLineInfo = getStackLineInfo(
       stackTable,
       frameTable,
       funcTable,
-      fileStringIndex,
-      isInverted
+      fileStringIndex
     );
     return getLineTimings(stackLineInfo, samples);
   }
@@ -71,7 +69,7 @@ describe('getLineTimings for getStackLineInfo', function () {
       B[file:file.js][line:30]
     `);
     const [thread] = profile.threads;
-    const lineTimings = getTimings(thread, 'file.js', false);
+    const lineTimings = getTimings(thread, 'file.js');
     expect(lineTimings.totalLineHits.get(20)).toBe(1);
     expect(lineTimings.totalLineHits.get(30)).toBe(1);
     expect(lineTimings.totalLineHits.size).toBe(2); // no other hits
@@ -89,7 +87,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     `);
     const [thread] = profile.threads;
 
-    const lineTimingsOne = getTimings(thread, 'one.js', false);
+    const lineTimingsOne = getTimings(thread, 'one.js');
     expect(lineTimingsOne.totalLineHits.get(20)).toBe(2);
     expect(lineTimingsOne.totalLineHits.get(21)).toBe(1);
     // one.js line 30 was hit in every sample, twice in the first sample
@@ -103,7 +101,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     expect(lineTimingsOne.selfLineHits.get(30)).toBe(1);
     expect(lineTimingsOne.selfLineHits.size).toBe(1); // no other hits
 
-    const lineTimingsTwo = getTimings(thread, 'two.js', false);
+    const lineTimingsTwo = getTimings(thread, 'two.js');
     expect(lineTimingsTwo.totalLineHits.get(10)).toBe(1);
     expect(lineTimingsTwo.totalLineHits.get(11)).toBe(1);
     expect(lineTimingsTwo.totalLineHits.get(40)).toBe(1);
@@ -113,31 +111,6 @@ describe('getLineTimings for getStackLineInfo', function () {
     // two.js line 40 recursed but should only be counted as 1 sample
     expect(lineTimingsTwo.selfLineHits.get(40)).toBe(1);
     expect(lineTimingsTwo.selfLineHits.size).toBe(2); // no other hits
-  });
-
-  it('computes the same values on an inverted thread', function () {
-    const { profile } = getProfileFromTextSamples(`
-      A[file:one.js][line:20]  A[file:one.js][line:21]  A[file:one.js][line:20]
-      B[file:one.js][line:30]  B[file:one.js][line:30]  B[file:one.js][line:30]
-      C[file:two.js][line:10]  C[file:two.js][line:11]  D[file:two.js][line:40]
-      B[file:one.js][line:30]                           D[file:two.js][line:40]
-    `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-
-    const [thread] = profile.threads;
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
-    const invertedThread = computeThreadWithInvertedStackTable(thread, defaultCategory);
-
-    const lineTimingsOne = getTimings(thread, 'one.js', false);
-    const lineTimingsInvertedOne = getTimings(invertedThread, 'one.js', true);
-    expect(lineTimingsInvertedOne).toEqual(lineTimingsOne);
-
-    const lineTimingsTwo = getTimings(thread, 'two.js', false);
-    const lineTimingsInvertedTwo = getTimings(invertedThread, 'two.js', true);
-    expect(lineTimingsInvertedTwo).toEqual(lineTimingsTwo);
   });
 });
 
@@ -149,12 +122,9 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     isInverted: boolean
   ) {
     const { stackTable, frameTable, funcTable, samples } = thread;
-    const callNodeInfo = getCallNodeInfo(
-      stackTable,
-      frameTable,
-      funcTable,
-      defaultCat
-    );
+    const callNodeInfo = isInverted
+      ? getInvertedCallNodeInfo(thread, defaultCat)
+      : getCallNodeInfo(stackTable, frameTable, funcTable, defaultCat);
     const callNodeIndex = ensureExists(
       getCallNodeIndexFromPath(callNodePath, callNodeInfo.callNodeTable),
       'invalid call node path'
@@ -163,8 +133,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
       stackTable,
       frameTable,
       callNodeIndex,
-      callNodeInfo,
-      isInverted
+      callNodeInfo
     );
     return getLineTimings(stackLineInfo, samples);
   }
@@ -271,10 +240,9 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
 
     const [{ C, D }] = funcNamesDictPerThread;
     const [thread] = profile.threads;
-    const invertedThread = computeThreadWithInvertedStackTable(thread, defaultCat);
 
     // For the root D of the inverted tree, we have 3 self line hits.
-    const lineTimingsD = getTimings(invertedThread, [D], defaultCat, true);
+    const lineTimingsD = getTimings(thread, [D], defaultCat, true);
     expect(lineTimingsD.totalLineHits.get(51)).toBe(2);
     expect(lineTimingsD.totalLineHits.get(52)).toBe(1);
     expect(lineTimingsD.totalLineHits.size).toBe(2); // no other hits
@@ -284,7 +252,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
 
     // For the C call node which is a child (direct caller) of D, we have
     // no self line hit and one hit in line 12.
-    const lineTimingsDC = getTimings(invertedThread, [D, C], defaultCat, true);
+    const lineTimingsDC = getTimings(thread, [D, C], defaultCat, true);
     expect(lineTimingsDC.totalLineHits.get(12)).toBe(1);
     expect(lineTimingsDC.totalLineHits.size).toBe(1); // no other hits
     expect(lineTimingsDC.selfLineHits.size).toBe(0); // no self line hits
