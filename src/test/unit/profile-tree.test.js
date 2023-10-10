@@ -10,7 +10,7 @@ import {
   getCallTree,
   computeCallTreeCountsAndSummary,
 } from '../../profile-logic/call-tree';
-import { getRootsAndChildren } from '../../profile-logic/flame-graph';
+import { computeOrderedCallNodeRows } from '../../profile-logic/flame-graph';
 import {
   getCallNodeInfo,
   invertCallstack,
@@ -92,8 +92,8 @@ describe('unfiltered call tree', function () {
     });
   });
 
-  describe('roots and children for flame graph', function () {
-    it('returns roots and children', function () {
+  describe('ordered rows of call node indexes for flame graph', function () {
+    it('returns ordered rows', function () {
       // On purpose, we build a profile where the call node indexes won't be in
       // the same order than the function names.
       const {
@@ -109,46 +109,35 @@ describe('unfiltered call tree', function () {
         profile.meta.categories,
         'Expected to find categories'
       ).findIndex((c) => c.name === 'Other');
-      const callNodeInfo = getCallNodeInfo(
+      const { callNodeTable } = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
         thread.funcTable,
         defaultCategory
       );
+      const cnZ = getCallNodeIndexFromPath([Z], callNodeTable);
+      const cnZX = getCallNodeIndexFromPath([Z, X], callNodeTable);
+      const cnZXY = getCallNodeIndexFromPath([Z, X, Y], callNodeTable);
+      const cnZXW = getCallNodeIndexFromPath([Z, X, W], callNodeTable);
+      const cnG = getCallNodeIndexFromPath([G], callNodeTable);
+      const cnGH = getCallNodeIndexFromPath([G, H], callNodeTable);
+      const cnGHI = getCallNodeIndexFromPath([G, H, I], callNodeTable);
+      const cnGHJ = getCallNodeIndexFromPath([G, H, J], callNodeTable);
+      const cnK = getCallNodeIndexFromPath([K], callNodeTable);
+      const cnKM = getCallNodeIndexFromPath([K, M], callNodeTable);
+      const cnKN = getCallNodeIndexFromPath([K, N], callNodeTable);
 
-      const { callNodeChildCount, callNodeSummary } =
-        computeCallTreeCountsAndSummary(
-          thread.samples,
-          getSampleIndexToCallNodeIndex(
-            thread.samples.stack,
-            callNodeInfo.stackIndexToCallNodeIndex
-          ),
-          callNodeInfo,
-          false /* inverted */
-        );
-
-      expect(
-        getRootsAndChildren(
-          thread,
-          callNodeInfo.callNodeTable,
-          callNodeChildCount,
-          callNodeSummary.total
-        )
-      ).toEqual({
-        // Roots are ordered in lexically descending order.
-        roots: [Z, K, G],
-        children: {
-          // Children are ordered in lexically descending order
-          array: new Uint32Array([X, Y, W, H, J, I, N, M, 0, 0, 0]),
-          offsets: new Uint32Array([0, 1, 3, 3, 3, 4, 6, 6, 6, 8, 8, 8]),
-          /*                        Z, X, Y, W, G, H, I, J, K, M, N, <end> */
-          /* offsets represent where children of a parent are located in "array".
-           * For example:
-           *   children of G are located between indexes 3 and 4 (excluded). That is H.
-           *   children of H are located between indexes 4 and 6 (excluded). That is J and I.
-           */
-        },
-      });
+      const rows = computeOrderedCallNodeRows(
+        callNodeTable,
+        thread.funcTable,
+        thread.stringTable
+      );
+      expect(rows).toEqual([
+        // Siblings are ordered in lexically ascending order.
+        [cnG, cnK, cnZ],
+        [cnGH, cnKM, cnKN, cnZX],
+        [cnGHI, cnGHJ, cnZXW, cnZXY],
+      ]);
     });
   });
 

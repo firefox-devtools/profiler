@@ -78,3 +78,60 @@ export function bisectionLeft(
 
   return low;
 }
+
+export function bisectionLeftByKey<T>(
+  array: T[],
+  x: number,
+  toKey: (T) => number,
+  low?: number,
+  high?: number
+): number {
+  low = low || 0;
+  high = high || array.length;
+
+  if (low < 0 || low > array.length || high < 0 || high > array.length) {
+    throw new TypeError("low and high must lie within the array's range");
+  }
+
+  while (low < high) {
+    const mid = (low + high) >> 1;
+
+    if (x <= toKey(array[mid])) {
+      high = mid;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return low;
+}
+
+// This is the same as bisectionLeftByKey but uses string as the key type.
+// If you can find a way to make Flow accept a single function that handles
+// both string and number keys, please remove this duplication.
+export function bisectionLeftByStrKey<T>(
+  array: T[],
+  x: string,
+  toKey: (T) => string,
+  low?: number,
+  high?: number
+): number {
+  low = low || 0;
+  high = high || array.length;
+
+  if (low < 0 || low > array.length || high < 0 || high > array.length) {
+    throw new TypeError("low and high must lie within the array's range");
+  }
+
+  while (low < high) {
+    const mid = (low + high) >> 1;
+
+    if (x <= toKey(array[mid])) {
+      high = mid;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return low;
+}
