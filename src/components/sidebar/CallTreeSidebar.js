@@ -29,7 +29,6 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type {
   ThreadsKey,
   CategoryList,
-  CallNodeTable,
   IndexIntoCallNodeTable,
   TracedTiming,
   Milliseconds,
@@ -286,7 +285,6 @@ export const CategoryBreakdown = explicitConnect<
 
 type StateProps = {|
   +selectedNodeIndex: IndexIntoCallNodeTable | null,
-  +callNodeTable: CallNodeTable,
   +selectedThreadsKey: ThreadsKey,
   +name: string,
   +lib: string,
@@ -503,7 +501,6 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
 export const CallTreeSidebar = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state) => ({
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
-    callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
     selectedThreadsKey: getSelectedThreadsKey(state),
     name: getFunctionName(selectedNodeSelectors.getName(state)),
     lib: selectedNodeSelectors.getLib(state),
