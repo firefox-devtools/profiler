@@ -507,7 +507,6 @@ export function applyTransformToCallNodePath(
       return _startCallNodePathWithFunction(transform.funcIndex, callNodePath);
     case 'focus-category':
       return _removeOtherCategoryFunctionsInNodePathWithFunction(
-        transformedThread,
         transform.category,
         callNodePath,
         callNodeTable
@@ -597,7 +596,6 @@ function _dropFunctionInCallNodePath(
 
 // removes all functions that are not in the category from the callNodePath
 function _removeOtherCategoryFunctionsInNodePathWithFunction(
-  thread: Thread,
   category: IndexIntoCategoryList,
   callNodePath: CallNodePath,
   callNodeTable: CallNodeTable
