@@ -185,19 +185,19 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         data-column-index="1"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn type"
+        class="treeViewHeaderColumn treeViewFixedColumn name"
         style="width: 150px;"
       >
-        Type
+        Name
       </span>
       <span
         class="treeViewColumnDivider isResizable"
         data-column-index="2"
       />
       <span
-        class="treeViewHeaderColumn treeViewMainColumn name"
+        class="treeViewHeaderColumn treeViewMainColumn details"
       >
-        Description
+        Details
       </span>
     </div>
     <div
@@ -248,7 +248,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeViewColumnDivider"
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn type"
+                  class="treeViewRowColumn treeViewFixedColumn name"
                   style="width: 150px;"
                   title="UserTiming"
                 >
@@ -281,11 +281,11 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeViewColumnDivider"
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn type"
+                  class="treeViewRowColumn treeViewFixedColumn name"
                   style="width: 150px;"
-                  title="Paint"
+                  title="NotifyDidPaint"
                 >
-                  Paint
+                  NotifyDidPaint
                 </span>
                 <span
                   class="treeViewColumnDivider"
@@ -316,11 +316,11 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeViewColumnDivider"
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn type"
+                  class="treeViewRowColumn treeViewFixedColumn name"
                   style="width: 150px;"
-                  title="IPC"
+                  title="IPCOut"
                 >
-                  IPC
+                  IPCOut
                 </span>
                 <span
                   class="treeViewColumnDivider"
@@ -351,11 +351,11 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeViewColumnDivider"
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn type"
+                  class="treeViewRowColumn treeViewFixedColumn name"
                   style="width: 150px;"
-                  title="Text"
+                  title="setTimeout"
                 >
-                  Text
+                  setTimeout
                 </span>
                 <span
                   class="treeViewColumnDivider"
@@ -386,11 +386,11 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeViewColumnDivider"
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn type"
+                  class="treeViewRowColumn treeViewFixedColumn name"
                   style="width: 150px;"
-                  title="Text"
+                  title="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget magna sed magna vehicula congue id id nulla. Ut convallis, neque consequat aliquam egestas, dui urna interdum quam, id semper magna erat et nisi. Vivamus molestie quis ligula eget aliquam. Sed facilisis, turpis sed facilisis posuere, risus odio convallis velit, vitae vehicula justo risus at ipsum. Proin non porttitor neque. Vivamus fringilla ex nec iaculis cursus. Vestibulum suscipit mauris sem, vitae gravida ipsum fermentum id. Quisque pulvinar blandit ullamcorper. Donec id justo at metus scelerisque pulvinar. Proin suscipit suscipit nisi, quis tempus ipsum vulputate quis. Pellentesque sodales rutrum eros, eget pulvinar ante condimentum a. Donec accumsan, ante ut facilisis cursus, nibh quam congue eros, vitae placerat tortor magna vel lacus. Etiam odio diam, venenatis eu sollicitudin non, ultrices ut urna. Aliquam vehicula diam eu eros eleifend, ac vulputate purus faucibus."
                 >
-                  Text
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget magna sed magna vehicula congue id id nulla. Ut convallis, neque consequat aliquam egestas, dui urna interdum quam, id semper magna erat et nisi. Vivamus molestie quis ligula eget aliquam. Sed facilisis, turpis sed facilisis posuere, risus odio convallis velit, vitae vehicula justo risus at ipsum. Proin non porttitor neque. Vivamus fringilla ex nec iaculis cursus. Vestibulum suscipit mauris sem, vitae gravida ipsum fermentum id. Quisque pulvinar blandit ullamcorper. Donec id justo at metus scelerisque pulvinar. Proin suscipit suscipit nisi, quis tempus ipsum vulputate quis. Pellentesque sodales rutrum eros, eget pulvinar ante condimentum a. Donec accumsan, ante ut facilisis cursus, nibh quam congue eros, vitae placerat tortor magna vel lacus. Etiam odio diam, venenatis eu sollicitudin non, ultrices ut urna. Aliquam vehicula diam eu eros eleifend, ac vulputate purus faucibus.
                 </span>
                 <span
                   class="treeViewColumnDivider"
@@ -419,11 +419,11 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeViewColumnDivider"
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn type"
+                  class="treeViewRowColumn treeViewFixedColumn name"
                   style="width: 150px;"
-                  title="Log"
+                  title="LogMessages"
                 >
-                  Log
+                  LogMessages
                 </span>
                 <span
                   class="treeViewColumnDivider"
@@ -454,7 +454,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeViewColumnDivider"
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn type"
+                  class="treeViewRowColumn treeViewFixedColumn name"
                   style="width: 150px;"
                   title="FileIO"
                 >
@@ -493,7 +493,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="treeViewRowColumn treeViewMainColumn details"
                 >
                   foobar
                 </span>
@@ -514,10 +514,8 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  NotifyDidPaint
-                </span>
+                  class="treeViewRowColumn treeViewMainColumn details"
+                />
               </div>
               <div
                 aria-level="1"
@@ -535,9 +533,9 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="treeViewRowColumn treeViewMainColumn details"
                 >
-                  IPCOut — PContent::Msg_PreferenceUpdate — sent to 2222
+                  PContent::Msg_PreferenceUpdate — sent to 2222
                 </span>
               </div>
               <div
@@ -556,9 +554,9 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="treeViewRowColumn treeViewMainColumn details"
                 >
-                  setTimeout — 5.5
+                  5.5
                 </span>
               </div>
               <div
@@ -577,9 +575,9 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="treeViewRowColumn treeViewMainColumn details"
                 >
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget magna sed magna vehicula congue id id nulla. Ut convallis, neque consequat aliquam egestas, dui urna interdum quam, id semper magna erat et nisi. Vivamus molestie quis ligula eget aliquam. Sed facilisis, turpis sed facilisis posuere, risus odio convallis velit, vitae vehicula justo risus at ipsum. Proin non porttitor neque. Vivamus fringilla ex nec iaculis cursus. Vestibulum suscipit mauris sem, vitae gravida ipsum fermentum id. Q…
+                  5.5
                 </span>
               </div>
               <div
@@ -598,7 +596,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="treeViewRowColumn treeViewMainColumn details"
                 >
                   (nsJarProtocol) nsJARChannel::nsJARChannel [this=0x87f1ec80]
 
@@ -620,7 +618,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="treeViewRowColumn treeViewMainColumn details"
                 >
                   (PoisonIOInterposer) create/open — /foo/bar
                 </span>
