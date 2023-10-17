@@ -10,6 +10,7 @@ import type {
   IndexIntoStringTable,
   Tid,
   Pid,
+  GraphColor,
 } from './profile';
 import type { ObjectMap } from './utils';
 
@@ -89,23 +90,11 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
-export type MarkerGraphColor =
-  | 'blue'
-  | 'green'
-  | 'grey'
-  | 'ink'
-  | 'magenta'
-  | 'orange'
-  | 'purple'
-  | 'red'
-  | 'teal'
-  | 'yellow';
-
 export type MarkerGraphType = 'bar' | 'line' | 'line-filled';
 export type MarkerGraph = {|
   key: string,
   type: MarkerGraphType,
-  color?: MarkerGraphColor,
+  color?: GraphColor,
 |};
 
 export type MarkerSchema = {|

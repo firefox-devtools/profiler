@@ -7,6 +7,11 @@
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import {
+  getStrokeColor,
+  getFillColor,
+  getDotColor,
+} from 'firefox-profiler/profile-logic/graph-color';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
@@ -15,10 +20,10 @@ import {
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { GREY_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { TooltipTrackPower } from 'firefox-profiler/components/tooltip/TrackPower';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
+import { TRACK_POWER_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants';
 
 import type {
   CounterIndex,
@@ -126,8 +131,10 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = GREY_50;
-      ctx.fillStyle = '#73737388'; // Grey 50 with transparency.
+      ctx.strokeStyle = getStrokeColor(
+        counter.color || TRACK_POWER_DEFAULT_COLOR
+      );
+      ctx.fillStyle = getFillColor(counter.color || TRACK_POWER_DEFAULT_COLOR);
       ctx.beginPath();
 
       const getX = (i) =>
@@ -488,7 +495,18 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
 
-    return <div style={{ left, top }} className="timelineTrackPowerGraphDot" />;
+    return (
+      <div
+        style={{
+          left,
+          top,
+          backgroundColor: getDotColor(
+            counter.color || TRACK_POWER_DEFAULT_COLOR
+          ),
+        }}
+        className="timelineTrackPowerGraphDot"
+      />
+    );
   }
 
   render() {

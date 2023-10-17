@@ -40,7 +40,7 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
               <span
                 class="timelineRulerNotchText"
               >
-                0.000s
+                0s
               </span>
             </li>
             <li
@@ -50,7 +50,7 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
               <span
                 class="timelineRulerNotchText"
               >
-                0.002s
+                2ms
               </span>
             </li>
             <li
@@ -60,7 +60,7 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
               <span
                 class="timelineRulerNotchText"
               >
-                0.004s
+                4ms
               </span>
             </li>
             <li
@@ -70,7 +70,7 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
               <span
                 class="timelineRulerNotchText"
               >
-                0.006s
+                6ms
               </span>
             </li>
             <li
@@ -80,7 +80,7 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
               <span
                 class="timelineRulerNotchText"
               >
-                0.008s
+                8ms
               </span>
             </li>
             <li
@@ -90,7 +90,7 @@ exports[`TimelineSelection renders the vertical line indicating the time positio
               <span
                 class="timelineRulerNotchText"
               >
-                0.010s
+                10ms
               </span>
             </li>
           </ol>

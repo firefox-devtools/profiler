@@ -243,7 +243,7 @@ export function formatSeconds(
   const msPerSecond = 1000;
   const timeInSeconds = time / msPerSecond;
   let result = '';
-  if (precision !== 0 && precision < msPerSecond) {
+  if (precision < msPerSecond) {
     const exponent = Math.floor(Math.log10(precision / msPerSecond));
     const digits = Math.max(0, -exponent);
     result = timeInSeconds.toFixed(digits);
@@ -271,8 +271,8 @@ export function formatMinutes(
   const seconds = time % msPerMinute;
   return (
     formatNumber((time - seconds) / msPerMinute, significantDigits, 0) +
-    'min' +
-    (seconds > 0 && (maxFractionalDigits > 0 || precision < msPerMinute)
+    'm' +
+    ((seconds > 0 && maxFractionalDigits > 0) || precision < msPerMinute
       ? formatSeconds(seconds, significantDigits, 0, precision)
       : '')
   );
@@ -293,7 +293,7 @@ export function formatHours(
   return (
     formatNumber((time - minutes) / msPerHour, significantDigits, 0) +
     'h' +
-    (minutes > 0 && (maxFractionalDigits > 0 || precision < msPerHour)
+    ((minutes > 0 && maxFractionalDigits > 0) || precision < msPerHour
       ? formatMinutes(minutes, significantDigits, 0, precision)
       : '')
   );
@@ -314,7 +314,7 @@ export function formatDays(
   return (
     formatNumber((time - hours) / msPerDay, significantDigits, 0) +
     'd' +
-    (hours > 0 && (maxFractionalDigits > 0 || precision < msPerDay)
+    ((hours > 0 && maxFractionalDigits > 0) || precision < msPerDay
       ? formatHours(hours, significantDigits, 0, precision)
       : '')
   );
@@ -330,7 +330,11 @@ export function formatTimestamp(
   if (precision !== Infinity) {
     // Round the values to display nicer numbers when the extra precision
     // isn't useful. (eg. show 3h52min10s instead of 3h52min14s)
-    precision = 10 ** Math.floor(Math.log10(precision));
+    // Only do this for values < 10s as after that we use time units that are
+    // not decimal.
+    if (precision < 10000) {
+      precision = 10 ** Math.floor(Math.log10(precision));
+    }
     if (time > precision) {
       time = Math.round(time / precision) * precision;
     }
