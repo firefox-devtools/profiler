@@ -99,10 +99,6 @@ class MarkerTree {
     return 0;
   }
 
-  hasSameNodeIds(tree) {
-    return this._markerIndexes === tree._markerIndexes;
-  }
-
   getDisplayData(markerIndex: MarkerIndex): MarkerDisplayData {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {

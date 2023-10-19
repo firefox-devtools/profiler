@@ -177,10 +177,6 @@ export class ZipFileTree {
     return this._zipFileTable.depth[zipTableIndex];
   }
 
-  hasSameNodeIds(tree: ZipFileTree) {
-    return this._zipFileTable === tree._zipFileTable;
-  }
-
   getDisplayData(zipTableIndex: IndexIntoZipFileTable): ZipDisplayData {
     let displayData = this._displayDataByIndex.get(zipTableIndex);
     if (displayData === undefined) {
