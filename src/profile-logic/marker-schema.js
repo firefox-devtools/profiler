@@ -53,8 +53,7 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
   {
     name: 'IPC',
     tooltipLabel: 'IPC — {marker.data.niceDirection}',
-    tableLabel:
-      '{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}',
+    tableLabel: '{marker.data.messageType} — {marker.data.niceDirection}',
     chartLabel: '{marker.data.messageType}',
     display: ['marker-chart', 'marker-table', 'timeline-ipc'],
     data: [
@@ -286,7 +285,7 @@ export function parseLabel(
   };
 }
 
-type LabelKey = 'tooltipLabel' | 'tableLabel' | 'chartLabel';
+type LabelKey = 'tooltipLabel' | 'tableLabel' | 'chartLabel' | 'copyLabel';
 
 // If no label making rule, these functions provide the fallbacks for how
 // to label things. It also allows for a place to do some custom handling
@@ -297,7 +296,7 @@ const fallbacks: { [LabelKey]: (Marker) => string } = {
   chartLabel: (_marker) => '',
 
   tableLabel: (marker: Marker) => {
-    let description = marker.name;
+    let description = '';
 
     if (marker.data) {
       const data = marker.data;
@@ -318,6 +317,8 @@ const fallbacks: { [LabelKey]: (Marker) => string } = {
     }
     return description;
   },
+
+  copyLabel: (marker) => marker.name,
 };
 
 /**
@@ -339,8 +340,27 @@ export function getLabelGetter(
 ): (MarkerIndex) => string {
   // Build up a list of label functions, that are tied to the schema name.
   const labelFns: Map<string, (Marker) => string> = new Map();
+  const markerNamePrefixRe = /^{marker.name}\s[-—]\s/;
   for (const schema of markerSchemaList) {
-    const labelString = schema[labelKey];
+    let labelString;
+    if (labelKey === 'copyLabel') {
+      // When copying a marker description, use the marker table label.
+      labelString = schema.tableLabel;
+      if (labelString && !markerNamePrefixRe.test(labelString)) {
+        // Ensure the label starts with the marker name.
+        labelString = '{marker.name} — ' + labelString;
+      }
+    } else {
+      labelString = schema[labelKey];
+      // The marker table used to not show the marker name, so all marker
+      // schemas included the marker name as the first part of their table
+      // label. Now that the marker table has a name column, we can remove
+      // this prefix to avoid duplication.
+      if (labelString && labelKey === 'tableLabel') {
+        labelString = labelString.replace(markerNamePrefixRe, '');
+      }
+    }
+
     if (labelString) {
       labelFns.set(
         schema.name,
@@ -354,7 +374,7 @@ export function getLabelGetter(
     'Unable to find a fallback label function.'
   );
 
-  // Cache the labels as they are creaetd.
+  // Cache the labels as they are created.
   const markerIndexToLabel: Map<MarkerIndex, string> = new Map();
 
   return (markerIndex: MarkerIndex) => {
