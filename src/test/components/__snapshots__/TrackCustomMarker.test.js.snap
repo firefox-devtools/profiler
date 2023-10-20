@@ -104,12 +104,12 @@ Array [
   Array [
     "lineTo",
     20,
-    21,
+    20,
   ],
   Array [
     "lineTo",
     30,
-    21,
+    20,
   ],
   Array [
     "lineTo",
@@ -124,12 +124,12 @@ Array [
   Array [
     "lineTo",
     40,
-    18,
+    17,
   ],
   Array [
     "lineTo",
     50,
-    18,
+    17,
   ],
   Array [
     "lineTo",
@@ -144,12 +144,12 @@ Array [
   Array [
     "lineTo",
     60,
-    15,
+    14,
   ],
   Array [
     "lineTo",
     70,
-    15,
+    14,
   ],
   Array [
     "lineTo",
@@ -171,13 +171,6 @@ Array [
   Array [
     "set fillStyle",
     "#30e60b",
-  ],
-  Array [
-    "fillRect",
-    0,
-    24,
-    10,
-    1,
   ],
   Array [
     "fillRect",

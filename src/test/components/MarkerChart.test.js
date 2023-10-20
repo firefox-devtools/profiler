@@ -481,7 +481,7 @@ describe('MarkerChart', function () {
       expect(getContextMenu()).toMatchSnapshot();
 
       clickOnMenuItem('Copy description');
-      expect(copy).toHaveBeenLastCalledWith('UserTiming A');
+      expect(copy).toHaveBeenLastCalledWith('UserTiming — UserTiming A');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
       jest.runAllTimers();
@@ -504,7 +504,7 @@ describe('MarkerChart', function () {
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
       clickOnMenuItem('Copy description');
-      expect(copy).toHaveBeenLastCalledWith('UserTiming B');
+      expect(copy).toHaveBeenLastCalledWith('UserTiming — UserTiming B');
     });
 
     it('displays and still highlights other markers when hovering them', () => {
