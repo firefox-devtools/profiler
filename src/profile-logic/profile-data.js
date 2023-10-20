@@ -557,30 +557,6 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-/**
- * Compute the descendants of a call node. Each item of the returned array is
- * either 0 or 1; 1 means "this node is a descendant of subtreeRoot".
- */
-export function computeDescendantCallNodes(
-  callNodeTable: CallNodeTable,
-  subtreeRoot: IndexIntoCallNodeTable
-): Uint8Array {
-  const callNodeCount = callNodeTable.length;
-  const callNodePrefixes = callNodeTable.prefix;
-  const result = new Uint8Array(callNodeCount);
-  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
-    if (callNodeIndex === subtreeRoot) {
-      result[callNodeIndex] = 1;
-    } else {
-      const callNodePrefix = callNodePrefixes[callNodeIndex];
-      const isDescendant =
-        callNodePrefix !== -1 && result[callNodePrefix] === 1;
-      result[callNodeIndex] = isDescendant ? 1 : 0;
-    }
-  }
-  return result;
-}
-
 export type JsImplementation =
   | 'interpreter'
   | 'blinterp'
@@ -850,12 +826,8 @@ export function getTimingsForCallNodeIndex(
     return { forPath: pathTimings, rootTime };
   }
 
-  // Do one pass over the call node table to compute which call nodes are
-  // descendants of needleNodeIndex.
-  const isDescendantOfNeedle = computeDescendantCallNodes(
-    callNodeTable,
-    needleNodeIndex
-  );
+  const needleDescendantsEndIndex =
+    callNodeTable.nextAfterDescendants[needleNodeIndex];
 
   const needleNodeIsRootOfInvertedTree =
     isInvertedTree && callNodeTable.prefix[needleNodeIndex] === -1;
@@ -883,7 +855,10 @@ export function getTimingsForCallNodeIndex(
       }
     }
 
-    if (isDescendantOfNeedle[thisNodeIndex] === 1) {
+    if (
+      thisNodeIndex >= needleNodeIndex &&
+      thisNodeIndex < needleDescendantsEndIndex
+    ) {
       // One of the parents is the exact passed path.
       accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
 
