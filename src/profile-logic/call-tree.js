@@ -114,7 +114,12 @@ export class CallTree {
     if (callNodeIndex === -1) {
       return this._callNodeTable.length !== 0 ? 0 : -1;
     }
-    return this._callNodeTable.firstChild[callNodeIndex];
+    const nextAfterDescendants =
+      this._callNodeTable.nextAfterDescendants[callNodeIndex];
+    if (nextAfterDescendants !== callNodeIndex + 1) {
+      return callNodeIndex + 1;
+    }
+    return -1;
   }
 
   getRoots() {

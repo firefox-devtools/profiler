@@ -51,14 +51,60 @@ export type IndexIntoCallNodeTable = number;
  *
  * For a detailed explanation of callNodes see `docs-developer/call-tree.md` and
  * `docs-developer/call-nodes-in-cpp.md`.
+ *
+ * # Call node ordering
+ *
+ * Call nodes are ordered in depth-first traversal order. This makes it super fast
+ * to check whether node A is a descendant of node B, because all subtrees are
+ * a contiguous range of call node indexes.
+ *
+ * More details about the ordering:
+ *
+ *  - The node at index 0 is the first root node.
+ *  - If a node A has children, then A + 1 is its first child.
+ *  - If a node A has no children, then A + 1 is its next sibling, or the closest
+ *    next sibling of an ancestor node if A doesn't have a next sibling.
+ *  - For every node A, there's a single "index range" which contains this node
+ *    and all its descendants: [A, callNodeTable.nextAfterDescendants[A]).
+ *  - This "tree of ranges" is well-nested.
+ *  - The ordering of siblings doesn't have any meaning, i.e. it doesn't matter
+ *    if a node is the first or the third child of its parent (they're not
+ *    ordered by func or anything).
+ *
+ * Example:
+ *
+ * ```
+ *  - 0 funcG
+ *    - 1 funcH
+ *      - 2 funcI
+ *      - 3 funcG
+ *    - 4 funcJ
+ *    - 5 funcI
+ *  - 6 funcK
+ *    - 7 funcG
+ *      - 8 funcL
+ *  - 9 funcH
+ * ```
+ *
+ * In this example, the index range of the subtree of node 0 is [0, 6).
+ * The index range of the subtree of node 3 is [3, 4), i.e. the half-open range
+ * which only contains node 3.
  */
 export type CallNodeTable = {
   // The index of the parent call node, or -1 for root nodes.
   prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
-  // The index of this node's first child, or -1 if this node has no children.
-  firstChild: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+
   // The index of this node's next sibling, or -1 if this node is the last child / last root.
   nextSibling: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+
+  // The index after this node's last descendant. If this node has a next sibling,
+  // nextAfterDescendants is equal to nextSibling. Otherwise, this is the index
+  // of the next sibling of the closest ancestor node which has a next sibling.
+  // The last node has nextAfterDescendants set to callNodeTable.length.
+  //
+  // The nodes in the range range [A, nextAfterDescendants[A]) form A's subtree.
+  nextAfterDescendants: Uint32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable
+
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory

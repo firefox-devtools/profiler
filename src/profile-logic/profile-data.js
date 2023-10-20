@@ -275,8 +275,8 @@ function _computeTreeOrderPermutationAndExtraColumns(
   newIndexToOldIndex: Uint32Array,
   // The new depth column for the sorted table
   depthSorted: Array<number>,
-  // The new firstChild column for the sorted table
-  firstChildSorted: Int32Array,
+  // The new nextAfterDescendants column for the sorted table
+  nextAfterDescendants: Uint32Array,
 |} {
   if (nextSibling.length === 0) {
     throw new Error('Empty call node table');
@@ -284,7 +284,7 @@ function _computeTreeOrderPermutationAndExtraColumns(
   const oldIndexToNewIndex = new Uint32Array(nextSibling.length);
   const newIndexToOldIndex = new Uint32Array(nextSibling.length);
   const depthSorted = new Array(nextSibling.length);
-  const firstChildSorted = new Int32Array(nextSibling.length);
+  const nextAfterDescendants = new Uint32Array(nextSibling.length);
   let nextNewIndex = 0;
   let currentDepth = 0;
   const currentStackOld = [];
@@ -310,7 +310,7 @@ function _computeTreeOrderPermutationAndExtraColumns(
     const firstChildIndex = firstChild[currentOldIndex];
     if (firstChildIndex !== -1) {
       // We have children. Our first child is the next node in DFS order.
-      firstChildSorted[newIndex] = nextNewIndex;
+      // Our nextAfterDescendants value will be set later, when we walk back up.
       currentStackOld[currentDepth] = currentOldIndex;
       currentStackNew[currentDepth] = newIndex;
       currentDepth++;
@@ -319,11 +319,12 @@ function _computeTreeOrderPermutationAndExtraColumns(
     }
 
     // We have no children.
-    firstChildSorted[newIndex] = -1;
+    nextAfterDescendants[newIndex] = newIndex + 1;
     let nextSiblingIndex = nextSibling[currentOldIndex];
     while (nextSiblingIndex === -1 && currentDepth !== 0) {
       currentDepth--;
       nextSiblingIndex = nextSibling[currentStackOld[currentDepth]];
+      nextAfterDescendants[currentStackNew[currentDepth]] = newIndex + 1;
     }
     if (nextSiblingIndex !== -1) {
       // We've found the next child (of this node or of an ancestor). Advance to it.
@@ -337,7 +338,7 @@ function _computeTreeOrderPermutationAndExtraColumns(
     oldIndexToNewIndex,
     newIndexToOldIndex,
     depthSorted,
-    firstChildSorted,
+    nextAfterDescendants,
   };
 }
 
@@ -376,7 +377,7 @@ function _createCallNodeInfoFromUnorderedComponents(
       oldIndexToNewIndex,
       newIndexToOldIndex,
       depthSorted,
-      firstChildSorted,
+      nextAfterDescendants,
     } = _computeTreeOrderPermutationAndExtraColumns(firstChild, nextSibling);
 
     // Create typed arrays for the columns, and apply the reordering.
@@ -408,7 +409,7 @@ function _createCallNodeInfoFromUnorderedComponents(
 
     const callNodeTable: CallNodeTable = {
       prefix: prefixSorted,
-      firstChild: firstChildSorted,
+      nextAfterDescendants,
       nextSibling: nextSiblingSorted,
       func: funcSorted,
       category: categorySorted,
