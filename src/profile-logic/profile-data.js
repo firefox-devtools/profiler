@@ -284,7 +284,7 @@ function _createCallNodeInfoFromUnorderedComponents(
       oldIndexToNewIndex,
       newIndexToOldIndex,
       depthSorted,
-      firstChildSorted,
+      nextAfterDescendants,
     } = (function computeTreeOrderPermutationAndExtraColumns(
       nextSibling,
       firstChild
@@ -295,7 +295,7 @@ function _createCallNodeInfoFromUnorderedComponents(
       const oldIndexToNewIndex = new Uint32Array(nextSibling.length);
       const newIndexToOldIndex = new Uint32Array(nextSibling.length);
       const depthSorted = new Array(nextSibling.length);
-      const firstChildSorted = new Int32Array(nextSibling.length);
+      const nextAfterDescendants = new Int32Array(nextSibling.length);
       let nextNewIndex = 0;
       let currentDepth = 0;
       const currentStackOld = [];
@@ -308,18 +308,18 @@ function _createCallNodeInfoFromUnorderedComponents(
         depthSorted[newIndex] = currentDepth;
         const firstChildIndex = firstChild[currentOldIndex];
         if (firstChildIndex !== -1) {
-          firstChildSorted[newIndex] = nextNewIndex;
           currentStackOld[currentDepth] = currentOldIndex;
           currentStackNew[currentDepth] = newIndex;
           currentDepth++;
           currentOldIndex = firstChildIndex;
           continue;
         }
-        firstChildSorted[newIndex] = -1;
+        nextAfterDescendants[newIndex] = newIndex + 1;
         let nextSiblingIndex = nextSibling[currentOldIndex];
         while (nextSiblingIndex === -1 && currentDepth !== 0) {
           currentDepth--;
           nextSiblingIndex = nextSibling[currentStackOld[currentDepth]];
+          nextAfterDescendants[currentStackNew[currentDepth]] = newIndex + 1;
         }
         if (nextSiblingIndex !== -1) {
           currentOldIndex = nextSiblingIndex;
@@ -331,7 +331,7 @@ function _createCallNodeInfoFromUnorderedComponents(
         oldIndexToNewIndex,
         newIndexToOldIndex,
         depthSorted,
-        firstChildSorted,
+        nextAfterDescendants,
       };
     })(nextSibling, firstChild);
 
@@ -363,7 +363,7 @@ function _createCallNodeInfoFromUnorderedComponents(
 
     const callNodeTable: CallNodeTable = {
       prefix: prefixSorted,
-      firstChild: firstChildSorted,
+      nextAfterDescendants,
       nextSibling: nextSiblingSorted,
       func: funcSorted,
       category: categorySorted,
