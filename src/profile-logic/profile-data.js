@@ -435,129 +435,14 @@ function getSamplesSelectedStatesForNoSelection(
 }
 
 /**
- * Compute a Map<IndexIntoCallNodeTable, CallNodeFlag>, represented as a
- * Uint8Array, which describes the relation of each call node with respect to
- * the selected call node:
- *
- * ```typescript
- * const enum CallNodeFlag {
- *   Unvisited = 0,
- *   InsideSelectedSubtree = 1,
- *   AncestorOfSelectedNode = 2,
- *   BeforeSelected = 3,
- *   AfterSelected = 4,
- * }
- * ```
- *
- * The ordering BeforeSelected / AfterSelected is determined in the same way
- * as in the function compareCallNodes in getTreeOrderComparator: Any nodes that
- * would be visited before the selected subtree in a depth-first traversal are
- * "before", and sibling nodes are ordered by call node index.
- *
- * Example:
- *
- * Here's an example tree where each node is represented as [flag], [callNodeIndex].
- * The tree nodes are written down in depth-first traversal order, but their call
- * node indexes are not in that order. The only guaranteed relationship between
- * call node indexes is, as usual, that every node has a higher index than its
- * prefix node.
- *
- * In this example, call node 14 is the selected call node. All descendants of
- * that node (including the selected node itself) are InsideSelectedSubtree.
- *
- * ```
- * BeforeSelected, 0
- *   BeforeSelected, 1
- *     BeforeSelected, 3
- *   BeforeSelected, 4
- * AncestorOfSelectedNode, 2
- *   BeforeSelected, 6
- *     BeforeSelected, 10
- *     BeforeSelected, 11
- *       BeforeSelected, 12
- *   AncestorOfSelectedNode, 7
- *     BeforeSelected, 13
- *       BeforeSelected, 22
- *     BeforeSelected, 23
- *     InsideSelectedSubtree, 14
- *       InsideSelectedSubtree, 15
- *         InsideSelectedSubtree, 17
- *           InsideSelectedSubtree, 18
- *         InsideSelectedSubtree, 20
- *       InsideSelectedSubtree, 16
- *         InsideSelectedSubtree, 19
- *         InsideSelectedSubtree, 27
- *     AfterSelected, 21
- *       AfterSelected, 24
- *     AfterSelected, 25
- *   AfterSelected, 8
- *     AfterSelected, 9
- * AfterSelected, 5
- *   AfterSelected, 26
- * ```
- *
- * The activity graph treats AncestorOfSelectedNode and BeforeSelected the
- * same; both are "before the selection". They just have two different flag values
- * here because the loop in this function needs to treat them differently.
- */
-function getCallNodeSelectedStates(
-  callNodeTable: CallNodeTable,
-  selectedCallNodeIndex: IndexIntoCallNodeTable
-): Uint8Array {
-  // Precompute an array containing the call node indexes for the selected call
-  // node and its ancestors.
-  const selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
-  const selectionAncestorAtDepth: IndexIntoCallNodeTable[] = new Array(
-    selectedCallNodeDepth
-  );
-  for (
-    let callNodeIndex = selectedCallNodeIndex, depth = selectedCallNodeDepth;
-    depth >= 0;
-    depth--, callNodeIndex = callNodeTable.prefix[callNodeIndex]
-  ) {
-    selectionAncestorAtDepth[depth] = callNodeIndex;
-  }
-
-  // Do a single pass over the call nodes and compute each node's selected state.
-  const callNodeCount = callNodeTable.length;
-  const callNodePrefixes = callNodeTable.prefix;
-  const callNodeDepths = callNodeTable.depth;
-  const callNodeSelectedStates = new Uint8Array(callNodeCount);
-  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
-    const prefix = callNodePrefixes[callNodeIndex];
-    let callNodeFlag = prefix !== -1 ? callNodeSelectedStates[prefix] : 2;
-    if (callNodeFlag === 2 /* CallNodeFlag.AncestorOfSelectedNode */) {
-      const depth = callNodeDepths[callNodeIndex];
-      // assert(depth <= selectedCallNodeDepth);
-      const selectionAncestorAtThisDepth = selectionAncestorAtDepth[depth];
-      if (callNodeIndex === selectionAncestorAtThisDepth) {
-        if (depth === selectedCallNodeDepth) {
-          callNodeFlag = 1 /* CallNodeFlag.InsideSelectedSubtree */;
-        } else {
-          callNodeFlag = 2 /* CallNodeFlag.AncestorOfSelectedNode */;
-        }
-      } else if (callNodeIndex < selectionAncestorAtThisDepth) {
-        callNodeFlag = 3 /* CallNodeFlag.BeforeSelected */;
-      } else {
-        callNodeFlag = 4 /* CallNodeFlag.AfterSelected */;
-      }
-    } else {
-      // All other flags are inherited. For example, if the parent is
-      // BeforeSelected, then so is its entire subtree. Do nothing.
-    }
-    callNodeSelectedStates[callNodeIndex] = callNodeFlag;
-  }
-  return callNodeSelectedStates;
-}
-
-/**
  * Given the call node for each sample and the call node selected states,
  * compute each sample's selected state.
  */
 function mapCallNodeSelectedStatesToSamples(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
-  callNodeSelectedStates: Uint8Array
+  selectedCallNodeIndex: IndexIntoCallNodeTable,
+  selectedCallNodeDescendantsEndIndex: IndexIntoCallNodeTable
 ): SelectedState[] {
   const sampleCount = sampleCallNodes.length;
   const samplesSelectedStates = new Array(sampleCount);
@@ -565,21 +450,12 @@ function mapCallNodeSelectedStatesToSamples(
     let sampleSelectedState: SelectedState = 'SELECTED';
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
-      switch (callNodeSelectedStates[callNodeIndex]) {
-        case 1 /* CallNodeFlags.InsideSelectedSubtree */:
-          sampleSelectedState = 'SELECTED';
-          break;
-        case 2 /* CallNodeFlags.AncestorOfSelectedNode */:
-        case 3 /* CallNodeFlags.BeforeSelected */:
-          sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
-          break;
-        case 4 /* CallNodeFlags.AfterSelected */:
-          sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
-          break;
-        default:
-          throw new Error(
-            `Unexpected value ${callNodeSelectedStates[callNodeIndex]} at callNodeSelectedStates[${callNodeIndex}]`
-          );
+      if (callNodeIndex < selectedCallNodeIndex) {
+        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+      } else if (callNodeIndex < selectedCallNodeDescendantsEndIndex) {
+        sampleSelectedState = 'SELECTED';
+      } else {
+        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
       }
     } else {
       // This sample was filtered out.
@@ -615,14 +491,11 @@ export function getSamplesSelectedStates(
     );
   }
 
-  const callNodeSelectedStates = getCallNodeSelectedStates(
-    callNodeTable,
-    selectedCallNodeIndex
-  );
   return mapCallNodeSelectedStatesToSamples(
     sampleCallNodes,
     activeTabFilteredCallNodes,
-    callNodeSelectedStates
+    selectedCallNodeIndex,
+    callNodeTable.nextAfterDescendants[selectedCallNodeIndex]
   );
 }
 
