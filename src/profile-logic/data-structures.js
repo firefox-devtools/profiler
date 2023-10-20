@@ -422,7 +422,7 @@ export function getEmptyCallNodeTable(): CallNodeTable {
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
     prefix: new Int32Array(0),
-    firstChild: new Int32Array(0),
+    nextAfterDescendants: new Uint32Array(0),
     nextSibling: new Int32Array(0),
     func: new Int32Array(0),
     category: new Int32Array(0),
