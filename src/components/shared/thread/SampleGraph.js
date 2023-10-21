@@ -20,7 +20,6 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  CallNodeInfo,
   IndexIntoCallNodeTable,
   SelectedState,
 } from 'firefox-profiler/types';
@@ -34,7 +33,6 @@ type Props = {|
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
@@ -96,7 +94,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
       interval,
       rangeStart,
       rangeEnd,
-      callNodeInfo,
       samplesSelectedStates,
       sampleCallNodes,
       categories,
@@ -110,13 +107,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     canvas.width = Math.round(width * devicePixelRatio);
     canvas.height = Math.round(height * devicePixelRatio);
     const ctx = canvas.getContext('2d');
-    let maxDepth = 0;
-    const { callNodeTable } = callNodeInfo;
-    for (let i = 0; i < callNodeTable.depth.length; i++) {
-      if (callNodeTable.depth[i] > maxDepth) {
-        maxDepth = callNodeTable.depth[i];
-      }
-    }
     const range = [rangeStart, rangeEnd];
     const rangeLength = range[1] - range[0];
     const xPixelsPerMs = canvas.width / rangeLength;

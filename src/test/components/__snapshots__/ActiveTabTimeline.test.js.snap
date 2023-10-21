@@ -357,7 +357,7 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
         <span
           class="timelineRulerNotchText"
         >
-          0.0000s
+          0s
         </span>
       </li>
       <li
@@ -367,7 +367,7 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
         <span
           class="timelineRulerNotchText"
         >
-          0.0005s
+          500μs
         </span>
       </li>
       <li
@@ -377,7 +377,7 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
         <span
           class="timelineRulerNotchText"
         >
-          0.0010s
+          1ms
         </span>
       </li>
     </ol>
