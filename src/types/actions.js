@@ -16,7 +16,7 @@ import type {
 } from './profile';
 import type {
   CallNodePath,
-  CallNodeTable,
+  CallNodeInfo,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
@@ -478,7 +478,7 @@ type UrlStateAction =
       +threadsKey: ThreadsKey,
       +transform: Transform,
       +transformedThread: Thread,
-      +callNodeTable: CallNodeTable,
+      +callNodeInfo: CallNodeInfo,
     |}
   | {|
       +type: 'POP_TRANSFORMS_FROM_STACK',

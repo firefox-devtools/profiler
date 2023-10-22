@@ -12,7 +12,6 @@ import {
   updateThreadStacks,
   updateThreadStacksByGeneratingNewStackColumns,
   getMapStackUpdater,
-  getCallNodeIndexFromParentAndFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
@@ -32,6 +31,7 @@ import type {
   CallNodePath,
   CallNodeAndCategoryPath,
   CallNodeTable,
+  CallNodeInfo,
   StackType,
   ImplementationFilter,
   Transform,
@@ -493,7 +493,7 @@ export function applyTransformToCallNodePath(
   callNodePath: CallNodePath,
   transform: Transform,
   transformedThread: Thread,
-  callNodeTable: CallNodeTable
+  callNodeInfo: CallNodeInfo
 ): CallNodePath {
   switch (transform.type) {
     case 'focus-subtree':
@@ -507,7 +507,7 @@ export function applyTransformToCallNodePath(
       return _removeOtherCategoryFunctionsInNodePathWithFunction(
         transform.category,
         callNodePath,
-        callNodeTable
+        callNodeInfo
       );
     case 'merge-call-node':
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
@@ -596,16 +596,17 @@ function _dropFunctionInCallNodePath(
 function _removeOtherCategoryFunctionsInNodePathWithFunction(
   category: IndexIntoCategoryList,
   callNodePath: CallNodePath,
-  callNodeTable: CallNodeTable
+  callNodeInfo: CallNodeInfo
 ): CallNodePath {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+
   const newCallNodePath = [];
 
   let prefix = -1;
   for (const funcIndex of callNodePath) {
-    const callNodeIndex = getCallNodeIndexFromParentAndFunc(
+    const callNodeIndex = callNodeInfo.getCallNodeIndexFromParentAndFunc(
       prefix,
-      funcIndex,
-      callNodeTable
+      funcIndex
     );
     if (callNodeIndex === null) {
       throw new Error(

@@ -48,7 +48,6 @@ import {
 } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 import {
-  getCallNodeIndexFromPath,
   processCounter,
   type BreakdownByCategory,
 } from '../../profile-logic/profile-data';
@@ -3286,8 +3285,7 @@ describe('traced timing', function () {
       );
     }
 
-    const { callNodeTable } =
-      selectedThreadSelectors.getCallNodeInfo(getState());
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
 
     const { running, self } = ensureExists(
       selectedThreadSelectors.getTracedTiming(getState()),
@@ -3297,7 +3295,7 @@ describe('traced timing', function () {
     return {
       funcNames: funcNamesDictPerThread[0],
       getCallNode: (...callNodePath) =>
-        ensureExists(getCallNodeIndexFromPath(callNodePath, callNodeTable)),
+        ensureExists(callNodeInfo.getCallNodeIndexFromPath(callNodePath)),
       running,
       self,
       profile,
