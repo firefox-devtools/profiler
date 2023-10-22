@@ -126,7 +126,7 @@ export function callTreeFromProfile(
   );
   const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
     thread.samples,
-    getSampleIndexToCallNodeIndex(thread.samples.stack, callNodeInfo.stackIndexToCallNodeIndex),
+    getSampleIndexToCallNodeIndex(thread.samples.stack, callNodeInfo.getStackIndexToCallNodeIndex()),
     callNodeInfo,
     false
   );

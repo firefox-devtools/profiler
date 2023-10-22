@@ -14,7 +14,6 @@ import { computeOrderedCallNodeRows } from '../../profile-logic/flame-graph';
 import {
   getCallNodeInfo,
   getInvertedCallNodeInfo,
-  getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
   filterThreadSamplesToRange,
   getSampleIndexToCallNodeIndex,
@@ -75,7 +74,7 @@ describe('unfiltered call tree', function () {
           thread.samples,
           getSampleIndexToCallNodeIndex(
             thread.samples.stack,
-            callNodeInfo.stackIndexToCallNodeIndex
+            callNodeInfo.getStackIndexToCallNodeIndex()
           ),
           callNodeInfo,
           false
@@ -109,26 +108,26 @@ describe('unfiltered call tree', function () {
         profile.meta.categories,
         'Expected to find categories'
       ).findIndex((c) => c.name === 'Other');
-      const { callNodeTable } = getCallNodeInfo(
+      const callNodeInfo = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
         thread.funcTable,
         defaultCategory
       );
-      const cnZ = getCallNodeIndexFromPath([Z], callNodeTable);
-      const cnZX = getCallNodeIndexFromPath([Z, X], callNodeTable);
-      const cnZXY = getCallNodeIndexFromPath([Z, X, Y], callNodeTable);
-      const cnZXW = getCallNodeIndexFromPath([Z, X, W], callNodeTable);
-      const cnG = getCallNodeIndexFromPath([G], callNodeTable);
-      const cnGH = getCallNodeIndexFromPath([G, H], callNodeTable);
-      const cnGHI = getCallNodeIndexFromPath([G, H, I], callNodeTable);
-      const cnGHJ = getCallNodeIndexFromPath([G, H, J], callNodeTable);
-      const cnK = getCallNodeIndexFromPath([K], callNodeTable);
-      const cnKM = getCallNodeIndexFromPath([K, M], callNodeTable);
-      const cnKN = getCallNodeIndexFromPath([K, N], callNodeTable);
+      const cnZ = callNodeInfo.getCallNodeIndexFromPath([Z]);
+      const cnZX = callNodeInfo.getCallNodeIndexFromPath([Z, X]);
+      const cnZXY = callNodeInfo.getCallNodeIndexFromPath([Z, X, Y]);
+      const cnZXW = callNodeInfo.getCallNodeIndexFromPath([Z, X, W]);
+      const cnG = callNodeInfo.getCallNodeIndexFromPath([G]);
+      const cnGH = callNodeInfo.getCallNodeIndexFromPath([G, H]);
+      const cnGHI = callNodeInfo.getCallNodeIndexFromPath([G, H, I]);
+      const cnGHJ = callNodeInfo.getCallNodeIndexFromPath([G, H, J]);
+      const cnK = callNodeInfo.getCallNodeIndexFromPath([K]);
+      const cnKM = callNodeInfo.getCallNodeIndexFromPath([K, M]);
+      const cnKN = callNodeInfo.getCallNodeIndexFromPath([K, N]);
 
       const rows = computeOrderedCallNodeRows(
-        callNodeTable,
+        callNodeInfo.getCallNodeTable(),
         thread.funcTable,
         thread.stringTable
       );
@@ -372,7 +371,7 @@ describe('unfiltered call tree', function () {
       profile.meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const { callNodeTable } = getCallNodeInfo(
+    const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable,
@@ -382,9 +381,7 @@ describe('unfiltered call tree', function () {
     // Helper to make the assertions a little less verbose.
     function checkStack(callNodePath, index, name) {
       it(`finds stack that ends in ${name}`, function () {
-        expect(getCallNodeIndexFromPath(callNodePath, callNodeTable)).toBe(
-          index
-        );
+        expect(callNodeInfo.getCallNodeIndexFromPath(callNodePath)).toBe(index);
       });
     }
 
@@ -401,9 +398,9 @@ describe('unfiltered call tree', function () {
     checkStack([A, B, H, I], I, 'I');
 
     it(`doesn't find a non-existent stack`, function () {
-      expect(
-        getCallNodeIndexFromPath([A, B, C, D, E, F, G], callNodeTable)
-      ).toBe(null);
+      expect(callNodeInfo.getCallNodeIndexFromPath([A, B, C, D, E, F, G])).toBe(
+        null
+      );
     });
   });
 });
@@ -439,7 +436,7 @@ describe('inverted call tree', function () {
       thread.samples,
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
-        callNodeInfo.stackIndexToCallNodeIndex
+        callNodeInfo.getStackIndexToCallNodeIndex()
       ),
       callNodeInfo,
       false
@@ -477,7 +474,7 @@ describe('inverted call tree', function () {
       thread.samples,
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
-        invertedCallNodeInfo.stackIndexToCallNodeIndex
+        invertedCallNodeInfo.getStackIndexToCallNodeIndex()
       ),
       invertedCallNodeInfo,
       true
@@ -614,7 +611,7 @@ describe('diffing trees', function () {
       thread.samples,
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
-        callNodeInfo.stackIndexToCallNodeIndex
+        callNodeInfo.getStackIndexToCallNodeIndex()
       ),
       callNodeInfo,
       false

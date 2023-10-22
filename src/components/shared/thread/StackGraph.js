@@ -43,7 +43,7 @@ export class ThreadStackGraph extends PureComponent<Props> {
     yPixelsPerHeight,
   }: HeightFunctionParams): number => {
     const { callNodeInfo } = this.props;
-    const { callNodeTable } = callNodeInfo;
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     return callNodeTable.depth[callNodeIndex] * yPixelsPerHeight;
   };
@@ -62,7 +62,7 @@ export class ThreadStackGraph extends PureComponent<Props> {
       trackName,
       onSampleClick,
     } = this.props;
-    const { callNodeTable } = callNodeInfo;
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     let maxDepth = 0;
     for (let i = 0; i < callNodeTable.depth.length; i++) {

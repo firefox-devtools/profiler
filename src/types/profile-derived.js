@@ -68,21 +68,32 @@ export type CallNodeTable = {
   length: number,
 };
 
-/**
- * Both the callNodeTable and a map that converts an IndexIntoStackTable
- * into an IndexIntoCallNodeTable.
- */
-export type CallNodeInfo = {
-  callNodeTable: CallNodeTable,
-  // IndexIntoStackTable -> IndexIntoCallNodeTable | -1
-  // If this CallNodeInfo is inverted, this maps the uninverted stack to
-  // the inverted call node. For stacks which aren't used as self stacks, this
-  // is -1. In the non-inverted case, all entries are >= 0.
-  stackIndexToCallNodeIndex: Int32Array,
-  // Whether the call node table in this call node info describes the inverted
-  // call tree.
-  isInverted: boolean,
-};
+export interface CallNodeInfo {
+  getCallNodeTable(): CallNodeTable;
+  getStackIndexToCallNodeIndex(): Int32Array;
+  isInverted(): boolean;
+
+  getCallNodePathFromIndex(
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ): CallNodePath;
+
+  // Returns a list of CallNodeIndex from CallNodePaths.
+  getCallNodeIndicesFromPaths(
+    callNodePaths: CallNodePath[]
+  ): Array<IndexIntoCallNodeTable | null>;
+
+  // This function returns a CallNodeIndex from a CallNodePath.
+  getCallNodeIndexFromPath(
+    callNodePath: CallNodePath
+  ): IndexIntoCallNodeTable | null;
+
+  // Returns the CallNodeIndex that matches the function `func` and whose parent's
+  // CallNodeIndex is `parent`.
+  getCallNodeIndexFromParentAndFunc(
+    parent: IndexIntoCallNodeTable | -1,
+    func: IndexIntoFuncTable
+  ): IndexIntoCallNodeTable | null;
+}
 
 export type LineNumber = number;
 

@@ -202,7 +202,7 @@ export function getStackAddressInfoForCallNode(
   callNodeInfo: CallNodeInfo,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
-  return callNodeInfo.isInverted
+  return callNodeInfo.isInverted()
     ? getStackAddressInfoForCallNodeInverted(
         stackTable,
         frameTable,
@@ -347,9 +347,11 @@ export function getStackAddressInfoForCallNodeNonInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
   callNodeIndex: IndexIntoCallNodeTable,
-  { stackIndexToCallNodeIndex }: CallNodeInfo,
+  callNodeInfo: CallNodeInfo,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+
   // "self address" == "the address which a stack's self time is contributed to"
   const callNodeSelfAddressForAllStacks = [];
   // "total addresses" == "the set of addresses whose total time this stack contributes to"

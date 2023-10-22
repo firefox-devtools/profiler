@@ -15,11 +15,9 @@ import {
   getCallNodeInfo,
   getInvertedCallNodeInfo,
   filterThreadByImplementation,
-  getCallNodePathFromIndex,
   getSampleIndexClosestToStartTime,
   convertStackToCallNodeAndCategoryPath,
   getSampleIndexToCallNodeIndex,
-  getCallNodeIndexFromPath,
   getTreeOrderComparator,
   getSamplesSelectedStates,
   extractProfileFilterPageData,
@@ -446,12 +444,13 @@ describe('profile-data', function () {
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
     const thread = profile.threads[0];
-    const { callNodeTable } = getCallNodeInfo(
+    const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable,
       defaultCategory
     );
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     it('should create one callNode per original stack', function () {
       // After nudgeReturnAddresses, the stack table now has 8 entries.
@@ -500,12 +499,15 @@ describe('profile-data', function () {
       meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
+    const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable,
       defaultCategory
     );
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const stackIndexToCallNodeIndex =
+      callNodeInfo.getStackIndexToCallNodeIndex();
     const stack0 = thread.samples.stack[0];
     const stack1 = thread.samples.stack[1];
     if (stack0 === null || stack1 === null) {
@@ -513,13 +515,11 @@ describe('profile-data', function () {
     }
     const originalStackListA = _getStackList(thread, stack0);
     const originalStackListB = _getStackList(thread, stack1);
-    const mergedFuncListA = getCallNodePathFromIndex(
-      stackIndexToCallNodeIndex[stack0],
-      callNodeTable
+    const mergedFuncListA = callNodeInfo.getCallNodePathFromIndex(
+      stackIndexToCallNodeIndex[stack0]
     );
-    const mergedFuncListB = getCallNodePathFromIndex(
-      stackIndexToCallNodeIndex[stack1],
-      callNodeTable
+    const mergedFuncListB = callNodeInfo.getCallNodePathFromIndex(
+      stackIndexToCallNodeIndex[stack1]
     );
 
     it('starts with a fully unduplicated set stack frames', function () {
@@ -889,26 +889,27 @@ describe('getSamplesSelectedStates', function () {
      C  E  F  G
   `);
   const thread = profile.threads[0];
-  const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
+  const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
     thread.frameTable,
     thread.funcTable,
     0
   );
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
   const sampleCallNodes = getSampleIndexToCallNodeIndex(
     thread.samples.stack,
     stackIndexToCallNodeIndex
   );
 
-  const A_B = getCallNodeIndexFromPath([A, B], callNodeTable);
-  const A_B_F = getCallNodeIndexFromPath([A, B, F], callNodeTable);
-  const A_D = getCallNodeIndexFromPath([A, D], callNodeTable);
-  const A_D_E = getCallNodeIndexFromPath([A, D, E], callNodeTable);
+  const A_B = callNodeInfo.getCallNodeIndexFromPath([A, B]);
+  const A_B_F = callNodeInfo.getCallNodeIndexFromPath([A, B, F]);
+  const A_D = callNodeInfo.getCallNodeIndexFromPath([A, D]);
+  const A_D_E = callNodeInfo.getCallNodeIndexFromPath([A, D, E]);
 
   it('determines the selection status of all the samples', function () {
     expect(
       getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
         A_B
@@ -922,7 +923,7 @@ describe('getSamplesSelectedStates', function () {
     ]);
     expect(
       getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
         A_D
@@ -936,7 +937,7 @@ describe('getSamplesSelectedStates', function () {
     ]);
     expect(
       getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
         A_B_F
@@ -950,7 +951,7 @@ describe('getSamplesSelectedStates', function () {
     ]);
     expect(
       getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
         A_D_E
@@ -1174,15 +1175,9 @@ describe('getNativeSymbolsForCallNode', function () {
       thread.funcTable,
       defaultCategory
     );
-    const ab = getCallNodeIndexFromPath(
-      [funA, funB],
-      callNodeInfo.callNodeTable
-    );
+    const ab = callNodeInfo.getCallNodeIndexFromPath([funA, funB]);
     expect(ab).not.toBeNull();
-    const abc = getCallNodeIndexFromPath(
-      [funA, funB, funC],
-      callNodeInfo.callNodeTable
-    );
+    const abc = callNodeInfo.getCallNodeIndexFromPath([funA, funB, funC]);
     expect(abc).not.toBeNull();
 
     // Both the call path [funA, funB] and the call path [funA, funB, funC] end
@@ -1222,7 +1217,7 @@ describe('getNativeSymbolsForCallNode', function () {
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
     const callNodeInfo = getInvertedCallNodeInfo(thread, defaultCategory);
-    const c = getCallNodeIndexFromPath([funC], callNodeInfo.callNodeTable);
+    const c = callNodeInfo.getCallNodeIndexFromPath([funC]);
     expect(c).not.toBeNull();
 
     // The call node for funC in the inverted thread has one sample where funC

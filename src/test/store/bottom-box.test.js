@@ -10,10 +10,7 @@ import {
   selectedNodeSelectors,
 } from '../../selectors/per-thread';
 import { emptyAddressTimings } from '../../profile-logic/address-timings';
-import {
-  getBottomBoxInfoForCallNode,
-  getCallNodeIndexFromPath,
-} from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   updateBottomBoxContentsAndMaybeOpen,
@@ -83,7 +80,7 @@ describe('bottom box', function () {
 
     // Simulate double-clicking the call node at [A, B, C, D].
     const abcd = ensureExists(
-      getCallNodeIndexFromPath([A, B, C, D], callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodeIndexFromPath([A, B, C, D])
     );
     const nativeSymbolInfoD = {
       libIndex: 0,
@@ -171,9 +168,7 @@ describe('bottom box', function () {
     // [selected tab: calltree] [calltree: bottombox open] [flame-graph: bottombox open] [assembly view closed]
 
     // Double-click a call node which doesn't have source file information.
-    const aef = ensureExists(
-      getCallNodeIndexFromPath([A, E, F], callNodeInfo.callNodeTable)
-    );
+    const aef = ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, E, F]));
     const nativeSymbolInfoF = {
       libIndex: 1,
       address: 0x12,
@@ -216,9 +211,7 @@ describe('bottom box', function () {
 
     // Simulate double-clicking the call node at [A, B, C].
     // This call node has been inlined into B and into A.
-    const abc = ensureExists(
-      getCallNodeIndexFromPath([A, B, C], callNodeInfo.callNodeTable)
-    );
+    const abc = ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C]));
     const nativeSymbolInfoA = {
       libIndex: 0,
       address: 0x20,
@@ -268,9 +261,7 @@ describe('bottom box', function () {
     // box with that info.
     dispatch(changeSelectedCallNode(threadsKey, [A, B, C, D]));
     const bottomBoxInfoABC = getBottomBoxInfoForCallNode(
-      ensureExists(
-        getCallNodeIndexFromPath([A, B, C, D], callNodeInfo.callNodeTable)
-      ),
+      ensureExists(callNodeInfo.getCallNodeIndexFromPath([A, B, C, D])),
       callNodeInfo,
       thread
     );

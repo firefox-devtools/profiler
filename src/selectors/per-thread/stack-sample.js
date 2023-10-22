@@ -194,10 +194,7 @@ export function getStackAndSampleSelectorsPerThread(
       getCallNodeInfo,
       getSelectedCallNodePath,
       (callNodeInfo, callNodePath) => {
-        return ProfileData.getCallNodeIndexFromPath(
-          callNodePath,
-          callNodeInfo.callNodeTable
-        );
+        return callNodeInfo.getCallNodeIndexFromPath(callNodePath);
       }
     );
 
@@ -211,19 +208,16 @@ export function getStackAndSampleSelectorsPerThread(
   > = createSelector(
     getCallNodeInfo,
     getExpandedCallNodePaths,
-    ({ callNodeTable }, callNodePaths) =>
-      ProfileData.getCallNodeIndicesFromPaths(
-        Array.from(callNodePaths),
-        callNodeTable
-      )
+    (callNodeInfo, callNodePaths) =>
+      callNodeInfo.getCallNodeIndicesFromPaths(Array.from(callNodePaths))
   );
 
   const getSampleIndexToCallNodeIndexForFilteredThread: Selector<
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
     (state) => threadSelectors.getFilteredThread(state).samples.stack,
-    getCallNodeInfo,
-    (filteredThreadSampleStacks, { stackIndexToCallNodeIndex }) =>
+    (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
+    (filteredThreadSampleStacks, stackIndexToCallNodeIndex) =>
       ProfileData.getSampleIndexToCallNodeIndex(
         filteredThreadSampleStacks,
         stackIndexToCallNodeIndex
@@ -234,8 +228,8 @@ export function getStackAndSampleSelectorsPerThread(
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
     (state) => threadSelectors.getTabFilteredThread(state).samples.stack,
-    getCallNodeInfo,
-    (tabFilteredThreadSampleStacks, { stackIndexToCallNodeIndex }) =>
+    (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
+    (tabFilteredThreadSampleStacks, stackIndexToCallNodeIndex) =>
       ProfileData.getSampleIndexToCallNodeIndex(
         tabFilteredThreadSampleStacks,
         stackIndexToCallNodeIndex
@@ -252,11 +246,11 @@ export function getStackAndSampleSelectorsPerThread(
     (
       sampleIndexToCallNodeIndex,
       activeTabFilteredCallNodeIndex,
-      { callNodeTable },
+      callNodeInfo,
       selectedCallNode
     ) => {
       return ProfileData.getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleIndexToCallNodeIndex,
         activeTabFilteredCallNodeIndex,
         selectedCallNode
@@ -305,7 +299,7 @@ export function getStackAndSampleSelectorsPerThread(
         const sampleIndexToCallNodeIndex =
           ProfileData.getSampleIndexToCallNodeIndex(
             samples.stack,
-            callNodeInfo.stackIndexToCallNodeIndex
+            callNodeInfo.getStackIndexToCallNodeIndex()
           );
         return CallTree.computeCallTreeCountsAndSummary(
           samples,
@@ -357,7 +351,7 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getFlameGraphOrderedCallNodeRows: Selector<FlameGraph.OrderedCallNodeRows> =
     createSelector(
-      (state) => getCallNodeInfo(state).callNodeTable,
+      (state) => getCallNodeInfo(state).getCallNodeTable(),
       (state) => threadSelectors.getFilteredThread(state).funcTable,
       (state) => threadSelectors.getFilteredThread(state).stringTable,
       FlameGraph.computeOrderedCallNodeRows
@@ -366,7 +360,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
     createSelector(
       getFlameGraphOrderedCallNodeRows,
-      (state) => getCallNodeInfo(state).callNodeTable,
+      (state) => getCallNodeInfo(state).getCallNodeTable(),
       getCallTreeCountsAndSummary,
       FlameGraph.getFlameGraphTiming
     );
@@ -375,14 +369,13 @@ export function getStackAndSampleSelectorsPerThread(
     createSelector(
       getRightClickedCallNodeInfo,
       getCallNodeInfo,
-      (rightClickedCallNodeInfo, { callNodeTable }) => {
+      (rightClickedCallNodeInfo, callNodeInfo) => {
         if (
           rightClickedCallNodeInfo !== null &&
           threadsKey === rightClickedCallNodeInfo.threadsKey
         ) {
-          return ProfileData.getCallNodeIndexFromPath(
-            rightClickedCallNodeInfo.callNodePath,
-            callNodeTable
+          return callNodeInfo.getCallNodeIndexFromPath(
+            rightClickedCallNodeInfo.callNodePath
           );
         }
 

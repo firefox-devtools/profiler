@@ -71,7 +71,9 @@ export function getStackTimingByDepth(
   maxDepth: number,
   interval: Milliseconds
 ): StackTimingByDepth {
-  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+
   const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
     start: [],
     end: [],

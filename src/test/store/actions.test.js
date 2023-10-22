@@ -146,9 +146,10 @@ describe('selectors/getFlameGraphTiming', function () {
    * "FunctionName1 (StartTime:EndTime) | FunctionName2 (StartTime:EndTime)"
    */
   function getHumanReadableFlameGraphRanges(store, funcNames) {
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
@@ -176,9 +177,10 @@ describe('selectors/getFlameGraphTiming', function () {
    * "FunctionName1 (SelfTimeRelative) | ..."
    */
   function getHumanReadableFlameGraphTimings(store, funcNames) {
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );

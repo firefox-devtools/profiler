@@ -96,7 +96,7 @@ export class CallTree {
   ) {
     this._categories = categories;
     this._callNodeInfo = callNodeInfo;
-    this._callNodeTable = callNodeInfo.callNodeTable;
+    this._callNodeTable = callNodeInfo.getCallNodeTable();
     this._callNodeSummary = callNodeSummary;
     this._callNodeChildCount = callNodeChildCount;
     this._thread = thread;
@@ -114,7 +114,8 @@ export class CallTree {
     if (callNodeIndex === -1) {
       return this._callNodeTable.length !== 0 ? 0 : -1;
     }
-    const nextAfterDescendants = this._callNodeTable.nextAfterDescendants[callNodeIndex];
+    const nextAfterDescendants =
+      this._callNodeTable.nextAfterDescendants[callNodeIndex];
     if (nextAfterDescendants !== callNodeIndex + 1) {
       return callNodeIndex + 1;
     }
@@ -514,9 +515,11 @@ function _getStackSelf(
 export function computeCallTreeCountsAndSummary(
   samples: SamplesLikeTable,
   sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
-  { callNodeTable }: CallNodeInfo,
+  callNodeInfo: CallNodeInfo,
   invertCallstack: boolean
 ): CallTreeCountsAndSummary {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+
   // Inverted trees need a different method for computing the timing.
   const { callNodeSelf, callNodeLeaf } = invertCallstack
     ? _getInvertedStackSelf(samples, callNodeTable, sampleIndexToCallNodeIndex)
@@ -677,10 +680,13 @@ export function extractSamplesLikeTable(
  */
 export function computeTracedTiming(
   samples: SamplesLikeTable,
-  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
+  callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
   invertCallstack: boolean
 ): TracedTiming | null {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+
   if (samples.weightType !== 'samples' || samples.weight) {
     // Only compute for the samples weight types that have no weights. If a samples
     // table has weights then it's a diff profile. Currently, we aren't calculating

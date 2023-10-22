@@ -36,7 +36,6 @@ import {
   getInvertCallstack,
   getHash,
 } from 'firefox-profiler/selectors/url-state';
-import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   assertExhaustiveCheck,
   getFirstItemFromSet,
@@ -172,10 +171,7 @@ export function selectLeafCallNode(
     dispatch(
       changeSelectedCallNode(
         threadsKey,
-        getCallNodePathFromIndex(
-          newSelectedCallNode,
-          callNodeInfo.callNodeTable
-        )
+        callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode)
       )
     );
   };
@@ -203,13 +199,12 @@ export function selectRootCallNode(
       dispatch(changeSelectedCallNode(threadsKey, []));
       return;
     }
-    const newSelectedCallNode =
-      callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+    const stackIndexToCallNodeIndex =
+      callNodeInfo.getStackIndexToCallNodeIndex();
+    const newSelectedCallNode = stackIndexToCallNodeIndex[newSelectedStack];
 
-    const selectedCallNodePath = getCallNodePathFromIndex(
-      newSelectedCallNode,
-      callNodeInfo.callNodeTable
-    );
+    const selectedCallNodePath =
+      callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode);
     const rootCallNodePath = [selectedCallNodePath[0]];
 
     dispatch(
@@ -1629,7 +1624,7 @@ export function expandAllCallNodeDescendants(
     });
 
     const expandedCallNodePaths = [...descendants].map((callNodeIndex) =>
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
     dispatch(changeExpandedCallNodes(threadsKey, expandedCallNodePaths));
   };
@@ -1871,13 +1866,13 @@ export function addTransformToStack(
     const transformedThread =
       threadSelectors.getRangeAndTransformFilteredThread(getState());
 
-    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
     dispatch({
       type: 'ADD_TRANSFORM_TO_STACK',
       threadsKey,
       transform,
       transformedThread,
-      callNodeTable,
+      callNodeInfo,
     });
     sendAnalytics({
       hitType: 'event',
@@ -2034,10 +2029,11 @@ export function handleCallNodeTransformShortcut(
     }
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const unfilteredThread = threadSelectors.getThread(getState());
-    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const implementation = getImplementationFilter(getState());
     const inverted = getInvertCallstack(getState());
-    const callNodePath = getCallNodePathFromIndex(callNodeIndex, callNodeTable);
+    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const funcIndex = callNodeTable.func[callNodeIndex];
     const category = callNodeTable.category[callNodeIndex];
 
