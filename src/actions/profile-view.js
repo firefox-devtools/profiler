@@ -1772,13 +1772,17 @@ export function changeInvertCallstack(
       eventCategory: 'profile',
       eventAction: 'change invert callstack',
     });
+    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const selectedCallNode = selectedThreadSelectors.getSelectedCallNodeIndex(
+      getState()
+    );
+    const newSelectedCallNodePath =
+      callTree.findHeavyPathToSameFunctionAfterInversion(selectedCallNode);
     dispatch({
       type: 'CHANGE_INVERT_CALLSTACK',
       invertCallstack,
       selectedThreadIndexes: getSelectedThreadIndexes(getState()),
-      callTree: selectedThreadSelectors.getCallTree(getState()),
-      callNodeTable: selectedThreadSelectors.getCallNodeInfo(getState())
-        .callNodeTable,
+      newSelectedCallNodePath,
     });
   };
 }

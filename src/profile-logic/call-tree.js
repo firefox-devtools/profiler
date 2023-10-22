@@ -20,6 +20,7 @@ import type {
   SamplesLikeTable,
   WeightType,
   CallNodeTable,
+  CallNodePath,
   IndexIntoCallNodeTable,
   CallNodeInfo,
   CallNodeData,
@@ -360,6 +361,58 @@ export class CallTree {
       callNodeIndex,
       this._callNodeInfo,
       this._thread
+    );
+  }
+
+  /**
+   * Take a CallNodeIndex, and compute an inverted path for it.
+   *
+   * e.g:
+   *   (invertedPath, invertedCallTree) => path
+   *   (path, callTree) => invertedPath
+   *
+   * Call trees are sorted with the CallNodes with the heaviest total time as the first
+   * entry. This function walks to the tip of the heaviest branches to find the leaf node,
+   * then construct an inverted CallNodePath with the result. This gives a pretty decent
+   * result, but it doesn't guarantee that it will select the heaviest CallNodePath for the
+   * INVERTED call tree. This would require doing a round trip through the reducers or
+   * some other mechanism in order to first calculate the next inverted call tree. This is
+   * probably not worth it, so go ahead and use the uninverted call tree, as it's probably
+   * good enough.
+   */
+  findHeavyPathToSameFunctionAfterInversion(
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ): CallNodePath {
+    if (callNodeIndex === null) {
+      return [];
+    }
+    let parentSelf = 0;
+    let children = [callNodeIndex];
+    const pathToLeaf = [];
+    do {
+      // Walk down the tree's depth to construct a path to the leaf node, this should
+      // be the heaviest branch of the tree.
+      const firstChild = children[0];
+      const { total, self } = this.getNodeData(firstChild);
+      if (total < parentSelf) {
+        // The parent node was the node with the highest self time. We don't need
+        // to descend any deeper because we won't find another node with higher
+        // self time in this subtree because this subtree's total is already lower.
+        // ... except if we have negative weights, i.e. a diff profile, but we
+        // don't bother to handle those separately.
+        break;
+      }
+      parentSelf = self;
+      pathToLeaf.push(firstChild);
+      children = this.getChildren(firstChild);
+    } while (children && children.length > 0);
+
+    return (
+      pathToLeaf
+        // Map the CallNodeIndex to FuncIndex.
+        .map((index) => this._callNodeTable.func[index])
+        // Reverse it so that it's in the proper inverted order.
+        .reverse()
     );
   }
 }
