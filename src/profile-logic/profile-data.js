@@ -114,7 +114,10 @@ export function getCallNodeInfo(
     );
   return new CallNodeInfoRegular(
     callNodeTable,
+    callNodeTable,
     stackIndexToCallNodeIndex,
+    stackIndexToCallNodeIndex,
+    null,
     stackTable,
     false
   );
@@ -403,7 +406,10 @@ function _createCallNodeInfoFromUnorderedComponents(
 
 class CallNodeInfoRegular implements CallNodeInfo {
   _callNodeTable: CallNodeTable;
+  _nonInvertedCallNodeTable: CallNodeTable;
   _stackIndexToCallNodeIndex: Int32Array;
+  _stackIndexToNonInvertedCallNodeIndex: Int32Array;
+  _nonInvertedCallNodesUsedAsSelf: IndexIntoCallNodeTable[] | null;
   _stackTable: StackTable;
   _isInverted: boolean;
 
@@ -414,12 +420,19 @@ class CallNodeInfoRegular implements CallNodeInfo {
 
   constructor(
     callNodeTable: CallNodeTable,
+    nonInvertedCallNodeTable: CallNodeTable,
     stackIndexToCallNodeIndex: Int32Array,
+    stackIndexToNonInvertedCallNodeIndex: Int32Array,
+    nonInvertedCallNodesUsedAsSelf: IndexIntoCallNodeTable[] | null,
     stackTable: StackTable,
     isInverted: boolean
   ) {
     this._callNodeTable = callNodeTable;
+    this._nonInvertedCallNodeTable = nonInvertedCallNodeTable;
     this._stackIndexToCallNodeIndex = stackIndexToCallNodeIndex;
+    this._stackIndexToNonInvertedCallNodeIndex =
+      stackIndexToNonInvertedCallNodeIndex;
+    this._nonInvertedCallNodesUsedAsSelf = nonInvertedCallNodesUsedAsSelf;
     this._stackTable = stackTable;
     this._isInverted = isInverted;
   }
@@ -432,6 +445,15 @@ class CallNodeInfoRegular implements CallNodeInfo {
   }
   isInverted(): boolean {
     return this._isInverted;
+  }
+  getNonInvertedCallNodeTable(): CallNodeTable {
+    return this._nonInvertedCallNodeTable;
+  }
+  getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
+    return this._stackIndexToNonInvertedCallNodeIndex;
+  }
+  getNonInvertedCallNodesUsedAsSelf(): IndexIntoCallNodeTable[] | null {
+    return this._nonInvertedCallNodesUsedAsSelf;
   }
 
   // This function returns a CallNodePath from a CallNodeIndex.
@@ -580,6 +602,8 @@ type CallNodeInfoComponents = {
 
 export function getInvertedCallNodeInfo(
   thread: Thread,
+  nonInvertedCallNodeTable: CallNodeTable,
+  stackIndexToNonInvertedCallNodeIndex: Int32Array,
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   const { invertedThread, oldStackToNewStack: uninvertedStackToInvertedStack } =
@@ -594,12 +618,13 @@ export function getInvertedCallNodeInfo(
     defaultCategory
   );
 
-  const uninvertedStackIndexToCallNodeIndex = new Int32Array(
+  const stackIndexToInvertedCallNodeIndex = new Int32Array(
     thread.stackTable.length
   );
+  const nonInvertedCallNodesUsedAsSelf = new Set();
   for (
     let uninvertedStackIndex = 0;
-    uninvertedStackIndex < uninvertedStackIndexToCallNodeIndex.length;
+    uninvertedStackIndex < stackIndexToInvertedCallNodeIndex.length;
     uninvertedStackIndex++
   ) {
     const invertedStackIndex =
@@ -607,15 +632,20 @@ export function getInvertedCallNodeInfo(
     if (invertedStackIndex === undefined) {
       // This uninverted stack is not used as a self stack, only as a prefix stack.
       // There is no inverted call node corresponding to it.
-      uninvertedStackIndexToCallNodeIndex[uninvertedStackIndex] = -1;
+      stackIndexToInvertedCallNodeIndex[uninvertedStackIndex] = -1;
     } else {
-      uninvertedStackIndexToCallNodeIndex[uninvertedStackIndex] =
-        invertedStackIndexToCallNodeIndex[invertedStackIndex];
+      stackIndexToInvertedCallNodeIndex[uninvertedStackIndex] =
+      invertedStackIndexToCallNodeIndex[invertedStackIndex];
+
+      nonInvertedCallNodesUsedAsSelf.add(stackIndexToNonInvertedCallNodeIndex[uninvertedStackIndex]);
     }
   }
   return new CallNodeInfoRegular(
     callNodeTable,
-    uninvertedStackIndexToCallNodeIndex,
+    nonInvertedCallNodeTable,
+    stackIndexToInvertedCallNodeIndex,
+    stackIndexToNonInvertedCallNodeIndex,
+    Array.from(nonInvertedCallNodesUsedAsSelf),
     thread.stackTable,
     true
   );

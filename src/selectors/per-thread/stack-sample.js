@@ -123,7 +123,12 @@ export function getStackAndSampleSelectorsPerThread(
         if (!invertCallStack) {
           return nonInvertedCallNodeInfo;
         }
-        return ProfileData.getInvertedCallNodeInfo(thread, defaultCategory);
+        return ProfileData.getInvertedCallNodeInfo(
+          thread,
+          nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+          nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+          defaultCategory
+        );
       }
     );
 
