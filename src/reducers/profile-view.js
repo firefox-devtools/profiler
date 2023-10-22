@@ -266,7 +266,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       });
     }
     case 'CHANGE_INVERT_CALLSTACK': {
-      const { callTree, callNodeTable, selectedThreadIndexes } = action;
+      const { newSelectedCallNodePath, selectedThreadIndexes } = action;
       return objectMap(state, (viewOptions, threadsKey) => {
         if (
           // `Object.entries` converts number threadsKeys into strings, so
@@ -274,23 +274,14 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
           threadsKey ===
           ProfileData.getThreadsKey(selectedThreadIndexes).toString()
         ) {
-          // Only attempt this on the current thread, as we need the transformed thread
-          // There is no guarantee that this has been calculated on all the other threads,
-          // and we shouldn't attempt to expect it, as that could be quite a perf cost.
-          const selectedCallNodePath = Transforms.invertCallNodePath(
-            viewOptions.selectedCallNodePath,
-            callTree,
-            callNodeTable
-          );
-
           const expandedCallNodePaths = new PathSet();
-          for (let i = 1; i < selectedCallNodePath.length; i++) {
-            expandedCallNodePaths.add(selectedCallNodePath.slice(0, i));
+          for (let i = 1; i < newSelectedCallNodePath.length; i++) {
+            expandedCallNodePaths.add(newSelectedCallNodePath.slice(0, i));
           }
 
           return {
             ...viewOptions,
-            selectedCallNodePath,
+            selectedCallNodePath: newSelectedCallNodePath,
             expandedCallNodePaths,
           };
         }
