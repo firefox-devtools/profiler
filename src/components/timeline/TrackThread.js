@@ -301,7 +301,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
                 callNodeInfo={callNodeInfo}
-                sampleCallNodes={sampleCallNodes}
                 samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
