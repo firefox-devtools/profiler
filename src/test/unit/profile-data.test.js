@@ -450,7 +450,7 @@ describe('profile-data', function () {
       thread.funcTable,
       defaultCategory
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     it('should create one callNode per original stack', function () {
       // After nudgeReturnAddresses, the stack table now has 8 entries.
@@ -505,7 +505,7 @@ describe('profile-data', function () {
       thread.funcTable,
       defaultCategory
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const stackIndexToCallNodeIndex =
       callNodeInfo.getStackIndexToCallNodeIndex();
     const stack0 = thread.samples.stack[0];

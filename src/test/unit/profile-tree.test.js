@@ -127,7 +127,7 @@ describe('unfiltered call tree', function () {
       const cnKN = callNodeInfo.getCallNodeIndexFromPath([K, N]);
 
       const rows = computeOrderedCallNodeRows(
-        callNodeInfo.getCallNodeTable(),
+        callNodeInfo.getNonInvertedCallNodeTable(),
         thread.funcTable,
         thread.stringTable
       );
