@@ -303,18 +303,6 @@ describe('unfiltered call tree', function () {
       });
     });
 
-    describe('hasSameNodeIds()', function () {
-      it('determines if the node IDs are the same between two trees', function () {
-        // This is tested through strict equality, so re-generating callNodes is
-        // the only thing this method expects.
-        const otherTree = callTreeFromProfile(
-          getProfileFromTextSamples('A').profile
-        );
-        expect(callTree.hasSameNodeIds(callTree)).toBe(true);
-        expect(callTree.hasSameNodeIds(otherTree)).toBe(false);
-      });
-    });
-
     describe('getNodeData()', function () {
       it('gets a node for a given callNodeIndex', function () {
         expect(callTree.getNodeData(A)).toEqual({
