@@ -123,6 +123,7 @@ export type CpuProfileEvent = TracingEvent<{|
 |}>;
 
 // A node performance profile only outputs this.
+// See https://chromedevtools.github.io/devtools-protocol/tot/Profiler/#type-Profile
 type CpuProfileData = {
   nodes?: Array<{
     callFrame: {
@@ -137,8 +138,8 @@ type CpuProfileData = {
   }>,
   samples: number[], // Index into cpuProfile nodes
   timeDeltas: number[],
-  startTime: number,
-  endTime: number,
+  startTime: number, // microseconds
+  endTime: number, // microseconds
 };
 
 type ThreadNameEvent = TracingEvent<{|
