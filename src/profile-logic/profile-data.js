@@ -663,74 +663,73 @@ export function getStackToInvertedCallNodeMatcher(
       'getStackToInvertedCallNodeMatcher can only be used with an inverted call node info'
     );
   }
-  const invertedCallNodeTable = callNodeInfo.getCallNodeTable();
-  const suffixPath = callNodeInfo
-    .getCallNodePathFromIndex(callNodeIndex)
-    .reverse();
-  const endIndex = invertedCallNodeTable.nextAfterDescendants[callNodeIndex];
+  const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
   return new StackToInvertedCallNodeMatcher(
     callNodeIndex,
-    endIndex,
-    suffixPath,
-    callNodeInfo.getStackIndexToCallNodeIndex(),
+    callNodePath,
+    callNodeInfo.getNonInvertedCallNodeTable(),
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
     stackTable
   );
 }
 
 export class StackToInvertedCallNodeMatcher {
   _subtreeRoot: IndexIntoCallNodeTable;
-  _subtreeEnd: IndexIntoCallNodeTable;
-  _suffixPath: CallNodePath;
-  _nonInvertedStackIndexToInvertedCallNodeIndex: Int32Array;
-  _nonInvertedStackTable: StackTable;
+  _callNodePath: CallNodePath;
+  _nonInvertedCallNodeTable: CallNodeTable;
+  _stackIndexToNonInvertedCallNodeIndex: Int32Array;
+  _stackTable: StackTable;
 
   constructor(
     rootIndex: IndexIntoCallNodeTable,
-    endIndex: IndexIntoCallNodeTable,
-    suffixPath: CallNodePath,
-    nonInvertedStackIndexToInvertedCallNodeIndex: Int32Array,
-    nonInvertedStackTable: StackTable
+    callNodePath: CallNodePath,
+    nonInvertedCallNodeTable: CallNodeTable,
+    stackIndexToNonInvertedCallNodeIndex: Int32Array,
+    stackTable: StackTable
   ) {
     this._subtreeRoot = rootIndex;
-    this._subtreeEnd = endIndex;
-    this._suffixPath = suffixPath;
-    this._nonInvertedStackIndexToInvertedCallNodeIndex =
-      nonInvertedStackIndexToInvertedCallNodeIndex;
-    this._nonInvertedStackTable = nonInvertedStackTable;
+    this._callNodePath = callNodePath;
+    this._nonInvertedCallNodeTable = nonInvertedCallNodeTable;
+    this._stackIndexToNonInvertedCallNodeIndex =
+      stackIndexToNonInvertedCallNodeIndex;
+    this._stackTable = stackTable;
   }
 
   callNodeIsRootOfInvertedTree(): boolean {
-    return this._suffixPath.length === 1;
+    return this._callNodePath.length === 1;
   }
 
-  // Returns null for any stacks which aren't used as self stacks.
   getMatchingAncestorStack(
     stackIndex: IndexIntoStackTable
   ): IndexIntoStackTable | null {
-    const callNode =
-      this._nonInvertedStackIndexToInvertedCallNodeIndex[stackIndex];
-    if (callNode === this._subtreeRoot) {
-      return stackIndex;
+    // Check if the non-inverted call node "ends with" this._callNodePath.
+    // this._callNodePath[0] is the expected "self" function, this._callNodePath[1]
+    // is the expected parent function, etc.
+    let currentCallNodeIndex =
+      this._stackIndexToNonInvertedCallNodeIndex[stackIndex];
+    let currentStackIndex = stackIndex;
+    for (let i = 0; i < this._callNodePath.length - 1; i++) {
+      const currentFunc =
+        this._nonInvertedCallNodeTable.func[currentCallNodeIndex];
+      const expectedFunc = this._callNodePath[i];
+      if (currentFunc !== expectedFunc) {
+        return null;
+      }
+      currentCallNodeIndex =
+        this._nonInvertedCallNodeTable.prefix[currentCallNodeIndex];
+      currentStackIndex = this._stackTable.prefix[currentStackIndex];
+
+      if (currentStackIndex === null) {
+        return null;
+      }
     }
-    if (callNode < this._subtreeRoot || callNode >= this._subtreeEnd) {
+    const expectedFunc = this._callNodePath[this._callNodePath.length - 1];
+    const currentFunc =
+      this._nonInvertedCallNodeTable.func[currentCallNodeIndex];
+    if (currentFunc !== expectedFunc) {
       return null;
     }
-    // stackIndex is within our subtree.
-    //
-    // This stack is used as a self stack in the non-inverted tree.
-    // callNode is the corresponding call node in the inverted call tree.
-    //
-    // Let's say stackIndex is in the non-inverted tree at A -> B -> C.
-    // Then callNode is the node at C <- B <- A in the inverted tree.
-    // Let's say this._subtreeRoot is C <- B, i.e. this._suffixPath is [B, C].
-    // Then callNode is a child in the inverted tree of this._subtreeRoot,
-    // and we want to return the stack corresponding to A -> B from this function.
-    const stackTablePrefixColumn = this._nonInvertedStackTable.prefix;
-    let stackForCallNode = stackIndex;
-    for (let i = 1; i < this._suffixPath.length; i++) {
-      stackForCallNode = ensureExists(stackTablePrefixColumn[stackForCallNode]);
-    }
-    return stackForCallNode;
+    return currentStackIndex;
   }
 }
 
@@ -2817,10 +2816,7 @@ export function getTreeOrderComparator(
   callNodeInfo: CallNodeInfo
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
   return callNodeInfo.isInverted()
-    ? _getTreeOrderComparatorInverted(
-        sampleNonInvertedCallNodes,
-        callNodeInfo
-      )
+    ? _getTreeOrderComparatorInverted(sampleNonInvertedCallNodes, callNodeInfo)
     : _getTreeOrderComparatorNonInverted(sampleNonInvertedCallNodes);
 }
 
