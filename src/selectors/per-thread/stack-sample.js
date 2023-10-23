@@ -241,35 +241,35 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
-  const getSampleIndexToCallNodeIndexForTabFilteredThread: Selector<
+  const getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread: Selector<
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
     (state) => threadSelectors.getTabFilteredThread(state).samples.stack,
-    (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
-    (tabFilteredThreadSampleStacks, stackIndexToCallNodeIndex) =>
+    (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
+    (tabFilteredThreadSampleStacks, stackIndexToNonInvertedCallNodeIndex) =>
       ProfileData.getSampleIndexToCallNodeIndex(
         tabFilteredThreadSampleStacks,
-        stackIndexToCallNodeIndex
+        stackIndexToNonInvertedCallNodeIndex
       )
   );
 
   const getSamplesSelectedStatesInFilteredThread: Selector<
     null | SelectedState[],
   > = createSelector(
-    getSampleIndexToCallNodeIndexForFilteredThread,
-    getSampleIndexToCallNodeIndexForTabFilteredThread,
+    getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
+    getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread,
     getCallNodeInfo,
     getSelectedCallNodeIndex,
     (
-      sampleIndexToCallNodeIndex,
-      activeTabFilteredCallNodeIndex,
+      sampleIndexToNonInvertedCallNodeIndex,
+      activeTabFilteredNonInvertedCallNodeIndex,
       callNodeInfo,
       selectedCallNode
     ) => {
       return ProfileData.getSamplesSelectedStates(
         callNodeInfo,
-        sampleIndexToCallNodeIndex,
-        activeTabFilteredCallNodeIndex,
+        sampleIndexToNonInvertedCallNodeIndex,
+        activeTabFilteredNonInvertedCallNodeIndex,
         selectedCallNode
       );
     }
@@ -278,7 +278,8 @@ export function getStackAndSampleSelectorsPerThread(
   const getTreeOrderComparatorInFilteredThread: Selector<
     (IndexIntoSamplesTable, IndexIntoSamplesTable) => number,
   > = createSelector(
-    getSampleIndexToCallNodeIndexForFilteredThread,
+    getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
+    getCallNodeInfo,
     ProfileData.getTreeOrderComparator
   );
 
@@ -413,7 +414,6 @@ export function getStackAndSampleSelectorsPerThread(
     getExpandedCallNodeIndexes,
     getSampleIndexToCallNodeIndexForFilteredThread,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
-    getSampleIndexToCallNodeIndexForTabFilteredThread,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,

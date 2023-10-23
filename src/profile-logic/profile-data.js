@@ -635,9 +635,11 @@ export function getInvertedCallNodeInfo(
       stackIndexToInvertedCallNodeIndex[uninvertedStackIndex] = -1;
     } else {
       stackIndexToInvertedCallNodeIndex[uninvertedStackIndex] =
-      invertedStackIndexToCallNodeIndex[invertedStackIndex];
+        invertedStackIndexToCallNodeIndex[invertedStackIndex];
 
-      nonInvertedCallNodesUsedAsSelf.add(stackIndexToNonInvertedCallNodeIndex[uninvertedStackIndex]);
+      nonInvertedCallNodesUsedAsSelf.add(
+        stackIndexToNonInvertedCallNodeIndex[uninvertedStackIndex]
+      );
     }
   }
   return new CallNodeInfoRegular(
@@ -752,13 +754,13 @@ export function getSampleIndexToCallNodeIndex(
  * no call node is selected.
  */
 function getSamplesSelectedStatesForNoSelection(
-  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
-  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>
 ): SelectedState[] {
-  const result = new Array(sampleCallNodes.length);
+  const result = new Array(sampleNonInvertedCallNodes.length);
   for (
     let sampleIndex = 0;
-    sampleIndex < sampleCallNodes.length;
+    sampleIndex < sampleNonInvertedCallNodes.length;
     sampleIndex++
   ) {
     // When there's no selected call node, we don't want to shadow everything
@@ -768,10 +770,10 @@ function getSamplesSelectedStatesForNoSelection(
     let sampleSelectedState = 'SELECTED';
 
     // But we still want to display filtered-out samples differently.
-    const callNodeIndex = sampleCallNodes[sampleIndex];
+    const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
     if (callNodeIndex === null) {
       sampleSelectedState =
-        activeTabFilteredCallNodes[sampleIndex] === null
+        activeTabFilteredNonInvertedCallNodes[sampleIndex] === null
           ? // This sample was not part of the active tab.
             'FILTERED_OUT_BY_ACTIVE_TAB'
           : // This sample was filtered out in the transform pipeline.
@@ -783,16 +785,15 @@ function getSamplesSelectedStatesForNoSelection(
   return result;
 }
 
-/**
- * Given the call node for each sample and the call node selected states,
- * compute each sample's selected state.
- */
-function mapCallNodeSelectedStatesToSamples(
+function _getSamplesSelectedStatesNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable,
-  selectedCallNodeDescendantsEndIndex: IndexIntoCallNodeTable
+  callNodeInfo: CallNodeInfo
 ): SelectedState[] {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const selectedCallNodeDescendantsEndIndex =
+    callNodeTable.nextAfterDescendants[selectedCallNodeIndex];
   const sampleCount = sampleCallNodes.length;
   const samplesSelectedStates = new Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
@@ -821,6 +822,58 @@ function mapCallNodeSelectedStatesToSamples(
 }
 
 /**
+ * Given the call node for each sample and the call node selected states,
+ * compute each sample's selected state.
+ */
+function _getSamplesSelectedStatesInverted(
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo
+): SelectedState[] {
+  const selectedCallPath = callNodeInfo.getCallNodePathFromIndex(
+    selectedInvertedCallNodeIndex
+  );
+  const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const sampleCount = sampleNonInvertedCallNodes.length;
+  const samplesSelectedStates = new Array(sampleCount);
+  for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
+    let sampleSelectedState: SelectedState = 'SELECTED';
+    const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
+    if (callNodeIndex !== null) {
+      let currentCallNode = callNodeIndex;
+      for (let i = 0; i < selectedCallPath.length; i++) {
+        const expectedFunc = selectedCallPath[i];
+        const actualFunc = nonInvertedCallNodeTable.func[currentCallNode];
+        if (actualFunc < expectedFunc) {
+          sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+          break;
+        }
+        if (actualFunc > expectedFunc) {
+          sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+          break;
+        }
+        currentCallNode = nonInvertedCallNodeTable.prefix[currentCallNode];
+        if (currentCallNode === -1) {
+          sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+          break;
+        }
+      }
+    } else {
+      // This sample was filtered out.
+      sampleSelectedState =
+        activeTabFilteredNonInvertedCallNodes[sampleIndex] === null
+          ? // This sample was not part of the active tab.
+            'FILTERED_OUT_BY_ACTIVE_TAB'
+          : // This sample was filtered out in the transform pipeline.
+            'FILTERED_OUT_BY_TRANSFORM';
+    }
+    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+  }
+  return samplesSelectedStates;
+}
+
+/**
  * Go through the samples, and determine their current state with respect to
  * the selection.
  *
@@ -829,24 +882,30 @@ function mapCallNodeSelectedStatesToSamples(
  */
 export function getSamplesSelectedStates(
   callNodeInfo: CallNodeInfo,
-  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
-  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
 ): SelectedState[] {
   if (selectedCallNodeIndex === null || selectedCallNodeIndex === -1) {
     return getSamplesSelectedStatesForNoSelection(
-      sampleCallNodes,
-      activeTabFilteredCallNodes
+      sampleNonInvertedCallNodes,
+      activeTabFilteredNonInvertedCallNodes
     );
   }
 
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  return mapCallNodeSelectedStatesToSamples(
-    sampleCallNodes,
-    activeTabFilteredCallNodes,
-    selectedCallNodeIndex,
-    callNodeTable.nextAfterDescendants[selectedCallNodeIndex]
-  );
+  return callNodeInfo.isInverted()
+    ? _getSamplesSelectedStatesInverted(
+        sampleNonInvertedCallNodes,
+        activeTabFilteredNonInvertedCallNodes,
+        selectedCallNodeIndex,
+        callNodeInfo
+      )
+    : _getSamplesSelectedStatesNonInverted(
+        sampleNonInvertedCallNodes,
+        activeTabFilteredNonInvertedCallNodes,
+        selectedCallNodeIndex,
+        callNodeInfo
+      );
 }
 
 /**
@@ -2754,6 +2813,18 @@ export function getFuncNamesAndOriginsForPath(
  * "Ordered after" means "swims on top in the activity graph"
  */
 export function getTreeOrderComparator(
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  callNodeInfo: CallNodeInfo
+): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+  return callNodeInfo.isInverted()
+    ? _getTreeOrderComparatorInverted(
+        sampleNonInvertedCallNodes,
+        callNodeInfo
+      )
+    : _getTreeOrderComparatorNonInverted(sampleNonInvertedCallNodes);
+}
+
+export function _getTreeOrderComparatorNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
   /**
@@ -2784,6 +2855,59 @@ export function getTreeOrderComparator(
       return -1;
     }
     return callNodeA - callNodeB;
+  };
+}
+
+/**
+ * TODO: Add a comment here with a bunch of examples
+ * Especially make sure to describe what happens if one is a suffix of the other.
+ */
+export function _getTreeOrderComparatorInverted(
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  callNodeInfo: CallNodeInfo
+): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+  const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  return function treeOrderComparator(
+    sampleA: IndexIntoSamplesTable,
+    sampleB: IndexIntoSamplesTable
+  ): number {
+    let callNodeA = sampleNonInvertedCallNodes[sampleA];
+    let callNodeB = sampleNonInvertedCallNodes[sampleB];
+
+    if (callNodeA === callNodeB) {
+      // Both are filtered out or both are the same.
+      return 0;
+    }
+    if (callNodeA === null) {
+      // A filtered out, B not filtered out. A goes after B.
+      return 1;
+    }
+    if (callNodeB === null) {
+      // B filtered out, A not filtered out. B goes after A.
+      return -1;
+    }
+    // Walk up both and stop at the first non-matching function.
+    // Walking up the non-inverted tree is equivalent to walking down the
+    // inverted tree.
+    while (true) {
+      const funcA = nonInvertedCallNodeTable.func[callNodeA];
+      const funcB = nonInvertedCallNodeTable.func[callNodeB];
+      if (funcA !== funcB) {
+        return funcA - funcB;
+      }
+      callNodeA = nonInvertedCallNodeTable.prefix[callNodeA];
+      callNodeB = nonInvertedCallNodeTable.prefix[callNodeB];
+      if (callNodeA === callNodeB) {
+        break;
+      }
+      if (callNodeA === -1) {
+        return 1;
+      }
+      if (callNodeB === -1) {
+        return -1;
+      }
+    }
+    return 0;
   };
 }
 
