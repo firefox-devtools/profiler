@@ -161,7 +161,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
   _wideEnough = (callNodeIndex: IndexIntoCallNodeTable): boolean => {
     const { flameGraphTiming, callNodeInfo } = this.props;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const depth = callNodeTable.depth[callNodeIndex];
     const row = flameGraphTiming[depth];
     const columnIndex = row.callNode.indexOf(callNodeIndex);
@@ -186,7 +186,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
 
     let callNodeIndex = startingCallNodeIndex;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const depth = callNodeTable.depth[callNodeIndex];
     const row = flameGraphTiming[depth];
     let columnIndex = row.callNode.indexOf(callNodeIndex);
@@ -217,7 +217,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       changeSelectedCallNode,
       handleCallNodeTransformShortcut,
     } = this.props;
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     if (
       // Please do not forget to update the switch/case below if changing the array to allow more keys.
@@ -303,7 +303,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     if (document.activeElement === this._viewport) {
       event.preventDefault();
       const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
-      const callNodeTable = callNodeInfo.getCallNodeTable();
+      const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
       if (selectedCallNodeIndex !== null) {
         const funcIndex = callNodeTable.func[selectedCallNodeIndex];
         const funcName = thread.stringTable.getString(
