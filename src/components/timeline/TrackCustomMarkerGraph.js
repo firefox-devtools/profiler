@@ -130,7 +130,6 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
     ctx.clearRect(0, 0, deviceWidth, deviceHeight);
 
     const deviceLineWidth = TRACK_MARKER_LINE_WIDTH * devicePixelRatio;
-    const deviceLineHalfWidth = deviceLineWidth * 0.5;
     ctx.lineWidth = deviceLineWidth;
     ctx.lineJoin = 'bevel';
 
@@ -152,6 +151,9 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 
         const getX = (time) =>
           Math.round((time - rangeStart) * millisecondWidth);
+        // For line graphs, ensure y is at least half the stroke's line width
+        // so that it won't be cut off the bottom edge of the graph.
+        const minY = type === 'bar' ? 0 : deviceLineWidth * 0.5;
         const getY = (i) => {
           const unitValue = _calculateUnitValue(
             type,
@@ -159,11 +161,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             maxNumber,
             samples[i]
           );
-          // Add on half the stroke's line width so that it won't be cut
-          // off the edge of the graph.
-          return Math.round(
-            deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth
-          );
+          return Math.floor(deviceHeight - deviceHeight * unitValue - minY);
         };
 
         switch (type) {
@@ -253,8 +251,13 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
                 y = Math.min(y, getY(++i));
               }
 
-              const x2 = marker.end ? Math.max(x + 1, getX(marker.end)) : x + 1;
-              ctx.fillRect(x, y, x2 - x, deviceHeight - y);
+              // Only draw if the height is more than 0
+              if (y !== deviceHeight) {
+                const x2 = marker.end
+                  ? Math.max(x + 1, getX(marker.end))
+                  : x + 1;
+                ctx.fillRect(x, y, x2 - x, deviceHeight - y);
+              }
             }
             break;
           default:
