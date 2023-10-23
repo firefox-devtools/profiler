@@ -6,7 +6,6 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { InView } from 'react-intersection-observer';
-import { ensureExists } from 'firefox-profiler/utils/flow';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { getSampleIndexClosestToCenteredTime } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
@@ -20,7 +19,6 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  IndexIntoCallNodeTable,
   SelectedState,
 } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
@@ -29,7 +27,6 @@ type Props = {|
   +className: string,
   +thread: Thread,
   +samplesSelectedStates: null | SelectedState[],
-  +sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -95,7 +92,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
       rangeStart,
       rangeEnd,
       samplesSelectedStates,
-      sampleCallNodes,
       categories,
       width,
       height,
@@ -144,8 +140,8 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
       if (sampleTime < nextMinTime) {
         continue;
       }
-      const callNodeIndex = sampleCallNodes[i];
-      if (callNodeIndex === null) {
+      const stackIndex = thread.samples.stack[i];
+      if (stackIndex === null) {
         continue;
       }
       const xPos =
@@ -157,10 +153,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
       ) {
         samplesBucket = highlightedSamples;
       } else {
-        const stackIndex = ensureExists(
-          thread.samples.stack[i],
-          'A stack must exist for this sample, since a callNodeIndex exists.'
-        );
         const categoryIndex = thread.stackTable.category[stackIndex];
         const category = categories[categoryIndex];
         if (category.name === 'Idle') {

@@ -85,7 +85,6 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
-  +sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +invertCallstack: boolean,
   +treeOrderSampleComparator: (
@@ -199,7 +198,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       timelineType,
       hasFileIoMarkers,
       showMemoryMarkers,
-      sampleCallNodes,
       sampleNonInvertedCallNodes,
       samplesSelectedStates,
       treeOrderSampleComparator,
@@ -287,7 +285,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 thread={filteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                sampleCallNodes={sampleCallNodes}
                 samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
@@ -359,8 +356,6 @@ export const TimelineTrackThread = explicitConnect<
       filteredThread: selectors.getFilteredThread(state),
       rangeFilteredThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
-      sampleCallNodes:
-        selectors.getSampleIndexToCallNodeIndexForFilteredThread(state),
       sampleNonInvertedCallNodes:
         selectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
           state
