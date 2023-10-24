@@ -185,10 +185,6 @@ export class CallTree {
     return this._callNodeTable.depth[callNodeIndex];
   }
 
-  hasSameNodeIds(tree: CallTree): boolean {
-    return this._callNodeTable === tree._callNodeTable;
-  }
-
   getNodeData(callNodeIndex: IndexIntoCallNodeTable): CallNodeData {
     const funcIndex = this._callNodeTable.func[callNodeIndex];
     const funcName = this._thread.stringTable.getString(
