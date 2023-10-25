@@ -2521,9 +2521,7 @@ CallTree {
   ],
   "_children": Array [],
   "_displayDataByIndex": Map {},
-  "_interval": 1,
   "_isHighPrecision": false,
-  "_jsOnly": false,
   "_rootCount": 1,
   "_rootTotalSummary": 2,
   "_thread": Object {
