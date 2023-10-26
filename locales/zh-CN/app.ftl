@@ -314,8 +314,8 @@ MarkerSidebar--select-a-marker = 选择标记即可显示其相关信息。
 
 MarkerTable--start = 开始
 MarkerTable--duration = 持续时间
-MarkerTable--type = 类型
-MarkerTable--description = 描述
+MarkerTable--name = 名称
+MarkerTable--details = 详情
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
