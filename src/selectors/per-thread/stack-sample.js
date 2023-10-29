@@ -307,7 +307,7 @@ export function getStackAndSampleSelectorsPerThread(
     (samples) => samples.weightType || 'samples'
   );
 
-  const getCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> =
+  const getCallTreeTimings: Selector<CallTree.CallTreeTimings> =
     createSelector(
       threadSelectors.getPreviewFilteredSamplesForCallTree,
       getCallNodeInfo,
@@ -319,7 +319,7 @@ export function getStackAndSampleSelectorsPerThread(
             samples.stack,
             callNodeInfo.getStackIndexToCallNodeIndex()
           );
-        return CallTree.computeCallTreeCountsAndSummary(
+        return CallTree.computeCallTreeTimings(
           samples,
           sampleIndexToCallNodeIndex,
           callNodeInfo,
@@ -332,7 +332,7 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getPreviewFilteredThread,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
-    getCallTreeCountsAndSummary,
+    getCallTreeTimings,
     getWeightTypeForCallTree,
     CallTree.getCallTree
   );
@@ -379,7 +379,7 @@ export function getStackAndSampleSelectorsPerThread(
     createSelector(
       getFlameGraphOrderedCallNodeRows,
       (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
-      getCallTreeCountsAndSummary,
+      getCallTreeTimings,
       FlameGraph.getFlameGraphTiming
     );
 
