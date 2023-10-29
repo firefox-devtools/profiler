@@ -78,7 +78,6 @@ describe('unfiltered call tree', function () {
             callNodeInfo.stackIndexToCallNodeIndex
           ),
           callNodeInfo,
-          profile.meta.interval,
           false
         )
       ).toEqual({
@@ -125,7 +124,6 @@ describe('unfiltered call tree', function () {
             callNodeInfo.stackIndexToCallNodeIndex
           ),
           callNodeInfo,
-          profile.meta.interval,
           false /* inverted */
         );
 
@@ -434,7 +432,6 @@ describe('inverted call tree', function () {
       E                Z           Y
                                    Z
     `).profile;
-    const { interval } = profile.meta;
     const categories = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
@@ -456,15 +453,12 @@ describe('inverted call tree', function () {
         callNodeInfo.stackIndexToCallNodeIndex
       ),
       callNodeInfo,
-      interval,
       true
     );
     const callTree = getCallTree(
       thread,
-      interval,
       callNodeInfo,
       categories,
-      'combined',
       callTreeCountsAndSummary,
       'samples'
     );
@@ -500,15 +494,12 @@ describe('inverted call tree', function () {
         invertedCallNodeInfo.stackIndexToCallNodeIndex
       ),
       invertedCallNodeInfo,
-      interval,
       true
     );
     const invertedCallTree = getCallTree(
       invertedThread,
-      interval,
       invertedCallNodeInfo,
       categories,
-      'combined',
       invertedCallTreeCountsAndSummary,
       'samples'
     );
@@ -623,7 +614,6 @@ describe('diffing trees', function () {
     const profile = getProfile();
 
     const thread = profile.threads[2];
-    const { interval } = profile.meta;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
@@ -641,7 +631,6 @@ describe('diffing trees', function () {
         callNodeInfo.stackIndexToCallNodeIndex
       ),
       callNodeInfo,
-      interval,
       false
     );
     expect(callTreeCountsAndSummary.rootTotalSummary).toBe(4);
