@@ -68,13 +68,39 @@ export type CallNodeTable = {
   length: number,
 };
 
+export type NodeIndex = number;
+
+export interface Tree<DisplayData> {
+  getDepth(NodeIndex): number;
+  getRoots(): NodeIndex[];
+  getDisplayData(NodeIndex): DisplayData;
+  getParent(NodeIndex): NodeIndex | -1;
+  getChildren(NodeIndex): NodeIndex[];
+  hasChildren(NodeIndex): boolean;
+  getAllDescendants(NodeIndex): Set<NodeIndex>;
+}
+
+export type IndexIntoInvertedOrdering = number;
+
+export type InvertedCallTreeRoot = {|
+  func: IndexIntoFuncTable,
+  callNodeSortIndexRangeStart: IndexIntoInvertedOrdering,
+  callNodeSortIndexRangeEnd: IndexIntoInvertedOrdering,
+|};
+
+export type InvertedTreeStuff = {|
+  orderedSelfNodes: Uint32Array, // IndexIntoCallNodeTable[],
+  orderingIndexForSelfNode: Int32Array, // Map<IndexIntoCallNodeTable, IndexIntoInvertedOrdering>,
+  roots: InvertedCallTreeRoot[],
+|};
+
 export interface CallNodeInfo {
   getCallNodeTable(): CallNodeTable;
   getStackIndexToCallNodeIndex(): Int32Array;
   isInverted(): boolean;
   getNonInvertedCallNodeTable(): CallNodeTable;
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
-  getNonInvertedCallNodesUsedAsSelf(): IndexIntoCallNodeTable[] | null;
+  getInvertedTreeStuff(): InvertedTreeStuff | null;
 
   getCallNodePathFromIndex(
     callNodeIndex: IndexIntoCallNodeTable | null
@@ -95,6 +121,10 @@ export interface CallNodeInfo {
   getCallNodeIndexFromParentAndFunc(
     parent: IndexIntoCallNodeTable | -1,
     func: IndexIntoFuncTable
+  ): IndexIntoCallNodeTable | null;
+
+  getParentCallNodeIndex(
+    callNodeIndex: IndexIntoCallNodeTable
   ): IndexIntoCallNodeTable | null;
 }
 
@@ -552,15 +582,17 @@ export type ProfileFilterPageData = {|
 |};
 
 /**
- * This struct contains the traced timing for each call node. The arrays are indexed
- * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
- * traced timing is computed by summing the distance between samples for a given call
- * node. See the `computeTracedTiming` for more details.
+ * This struct contains the timing for each call node. The arrays are indexed
+ * by the CallNodeIndex. The values in the Float32Arrays depend on the context:
+ *  - When used for "traced" timing, the values are Milliseconds.
+ *  - Otherwise, the values are in the same unit as the sample weight type.
  */
-export type TracedTiming = {|
-  +self: Float32Array,
-  +running: Float32Array,
+export type CallNodeSummary = {|
+  self: Float32Array,
+  total: Float32Array,
 |};
+
+export type SelfAndTotal = {| self: number, total: number |};
 
 /*
  * Event delay table that holds the pre-processed event delay values and other

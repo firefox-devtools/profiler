@@ -42,8 +42,9 @@ import type {
   StartEndRange,
   Selector,
   $ReturnType,
-  TracedTiming,
+  CallNodeSummary,
   ThreadsKey,
+  SelfAndTotal,
 } from 'firefox-profiler/types';
 
 import type { ThreadSelectorsPerThread } from './thread';
@@ -307,26 +308,28 @@ export function getStackAndSampleSelectorsPerThread(
     (samples) => samples.weightType || 'samples'
   );
 
-  const getCallTreeTimings: Selector<CallTree.CallTreeTimings> =
+  const getSampleIndexToNonInvertedCallNodeIndexForPreviewFilteredThread: Selector<
+    Array<IndexIntoCallNodeTable | null>,
+  > = createSelector(
+    (state) =>
+      threadSelectors.getPreviewFilteredSamplesForCallTree(state).stack,
+    (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
+    ProfileData.getSampleIndexToCallNodeIndex
+  );
+
+  const getCallNodeSelfAndSummaryForPreviewFilteredThread: Selector<CallTree.CallNodeSelfAndSummary> =
     createSelector(
       threadSelectors.getPreviewFilteredSamplesForCallTree,
-      getCallNodeInfo,
-      ProfileSelectors.getProfileInterval,
-      UrlState.getInvertCallstack,
-      (samples, callNodeInfo, interval, invertCallStack) => {
-        const sampleIndexToCallNodeIndex =
-          ProfileData.getSampleIndexToCallNodeIndex(
-            samples.stack,
-            callNodeInfo.getStackIndexToCallNodeIndex()
-          );
-        return CallTree.computeCallTreeTimings(
-          samples,
-          sampleIndexToCallNodeIndex,
-          callNodeInfo,
-          invertCallStack
-        );
-      }
+      (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
+      getSampleIndexToNonInvertedCallNodeIndexForPreviewFilteredThread,
+      CallTree.computeCallNodeSelfAndSummary
     );
+
+  const getCallTreeTimings: Selector<CallTree.CallTreeTimings> = createSelector(
+    getCallNodeSelfAndSummaryForPreviewFilteredThread,
+    getCallNodeInfo,
+    CallTree.computeCallTreeTimings
+  );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getPreviewFilteredThread,
@@ -334,7 +337,15 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileSelectors.getCategories,
     getCallTreeTimings,
     getWeightTypeForCallTree,
-    CallTree.getCallTree
+    (thread, callNodeInfo, categories, callTreeTimings, weightType) => {
+      return CallTree.getCallTree(
+        thread,
+        callNodeInfo,
+        categories,
+        callTreeTimings,
+        weightType
+      );
+    }
   );
 
   const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
@@ -350,13 +361,56 @@ export function getStackAndSampleSelectorsPerThread(
       getAddressTimings
     );
 
-  const getTracedTiming: Selector<TracedTiming | null> = createSelector(
-    threadSelectors.getFilteredSamplesForCallTree,
-    getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
-    UrlState.getInvertCallstack,
-    CallTree.computeTracedTiming
-  );
+  // TODO: We're using the filtered thread for computing traced timings; shouldn't
+  // we be using the preview filtered thread, for consistent sidebar numbers during
+  // preview selections?
+  const getCallNodeTracedSelfAndSummary: Selector<CallTree.CallNodeSelfAndSummary | null> =
+    createSelector(
+      threadSelectors.getFilteredSamplesForCallTree,
+      (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
+      getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
+      ProfileSelectors.getProfileInterval,
+      CallTree.computeCallNodeTracedSelfAndSummary
+    );
+
+  const getTracedTiming: Selector<CallTree.CallTreeTimings | null> =
+    createSelector(
+      getCallNodeTracedSelfAndSummary,
+      getCallNodeInfo,
+      (callNodeTracedSelfAndSummary, callNodeInfo) =>
+        callNodeTracedSelfAndSummary !== null
+          ? CallTree.computeCallTreeTimings(
+              callNodeTracedSelfAndSummary,
+              callNodeInfo
+            )
+          : null
+    );
+
+  const getTracedTimingNonInverted: Selector<CallNodeSummary | null> =
+    createSelector(getTracedTiming, (tracedCallTreeTimings) => {
+      if (
+        tracedCallTreeTimings === null ||
+        tracedCallTreeTimings.type !== 'NON_INVERTED'
+      ) {
+        return null;
+      }
+      return tracedCallTreeTimings.timings.callNodeSummary;
+    });
+
+  const getTracedSelfAndTotalForSelectedCallNode: Selector<SelfAndTotal | null> =
+    createSelector(
+      getSelectedCallNodeIndex,
+      getCallNodeInfo,
+      getTracedTiming,
+      (selectedCallNodeIndex, callNodeInfo, tracedTiming) =>
+        selectedCallNodeIndex !== null && tracedTiming !== null
+          ? CallTree.getSelfAndTotalForCallNode(
+              selectedCallNodeIndex,
+              callNodeInfo,
+              tracedTiming
+            )
+          : null
+    );
 
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
     createSelector(
@@ -420,6 +474,8 @@ export function getStackAndSampleSelectorsPerThread(
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,
+    getTracedTimingNonInverted,
+    getTracedSelfAndTotalForSelectedCallNode,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepth,
     getPreviewFilteredCallNodeMaxDepth,

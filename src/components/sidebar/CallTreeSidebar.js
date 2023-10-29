@@ -30,10 +30,10 @@ import type {
   ThreadsKey,
   CategoryList,
   IndexIntoCallNodeTable,
-  TracedTiming,
   Milliseconds,
   WeightType,
   IndexIntoCategoryList,
+  SelfAndTotal,
 } from 'firefox-profiler/types';
 
 import type {
@@ -291,7 +291,7 @@ type StateProps = {|
   +timings: TimingsForPath,
   +categoryList: CategoryList,
   +weightType: WeightType,
-  +tracedTiming: TracedTiming | null,
+  +selectedNodeTracedSelfAndTotal: SelfAndTotal | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -352,7 +352,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
       timings,
       categoryList,
       weightType,
-      tracedTiming,
+      selectedNodeTracedSelfAndTotal,
     } = this.props;
     const {
       forPath: { selfTime, totalTime },
@@ -402,24 +402,24 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           <h4 className="sidebar-title3">
             <div>Call node details</div>
           </h4>
-          {tracedTiming ? (
+          {selectedNodeTracedSelfAndTotal ? (
             <SidebarDetail
               label="Traced running time"
               value={formatMilliseconds(
-                tracedTiming.running[selectedNodeIndex],
+                selectedNodeTracedSelfAndTotal.total,
                 3,
                 1
               )}
             ></SidebarDetail>
           ) : null}
-          {tracedTiming ? (
+          {selectedNodeTracedSelfAndTotal ? (
             <SidebarDetail
               label="Traced self time"
               value={
-                tracedTiming.self[selectedNodeIndex] === 0
+                selectedNodeTracedSelfAndTotal.self === 0
                   ? '—'
                   : formatMilliseconds(
-                      tracedTiming.self[selectedNodeIndex],
+                      selectedNodeTracedSelfAndTotal.self,
                       3,
                       1
                     )
@@ -507,7 +507,8 @@ export const CallTreeSidebar = explicitConnect<{||}, StateProps, {||}>({
     timings: selectedNodeSelectors.getTimingsForSidebar(state),
     categoryList: getCategories(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
-    tracedTiming: selectedThreadSelectors.getTracedTiming(state),
+    selectedNodeTracedSelfAndTotal:
+      selectedThreadSelectors.getTracedSelfAndTotalForSelectedCallNode(state),
   }),
   component: CallTreeSidebarImpl,
 });

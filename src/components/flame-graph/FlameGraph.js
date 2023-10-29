@@ -42,7 +42,7 @@ import type {
   CallTreeSummaryStrategy,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  TracedTiming,
+  CallNodeSummary,
   ThreadsKey,
   InnerWindowID,
   Page,
@@ -87,7 +87,7 @@ type StateProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: TracedTiming | null,
+  +tracedTiming: CallNodeSummary | null,
   +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
@@ -442,7 +442,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
       selectedThreadSelectors.getPreviewFilteredSamplesForCallTree(state),
     unfilteredSamples:
       selectedThreadSelectors.getUnfilteredSamplesForCallTree(state),
-    tracedTiming: selectedThreadSelectors.getTracedTiming(state),
+    tracedTiming: selectedThreadSelectors.getTracedTimingNonInverted(state),
     displayImplementation: getProfileUsesFrameImplementation(state),
     displayStackType: getProfileUsesMultipleStackTypes(state),
   }),

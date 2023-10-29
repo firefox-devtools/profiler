@@ -51,6 +51,7 @@ import {
   processCounter,
   type BreakdownByCategory,
 } from '../../profile-logic/profile-data';
+import { getSelfAndTotalForCallNode } from '../../profile-logic/call-tree';
 
 import type {
   TrackReference,
@@ -3209,16 +3210,23 @@ describe('traced timing', function () {
     dispatch(ProfileView.changeInvertCallstack(inverted));
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
 
-    const { running, self } = ensureExists(
+    const tracedTiming = ensureExists(
       selectedThreadSelectors.getTracedTiming(getState()),
       'Expected to get a traced timing.'
     );
 
     return {
       funcNames: funcNamesDictPerThread[0],
-      getCallNode: (...callNodePath) =>
-        ensureExists(callNodeInfo.getCallNodeIndexFromPath(callNodePath)),
-      running,
+      getSelfAndTotal: (...callNodePath) => {
+        const callNodeIndex = ensureExists(
+          callNodeInfo.getCallNodeIndexFromPath(callNodePath)
+        );
+        return getSelfAndTotalForCallNode(
+          callNodeIndex,
+          callNodeInfo,
+          tracedTiming
+        );
+      },
       self,
       profile,
     };
@@ -3227,9 +3235,7 @@ describe('traced timing', function () {
   it('computes traced timing', function () {
     const {
       funcNames: { A, B, C },
-      getCallNode,
-      running,
-      self,
+      getSelfAndTotal,
       profile,
     } = setup(
       { inverted: false },
@@ -3240,24 +3246,18 @@ describe('traced timing', function () {
       `
     );
 
-    expect(running[getCallNode(A)]).toBe(6);
-    expect(self[getCallNode(A)]).toBe(2);
-
-    expect(running[getCallNode(A, B)]).toBe(4);
-    expect(self[getCallNode(A, B)]).toBe(4);
+    expect(getSelfAndTotal(A)).toEqual({ self: 2, total: 6 });
+    expect(getSelfAndTotal(A, B)).toEqual({ self: 4, total: 4 });
 
     // This is the last sample, which is deduced to be the interval length.
-    expect(running[getCallNode(C)]).toBe(profile.meta.interval);
-    expect(self[getCallNode(C)]).toBe(profile.meta.interval);
+    const interval = profile.meta.interval;
+    expect(getSelfAndTotal(C)).toEqual({ self: interval, total: interval });
   });
 
   it('computes traced timing for an inverted tree', function () {
     const {
       funcNames: { A, B, C },
-      getCallNode,
-      running,
-      // Rename self to make the assertions more readable.
-      self: self___,
+      getSelfAndTotal,
     } = setup(
       { inverted: true },
       `
@@ -3278,23 +3278,12 @@ describe('traced timing', function () {
     // Running: [ 1, 4, 4, 1.5, 1, 1 ]
     // Self:    [ 1, 4, 0, 1.5, 0, 0 ]
 
-    expect(running[getCallNode(A)]).toBe(1);
-    expect(self___[getCallNode(A)]).toBe(1);
-
-    expect(running[getCallNode(B)]).toBe(4);
-    expect(self___[getCallNode(B)]).toBe(4);
-
-    expect(running[getCallNode(B, A)]).toBe(4);
-    expect(self___[getCallNode(B, A)]).toBe(0);
-
-    expect(running[getCallNode(C)]).toBe(1.5);
-    expect(self___[getCallNode(C)]).toBe(1.5);
-
-    expect(running[getCallNode(C, B)]).toBe(1);
-    expect(self___[getCallNode(C, B)]).toBe(0);
-
-    expect(running[getCallNode(C, B, A)]).toBe(1);
-    expect(self___[getCallNode(C, B, A)]).toBe(0);
+    expect(getSelfAndTotal(A)).toEqual({ self: 1, total: 1 });
+    expect(getSelfAndTotal(B)).toEqual({ self: 4, total: 4 });
+    expect(getSelfAndTotal(B, A)).toEqual({ self: 0, total: 4 });
+    expect(getSelfAndTotal(C)).toEqual({ self: 1.5, total: 1.5 });
+    expect(getSelfAndTotal(C, B)).toEqual({ self: 0, total: 1 });
+    expect(getSelfAndTotal(C, B, A)).toEqual({ self: 0, total: 1 });
   });
 
   it('does not compute traced timing for other types', function () {
@@ -3309,7 +3298,9 @@ describe('traced timing', function () {
     samples.weight = samples.time.map(() => 1);
 
     const { getState } = storeWithProfile(profile);
-    expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
+    expect(selectedThreadSelectors.getTracedTimingNonInverted(getState())).toBe(
+      null
+    );
   });
 });
 

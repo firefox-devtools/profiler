@@ -82,6 +82,7 @@ import type {
   BottomBoxInfo,
   Bytes,
   ThreadWithReservedFunctions,
+  InvertedTreeStuff,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -409,7 +410,7 @@ class CallNodeInfoRegular implements CallNodeInfo {
   _nonInvertedCallNodeTable: CallNodeTable;
   _stackIndexToCallNodeIndex: Int32Array;
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
-  _nonInvertedCallNodesUsedAsSelf: IndexIntoCallNodeTable[] | null;
+  _invertedTreeStuff: InvertedTreeStuff | null;
   _stackTable: StackTable;
   _isInverted: boolean;
 
@@ -423,7 +424,7 @@ class CallNodeInfoRegular implements CallNodeInfo {
     nonInvertedCallNodeTable: CallNodeTable,
     stackIndexToCallNodeIndex: Int32Array,
     stackIndexToNonInvertedCallNodeIndex: Int32Array,
-    nonInvertedCallNodesUsedAsSelf: IndexIntoCallNodeTable[] | null,
+    invertedTreeStuff: InvertedTreeStuff | null,
     stackTable: StackTable,
     isInverted: boolean
   ) {
@@ -432,7 +433,7 @@ class CallNodeInfoRegular implements CallNodeInfo {
     this._stackIndexToCallNodeIndex = stackIndexToCallNodeIndex;
     this._stackIndexToNonInvertedCallNodeIndex =
       stackIndexToNonInvertedCallNodeIndex;
-    this._nonInvertedCallNodesUsedAsSelf = nonInvertedCallNodesUsedAsSelf;
+    this._invertedTreeStuff = invertedTreeStuff;
     this._stackTable = stackTable;
     this._isInverted = isInverted;
   }
@@ -452,8 +453,8 @@ class CallNodeInfoRegular implements CallNodeInfo {
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
     return this._stackIndexToNonInvertedCallNodeIndex;
   }
-  getNonInvertedCallNodesUsedAsSelf(): IndexIntoCallNodeTable[] | null {
-    return this._nonInvertedCallNodesUsedAsSelf;
+  getInvertedTreeStuff(): InvertedTreeStuff | null {
+    return this._invertedTreeStuff;
   }
 
   // This function returns a CallNodePath from a CallNodeIndex.
@@ -592,6 +593,13 @@ class CallNodeInfoRegular implements CallNodeInfo {
 
     return null;
   }
+
+  getParentCallNodeIndex(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable | null {
+    const parentIndex = this._callNodeTable.prefix[callNodeIndex];
+    return parentIndex === -1 ? null : parentIndex;
+  }
 }
 
 type CallNodeInfoComponents = {
@@ -642,12 +650,53 @@ export function getInvertedCallNodeInfo(
       );
     }
   }
+  const orderedSelfNodes = Uint32Array.from(nonInvertedCallNodesUsedAsSelf);
+  orderedSelfNodes.sort((a, b) =>
+    compareCallNodesInverted(a, b, nonInvertedCallNodeTable)
+  );
+  const orderingIndexForSelfNode = new Int32Array(
+    nonInvertedCallNodeTable.length
+  );
+  orderingIndexForSelfNode.fill(-1);
+  const invertedRoots = [];
+  let currentRootFunc = null;
+  let currentRootStartSortIndex = 0;
+  for (let i = 0; i < orderedSelfNodes.length; i++) {
+    const currentCallNode = orderedSelfNodes[i];
+    orderingIndexForSelfNode[currentCallNode] = i;
+    const currentFunc = nonInvertedCallNodeTable.func[currentCallNode];
+    if (currentFunc !== currentRootFunc) {
+      if (currentRootFunc !== null) {
+        invertedRoots.push({
+          func: currentRootFunc,
+          callNodeSortIndexRangeStart: currentRootStartSortIndex,
+          callNodeSortIndexRangeEnd: i,
+        });
+      }
+      currentRootFunc = currentFunc;
+      currentRootStartSortIndex = i;
+    }
+  }
+  if (currentRootFunc !== null) {
+    invertedRoots.push({
+      func: currentRootFunc,
+      callNodeSortIndexRangeStart: currentRootStartSortIndex,
+      callNodeSortIndexRangeEnd: orderedSelfNodes.length,
+    });
+  }
+
+  const invertedTreeStuff = {
+    orderedSelfNodes,
+    orderingIndexForSelfNode,
+    roots: invertedRoots,
+  };
+
   return new CallNodeInfoRegular(
     callNodeTable,
     nonInvertedCallNodeTable,
     stackIndexToInvertedCallNodeIndex,
     stackIndexToNonInvertedCallNodeIndex,
-    Array.from(nonInvertedCallNodesUsedAsSelf),
+    invertedTreeStuff,
     thread.stackTable,
     true
   );
@@ -2854,6 +2903,37 @@ export function _getTreeOrderComparatorNonInverted(
   };
 }
 
+// Compare two non-inverted call nodes by their "inverted order".
+// The inverted order is defined as the lexicographical order of the inverted call path.
+export function compareCallNodesInverted(
+  callNodeA: IndexIntoCallNodeTable,
+  callNodeB: IndexIntoCallNodeTable,
+  nonInvertedCallNodeTable: CallNodeTable
+): number {
+  // Walk up both and stop at the first non-matching function.
+  // Walking up the non-inverted tree is equivalent to walking down the
+  // inverted tree.
+  while (true) {
+    const funcA = nonInvertedCallNodeTable.func[callNodeA];
+    const funcB = nonInvertedCallNodeTable.func[callNodeB];
+    if (funcA !== funcB) {
+      return funcA - funcB;
+    }
+    callNodeA = nonInvertedCallNodeTable.prefix[callNodeA];
+    callNodeB = nonInvertedCallNodeTable.prefix[callNodeB];
+    if (callNodeA === callNodeB) {
+      break;
+    }
+    if (callNodeA === -1) {
+      return 1;
+    }
+    if (callNodeB === -1) {
+      return -1;
+    }
+  }
+  return 0;
+}
+
 /**
  * TODO: Add a comment here with a bunch of examples
  * Especially make sure to describe what happens if one is a suffix of the other.
@@ -2867,8 +2947,8 @@ export function _getTreeOrderComparatorInverted(
     sampleA: IndexIntoSamplesTable,
     sampleB: IndexIntoSamplesTable
   ): number {
-    let callNodeA = sampleNonInvertedCallNodes[sampleA];
-    let callNodeB = sampleNonInvertedCallNodes[sampleB];
+    const callNodeA = sampleNonInvertedCallNodes[sampleA];
+    const callNodeB = sampleNonInvertedCallNodes[sampleB];
 
     if (callNodeA === callNodeB) {
       // Both are filtered out or both are the same.
@@ -2882,28 +2962,11 @@ export function _getTreeOrderComparatorInverted(
       // B filtered out, A not filtered out. B goes after A.
       return -1;
     }
-    // Walk up both and stop at the first non-matching function.
-    // Walking up the non-inverted tree is equivalent to walking down the
-    // inverted tree.
-    while (true) {
-      const funcA = nonInvertedCallNodeTable.func[callNodeA];
-      const funcB = nonInvertedCallNodeTable.func[callNodeB];
-      if (funcA !== funcB) {
-        return funcA - funcB;
-      }
-      callNodeA = nonInvertedCallNodeTable.prefix[callNodeA];
-      callNodeB = nonInvertedCallNodeTable.prefix[callNodeB];
-      if (callNodeA === callNodeB) {
-        break;
-      }
-      if (callNodeA === -1) {
-        return 1;
-      }
-      if (callNodeB === -1) {
-        return -1;
-      }
-    }
-    return 0;
+    return compareCallNodesInverted(
+      callNodeA,
+      callNodeB,
+      nonInvertedCallNodeTable
+    );
   };
 }
 

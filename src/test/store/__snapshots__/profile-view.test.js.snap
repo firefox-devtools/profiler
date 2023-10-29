@@ -2277,6 +2277,7 @@ CallNodeInfoRegular {
       0,
     ],
   },
+  "_invertedTreeStuff": null,
   "_isInverted": false,
   "_nonInvertedCallNodeTable": Object {
     "category": Int32Array [
@@ -2371,7 +2372,6 @@ CallNodeInfoRegular {
       0,
     ],
   },
-  "_nonInvertedCallNodesUsedAsSelf": null,
   "_stackIndexToCallNodeIndex": Int32Array [
     0,
     1,
@@ -2439,7 +2439,7 @@ CallNodeInfoRegular {
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCallTree 1`] = `
-CallTree {
+CallTreeNonInverted {
   "_callNodeChildCount": Uint32Array [
     1,
     1,
@@ -2545,6 +2545,7 @@ CallTree {
         0,
       ],
     },
+    "_invertedTreeStuff": null,
     "_isInverted": false,
     "_nonInvertedCallNodeTable": Object {
       "category": Int32Array [
@@ -2639,7 +2640,6 @@ CallTree {
         0,
       ],
     },
-    "_nonInvertedCallNodesUsedAsSelf": null,
     "_stackIndexToCallNodeIndex": Int32Array [
       0,
       1,

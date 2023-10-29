@@ -142,7 +142,12 @@ export function getFlameGraphTiming(
   callNodeTable: CallNodeTable,
   callTreeTimings: CallTreeTimings
 ): FlameGraphTiming {
-  const { callNodeSummary, rootTotalSummary } = callTreeTimings;
+  if (callTreeTimings.type !== 'NON_INVERTED') {
+    throw new Error(
+      'getFlameGraphTiming should only be used with the non-inverted tree'
+    );
+  }
+  const { callNodeSummary, rootTotalSummary } = callTreeTimings.timings;
   const { total, self } = callNodeSummary;
   const { prefix } = callNodeTable;
 
