@@ -23,7 +23,7 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
-AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>App web para el anáisis de rendimiento de { -firefox-brand-name }</subheader>
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>App web para el análisis de rendimiento de { -firefox-brand-name }</subheader>
 AppHeader--github-icon =
     .title = Ir a nuestro repositorio Git (se abrirá en una nueva ventana)
 
