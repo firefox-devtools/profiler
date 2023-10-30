@@ -79,8 +79,6 @@ export class CallTree {
   // _children is indexed by IndexIntoCallNodeTable. Since they are
   // integers, using an array directly is faster than going through a Map.
   _children: Array<CallNodeChildren>;
-  _jsOnly: boolean;
-  _interval: number;
   _isHighPrecision: boolean;
   _weightType: WeightType;
 
@@ -92,8 +90,6 @@ export class CallTree {
     callNodeChildCount: Uint32Array,
     rootTotalSummary: number,
     rootCount: number,
-    jsOnly: boolean,
-    interval: number,
     isHighPrecision: boolean,
     weightType: WeightType
   ) {
@@ -107,8 +103,6 @@ export class CallTree {
     this._rootCount = rootCount;
     this._displayDataByIndex = new Map();
     this._children = [];
-    this._jsOnly = jsOnly;
-    this._interval = interval;
     this._isHighPrecision = isHighPrecision;
     this._weightType = weightType;
   }
@@ -183,10 +177,6 @@ export class CallTree {
 
   getDepth(callNodeIndex: IndexIntoCallNodeTable): number {
     return this._callNodeTable.depth[callNodeIndex];
-  }
-
-  hasSameNodeIds(tree: CallTree): boolean {
-    return this._callNodeTable === tree._callNodeTable;
   }
 
   getNodeData(callNodeIndex: IndexIntoCallNodeTable): CallNodeData {
@@ -471,7 +461,6 @@ export function computeCallTreeCountsAndSummary(
   samples: SamplesLikeTable,
   sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
   { callNodeTable }: CallNodeInfo,
-  interval: Milliseconds,
   invertCallstack: boolean
 ): CallTreeCountsAndSummary {
   // Inverted trees need a different method for computing the timing.
@@ -525,15 +514,11 @@ export function computeCallTreeCountsAndSummary(
 
 /**
  * An exported interface to get an instance of the CallTree class.
- * This handles computing timing information, and passing it all into
- * the CallTree constructor.
  */
 export function getCallTree(
   thread: Thread,
-  interval: Milliseconds,
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
-  implementationFilter: string,
   callTreeCountsAndSummary: CallTreeCountsAndSummary,
   weightType: WeightType
 ): CallTree {
@@ -541,8 +526,6 @@ export function getCallTree(
     const { callNodeSummary, callNodeChildCount, rootTotalSummary, rootCount } =
       callTreeCountsAndSummary;
 
-    const jsOnly = implementationFilter === 'js';
-    // By default add a single decimal value, e.g 13.1, 0.3, 5234.4
     return new CallTree(
       thread,
       categories,
@@ -551,8 +534,6 @@ export function getCallTree(
       callNodeChildCount,
       rootTotalSummary,
       rootCount,
-      jsOnly,
-      interval,
       Boolean(thread.isJsTracer),
       weightType
     );
