@@ -371,8 +371,8 @@ MarkerSidebar--select-a-marker = Wählen Sie eine Markierung aus, um Information
 
 MarkerTable--start = Beginn
 MarkerTable--duration = Dauer
-MarkerTable--type = Typ
-MarkerTable--description = Beschreibung
+MarkerTable--name = Name
+MarkerTable--details = Details
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
