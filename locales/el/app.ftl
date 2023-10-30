@@ -390,8 +390,8 @@ MarkerSidebar--select-a-marker = Επιλέξτε σημάδι για προβο
 
 MarkerTable--start = Έναρξη
 MarkerTable--duration = Διάρκεια
-MarkerTable--type = Τύπος
-MarkerTable--description = Περιγραφή
+MarkerTable--name = Όνομα
+MarkerTable--details = Λεπτομέρειες
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.

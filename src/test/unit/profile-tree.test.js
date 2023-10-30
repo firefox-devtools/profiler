@@ -78,7 +78,6 @@ describe('unfiltered call tree', function () {
             callNodeInfo.stackIndexToCallNodeIndex
           ),
           callNodeInfo,
-          profile.meta.interval,
           false
         )
       ).toEqual({
@@ -125,7 +124,6 @@ describe('unfiltered call tree', function () {
             callNodeInfo.stackIndexToCallNodeIndex
           ),
           callNodeInfo,
-          profile.meta.interval,
           false /* inverted */
         );
 
@@ -303,18 +301,6 @@ describe('unfiltered call tree', function () {
       });
     });
 
-    describe('hasSameNodeIds()', function () {
-      it('determines if the node IDs are the same between two trees', function () {
-        // This is tested through strict equality, so re-generating callNodes is
-        // the only thing this method expects.
-        const otherTree = callTreeFromProfile(
-          getProfileFromTextSamples('A').profile
-        );
-        expect(callTree.hasSameNodeIds(callTree)).toBe(true);
-        expect(callTree.hasSameNodeIds(otherTree)).toBe(false);
-      });
-    });
-
     describe('getNodeData()', function () {
       it('gets a node for a given callNodeIndex', function () {
         expect(callTree.getNodeData(A)).toEqual({
@@ -446,7 +432,6 @@ describe('inverted call tree', function () {
       E                Z           Y
                                    Z
     `).profile;
-    const { interval } = profile.meta;
     const categories = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
@@ -468,15 +453,12 @@ describe('inverted call tree', function () {
         callNodeInfo.stackIndexToCallNodeIndex
       ),
       callNodeInfo,
-      interval,
       true
     );
     const callTree = getCallTree(
       thread,
-      interval,
       callNodeInfo,
       categories,
-      'combined',
       callTreeCountsAndSummary,
       'samples'
     );
@@ -512,15 +494,12 @@ describe('inverted call tree', function () {
         invertedCallNodeInfo.stackIndexToCallNodeIndex
       ),
       invertedCallNodeInfo,
-      interval,
       true
     );
     const invertedCallTree = getCallTree(
       invertedThread,
-      interval,
       invertedCallNodeInfo,
       categories,
-      'combined',
       invertedCallTreeCountsAndSummary,
       'samples'
     );
@@ -635,7 +614,6 @@ describe('diffing trees', function () {
     const profile = getProfile();
 
     const thread = profile.threads[2];
-    const { interval } = profile.meta;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
@@ -653,7 +631,6 @@ describe('diffing trees', function () {
         callNodeInfo.stackIndexToCallNodeIndex
       ),
       callNodeInfo,
-      interval,
       false
     );
     expect(callTreeCountsAndSummary.rootTotalSummary).toBe(4);

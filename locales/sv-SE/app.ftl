@@ -390,8 +390,8 @@ MarkerSidebar--select-a-marker = Välj en markör för att visa information om d
 
 MarkerTable--start = Börja
 MarkerTable--duration = Längd
-MarkerTable--type = Typ
-MarkerTable--description = Beskrivning
+MarkerTable--name = Namn
+MarkerTable--details = Detaljer
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.

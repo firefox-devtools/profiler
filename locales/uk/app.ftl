@@ -391,8 +391,8 @@ MarkerSidebar--select-a-marker = Виберіть маркер для показ
 
 MarkerTable--start = Почати
 MarkerTable--duration = Тривалість
-MarkerTable--type = Тип
-MarkerTable--description = Опис
+MarkerTable--name = Назва
+MarkerTable--details = Подробиці
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.

@@ -123,6 +123,7 @@ export type CpuProfileEvent = TracingEvent<{|
 |}>;
 
 // A node performance profile only outputs this.
+// See https://chromedevtools.github.io/devtools-protocol/tot/Profiler/#type-Profile
 type CpuProfileData = {
   nodes?: Array<{
     callFrame: {
@@ -137,8 +138,8 @@ type CpuProfileData = {
   }>,
   samples: number[], // Index into cpuProfile nodes
   timeDeltas: number[],
-  startTime: number,
-  endTime: number,
+  startTime: number, // microseconds
+  endTime: number, // microseconds
 };
 
 type ThreadNameEvent = TracingEvent<{|
@@ -674,6 +675,13 @@ async function processTracingEvents(
           stackTable.prefix.push(prefixStackIndex);
           nodeIdToStackId.set(nodeIndex, stackTable.length++);
         }
+      }
+
+      if (profileEvent.name === 'CpuProfile') {
+        profile.meta.profilingStartTime =
+          profileEvent.args.data.cpuProfile.startTime / 1000;
+        profile.meta.profilingEndTime =
+          profileEvent.args.data.cpuProfile.endTime / 1000;
       }
 
       // Chrome profiles sample much more frequently than Gecko ones do, and they store

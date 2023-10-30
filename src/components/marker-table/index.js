@@ -39,7 +39,6 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
-import { getMarkerSchemaName } from '../../profile-logic/marker-schema';
 
 // Limit how many characters in the description get sent to the DOM.
 const MAX_DESCRIPTION_CHARACTERS = 500;
@@ -48,7 +47,7 @@ type MarkerDisplayData = {|
   start: string,
   duration: string | null,
   name: string,
-  type: string,
+  details: string,
 |};
 
 class MarkerTree {
@@ -99,21 +98,16 @@ class MarkerTree {
     return 0;
   }
 
-  hasSameNodeIds(tree) {
-    return this._markerIndexes === tree._markerIndexes;
-  }
-
   getDisplayData(markerIndex: MarkerIndex): MarkerDisplayData {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {
       const marker = this._getMarker(markerIndex);
+      let details = this._getMarkerLabel(markerIndex);
 
-      let name = this._getMarkerLabel(markerIndex);
-
-      if (name.length > MAX_DESCRIPTION_CHARACTERS) {
+      if (details.length > MAX_DESCRIPTION_CHARACTERS) {
         // This was adapted from the log marker payloads as a general rule for
         // the marker table. This way no special handling is needed.
-        name = name.substring(0, MAX_DESCRIPTION_CHARACTERS) + '…';
+        details = details.substring(0, MAX_DESCRIPTION_CHARACTERS) + '…';
       }
 
       let duration = null;
@@ -126,12 +120,8 @@ class MarkerTree {
       displayData = {
         start: _formatStart(marker.start, this._zeroAt),
         duration,
-        name,
-        type: getMarkerSchemaName(
-          this._markerSchemaByName,
-          marker.name,
-          marker.data
-        ),
+        name: marker.name,
+        details,
       };
       this._displayDataByIndex.set(markerIndex, displayData);
     }
@@ -181,14 +171,14 @@ class MarkerTableImpl extends PureComponent<Props> {
       resizable: true,
     },
     {
-      propName: 'type',
-      titleL10nId: 'MarkerTable--type',
+      propName: 'name',
+      titleL10nId: 'MarkerTable--name',
       minWidth: 30,
       initialWidth: 150,
       resizable: true,
     },
   ];
-  _mainColumn = { propName: 'name', titleL10nId: 'MarkerTable--description' };
+  _mainColumn = { propName: 'details', titleL10nId: 'MarkerTable--details' };
   _expandedNodeIds: Array<MarkerIndex | null> = [];
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;

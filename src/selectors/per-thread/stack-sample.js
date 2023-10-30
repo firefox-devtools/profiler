@@ -314,7 +314,6 @@ export function getStackAndSampleSelectorsPerThread(
           samples,
           sampleIndexToCallNodeIndex,
           callNodeInfo,
-          interval,
           invertCallStack
         );
       }
@@ -322,10 +321,8 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getPreviewFilteredThread,
-    ProfileSelectors.getProfileInterval,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
-    UrlState.getImplementationFilter,
     getCallTreeCountsAndSummary,
     getWeightTypeForCallTree,
     CallTree.getCallTree

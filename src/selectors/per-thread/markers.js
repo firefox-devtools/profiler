@@ -461,7 +461,15 @@ export function getMarkerSelectorsPerThread(
    * in the marker table.
    */
   const getMarkerLabelToCopyGetter: Selector<(MarkerIndex) => string> =
-    getMarkerTableLabelGetter;
+    createSelector(
+      getMarkerGetter,
+      ProfileSelectors.getMarkerSchema,
+      ProfileSelectors.getMarkerSchemaByName,
+      ProfileSelectors.getCategories,
+      threadSelectors.getStringTable,
+      () => 'copyLabel',
+      getLabelGetter
+    );
 
   /**
    * This organizes the result of the previous selector in rows to be nicely

@@ -286,7 +286,7 @@ describe('TimelineMarkers', function () {
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       clickOnMenuItem('Copy description');
-      expect(copy).toHaveBeenLastCalledWith('mousedown');
+      expect(copy).toHaveBeenLastCalledWith('DOMEvent — mousedown');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
       jest.runAllTimers();

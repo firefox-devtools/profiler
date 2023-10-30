@@ -113,7 +113,6 @@ export function callTreeFromProfile(
   threadIndex: number = 0
 ): CallTree {
   const thread = profile.threads[threadIndex] ?? getEmptyThread();
-  const { interval } = profile.meta;
   const categories = ensureExists(
     profile.meta.categories,
     'Expected to find categories'
@@ -129,15 +128,12 @@ export function callTreeFromProfile(
     thread.samples,
     getSampleIndexToCallNodeIndex(thread.samples.stack, callNodeInfo.stackIndexToCallNodeIndex),
     callNodeInfo,
-    interval,
     false
   );
   return getCallTree(
     thread,
-    interval,
     callNodeInfo,
     categories,
-    'combined',
     callTreeCountsAndSummary,
     'samples'
   );
