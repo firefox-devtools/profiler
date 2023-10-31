@@ -110,13 +110,12 @@ function snap(floatDeviceValue: DevicePixels): DevicePixels {
 }
 
 /**
- * Round the given value to a multiple of `integerFactor`.
+ * Round the given value to a multiple of 2.
  */
-function snapValueToMultipleOf(
-  floatDeviceValue: DevicePixels,
-  integerFactor: number
+function snapValueToMultipleOfTwo(
+  floatDeviceValue: DevicePixels
 ): DevicePixels {
-  return snap(floatDeviceValue / integerFactor) * integerFactor;
+  return snap(floatDeviceValue / 2) << 1;
 }
 
 class FlameGraphCanvasImpl extends React.PureComponent<Props> {
@@ -153,11 +152,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   }
 
   _scrollSelectionIntoView = () => {
-    const {
-      selectedCallNodeIndex,
-      maxStackDepth,
-      callNodeInfo,
-    } = this.props;
+    const { selectedCallNodeIndex, maxStackDepth, callNodeInfo } = this.props;
 
     if (selectedCallNodeIndex === null) {
       return;
@@ -281,12 +276,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         const deviceBoxLeftUnsnapped = boxLeftFraction * deviceContainerWidth;
         const deviceBoxRightUnsnapped = boxRightFraction * deviceContainerWidth;
 
-        const deviceBoxLeft: DevicePixels = snapValueToMultipleOf(
-          deviceBoxLeftUnsnapped,
-          2
+        const deviceBoxLeft: DevicePixels = snapValueToMultipleOfTwo(
+          deviceBoxLeftUnsnapped
         );
         const deviceBoxRight: DevicePixels =
-          snapValueToMultipleOf(deviceBoxRightUnsnapped, 2) - 0.8;
+          snapValueToMultipleOfTwo(deviceBoxRightUnsnapped) - 0.8;
 
         const deviceBoxWidth: DevicePixels = deviceBoxRight - deviceBoxLeft;
         if (deviceBoxWidth <= 0) {

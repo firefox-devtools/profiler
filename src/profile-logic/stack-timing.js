@@ -3,12 +3,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+
+import { bisectionLeft } from 'firefox-profiler/utils/bisect';
+
 import type {
   SamplesLikeTable,
   Milliseconds,
   CallNodeInfo,
-  CallNodeTable,
+  StackTable,
   IndexIntoCallNodeTable,
+  DevicePixels,
+  IndexIntoFuncTable,
+  IndexIntoSamplesTable,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
@@ -49,145 +56,545 @@ export type StackTimingDepth = number;
 export type IndexIntoStackTiming = number;
 
 export type StackTiming = {|
-  start: Milliseconds[],
-  end: Milliseconds[],
-  callNode: IndexIntoCallNodeTable[],
+  start: DevicePixels[],
+  end: DevicePixels[],
+  func: IndexIntoFuncTable[],
+  category: IndexIntoCategoryList[],
+  isSelectedPath: boolean[],
+  parentIndexInPreviousRow: IndexIntoStackTiming[],
   length: number,
 |};
 
-export type StackTimingByDepth = Array<StackTiming>;
+export type StackTimingByDepth = StackTiming[];
 
-type LastSeen = {
-  startTimeByDepth: number[],
-  callNodeIndexByDepth: IndexIntoCallNodeTable[],
-};
+function getEmptyStackTimingByDepth(
+  maxDepth: StackTimingDepth
+): StackTimingByDepth {
+  return Array.from({ length: maxDepth }, () => ({
+    start: [],
+    end: [],
+    func: [],
+    category: [],
+    isSelectedPath: [],
+    parentIndexInPreviousRow: [],
+    length: 0,
+  }));
+}
+
+/**
+ * Round the given value to integers, consistently rounding x.5 towards positive infinity.
+ * This is different from Math.round: Math.round rounds 0.5 to the right (to 1), and -0.5
+ * to the left (to -1).
+ * snap should be preferred over Math.round for rounding coordinates which might
+ * be negative, so that there is no discontinuity when a box moves past zero.
+ */
+function snap(floatDeviceValue: DevicePixels): DevicePixels {
+  return Math.floor(floatDeviceValue + 0.5);
+}
+
+/**
+ * Round the given value to a multiple of 2.
+ */
+function snapValueToMultipleOfTwo(
+  floatDeviceValue: DevicePixels
+): DevicePixels {
+  return snap(floatDeviceValue / 2) << 1;
+}
 
 /**
  * Build a StackTimingByDepth table from a given thread.
  */
 export function getStackTimingByDepth(
   samples: SamplesLikeTable,
+  stackTable: StackTable,
   callNodeInfo: CallNodeInfo,
   maxDepth: number,
+  timeRangeStart: Milliseconds,
+  timeRangeEnd: Milliseconds,
+  deviceWidth: DevicePixels,
+  selectedCallNode: IndexIntoCallNodeTable | null,
+  defaultCategory: IndexIntoCategoryList,
   interval: Milliseconds
 ): StackTimingByDepth {
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
-
-  const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
-    start: [],
-    end: [],
-    callNode: [],
-    length: 0,
-  }));
-
-  const lastSeen: LastSeen = {
-    startTimeByDepth: [],
-    callNodeIndexByDepth: [],
-  };
-
-  // Go through each sample, and push/pop it on the stack to build up
-  // the stackTimingByDepth.
-  let previousDepth = -1;
-  for (let i = 0; i < samples.length; i++) {
-    const stackIndex = samples.stack[i];
-    const sampleTime = samples.time[i];
-
-    // If this stack index is null (for instance if it was filtered out) then pop back
-    // down to the base stack.
-    if (stackIndex === null) {
-      _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, sampleTime);
-      previousDepth = -1;
-    } else {
-      const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
-      const depth = callNodeTable.depth[callNodeIndex];
-
-      // Find the depth of the nearest shared stack.
-      const depthToPop = _findNearestSharedCallNodeDepth(
-        callNodeTable,
-        callNodeIndex,
-        lastSeen,
-        depth
-      );
-      _popStacks(
-        stackTimingByDepth,
-        lastSeen,
-        depthToPop,
-        previousDepth,
-        sampleTime
-      );
-      _pushStacks(callNodeTable, lastSeen, depth, callNodeIndex, sampleTime);
-      previousDepth = depth;
-    }
+  if (timeRangeStart >= timeRangeEnd || deviceWidth <= 0) {
+    return getEmptyStackTimingByDepth(maxDepth);
   }
 
-  // Pop the remaining stacks
-  const lastIndex = samples.length - 1;
-  const endingTime = samples.time[lastIndex] + interval;
-  _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
+  let sampleIndexRangeStart = Math.max(
+    0,
+    bisectionLeft(samples.time, timeRangeStart) - 1
+  );
+  const sampleIndexRangeEnd = Math.min(
+    samples.length - 1,
+    bisectionLeft(samples.time, timeRangeEnd, sampleIndexRangeStart)
+  );
+
+  while (
+    sampleIndexRangeStart < sampleIndexRangeEnd &&
+    samples.stack[sampleIndexRangeStart] === null
+  ) {
+    sampleIndexRangeStart++;
+  }
+
+  if (sampleIndexRangeStart === sampleIndexRangeEnd) {
+    return getEmptyStackTimingByDepth(maxDepth);
+  }
+
+  const timeWindowSizeInMilliseconds = timeRangeEnd - timeRangeStart;
+  const devPxPerMs = deviceWidth / timeWindowSizeInMilliseconds;
+
+  const firstSampleTime = samples.time[sampleIndexRangeStart];
+  const firstSamplePos = snapValueToMultipleOfTwo(
+    (firstSampleTime - timeRangeStart) * devPxPerMs
+  );
+  const firstPos = Math.max(0, firstSamplePos);
+
+  const endTime =
+    sampleIndexRangeEnd < samples.length
+      ? samples.time[sampleIndexRangeEnd]
+      : samples.time[sampleIndexRangeEnd - 1] + interval;
+  const endPos = Math.min(
+    deviceWidth,
+    snapValueToMultipleOfTwo((endTime - timeRangeStart) * devPxPerMs)
+  );
+
+  return callNodeInfo.isInverted()
+    ? getStackTimingByDepthInverted(
+        samples,
+        stackTable,
+        callNodeInfo,
+        maxDepth,
+        timeRangeStart,
+        devPxPerMs,
+        selectedCallNode,
+        defaultCategory,
+        sampleIndexRangeStart,
+        sampleIndexRangeEnd,
+        firstPos,
+        endPos
+      )
+    : getStackTimingByDepthNonInverted(
+        samples,
+        stackTable,
+        callNodeInfo,
+        maxDepth,
+        timeRangeStart,
+        devPxPerMs,
+        selectedCallNode,
+        sampleIndexRangeStart,
+        sampleIndexRangeEnd,
+        firstPos,
+        endPos
+      );
+}
+
+type StackTimingOpenBox = {|
+  callNodeIndex: IndexIntoCallNodeTable | -1,
+  start: DevicePixels,
+|};
+
+export function getStackTimingByDepthNonInverted(
+  samples: SamplesLikeTable,
+  stackTable: StackTable,
+  callNodeInfo: CallNodeInfo,
+  maxDepth: number,
+  timeRangeStart: Milliseconds,
+  devPxPerMs: number,
+  selectedCallNode: IndexIntoCallNodeTable | null,
+  sampleIndexRangeStart: IndexIntoSamplesTable,
+  sampleIndexRangeEnd: IndexIntoSamplesTable,
+  firstPos: DevicePixels,
+  endPos: DevicePixels
+): StackTimingByDepth {
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+  const callNodeTablePrefixColumn = callNodeTable.prefix;
+
+  const stackTimingByDepth = getEmptyStackTimingByDepth(maxDepth);
+
+  // Must be called in order of decreasing depth.
+  function commitBox(
+    openBox: StackTimingOpenBox,
+    depth: StackTimingDepth,
+    currentPos: DevicePixels
+  ) {
+    const { start, callNodeIndex } = openBox;
+    if (start === currentPos) {
+      return;
+    }
+    const stackTimingForThisDepth = stackTimingByDepth[depth];
+    const index = stackTimingForThisDepth.length++;
+    stackTimingForThisDepth.start[index] = start;
+    stackTimingForThisDepth.end[index] = currentPos;
+    stackTimingForThisDepth.func[index] = callNodeTable.func[callNodeIndex];
+    stackTimingForThisDepth.category[index] =
+      callNodeTable.category[callNodeIndex];
+    stackTimingForThisDepth.isSelectedPath[index] =
+      callNodeIndex === selectedCallNode;
+    stackTimingForThisDepth.isSelectedPath[index] =
+      callNodeIndex === selectedCallNode;
+    const parentIndexInPreviousRow =
+      depth === 0 ? 0 : stackTimingByDepth[depth - 1].length;
+    stackTimingForThisDepth.parentIndexInPreviousRow[index] =
+      parentIndexInPreviousRow;
+  }
+
+  let prevCallNodeIndex = null;
+  let prevCallNodeDepth = -1;
+  const prevBoxByDepth: Array<StackTimingOpenBox> = Array.from(
+    { length: maxDepth },
+    () => ({ callNodeIndex: -1, start: 0 })
+  );
+
+  let nextSamplePos = firstPos;
+
+  for (
+    let sampleIndex = sampleIndexRangeStart;
+    sampleIndex < sampleIndexRangeEnd;
+    sampleIndex++
+  ) {
+    const currentStack = samples.stack[sampleIndex];
+    let currentCallNodeIndex =
+      currentStack !== null ? stackIndexToCallNodeIndex[currentStack] : -1;
+    if (currentCallNodeIndex === prevCallNodeIndex) {
+      if (sampleIndex + 1 < sampleIndexRangeEnd) {
+        const nextSampleTime = samples.time[sampleIndex + 1];
+        nextSamplePos = snapValueToMultipleOfTwo(
+          (nextSampleTime - timeRangeStart) * devPxPerMs
+        );
+      }
+      continue;
+    }
+
+    const currentPos = nextSamplePos;
+
+    while (sampleIndex + 1 < sampleIndexRangeEnd) {
+      const nextSampleTime = samples.time[sampleIndex + 1];
+      nextSamplePos = snapValueToMultipleOfTwo(
+        (nextSampleTime - timeRangeStart) * devPxPerMs
+      );
+
+      if (nextSamplePos !== currentPos) {
+        break;
+      }
+
+      if (prevCallNodeDepth !== -1) {
+        // Close boxes for current sample.
+        let currentDepth =
+          currentCallNodeIndex === -1
+            ? -1
+            : callNodeTable.depth[currentCallNodeIndex];
+
+        // If this stack is smaller than the previous stack, close the excess boxes.
+        while (prevCallNodeDepth > currentDepth) {
+          const openBox = prevBoxByDepth[prevCallNodeDepth];
+          commitBox(openBox, prevCallNodeDepth, currentPos);
+          openBox.callNodeIndex = -1;
+          prevCallNodeDepth--;
+        }
+
+        // If this stack is larger than the previous stack, walk up until we're at the same depth.
+        while (currentDepth > prevCallNodeDepth) {
+          currentCallNodeIndex =
+            callNodeTablePrefixColumn[currentCallNodeIndex];
+          currentDepth--;
+        }
+
+        // Close all mismatching boxes. Don't open any new ones because this sample
+        // doesn't have a width.
+        while (currentDepth >= 0) {
+          const openBox = prevBoxByDepth[currentDepth];
+          if (openBox.callNodeIndex === currentCallNodeIndex) {
+            break;
+          }
+
+          commitBox(openBox, currentDepth, currentPos);
+          openBox.callNodeIndex = -1;
+          currentCallNodeIndex =
+            callNodeTablePrefixColumn[currentCallNodeIndex];
+          currentDepth--;
+        }
+
+        prevCallNodeDepth = currentDepth;
+        prevCallNodeIndex = currentCallNodeIndex;
+      }
+
+      sampleIndex++;
+      const currentStack = samples.stack[sampleIndex];
+      currentCallNodeIndex =
+        currentStack !== null ? stackIndexToCallNodeIndex[currentStack] : -1;
+    }
+
+    let currentDepth =
+      currentCallNodeIndex === -1
+        ? -1
+        : callNodeTable.depth[currentCallNodeIndex];
+
+    // assert(currentDepth < maxDepth);
+
+    // If this stack is smaller than the previous stack, close the excess boxes.
+    while (prevCallNodeDepth > currentDepth) {
+      const openBox = prevBoxByDepth[prevCallNodeDepth];
+      commitBox(openBox, prevCallNodeDepth, currentPos);
+      openBox.callNodeIndex = -1;
+      prevCallNodeDepth--;
+    }
+
+    const thisCallNodeIndex = currentCallNodeIndex;
+    const thisCallNodeDepth = currentDepth;
+
+    // If this stack is larger than the previous stack, initialize the new boxes.
+    while (currentDepth > prevCallNodeDepth) {
+      const openBox = prevBoxByDepth[currentDepth];
+      openBox.callNodeIndex = currentCallNodeIndex;
+      openBox.start = currentPos;
+      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
+      currentDepth--;
+    }
+
+    // Now currentDepth === prevCallNodeDepth.
+    // Walk the common depth and check if the boxes differ.
+
+    // First, walk the part for which the callNodeIndex has changed. Even if the
+    // func in the row is unchanged, a differing callNodeIndex means that some
+    // func further to the root of the stack has changed, so it wouldn't be the
+    // same call to that function and we'd need to open a new box.
+    while (currentDepth >= 0) {
+      const openBox = prevBoxByDepth[currentDepth];
+      if (openBox.callNodeIndex === currentCallNodeIndex) {
+        break;
+      }
+
+      commitBox(openBox, currentDepth, currentPos);
+      openBox.callNodeIndex = currentCallNodeIndex;
+      openBox.start = currentPos;
+      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
+      currentDepth--;
+    }
+
+    // We're done with the part of the stack where the callNodeIndex per depth differs.
+    // If currentDepth is still >= 0, the rest of the stack has matching call node
+    // indexes. These boxes can stay unchanged.
+
+    // We are done with this sample. Go to the next.
+
+    prevCallNodeIndex = thisCallNodeIndex;
+    prevCallNodeDepth = thisCallNodeDepth;
+  }
+
+  // Commit all open boxes.
+  for (let depth = prevCallNodeDepth; depth >= 0; depth--) {
+    const openBox = prevBoxByDepth[depth];
+    commitBox(openBox, depth, endPos);
+  }
 
   return stackTimingByDepth;
 }
 
-function _findNearestSharedCallNodeDepth(
-  callNodeTable: CallNodeTable,
-  callNodeIndex: IndexIntoCallNodeTable,
-  lastSeen: LastSeen,
-  depthStart: number
-): number {
-  let nextCallNodeIndex = callNodeIndex;
-  for (let depth = depthStart; depth >= 0; depth--) {
-    if (lastSeen.callNodeIndexByDepth[depth] === nextCallNodeIndex) {
-      return depth;
+type StackTimingOpenBoxInverted = {|
+  func: IndexIntoFuncTable,
+  category: IndexIntoCategoryList,
+  start: DevicePixels,
+  isSelectedPath: boolean,
+|};
+
+export function getStackTimingByDepthInverted(
+  samples: SamplesLikeTable,
+  stackTable: StackTable,
+  callNodeInfo: CallNodeInfo,
+  maxDepth: number,
+  timeRangeStart: Milliseconds,
+  devPxPerMs: number,
+  selectedCallNode: IndexIntoCallNodeTable | null,
+  defaultCategory: IndexIntoCategoryList,
+  sampleIndexRangeStart: IndexIntoSamplesTable,
+  sampleIndexRangeEnd: IndexIntoSamplesTable,
+  firstPos: DevicePixels,
+  endPos: DevicePixels
+): StackTimingByDepth {
+  const selectedCallPath =
+    callNodeInfo.getCallNodePathFromIndex(selectedCallNode);
+  const selectedCallPathDepth = selectedCallPath.length - 1;
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const callNodeTablePrefixColumn = callNodeTable.prefix;
+  const stackIndexToNonInvertedCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+
+  function commitBox(
+    openBox: StackTimingOpenBoxInverted,
+    depth: StackTimingDepth,
+    currentPos: DevicePixels,
+    parentBoxHasAlreadyBeenCommitted: boolean
+  ) {
+    const { start, func, category, isSelectedPath } = openBox;
+    if (start === currentPos) {
+      return;
     }
-    nextCallNodeIndex = callNodeTable.prefix[nextCallNodeIndex];
+    const stackTimingForThisDepth = stackTimingByDepth[depth];
+    const index = stackTimingForThisDepth.length++;
+    stackTimingForThisDepth.start[index] = start;
+    stackTimingForThisDepth.end[index] = currentPos;
+    stackTimingForThisDepth.func[index] = func;
+    stackTimingForThisDepth.category[index] = category;
+    stackTimingForThisDepth.isSelectedPath[index] = isSelectedPath;
+    const indexAdjust = parentBoxHasAlreadyBeenCommitted ? 1 : 0;
+    const parentIndexInPreviousRow =
+      depth === 0 ? 0 : stackTimingByDepth[depth - 1].length - indexAdjust;
+    stackTimingForThisDepth.parentIndexInPreviousRow[index] =
+      parentIndexInPreviousRow;
   }
-  return -1;
-}
 
-function _popStacks(
-  stackTimingByDepth: StackTimingByDepth,
-  lastSeen: LastSeen,
-  depth: number,
-  previousDepth: number,
-  sampleTime: number
-) {
-  // "Pop" off the stack, and commit the timing of the frames
-  for (let stackDepth = depth + 1; stackDepth <= previousDepth; stackDepth++) {
-    // Push on the new information.
-    stackTimingByDepth[stackDepth].start.push(
-      lastSeen.startTimeByDepth[stackDepth]
-    );
-    stackTimingByDepth[stackDepth].end.push(sampleTime);
-    stackTimingByDepth[stackDepth].callNode.push(
-      lastSeen.callNodeIndexByDepth[stackDepth]
-    );
-    stackTimingByDepth[stackDepth].length++;
+  const stackTimingByDepth = getEmptyStackTimingByDepth(maxDepth);
 
-    // Delete that this stack frame has been seen.
-    delete lastSeen.callNodeIndexByDepth[stackDepth];
-    delete lastSeen.startTimeByDepth[stackDepth];
-  }
-}
+  let prevCallNodeIndex = null;
+  let prevCallNodeDepth = -1;
+  let prevSampleWasVisible = true;
+  const prevBoxByDepth: Array<StackTimingOpenBoxInverted> = Array.from(
+    { length: maxDepth },
+    () => ({ func: 0, category: 0, start: 0, isSelectedPath: false })
+  );
 
-function _pushStacks(
-  callNodeTable: CallNodeTable,
-  lastSeen: LastSeen,
-  depth: number,
-  startingCallNodeIndex: IndexIntoCallNodeTable,
-  sampleTime: number
-) {
-  let callNodeIndex = startingCallNodeIndex;
-  // "Push" onto the stack with new frames
-  for (let parentDepth = depth; parentDepth >= 0; parentDepth--) {
-    if (
-      callNodeIndex === -1 ||
-      lastSeen.callNodeIndexByDepth[parentDepth] !== undefined
+  let nextSamplePos = firstPos;
+
+  for (
+    let sampleIndex = sampleIndexRangeStart;
+    sampleIndex < sampleIndexRangeEnd;
+    sampleIndex++
+  ) {
+    const currentStack = samples.stack[sampleIndex];
+    const currentPos = nextSamplePos;
+    let thisSampleIsVisible = true;
+
+    if (sampleIndex + 1 < sampleIndexRangeEnd) {
+      nextSamplePos = snapValueToMultipleOfTwo(
+        (samples.time[sampleIndex + 1] - timeRangeStart) * devPxPerMs
+      );
+      thisSampleIsVisible = nextSamplePos !== currentPos;
+    }
+
+    if (currentStack === null) {
+      // Commit all open boxes.
+      for (let depth = 0; depth <= prevCallNodeDepth; depth++) {
+        const openBox = prevBoxByDepth[depth];
+        commitBox(openBox, depth, currentPos, true);
+      }
+
+      prevCallNodeIndex = -1;
+      prevCallNodeDepth = -1;
+      continue;
+    }
+
+    const thisCallNodeIndex =
+      stackIndexToNonInvertedCallNodeIndex[currentStack];
+    let thisCallNodeDepth = callNodeTable.depth[thisCallNodeIndex];
+
+    if (thisCallNodeIndex === prevCallNodeIndex && prevSampleWasVisible) {
+      continue;
+    }
+
+    let currentCallNodeIndex = thisCallNodeIndex;
+    let currentFunc = callNodeTable.func[currentCallNodeIndex];
+    let currentDepth = 0;
+    let currentPathMatchesSelectedCallPath =
+      currentDepth <= selectedCallPathDepth &&
+      currentFunc === selectedCallPath[currentDepth];
+
+    // Step 1: Walk common depth while funcs match
+    while (
+      currentDepth <= prevCallNodeDepth &&
+      currentDepth <= thisCallNodeDepth
     ) {
-      break;
+      const openBox = prevBoxByDepth[currentDepth];
+      if (openBox.func !== currentFunc) {
+        break;
+      }
+
+      // Resolve category mismatches.
+      const category = callNodeTable.category[currentCallNodeIndex];
+      if (openBox.category !== category) {
+        openBox.category = defaultCategory;
+      }
+      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
+      currentFunc = callNodeTable.func[currentCallNodeIndex];
+      currentDepth++;
+      if (currentPathMatchesSelectedCallPath) {
+        currentPathMatchesSelectedCallPath =
+          currentDepth <= selectedCallPathDepth &&
+          currentFunc === selectedCallPath[currentDepth];
+      }
     }
-    lastSeen.callNodeIndexByDepth[parentDepth] = callNodeIndex;
-    lastSeen.startTimeByDepth[parentDepth] = sampleTime;
-    callNodeIndex = callNodeTable.prefix[callNodeIndex];
+
+    if (!thisSampleIsVisible) {
+      thisCallNodeDepth = currentDepth;
+    }
+
+    // Step 2: Walk common depth after first func mismatch; close and reopen boxes
+    let currentParentHasBeenCommitted = false;
+    while (
+      currentDepth <= prevCallNodeDepth &&
+      currentDepth <= thisCallNodeDepth
+    ) {
+      const openBox = prevBoxByDepth[currentDepth];
+      commitBox(
+        openBox,
+        currentDepth,
+        currentPos,
+        currentParentHasBeenCommitted
+      );
+      openBox.func = currentFunc;
+      openBox.start = currentPos;
+      openBox.category = callNodeTable.category[currentCallNodeIndex];
+      openBox.isSelectedPath =
+        currentPathMatchesSelectedCallPath &&
+        currentDepth === selectedCallPathDepth;
+      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
+      currentFunc = callNodeTable.func[currentCallNodeIndex];
+      currentParentHasBeenCommitted = true;
+      currentDepth++;
+      if (currentPathMatchesSelectedCallPath) {
+        currentPathMatchesSelectedCallPath =
+          currentDepth <= selectedCallPathDepth &&
+          currentFunc === selectedCallPath[currentDepth];
+      }
+    }
+
+    // Step 3a: Previous stack was deeper - close extra boxes.
+    for (let depth = currentDepth; depth <= prevCallNodeDepth; depth++) {
+      const openBox = prevBoxByDepth[depth];
+      commitBox(openBox, depth, currentPos, currentParentHasBeenCommitted);
+      currentParentHasBeenCommitted = true;
+    }
+
+    // Step 3b: This stack is deeper - open extra boxes.
+    while (currentDepth <= thisCallNodeDepth) {
+      const openBox = prevBoxByDepth[currentDepth];
+      openBox.func = currentFunc;
+      openBox.start = currentPos;
+      openBox.category = callNodeTable.category[currentCallNodeIndex];
+      openBox.isSelectedPath =
+        currentPathMatchesSelectedCallPath &&
+        currentDepth === selectedCallPathDepth;
+      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
+      currentFunc = callNodeTable.func[currentCallNodeIndex];
+      currentDepth++;
+      if (currentPathMatchesSelectedCallPath) {
+        currentPathMatchesSelectedCallPath =
+          currentDepth <= selectedCallPathDepth &&
+          currentFunc === selectedCallPath[currentDepth];
+      }
+    }
+
+    prevCallNodeIndex = thisCallNodeIndex;
+    prevCallNodeDepth = thisCallNodeDepth;
+    prevSampleWasVisible = thisSampleIsVisible;
   }
+
+  // Commit all open boxes.
+  for (let depth = 0; depth <= prevCallNodeDepth; depth++) {
+    const openBox = prevBoxByDepth[depth];
+    commitBox(openBox, depth, endPos, true);
+  }
+
+  return stackTimingByDepth;
 }

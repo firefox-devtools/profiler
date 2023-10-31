@@ -18,12 +18,10 @@ import {
   getCategories,
   getInnerWindowIDToPageMap,
   getProfileUsesMultipleStackTypes,
+  getDefaultCategory,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import {
-  getShowUserTimings,
-  getSelectedThreadsKey,
-} from '../../selectors/url-state';
+import { getSelectedThreadsKey } from '../../selectors/url-state';
 import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
@@ -43,9 +41,9 @@ import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
 import type {
   Thread,
   CategoryList,
+  IndexIntoCategoryList,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  CombinedTimingRows,
   MarkerIndex,
   Marker,
   Milliseconds,
@@ -70,7 +68,7 @@ type StateProps = {|
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +maxStackDepth: number,
-  +combinedTimingRows: CombinedTimingRows,
+  +defaultCategory: IndexIntoCategoryList,
   +timeRange: StartEndRange,
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
@@ -205,7 +203,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       thread,
       threadsKey,
       maxStackDepth,
-      combinedTimingRows,
+      defaultCategory,
       timeRange,
       interval,
       previewSelection,
@@ -259,9 +257,10 @@ class StackChartImpl extends React.PureComponent<Props> {
                   interval,
                   thread,
                   weightType,
+                  maxDepth: maxStackDepth,
+                  defaultCategory,
                   innerWindowIDToPageMap,
                   threadsKey,
-                  combinedTimingRows,
                   getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
@@ -291,17 +290,12 @@ class StackChartImpl extends React.PureComponent<Props> {
 
 export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
-    const showUserTimings = getShowUserTimings(state);
-    const combinedTimingRows = showUserTimings
-      ? selectedThreadSelectors.getCombinedTimingRows(state)
-      : selectedThreadSelectors.getStackTimingByDepth(state);
-
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
       maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
-      combinedTimingRows,
+      defaultCategory: getDefaultCategory(state),
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
@@ -332,9 +326,6 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
 });
 
 // This function is given the StackChartCanvas's chartProps.
-function viewportNeedsUpdate(
-  prevProps: { +combinedTimingRows: CombinedTimingRows },
-  newProps: { +combinedTimingRows: CombinedTimingRows }
-) {
-  return prevProps.combinedTimingRows !== newProps.combinedTimingRows;
+function viewportNeedsUpdate(_prevProps, _newProps) {
+  return false;
 }

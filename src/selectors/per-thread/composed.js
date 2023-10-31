@@ -17,14 +17,9 @@ import type {
   Thread,
   JsTracerTable,
   MarkerTimingRows,
-  CombinedTimingRows,
-  MarkerTiming,
 } from 'firefox-profiler/types';
 
-import type {
-  StackTiming,
-  StackTimingByDepth,
-} from '../../profile-logic/stack-timing';
+import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 
 import { hasUsefulSamples } from '../../profile-logic/profile-data';
 
@@ -98,24 +93,7 @@ export function getComposedSelectorsPerThread(
     }
   );
 
-  /**
-   * This selector combines the marker timing and stack timing for the stack chart.
-   * This way it displays UserTiming along with the stack chart.
-   */
-  const getCombinedTimingRows: Selector<CombinedTimingRows> = createSelector(
-    threadSelectors.getUserTimingMarkerTiming,
-    threadSelectors.getStackTimingByDepth,
-    (
-      userTimingMarkerTiming,
-      stackTimingByDepth
-    ): Array<MarkerTiming | StackTiming> => [
-      ...userTimingMarkerTiming,
-      ...stackTimingByDepth,
-    ]
-  );
-
   return {
     getUsefulTabs,
-    getCombinedTimingRows,
   };
 }

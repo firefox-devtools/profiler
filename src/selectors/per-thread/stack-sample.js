@@ -10,7 +10,6 @@ import {
 } from 'reselect';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
-import * as StackTiming from '../../profile-logic/stack-timing';
 import * as FlameGraph from '../../profile-logic/flame-graph';
 import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
@@ -412,15 +411,6 @@ export function getStackAndSampleSelectorsPerThread(
           : null
     );
 
-  const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
-    createSelector(
-      threadSelectors.getFilteredSamplesForCallTree,
-      getCallNodeInfo,
-      getFilteredCallNodeMaxDepth,
-      ProfileSelectors.getProfileInterval,
-      StackTiming.getStackTimingByDepth
-    );
-
   const getFlameGraphOrderedCallNodeRows: Selector<FlameGraph.OrderedCallNodeRows> =
     createSelector(
       (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
@@ -476,7 +466,6 @@ export function getStackAndSampleSelectorsPerThread(
     getTracedTiming,
     getTracedTimingNonInverted,
     getTracedSelfAndTotalForSelectedCallNode,
-    getStackTimingByDepth,
     getFilteredCallNodeMaxDepth,
     getPreviewFilteredCallNodeMaxDepth,
     getFlameGraphTiming,
