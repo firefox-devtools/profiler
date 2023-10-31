@@ -453,7 +453,7 @@ describe('inverted call tree', function () {
         callNodeInfo.stackIndexToCallNodeIndex
       ),
       callNodeInfo,
-      true
+      false
     );
     const callTree = getCallTree(
       thread,
@@ -463,19 +463,19 @@ describe('inverted call tree', function () {
       'samples'
     );
 
-    it('computes an non-inverted call tree', function () {
+    it('computes a non-inverted call tree', function () {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
-        '- A [Other] (total: 3, self: 3)',
+        '- A [Other] (total: 3, self: —)',
         '  - B [DOM] (total: 3, self: —)',
         '    - C [Graphics] (total: 2, self: —)',
         '      - D [Other] (total: 1, self: —)',
-        '        - E [Other] (total: 1, self: —)',
+        '        - E [Other] (total: 1, self: 1)',
         '      - X [Graphics] (total: 1, self: —)',
         '        - Y [Graphics] (total: 1, self: —)',
-        '          - Z [Graphics] (total: 1, self: —)',
+        '          - Z [Graphics] (total: 1, self: 1)',
         '    - X [DOM] (total: 1, self: —)',
         '      - Y [DOM] (total: 1, self: —)',
-        '        - Z [DOM] (total: 1, self: —)',
+        '        - Z [DOM] (total: 1, self: 1)',
       ]);
     });
 
