@@ -25,7 +25,7 @@
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>{ -firefox-brand-name } 性能分析网页应用程序</subheader>
 AppHeader--github-icon =
-    .title = 前往我们的 Git 仓库（新建窗口打开）
+    .title = 前往我们的 Git 仓库（将打开新窗口）
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
@@ -314,8 +314,8 @@ MarkerSidebar--select-a-marker = 选择标记即可显示其相关信息。
 
 MarkerTable--start = 开始
 MarkerTable--duration = 持续时间
-MarkerTable--type = 类型
-MarkerTable--description = 描述
+MarkerTable--name = 名称
+MarkerTable--details = 详情
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
