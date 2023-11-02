@@ -12,14 +12,20 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
     My Button
   </button>
   <div
-    class="arrowPanelAnchor"
+    class="arrowPanel open panel"
+    style="left: 0px; top: 0px; width: 400px;"
   >
     <div
-      class="arrowPanel open panel"
+      class="arrowPanelInnerWrapper open"
     >
       <div
-        class="arrowPanelArrow"
-      />
+        class="arrowPanelArrowContainer"
+      >
+        <div
+          class="arrowPanelArrow"
+          style="left: 0px;"
+        />
+      </div>
       <div
         class="arrowPanelContent"
       >
@@ -59,14 +65,20 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
     My Button
   </button>
   <div
-    class="arrowPanelAnchor"
+    class="arrowPanel open panel"
+    style="left: 0px; top: 0px; width: 400px;"
   >
     <div
-      class="arrowPanel open panel"
+      class="arrowPanelInnerWrapper open"
     >
       <div
-        class="arrowPanelArrow"
-      />
+        class="arrowPanelArrowContainer"
+      >
+        <div
+          class="arrowPanelArrow"
+          style="left: 0px;"
+        />
+      </div>
       <div
         class="arrowPanelContent"
       >
@@ -106,14 +118,20 @@ exports[`shared/ButtonWithPanel renders a button with a panel 1`] = `
     My Button
   </button>
   <div
-    class="arrowPanelAnchor"
+    class="arrowPanel open panel"
+    style="left: 0px; top: 0px; width: 400px;"
   >
     <div
-      class="arrowPanel open panel"
+      class="arrowPanelInnerWrapper open"
     >
       <div
-        class="arrowPanelArrow"
-      />
+        class="arrowPanelArrowContainer"
+      >
+        <div
+          class="arrowPanelArrow"
+          style="left: 0px;"
+        />
+      </div>
       <div
         class="arrowPanelContent"
       >

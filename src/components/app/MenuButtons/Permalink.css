@@ -8,12 +8,11 @@
   background-image: url(firefox-profiler-res/img/svg/link-dark-12.svg);
 }
 
-.menuButtonsPermalinkPanel .arrowPanelContent {
-  /* Override the default padding for ArrowPanel */
-  padding: 4px;
+.menuButtonsPermalinkPanel {
+  --arrow-panel-padding: 4px;
 }
 
 .menuButtonsPermalinkTextField {
-  width: 16em;
+  /* the width of the text field is determined by the panel size (set in JS) + align-items:stretch */
   height: 19px;
 }

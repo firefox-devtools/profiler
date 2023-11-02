@@ -33,6 +33,7 @@ import type {
   Selector,
   ThreadViewOptions,
   TransformStack,
+  DroppedFunctions,
   JsTracerTiming,
   $ReturnType,
   StartEndRange,
@@ -43,6 +44,7 @@ import type {
   ThreadWithReservedFunctions,
   IndexIntoResourceTable,
   IndexIntoFuncTable,
+  FunctionDisplayData,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
@@ -417,9 +419,30 @@ export function getThreadSelectorsWithMarkersPerThread(
   const getTransformStack: Selector<TransformStack> = (state) =>
     UrlState.getTransformStack(state, threadsKey);
 
+  const getDroppedFunctions: Selector<DroppedFunctions> = (state) =>
+    UrlState.getDroppedFunctions(state, threadsKey);
+
+  const getDroppedFunctionsDisplayData: Selector<FunctionDisplayData[]> =
+    createSelector(
+      getDroppedFunctions,
+      (state) => threadSelectors.getRangeFilteredThread(state).funcTable,
+      (state) => threadSelectors.getRangeFilteredThread(state).resourceTable,
+      (state) => threadSelectors.getRangeFilteredThread(state).stringTable,
+      (droppedFunctions, funcTable, resourceTable, stringTable) =>
+        droppedFunctions.map((funcIndex) =>
+          ProfileData.getFunctionDisplayData(
+            funcIndex,
+            funcTable,
+            resourceTable,
+            stringTable
+          )
+        )
+    );
+
   const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
     threadSelectors.getRangeFilteredThread,
     getTransformStack,
+    getDroppedFunctions,
     ProfileSelectors.getDefaultCategory,
     threadSelectors.getMarkerGetter,
     threadSelectors.getFullMarkerListIndexes,
@@ -428,13 +451,14 @@ export function getThreadSelectorsWithMarkersPerThread(
     (
       startingThread,
       transforms,
+      droppedFunctions,
       defaultCategory,
       markerGetter,
       markerIndexes,
       markerSchemaByName,
       categories
     ) => {
-      return transforms.reduce(
+      const transformFilteredThread = transforms.reduce(
         // Apply the reducer using an arrow function to ensure correct memoization.
         (thread, transform) =>
           _applyTransformMemoized(
@@ -447,6 +471,10 @@ export function getThreadSelectorsWithMarkersPerThread(
             categories
           ),
         startingThread
+      );
+      return Transforms.dropFunctions(
+        transformFilteredThread,
+        new Set(droppedFunctions)
       );
     }
   );
@@ -554,6 +582,8 @@ export function getThreadSelectorsWithMarkersPerThread(
 
   return {
     getTransformStack,
+    getDroppedFunctions,
+    getDroppedFunctionsDisplayData,
     getRangeAndTransformFilteredThread,
     getFilteredThread,
     getPreviewFilteredThread,

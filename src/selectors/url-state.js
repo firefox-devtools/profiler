@@ -17,6 +17,7 @@ import type {
   ThreadIndex,
   Pid,
   TransformStack,
+  DroppedFunctions,
   Action,
   TimelineType,
   DataSource,
@@ -217,6 +218,19 @@ export const getTransformStack: DangerousSelectorWithArguments<
   return (
     getProfileSpecificState(state).transforms[threadsKey] ||
     EMPTY_TRANSFORM_STACK
+  );
+};
+
+// Pre-allocate an array to help with strict equality tests in the selectors.
+const EMPTY_DROPPED_FUNCTIONS = [];
+
+export const getDroppedFunctions: DangerousSelectorWithArguments<
+  DroppedFunctions,
+  ThreadsKey
+> = (state, threadsKey) => {
+  return (
+    getProfileSpecificState(state).droppedFunctions[threadsKey] ||
+    EMPTY_DROPPED_FUNCTIONS
   );
 };
 

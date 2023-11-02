@@ -28,6 +28,9 @@ import * as React from 'react';
 import classNames from 'classnames';
 
 import { ArrowPanel } from './ArrowPanel';
+import type { AnchorPosition } from './ArrowPanel';
+
+import type { CssPixels } from 'firefox-profiler/types';
 
 import './ButtonWithPanel.css';
 
@@ -44,6 +47,8 @@ type Props = {|
   +onPanelOpen?: () => mixed,
   +onPanelClose?: () => mixed,
   +title?: string,
+  +panelWidth?: CssPixels,
+  +panelPosition?: AnchorPosition,
 |};
 
 type State = {|
@@ -104,8 +109,17 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
   };
 
   openPanel() {
-    if (this._panel) {
-      this._panel.open();
+    const button = this._buttonRef.current;
+    if (this._panel && button) {
+      const { panelWidth, panelPosition } = this.props;
+      this._panel.open(
+        button,
+        panelWidth ?? 400,
+        panelPosition ?? {
+          anchorEdge: 'right',
+          distanceFromEdge: 60,
+        }
+      );
     }
   }
 

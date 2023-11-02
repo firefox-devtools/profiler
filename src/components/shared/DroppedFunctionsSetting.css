@@ -1,0 +1,27 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.droppedFunctionsDropdownButton {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 100px;
+  background: var(--grey-90-a10);
+  font: inherit;
+  line-height: 1;
+}
+
+.droppedFunctionsDropdownButton:hover {
+  background: var(--grey-90-a20);
+}
+
+.droppedFunctionsDropdownButton:active:hover,
+.droppedFunctionsDropdownButton[aria-expanded='true'] {
+  background: var(--grey-90-a30);
+}
+
+.droppedFunctionsPanel {
+  --arrow-panel-padding: 8px;
+
+  white-space: normal; /* unset inherited property (TODO: use portals for the arrow panel, so that it doesn't inherit these properties) */
+}

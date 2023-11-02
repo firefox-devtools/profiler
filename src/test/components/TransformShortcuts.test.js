@@ -32,6 +32,7 @@ type KeyPressOptions = { key: string, ... };
 
 type TestSetup = {|
   getTransform: () => null | Transform,
+  getDroppedFunctions: () => IndexIntoFuncTable[],
   pressKey: (options: KeyPressOptions) => void,
   expectedCallNodePath: CallNodePath,
   // This should be expectedCallNodePath[expectedCallNodePath.length - 1], but this simplifies tests a bit.
@@ -88,12 +89,11 @@ function testTransformKeyboardShortcuts(setup: () => TestSetup) {
   });
 
   it('handles drop function', () => {
-    const { pressKey, getTransform, expectedFuncIndex } = setup();
+    const { pressKey, getTransform, getDroppedFunctions, expectedFuncIndex } =
+      setup();
     pressKey({ key: 'd' });
-    expect(getTransform()).toEqual({
-      type: 'drop-function',
-      funcIndex: expectedFuncIndex,
-    });
+    expect(getTransform()).toEqual(null);
+    expect(getDroppedFunctions()).toEqual([expectedFuncIndex]);
   });
 
   it('handles collapse resource', () => {
@@ -173,6 +173,8 @@ function setupStore(childrenToRender) {
           throw new Error('This test assumes there is only one transform.');
       }
     },
+    getDroppedFunctions: () =>
+      selectedThreadSelectors.getDroppedFunctions(getState()),
   };
 }
 
@@ -237,13 +239,15 @@ describe('flame graph transform shortcuts', () => {
   for (const [name, action] of objectEntries(actions)) {
     describe(`with ${name}`, () => {
       testTransformKeyboardShortcuts(() => {
-        const { store, funcNames, getTransform } = setupStore(<FlameGraph />);
+        const { store, funcNames, getTransform, getDroppedFunctions } =
+          setupStore(<FlameGraph />);
 
         const { A, B } = funcNames;
         action(store, funcNames);
 
         return {
           getTransform,
+          getDroppedFunctions,
           // take either a key as a string, or a full event if we need more
           // information like modifier keys.
           pressKey: pressKeyBuilder('flameGraphContent'),
@@ -261,15 +265,15 @@ describe('CallTree transform shortcuts', () => {
   for (const [name, action] of objectEntries(actions)) {
     describe(`with ${name}`, () => {
       testTransformKeyboardShortcuts(() => {
-        const { store, funcNames, getTransform } = setupStore(
-          <ProfileCallTreeView />
-        );
+        const { store, funcNames, getTransform, getDroppedFunctions } =
+          setupStore(<ProfileCallTreeView />);
 
         const { A, B } = funcNames;
         action(store, funcNames);
 
         return {
           getTransform,
+          getDroppedFunctions,
           // take either a key as a string, or a full event if we need more
           // information like modifier keys.
           pressKey: pressKeyBuilder('treeViewBody'),
@@ -287,13 +291,15 @@ describe('stack chart transform shortcuts', () => {
   for (const [name, action] of objectEntries(actions)) {
     describe(`with ${name}`, () => {
       testTransformKeyboardShortcuts(() => {
-        const { store, funcNames, getTransform } = setupStore(<StackChart />);
+        const { store, funcNames, getTransform, getDroppedFunctions } =
+          setupStore(<StackChart />);
 
         const { A, B } = funcNames;
         action(store, funcNames);
 
         return {
           getTransform,
+          getDroppedFunctions,
           // take either a key as a string, or a full event if we need more
           // information like modifier keys.
           pressKey: pressKeyBuilder('stackChartContent'),

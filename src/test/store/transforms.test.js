@@ -26,6 +26,7 @@ import {
   changeImplementationFilter,
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,
+  dropFunctions,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 
@@ -497,7 +498,7 @@ describe('"merge-function" transform', function () {
   });
 });
 
-describe('"drop-function" transform', function () {
+describe('dropping functions', function () {
   describe('on a call tree', function () {
     const {
       profile,
@@ -525,13 +526,8 @@ describe('"drop-function" transform', function () {
       ]);
     });
 
-    it('function C can be merged into callers', function () {
-      dispatch(
-        addTransformToStack(threadIndex, {
-          type: 'drop-function',
-          funcIndex: C,
-        })
-      );
+    it('function C can be dropped', function () {
+      dispatch(dropFunctions(threadIndex, [C]));
       const callTree = selectedThreadSelectors.getCallTree(getState());
       expect(formatTree(callTree)).toEqual([
         '- A (total: 1, self: —)',

@@ -123,7 +123,6 @@ describe('calltree/CallNodeContextMenu', function () {
         matcher: /Collapse direct recursion/,
         type: 'collapse-direct-recursion',
       },
-      { matcher: /Drop samples/, type: 'drop-function' },
     ];
 
     fixtures.forEach(({ matcher, type }) => {
@@ -199,6 +198,14 @@ describe('calltree/CallNodeContextMenu', function () {
       expect(copy).toHaveBeenCalledWith(
         `B.js [https://example.com/script.js:2:222]\nA.js [https://example.com/script.js:1:111]\n`
       );
+    });
+
+    it('can drop a function', function () {
+      const { getState, getByText } = setup();
+      fireFullClick(getByText(/Drop samples/));
+      expect(
+        selectedThreadSelectors.getDroppedFunctions(getState()).length
+      ).toBe(1);
     });
   });
 });

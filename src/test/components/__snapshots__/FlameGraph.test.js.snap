@@ -369,6 +369,22 @@ exports[`FlameGraph matches the snapshot 1`] = `
           Native
         </label>
       </li>
+      <li
+        class="panelSettingsListItem"
+      >
+        <div
+          class="buttonWithPanel"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton droppedFunctionsDropdownButton"
+            title="Click to manage dropped functions"
+            type="button"
+          >
+            ⁨0⁩ dropped functions
+          </button>
+        </div>
+      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"

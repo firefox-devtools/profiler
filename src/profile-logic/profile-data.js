@@ -81,6 +81,7 @@ import type {
   BottomBoxInfo,
   Bytes,
   ThreadWithReservedFunctions,
+  FunctionDisplayData,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -2459,6 +2460,22 @@ export function getOriginAnnotationForFunc(
   }
 
   return '';
+}
+
+export function getFunctionDisplayData(
+  funcIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray
+): FunctionDisplayData {
+  const name = stringTable.getString(funcTable.name[funcIndex]);
+  const originAnnotation = getOriginAnnotationForFunc(
+    funcIndex,
+    funcTable,
+    resourceTable,
+    stringTable
+  );
+  return { funcIndex, name, originAnnotation };
 }
 
 /**

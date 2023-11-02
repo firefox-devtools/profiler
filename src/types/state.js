@@ -39,7 +39,10 @@ import type {
   NativeSymbolInfo,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
-import type { TransformStacksPerThread } from './transforms';
+import type {
+  TransformStacksPerThread,
+  DroppedFunctionsPerThread,
+} from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path.js';
@@ -376,6 +379,7 @@ export type ProfileSpecificUrlState = {|
   markersSearchString: string,
   networkSearchString: string,
   transforms: TransformStacksPerThread,
+  droppedFunctions: DroppedFunctionsPerThread,
   timelineType: TimelineType,
   sourceView: SourceViewState,
   assemblyView: AssemblyViewState,

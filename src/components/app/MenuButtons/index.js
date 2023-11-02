@@ -318,6 +318,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
             }
           )}
           panelClassName="menuButtonsPublishPanel"
+          panelWidth={510}
           // The value for the label following will be replaced
           label=""
           panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}

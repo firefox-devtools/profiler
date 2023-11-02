@@ -14,6 +14,8 @@ import classNames from 'classnames';
 
 import './ArrowPanel.css';
 
+import type { CssPixels } from 'firefox-profiler/types';
+
 type Props = {|
   +onOpen: () => mixed,
   +onClose: () => mixed,
@@ -25,6 +27,42 @@ type State = {|
   +open: boolean,
   +isClosing: boolean,
   +openGeneration: number,
+  +panelRect: Rect,
+  +arrowOffset: CssPixels,
+|};
+
+type Rect = {|
+  left: CssPixels,
+  top: CssPixels,
+  width: CssPixels,
+  height: CssPixels,
+|};
+
+// The anchor position describes where the arrow panel's arrow should be located
+// *in relation to the panel*. Then the panel will be positioned so that the arrow
+// points at the center of the anchor element.
+//
+//                                   +---------------------------+
+//                                   |       anchorElement       |
+//                                   +---------------------------+
+//                                                 ^
+//                                                 |
+//          +--------------------------------------+--------+
+//          |                                               |
+//          |                  The panel                    |
+//          |                                               |
+//          +-----------------------------------------------+
+//
+//          |<---------------- panelWidth ----------------->|
+//                                                  |<----->|
+//                                               distanceFromEdge
+export type AnchorPosition = {|
+  // If set to "right", the arrow will be positioned `distanceFromEdge` pixels
+  // from the right edge of the panel.
+  // If set to "left", the arrow will be positioned `distanceFromEdge` pixels
+  // from the left edge of the panel.
+  anchorEdge: 'left' | 'right',
+  distanceFromEdge: CssPixels,
 |};
 
 export class ArrowPanel extends React.PureComponent<Props, State> {
@@ -33,18 +71,71 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
     open: false,
     isClosing: false,
     openGeneration: 0,
+    panelRect: { left: 0, top: 0, width: 0, height: 0 },
+    arrowOffset: 40,
   };
 
   /* These 2 methods are called from other components.
   /* See https://github.com/firefox-devtools/profiler/issues/1888 and
    * https://github.com/firefox-devtools/profiler/issues/1641 */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
-  open() {
+  open(
+    anchorElement: HTMLElement,
+    panelWidthInCssPx: number,
+    anchorPosition: AnchorPosition
+  ) {
     if (this.state.open) {
       return;
     }
 
-    this.setState({ open: true });
+    const win = anchorElement.ownerDocument.defaultView;
+    const anchorRectRelativeToPage = anchorElement.getBoundingClientRect();
+    const anchorRectRelativeToViewport = {
+      left: anchorRectRelativeToPage.left - win.scrollX,
+      top: anchorRectRelativeToPage.top - win.scrollY,
+      width: anchorRectRelativeToPage.width,
+      height: anchorRectRelativeToPage.height,
+    };
+
+    // Compute the location that the arrow panel should point at with its arrow.
+    // This location is in the middle of the anchorRect, 75% of the way down.
+    const anchorPoint = {
+      left:
+        anchorRectRelativeToViewport.left +
+        anchorRectRelativeToViewport.width * 0.5,
+      top:
+        anchorRectRelativeToViewport.top +
+        anchorRectRelativeToViewport.height * 0.75,
+    };
+
+    // Constrain the panel width to the viewport.
+    const adjustedPanelWidth = Math.min(panelWidthInCssPx, win.innerWidth);
+
+    // Compute the panel position.
+    const preferredPanelLeft = (function () {
+      if (anchorPosition.anchorEdge === 'left') {
+        return anchorPoint.left - anchorPosition.distanceFromEdge;
+      }
+      const right = anchorPoint.left + anchorPosition.distanceFromEdge;
+      return right - adjustedPanelWidth;
+    })();
+
+    // Constrain the panel position so that the panel is fully onscreen.
+    const panelLeft = Math.max(
+      0,
+      Math.min(preferredPanelLeft, win.innerWidth - adjustedPanelWidth)
+    );
+
+    this.setState({
+      open: true,
+      panelRect: {
+        left: panelLeft,
+        top: anchorPoint.top,
+        width: adjustedPanelWidth,
+        height: 0, // ignored
+      },
+      arrowOffset: anchorPoint.left - panelLeft,
+    });
   }
 
   /* eslint-disable-next-line react/no-unused-class-component-methods */
@@ -107,18 +198,29 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
 
   render() {
     const { className, children } = this.props;
-    const { open, isClosing } = this.state;
+    const { open, isClosing, panelRect, arrowOffset } = this.state;
+
     if (!open && !isClosing) {
       return null;
     }
 
     return (
-      <div className="arrowPanelAnchor">
-        <div
-          className={classNames('arrowPanel', { open }, className)}
-          onClick={this._onArrowPanelClick}
-        >
-          <div className="arrowPanelArrow" />
+      <div
+        className={classNames('arrowPanel', { open }, className)}
+        onClick={this._onArrowPanelClick}
+        style={{
+          left: `${panelRect.left}px`,
+          top: `${panelRect.top}px`,
+          width: `${panelRect.width}px`,
+        }}
+      >
+        <div className={classNames('arrowPanelInnerWrapper', { open })}>
+          <div className="arrowPanelArrowContainer">
+            <div
+              className="arrowPanelArrow"
+              style={{ left: `${arrowOffset}px` }}
+            />
+          </div>
           <div className="arrowPanelContent">{children}</div>
         </div>
       </div>

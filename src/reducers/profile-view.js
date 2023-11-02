@@ -343,6 +343,31 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         expandedCallNodePaths,
       });
     }
+    case 'DROP_FUNCTIONS': {
+      const { threadsKey, functionIndexes } = action;
+      const threadViewOptions = _getThreadViewOptions(state, threadsKey);
+      const expandedCallNodePaths = new PathSet(
+        Array.from(threadViewOptions.expandedCallNodePaths)
+          .map((path: CallNodePath) =>
+            functionIndexes.reduce(
+              (p, funcIndex) =>
+                Transforms.dropFunctionInCallNodePath(funcIndex, p),
+              path
+            )
+          )
+          .filter((path) => path.length > 0)
+      );
+
+      const selectedCallNodePath = functionIndexes.reduce(
+        (p, funcIndex) => Transforms.dropFunctionInCallNodePath(funcIndex, p),
+        threadViewOptions.selectedCallNodePath
+      );
+
+      return _updateThreadViewOptions(state, threadsKey, {
+        selectedCallNodePath,
+        expandedCallNodePaths,
+      });
+    }
     case 'POP_TRANSFORMS_FROM_STACK': {
       // Simply reset the stored paths until this bug is fixed:
       // https://github.com/firefox-devtools/profiler/issues/882
@@ -639,6 +664,7 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
     case 'PROFILE_LOADED':
     case 'CHANGE_INVERT_CALLSTACK':
     case 'ADD_TRANSFORM_TO_STACK':
+    case 'DROP_FUNCTIONS':
     case 'POP_TRANSFORMS_FROM_STACK':
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return null;

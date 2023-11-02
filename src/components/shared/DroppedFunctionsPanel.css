@@ -1,0 +1,68 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.droppedFunctionsClearAllRow {
+  margin: 0 0 4px;
+  text-align: right;
+}
+
+.functionListBoxInPanel {
+  overflow: auto;
+  height: 350px;
+  border: 0.5px solid gray;
+  background: white;
+  contain: size;
+}
+
+.functionListBoxList {
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 0;
+  margin: 0;
+  line-height: 16px;
+  list-style: none;
+}
+
+.functionListBoxListItem {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  padding: 2px 4px;
+  margin: 0;
+}
+
+.functionListBoxFunctionName {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.functionListBoxNote {
+  margin: 5px;
+}
+
+.functionListItemRemoveButton {
+  overflow: hidden;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  padding: 1px;
+  border: 0;
+  border-radius: 2px;
+  background: url(../../../res/img/svg/close-dark.svg) no-repeat center;
+  background-origin: content-box;
+  background-size: contain;
+  color: transparent;
+  margin-inline-end: 2px;
+}
+
+.functionListItemRemoveButton:hover {
+  background-color: rgb(0 0 0 / 0.15);
+}
+
+.functionListItemRemoveButton:active:hover {
+  background-color: rgb(0 0 0 / 0.3);
+}
