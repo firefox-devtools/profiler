@@ -75,6 +75,7 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
           onPanelOpen={this._shortenUrlAndFocusTextFieldOnCompletion}
           onPanelClose={this._onPermalinkPanelClose}
           panelClassName="menuButtonsPermalinkPanel"
+          panelWidth={260}
           panelContent={
             <input
               data-testid="MenuButtonsPermalink-input"

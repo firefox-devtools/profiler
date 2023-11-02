@@ -6,11 +6,8 @@
   width: 350px;
   font-size: 12px;
   line-height: 20px;
-}
 
-.metaInfoPanel,
-.metaInfoPanel .arrowPanelArrow::before {
-  background-color: white;
+  --arrow-panel-background: white;
 }
 
 .metaInfoSection {

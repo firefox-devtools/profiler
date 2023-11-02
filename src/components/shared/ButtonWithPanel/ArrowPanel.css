@@ -2,36 +2,48 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.arrowPanelAnchor {
-  position: absolute;
-  z-index: 10;
-  top: 75%;
-  left: 50%;
-}
-
+/**
+ * .arrowPanel is a wrapper which renders nothing by itself and
+ * just establishes the bounds of the panel. The actual panel appearance is
+ * rendered by .arrowPanelInnerWrapper.
+ * The bottom edge of .arrowPanel is always at the bottom of the viewport.
+ * This allows .arrowPanelInnerWrapper to grow as needed and then to stop
+ * growing (and become scrollable) once it hits the bottom.
+ *
+ * The following properties are set by inline style: left, top, width
+ * The following CSS variables may be set by users: --arrow-panel-background, --arrow-panel-padding
+ */
 .arrowPanel {
-  --internal-offset-from-right: var(--offset-from-right, 60px);
-  --internal-offset-from-top: 15px;
-  --internal-width: var(--width, initial);
-  --internal-button-height: 30px;
+  --internal-arrow-clip-height: 15px;
+  --internal-background: var(--arrow-panel-background, hsl(0deg 0% 97%));
+  --internal-padding: var(--arrow-panel-padding, 16px);
 
-  position: absolute;
-  top: var(--internal-offset-from-top);
-  right: calc(var(--internal-offset-from-right) * -1);
-  min-width: var(--internal-width);
-  border: 0.5px solid rgb(0 0 0 / 0.25);
-  border-radius: 5px;
-  background: hsl(0deg 0% 97%);
-  background-clip: padding-box;
-  box-shadow: 0 8px 12px rgb(0 0 0 / 0.35);
+  position: fixed;
+  z-index: 2;
+  bottom: 5px; /* leave a small gap at the bottom of the viewport */
+  display: flex;
+  flex-flow: column nowrap;
+  padding-top: var(--internal-arrow-clip-height);
+  margin-bottom: auto;
   color: black;
   line-height: 1.3;
+  pointer-events: none;
   text-align: left;
-  transform-origin: calc(100% - var(--internal-offset-from-right))
-    calc(var(--internal-offset-from-top) * -1);
 }
 
-.arrowPanel:not(.open) {
+.arrowPanelInnerWrapper {
+  display: flex;
+  min-height: 0;
+  flex-flow: column nowrap;
+  border: 0.5px solid rgb(0 0 0 / 0.25);
+  border-radius: 5px;
+  background: var(--internal-background);
+  background-clip: padding-box;
+  box-shadow: 0 8px 12px rgb(0 0 0 / 0.35);
+  pointer-events: initial;
+}
+
+.arrowPanelInnerWrapper:not(.open) {
   opacity: 0;
   pointer-events: none;
 
@@ -44,12 +56,12 @@
   visibility: hidden;
 }
 
-.arrowPanel.open {
+.arrowPanelInnerWrapper.open {
   animation: arrowPanelAppear 200ms cubic-bezier(0.07, 0.95, 0, 1);
 }
 
 @media (prefers-reduced-motion) {
-  .arrowPanel.open {
+  .arrowPanelInnerWrapper.open {
     animation: none;
     opacity: 1;
   }
@@ -67,38 +79,45 @@
   }
 }
 
+/**
+ * This element clips the arrow to its triangle shape.
+ */
+.arrowPanelArrowContainer {
+  position: relative;
+  overflow: hidden;
+  height: var(--internal-arrow-clip-height);
+  flex-shrink: 0;
+  margin-top: calc(-1 * var(--internal-arrow-clip-height));
+}
+
+/**
+ * This element is the actual arrow, as a (clipped) rotated square.
+ *
+ * The `left` property is set by inline style, to the offset at which
+ * the arrow tip should be located.
+ */
 .arrowPanelArrow {
   position: absolute;
-  top: calc(var(--internal-offset-from-top) * -1);
-  right: 0;
-  left: 0;
-  overflow: hidden;
-  height: var(--internal-offset-from-top);
-}
-
-.arrowPanelArrow::before {
-  position: absolute;
   top: 0;
-  left: calc(100% - var(--internal-offset-from-right));
   display: block;
-  width: calc(1.42 * var(--internal-offset-from-top));
-  height: calc(1.42 * var(--internal-offset-from-top));
+  width: calc(1.42 * var(--internal-arrow-clip-height));
+  height: calc(1.42 * var(--internal-arrow-clip-height));
   border: 0.5px solid rgb(0 0 0 / 0.25);
-  background: hsl(0deg 0% 97%);
+  background: var(--internal-background);
   background-clip: padding-box;
-  content: '';
   transform: rotate(45deg);
-  transform-origin: top left;
+  transform-origin: top left; /* rotate around the arrow tip */
 }
 
+/**
+ * This element supplies the padding and optional scrolling for the panel contents.
+ */
 .arrowPanelContent {
+  display: flex;
   overflow: auto;
-  max-height: calc(
-    100vh - var(--internal-approx-distance-from-top) -
-      var(--internal-button-height) - var(--internal-approx-distance-to-bottom)
-  );
-  padding: 16px;
-
-  --internal-approx-distance-from-top: 60px;
-  --internal-approx-distance-to-bottom: 100px;
+  min-height: 0;
+  flex-flow: column nowrap;
+  flex-shrink: 1;
+  align-items: stretch;
+  padding: var(--internal-padding);
 }
