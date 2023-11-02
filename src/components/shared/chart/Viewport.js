@@ -525,9 +525,9 @@ export const withChartViewport: WithChartViewport<*, *> =
 
         const mouseX = event.clientX;
         const { containerLeft, containerWidth } = this.state;
-        const innerContainerWidth = containerWidth - marginLeft - marginRight;
+        const viewportPixelWidth = containerWidth - marginLeft - marginRight;
         const mouseCenter =
-          (mouseX - containerLeft - marginLeft) / innerContainerWidth;
+          (mouseX - containerLeft - marginLeft) / viewportPixelWidth;
         this.zoomRangeSelection(mouseCenter, zoomFactor);
       }
 
@@ -715,6 +715,8 @@ export const withChartViewport: WithChartViewport<*, *> =
             timeRange,
             startsAtBottom,
             disableHorizontalMovement,
+            marginLeft,
+            marginRight,
           },
         } = this.props;
         const { containerWidth, containerHeight, viewportTop, isSizeSet } =
@@ -768,7 +770,10 @@ export const withChartViewport: WithChartViewport<*, *> =
                   isModifying: false,
                 };
               }
-              const unitOffsetX = (viewportLength * offsetX) / containerWidth;
+              const viewportPixelWidth =
+                containerWidth - marginLeft - marginRight;
+              const unitOffsetX =
+                offsetX * (viewportLength / viewportPixelWidth);
               let newViewportLeft = viewportLeft - unitOffsetX;
               let newViewportRight = viewportRight - unitOffsetX;
               if (newViewportLeft < 0) {
