@@ -41,7 +41,7 @@ import {
  *        |       |                           |         v                      |
  * |<-------------|---------------------------|---------*------- Total profile samples ------>|
  *        |       |                           |                                |
- *        |       |      Screen Viewport      |                                |
+ *        |       |         Viewport          |                                |
  *        |       |                           |         Current profile range  |
  *        |_______|___________________________|________________________________|
  *                |___________________________|
@@ -53,10 +53,34 @@ import {
  * viewportRight = 0.6
  * viewportLength = viewportRight - viewportLeft
  * viewportTop = 30 (in pixels)
- * screenWidth = 1000
- * unitPixel = viewportLength / screenWidth
+ * viewportPixelWidth = 1000 (= containerWidth - marginLeft - marginRight)
+ * unitPixel = viewportLength / viewportPixelWidth
  * viewportRight += mouseMoveDelta * unitPixel
  * viewportLeft += mouseMoveDelta * unitPixel
+ *
+ * Placement of margins:
+ *
+ * Margins are outside the viewport but inside containerWidth.
+ *
+ *  (1) Fully zoomed out:
+ *
+ *             viewportLeft: 0                    viewportRight: 1
+ *                  |                                   |
+ *       marginLeft v               Viewport            v  marginRight
+ *     |<---------->|<--------------------------------->|<------------->|
+ *                  #####################################
+ *     |<-------------------------------------------------------------->|
+ *                           containerWidth
+ *
+ *  (2) Zoomed in by 5x (viewportLength = 0.2) centered around 0.5:
+ *
+ *             viewportLeft: 0.4                  viewportRight: 0.6
+ *                  |                                   |
+ *       marginLeft v               Viewport            v  marginRight
+ *     |<---------->|<--------------------------------->|<------------->|
+ * ...#####################################################################...
+ *     |<-------------------------------------------------------------->|
+ *                           containerWidth
  **/
 
 const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
@@ -126,15 +150,20 @@ type ViewportDispatchProps = {|
 // optionally used by the wrapped component.
 type ViewportOwnProps<ChartProps> = {|
   +viewportProps: {|
+    // The "committed range", whose endpoints correspond to 0 and 1.
     +timeRange: StartEndRange,
+    // The preview selection, whose endpoints correspond to viewportLeft and viewportRight.
+    +previewSelection: PreviewSelection,
+    // The left margin. Margins are outside the viewport but inside containerWidth.
+    +marginLeft: CssPixels,
+    // The right margin. Margins are outside the viewport but inside containerWidth.
+    +marginRight: CssPixels,
+
     +maxViewportHeight: number,
     +startsAtBottom?: boolean,
     +maximumZoom: UnitIntervalOfProfileRange,
-    +previewSelection: PreviewSelection,
     +disableHorizontalMovement?: boolean,
     +className?: string,
-    +marginLeft: CssPixels,
-    +marginRight: CssPixels,
     +containerRef?: (HTMLDivElement | null) => void,
     // These props are defined by the generic variables passed into to the type
     // WithChartViewport when calling withChartViewport. This is how the relationship
@@ -152,7 +181,11 @@ type ViewportOwnProps<ChartProps> = {|
 |};
 
 type HorizontalViewport = {|
+  // The position of the profile range that should be drawn at the left edge of
+  // the chart's "inner box", i.e. after the marginLeft.
   viewportLeft: UnitIntervalOfProfileRange,
+  // The position of the profile range that should be drawn at the right edge of
+  // the chart's "inner box", i.e. to the left of marginRight.
   viewportRight: UnitIntervalOfProfileRange,
 |};
 
@@ -380,9 +413,8 @@ export const withChartViewport: WithChartViewport<*, *> =
       // our Viewport component so that there is no scrolling performance impact
       // on elements outside the Viewport component.
       // Another problem with React setting the listener on the document is the
-      // fact that, due to a recent intervention by some browsers (at least
-      // Firefox and Chrome), `preventDefault()` no longer has any effect in
-      // wheel event listeners that are set on the document, unless that
+      // fact that, as of 2019 [1][2], `preventDefault()` no longer has any effect
+      // in wheel event listeners that are set on the document, unless that
       // listener is explicitly marked with `{passive: false}` (which React
       // doesn't let us do).
       //
@@ -393,6 +425,9 @@ export const withChartViewport: WithChartViewport<*, *> =
       // limits the performance impact from the non-passiveness to the Viewport
       // component itself, so that scrolling outside of the Viewport can proceed
       // in a fully accelerated and asynchronous fashion.
+      //
+      // [1] https://developer.chrome.com/blog/scrolling-intervention-2/
+      // [2] https://bugzilla.mozilla.org/show_bug.cgi?id=1526725
       _mouseWheelListener = (event: WheelEvent) => {
         // We handle the wheel event, so disable the browser's handling, such
         // as back/forward swiping or scrolling.
@@ -496,7 +531,13 @@ export const withChartViewport: WithChartViewport<*, *> =
         this.zoomRangeSelection(mouseCenter, zoomFactor);
       }
 
-      zoomRangeSelection = (center, zoomFactor) => {
+      zoomRangeSelection = (
+        // A number between 0 and 1 indicating the horizontal position of the
+        // zoom center.
+        center,
+        // The factor to zoom by. Factors smaller than 1 zoom in, larger than 1 zoom out.
+        zoomFactor
+      ) => {
         const { disableHorizontalMovement, maximumZoom } =
           this.props.viewportProps;
         if (disableHorizontalMovement) {
