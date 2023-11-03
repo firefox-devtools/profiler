@@ -267,6 +267,31 @@ Array [
   ],
   Array [
     "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "fillRect",
+    350,
+    48,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "componentC",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "componentC",
+    353,
+    59,
+  ],
+  Array [
+    "set fillStyle",
     "#0060df60",
   ],
   Array [
