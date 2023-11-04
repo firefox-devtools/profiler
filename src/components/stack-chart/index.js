@@ -38,7 +38,10 @@ import {
   changeMouseTimePosition,
 } from '../../actions/profile-view';
 
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
+import {
+  getCallNodePathFromIndex,
+  getBottomBoxInfoForCallNode,
+} from '../../profile-logic/profile-data';
 
 import type {
   Thread,
@@ -59,8 +62,6 @@ import type {
   Page,
 } from 'firefox-profiler/types';
 
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
-
 import type { ConnectedProps } from '../../utils/connect';
 
 import './index.css';
@@ -77,7 +78,6 @@ type StateProps = {|
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
   +threadsKey: ThreadsKey,
-  +callTree: CallTree,
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -150,7 +150,8 @@ class StackChartImpl extends React.PureComponent<Props> {
   _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
     const {
       threadsKey,
-      callTree,
+      thread,
+      callNodeInfo,
       selectedCallNodeIndex,
       rightClickedCallNodeIndex,
       handleCallNodeTransformShortcut,
@@ -166,7 +167,11 @@ class StackChartImpl extends React.PureComponent<Props> {
     }
 
     if (event.key === 'Enter') {
-      const bottomBoxInfo = callTree.getBottomBoxInfoForCallNode(nodeIndex);
+      const bottomBoxInfo = getBottomBoxInfoForCallNode(
+        nodeIndex,
+        callNodeInfo,
+        thread
+      );
       updateBottomBoxContentsAndMaybeOpen('stack-chart', bottomBoxInfo);
       return;
     }
@@ -307,7 +312,6 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
       threadsKey: getSelectedThreadsKey(state),
-      callTree: selectedThreadSelectors.getCallTree(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       categories: getCategories(state),
       selectedCallNodeIndex:
