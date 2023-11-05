@@ -113,7 +113,7 @@ const ROW_CSS_PIXELS_HEIGHT = 16;
 const TEXT_CSS_PIXELS_OFFSET_START = 3;
 const TEXT_CSS_PIXELS_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
-const BORDER_OPACITY = 0.4;
+const BORDER_OPACITY = 0.8;
 
 class StackChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
@@ -347,7 +347,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             ? colorStyles.selectedFillStyle
             : colorStyles.unselectedFillStyle
         );
-        ctx.fillRect(stackTiming.start[i], intY, intW - 0.8, intH);
+        ctx.fillRect(stackTiming.start[i], intY, intW - BORDER_OPACITY, intH);
 
         const textX: DevicePixels = intX + textDevicePixelsOffsetStart;
         const textW: DevicePixels = Math.max(
@@ -385,28 +385,66 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     );
   };
 
-  _getHoveredStackInfo = ({
-    _depth,
-    _stackTimingIndex,
-  }: HoveredPosition): React.Node | null => {
-    return null;
-    // const {
-    //   thread,
-    //   weightType,
-    //   threadsKey,
-    //   combinedTimingRows,
-    //   categories,
-    //   callNodeInfo,
-    //   getMarker,
-    //   shouldDisplayTooltips,
-    //   interval,
-    //   innerWindowIDToPageMap,
-    //   displayStackType,
-    // } = this.props;
+  _getHoveredStackInfo = (
+    hoveredPosition: HoveredPosition
+  ): React.Node | null => {
+    const {
+      thread,
+      weightType,
+      categories,
+      callNodeInfo,
+      shouldDisplayTooltips,
+      interval,
+      innerWindowIDToPageMap,
+      displayStackType,
+    } = this.props;
 
-    // if (!shouldDisplayTooltips()) {
-    //   return null;
-    // }
+    if (!shouldDisplayTooltips()) {
+      return null;
+    }
+
+    const result =
+      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredPosition);
+    if (!result) {
+      return null;
+    }
+
+    switch (result.type) {
+      case 'call-node': {
+        const callNodeIndex = result.index;
+
+        const durationText = 'duration text'; // TODO
+        return (
+          <TooltipCallNode
+            thread={thread}
+            weightType={weightType}
+            innerWindowIDToPageMap={innerWindowIDToPageMap}
+            interval={interval}
+            callNodeIndex={callNodeIndex}
+            callNodeInfo={callNodeInfo}
+            categories={categories}
+            // The stack chart doesn't support other call tree summary types.
+            callTreeSummaryStrategy="timing"
+            durationText={durationText}
+            displayStackType={displayStackType}
+          />
+        );
+      }
+      case 'marker': {
+        const markerIndex = result.index;
+
+        return (
+          <TooltipMarker
+            markerIndex={markerIndex}
+            marker={this.props.getMarker(markerIndex)}
+            threadsKey={this.props.threadsKey}
+            restrictHeightWidth={true}
+          />
+        );
+      }
+      default:
+        return null;
+    }
 
     // const timing = combinedTimingRows[depth];
 
@@ -449,7 +487,10 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return;
     }
 
-    const hoveredItem = this._itemAtPosition(hoveredPosition.x, hoveredPosition.y);
+    const hoveredItem = this._itemAtPosition(
+      hoveredPosition.x,
+      hoveredPosition.y
+    );
     const lastDrawInfo = this._lastDrawInfo;
     if (hoveredItem === null || lastDrawInfo === null) {
       return;
@@ -476,7 +517,10 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const hoveredItem = this._itemAtPosition(hoveredPosition.x, hoveredPosition.y);
+    const hoveredItem = this._itemAtPosition(
+      hoveredPosition.x,
+      hoveredPosition.y
+    );
     const lastDrawInfo = this._lastDrawInfo;
     if (hoveredItem === null || lastDrawInfo === null) {
       return null;
@@ -495,7 +539,6 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     }
     callPath.reverse();
 
-    console.log({callPath});
     const callNodeIndex = ensureExists(
       callNodeInfo.getCallNodeIndexFromPath(callPath)
     );
@@ -512,9 +555,11 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);
     if (!result) {
       this.props.onSelectionChange(null);
+      return;
     }
+
     // TODO implement selecting user timing markers #2355
-    if (result && result.type === 'call-node') {
+    if (result.type === 'call-node') {
       this.props.onSelectionChange(result.index);
     }
   };
@@ -558,10 +603,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     const hoveredRow = stackTimingRows[depth];
     const stackTimingIndex = bisectionRight(hoveredRow.start, xDev) - 1;
-    if (
-      stackTimingIndex < 0 ||
-      hoveredRow.end[stackTimingIndex] <= xDev
-    ) {
+    if (stackTimingIndex < 0 || hoveredRow.end[stackTimingIndex] <= xDev) {
       return null;
     }
 
