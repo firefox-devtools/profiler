@@ -15,7 +15,6 @@ import {
 } from 'firefox-profiler/profile-logic/profile-data';
 import { countPositiveValues } from 'firefox-profiler/utils';
 
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 import type {
   Thread,
   CategoryList,
@@ -54,7 +53,7 @@ type Props = {|
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
   +durationText: string,
-  +callTree?: CallTree,
+  +displayData?: CallNodeDisplayData,
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +displayStackType: boolean,
@@ -227,11 +226,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     return rows;
   }
 
-  _renderCategoryTimings(
-    maybeTimings: ?TimingsForPath,
-    maybeDisplayData: ?CallNodeDisplayData
-  ) {
-    if (!maybeTimings || !maybeDisplayData) {
+  _renderCategoryTimings(maybeTimings: ?TimingsForPath) {
+    if (!maybeTimings) {
       return null;
     }
     const { totalTime, selfTime } = maybeTimings.forPath;
@@ -303,21 +299,15 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     );
   }
 
-  _canRenderImplementationTimings(
-    maybeTimings: ?TimingsForPath,
-    maybeDisplayData: ?CallNodeDisplayData
-  ) {
-    if (!maybeTimings || !maybeDisplayData) {
+  _canRenderImplementationTimings(maybeTimings: ?TimingsForPath) {
+    if (!maybeTimings) {
       return false;
     }
-    return Boolean(maybeTimings.forPath.totalTime.breakdownByImplementation);
+    return maybeTimings.forPath.totalTime.breakdownByImplementation !== null;
   }
 
-  _renderImplementationTimings(
-    maybeTimings: ?TimingsForPath,
-    maybeDisplayData: ?CallNodeDisplayData
-  ) {
-    if (!maybeTimings || !maybeDisplayData) {
+  _renderImplementationTimings(maybeTimings: ?TimingsForPath) {
+    if (!maybeTimings) {
       return null;
     }
     const { totalTime, selfTime } = maybeTimings.forPath;
@@ -436,7 +426,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       thread,
       durationText,
       categories,
-      callTree,
+      displayData,
       timings,
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
@@ -451,11 +441,6 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const innerWindowID = callNodeTable.innerWindowID[callNodeIndex];
     const funcStringIndex = thread.funcTable.name[funcIndex];
     const funcName = thread.stringTable.getString(funcStringIndex);
-
-    let displayData;
-    if (callTree) {
-      displayData = callTree.getDisplayData(callNodeIndex);
-    }
 
     let fileName = null;
 
@@ -590,9 +575,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           </div>
         </div>
         <div className="tooltipCallNodeDetails">
-          {this._canRenderImplementationTimings(timings, displayData)
-            ? this._renderImplementationTimings(timings, displayData)
-            : this._renderCategoryTimings(timings, displayData)}
+          {this._canRenderImplementationTimings(timings)
+            ? this._renderImplementationTimings(timings)
+            : this._renderCategoryTimings(timings)}
           {callTreeSummaryStrategy !== 'timing' && displayData ? (
             <div className="tooltipDetails tooltipCallNodeDetailsLeft">
               {/* Everything in this div needs to come in pairs of two in order to

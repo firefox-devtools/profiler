@@ -398,6 +398,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       // strategies, but it may not be worth implementing it.
       callTreeSummaryStrategy === 'timing';
 
+    const displayData = callTree.getDisplayData(callNodeIndex);
+
     return (
       // Important! Only pass in props that have been properly memoized so this component
       // doesn't over-render.
@@ -410,7 +412,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         callNodeInfo={callNodeInfo}
         categories={categories}
         durationText={percentage}
-        callTree={callTree}
+        displayData={displayData}
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={
           shouldComputeTimings
