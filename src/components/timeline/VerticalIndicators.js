@@ -72,7 +72,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
           break;
         case 'FirstContentfulPaint':
         case 'FirstContentfulComposite':
-          color = 'var(--green-60)';
+          color = 'var(--magenta-60)';
           break;
         default:
           color = '#000';
