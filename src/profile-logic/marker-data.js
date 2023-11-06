@@ -1094,7 +1094,11 @@ export function isNavigationMarker({ name, data }: Marker) {
     return true;
   }
 
-  if (name === 'FirstContentfulPaint' || name === 'FirstContentfulComposite') {
+  if (
+    name === 'FirstContentfulPaint' ||
+    name === 'FirstContentfulComposite' ||
+    name === 'LargestContentfulPaint'
+  ) {
     // Add the performance metric markers.
     return true;
   }
