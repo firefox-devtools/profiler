@@ -47,7 +47,7 @@ Array [
     "category": 0,
     "data": null,
     "end": null,
-    "name": "Contentful paint at something",
+    "name": "FirstContentfulPaint",
     "start": 8,
     "threadId": null,
   },

@@ -70,10 +70,13 @@ export class VerticalIndicators extends React.PureComponent<Props> {
         case 'DOMContentLoaded':
           color = 'var(--blue-50)';
           break;
+        case 'FirstContentfulPaint':
+        case 'FirstContentfulComposite':
+          color = 'var(--green-60)';
+          break;
         default:
-          if (marker.name.startsWith('Contentful paint ')) {
-            color = 'var(--green-60)';
-          }
+          color = '#000';
+          break;
       }
 
       // Compute the positioning
