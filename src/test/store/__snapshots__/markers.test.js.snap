@@ -10,7 +10,7 @@ Array [
       "innerWindowID": 1,
       "type": "tracing",
     },
-    "end": 5,
+    "end": 6,
     "name": "Load",
     "start": 4,
     "threadId": null,

@@ -1210,7 +1210,7 @@ export function getNetworkTrackProfile() {
     [
       'Load',
       4,
-      5,
+      6,
       ({
         ...loadPayloadBase,
       }: NavigationMarkerPayload),

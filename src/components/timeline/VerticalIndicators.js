@@ -82,7 +82,8 @@ export class VerticalIndicators extends React.PureComponent<Props> {
       // Compute the positioning
       const rangeLength = rangeEnd - rangeStart;
       const xPixelsPerMs = width / rangeLength;
-      const left = (marker.start - rangeStart) * xPixelsPerMs;
+      const markerPos = marker.end !== null ? marker.end : marker.start;
+      const left = (markerPos - rangeStart) * xPixelsPerMs;
 
       // Optionally compute a url.
       let url = null;

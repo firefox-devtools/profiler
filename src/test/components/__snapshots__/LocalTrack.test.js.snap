@@ -107,7 +107,7 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
             class="timelineVerticalIndicatorsLine"
             data-marker-index="10"
             data-testid="vertical-indicator-line"
-            style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
+            style="--vertical-indicator-color: var(--red-60); left: 200px;"
           />
           <div
             class="timelineVerticalIndicatorsLine"
@@ -119,7 +119,7 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
             class="timelineVerticalIndicatorsLine"
             data-marker-index="12"
             data-testid="vertical-indicator-line"
-            style="--vertical-indicator-color: var(--blue-50); left: 200px;"
+            style="--vertical-indicator-color: var(--blue-50); left: 266.6666666666667px;"
           />
           <div
             class="timelineVerticalIndicatorsLine"
