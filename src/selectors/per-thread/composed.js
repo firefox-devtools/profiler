@@ -16,10 +16,7 @@ import type {
   $ReturnType,
   Thread,
   JsTracerTable,
-  MarkerTimingRows,
 } from 'firefox-profiler/types';
-
-import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 
 import { hasUsefulSamples } from '../../profile-logic/profile-data';
 
@@ -41,8 +38,6 @@ type NeededThreadSelectors = {
   getThread: Selector<Thread>,
   getIsNetworkChartEmptyInFullRange: Selector<boolean>,
   getJsTracerTable: Selector<JsTracerTable | null>,
-  getUserTimingMarkerTiming: Selector<MarkerTimingRows>,
-  getStackTimingByDepth: Selector<StackTimingByDepth>,
 };
 
 /**

@@ -15,8 +15,8 @@ import {
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
-import { ensureExists } from '../../utils/flow';
-import { formatMilliseconds } from '../../utils/format-numbers';
+import { ensureExists, assertExhaustiveCheck } from '../../utils/flow';
+import { snapValueToMultipleOfTwo } from '../../utils/coordinates';
 import { bisectionRight } from '../../utils/bisect';
 import {
   updatePreviewSelection,
@@ -30,11 +30,10 @@ import type {
   Thread,
   CategoryList,
   ThreadsKey,
-  UserTimingMarkerPayload,
+  MarkerTiming,
   WeightType,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  CombinedTimingRows,
   Milliseconds,
   CssPixels,
   DevicePixels,
@@ -68,12 +67,12 @@ type OwnProps = {|
   +defaultCategory: IndexIntoCategoryList,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +stackFrameHeight: CssPixels,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
   >,
   +changeMouseTimePosition: ChangeMouseTimePosition,
   +getMarker: (MarkerIndex) => Marker,
+  +userTimingRows: MarkerTiming[] | null,
   +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -90,10 +89,17 @@ type Props = $ReadOnly<{|
   +viewport: Viewport,
 |}>;
 
-type HoveredStackTiming = {|
-  +depth: StackTimingDepth,
-  +stackTimingIndex: IndexIntoStackTiming,
-|};
+type HoveredStackTiming =
+  | {|
+      type: 'STACK',
+      depth: StackTimingDepth,
+      stackTimingIndex: IndexIntoStackTiming,
+    |}
+  | {|
+      type: 'USER_TIMING',
+      rowIndex: number,
+      marker: IndexIntoStackTiming,
+    |};
 
 type HoveredPosition = {|
   +x: CssPixels,
@@ -103,13 +109,18 @@ type HoveredPosition = {|
 type DrawInfo = {|
   stackTimingRows: StackTimingByDepth,
   cssToDeviceScale: number,
-  viewportDevicePixelsTop: DevicePixels,
-  rowDevicePixelsHeight: DevicePixels,
+  viewportTopDev: DevicePixels,
+  rowHeightDev: DevicePixels,
+  userTimingHeaderHeightDev: DevicePixels,
+  userTimingRows: MarkerTiming[] | null,
+  timeAtOuterStart: Milliseconds,
+  devPxPerMs: number,
 |};
 
 import './Canvas.css';
 
 const ROW_CSS_PIXELS_HEIGHT = 16;
+const GAP_HEIGHT_AFTER_USER_TIMING = 8;
 const TEXT_CSS_PIXELS_OFFSET_START = 3;
 const TEXT_CSS_PIXELS_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
@@ -177,9 +188,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   ) => {
     const {
       thread,
+      userTimingRows,
       rangeStart,
       rangeEnd,
-      stackFrameHeight,
       selectedCallNodeIndex,
       categories,
       callNodeInfo,
@@ -224,11 +235,11 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     const textMeasurement = this._textMeasurement;
 
-    const devicePixelsWidth = containerWidth * cssToDeviceScale;
-    const devicePixelsHeight = containerHeight * cssToDeviceScale;
+    const canvasWidthDev = containerWidth * cssToDeviceScale;
+    const canvasHeightDev = containerHeight * cssToDeviceScale;
 
     fastFillStyle.set('#ffffff');
-    ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
+    ctx.fillRect(0, 0, canvasWidthDev, canvasHeightDev);
 
     // Length of the committed range
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -236,10 +247,6 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     // Fraction of the committed range that's currently in the viewport
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
-    // function mapAffine(x1, y1, x2, y2, x3) {
-    //   const m = (y2 - y1) / (x2 - x1);
-    //   return m * (x3 - x1) + y1;
-    // }
 
     const innerContainerWidth: CssPixels =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
@@ -259,39 +266,35 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       maxDepth,
       timeAtOuterStart,
       timeAtOuterEnd,
-      devicePixelsWidth,
+      canvasWidthDev,
       selectedCallNodeIndex,
       defaultCategory,
       interval
     );
 
-    const viewportDevicePixelsTop = viewportTop * cssToDeviceScale;
+    const rowHeightDev = Math.round(ROW_CSS_PIXELS_HEIGHT * cssToDeviceScale);
 
-    // Convert CssPixels to Stack Depth
-    const startDepth = Math.floor(viewportTop / stackFrameHeight);
-    const endDepth = Math.ceil(viewportBottom / stackFrameHeight);
+    const userTimingHeaderHeightDev =
+      userTimingRows === null
+        ? 0
+        : userTimingRows.length * rowHeightDev +
+          Math.round(GAP_HEIGHT_AFTER_USER_TIMING * cssToDeviceScale);
 
-    const pixelAtViewportPosition = (
-      viewportPosition: UnitIntervalOfProfileRange
-    ): DevicePixels =>
-      cssToDeviceScale *
-      // The right hand side of this formula is all in CSS pixels.
-      (marginLeft +
-        ((viewportPosition - viewportLeft) * innerContainerWidth) /
-          viewportLength);
+    const viewportTopDev = viewportTop * cssToDeviceScale;
+    const viewportBottomDev = viewportBottom * cssToDeviceScale;
+    const devPxPerMs = canvasWidthDev / (timeAtOuterEnd - timeAtOuterStart);
 
-    // Apply the device pixel ratio to various CssPixel constants.
-    const rowDevicePixelsHeight = Math.round(
-      ROW_CSS_PIXELS_HEIGHT * cssToDeviceScale
-    );
     this._lastDrawInfo = {
       stackTimingRows,
       cssToDeviceScale,
-      viewportDevicePixelsTop,
-      rowDevicePixelsHeight,
+      viewportTopDev,
+      rowHeightDev,
+      userTimingHeaderHeightDev,
+      userTimingRows,
+      timeAtOuterStart,
+      devPxPerMs,
     };
 
-    const oneCssPixelInDevicePixels = 1 * cssToDeviceScale;
     const textDevicePixelsOffsetStart =
       TEXT_CSS_PIXELS_OFFSET_START * cssToDeviceScale;
     const textDevicePixelsOffsetTop =
@@ -309,11 +312,85 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       hoveredPosition !== null
         ? this._itemAtPosition(hoveredPosition.x, hoveredPosition.y)
         : null;
-    const hoveredDepth = hoveredItem !== null ? hoveredItem.depth : null;
-    const hoveredIndex =
-      hoveredItem !== null ? hoveredItem.stackTimingIndex : null;
+    const [hoveredDepth, hoveredIndex] =
+      hoveredItem !== null && hoveredItem.type === 'STACK'
+        ? [hoveredItem.depth, hoveredItem.stackTimingIndex]
+        : [null, null];
+
+    if (userTimingRows !== null) {
+      const startRowIndex = Math.max(
+        0,
+        Math.floor(viewportTopDev / rowHeightDev)
+      );
+      const endRowIndex = Math.min(
+        userTimingRows.length,
+        Math.ceil(viewportBottomDev / rowHeightDev)
+      );
+      const [hoveredRowIndex, hoveredMarker] =
+        hoveredItem !== null && hoveredItem.type === 'USER_TIMING'
+          ? [hoveredItem.rowIndex, hoveredItem.marker]
+          : [null, null];
+      for (let rowIndex = startRowIndex; rowIndex < endRowIndex; rowIndex++) {
+        const row = userTimingRows[rowIndex];
+        const isHoveredRow = rowIndex === hoveredRowIndex;
+
+        const intY = rowIndex * rowHeightDev - viewportTopDev;
+        const intH = rowHeightDev - 1;
+
+        for (let i = 0; i < row.length; i++) {
+          const leftDevFloat = (row.start[i] - timeAtOuterStart) * devPxPerMs;
+          const rightDevFloat = (row.end[i] - timeAtOuterStart) * devPxPerMs;
+          const leftDevInt = snapValueToMultipleOfTwo(leftDevFloat);
+          const rightDevInt = snapValueToMultipleOfTwo(rightDevFloat);
+          if (leftDevInt >= rightDevInt) {
+            continue;
+          }
+          const intX = leftDevInt;
+          const intW = rightDevInt - leftDevInt;
+          const isSelected = false;
+          const isHovered = isHoveredRow && i === hoveredMarker;
+
+          const colorStyles = mapCategoryColorNameToStackChartStyles(
+            categories[categoryForUserTiming].color
+          );
+          // Draw the box.
+          fastFillStyle.set(
+            isHovered || isSelected
+              ? colorStyles.selectedFillStyle
+              : colorStyles.unselectedFillStyle
+          );
+          ctx.fillRect(intX, intY, intW - BORDER_OPACITY, intH);
+
+          const textX: DevicePixels = intX + textDevicePixelsOffsetStart;
+          const textW: DevicePixels = Math.max(
+            0,
+            intW - textDevicePixelsOffsetStart
+          );
+
+          if (textW > textMeasurement.minWidth) {
+            const text = row.label[i];
+            const fittedText = textMeasurement.getFittedText(text, textW);
+            if (fittedText) {
+              fastFillStyle.set(
+                isHovered || isSelected
+                  ? colorStyles.selectedTextColor
+                  : '#000000'
+              );
+              ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
+            }
+          }
+        }
+      }
+    }
 
     // Only draw the stack frames that are vertically within view.
+    const startDepth = Math.floor(
+      (viewportTopDev - userTimingHeaderHeightDev) / rowHeightDev
+    );
+    const endDepth = Math.ceil(
+      (viewportBottomDev - userTimingHeaderHeightDev) / rowHeightDev
+    );
+
     for (let depth = startDepth; depth < endDepth; depth++) {
       // Get the timing information for a row of stack frames.
       const stackTiming = stackTimingRows[depth];
@@ -324,8 +401,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
       const isHoveredDepth = hoveredDepth === depth;
 
-      const intY = depth * rowDevicePixelsHeight - viewportDevicePixelsTop;
-      const intH = rowDevicePixelsHeight - 1;
+      const intY =
+        userTimingHeaderHeightDev + depth * rowHeightDev - viewportTopDev;
+      const intH = rowHeightDev - 1;
 
       for (let i = 0; i < stackTiming.length; i++) {
         const intX = stackTiming.start[i];
@@ -371,17 +449,21 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     // Draw the borders on the left and right.
     fastFillStyle.set(GREY_30);
+    const oneCssPixelInDevicePixels = 1 * cssToDeviceScale;
     ctx.fillRect(
-      pixelAtViewportPosition(0),
+      cssToDeviceScale *
+        (marginLeft - (viewportLeft * innerContainerWidth) / viewportLength),
       0,
       oneCssPixelInDevicePixels,
-      devicePixelsHeight
+      canvasHeightDev
     );
     ctx.fillRect(
-      pixelAtViewportPosition(1),
+      cssToDeviceScale *
+        (marginLeft +
+          ((1 - viewportLeft) * innerContainerWidth) / viewportLength),
       0,
       oneCssPixelInDevicePixels,
-      devicePixelsHeight
+      canvasHeightDev
     );
   };
 
@@ -445,58 +527,20 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       default:
         return null;
     }
-
-    // const timing = combinedTimingRows[depth];
-
-    // if (timing.index) {
-    //   const markerIndex = timing.index[stackTimingIndex];
-
-    //   return (
-    //     <TooltipMarker
-    //       markerIndex={markerIndex}
-    //       marker={getMarker(markerIndex)}
-    //       threadsKey={threadsKey}
-    //       restrictHeightWidth={true}
-    //     />
-    //   );
-    // }
-
-    // const callNodeIndex = timing.callNode[stackTimingIndex];
-    // const duration =
-    //   timing.end[stackTimingIndex] - timing.start[stackTimingIndex];
-
-    // return (
-    //   <TooltipCallNode
-    //     thread={thread}
-    //     weightType={weightType}
-    //     innerWindowIDToPageMap={innerWindowIDToPageMap}
-    //     interval={interval}
-    //     callNodeIndex={callNodeIndex}
-    //     callNodeInfo={callNodeInfo}
-    //     categories={categories}
-    //     // The stack chart doesn't support other call tree summary types.
-    //     callTreeSummaryStrategy="timing"
-    //     durationText={formatMilliseconds(duration)}
-    //     displayStackType={displayStackType}
-    //   />
-    // );
   };
 
-  _onDoubleClickStack = (hoveredPosition: HoveredPosition | null) => {
-    if (hoveredPosition === null) {
+  _onDoubleClick = (position: HoveredPosition | null) => {
+    if (position === null) {
       return;
     }
 
-    const hoveredItem = this._itemAtPosition(
-      hoveredPosition.x,
-      hoveredPosition.y
-    );
+    const item = this._itemAtPosition(position.x, position.y);
     const lastDrawInfo = this._lastDrawInfo;
-    if (hoveredItem === null || lastDrawInfo === null) {
+    if (item === null || item.type !== 'STACK' || lastDrawInfo === null) {
       return;
     }
 
-    const { depth, stackTimingIndex } = hoveredItem;
+    const { depth, stackTimingIndex } = item;
     const { stackTimingRows } = lastDrawInfo;
 
     const { updatePreviewSelection } = this.props;
@@ -526,26 +570,35 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const { depth, stackTimingIndex } = hoveredItem;
-    const { stackTimingRows } = lastDrawInfo;
-    const { callNodeInfo } = this.props;
+    switch (hoveredItem.type) {
+      case 'STACK': {
+        const { depth, stackTimingIndex } = hoveredItem;
+        const { stackTimingRows } = lastDrawInfo;
+        const { callNodeInfo } = this.props;
 
-    const callPath = [];
-    let currentIndex = stackTimingIndex;
-    for (let currentDepth = depth; currentDepth >= 0; currentDepth--) {
-      const currentRow = stackTimingRows[currentDepth];
-      callPath.push(currentRow.func[currentIndex]);
-      currentIndex = currentRow.parentIndexInPreviousRow[currentIndex];
+        const callPath = [];
+        let currentIndex = stackTimingIndex;
+        for (let currentDepth = depth; currentDepth >= 0; currentDepth--) {
+          const currentRow = stackTimingRows[currentDepth];
+          callPath.push(currentRow.func[currentIndex]);
+          currentIndex = currentRow.parentIndexInPreviousRow[currentIndex];
+        }
+        callPath.reverse();
+
+        const callNodeIndex = ensureExists(
+          callNodeInfo.getCallNodeIndexFromPath(callPath)
+        );
+        return { index: callNodeIndex, type: 'call-node' };
+      }
+      case 'USER_TIMING': {
+        const userTimingRows = ensureExists(lastDrawInfo.userTimingRows);
+        const index =
+          userTimingRows[hoveredItem.rowIndex].index[hoveredItem.marker];
+        return { index, type: 'marker' };
+      }
+      default:
+        throw assertExhaustiveCheck(hoveredItem.type);
     }
-    callPath.reverse();
-
-    const callNodeIndex = ensureExists(
-      callNodeInfo.getCallNodeIndexFromPath(callPath)
-    );
-    return { index: callNodeIndex, type: 'call-node' };
-
-    // const index = combinedTimingRows[depth].index[stackTimingIndex];
-    // return { index, type: 'marker' };
   }
 
   _onSelectItem = (hoveredItem: HoveredPosition | null) => {
@@ -586,17 +639,36 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const {
       stackTimingRows,
       cssToDeviceScale,
-      viewportDevicePixelsTop,
-      rowDevicePixelsHeight,
+      viewportTopDev,
+      userTimingHeaderHeightDev,
+      rowHeightDev,
+      userTimingRows,
+      timeAtOuterStart,
+      devPxPerMs,
     } = lastDrawInfo;
 
     const xDev = x * cssToDeviceScale;
-    const yDev = y * cssToDeviceScale;
+    const yDev = viewportTopDev + y * cssToDeviceScale;
 
-    // TODO: Consider extra UserTiming row
-    const depth = Math.floor(
-      (yDev + viewportDevicePixelsTop) / rowDevicePixelsHeight
-    );
+    if (yDev < userTimingHeaderHeightDev) {
+      if (userTimingRows !== null) {
+        const rowIndex = Math.floor(yDev / rowHeightDev);
+        if (rowIndex < 0 || rowIndex >= userTimingRows.length) {
+          return null;
+        }
+        const xMillis = timeAtOuterStart + xDev / devPxPerMs;
+        const row = userTimingRows[rowIndex];
+        for (let i = 0; i < row.length; i++) {
+          if (xMillis >= row.start[i] && xMillis < row.end[i]) {
+            console.log({xMillis, rowIndex, row, i});
+            return { type: 'USER_TIMING', rowIndex, marker: i };
+          }
+        }
+      }
+      return null;
+    }
+
+    const depth = Math.floor((yDev - userTimingHeaderHeightDev) / rowHeightDev);
     if (depth >= stackTimingRows.length) {
       return null;
     }
@@ -607,7 +679,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    return { depth, stackTimingIndex };
+    return { type: 'STACK', depth, stackTimingIndex };
   };
 
   onMouseMove = (event: { nativeEvent: MouseEvent }) => {
@@ -649,7 +721,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
-        onDoubleClickItem={this._onDoubleClickStack}
+        onDoubleClickItem={this._onDoubleClick}
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}

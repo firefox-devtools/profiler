@@ -21,7 +21,10 @@ import {
   getDefaultCategory,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadsKey } from '../../selectors/url-state';
+import {
+  getShowUserTimings,
+  getSelectedThreadsKey,
+} from '../../selectors/url-state';
 import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
@@ -46,6 +49,7 @@ import type {
   IndexIntoCallNodeTable,
   MarkerIndex,
   Marker,
+  MarkerTiming,
   Milliseconds,
   UnitIntervalOfProfileRange,
   StartEndRange,
@@ -79,7 +83,7 @@ type StateProps = {|
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
   +getMarker: (MarkerIndex) => Marker,
-  +userTimings: MarkerIndex[],
+  +userTimingRows: MarkerTiming[] | null,
   +timelineMarginLeft: CssPixels,
   +displayStackType: boolean,
 |};
@@ -215,12 +219,13 @@ class StackChartImpl extends React.PureComponent<Props> {
       scrollToSelectionGeneration,
       innerWindowIDToPageMap,
       getMarker,
-      userTimings,
+      userTimingRows,
       weightType,
       timelineMarginLeft,
       displayStackType,
     } = this.props;
 
+    // TODO: Account for user timing rows + gap
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
@@ -232,7 +237,8 @@ class StackChartImpl extends React.PureComponent<Props> {
       >
         <StackSettings />
         <TransformNavigator />
-        {maxStackDepth === 0 && userTimings.length === 0 ? (
+        {maxStackDepth === 0 &&
+        (userTimingRows === null || userTimingRows.length === 0) ? (
           <StackChartEmptyReasons />
         ) : (
           <ContextMenuTrigger
@@ -262,12 +268,12 @@ class StackChartImpl extends React.PureComponent<Props> {
                   innerWindowIDToPageMap,
                   threadsKey,
                   getMarker,
+                  userTimingRows,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
                   changeMouseTimePosition,
                   rangeStart: timeRange.start,
                   rangeEnd: timeRange.end,
-                  stackFrameHeight: STACK_FRAME_HEIGHT,
                   callNodeInfo,
                   categories,
                   selectedCallNodeIndex,
@@ -290,11 +296,17 @@ class StackChartImpl extends React.PureComponent<Props> {
 
 export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
+    const showUserTimings = getShowUserTimings(state);
+    const userTimingRows = showUserTimings
+      ? selectedThreadSelectors.getUserTimingMarkerTiming(state)
+      : null;
+
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
       maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
+      userTimingRows,
       defaultCategory: getDefaultCategory(state),
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
@@ -309,7 +321,6 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
-      userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
       displayStackType: getProfileUsesMultipleStackTypes(state),
     };

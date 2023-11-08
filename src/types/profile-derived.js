@@ -24,7 +24,6 @@ import type {
   Tid,
 } from './profile';
 import type { IndexedArray } from './utils';
-import type { StackTiming } from '../profile-logic/stack-timing';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -330,15 +329,6 @@ export type MarkerTiming = {|
 |};
 
 export type MarkerTimingRows = Array<MarkerTiming>;
-
-/**
- * Combined timing can be used in the Stack Chart. When this happens, the chart will
- * either take both marker timing and stack timing, or just the stack timing information.
- * This way, UserTiming markers can be shown together with the stack information.
- */
-export type CombinedTimingRows =
-  | Array<MarkerTiming | StackTiming>
-  | Array<StackTiming>;
 
 /**
  * This type contains the necessary information to fully draw the marker chart. Each
