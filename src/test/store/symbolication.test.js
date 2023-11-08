@@ -484,6 +484,7 @@ describe('doSymbolicateProfile', function () {
       implementationFilter: undefined,
       pathInZipFile: undefined,
       transformStacks: undefined,
+      dataSource: undefined,
     });
     profile = ProfileViewSelectors.getProfile(getState());
     expect(profile).toBe(newProfile);

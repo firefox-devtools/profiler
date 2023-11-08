@@ -106,6 +106,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
       case 'compare':
         return 'uploaded';
       case 'from-browser':
+      case 'from-post-message':
       case 'unpublished':
       case 'from-file':
       case 'local':

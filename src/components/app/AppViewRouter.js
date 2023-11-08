@@ -65,6 +65,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
       case 'uploaded-recordings':
         return <UploadedRecordingsHome />;
       case 'from-browser':
+      case 'from-post-message':
       case 'unpublished':
       case 'from-file':
       case 'local':

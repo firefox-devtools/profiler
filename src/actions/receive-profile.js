@@ -82,6 +82,7 @@ import type {
   InnerWindowID,
   Pid,
   OriginsTimelineRoot,
+  DataSource,
 } from 'firefox-profiler/types';
 
 import type {
@@ -126,6 +127,7 @@ export function loadProfile(
     transformStacks: TransformStacksPerThread,
     browserConnection: BrowserConnection | null,
     skipSymbolication: boolean, // Please use this in tests only.
+    dataSource: DataSource,
   |}> = {},
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
@@ -155,6 +157,7 @@ export function loadProfile(
       pathInZipFile: config.pathInZipFile,
       implementationFilter: config.implementationFilter,
       transformStacks: config.transformStacks,
+      dataSource: config.dataSource,
     });
 
     // During initial load, we are upgrading the URL and generating the UrlState
@@ -713,6 +716,7 @@ export function viewProfile(
     transformStacks: TransformStacksPerThread,
     skipSymbolication: boolean,
     browserConnection: BrowserConnection | null,
+    dataSource: DataSource,
   |}> = {}
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
@@ -1480,6 +1484,29 @@ export function retrieveProfileFromFile(
 }
 
 /**
+ * View a profile that was injected via a "postMessage". A website can
+ * inject a profile to the profiler.
+ */
+export function viewProfileFromPostMessage(
+  rawProfile: any
+): ThunkAction<Promise<void>> {
+  return async (dispatch) => {
+    try {
+      const profile = await unserializeProfileOfArbitraryFormat(rawProfile);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      await withHistoryReplaceStateAsync(async () => {
+        await dispatch(viewProfile(profile));
+      });
+    } catch (error) {
+      dispatch(fatalError(error));
+    }
+  };
+}
+
+/**
  * This action retrieves several profiles and push them into 1 profile using the
  * information contained in the query.
  */
@@ -1618,6 +1645,31 @@ export function retrieveProfileForRawUrl(
         if (Array.isArray(query.profiles)) {
           await dispatch(retrieveProfilesToCompare(query.profiles, true));
         }
+        break;
+      }
+      case 'from-post-message': {
+        window.addEventListener('message', (event) => {
+          const { data } = event;
+          console.log(`Received postMessage`, data);
+          if (!data || typeof data !== 'object') {
+            return;
+          }
+          switch (data.name) {
+            case 'inject-profile':
+              dispatch(viewProfileFromPostMessage(data.profile));
+              break;
+            case 'is-ready': {
+              console.log(
+                'Responding via postMessage that the profiler is ready.'
+              );
+              const otherWindow = event.source ?? window;
+              otherWindow.postMessage({ name: 'is-ready' }, '*');
+              break;
+            }
+            default:
+              console.log('Unknown post message', data);
+          }
+        });
         break;
       }
       case 'uploaded-recordings':

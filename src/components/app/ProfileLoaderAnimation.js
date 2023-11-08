@@ -20,6 +20,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 const LOADING_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
   'from-browser': 'ProfileLoaderAnimation--loading-unpublished',
+  'from-post-message': 'ProfileLoaderAnimation--loading-unpublished',
   unpublished: 'ProfileLoaderAnimation--loading-unpublished',
   'from-file': 'ProfileLoaderAnimation--loading-from-file',
   local: 'ProfileLoaderAnimation--loading-local',

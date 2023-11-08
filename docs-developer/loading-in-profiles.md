@@ -104,6 +104,66 @@ Note that if you have a copy of the project locally, you can add the profile pat
 
 Firefox loads the profiles directly into the front-end through a WebChannel mechanism. This is done with the profile menu button, which can be enabled on the homepage of [profiler.firefox.com](https://profiler.firefox.com/)
 
+### From a window.postMessage
+
+> `https://profiler.firefox.com/from-post-message/`
+
+A profile can be injected via another website and the postMessage API.
+
+First wait for the page to be ready. This can be done by posting an `{ name: 'is-ready' }` message and waiting for the response of a similar `{ name: 'is-ready' }`.
+
+```js
+/**
+ * Open a profile in https://profiler.firefox.com/
+ */
+function openProfile(profile) {
+  const origin = 'https://profiler.firefox.com';
+  const profilerURL = origin + '/from-post-message/' + params;
+  const profilerWindow = window.open(profilerURL, '_blank');
+
+  if (!profilerWindow) {
+    console.error('Failed to open the new window.');
+    return;
+  }
+
+  // Wait for the profiler page to respond that it is ready.
+  let isReady = false;
+
+  /**
+   * @param {MessageEvent} event
+   */
+  const listener = ({ data }) => {
+    if (data?.name === 'is-ready') {
+      console.log('The profiler is ready. Injecting the profile.');
+      isReady = true;
+      const message = {
+        name: 'inject-profile',
+        profile,
+      };
+      profilerWindow.postMessage(message, origin);
+      window.removeEventListener('message', listener);
+    }
+  };
+
+  window.addEventListener('message', listener);
+  while (!isReady) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    profilerWindow.postMessage({ name: 'is-ready' }, origin);
+  }
+
+  window.removeEventListener('message', listener);
+}
+```
+
+Then you can inject the profile via a postMessage.
+
+```js
+await waitForProfilerReady();
+window.postMessage({ name: 'inject-profile', profile }, '*');
+```
+
+This
+
 ### File
 
 > `https://profiler.firefox.com/from-file/`
