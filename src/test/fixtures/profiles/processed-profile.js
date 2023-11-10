@@ -1210,14 +1210,14 @@ export function getNetworkTrackProfile() {
     [
       'Load',
       4,
-      5,
+      6,
       ({
         ...loadPayloadBase,
       }: NavigationMarkerPayload),
     ],
     ['TTI', 6],
     ['Navigation::Start', 7],
-    ['Contentful paint at something', 8],
+    ['FirstContentfulPaint', 7, 8],
     [
       'DOMContentLoaded',
       6,
