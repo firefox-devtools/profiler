@@ -46,9 +46,9 @@ Array [
   Object {
     "category": 0,
     "data": null,
-    "end": null,
+    "end": 8,
     "name": "FirstContentfulPaint",
-    "start": 8,
+    "start": 7,
     "threadId": null,
   },
 ]

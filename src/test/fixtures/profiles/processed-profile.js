@@ -1217,7 +1217,7 @@ export function getNetworkTrackProfile() {
     ],
     ['TTI', 6],
     ['Navigation::Start', 7],
-    ['FirstContentfulPaint', 8],
+    ['FirstContentfulPaint', 7, 8],
     [
       'DOMContentLoaded',
       6,
