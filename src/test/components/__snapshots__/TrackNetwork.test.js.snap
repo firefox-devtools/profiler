@@ -702,7 +702,7 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
       class="timelineVerticalIndicatorsLine"
       data-marker-index="10"
       data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
+      style="--vertical-indicator-color: var(--red-60); left: 200px;"
     />
     <div
       class="timelineVerticalIndicatorsLine"
@@ -714,7 +714,7 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
       class="timelineVerticalIndicatorsLine"
       data-marker-index="12"
       data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--blue-50); left: 200px;"
+      style="--vertical-indicator-color: var(--blue-50); left: 266.6666666666667px;"
     />
     <div
       class="timelineVerticalIndicatorsLine"
@@ -726,7 +726,7 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
       class="timelineVerticalIndicatorsLine"
       data-marker-index="14"
       data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--green-60); left: 333.33333333333337px;"
+      style="--vertical-indicator-color: var(--magenta-60); left: 333.33333333333337px;"
     />
   </div>
 </div>
