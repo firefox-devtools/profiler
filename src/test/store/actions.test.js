@@ -19,7 +19,6 @@ import {
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-  getUserTiming,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {

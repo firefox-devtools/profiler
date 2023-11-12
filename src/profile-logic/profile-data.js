@@ -24,7 +24,11 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { hashPath } from 'firefox-profiler/utils/path';
-import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
+import {
+  bisectionRight,
+  bisectionLeft,
+  bisectEqualRange,
+} from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   assertExhaustiveCheck,
@@ -2968,6 +2972,37 @@ export function _getTreeOrderComparatorInverted(
       nonInvertedCallNodeTable
     );
   };
+}
+
+export function getOrderingIndexRangeForDescendantsOfInvertedCallPath(
+  callPath: CallNodePath,
+  orderedSelfNodes: Uint32Array,
+  callNodeTable: CallNodeTable
+): [number, number] {
+  return bisectEqualRange(
+    orderedSelfNodes,
+    (callNodeIndex: IndexIntoCallNodeTable) => {
+      let currentCallNodeIndex = callNodeIndex;
+      for (let i = 0; i < callPath.length - 1; i++) {
+        const expectedFunc = callPath[i];
+        const currentFunc = callNodeTable.func[currentCallNodeIndex];
+        if (currentFunc < expectedFunc) {
+          return -1;
+        }
+        if (currentFunc > expectedFunc) {
+          return 1;
+        }
+        const prefix = callNodeTable.prefix[currentCallNodeIndex];
+        if (prefix === -1) {
+          return -1;
+        }
+        currentCallNodeIndex = prefix;
+      }
+      const expectedFunc = callPath[callPath.length - 1];
+      const currentFunc = callNodeTable.func[currentCallNodeIndex];
+      return currentFunc - expectedFunc;
+    }
+  );
 }
 
 export function getFriendlyStackTypeName(

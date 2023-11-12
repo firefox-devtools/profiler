@@ -6,7 +6,10 @@
 import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
-import { getStackTimingByDepth } from '../../profile-logic/stack-timing';
+import {
+  getStackTimingByDepth,
+  getTimeRangeForSpan,
+} from '../../profile-logic/stack-timing';
 import {
   withChartViewport,
   type WithChartViewport,
@@ -15,6 +18,7 @@ import {
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
+import { formatMilliseconds } from '../../utils/format-numbers';
 import { ensureExists, assertExhaustiveCheck } from '../../utils/flow';
 import { snapValueToMultipleOfTwo } from '../../utils/coordinates';
 import { bisectionRight } from '../../utils/bisect';
@@ -43,6 +47,7 @@ import type {
   InnerWindowID,
   IndexIntoCategoryList,
   Page,
+  StartEndRange,
 } from 'firefox-profiler/types';
 
 import type {
@@ -59,6 +64,7 @@ import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {|
   +thread: Thread,
+  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +threadsKey: ThreadsKey,
   +interval: Milliseconds,
@@ -105,6 +111,14 @@ type HoveredPosition = {|
   +x: CssPixels,
   +y: CssPixels,
 |};
+
+type ItemInfo =
+  | {|
+      type: 'CALL_NODE',
+      callNodeIndex: IndexIntoCallNodeTable,
+      timeRange: StartEndRange,
+    |}
+  | {| type: 'MARKER', markerIndex: MarkerIndex |};
 
 type DrawInfo = {|
   stackTimingRows: StackTimingByDepth,
@@ -160,14 +174,32 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
-    const y = depth * ROW_CSS_PIXELS_HEIGHT;
 
-    if (y < this.props.viewport.viewportTop) {
-      this.props.viewport.moveViewport(0, this.props.viewport.viewportTop - y);
-    } else if (y + ROW_CSS_PIXELS_HEIGHT > this.props.viewport.viewportBottom) {
+    const lastDrawInfo = this._lastDrawInfo ?? {
+      cssToDeviceScale: 1,
+      userTimingHeaderHeightDev:
+        (this.props.userTimingRows?.length ?? 0) * ROW_CSS_PIXELS_HEIGHT +
+        GAP_HEIGHT_AFTER_USER_TIMING,
+      rowHeightDev: ROW_CSS_PIXELS_HEIGHT,
+    };
+
+    const { cssToDeviceScale, userTimingHeaderHeightDev, rowHeightDev } =
+      lastDrawInfo;
+
+    const rowTopDev = userTimingHeaderHeightDev + depth * rowHeightDev;
+    const rowBottomDev = rowTopDev + rowHeightDev;
+    const rowTop = rowTopDev / cssToDeviceScale;
+    const rowBottom = rowBottomDev / cssToDeviceScale;
+
+    if (rowTop < this.props.viewport.viewportTop) {
       this.props.viewport.moveViewport(
         0,
-        this.props.viewport.viewportBottom - (y + ROW_CSS_PIXELS_HEIGHT)
+        this.props.viewport.viewportTop - rowTop
+      );
+    } else if (rowBottom > this.props.viewport.viewportBottom) {
+      this.props.viewport.moveViewport(
+        0,
+        this.props.viewport.viewportBottom - rowBottom
       );
     }
   };
@@ -406,8 +438,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       const intH = rowHeightDev - 1;
 
       for (let i = 0; i < stackTiming.length; i++) {
-        const intX = stackTiming.start[i];
-        const intW = stackTiming.end[i] - intX;
+        const intX = stackTiming.startDev[i];
+        const intW = stackTiming.endDev[i] - intX;
         const funcIndex = stackTiming.func[i];
         const funcNameIndex = thread.funcTable.name[funcIndex];
         const text = thread.stringTable.getString(funcNameIndex);
@@ -425,7 +457,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             ? colorStyles.selectedFillStyle
             : colorStyles.unselectedFillStyle
         );
-        ctx.fillRect(stackTiming.start[i], intY, intW - BORDER_OPACITY, intH);
+        ctx.fillRect(intX, intY, intW - BORDER_OPACITY, intH);
 
         const textX: DevicePixels = intX + textDevicePixelsOffsetStart;
         const textW: DevicePixels = Math.max(
@@ -485,17 +517,17 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const result =
-      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredPosition);
-    if (!result) {
+    const itemInfo = this._getItemInfoFromHoveredPosition(hoveredPosition);
+    if (!itemInfo) {
       return null;
     }
 
-    switch (result.type) {
-      case 'call-node': {
-        const callNodeIndex = result.index;
+    switch (itemInfo.type) {
+      case 'CALL_NODE': {
+        const { callNodeIndex, timeRange } = itemInfo;
+        const { start, end } = timeRange;
 
-        const durationText = 'duration text'; // TODO
+        const duration = end - start;
         return (
           <TooltipCallNode
             thread={thread}
@@ -507,13 +539,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             categories={categories}
             // The stack chart doesn't support other call tree summary types.
             callTreeSummaryStrategy="timing"
-            durationText={durationText}
+            durationText={formatMilliseconds(duration)}
             displayStackType={displayStackType}
           />
         );
       }
-      case 'marker': {
-        const markerIndex = result.index;
+      case 'MARKER': {
+        const { markerIndex } = itemInfo;
 
         return (
           <TooltipMarker
@@ -525,7 +557,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         );
       }
       default:
-        return null;
+        throw assertExhaustiveCheck(itemInfo.type);
     }
   };
 
@@ -540,23 +572,32 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return;
     }
 
+    const { thread, callNodeInfo, sampleNonInvertedCallNodes, interval } =
+      this.props;
     const { depth, stackTimingIndex } = item;
     const { stackTimingRows } = lastDrawInfo;
+    const sampleIndex = stackTimingRows[depth].sampleIndex[stackTimingIndex];
+    const { start, end } = getTimeRangeForSpan(
+      sampleIndex,
+      depth,
+      callNodeInfo,
+      sampleNonInvertedCallNodes,
+      thread.samples.time,
+      interval
+    );
 
     const { updatePreviewSelection } = this.props;
-    // TODO: Store milliseconds on stack timing info
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      // XXX this gets devpx and interprets as milliseconds
-      selectionStart: stackTimingRows[depth].start[stackTimingIndex],
-      selectionEnd: stackTimingRows[depth].end[stackTimingIndex],
+      selectionStart: start,
+      selectionEnd: end,
     });
   };
 
-  _getCallNodeIndexOrMarkerIndexFromHoveredItem(
+  _getItemInfoFromHoveredPosition(
     hoveredPosition: HoveredPosition | null
-  ): {| index: number, type: 'marker' | 'call-node' |} | null {
+  ): ItemInfo | null {
     if (hoveredPosition === null) {
       return null;
     }
@@ -574,7 +615,10 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       case 'STACK': {
         const { depth, stackTimingIndex } = hoveredItem;
         const { stackTimingRows } = lastDrawInfo;
-        const { callNodeInfo } = this.props;
+        const { callNodeInfo, sampleNonInvertedCallNodes, thread, interval } =
+          this.props;
+        const sampleIndex =
+          stackTimingRows[depth].sampleIndex[stackTimingIndex];
 
         const callPath = [];
         let currentIndex = stackTimingIndex;
@@ -588,13 +632,21 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         const callNodeIndex = ensureExists(
           callNodeInfo.getCallNodeIndexFromPath(callPath)
         );
-        return { index: callNodeIndex, type: 'call-node' };
+        const timeRange = getTimeRangeForSpan(
+          sampleIndex,
+          depth,
+          callNodeInfo,
+          sampleNonInvertedCallNodes,
+          thread.samples.time,
+          interval
+        );
+        return { type: 'CALL_NODE', callNodeIndex, timeRange };
       }
       case 'USER_TIMING': {
         const userTimingRows = ensureExists(lastDrawInfo.userTimingRows);
-        const index =
+        const markerIndex =
           userTimingRows[hoveredItem.rowIndex].index[hoveredItem.marker];
-        return { index, type: 'marker' };
+        return { type: 'MARKER', markerIndex };
       }
       default:
         throw assertExhaustiveCheck(hoveredItem.type);
@@ -604,25 +656,43 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   _onSelectItem = (hoveredItem: HoveredPosition | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
-    const result =
-      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);
-    if (!result) {
+    const itemInfo = this._getItemInfoFromHoveredPosition(hoveredItem);
+    if (!itemInfo) {
       this.props.onSelectionChange(null);
       return;
     }
 
-    // TODO implement selecting user timing markers #2355
-    if (result.type === 'call-node') {
-      this.props.onSelectionChange(result.index);
+    switch (itemInfo.type) {
+      case 'CALL_NODE': {
+        this.props.onSelectionChange(itemInfo.callNodeIndex);
+        break;
+      }
+      case 'MARKER': {
+        // TODO implement selecting user timing markers #2355
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(itemInfo.type);
     }
   };
 
   _onRightClick = (hoveredItem: HoveredPosition | null) => {
-    const result =
-      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);
-    // TODO implement right clicking user timing markers #2354
-    if (result && result.type === 'call-node') {
-      this.props.onRightClick(result.index);
+    const itemInfo = this._getItemInfoFromHoveredPosition(hoveredItem);
+    if (!itemInfo) {
+      return;
+    }
+
+    switch (itemInfo.type) {
+      case 'CALL_NODE': {
+        this.props.onRightClick(itemInfo.callNodeIndex);
+        break;
+      }
+      case 'MARKER': {
+        // TODO implement right clicking user timing markers #2354
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(itemInfo.type);
     }
   };
 
@@ -656,11 +726,15 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         if (rowIndex < 0 || rowIndex >= userTimingRows.length) {
           return null;
         }
-        const xMillis = timeAtOuterStart + xDev / devPxPerMs;
         const row = userTimingRows[rowIndex];
         for (let i = 0; i < row.length; i++) {
-          if (xMillis >= row.start[i] && xMillis < row.end[i]) {
-            console.log({xMillis, rowIndex, row, i});
+          const startDev = snapValueToMultipleOfTwo(
+            (row.start[i] - timeAtOuterStart) * devPxPerMs
+          );
+          const endDev = snapValueToMultipleOfTwo(
+            (row.end[i] - timeAtOuterStart) * devPxPerMs
+          );
+          if (xDev >= startDev && xDev < endDev) {
             return { type: 'USER_TIMING', rowIndex, marker: i };
           }
         }
@@ -674,8 +748,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     const hoveredRow = stackTimingRows[depth];
-    const stackTimingIndex = bisectionRight(hoveredRow.start, xDev) - 1;
-    if (stackTimingIndex < 0 || hoveredRow.end[stackTimingIndex] <= xDev) {
+    const stackTimingIndex = bisectionRight(hoveredRow.startDev, xDev) - 1;
+    if (stackTimingIndex < 0 || hoveredRow.endDev[stackTimingIndex] <= xDev) {
       return null;
     }
 

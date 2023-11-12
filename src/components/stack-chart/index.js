@@ -69,6 +69,7 @@ const STACK_FRAME_HEIGHT = 16;
 
 type StateProps = {|
   +thread: Thread,
+  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +maxStackDepth: number,
@@ -205,6 +206,7 @@ class StackChartImpl extends React.PureComponent<Props> {
   render() {
     const {
       thread,
+      sampleNonInvertedCallNodes,
       threadsKey,
       maxStackDepth,
       defaultCategory,
@@ -262,6 +264,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                 chartProps={{
                   interval,
                   thread,
+                  sampleNonInvertedCallNodes,
                   weightType,
                   maxDepth: maxStackDepth,
                   defaultCategory,
@@ -303,6 +306,10 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
 
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
+      sampleNonInvertedCallNodes:
+        selectedThreadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
+          state
+        ),
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
       maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
