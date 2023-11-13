@@ -3763,7 +3763,7 @@ export function getNativeSymbolsForCallNodeInverted(
   stackTable: StackTable,
   frameTable: FrameTable
 ): IndexIntoNativeSymbolTable[] {
-  const depth = callNodeInfo.getCallNodeTable().depth[callNodeIndex];
+  const depth = callNodeInfo.depthForNode(callNodeIndex);
   const [rangeStart, rangeEnd] =
     callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
   const stackTablePrefixCol = stackTable.prefix;
@@ -3841,8 +3841,7 @@ export function getBottomBoxInfoForCallNode(
     nativeSymbols,
   } = thread;
 
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const funcIndex = callNodeTable.func[callNodeIndex];
+  const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
   const fileName = funcTable.fileName[funcIndex];
   const sourceFile = fileName !== null ? stringTable.getString(fileName) : null;
   const resource = funcTable.resource[funcIndex];

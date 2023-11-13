@@ -174,6 +174,29 @@ export interface CallNodeInfo {
 
   // Returns the list of children of a node.
   getChildren(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[];
+
+  // These functions return various properties about each node. You could also
+  // get these properties from the call node table, but that only works if the
+  // call node is a non-inverted call node (because we only have a non-inverted
+  // call node table). If your code is generic over inverted / non-inverted mode,
+  // and you just have a IndexIntoCallNodeTable and a CallNodeInfo instance,
+  // call the functions below.
+
+  prefixForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable | -1;
+  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable;
+  categoryForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCategoryList;
+  subcategoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  innerWindowIDForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoNativeSymbolTable | -1 | null;
 }
 
 // An index into SuffixOrderedCallNodes.
