@@ -881,35 +881,31 @@ function _getSamplesSelectedStatesInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo
+  callNodeInfo: CallNodeInfo,
+  invertedTreeStuff: InvertedTreeStuff
 ): SelectedState[] {
   const selectedCallPath = callNodeInfo.getCallNodePathFromIndex(
     selectedInvertedCallNodeIndex
   );
   const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const { orderedSelfNodes, orderingIndexForSelfNode } = invertedTreeStuff;
+  const [orderingIndexRangeStart, orderingIndexRangeEnd] =
+    getOrderingIndexRangeForDescendantsOfInvertedCallPath(
+      selectedCallPath,
+      orderedSelfNodes,
+      nonInvertedCallNodeTable
+    );
   const sampleCount = sampleNonInvertedCallNodes.length;
   const samplesSelectedStates = new Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
     let sampleSelectedState: SelectedState = 'SELECTED';
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
-      let currentCallNode = callNodeIndex;
-      for (let i = 0; i < selectedCallPath.length; i++) {
-        const expectedFunc = selectedCallPath[i];
-        const actualFunc = nonInvertedCallNodeTable.func[currentCallNode];
-        if (actualFunc < expectedFunc) {
-          sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
-          break;
-        }
-        if (actualFunc > expectedFunc) {
-          sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
-          break;
-        }
-        currentCallNode = nonInvertedCallNodeTable.prefix[currentCallNode];
-        if (currentCallNode === -1) {
-          sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
-          break;
-        }
+      const orderingIndex = orderingIndexForSelfNode[callNodeIndex];
+      if (orderingIndex < orderingIndexRangeStart) {
+        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+      } else if (orderingIndex >= orderingIndexRangeEnd) {
+        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
       }
     } else {
       // This sample was filtered out.
@@ -945,19 +941,22 @@ export function getSamplesSelectedStates(
     );
   }
 
-  return callNodeInfo.isInverted()
-    ? _getSamplesSelectedStatesInverted(
-        sampleNonInvertedCallNodes,
-        activeTabFilteredNonInvertedCallNodes,
-        selectedCallNodeIndex,
-        callNodeInfo
-      )
-    : _getSamplesSelectedStatesNonInverted(
-        sampleNonInvertedCallNodes,
-        activeTabFilteredNonInvertedCallNodes,
-        selectedCallNodeIndex,
-        callNodeInfo
-      );
+  const invertedTreeStuff = callNodeInfo.getInvertedTreeStuff();
+  if (invertedTreeStuff !== null) {
+    return _getSamplesSelectedStatesInverted(
+      sampleNonInvertedCallNodes,
+      activeTabFilteredNonInvertedCallNodes,
+      selectedCallNodeIndex,
+      callNodeInfo,
+      invertedTreeStuff
+    );
+  }
+  return _getSamplesSelectedStatesNonInverted(
+    sampleNonInvertedCallNodes,
+    activeTabFilteredNonInvertedCallNodes,
+    selectedCallNodeIndex,
+    callNodeInfo
+  );
 }
 
 /**
@@ -2898,9 +2897,14 @@ export function getTreeOrderComparator(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfo
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
-  return callNodeInfo.isInverted()
-    ? _getTreeOrderComparatorInverted(sampleNonInvertedCallNodes, callNodeInfo)
-    : _getTreeOrderComparatorNonInverted(sampleNonInvertedCallNodes);
+  const invertedTreeStuff = callNodeInfo.getInvertedTreeStuff();
+  if (invertedTreeStuff !== null) {
+    return _getTreeOrderComparatorInverted(
+      sampleNonInvertedCallNodes,
+      invertedTreeStuff
+    );
+  }
+  return _getTreeOrderComparatorNonInverted(sampleNonInvertedCallNodes);
 }
 
 export function _getTreeOrderComparatorNonInverted(
@@ -2974,9 +2978,9 @@ export function compareCallNodesInverted(
  */
 export function _getTreeOrderComparatorInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  callNodeInfo: CallNodeInfo
+  invertedTreeStuff: InvertedTreeStuff
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
-  const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const { orderingIndexForSelfNode } = invertedTreeStuff;
   return function treeOrderComparator(
     sampleA: IndexIntoSamplesTable,
     sampleB: IndexIntoSamplesTable
@@ -2996,10 +3000,8 @@ export function _getTreeOrderComparatorInverted(
       // B filtered out, A not filtered out. B goes after A.
       return -1;
     }
-    return compareCallNodesInverted(
-      callNodeA,
-      callNodeB,
-      nonInvertedCallNodeTable
+    return (
+      orderingIndexForSelfNode[callNodeA] - orderingIndexForSelfNode[callNodeB]
     );
   };
 }
