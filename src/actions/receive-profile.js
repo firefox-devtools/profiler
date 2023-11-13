@@ -7,6 +7,7 @@ import { oneLine } from 'common-tags';
 import queryString from 'query-string';
 import JSZip from 'jszip';
 import {
+  insertExternalPowerCountersIntoProfile,
   processGeckoProfile,
   unserializeProfileOfArbitraryFormat,
 } from 'firefox-profiler/profile-logic/process-profile';
@@ -1051,6 +1052,14 @@ export function retrieveProfileFromBrowser(
       });
       const unpackedProfile =
         await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
+      const meta = unpackedProfile.meta;
+      if (meta.configuration && meta.configuration.features.includes('power')) {
+        const tracks = await browserConnection.getExternalPowerTracks(
+          meta.startTime + meta.profilingStartTime,
+          meta.startTime + meta.profilingEndTime
+        );
+        insertExternalPowerCountersIntoProfile(tracks, unpackedProfile);
+      }
       const profile = processGeckoProfile(unpackedProfile);
       await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
     } catch (error) {
