@@ -843,7 +843,7 @@ function _getSamplesSelectedStatesNonInverted(
   selectedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): SelectedState[] {
-  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const selectedCallNodeDescendantsEndIndex =
     callNodeTable.nextAfterDescendants[selectedCallNodeIndex];
   const sampleCount = sampleCallNodes.length;

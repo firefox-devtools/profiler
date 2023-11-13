@@ -151,7 +151,7 @@ export class CallTreeNonInverted implements CallTree {
   ) {
     this._categories = categories;
     this._callNodeInfo = callNodeInfo;
-    this._callNodeTable = callNodeInfo.getCallNodeTable();
+    this._callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     this._callNodeSummary = callNodeSummary;
     this._callNodeChildCount = callNodeChildCount;
     this._thread = thread;
@@ -1061,7 +1061,7 @@ export function computeCallTreeTimingsNonInverted(
   { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary,
   callNodeInfo: CallNodeInfo
 ): CallTreeTimingsNonInverted {
-  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
   // Compute the following variables:
   const callNodeTotalSummary = new Float32Array(callNodeTable.length);
