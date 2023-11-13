@@ -148,77 +148,64 @@ export function changeRightClickedCallNode(
 }
 
 /**
- * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
- * of that sample's stack.
+ * Given a threadIndex and a sampleIndex, select the call node which carries the
+ * sample's self time. In the inverted tree, this will be a root node.
  */
-export function selectLeafCallNode(
+export function selectSelfCallNode(
   threadsKey: ThreadsKey,
   sampleIndex: IndexIntoSamplesTable | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const sampleCallNodes =
-      threadSelectors.getSampleIndexToCallNodeIndexForFilteredThread(
+      threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
         getState()
       );
-    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
-    let newSelectedCallNode = -1;
     if (
-      sampleIndex !== null &&
-      sampleIndex >= 0 &&
-      sampleIndex < sampleCallNodes.length
+      sampleIndex === null ||
+      sampleIndex < 0 ||
+      sampleIndex >= sampleCallNodes.length
     ) {
-      newSelectedCallNode = sampleCallNodes[sampleIndex] ?? -1;
+      dispatch(changeSelectedCallNode(threadsKey, []));
+      return;
     }
 
-    dispatch(
-      changeSelectedCallNode(
-        threadsKey,
-        callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode)
-      )
-    );
-  };
-}
+    const nonInvertedSelfCallNode = sampleCallNodes[sampleIndex];
+    if (nonInvertedSelfCallNode === null) {
+      dispatch(changeSelectedCallNode(threadsKey, []));
+      return;
+    }
 
-/**
- * Given a threadIndex and a sampleIndex, select the call node at the bottom ("root")
- * of that sample's stack.
- */
-export function selectRootCallNode(
-  threadsKey: ThreadsKey,
-  sampleIndex: IndexIntoSamplesTable | null
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const filteredThread = threadSelectors.getFilteredThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
-    if (sampleIndex === null) {
-      dispatch(changeSelectedCallNode(threadsKey, []));
-      return;
+    // Compute the call path based on the non-inverted call node table.
+    // We're not calling callNodeInfo.getCallNodePathFromIndex here because we
+    // only have a non-inverted call node index, which wouldn't be accepted by
+    // the inverted call node info.
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodePath = [];
+    let cni = nonInvertedSelfCallNode;
+    while (cni !== -1) {
+      callNodePath.push(callNodeTable.func[cni]);
+      cni = callNodeTable.prefix[cni];
     }
-    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
-    if (newSelectedStack === null || newSelectedStack === undefined) {
-      dispatch(changeSelectedCallNode(threadsKey, []));
-      return;
+
+    if (callNodeInfo.isInverted()) {
+      // In the inverted tree, we want to select the inverted tree root node
+      // with the "self" function, and also expand the path to the non-inverted root.
+      dispatch(
+        changeSelectedCallNode(
+          threadsKey,
+          callNodePath.slice(0, 1), // Select a root node
+          { source: 'auto' },
+          callNodePath // Expand the full path
+        )
+      );
+    } else {
+      // In the non-inverted tree, we want to select the self node.
+      dispatch(changeSelectedCallNode(threadsKey, callNodePath.reverse()));
     }
-    const stackIndexToCallNodeIndex =
-      callNodeInfo.getStackIndexToCallNodeIndex();
-    const newSelectedCallNode = stackIndexToCallNodeIndex[newSelectedStack];
-
-    const selectedCallNodePath =
-      callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode);
-    const rootCallNodePath = [selectedCallNodePath[0]];
-
-    dispatch(
-      changeSelectedCallNode(
-        threadsKey,
-        rootCallNodePath,
-        { source: 'auto' },
-        selectedCallNodePath
-      )
-    );
   };
 }
 
