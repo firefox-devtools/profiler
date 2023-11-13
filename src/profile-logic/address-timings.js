@@ -350,7 +350,8 @@ export function getStackAddressInfoForCallNodeNonInverted(
   callNodeInfo: CallNodeInfo,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
 
   // "self address" == "the address which a stack's self time is contributed to"
   const callNodeSelfAddressForAllStacks = [];
