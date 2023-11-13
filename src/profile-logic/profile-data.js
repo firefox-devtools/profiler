@@ -3981,7 +3981,8 @@ export function getNativeSymbolsForCallNodeNonInverted(
   stackTable: StackTable,
   frameTable: FrameTable
 ): IndexIntoNativeSymbolTable[] {
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const set = new Set();
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
