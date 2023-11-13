@@ -94,7 +94,6 @@ export type InvertedTreeStuff = {|
 |};
 
 export interface CallNodeInfo {
-  getCallNodeTable(): CallNodeTable;
   isInverted(): boolean;
   getNonInvertedCallNodeTable(): CallNodeTable;
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
@@ -124,6 +123,19 @@ export interface CallNodeInfo {
   getParentCallNodeIndex(
     callNodeIndex: IndexIntoCallNodeTable
   ): IndexIntoCallNodeTable | null;
+
+  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable;
+  categoryForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCategoryList;
+  subcategoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  innerWindowIDForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoNativeSymbolTable | -1 | null;
 }
 
 export type LineNumber = number;

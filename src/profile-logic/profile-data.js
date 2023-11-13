@@ -438,9 +438,6 @@ class CallNodeInfoRegular implements CallNodeInfo {
     this._isInverted = isInverted;
   }
 
-  getCallNodeTable(): CallNodeTable {
-    return this._callNodeTable;
-  }
   isInverted(): boolean {
     return this._isInverted;
   }
@@ -596,6 +593,38 @@ class CallNodeInfoRegular implements CallNodeInfo {
   ): IndexIntoCallNodeTable | null {
     const parentIndex = this._callNodeTable.prefix[callNodeIndex];
     return parentIndex === -1 ? null : parentIndex;
+  }
+
+  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable {
+    return this._callNodeTable.func[callNodeIndex];
+  }
+
+  categoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._callNodeTable.category[callNodeIndex];
+  }
+
+  subcategoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._callNodeTable.subcategory[callNodeIndex];
+  }
+
+  innerWindowIDForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._callNodeTable.innerWindowID[callNodeIndex];
+  }
+
+  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callNodeTable.depth[callNodeIndex];
+  }
+
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoNativeSymbolTable | -1 | null {
+    return this._callNodeTable.sourceFramesInlinedIntoSymbol[callNodeIndex];
   }
 }
 
@@ -4048,8 +4077,7 @@ export function getBottomBoxInfoForCallNode(
     nativeSymbols,
   } = thread;
 
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const funcIndex = callNodeTable.func[callNodeIndex];
+  const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
   const fileName = funcTable.fileName[funcIndex];
   const sourceFile = fileName !== null ? stringTable.getString(fileName) : null;
   const resource = funcTable.resource[funcIndex];

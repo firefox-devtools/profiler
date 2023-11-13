@@ -493,7 +493,6 @@ type CallNodeIndex = IndexIntoCallNodeTable; // into inverted call node table
 export class CallTreeInverted implements CallTree {
   _categories: CategoryList;
   _callNodeInfo: CallNodeInfo;
-  _invertedCallNodeTable: CallNodeTable;
   _nonInvertedCallNodeTable: CallNodeTable;
   _callTreeTimingsInverted: CallTreeTimingsInverted;
   _invertedTreeStuff: InvertedTreeStuff;
@@ -518,7 +517,6 @@ export class CallTreeInverted implements CallTree {
   ) {
     this._categories = categories;
     this._callNodeInfo = callNodeInfo;
-    this._invertedCallNodeTable = callNodeInfo.getCallNodeTable();
     this._nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     this._callTreeTimingsInverted = callTreeTimingsInverted;
     this._invertedTreeStuff = ensureExists(callNodeInfo.getInvertedTreeStuff());
@@ -727,7 +725,7 @@ export class CallTreeInverted implements CallTree {
   ): ExtraBadgeInfo | void {
     const calledFunction = getFunctionName(funcName);
     const inlinedIntoNativeSymbol =
-      this._invertedCallNodeTable.sourceFramesInlinedIntoSymbol[callNodeIndex];
+      this._callNodeInfo.sourceFramesInlinedIntoSymbolForNode(callNodeIndex);
     if (inlinedIntoNativeSymbol === null) {
       return undefined;
     }
@@ -762,10 +760,10 @@ export class CallTreeInverted implements CallTree {
     if (displayData === undefined) {
       const { funcName, total, totalRelative, self } =
         this.getNodeData(callNodeIndex);
-      const funcIndex = this._invertedCallNodeTable.func[callNodeIndex];
-      const categoryIndex = this._invertedCallNodeTable.category[callNodeIndex];
+      const funcIndex = this._callNodeInfo.funcForNode(callNodeIndex);
+      const categoryIndex = this._callNodeInfo.categoryForNode(callNodeIndex);
       const subcategoryIndex =
-        this._invertedCallNodeTable.subcategory[callNodeIndex];
+        this._callNodeInfo.subcategoryForNode(callNodeIndex);
       const badge = this._getInliningBadge(callNodeIndex, funcName);
       const resourceIndex = this._thread.funcTable.resource[funcIndex];
       const resourceType = this._thread.resourceTable.type[resourceIndex];
