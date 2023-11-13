@@ -895,7 +895,8 @@ describe('getSamplesSelectedStates', function () {
     thread.funcTable,
     0
   );
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const sampleCallNodes = getSampleIndexToCallNodeIndex(
     thread.samples.stack,
     stackIndexToCallNodeIndex
