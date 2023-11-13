@@ -209,7 +209,8 @@ export function getStackLineInfoForCallNodeNonInverted(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): StackLineInfo {
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
 
   // "self line" == "the line which a stack's self time is contributed to"
   const callNodeSelfLineForAllStacks = [];
