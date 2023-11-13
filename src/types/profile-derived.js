@@ -95,7 +95,6 @@ export type InvertedTreeStuff = {|
 
 export interface CallNodeInfo {
   getCallNodeTable(): CallNodeTable;
-  getStackIndexToCallNodeIndex(): Int32Array;
   isInverted(): boolean;
   getNonInvertedCallNodeTable(): CallNodeTable;
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
