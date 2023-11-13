@@ -10,7 +10,7 @@ Array [
       "innerWindowID": 1,
       "type": "tracing",
     },
-    "end": 5,
+    "end": 6,
     "name": "Load",
     "start": 4,
     "threadId": null,
@@ -46,9 +46,9 @@ Array [
   Object {
     "category": 0,
     "data": null,
-    "end": null,
-    "name": "Contentful paint at something",
-    "start": 8,
+    "end": 8,
+    "name": "FirstContentfulPaint",
+    "start": 7,
     "threadId": null,
   },
 ]

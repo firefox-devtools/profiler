@@ -1093,14 +1093,19 @@ export function isNavigationMarker({ name, data }: Marker) {
     // TTI is only selectable by name, as it doesn't have a structured payload.
     return true;
   }
+
+  if (
+    name === 'FirstContentfulPaint' ||
+    name === 'FirstContentfulComposite' ||
+    name === 'LargestContentfulPaint'
+  ) {
+    // Add the performance metric markers.
+    return true;
+  }
+
   if (!data) {
     // This marker has no payload, only consider the name.
     if (name === 'Navigation::Start') {
-      return true;
-    }
-    if (name.startsWith('Contentful paint ')) {
-      // This is a long plaintext marker.
-      // e.g. "Contentful paint after 322ms for URL https://developer.mozilla.org/en-US/, foreground tab"
       return true;
     }
     return false;

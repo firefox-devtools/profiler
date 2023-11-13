@@ -213,18 +213,32 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
 
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange =
-      viewportRight - viewportLeft;
     const viewportDevicePixelsTop = viewportTop * cssToDeviceScale;
 
     // Convert CssPixels to Stack Depth
     const startDepth = Math.floor(viewportTop / stackFrameHeight);
     const endDepth = Math.ceil(viewportBottom / stackFrameHeight);
 
+    // Convert between horizontal units: viewport units, milliseconds, CSS pixels, device pixels
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportRangeLength: Milliseconds = rangeLength * viewportLength;
+
     const innerContainerWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
     const innerDevicePixelsWidth = innerContainerWidth * cssToDeviceScale;
+
+    const timePerCssPixel = viewportRangeLength / innerContainerWidth;
+
+    // Compute the time range that's displayed on the canvas, including in the
+    // margins around the viewport.
+    const timeAtStart: Milliseconds =
+      rangeStart + rangeLength * viewportLeft - timePerCssPixel * marginLeft;
+    const timeAtEnd: Milliseconds =
+      rangeStart +
+      rangeLength * viewportRight +
+      timePerCssPixel * TIMELINE_MARGIN_RIGHT;
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
@@ -258,25 +272,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       if (!stackTiming) {
         continue;
       }
-      /*
-       * TODO - Do an O(log n) binary search to find the only samples in range rather than
-       * linear O(n) search for loops. Profile the results to see if this helps at all.
-       *
-       * const startSampleIndex = binarySearch(stackTiming.start, rangeStart + rangeLength * viewportLeft);
-       * const endSampleIndex = binarySearch(stackTiming.end, rangeStart + rangeLength * viewportRight);
-       */
-
-      const pixelsInViewport = viewportLength * innerDevicePixelsWidth;
-      const timePerPixel = rangeLength / pixelsInViewport;
-
-      // Decide which samples to actually draw
-      const timeAtStart: Milliseconds =
-        rangeStart + rangeLength * viewportLeft - timePerPixel * marginLeft;
-      const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
-
       let lastDrawnPixelX = 0;
       for (let i = 0; i < stackTiming.length; i++) {
-        // Only draw samples that are in bounds.
+        // Only draw boxes that overlap with the canvas.
         if (
           stackTiming.end[i] > timeAtStart &&
           stackTiming.start[i] < timeAtEnd
