@@ -1014,7 +1014,6 @@ export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  isInvertedTree: boolean,
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
@@ -1027,7 +1026,6 @@ export function getTimingsForPath(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
     interval,
-    isInvertedTree,
     thread,
     unfilteredThread,
     sampleIndexOffset,
@@ -1050,7 +1048,6 @@ export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  isInvertedTree: boolean,
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
@@ -1247,6 +1244,7 @@ export function getTimingsForCallNodeIndex(
   const needleDescendantsEndIndex =
     callNodeTable.nextAfterDescendants[needleNodeIndex];
 
+  const isInvertedTree = callNodeInfo.isInverted();
   const needleNodeIsRootOfInvertedTree =
     isInvertedTree && callNodeTable.prefix[needleNodeIndex] === -1;
 
