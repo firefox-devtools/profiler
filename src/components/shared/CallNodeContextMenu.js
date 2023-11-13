@@ -138,8 +138,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
@@ -176,8 +175,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const stringIndex = funcTable.fileName[funcIndex];
     if (stringIndex === null) {
       return null;
@@ -303,8 +301,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const { threadsKey, callNodePath, thread, callNodeIndex, callNodeInfo } =
       rightClickedCallNodeInfo;
     const selectedFunc = callNodePath[callNodePath.length - 1];
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const category = callNodeTable.category[callNodeIndex];
+    const category = callNodeInfo.categoryForNode(callNodeIndex);
     switch (type) {
       case 'focus-subtree':
         addTransformToStack(threadsKey, {
@@ -488,9 +485,8 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const categoryIndex = callNodeTable.category[callNodeIndex];
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const categoryIndex = callNodeInfo.categoryForNode(callNodeIndex);
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const isJS = funcTable.isJS[funcIndex];
     const hasCategory = categoryIndex !== -1;
     // This could be the C++ library, or the JS filename.
@@ -504,6 +500,9 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const fileName =
       filePath &&
       parseFileNameFromSymbolication(filePath).path.match(/[^\\/]+$/)?.[0];
+
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+
     return (
       <>
         {fileName ? (

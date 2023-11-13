@@ -165,6 +165,22 @@ export interface CallNodeInfo {
     parent: IndexIntoCallNodeTable | -1,
     func: IndexIntoFuncTable
   ): IndexIntoCallNodeTable | null;
+
+  prefixForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable | -1;
+  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable;
+  categoryForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCategoryList;
+  subcategoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  innerWindowIDForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoNativeSymbolTable | -1 | null;
 }
 
 // An index into SuffixOrderedCallNodes.

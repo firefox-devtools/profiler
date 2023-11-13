@@ -14,6 +14,8 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   SuffixOrderIndex,
+  IndexIntoCategoryList,
+  IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -192,6 +194,44 @@ export class CallNodeInfoImpl implements CallNodeInfo {
     }
 
     return null;
+  }
+
+  prefixForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable | -1 {
+    return this._callNodeTable.prefix[callNodeIndex];
+  }
+
+  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable {
+    return this._callNodeTable.func[callNodeIndex];
+  }
+
+  categoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._callNodeTable.category[callNodeIndex];
+  }
+
+  subcategoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._callNodeTable.subcategory[callNodeIndex];
+  }
+
+  innerWindowIDForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._callNodeTable.innerWindowID[callNodeIndex];
+  }
+
+  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callNodeTable.depth[callNodeIndex];
+  }
+
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoNativeSymbolTable | -1 | null {
+    return this._callNodeTable.sourceFramesInlinedIntoSymbol[callNodeIndex];
   }
 }
 
