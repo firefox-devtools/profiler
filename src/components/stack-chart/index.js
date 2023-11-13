@@ -181,8 +181,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       event.preventDefault();
       const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
       if (selectedCallNodeIndex !== null) {
-        const callNodeTable = callNodeInfo.getCallNodeTable();
-        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );

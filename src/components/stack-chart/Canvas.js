@@ -128,8 +128,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return;
     }
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[selectedCallNodeIndex];
+    const depth = callNodeInfo.depthForNode(selectedCallNodeIndex);
     const y = depth * ROW_CSS_PIXELS_HEIGHT;
 
     if (y < this.props.viewport.viewportTop) {

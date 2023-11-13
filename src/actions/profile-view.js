@@ -2035,12 +2035,12 @@ export function handleCallNodeTransformShortcut(
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const unfilteredThread = threadSelectors.getThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
-    const callNodeTable = callNodeInfo.getCallNodeTable();
     const implementation = getImplementationFilter(getState());
     const inverted = getInvertCallstack(getState());
     const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
-    const funcIndex = callNodeTable.func[callNodeIndex];
-    const category = callNodeTable.category[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
+    const category = callNodeInfo.categoryForNode(callNodeIndex);
+
     const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     switch (event.key) {
