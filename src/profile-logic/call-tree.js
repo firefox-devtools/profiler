@@ -304,7 +304,6 @@ export class CallTree {
   _categories: CategoryList;
   _internal: CallTreeInternal;
   _callNodeInfo: CallNodeInfo;
-  _callNodeTable: CallNodeTable;
   _thread: Thread;
   _rootTotalSummary: number;
   _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
@@ -327,7 +326,6 @@ export class CallTree {
     this._categories = categories;
     this._internal = internal;
     this._callNodeInfo = callNodeInfo;
-    this._callNodeTable = callNodeInfo.getCallNodeTable();
     this._thread = thread;
     this._rootTotalSummary = rootTotalSummary;
     this._displayDataByIndex = new Map();
@@ -375,15 +373,15 @@ export class CallTree {
   getParent(
     callNodeIndex: IndexIntoCallNodeTable
   ): IndexIntoCallNodeTable | -1 {
-    return this._callNodeTable.prefix[callNodeIndex];
+    return this._callNodeInfo.prefixForNode(callNodeIndex);
   }
 
   getDepth(callNodeIndex: IndexIntoCallNodeTable): number {
-    return this._callNodeTable.depth[callNodeIndex];
+    return this._callNodeInfo.depthForNode(callNodeIndex);
   }
 
   getNodeData(callNodeIndex: IndexIntoCallNodeTable): CallNodeData {
-    const funcIndex = this._callNodeTable.func[callNodeIndex];
+    const funcIndex = this._callNodeInfo.funcForNode(callNodeIndex);
     const funcName = this._thread.stringTable.getString(
       this._thread.funcTable.name[funcIndex]
     );
@@ -407,7 +405,7 @@ export class CallTree {
   ): ExtraBadgeInfo | void {
     const calledFunction = getFunctionName(funcName);
     const inlinedIntoNativeSymbol =
-      this._callNodeTable.sourceFramesInlinedIntoSymbol[callNodeIndex];
+      this._callNodeInfo.sourceFramesInlinedIntoSymbolForNode(callNodeIndex);
     if (inlinedIntoNativeSymbol === null) {
       return undefined;
     }
@@ -442,9 +440,10 @@ export class CallTree {
     if (displayData === undefined) {
       const { funcName, total, totalRelative, self } =
         this.getNodeData(callNodeIndex);
-      const funcIndex = this._callNodeTable.func[callNodeIndex];
-      const categoryIndex = this._callNodeTable.category[callNodeIndex];
-      const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
+      const funcIndex = this._callNodeInfo.funcForNode(callNodeIndex);
+      const categoryIndex = this._callNodeInfo.categoryForNode(callNodeIndex);
+      const subcategoryIndex =
+        this._callNodeInfo.subcategoryForNode(callNodeIndex);
       const badge = this._getInliningBadge(callNodeIndex, funcName);
       const resourceIndex = this._thread.funcTable.resource[funcIndex];
       const resourceType = this._thread.resourceTable.type[resourceIndex];
@@ -590,7 +589,7 @@ export class CallTree {
     }
     const heaviestPath =
       this._internal.findHeaviestPathInSubtree(callNodeIndex);
-    const startingDepth = this._callNodeTable.depth[callNodeIndex];
+    const startingDepth = this._callNodeInfo.depthForNode(callNodeIndex);
     const partialPath = heaviestPath.slice(startingDepth);
     return partialPath.reverse();
   }
@@ -666,7 +665,7 @@ function _getInvertedTreeNodeTotalAndHasChildren(
   callNodeInfo: CallNodeInfoInverted,
   callNodeSelf: Float32Array
 ): TotalAndHasChildren {
-  const nodeDepth = callNodeInfo.getCallNodeTable().depth[callNodeIndex];
+  const nodeDepth = callNodeInfo.depthForNode(callNodeIndex);
   const [rangeStart, rangeEnd] =
     callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
   const suffixOrderedCallNodes = callNodeInfo.getSuffixOrderedCallNodes();
@@ -713,7 +712,6 @@ export function computeCallTreeTimingsInverted(
   { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary
 ): CallTreeTimingsInverted {
   const roots = callNodeInfo.getRoots();
-  const invertedCallNodeTable = callNodeInfo.getCallNodeTable();
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const callNodeTableFuncCol = callNodeTable.func;
   const callNodeTableDepthCol = callNodeTable.depth;
@@ -731,8 +729,7 @@ export function computeCallTreeTimingsInverted(
     // the self function of the non-inverted call node.
     const func = callNodeTableFuncCol[i];
     const rootNode = roots.find(
-      (invertedCallNode) =>
-        invertedCallNodeTable.func[invertedCallNode] === func
+      (invertedCallNode) => callNodeInfo.funcForNode(invertedCallNode) === func
     );
     if (rootNode === undefined) {
       throw new Error(

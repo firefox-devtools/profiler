@@ -286,7 +286,7 @@ export function getStackLineInfoForCallNodeInverted(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted
 ): StackLineInfo {
-  const depth = callNodeInfo.getCallNodeTable().depth[callNodeIndex];
+  const depth = callNodeInfo.depthForNode(callNodeIndex);
   const [rangeStart, rangeEnd] =
     callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
   const callNodeIsRootOfInvertedTree = callNodeInfo.isRoot(callNodeIndex);
