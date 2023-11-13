@@ -507,7 +507,7 @@ describe('profile-data', function () {
     );
     const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const stackIndexToCallNodeIndex =
-      callNodeInfo.getStackIndexToCallNodeIndex();
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
     const stack0 = thread.samples.stack[0];
     const stack1 = thread.samples.stack[1];
     if (stack0 === null || stack1 === null) {

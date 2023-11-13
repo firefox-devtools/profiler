@@ -75,7 +75,7 @@ describe('unfiltered call tree', function () {
         callNodeInfo.getNonInvertedCallNodeTable(),
         getSampleIndexToCallNodeIndex(
           thread.samples.stack,
-          callNodeInfo.getStackIndexToCallNodeIndex()
+          callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
         )
       );
       expect(
@@ -441,7 +441,7 @@ describe('inverted call tree', function () {
       callNodeInfo.getNonInvertedCallNodeTable(),
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
-        callNodeInfo.getStackIndexToCallNodeIndex()
+        callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
       )
     );
     const callTreeTimings = computeCallTreeTimings(
@@ -616,7 +616,7 @@ describe('diffing trees', function () {
       callNodeInfo.getNonInvertedCallNodeTable(),
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
-        callNodeInfo.getStackIndexToCallNodeIndex()
+        callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
       )
     );
     expect(callNodeSelfAndTotal.rootTotalSummary).toBe(4);
