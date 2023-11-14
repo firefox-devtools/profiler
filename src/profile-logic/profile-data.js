@@ -23,7 +23,7 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import { hashPath } from 'firefox-profiler/utils/path';
+import { hashPath, concatHash } from 'firefox-profiler/utils/path';
 import {
   bisectionRight,
   bisectionLeft,
@@ -87,6 +87,7 @@ import type {
   Bytes,
   ThreadWithReservedFunctions,
   InvertedTreeStuff,
+  InvertedCallTreeRoot,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -117,14 +118,7 @@ export function getCallNodeInfo(
       funcTable,
       defaultCategory
     );
-  return new CallNodeInfoRegular(
-    callNodeTable,
-    callNodeTable,
-    stackIndexToCallNodeIndex,
-    null,
-    stackTable,
-    false
-  );
+  return new CallNodeInfoNonInverted(callNodeTable, stackIndexToCallNodeIndex);
 }
 
 export function getUninvertedCallNodeInfoComponents(
@@ -408,13 +402,9 @@ function _createCallNodeInfoFromUnorderedComponents(
   });
 }
 
-class CallNodeInfoRegular implements CallNodeInfo {
+class CallNodeInfoNonInverted implements CallNodeInfo {
   _callNodeTable: CallNodeTable;
-  _nonInvertedCallNodeTable: CallNodeTable;
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
-  _invertedTreeStuff: InvertedTreeStuff | null;
-  _stackTable: StackTable;
-  _isInverted: boolean;
 
   // This is a Map<CallNodePathHash, IndexIntoCallNodeTable>. This map speeds up
   // the look-up process by caching every CallNodePath we handle which avoids
@@ -423,32 +413,24 @@ class CallNodeInfoRegular implements CallNodeInfo {
 
   constructor(
     callNodeTable: CallNodeTable,
-    nonInvertedCallNodeTable: CallNodeTable,
-    stackIndexToNonInvertedCallNodeIndex: Int32Array,
-    invertedTreeStuff: InvertedTreeStuff | null,
-    stackTable: StackTable,
-    isInverted: boolean
+    stackIndexToNonInvertedCallNodeIndex: Int32Array
   ) {
     this._callNodeTable = callNodeTable;
-    this._nonInvertedCallNodeTable = nonInvertedCallNodeTable;
     this._stackIndexToNonInvertedCallNodeIndex =
       stackIndexToNonInvertedCallNodeIndex;
-    this._invertedTreeStuff = invertedTreeStuff;
-    this._stackTable = stackTable;
-    this._isInverted = isInverted;
   }
 
   isInverted(): boolean {
-    return this._isInverted;
+    return false;
   }
   getNonInvertedCallNodeTable(): CallNodeTable {
-    return this._nonInvertedCallNodeTable;
+    return this._callNodeTable;
   }
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
     return this._stackIndexToNonInvertedCallNodeIndex;
   }
   getInvertedTreeStuff(): InvertedTreeStuff | null {
-    return this._invertedTreeStuff;
+    return null;
   }
 
   // This function returns a CallNodePath from a CallNodeIndex.
@@ -628,6 +610,526 @@ class CallNodeInfoRegular implements CallNodeInfo {
   }
 }
 
+type NonInvertedCallNodePair = {|
+  nodeNode: IndexIntoCallNodeTable,
+  selfNode: IndexIntoCallNodeTable,
+|};
+
+type CallNodePairsForInvertedNode =
+  | {| type: 'ROOT', rootNode: InvertedCallTreeRoot |}
+  | {| type: 'NON_ROOT', orderedCallNodePairs: NonInvertedCallNodePair[] |};
+
+type IndexIntoInvertedCallNodeTable = number;
+
+type InvertedCallNodeTable = {|
+  prefix: Array<IndexIntoInvertedCallNodeTable | null>,
+  func: IndexIntoFuncTable[], // IndexIntoCallNodeTable -> IndexIntoFuncTable
+  category: IndexIntoCategoryList[], // IndexIntoCallNodeTable -> IndexIntoCategoryList
+  subcategory: IndexIntoSubcategoryListForCategory[], // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
+  innerWindowID: InnerWindowID[], // IndexIntoCallNodeTable -> InnerWindowID
+  // null: no inlining
+  // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
+  // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  callNodePairs: CallNodePairsForInvertedNode[],
+  depth: number[],
+  length: number,
+|};
+
+function _createInitialInvertedCallNodeTableFromRoots(
+  callNodeTable: CallNodeTable,
+  roots: InvertedCallTreeRoot[],
+  orderedSelfNodes: Uint32Array,
+  defaultCategory: IndexIntoCategoryList
+): InvertedCallNodeTable {
+  const prefix = [];
+  const func = [];
+  const category = [];
+  const subcategory = [];
+  const innerWindowID = [];
+  const sourceFramesInlinedIntoSymbol = [];
+  const callNodePairs = [];
+  const depth = [];
+  for (let funcIndex = 0; funcIndex < roots.length; funcIndex++) {
+    const rootNode = roots[funcIndex];
+    if (rootNode.func !== funcIndex) {
+      throw new Error('Expecting one root per func');
+    }
+
+    prefix[funcIndex] = null;
+    func[funcIndex] = funcIndex;
+    callNodePairs[funcIndex] = { type: 'ROOT', rootNode };
+    depth[funcIndex] = 0;
+
+    const { callNodeSortIndexRangeStart, callNodeSortIndexRangeEnd } = rootNode;
+    if (callNodeSortIndexRangeStart === callNodeSortIndexRangeEnd) {
+      category[funcIndex] = 0;
+      subcategory[funcIndex] = 0;
+      innerWindowID[funcIndex] = 0;
+      sourceFramesInlinedIntoSymbol[funcIndex] = null;
+      continue;
+    }
+
+    // Fill the remaining fields with the conflict-resolved versions of the values
+    // in the non-inverted call node table.
+    const firstNonInvertedCallNodeIndex =
+      orderedSelfNodes[callNodeSortIndexRangeStart];
+    let resolvedCategory =
+      callNodeTable.category[firstNonInvertedCallNodeIndex];
+    let resolvedSubcategory =
+      callNodeTable.subcategory[firstNonInvertedCallNodeIndex];
+    const resolvedInnerWindowID =
+      callNodeTable.innerWindowID[firstNonInvertedCallNodeIndex];
+    let resolvedSourceFramesInlinedIntoSymbol =
+      callNodeTable.sourceFramesInlinedIntoSymbol[
+        firstNonInvertedCallNodeIndex
+      ];
+
+    // Resolve conflicts in the same way as for the non-inverted call node table.
+    for (
+      let orderingIndex = callNodeSortIndexRangeStart + 1;
+      orderingIndex < callNodeSortIndexRangeEnd;
+      orderingIndex++
+    ) {
+      const currentNonInvertedCallNodeIndex = orderedSelfNodes[orderingIndex];
+      // Resolve category conflicts, by resetting a conflicting subcategory or
+      // category to the default category.
+      if (
+        resolvedCategory !==
+        callNodeTable.category[currentNonInvertedCallNodeIndex]
+      ) {
+        // Conflicting origin stack categories -> default category + subcategory.
+        resolvedCategory = defaultCategory;
+        resolvedSubcategory = 0;
+      } else if (
+        resolvedSubcategory !==
+        callNodeTable.subcategory[currentNonInvertedCallNodeIndex]
+      ) {
+        // Conflicting origin stack subcategories -> "Other" subcategory.
+        resolvedSubcategory = 0;
+      }
+
+      // Resolve "inlined into" conflicts. This can happen if you have two
+      // function calls A -> B where only one of the B calls is inlined, or
+      // if you use call tree transforms in such a way that a function B which
+      // was inlined into two different callers (A -> B, C -> B) gets collapsed
+      // into one call node.
+      if (
+        resolvedSourceFramesInlinedIntoSymbol !==
+        callNodeTable.sourceFramesInlinedIntoSymbol[
+          currentNonInvertedCallNodeIndex
+        ]
+      ) {
+        // Conflicting inlining: -1.
+        resolvedSourceFramesInlinedIntoSymbol = -1;
+      }
+
+      // FIXME: Resolve conflicts of InnerWindowID
+    }
+
+    category[funcIndex] = resolvedCategory;
+    subcategory[funcIndex] = resolvedSubcategory;
+    innerWindowID[funcIndex] = resolvedInnerWindowID;
+    sourceFramesInlinedIntoSymbol[funcIndex] =
+      resolvedSourceFramesInlinedIntoSymbol;
+  }
+
+  return {
+    prefix,
+    func,
+    category,
+    subcategory,
+    innerWindowID,
+    sourceFramesInlinedIntoSymbol,
+    callNodePairs,
+    depth,
+    length: roots.length,
+  };
+}
+
+class CallNodeInfoInverted implements CallNodeInfo {
+  _callNodeTable: CallNodeTable;
+  _invertedCallNodeTable: InvertedCallNodeTable;
+  _stackIndexToNonInvertedCallNodeIndex: Int32Array;
+  _invertedTreeStuff: InvertedTreeStuff;
+  _orderedSelfNodes: Uint32Array;
+  _defaultCategory: IndexIntoCategoryList;
+
+  // This is a Map<CallNodePathHash, IndexIntoInvertedCallNodeTable>. This map speeds up
+  // the look-up process by caching every CallNodePath we handle which avoids
+  // looking up parents again and again.
+  _cache: Map<string, IndexIntoInvertedCallNodeTable> = new Map();
+  _children: Map<
+    IndexIntoInvertedCallNodeTable | -1,
+    IndexIntoInvertedCallNodeTable[],
+  > = new Map();
+
+  constructor(
+    callNodeTable: CallNodeTable,
+    stackIndexToNonInvertedCallNodeIndex: Int32Array,
+    invertedTreeStuff: InvertedTreeStuff,
+    defaultCategory: IndexIntoCategoryList
+  ) {
+    this._callNodeTable = callNodeTable;
+    this._stackIndexToNonInvertedCallNodeIndex =
+      stackIndexToNonInvertedCallNodeIndex;
+    this._invertedTreeStuff = invertedTreeStuff;
+    const { roots, orderedSelfNodes } = invertedTreeStuff;
+    this._orderedSelfNodes = orderedSelfNodes;
+    this._defaultCategory = defaultCategory;
+    this._invertedCallNodeTable = _createInitialInvertedCallNodeTableFromRoots(
+      callNodeTable,
+      roots,
+      orderedSelfNodes,
+      defaultCategory
+    );
+  }
+
+  isInverted(): boolean {
+    return true;
+  }
+  getNonInvertedCallNodeTable(): CallNodeTable {
+    return this._callNodeTable;
+  }
+  getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
+    return this._stackIndexToNonInvertedCallNodeIndex;
+  }
+  getInvertedTreeStuff(): InvertedTreeStuff | null {
+    return this._invertedTreeStuff;
+  }
+
+  _prepareChildrenOfNode(
+    parentNodeIndex: IndexIntoInvertedCallNodeTable,
+    parentNodeCallPathHash: string,
+    parentNodeCallNodePairs: NonInvertedCallNodePair[],
+    parentNodeDepth: number
+  ): IndexIntoInvertedCallNodeTable[] {
+    if (this._children.has(parentNodeIndex)) {
+      throw new Error('Overwriting children!');
+    }
+
+    const invertedCallNodeTable = this._invertedCallNodeTable;
+    const callNodeTable = this._callNodeTable;
+    const cache = this._cache;
+
+    function addInvertedCallNode(
+      func: IndexIntoFuncTable,
+      category: IndexIntoCategoryList,
+      subcategory: IndexIntoSubcategoryListForCategory,
+      innerWindowID: InnerWindowID,
+      sourceFramesInlinedIntoSymbol: IndexIntoNativeSymbolTable | -1 | null,
+      orderedCallNodePairs: NonInvertedCallNodePair[]
+    ) {
+      const newIndex = invertedCallNodeTable.length++;
+
+      invertedCallNodeTable.prefix[newIndex] = parentNodeIndex;
+      invertedCallNodeTable.func[newIndex] = func;
+      invertedCallNodeTable.category[newIndex] = category;
+      invertedCallNodeTable.subcategory[newIndex] = subcategory;
+      invertedCallNodeTable.innerWindowID[newIndex] = innerWindowID;
+      invertedCallNodeTable.sourceFramesInlinedIntoSymbol[newIndex] =
+        sourceFramesInlinedIntoSymbol;
+      invertedCallNodeTable.callNodePairs[newIndex] = {
+        type: 'NON_ROOT',
+        orderedCallNodePairs,
+      };
+      invertedCallNodeTable.depth[newIndex] = parentNodeDepth + 1;
+      const pathHash = concatHash(parentNodeCallPathHash, func);
+      cache.set(pathHash, newIndex);
+      return newIndex;
+    }
+
+    const childCallNodes = [];
+
+    let currentFunc = null;
+    let currentCategory = 0;
+    let currentSubcategory = 0;
+    let currentInnerWindowID = 0;
+    let currentSourceFramesInlinedIntoSymbol = null;
+    let currentOrderedCallNodePairs = [];
+    for (let i = 0; i < parentNodeCallNodePairs.length; i++) {
+      const { selfNode, nodeNode } = parentNodeCallNodePairs[i];
+      const childCallNode = callNodeTable.prefix[nodeNode];
+      if (childCallNode === -1) {
+        continue;
+      }
+      const childFunc = callNodeTable.func[childCallNode];
+      if (childFunc !== currentFunc) {
+        if (currentFunc !== null) {
+          const childNodeIndex = addInvertedCallNode(
+            currentFunc,
+            currentCategory,
+            currentSubcategory,
+            currentInnerWindowID,
+            currentSourceFramesInlinedIntoSymbol,
+            currentOrderedCallNodePairs
+          );
+          childCallNodes.push(childNodeIndex);
+        }
+        currentFunc = childFunc;
+        currentCategory = callNodeTable.category[childCallNode];
+        currentSubcategory = callNodeTable.subcategory[childCallNode];
+        currentInnerWindowID = callNodeTable.innerWindowID[childCallNode];
+        currentSourceFramesInlinedIntoSymbol =
+          callNodeTable.sourceFramesInlinedIntoSymbol[childCallNode];
+        currentOrderedCallNodePairs = [];
+      } else {
+        // Resolve category conflicts, by resetting a conflicting subcategory or
+        // category to the default category.
+        if (currentCategory !== callNodeTable.category[childCallNode]) {
+          // Conflicting origin stack categories -> default category + subcategory.
+          currentCategory = this._defaultCategory;
+          currentSubcategory = 0;
+        } else if (
+          currentSubcategory !== callNodeTable.subcategory[childCallNode]
+        ) {
+          // Conflicting origin stack subcategories -> "Other" subcategory.
+          currentSubcategory = 0;
+        }
+
+        // Resolve "inlined into" conflicts. This can happen if you have two
+        // function calls A -> B where only one of the B calls is inlined, or
+        // if you use call tree transforms in such a way that a function B which
+        // was inlined into two different callers (A -> B, C -> B) gets collapsed
+        // into one call node.
+        if (
+          currentSourceFramesInlinedIntoSymbol !==
+          callNodeTable.sourceFramesInlinedIntoSymbol[childCallNode]
+        ) {
+          // Conflicting inlining: -1.
+          currentSourceFramesInlinedIntoSymbol = -1;
+        }
+
+        // FIXME: Resolve conflicts of InnerWindowID
+      }
+      currentOrderedCallNodePairs.push({
+        nodeNode: childCallNode,
+        selfNode,
+      });
+    }
+    if (currentFunc !== null) {
+      const childNodeIndex = addInvertedCallNode(
+        currentFunc,
+        currentCategory,
+        currentSubcategory,
+        currentInnerWindowID,
+        currentSourceFramesInlinedIntoSymbol,
+        currentOrderedCallNodePairs
+      );
+      childCallNodes.push(childNodeIndex);
+    }
+    this._children.set(parentNodeIndex, childCallNodes);
+    return childCallNodes;
+  }
+
+  _prepareChildrenUpToPreparedAncestor(
+    callPath: CallNodePath
+  ): IndexIntoInvertedCallNodeTable[] {
+    if (callPath.length === 0) {
+      throw new Error(
+        'Invalid call path in _prepareChildrenUpToPreparedAncestor'
+      );
+    }
+
+    // Find the first ancestor node for which we have an index.
+    // Roots are always present, so this search will terminate.
+    // Then prepare children of all the encountered nodes on the way to that
+    // cached ancestor, from root-most up to nodeIndex's parent.
+    let currentAncestorCallPath = callPath;
+    let currentDepth = callPath.length - 1;
+    const ancestorsNeedingChildrenPreparation = [];
+    while (
+      currentDepth > 0 &&
+      !this._cache.has(hashPath(currentAncestorCallPath))
+    ) {
+      currentAncestorCallPath = currentAncestorCallPath.slice(0, currentDepth);
+      currentDepth--;
+      ancestorsNeedingChildrenPreparation.push(currentAncestorCallPath);
+    }
+
+    for (let i = ancestorsNeedingChildrenPreparation.length - 1; i >= 0; i--) {
+      const ancestorCallPath = ancestorsNeedingChildrenPreparation[i];
+      const ancestorHash = hashPath(ancestorCallPath);
+      const ancestorNodeIndex =
+        ancestorCallPath.length === 1
+          ? ancestorCallPath[0]
+          : ensureExists(this._cache.get(ancestorHash));
+      this._prepareChildrenOfNode(
+        ancestorNodeIndex,
+        ancestorHash,
+        this.getOrderedCallNodePairsForInvertedNode(ancestorNodeIndex),
+        ancestorCallPath.length - 1
+      );
+    }
+    const nodePathHash = hashPath(callPath);
+    const nodeIndex =
+      callPath.length === 1
+        ? callPath[0]
+        : ensureExists(this._cache.get(nodePathHash));
+    return this._prepareChildrenOfNode(
+      nodeIndex,
+      nodePathHash,
+      this.getOrderedCallNodePairsForInvertedNode(nodeIndex),
+      callPath.length - 1
+    );
+  }
+
+  getChildren(
+    nodeIndex: IndexIntoInvertedCallNodeTable
+  ): IndexIntoInvertedCallNodeTable[] {
+    const children = this._children.get(nodeIndex);
+    if (children !== undefined) {
+      return children;
+    }
+
+    return this._prepareChildrenOfNode(
+      nodeIndex,
+      hashPath(this.getCallNodePathFromIndex(nodeIndex)),
+      this.getOrderedCallNodePairsForInvertedNode(nodeIndex),
+      this.depthForNode(nodeIndex)
+    );
+  }
+
+  getOrderedCallNodePairsForInvertedNode(
+    nodeIndex: IndexIntoInvertedCallNodeTable
+  ): NonInvertedCallNodePair[] {
+    const node = this._invertedCallNodeTable.callNodePairs[nodeIndex];
+    switch (node.type) {
+      case 'ROOT': {
+        const {
+          callNodeSortIndexRangeStart: rangeStart,
+          callNodeSortIndexRangeEnd: rangeEnd,
+        } = node.rootNode;
+        const pairs = [];
+        for (let i = rangeStart; i < rangeEnd; i++) {
+          const selfNode = this._orderedSelfNodes[i];
+          pairs.push({ selfNode, nodeNode: selfNode });
+        }
+        return pairs;
+      }
+      case 'NON_ROOT':
+        return node.orderedCallNodePairs;
+      default:
+        throw assertExhaustiveCheck(node.type);
+    }
+  }
+
+  // This function returns a CallNodePath from a CallNodeIndex.
+  getCallNodePathFromIndex(
+    callNodeIndex: IndexIntoInvertedCallNodeTable | null
+  ): CallNodePath {
+    if (callNodeIndex === null || callNodeIndex === -1) {
+      return [];
+    }
+
+    const callNodePath = [];
+    let cni = callNodeIndex;
+    while (cni !== null) {
+      callNodePath.push(this._invertedCallNodeTable.func[cni]);
+      cni = this._invertedCallNodeTable.prefix[cni];
+    }
+    callNodePath.reverse();
+    return callNodePath;
+  }
+
+  // Returns a list of CallNodeIndex from CallNodePaths. This function uses a map
+  // to speed up the look-up process.
+  getCallNodeIndicesFromPaths(
+    callNodePaths: CallNodePath[]
+  ): Array<IndexIntoInvertedCallNodeTable | null> {
+    return callNodePaths.map((path) => this.getCallNodeIndexFromPath(path));
+  }
+
+  // Returns a CallNodeIndex from a CallNodePath, using and contributing to the
+  // cache parameter.
+  getCallNodeIndexFromPath(
+    callNodePath: CallNodePath
+  ): IndexIntoInvertedCallNodeTable | null {
+    if (callNodePath.length === 0) {
+      return null;
+    }
+
+    if (callNodePath.length === 1) {
+      return callNodePath[0]; // For roots, IndexIntoFuncTable === IndexIntoInvertedCallNodeTable
+    }
+
+    const cachedIndex = this._cache.get(hashPath(callNodePath));
+    if (cachedIndex !== undefined) {
+      return cachedIndex;
+    }
+
+    const parentPath = callNodePath.slice(0, callNodePath.length - 1);
+    const childFunc = callNodePath[callNodePath.length - 1];
+    this._prepareChildrenUpToPreparedAncestor(parentPath);
+    const parentIndex =
+      parentPath.length === 1
+        ? parentPath[0]
+        : ensureExists(this._cache.get(hashPath(parentPath)));
+    return this.getCallNodeIndexFromParentAndFunc(parentIndex, childFunc);
+  }
+
+  // Returns the CallNodeIndex that matches the function `func` and whose parent's
+  // CallNodeIndex is `parent`.
+  getCallNodeIndexFromParentAndFunc(
+    parent: IndexIntoInvertedCallNodeTable | -1,
+    func: IndexIntoFuncTable
+  ): IndexIntoInvertedCallNodeTable | null {
+    if (parent === -1) {
+      return func; // For roots, IndexIntoFuncTable === IndexIntoInvertedCallNodeTable
+    }
+    const children = this.getChildren(parent);
+    // TODO: Use bisection
+    for (let i = 0; i < children.length; i++) {
+      const childNodeIndex = children[i];
+      if (this._invertedCallNodeTable.func[childNodeIndex] === func) {
+        return childNodeIndex;
+      }
+    }
+    return null;
+  }
+
+  getParentCallNodeIndex(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable | null {
+    const parentIndex = this._invertedCallNodeTable.prefix[callNodeIndex];
+    return parentIndex === -1 ? null : parentIndex;
+  }
+
+  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable {
+    return this._invertedCallNodeTable.func[callNodeIndex];
+  }
+
+  categoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._invertedCallNodeTable.category[callNodeIndex];
+  }
+
+  subcategoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._invertedCallNodeTable.subcategory[callNodeIndex];
+  }
+
+  innerWindowIDForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList {
+    return this._invertedCallNodeTable.innerWindowID[callNodeIndex];
+  }
+
+  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._invertedCallNodeTable.depth[callNodeIndex];
+  }
+
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoNativeSymbolTable | -1 | null {
+    return this._invertedCallNodeTable.sourceFramesInlinedIntoSymbol[
+      callNodeIndex
+    ];
+  }
+}
+
 type CallNodeInfoComponents = {
   callNodeTable: CallNodeTable,
   // IndexIntoStackTable -> IndexIntoCallNodeTable
@@ -640,27 +1142,17 @@ export function getInvertedCallNodeInfo(
   stackIndexToNonInvertedCallNodeIndex: Int32Array,
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
-  const { invertedThread, oldStackToNewStack: uninvertedStackToInvertedStack } =
-    _computeThreadWithInvertedStackTable(thread, defaultCategory);
-  const { callNodeTable } = getUninvertedCallNodeInfoComponents(
-    invertedThread.stackTable,
-    invertedThread.frameTable,
-    invertedThread.funcTable,
-    defaultCategory
-  );
-
+  const { funcTable } = thread;
   const nonInvertedCallNodesUsedAsSelf = new Set();
-  for (
-    let uninvertedStackIndex = 0;
-    uninvertedStackIndex < thread.stackTable.length;
-    uninvertedStackIndex++
-  ) {
-    if (uninvertedStackToInvertedStack.has(uninvertedStackIndex)) {
+  updateThreadStacks(thread, thread.stackTable, (stackIndex) => {
+    if (stackIndex !== null) {
       nonInvertedCallNodesUsedAsSelf.add(
-        stackIndexToNonInvertedCallNodeIndex[uninvertedStackIndex]
+        stackIndexToNonInvertedCallNodeIndex[stackIndex]
       );
     }
-  }
+    return stackIndex;
+  });
+
   const orderedSelfNodes = Uint32Array.from(nonInvertedCallNodesUsedAsSelf);
   orderedSelfNodes.sort((a, b) =>
     compareCallNodesInverted(a, b, nonInvertedCallNodeTable)
@@ -670,29 +1162,22 @@ export function getInvertedCallNodeInfo(
   );
   orderingIndexForSelfNode.fill(-1);
   const invertedRoots = [];
-  let currentRootFunc = null;
-  let currentRootStartSortIndex = 0;
-  for (let i = 0; i < orderedSelfNodes.length; i++) {
-    const currentCallNode = orderedSelfNodes[i];
-    orderingIndexForSelfNode[currentCallNode] = i;
-    const currentFunc = nonInvertedCallNodeTable.func[currentCallNode];
-    if (currentFunc !== currentRootFunc) {
-      if (currentRootFunc !== null) {
-        invertedRoots.push({
-          func: currentRootFunc,
-          callNodeSortIndexRangeStart: currentRootStartSortIndex,
-          callNodeSortIndexRangeEnd: i,
-        });
+  let orderingIndex = 0;
+  for (let func = 0; func < funcTable.length; func++) {
+    const callNodeSortIndexRangeStart = orderingIndex;
+    while (orderingIndex < orderedSelfNodes.length) {
+      const currentCallNode = orderedSelfNodes[orderingIndex];
+      orderingIndexForSelfNode[currentCallNode] = orderingIndex;
+      if (nonInvertedCallNodeTable.func[currentCallNode] !== func) {
+        break;
       }
-      currentRootFunc = currentFunc;
-      currentRootStartSortIndex = i;
+      orderingIndex++;
     }
-  }
-  if (currentRootFunc !== null) {
+    const callNodeSortIndexRangeEnd = orderingIndex;
     invertedRoots.push({
-      func: currentRootFunc,
-      callNodeSortIndexRangeStart: currentRootStartSortIndex,
-      callNodeSortIndexRangeEnd: orderedSelfNodes.length,
+      func,
+      callNodeSortIndexRangeStart,
+      callNodeSortIndexRangeEnd,
     });
   }
 
@@ -702,13 +1187,11 @@ export function getInvertedCallNodeInfo(
     roots: invertedRoots,
   };
 
-  return new CallNodeInfoRegular(
-    callNodeTable,
+  return new CallNodeInfoInverted(
     nonInvertedCallNodeTable,
     stackIndexToNonInvertedCallNodeIndex,
     invertedTreeStuff,
-    thread.stackTable,
-    true
+    defaultCategory
   );
 }
 
@@ -2368,98 +2851,6 @@ export function computeCallNodeMaxDepth(
   }
 
   return max + 1;
-}
-
-export function _computeThreadWithInvertedStackTable(
-  thread: Thread,
-  defaultCategory: IndexIntoCategoryList
-): {
-  invertedThread: Thread,
-  oldStackToNewStack: Map<IndexIntoStackTable, IndexIntoStackTable>,
-} {
-  return timeCode('_computeThreadWithInvertedStackTable', () => {
-    const { stackTable, frameTable } = thread;
-
-    const newStackTable = {
-      length: 0,
-      frame: [],
-      category: [],
-      subcategory: [],
-      prefix: [],
-    };
-    // Create a Map that keys off of two values, both the prefix and frame combination
-    // by using a bit of math: prefix * frameCount + frame => stackIndex
-    const prefixAndFrameToStack = new Map();
-    const frameCount = frameTable.length;
-
-    // Returns the stackIndex for a specific frame (that is, a function and its
-    // context), and a specific prefix. If it doesn't exist yet it will create
-    // a new stack entry and return its index.
-    function stackFor(prefix, frame, category, subcategory) {
-      const prefixAndFrameIndex =
-        (prefix === null ? -1 : prefix) * frameCount + frame;
-      let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
-      if (stackIndex === undefined) {
-        stackIndex = newStackTable.length++;
-        newStackTable.prefix[stackIndex] = prefix;
-        newStackTable.frame[stackIndex] = frame;
-        newStackTable.category[stackIndex] = category;
-        newStackTable.subcategory[stackIndex] = subcategory;
-        prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
-      } else if (newStackTable.category[stackIndex] !== category) {
-        // If two stack nodes from the non-inverted stack tree with different
-        // categories happen to collapse into the same stack node in the
-        // inverted tree, discard their category and set the category to the
-        // default category.
-        newStackTable.category[stackIndex] = defaultCategory;
-        newStackTable.subcategory[stackIndex] = 0;
-      } else if (newStackTable.subcategory[stackIndex] !== subcategory) {
-        // If two stack nodes from the non-inverted stack tree with the same
-        // category but different subcategories happen to collapse into the same
-        // stack node in the inverted tree, discard their subcategory and set it
-        // to the "Other" subcategory.
-        newStackTable.subcategory[stackIndex] = 0;
-      }
-      return stackIndex;
-    }
-
-    const oldStackToNewStack = new Map();
-
-    // For one specific stack, this will ensure that stacks are created for all
-    // of its ancestors, by walking its prefix chain up to the root.
-    function convertStack(stackIndex) {
-      if (stackIndex === null) {
-        return null;
-      }
-      let newStack = oldStackToNewStack.get(stackIndex);
-      if (newStack === undefined) {
-        newStack = null;
-        for (
-          let currentStack = stackIndex;
-          currentStack !== null;
-          currentStack = stackTable.prefix[currentStack]
-        ) {
-          // Notice how we reuse the previous stack as the prefix. This is what
-          // effectively inverts the call tree.
-          newStack = stackFor(
-            newStack,
-            stackTable.frame[currentStack],
-            stackTable.category[currentStack],
-            stackTable.subcategory[currentStack]
-          );
-        }
-        oldStackToNewStack.set(stackIndex, ensureExists(newStack));
-      }
-      return newStack;
-    }
-
-    const invertedThread = updateThreadStacks(
-      thread,
-      newStackTable,
-      convertStack
-    );
-    return { invertedThread, oldStackToNewStack };
-  });
 }
 
 /**

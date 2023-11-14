@@ -501,7 +501,7 @@ export class CallTreeInverted implements CallTree {
   _rootTotalSummary: number;
   _rootNodes: CallNodeIndex[];
   _thread: Thread;
-  _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
+  _displayDataByIndex: Map<CallNodeIndex, CallNodeDisplayData>;
   _nodeInfo: Map<CallNodeIndex, MyInvertedCallTreeNodeInfo>;
   _children: Map<CallNodeIndex | -1, CallNodeChildren>;
   _isHighPrecision: boolean;
@@ -695,16 +695,16 @@ export class CallTreeInverted implements CallTree {
   }
 
   getDepth(nodeIndex: CallNodeIndex): number {
-    return this._callNodeInfo.getCallNodePathFromIndex(nodeIndex).length - 1;
+    return this._callNodeInfo.depthForNode(nodeIndex);
   }
 
   getNodeData(nodeIndex: CallNodeIndex): CallNodeData {
-    const callNodePath = this._callNodeInfo.getCallNodePathFromIndex(nodeIndex);
-    const funcIndex = callNodePath[callNodePath.length - 1];
+    const funcIndex = this._callNodeInfo.funcForNode(nodeIndex);
     const funcName = this._thread.stringTable.getString(
       this._thread.funcTable.name[funcIndex]
     );
-    const isRoot = callNodePath.length === 1;
+    const isRoot =
+      this._callNodeInfo.getParentCallNodeIndex(nodeIndex) === null;
     const total = this._getTotal(nodeIndex);
     const totalRelative = total / this._rootTotalSummary;
     const self = isRoot ? total : 0;
