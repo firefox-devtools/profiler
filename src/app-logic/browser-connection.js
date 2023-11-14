@@ -6,10 +6,12 @@
 import { oneLine } from 'common-tags';
 import {
   getProfileViaWebChannel,
+  getExternalPowerTracksViaWebChannel,
   getSymbolTableViaWebChannel,
-  querySupportsGetProfileAndSymbolicationViaWebChannel,
+  queryWebChannelVersionViaWebChannel,
   querySymbolicationApiViaWebChannel,
 } from './web-channel';
+import type { Milliseconds } from 'firefox-profiler/types';
 
 /**
  * This file manages the communication between the profiler and the browser.
@@ -46,6 +48,11 @@ export interface BrowserConnection {
     onThirtySecondTimeout: () => void,
   |}): Promise<ArrayBuffer | MixedObject>;
 
+  getExternalPowerTracks(
+    startTime: Milliseconds,
+    endTime: Milliseconds
+  ): Promise<MixedObject>;
+
   // Query the browser-internal symbolication API. This provides richer
   // information than getSymbolTable.
   querySymbolicationApi(path: string, requestJson: string): Promise<string>;
@@ -66,11 +73,12 @@ export interface BrowserConnection {
  */
 class BrowserConnectionImpl implements BrowserConnection {
   _webChannelSupportsGetProfileAndSymbolication: boolean;
+  _webChannelSupportsGetExternalPowerTracks: boolean;
   _geckoProfiler: $GeckoProfiler | void;
 
-  constructor(webChannelSupportsGetProfileAndSymbolication: boolean) {
-    this._webChannelSupportsGetProfileAndSymbolication =
-      webChannelSupportsGetProfileAndSymbolication;
+  constructor(webChannelVersion: number) {
+    this._webChannelSupportsGetProfileAndSymbolication = webChannelVersion >= 1;
+    this._webChannelSupportsGetExternalPowerTracks = webChannelVersion >= 2;
   }
 
   // Only called when we must obtain the profile from the browser, i.e. if we
@@ -102,6 +110,18 @@ class BrowserConnectionImpl implements BrowserConnection {
     const profile = await geckoProfiler.getProfile();
     clearTimeout(timeoutId);
     return profile;
+  }
+
+  async getExternalPowerTracks(
+    startTime: Milliseconds,
+    endTime: Milliseconds
+  ): Promise<MixedObject> {
+    // On Firefox 121 and above, we can get additional power tracks recorded outside the browser.
+    if (this._webChannelSupportsGetExternalPowerTracks) {
+      return getExternalPowerTracksViaWebChannel(startTime, endTime);
+    }
+
+    return [];
   }
 
   async querySymbolicationApi(
@@ -166,15 +186,13 @@ export async function createBrowserConnection(
     return { status: 'NOT_FIREFOX' };
   }
   try {
-    const webChannelSupportsGetProfileAndSymbolication = await Promise.race([
-      querySupportsGetProfileAndSymbolicationViaWebChannel(),
+    const webChannelVersion = await Promise.race([
+      queryWebChannelVersionViaWebChannel(),
       makeTimeoutRejectionPromise(5000),
     ]);
-    // If we get here, it means querySupportsGetProfileAndSymbolicationViaWebChannel()
+    // If we get here, it means queryWebChannelVersionViaWebChannel()
     // did not throw an exception. This means that a WebChannel exists.
-    const browserConnection = new BrowserConnectionImpl(
-      webChannelSupportsGetProfileAndSymbolication
-    );
+    const browserConnection = new BrowserConnectionImpl(webChannelVersion);
     return {
       status: 'ESTABLISHED',
       browserConnection,
