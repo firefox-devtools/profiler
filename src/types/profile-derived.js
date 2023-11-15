@@ -24,6 +24,7 @@ import type {
   Tid,
 } from './profile';
 import type { IndexedArray } from './utils';
+export type { CallNodeInfo } from '../profile-logic/profile-data';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -77,65 +78,6 @@ export interface Tree<DisplayData> {
   getChildren(NodeIndex): NodeIndex[];
   hasChildren(NodeIndex): boolean;
   getAllDescendants(NodeIndex): Set<NodeIndex>;
-}
-
-export type IndexIntoInvertedOrdering = number;
-
-export type InvertedCallTreeRoot = {|
-  func: IndexIntoFuncTable,
-  callNodeSortIndexRangeStart: IndexIntoInvertedOrdering,
-  callNodeSortIndexRangeEnd: IndexIntoInvertedOrdering,
-|};
-
-export type InvertedTreeStuff = {|
-  orderedSelfNodes: Uint32Array, // IndexIntoCallNodeTable[],
-  orderingIndexForSelfNode: Int32Array, // Map<IndexIntoCallNodeTable, IndexIntoInvertedOrdering>,
-  roots: InvertedCallTreeRoot[],
-|};
-
-export interface CallNodeInfo {
-  isInverted(): boolean;
-  getNonInvertedCallNodeTable(): CallNodeTable;
-  getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
-  getInvertedTreeStuff(): InvertedTreeStuff | null;
-
-  getCallNodePathFromIndex(
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ): CallNodePath;
-
-  // Returns a list of CallNodeIndex from CallNodePaths.
-  getCallNodeIndicesFromPaths(
-    callNodePaths: CallNodePath[]
-  ): Array<IndexIntoCallNodeTable | null>;
-
-  // This function returns a CallNodeIndex from a CallNodePath.
-  getCallNodeIndexFromPath(
-    callNodePath: CallNodePath
-  ): IndexIntoCallNodeTable | null;
-
-  // Returns the CallNodeIndex that matches the function `func` and whose parent's
-  // CallNodeIndex is `parent`.
-  getCallNodeIndexFromParentAndFunc(
-    parent: IndexIntoCallNodeTable | -1,
-    func: IndexIntoFuncTable
-  ): IndexIntoCallNodeTable | null;
-
-  getParentCallNodeIndex(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoCallNodeTable | null;
-
-  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable;
-  categoryForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCategoryList;
-  subcategoryForNode(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoCategoryList;
-  innerWindowIDForNode(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoCategoryList;
-  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
-  sourceFramesInlinedIntoSymbolForNode(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoNativeSymbolTable | -1 | null;
 }
 
 export type LineNumber = number;

@@ -7,6 +7,7 @@
 import { bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { getOrderingIndexRangeForDescendantsOfInvertedCallPath } from 'firefox-profiler/profile-logic/profile-data';
+import type { CallNodeInfoInverted } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   SamplesLikeTable,
@@ -14,7 +15,6 @@ import type {
   CallNodeInfo,
   CallNodeTable,
   CallNodePath,
-  InvertedTreeStuff,
   StackTable,
   IndexIntoCallNodeTable,
   DevicePixels,
@@ -648,20 +648,18 @@ export function getSampleIndexRangeForSpan(
   callNodeInfo: CallNodeInfo,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  const invertedTreeStuff = callNodeInfo.getInvertedTreeStuff();
-  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
-  return invertedTreeStuff !== null
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
     ? getTimeRangeForSpanInverted(
         sampleIndex,
         depth,
-        callNodeTable,
-        invertedTreeStuff,
+        callNodeInfoInverted,
         sampleCallNodes
       )
     : getTimeRangeForSpanNonInverted(
         sampleIndex,
         depth,
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes
       );
 }
@@ -682,9 +680,10 @@ function getAncestorCallNodeAtDepth(
 function getTimeRangeForSpanNonInverted(
   sampleIndex: IndexIntoSamplesTable,
   depth: StackTimingDepth,
-  callNodeTable: CallNodeTable,
+  callNodeInfo: CallNodeInfo,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const spanCallNodeIndex = getAncestorCallNodeAtDepth(
     ensureExists(sampleCallNodes[sampleIndex]),
     depth,
@@ -740,16 +739,17 @@ function getInvertedCallPathOfDepth(
 function getTimeRangeForSpanInverted(
   sampleIndex: IndexIntoSamplesTable,
   depth: StackTimingDepth,
-  callNodeTable: CallNodeTable,
-  invertedTreeStuff: InvertedTreeStuff,
+  callNodeInfo: CallNodeInfoInverted,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const callPath = getInvertedCallPathOfDepth(
     ensureExists(sampleCallNodes[sampleIndex]),
     depth,
     callNodeTable
   );
-  const { orderedSelfNodes, orderingIndexForSelfNode } = invertedTreeStuff;
+  const { orderedSelfNodes, orderingIndexForSelfNode } =
+    callNodeInfo.getInvertedTreeStuff();
   const [orderingIndexRangeStart, orderingIndexRangeEnd] =
     getOrderingIndexRangeForDescendantsOfInvertedCallPath(
       callPath,

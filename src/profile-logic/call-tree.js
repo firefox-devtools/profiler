@@ -29,8 +29,6 @@ import type {
   ExtraBadgeInfo,
   BottomBoxInfo,
   Tree,
-  IndexIntoInvertedOrdering,
-  InvertedTreeStuff,
   SelfAndTotal,
 } from 'firefox-profiler/types';
 
@@ -57,8 +55,8 @@ export type CallTreeTimingsNonInverted = {
 export type InvertedCallTreeRootWithTotal = {|
   total: number,
   func: IndexIntoFuncTable,
-  callNodeSortIndexRangeStart: IndexIntoInvertedOrdering,
-  callNodeSortIndexRangeEnd: IndexIntoInvertedOrdering,
+  callNodeSortIndexRangeStart: ProfileData.IndexIntoInvertedOrdering,
+  callNodeSortIndexRangeEnd: ProfileData.IndexIntoInvertedOrdering,
 |};
 
 export type CallTreeTimingsInverted = {|
@@ -495,7 +493,7 @@ export class CallTreeInverted implements CallTree {
   _callNodeInfo: CallNodeInfo;
   _nonInvertedCallNodeTable: CallNodeTable;
   _callTreeTimingsInverted: CallTreeTimingsInverted;
-  _invertedTreeStuff: InvertedTreeStuff;
+  _invertedTreeStuff: ProfileData.InvertedTreeStuff;
   _callNodeSelf: Float32Array;
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
   _rootTotalSummary: number;
@@ -510,7 +508,7 @@ export class CallTreeInverted implements CallTree {
   constructor(
     thread: Thread,
     categories: CategoryList,
-    callNodeInfo: CallNodeInfo,
+    callNodeInfo: ProfileData.CallNodeInfoInverted,
     callTreeTimingsInverted: CallTreeTimingsInverted,
     isHighPrecision: boolean,
     weightType: WeightType
@@ -519,7 +517,7 @@ export class CallTreeInverted implements CallTree {
     this._callNodeInfo = callNodeInfo;
     this._nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     this._callTreeTimingsInverted = callTreeTimingsInverted;
-    this._invertedTreeStuff = ensureExists(callNodeInfo.getInvertedTreeStuff());
+    this._invertedTreeStuff = callNodeInfo.getInvertedTreeStuff();
     this._callNodeSelf = callTreeTimingsInverted.callNodeSelf;
     this._thread = thread;
     this._displayDataByIndex = new Map();
@@ -976,8 +974,8 @@ export function computeCallNodeSelfAndSummary(
 }
 
 function _getInvertedTreeNodeTotal(
-  callNodeSortIndexRangeStart: IndexIntoInvertedOrdering,
-  callNodeSortIndexRangeEnd: IndexIntoInvertedOrdering,
+  callNodeSortIndexRangeStart: ProfileData.IndexIntoInvertedOrdering,
+  callNodeSortIndexRangeEnd: ProfileData.IndexIntoInvertedOrdering,
   orderedCallNodes: Uint32Array,
   callNodeSelf: Float32Array
 ): number {
@@ -994,9 +992,10 @@ function _getInvertedTreeNodeTotal(
 }
 
 export function computeCallTreeTimingsInverted(
-  { orderedSelfNodes, roots }: InvertedTreeStuff,
-  { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary
+  { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary,
+  callNodeInfo: ProfileData.CallNodeInfoInverted
 ): CallTreeTimingsInverted {
+  const { orderedSelfNodes, roots } = callNodeInfo.getInvertedTreeStuff();
   const sortedRoots = [];
   for (let i = 0; i < roots.length; i++) {
     const { callNodeSortIndexRangeStart, callNodeSortIndexRangeEnd, func } =
@@ -1028,13 +1027,13 @@ export function computeCallTreeTimings(
   callNodeSelfAndSummary: CallNodeSelfAndSummary,
   callNodeInfo: CallNodeInfo
 ): CallTreeTimings {
-  const invertedTreeStuff = callNodeInfo.getInvertedTreeStuff();
-  if (invertedTreeStuff !== null) {
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  if (callNodeInfoInverted !== null) {
     return {
       type: 'INVERTED',
       timings: computeCallTreeTimingsInverted(
-        invertedTreeStuff,
-        callNodeSelfAndSummary
+        callNodeSelfAndSummary,
+        callNodeInfoInverted
       ),
     };
   }
@@ -1139,7 +1138,7 @@ export function getCallTree(
         return new CallTreeInverted(
           thread,
           categories,
-          callNodeInfo,
+          ensureExists(callNodeInfo.asInverted()),
           callTreeTimings.timings,
           Boolean(thread.isJsTracer),
           weightType
@@ -1357,8 +1356,8 @@ export function getSelfAndTotalForCallNode(
       // the contributions from the self call nodes which match callNodePath.
       const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
       const { orderedSelfNodes } = ensureExists(
-        callNodeInfo.getInvertedTreeStuff()
-      );
+        callNodeInfo.asInverted()
+      ).getInvertedTreeStuff();
       const { callNodeSortIndexRangeStart, callNodeSortIndexRangeEnd } = root;
       const { rangeStart, rangeEnd } =
         getOrderingIndexRangeForDescendantsOfInvertedTreeNode(

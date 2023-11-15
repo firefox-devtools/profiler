@@ -62,7 +62,6 @@ import type {
   BalancedNativeAllocationsTable,
   IndexIntoFrameTable,
   PageList,
-  CallNodeInfo,
   CallNodeTable,
   CallNodePath,
   CallNodeAndCategoryPath,
@@ -86,8 +85,6 @@ import type {
   BottomBoxInfo,
   Bytes,
   ThreadWithReservedFunctions,
-  InvertedTreeStuff,
-  InvertedCallTreeRoot,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -402,6 +399,65 @@ function _createCallNodeInfoFromUnorderedComponents(
   });
 }
 
+export type IndexIntoInvertedOrdering = number;
+
+export type InvertedCallTreeRoot = {|
+  func: IndexIntoFuncTable,
+  callNodeSortIndexRangeStart: IndexIntoInvertedOrdering,
+  callNodeSortIndexRangeEnd: IndexIntoInvertedOrdering,
+|};
+
+export type InvertedTreeStuff = {|
+  orderedSelfNodes: Uint32Array, // IndexIntoCallNodeTable[],
+  orderingIndexForSelfNode: Int32Array, // Map<IndexIntoCallNodeTable, IndexIntoInvertedOrdering>,
+  roots: InvertedCallTreeRoot[],
+|};
+
+export interface CallNodeInfo {
+  isInverted(): boolean;
+  asInverted(): CallNodeInfoInverted | null;
+  getNonInvertedCallNodeTable(): CallNodeTable;
+  getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
+
+  getCallNodePathFromIndex(
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ): CallNodePath;
+
+  // Returns a list of CallNodeIndex from CallNodePaths.
+  getCallNodeIndicesFromPaths(
+    callNodePaths: CallNodePath[]
+  ): Array<IndexIntoCallNodeTable | null>;
+
+  // This function returns a CallNodeIndex from a CallNodePath.
+  getCallNodeIndexFromPath(
+    callNodePath: CallNodePath
+  ): IndexIntoCallNodeTable | null;
+
+  // Returns the CallNodeIndex that matches the function `func` and whose parent's
+  // CallNodeIndex is `parent`.
+  getCallNodeIndexFromParentAndFunc(
+    parent: IndexIntoCallNodeTable | -1,
+    func: IndexIntoFuncTable
+  ): IndexIntoCallNodeTable | null;
+
+  getParentCallNodeIndex(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable | null;
+
+  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable;
+  categoryForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCategoryList;
+  subcategoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  innerWindowIDForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoNativeSymbolTable | -1 | null;
+}
+
 class CallNodeInfoNonInverted implements CallNodeInfo {
   _callNodeTable: CallNodeTable;
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
@@ -423,14 +479,14 @@ class CallNodeInfoNonInverted implements CallNodeInfo {
   isInverted(): boolean {
     return false;
   }
+  asInverted(): CallNodeInfoInverted | null {
+    return null;
+  }
   getNonInvertedCallNodeTable(): CallNodeTable {
     return this._callNodeTable;
   }
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
     return this._stackIndexToNonInvertedCallNodeIndex;
-  }
-  getInvertedTreeStuff(): InvertedTreeStuff | null {
-    return null;
   }
 
   // This function returns a CallNodePath from a CallNodeIndex.
@@ -747,7 +803,7 @@ function _createInitialInvertedCallNodeTableFromRoots(
   };
 }
 
-class CallNodeInfoInverted implements CallNodeInfo {
+export class CallNodeInfoInverted implements CallNodeInfo {
   _callNodeTable: CallNodeTable;
   _invertedCallNodeTable: InvertedCallNodeTable;
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
@@ -788,13 +844,16 @@ class CallNodeInfoInverted implements CallNodeInfo {
   isInverted(): boolean {
     return true;
   }
+  asInverted(): CallNodeInfoInverted | null {
+    return this;
+  }
   getNonInvertedCallNodeTable(): CallNodeTable {
     return this._callNodeTable;
   }
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
     return this._stackIndexToNonInvertedCallNodeIndex;
   }
-  getInvertedTreeStuff(): InvertedTreeStuff | null {
+  getInvertedTreeStuff(): InvertedTreeStuff {
     return this._invertedTreeStuff;
   }
 
@@ -1370,14 +1429,14 @@ function _getSamplesSelectedStatesInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  invertedTreeStuff: InvertedTreeStuff
+  callNodeInfo: CallNodeInfoInverted
 ): SelectedState[] {
   const selectedCallPath = callNodeInfo.getCallNodePathFromIndex(
     selectedInvertedCallNodeIndex
   );
   const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
-  const { orderedSelfNodes, orderingIndexForSelfNode } = invertedTreeStuff;
+  const { orderedSelfNodes, orderingIndexForSelfNode } =
+    callNodeInfo.getInvertedTreeStuff();
   const [orderingIndexRangeStart, orderingIndexRangeEnd] =
     getOrderingIndexRangeForDescendantsOfInvertedCallPath(
       selectedCallPath,
@@ -1430,14 +1489,13 @@ export function getSamplesSelectedStates(
     );
   }
 
-  const invertedTreeStuff = callNodeInfo.getInvertedTreeStuff();
-  if (invertedTreeStuff !== null) {
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  if (callNodeInfoInverted !== null) {
     return _getSamplesSelectedStatesInverted(
       sampleNonInvertedCallNodes,
       activeTabFilteredNonInvertedCallNodes,
       selectedCallNodeIndex,
-      callNodeInfo,
-      invertedTreeStuff
+      callNodeInfoInverted
     );
   }
   return _getSamplesSelectedStatesNonInverted(
@@ -1729,11 +1787,11 @@ export function getTimingsForPath(
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
-  const invertedTreeStuff = callNodeInfo.getInvertedTreeStuff();
-  if (invertedTreeStuff !== null) {
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  if (callNodeInfoInverted !== null) {
     // Inverted case
     const needleNodeIsRootOfInvertedTree = needlePath.length === 1;
-    const { orderingIndexForSelfNode, orderedSelfNodes } = invertedTreeStuff;
+    const { orderingIndexForSelfNode, orderedSelfNodes } = callNodeInfoInverted.getInvertedTreeStuff();
     const [orderingIndexRangeStart, orderingIndexRangeEnd] =
       getOrderingIndexRangeForDescendantsOfInvertedCallPath(
         needlePath,
@@ -3296,11 +3354,11 @@ export function getTreeOrderComparator(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfo
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
-  const invertedTreeStuff = callNodeInfo.getInvertedTreeStuff();
-  if (invertedTreeStuff !== null) {
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  if (callNodeInfoInverted !== null) {
     return _getTreeOrderComparatorInverted(
       sampleNonInvertedCallNodes,
-      invertedTreeStuff
+      callNodeInfoInverted
     );
   }
   return _getTreeOrderComparatorNonInverted(sampleNonInvertedCallNodes);
@@ -3377,9 +3435,9 @@ export function compareCallNodesInverted(
  */
 export function _getTreeOrderComparatorInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
-  invertedTreeStuff: InvertedTreeStuff
+  callNodeInfo: CallNodeInfoInverted
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
-  const { orderingIndexForSelfNode } = invertedTreeStuff;
+  const { orderingIndexForSelfNode } = callNodeInfo.getInvertedTreeStuff();
   return function treeOrderComparator(
     sampleA: IndexIntoSamplesTable,
     sampleB: IndexIntoSamplesTable
