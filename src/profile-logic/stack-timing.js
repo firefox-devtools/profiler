@@ -6,7 +6,6 @@
 
 import { bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import { getOrderingIndexRangeForDescendantsOfInvertedCallPath } from 'firefox-profiler/profile-logic/profile-data';
 import type { CallNodeInfoInverted } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
@@ -748,13 +747,12 @@ function getTimeRangeForSpanInverted(
     depth,
     callNodeTable
   );
+  const callNodeIndex = ensureExists(
+    callNodeInfo.getCallNodeIndexFromPath(callPath)
+  );
   const orderingIndexForSelfNode = callNodeInfo.getOrderingIndexForSelfNode();
   const [orderingIndexRangeStart, orderingIndexRangeEnd] =
-    getOrderingIndexRangeForDescendantsOfInvertedCallPath(
-      callPath,
-      callNodeInfo.getOrderedSelfNodes(),
-      callNodeTable
-    );
+    callNodeInfo.getOrderingIndexRangeForNode(callNodeIndex);
   let firstMatchingSampleIndex = sampleIndex;
   while (firstMatchingSampleIndex > 0) {
     const previousSampleIndex = firstMatchingSampleIndex - 1;

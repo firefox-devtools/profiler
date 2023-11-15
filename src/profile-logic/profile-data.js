@@ -24,11 +24,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { hashPath, concatHash } from 'firefox-profiler/utils/path';
-import {
-  bisectionRight,
-  bisectionLeft,
-  bisectEqualRange,
-} from 'firefox-profiler/utils/bisect';
+import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   assertExhaustiveCheck,
@@ -1448,17 +1444,9 @@ function _getSamplesSelectedStatesInverted(
   selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted
 ): SelectedState[] {
-  const selectedCallPath = callNodeInfo.getCallNodePathFromIndex(
-    selectedInvertedCallNodeIndex
-  );
-  const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const orderingIndexForSelfNode = callNodeInfo.getOrderingIndexForSelfNode();
   const [orderingIndexRangeStart, orderingIndexRangeEnd] =
-    getOrderingIndexRangeForDescendantsOfInvertedCallPath(
-      selectedCallPath,
-      callNodeInfo.getOrderedSelfNodes(),
-      nonInvertedCallNodeTable
-    );
+    callNodeInfo.getOrderingIndexRangeForNode(selectedInvertedCallNodeIndex);
   const sampleCount = sampleNonInvertedCallNodes.length;
   const samplesSelectedStates = new Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
@@ -1569,11 +1557,11 @@ export type TimingsForPath = {|
 |};
 
 /**
- * This function is the same as getTimingsForPath, but accepts an IndexIntoCallNodeTable
- * instead of a CallNodePath.
+ * This function is the same as getTimingsForPath, but accepts a CallNodePath
+ * instead of an IndexIntoCallNodeTable.
  */
-export function getTimingsForCallNodeIndex(
-  needleIndex: IndexIntoCallNodeTable | null,
+export function getTimingsForPath(
+  needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
   thread: Thread,
@@ -1584,8 +1572,8 @@ export function getTimingsForCallNodeIndex(
   unfilteredSamples: SamplesLikeTable,
   displayImplementation: boolean
 ) {
-  return getTimingsForPath(
-    callNodeInfo.getCallNodePathFromIndex(needleIndex),
+  return getTimingsForCallNodeIndex(
+    callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
     interval,
     thread,
@@ -1606,8 +1594,8 @@ export function getTimingsForCallNodeIndex(
  * specified and is the offset to be applied on thread's indexes to access
  * the same samples in unfilteredThread.
  */
-export function getTimingsForPath(
-  needlePath: CallNodePath,
+export function getTimingsForCallNodeIndex(
+  needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
   thread: Thread,
@@ -1795,7 +1783,7 @@ export function getTimingsForPath(
   /* ------------- End of function definitions ------------- */
 
   /* ------------ Start of the algorithm itself ------------ */
-  if (needlePath.length === 0) {
+  if (needleNodeIndex === null) {
     // No index was provided, return empty timing information.
     return { forPath: pathTimings, rootTime };
   }
@@ -1806,15 +1794,12 @@ export function getTimingsForPath(
   const callNodeInfoInverted = callNodeInfo.asInverted();
   if (callNodeInfoInverted !== null) {
     // Inverted case
-    const needleNodeIsRootOfInvertedTree = needlePath.length === 1;
+    const needleNodeIsRootOfInvertedTree =
+      needleNodeIndex < callNodeInfoInverted.getRootCount();
     const orderingIndexForSelfNode =
       callNodeInfoInverted.getOrderingIndexForSelfNode();
     const [orderingIndexRangeStart, orderingIndexRangeEnd] =
-      getOrderingIndexRangeForDescendantsOfInvertedCallPath(
-        needlePath,
-        callNodeInfoInverted.getOrderedSelfNodes(),
-        callNodeTable
-      );
+      callNodeInfoInverted.getOrderingIndexRangeForNode(needleNodeIndex);
 
     // Loop over each sample and accumulate the self time, running time, and
     // the implementation breakdown.
@@ -1848,9 +1833,6 @@ export function getTimingsForPath(
     }
   } else {
     // Non-inverted case
-    const needleNodeIndex = ensureExists(
-      callNodeInfo.getCallNodeIndexFromPath(needlePath)
-    );
     const needleDescendantsEndIndex =
       callNodeTable.nextAfterDescendants[needleNodeIndex];
 
@@ -3478,37 +3460,6 @@ export function _getTreeOrderComparatorInverted(
       orderingIndexForSelfNode[callNodeA] - orderingIndexForSelfNode[callNodeB]
     );
   };
-}
-
-export function getOrderingIndexRangeForDescendantsOfInvertedCallPath(
-  callPath: CallNodePath,
-  orderedSelfNodes: Uint32Array,
-  callNodeTable: CallNodeTable
-): [number, number] {
-  return bisectEqualRange(
-    orderedSelfNodes,
-    (callNodeIndex: IndexIntoCallNodeTable) => {
-      let currentCallNodeIndex = callNodeIndex;
-      for (let i = 0; i < callPath.length - 1; i++) {
-        const expectedFunc = callPath[i];
-        const currentFunc = callNodeTable.func[currentCallNodeIndex];
-        if (currentFunc < expectedFunc) {
-          return -1;
-        }
-        if (currentFunc > expectedFunc) {
-          return 1;
-        }
-        const prefix = callNodeTable.prefix[currentCallNodeIndex];
-        if (prefix === -1) {
-          return -1;
-        }
-        currentCallNodeIndex = prefix;
-      }
-      const expectedFunc = callPath[callPath.length - 1];
-      const currentFunc = callNodeTable.func[currentCallNodeIndex];
-      return currentFunc - expectedFunc;
-    }
-  );
 }
 
 export function getFriendlyStackTypeName(
