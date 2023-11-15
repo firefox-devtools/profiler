@@ -55,8 +55,6 @@ export type CallTreeTimingsNonInverted = {
 export type InvertedCallTreeRootWithTotal = {|
   total: number,
   func: IndexIntoFuncTable,
-  callNodeSortIndexRangeStart: ProfileData.IndexIntoInvertedOrdering,
-  callNodeSortIndexRangeEnd: ProfileData.IndexIntoInvertedOrdering,
 |};
 
 export type CallTreeTimingsInverted = {|
@@ -68,30 +66,6 @@ export type CallTreeTimingsInverted = {|
 export type CallTreeTimings =
   | {| type: 'NON_INVERTED', timings: CallTreeTimingsNonInverted |}
   | {| type: 'INVERTED', timings: CallTreeTimingsInverted |};
-
-function getUnpackedCallNodesForInvertedNode(
-  node: MyInvertedCallTreeNodeInfo,
-  orderedSelfNodes: Uint32Array
-): UnpackedInvertedCallTreeNodeIndex[] {
-  switch (node.type) {
-    case 'ROOT': {
-      const {
-        callNodeSortIndexRangeStart: rangeStart,
-        callNodeSortIndexRangeEnd: rangeEnd,
-      } = node.rootNode;
-      const unpackedCallNodes = [];
-      for (let i = rangeStart; i < rangeEnd; i++) {
-        const selfNode = orderedSelfNodes[i];
-        unpackedCallNodes.push({ selfNode, nodeNode: selfNode });
-      }
-      return unpackedCallNodes;
-    }
-    case 'NON_ROOT':
-      return node.node.unpackedCallNodes;
-    default:
-      throw assertExhaustiveCheck(node.type);
-  }
-}
 
 function extractFaviconFromLibname(libname: string): string | null {
   try {
@@ -537,14 +511,11 @@ export class CallTreeInverted implements CallTree {
     return this._rootNodes;
   }
 
-  _prepareChildrenOfNode(
-    parentNodeIndex: CallNodeIndex,
-    parentNode: MyInvertedCallTreeNodeInfo
-  ): CallNodeIndex[] {
-    const parentUnpackedCallNodes = getUnpackedCallNodesForInvertedNode(
-      parentNode,
-      this._callNodeInfo.getOrderedSelfNodes()
-    );
+  _prepareChildrenOfNode(parentNodeIndex: CallNodeIndex): CallNodeIndex[] {
+    const parentUnpackedCallNodes =
+      this._callNodeInfo.getOrderedCallNodePairsForInvertedNode(
+        parentNodeIndex
+      );
 
     const childCallNodes = [];
     let currentChildFunc = null;
@@ -618,13 +589,9 @@ export class CallTreeInverted implements CallTree {
 
     for (let i = ancestorsNeedingChildrenPreparation.length - 1; i >= 0; i--) {
       const ancestorNodeIndex = ancestorsNeedingChildrenPreparation[i];
-      const ancestorNode = ensureExists(this._nodeInfo.get(ancestorNodeIndex));
-      this._prepareChildrenOfNode(ancestorNodeIndex, ancestorNode);
+      this._prepareChildrenOfNode(ancestorNodeIndex);
     }
-    return this._prepareChildrenOfNode(
-      nodeIndex,
-      ensureExists(this._nodeInfo.get(nodeIndex))
-    );
+    return this._prepareChildrenOfNode(nodeIndex);
   }
 
   getChildren(nodeIndex: CallNodeIndex): CallNodeChildren {
@@ -904,11 +871,8 @@ export class CallTreeInverted implements CallTree {
       return [];
     }
 
-    const nodeInfo = this._getNodeInfo(callNodeIndex);
-    const unpackedCallNodes = getUnpackedCallNodesForInvertedNode(
-      nodeInfo,
-      this._callNodeInfo.getOrderedSelfNodes()
-    );
+    const unpackedCallNodes =
+      this._callNodeInfo.getOrderedCallNodePairsForInvertedNode(callNodeIndex);
 
     // Find the nodeNode in unpackedCallNodes with the highest self time.
     let heaviestNonInvertedNode = -1;
@@ -994,11 +958,11 @@ export function computeCallTreeTimingsInverted(
   callNodeInfo: ProfileData.CallNodeInfoInverted
 ): CallTreeTimingsInverted {
   const orderedSelfNodes = callNodeInfo.getOrderedSelfNodes();
-  const roots = callNodeInfo.getRoots();
+  const rootCount = callNodeInfo.getRootCount();
   const sortedRoots = [];
-  for (let i = 0; i < roots.length; i++) {
-    const { callNodeSortIndexRangeStart, callNodeSortIndexRangeEnd, func } =
-      roots[i];
+  for (let func = 0; func < rootCount; func++) {
+    const [callNodeSortIndexRangeStart, callNodeSortIndexRangeEnd] =
+      callNodeInfo.getOrderingIndexRangeForNode(func);
     const total = _getInvertedTreeNodeTotal(
       callNodeSortIndexRangeStart,
       callNodeSortIndexRangeEnd,
@@ -1006,12 +970,7 @@ export function computeCallTreeTimingsInverted(
       callNodeSelf
     );
     if (total !== 0) {
-      sortedRoots.push({
-        callNodeSortIndexRangeStart,
-        callNodeSortIndexRangeEnd,
-        func,
-        total,
-      });
+      sortedRoots.push({ func, total });
     }
   }
   sortedRoots.sort((a, b) => b.total - a.total);
@@ -1275,57 +1234,6 @@ export function computeCallNodeTracedSelfAndSummary(
   return { callNodeSelf, rootTotalSummary };
 }
 
-export type OrderingIndexRange = {| rangeStart: number, rangeEnd: number |};
-
-function getOrderingIndexRangeForDescendantsOfInvertedTreeNode(
-  callNodePath: CallNodePath,
-  orderedSelfNodes: Uint32Array,
-  callNodeTable: CallNodeTable,
-  initialRangeStart: number = 0,
-  initialRangeEnd: number = orderedSelfNodes.length
-): OrderingIndexRange {
-  function selfNodeMatchesPath(
-    selfNode: IndexIntoCallNodeTable,
-    callNodePath: CallNodePath
-  ): boolean {
-    let currentCallNodeIndex = selfNode;
-    for (let i = 0; i < callNodePath.length - 1; i++) {
-      const currentFunc = callNodeTable.func[currentCallNodeIndex];
-      const expectedFunc = callNodePath[i];
-      if (currentFunc !== expectedFunc) {
-        return false;
-      }
-      currentCallNodeIndex = callNodeTable.prefix[currentCallNodeIndex];
-      if (currentCallNodeIndex === -1) {
-        return false;
-      }
-    }
-    const expectedFunc = callNodePath[callNodePath.length - 1];
-    const currentFunc = callNodeTable.func[currentCallNodeIndex];
-    return currentFunc === expectedFunc;
-  }
-
-  const rangeStart = (function findRangeStart() {
-    // Find the index of the first element in orderedSelfNodes which matches callNodePath.
-    for (let i = initialRangeStart; i < initialRangeEnd; i++) {
-      if (selfNodeMatchesPath(orderedSelfNodes[i], callNodePath)) {
-        return i;
-      }
-    }
-    return initialRangeEnd;
-  })();
-  const rangeEnd = (function findRangeEnd() {
-    // Find the index of the first element in orderedSelfNodes which doesn't match callNodePath.
-    for (let i = rangeStart; i < initialRangeEnd; i++) {
-      if (!selfNodeMatchesPath(orderedSelfNodes[i], callNodePath)) {
-        return i;
-      }
-    }
-    return initialRangeEnd;
-  })();
-  return { rangeStart, rangeEnd };
-}
-
 export function getSelfAndTotalForCallNode(
   callNodeIndex: CallNodeIndex,
   callNodeInfo: CallNodeInfo,
@@ -1340,31 +1248,22 @@ export function getSelfAndTotalForCallNode(
     }
     case 'INVERTED': {
       const { sortedRoots, callNodeSelf } = callTreeTimings.timings;
-      const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
-      const rootFunc = ensureExists(callNodePath[0]);
-      const root = sortedRoots.find((root) => root.func === rootFunc);
-      if (root === undefined) {
-        return { self: 0, total: 0 };
-      }
-      if (callNodePath.length === 1) {
+      const callNodeInfoInverted = ensureExists(callNodeInfo.asInverted());
+      if (callNodeIndex < callNodeInfoInverted.getRootCount()) {
         // This is a root node.
+        const rootFunc = callNodeIndex;
+        const root = sortedRoots.find((root) => root.func === rootFunc);
+        if (root === undefined) {
+          return { self: 0, total: 0 };
+        }
         return { self: root.total, total: root.total };
       }
 
       // To compute the time for a non-root node in the inverted tree, sum up
-      // the contributions from the self call nodes which match callNodePath.
-      const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
-      const callNodeInfoInverted = ensureExists(callNodeInfo.asInverted());
-      const { callNodeSortIndexRangeStart, callNodeSortIndexRangeEnd } = root;
+      // the contributions from the self call nodes which contribute to this node.
       const orderedSelfNodes = callNodeInfoInverted.getOrderedSelfNodes();
-      const { rangeStart, rangeEnd } =
-        getOrderingIndexRangeForDescendantsOfInvertedTreeNode(
-          callNodePath,
-          orderedSelfNodes,
-          callNodeTable,
-          callNodeSortIndexRangeStart,
-          callNodeSortIndexRangeEnd
-        );
+      const [rangeStart, rangeEnd] =
+        callNodeInfoInverted.getOrderingIndexRangeForNode(callNodeIndex);
       let total = 0;
       for (let i = rangeStart; i < rangeEnd; i++) {
         total += callNodeSelf[orderedSelfNodes[i]];
