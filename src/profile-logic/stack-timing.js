@@ -748,12 +748,11 @@ function getTimeRangeForSpanInverted(
     depth,
     callNodeTable
   );
-  const { orderedSelfNodes, orderingIndexForSelfNode } =
-    callNodeInfo.getInvertedTreeStuff();
+  const orderingIndexForSelfNode = callNodeInfo.getOrderingIndexForSelfNode();
   const [orderingIndexRangeStart, orderingIndexRangeEnd] =
     getOrderingIndexRangeForDescendantsOfInvertedCallPath(
       callPath,
-      orderedSelfNodes,
+      callNodeInfo.getOrderedSelfNodes(),
       callNodeTable
     );
   let firstMatchingSampleIndex = sampleIndex;

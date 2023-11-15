@@ -407,12 +407,6 @@ export type InvertedCallTreeRoot = {|
   callNodeSortIndexRangeEnd: IndexIntoInvertedOrdering,
 |};
 
-export type InvertedTreeStuff = {|
-  orderedSelfNodes: Uint32Array, // IndexIntoCallNodeTable[],
-  orderingIndexForSelfNode: Int32Array, // Map<IndexIntoCallNodeTable, IndexIntoInvertedOrdering>,
-  roots: InvertedCallTreeRoot[],
-|};
-
 export interface CallNodeInfo {
   isInverted(): boolean;
   asInverted(): CallNodeInfoInverted | null;
@@ -807,8 +801,9 @@ export class CallNodeInfoInverted implements CallNodeInfo {
   _callNodeTable: CallNodeTable;
   _invertedCallNodeTable: InvertedCallNodeTable;
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
-  _invertedTreeStuff: InvertedTreeStuff;
-  _orderedSelfNodes: Uint32Array;
+  _orderedSelfNodes: Uint32Array; // IndexIntoCallNodeTable[],
+  _orderingIndexForSelfNode: Int32Array; // Map<IndexIntoCallNodeTable, IndexIntoInvertedOrdering>,
+  _roots: InvertedCallTreeRoot[];
   _defaultCategory: IndexIntoCategoryList;
 
   // This is a Map<CallNodePathHash, IndexIntoInvertedCallNodeTable>. This map speeds up
@@ -823,15 +818,17 @@ export class CallNodeInfoInverted implements CallNodeInfo {
   constructor(
     callNodeTable: CallNodeTable,
     stackIndexToNonInvertedCallNodeIndex: Int32Array,
-    invertedTreeStuff: InvertedTreeStuff,
+    orderedSelfNodes: Uint32Array, // IndexIntoCallNodeTable[],
+    orderingIndexForSelfNode: Int32Array, // Map<IndexIntoCallNodeTable, IndexIntoInvertedOrdering>,
+    roots: InvertedCallTreeRoot[],
     defaultCategory: IndexIntoCategoryList
   ) {
     this._callNodeTable = callNodeTable;
     this._stackIndexToNonInvertedCallNodeIndex =
       stackIndexToNonInvertedCallNodeIndex;
-    this._invertedTreeStuff = invertedTreeStuff;
-    const { roots, orderedSelfNodes } = invertedTreeStuff;
     this._orderedSelfNodes = orderedSelfNodes;
+    this._orderingIndexForSelfNode = orderingIndexForSelfNode;
+    this._roots = roots;
     this._defaultCategory = defaultCategory;
     this._invertedCallNodeTable = _createInitialInvertedCallNodeTableFromRoots(
       callNodeTable,
@@ -853,8 +850,14 @@ export class CallNodeInfoInverted implements CallNodeInfo {
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
     return this._stackIndexToNonInvertedCallNodeIndex;
   }
-  getInvertedTreeStuff(): InvertedTreeStuff {
-    return this._invertedTreeStuff;
+  getOrderedSelfNodes(): Uint32Array {
+    return this._orderedSelfNodes;
+  }
+  getOrderingIndexForSelfNode(): Int32Array {
+    return this._orderingIndexForSelfNode;
+  }
+  getRoots(): InvertedCallTreeRoot[] {
+    return this._roots;
   }
 
   _prepareChildrenOfNode(
@@ -1240,16 +1243,12 @@ export function getInvertedCallNodeInfo(
     });
   }
 
-  const invertedTreeStuff = {
-    orderedSelfNodes,
-    orderingIndexForSelfNode,
-    roots: invertedRoots,
-  };
-
   return new CallNodeInfoInverted(
     nonInvertedCallNodeTable,
     stackIndexToNonInvertedCallNodeIndex,
-    invertedTreeStuff,
+    orderedSelfNodes,
+    orderingIndexForSelfNode,
+    invertedRoots,
     defaultCategory
   );
 }
@@ -1435,12 +1434,11 @@ function _getSamplesSelectedStatesInverted(
     selectedInvertedCallNodeIndex
   );
   const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
-  const { orderedSelfNodes, orderingIndexForSelfNode } =
-    callNodeInfo.getInvertedTreeStuff();
+  const orderingIndexForSelfNode = callNodeInfo.getOrderingIndexForSelfNode();
   const [orderingIndexRangeStart, orderingIndexRangeEnd] =
     getOrderingIndexRangeForDescendantsOfInvertedCallPath(
       selectedCallPath,
-      orderedSelfNodes,
+      callNodeInfo.getOrderedSelfNodes(),
       nonInvertedCallNodeTable
     );
   const sampleCount = sampleNonInvertedCallNodes.length;
@@ -1791,11 +1789,12 @@ export function getTimingsForPath(
   if (callNodeInfoInverted !== null) {
     // Inverted case
     const needleNodeIsRootOfInvertedTree = needlePath.length === 1;
-    const { orderingIndexForSelfNode, orderedSelfNodes } = callNodeInfoInverted.getInvertedTreeStuff();
+    const orderingIndexForSelfNode =
+      callNodeInfoInverted.getOrderingIndexForSelfNode();
     const [orderingIndexRangeStart, orderingIndexRangeEnd] =
       getOrderingIndexRangeForDescendantsOfInvertedCallPath(
         needlePath,
-        orderedSelfNodes,
+        callNodeInfoInverted.getOrderedSelfNodes(),
         callNodeTable
       );
 
@@ -3437,7 +3436,7 @@ export function _getTreeOrderComparatorInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfoInverted
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
-  const { orderingIndexForSelfNode } = callNodeInfo.getInvertedTreeStuff();
+  const orderingIndexForSelfNode = callNodeInfo.getOrderingIndexForSelfNode();
   return function treeOrderComparator(
     sampleA: IndexIntoSamplesTable,
     sampleB: IndexIntoSamplesTable
