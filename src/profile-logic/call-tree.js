@@ -446,34 +446,19 @@ export class CallTreeNonInverted implements CallTree {
   }
 }
 
-type UnpackedInvertedCallTreeNodeIndex = {|
-  nodeNode: IndexIntoCallNodeTable,
-  selfNode: IndexIntoCallNodeTable,
-|};
-
-type InvertedCallTreeNodeInfo = {|
-  unpackedCallNodes: UnpackedInvertedCallTreeNodeIndex[],
-  total: number,
-|};
-
-type MyInvertedCallTreeNodeInfo =
-  | {| type: 'ROOT', rootNode: InvertedCallTreeRootWithTotal |}
-  | {| type: 'NON_ROOT', node: InvertedCallTreeNodeInfo |};
-
 type CallNodeIndex = IndexIntoCallNodeTable; // into inverted call node table
 
 export class CallTreeInverted implements CallTree {
   _categories: CategoryList;
   _callNodeInfo: ProfileData.CallNodeInfoInverted;
   _nonInvertedCallNodeTable: CallNodeTable;
-  _callTreeTimingsInverted: CallTreeTimingsInverted;
   _callNodeSelf: Float32Array;
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
   _rootTotalSummary: number;
   _rootNodes: CallNodeIndex[];
   _thread: Thread;
   _displayDataByIndex: Map<CallNodeIndex, CallNodeDisplayData>;
-  _nodeInfo: Map<CallNodeIndex, MyInvertedCallTreeNodeInfo>;
+  _totalPerNode: Map<CallNodeIndex, number>;
   _children: Map<CallNodeIndex | -1, CallNodeChildren>;
   _isHighPrecision: boolean;
   _weightType: WeightType;
@@ -489,19 +474,15 @@ export class CallTreeInverted implements CallTree {
     this._categories = categories;
     this._callNodeInfo = callNodeInfo;
     this._nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
-    this._callTreeTimingsInverted = callTreeTimingsInverted;
     this._callNodeSelf = callTreeTimingsInverted.callNodeSelf;
     this._thread = thread;
     this._displayDataByIndex = new Map();
     this._rootTotalSummary = callTreeTimingsInverted.rootTotalSummary;
-    this._nodeInfo = new Map();
-    this._rootNodes = callTreeTimingsInverted.sortedRoots.map((rootNode) => {
-      const nodeIndex = ensureExists(
-        callNodeInfo.getCallNodeIndexFromPath([rootNode.func])
-      );
-      this._nodeInfo.set(nodeIndex, { type: 'ROOT', rootNode });
-      return nodeIndex;
-    });
+    const { sortedRoots } = callTreeTimingsInverted;
+    this._totalPerNode = new Map(
+      sortedRoots.map(({ func, total }) => [func, total])
+    );
+    this._rootNodes = sortedRoots.map(({ func }) => func);
     this._children = new Map();
     this._isHighPrecision = isHighPrecision;
     this._weightType = weightType;
@@ -512,56 +493,28 @@ export class CallTreeInverted implements CallTree {
   }
 
   _prepareChildrenOfNode(parentNodeIndex: CallNodeIndex): CallNodeIndex[] {
-    const parentUnpackedCallNodes =
-      this._callNodeInfo.getOrderedCallNodePairsForInvertedNode(
-        parentNodeIndex
-      );
-
+    const orderedSelfNodes = this._callNodeInfo.getOrderedSelfNodes();
+    const allChildCallNodeIndexes =
+      this._callNodeInfo.getChildren(parentNodeIndex);
     const childCallNodes = [];
-    let currentChildFunc = null;
-    let currentChildTotal = 0;
-    let currentChildCallTreeNode = null;
-    let currentChildCallNodes = [];
-    const flushCurrentChildCallNode = () => {
-      if (currentChildCallTreeNode !== null) {
-        childCallNodes.push({
-          callNodeIndex: currentChildCallTreeNode,
-          total: currentChildTotal,
-        });
-        this._nodeInfo.set(currentChildCallTreeNode, {
-          type: 'NON_ROOT',
-          node: {
-            total: currentChildTotal,
-            unpackedCallNodes: currentChildCallNodes,
-          },
-        });
+    for (let i = 0; i < allChildCallNodeIndexes.length; i++) {
+      const callNodeIndex = allChildCallNodeIndexes[i];
+      let total = 0;
+      const [rangeStart, rangeEnd] =
+        this._callNodeInfo.getOrderingIndexRangeForNode(callNodeIndex);
+      for (
+        let orderingIndex = rangeStart;
+        orderingIndex < rangeEnd;
+        orderingIndex++
+      ) {
+        const selfNode = orderedSelfNodes[orderingIndex];
+        total += this._callNodeSelf[selfNode];
       }
-    };
-    for (let i = 0; i < parentUnpackedCallNodes.length; i++) {
-      const { selfNode, nodeNode } = parentUnpackedCallNodes[i];
-      const childCallNode = this._nonInvertedCallNodeTable.prefix[nodeNode];
-      if (childCallNode === -1) {
-        continue;
+      if (total !== 0) {
+        childCallNodes.push({ callNodeIndex, total });
+        this._totalPerNode.set(callNodeIndex, total);
       }
-      const childFunc = this._nonInvertedCallNodeTable.func[childCallNode];
-      if (childFunc !== currentChildFunc) {
-        flushCurrentChildCallNode();
-        currentChildFunc = childFunc;
-        currentChildTotal = 0;
-        currentChildCallTreeNode =
-          this._callNodeInfo.getCallNodeIndexFromParentAndFunc(
-            parentNodeIndex,
-            childFunc
-          );
-        currentChildCallNodes = [];
-      }
-      currentChildCallNodes.push({
-        nodeNode: childCallNode,
-        selfNode,
-      });
-      currentChildTotal += this._callNodeSelf[selfNode];
     }
-    flushCurrentChildCallNode();
     childCallNodes.sort((a, b) => b.total - a.total);
     const childCallNodeIndexes = childCallNodes.map(
       ({ callNodeIndex }) => callNodeIndex
@@ -570,65 +523,29 @@ export class CallTreeInverted implements CallTree {
     return childCallNodeIndexes;
   }
 
-  _prepareChildrenUpToPreparedAncestor(
-    nodeIndex: CallNodeIndex
-  ): CallNodeChildren {
-    // Find the first ancestor node for which we have cached _nodeInfo.
-    // Roots are always present in _nodeInfo, so this search will terminate.
-    // Then prepare children of all the encountered nodes on the way to that
-    // cached ancestor, from root-most up to nodeIndex's parent.
-    let currentAncestor = nodeIndex;
-    const ancestorsNeedingChildrenPreparation = [];
-    while (!this._nodeInfo.has(currentAncestor)) {
-      currentAncestor = ensureExists(
-        this._callNodeInfo.getParentCallNodeIndex(currentAncestor),
-        'We should have exited this loop before encountering a root, because all roots are present in _nodeInfo'
-      );
-      ancestorsNeedingChildrenPreparation.push(currentAncestor);
-    }
-
-    for (let i = ancestorsNeedingChildrenPreparation.length - 1; i >= 0; i--) {
-      const ancestorNodeIndex = ancestorsNeedingChildrenPreparation[i];
-      this._prepareChildrenOfNode(ancestorNodeIndex);
-    }
-    return this._prepareChildrenOfNode(nodeIndex);
-  }
-
   getChildren(nodeIndex: CallNodeIndex): CallNodeChildren {
     const children = this._children.get(nodeIndex);
     if (children !== undefined) {
       return children;
     }
 
-    return this._prepareChildrenUpToPreparedAncestor(nodeIndex);
-  }
-
-  _getNodeInfo(nodeIndex: CallNodeIndex): MyInvertedCallTreeNodeInfo {
-    const nodeInfo = this._nodeInfo.get(nodeIndex);
-    if (nodeInfo !== undefined) {
-      return nodeInfo;
-    }
-    const parent = ensureExists(
-      this._callNodeInfo.getParentCallNodeIndex(nodeIndex),
-      'Roots are always present in _nodeInfo'
-    );
-    this._prepareChildrenUpToPreparedAncestor(parent);
-    return ensureExists(
-      this._nodeInfo.get(nodeIndex),
-      'Preparing the children of our parent should have created our entry in _nodeInfo'
-    );
+    return this._prepareChildrenOfNode(nodeIndex);
   }
 
   _getTotal(nodeIndex: CallNodeIndex): number {
-    const nodeInfo = this._getNodeInfo(nodeIndex);
-    switch (nodeInfo.type) {
-      case 'ROOT':
-        return nodeInfo.rootNode.total;
-      case 'NON_ROOT':
-        return nodeInfo.node.total;
-      default:
-        throw assertExhaustiveCheck(nodeInfo.type);
+    const total = this._totalPerNode.get(nodeIndex);
+    if (total !== undefined) {
+      return total;
     }
+    const parent = ensureExists(
+      this._callNodeInfo.getParentCallNodeIndex(nodeIndex),
+      'Roots are always present in _totalPerNode'
+    );
+    this._prepareChildrenOfNode(parent);
+    return ensureExists(
+      this._totalPerNode.get(nodeIndex),
+      'Preparing the children of our parent should have created our entry in _total'
+    );
   }
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
