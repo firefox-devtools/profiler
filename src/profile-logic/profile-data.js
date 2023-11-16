@@ -650,11 +650,6 @@ class CallNodeInfoNonInverted implements CallNodeInfo {
   }
 }
 
-type NonInvertedCallNodePair = {|
-  nodeNode: IndexIntoCallNodeTable,
-  selfNode: IndexIntoCallNodeTable,
-|};
-
 type IndexIntoInvertedCallNodeTable = number;
 
 type InvertedCallNodeTable = {|
@@ -667,7 +662,8 @@ type InvertedCallNodeTable = {|
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
   sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
-  callNodePairs: Array<NonInvertedCallNodePair[] | null>,
+  // Non-null for non-root nodes whose children haven't been prepared yet.
+  orderedCallNodes: Array<Uint32Array | null>,
   orderingIndexRangeStart: IndexIntoInvertedOrdering[],
   orderingIndexRangeEnd: IndexIntoInvertedOrdering[],
   depth: number[],
@@ -688,12 +684,12 @@ function _createInitialInvertedCallNodeTableFromRoots(
   const subcategory = [];
   const innerWindowID = [];
   const sourceFramesInlinedIntoSymbol = [];
-  const callNodePairs = [];
+  const orderedCallNodes = [];
   const depth = [];
   for (let funcIndex = 0; funcIndex < funcCount; funcIndex++) {
     prefix[funcIndex] = null;
     func[funcIndex] = funcIndex;
-    callNodePairs[funcIndex] = null;
+    orderedCallNodes[funcIndex] = null;
     depth[funcIndex] = 0;
 
     const callNodeOrderingIndexRangeStart =
@@ -779,7 +775,7 @@ function _createInitialInvertedCallNodeTableFromRoots(
     subcategory,
     innerWindowID,
     sourceFramesInlinedIntoSymbol,
-    callNodePairs,
+    orderedCallNodes,
     orderingIndexRangeStart: rootOrderingIndexRangeStartCol,
     orderingIndexRangeEnd: rootOrderingIndexRangeEndCol,
     depth,
@@ -795,6 +791,10 @@ export class CallNodeInfoInverted implements CallNodeInfo {
   _orderedSelfNodes: Uint32Array; // IndexIntoCallNodeTable[],
   _orderingIndexForSelfNode: Uint32Array; // Map<IndexIntoCallNodeTable, IndexIntoInvertedOrdering>,
   _defaultCategory: IndexIntoCategoryList;
+
+  // A scratch array of length funcTable.length, which can be used to count the
+  // number of occurrences of a function. Used for incremental sorting of call nodes.
+  _funcCountBuf: Uint32Array;
 
   // This is a Map<CallNodePathHash, IndexIntoInvertedCallNodeTable>. This map speeds up
   // the look-up process by caching every CallNodePath we handle which avoids
@@ -812,7 +812,8 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     orderingIndexForSelfNode: Uint32Array, // Map<IndexIntoCallNodeTable, IndexIntoInvertedOrdering>,
     rootOrderingIndexRangeStartCol: IndexIntoInvertedOrdering[],
     rootOrderingIndexRangeEndCol: IndexIntoInvertedOrdering[],
-    defaultCategory: IndexIntoCategoryList
+    defaultCategory: IndexIntoCategoryList,
+    funcCountBuf: Uint32Array
   ) {
     this._callNodeTable = callNodeTable;
     this._stackIndexToNonInvertedCallNodeIndex =
@@ -821,6 +822,8 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     this._orderingIndexForSelfNode = orderingIndexForSelfNode;
     this._defaultCategory = defaultCategory;
     this._rootCount = rootOrderingIndexRangeStartCol.length;
+    this._funcCountBuf = funcCountBuf;
+    this._funcCountBuf.fill(0);
     this._invertedCallNodeTable = _createInitialInvertedCallNodeTableFromRoots(
       callNodeTable,
       rootOrderingIndexRangeStartCol,
@@ -875,34 +878,40 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     const orderedSelfNodes = this._orderedSelfNodes;
     const orderingIndexForSelfNode = this._orderingIndexForSelfNode;
 
-    const parentNodeCallNodePairs =
-      this._getOrderedCallNodePairsForInvertedNode(parentNodeIndex);
+    const parentNodeOrderedCallNodes =
+      this._takeOrderedCallNodesForNode(parentNodeIndex);
     const parentNodeDepth = invertedCallNodeTable.depth[parentNodeIndex];
     const parentIndexRangeStart =
       invertedCallNodeTable.orderingIndexRangeStart[parentNodeIndex];
     const parentIndexRangeEnd =
       invertedCallNodeTable.orderingIndexRangeEnd[parentNodeIndex];
     if (
-      parentNodeCallNodePairs.length !==
+      parentNodeOrderedCallNodes.length !==
       parentIndexRangeEnd - parentIndexRangeStart
     ) {
       throw new Error('indexes out of sync');
     }
 
     // We need to sort the next level in [parentIndexRangeStart, parentIndexRangeEnd)
-    const funcCount = this._rootCount;
-    const childCountsPerFunc = new Uint32Array(funcCount);
+    const nextIndexPerFunc = this._funcCountBuf;
     const nodesWhichEndHere = [];
     const childrenCallNodePairsSelfCol = [];
     const childrenCallNodePairsNodeCol = [];
     const childrenCallNodePairsFuncCol = [];
 
-    for (let i = 0; i < parentNodeCallNodePairs.length; i++) {
-      const { nodeNode, selfNode } = parentNodeCallNodePairs[i];
+    const uniqueFuncs = [];
+
+    for (let i = 0; i < parentNodeOrderedCallNodes.length; i++) {
+      const selfNode = orderedSelfNodes[parentIndexRangeStart + i];
+      const nodeNode = parentNodeOrderedCallNodes[i];
       const childCallNode = callNodeTable.prefix[nodeNode];
       if (childCallNode !== -1) {
         const func = callNodeTable.func[childCallNode];
-        childCountsPerFunc[func]++;
+        const previousCountForThisFunc = nextIndexPerFunc[func];
+        nextIndexPerFunc[func] = previousCountForThisFunc + 1;
+        if (previousCountForThisFunc === 0) {
+          uniqueFuncs.push(func);
+        }
         childrenCallNodePairsSelfCol.push(selfNode);
         childrenCallNodePairsNodeCol.push(childCallNode);
         childrenCallNodePairsFuncCol.push(func);
@@ -911,13 +920,14 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       }
     }
 
-    const nextIndexPerFunc = new Uint32Array(funcCount);
-    const childNodesFuncCol = [];
-    const childNodesIndexRangeStartCol = [];
-    const childNodesIndexRangeEndCol = [];
+    const childNodesFuncCol = new Uint32Array(uniqueFuncs);
+    childNodesFuncCol.sort();
+    const childNodesIndexRangeStartCol = new Uint32Array(uniqueFuncs.length);
+    const childNodesIndexRangeEndCol = new Uint32Array(uniqueFuncs.length);
     let previousEndIndex = 0;
-    for (let func = 0; func < funcCount - 1; func++) {
-      const count = childCountsPerFunc[func];
+    for (let i = 0; i < childNodesFuncCol.length; i++) {
+      const func = childNodesFuncCol[i];
+      const count = nextIndexPerFunc[func];
       if (count === 0) {
         continue;
       }
@@ -926,18 +936,10 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       const endIndex = previousEndIndex + count;
       nextIndexPerFunc[func] = startIndex;
 
-      childNodesFuncCol.push(func);
-      childNodesIndexRangeStartCol.push(previousEndIndex);
-      childNodesIndexRangeEndCol.push(endIndex);
+      childNodesIndexRangeStartCol[i] = startIndex;
+      childNodesIndexRangeEndCol[i] = endIndex;
 
       previousEndIndex = endIndex;
-    }
-
-    for (let i = 0; i < nodesWhichEndHere.length; i++) {
-      const selfNode = nodesWhichEndHere[i];
-      const orderingIndex = parentIndexRangeStart + i;
-      orderingIndexForSelfNode[selfNode] = orderingIndex;
-      orderedSelfNodes[orderingIndex] = selfNode;
     }
 
     const childRangeStart = parentIndexRangeStart + nodesWhichEndHere.length;
@@ -946,19 +948,37 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       throw new Error('indexes out of sync');
     }
 
-    const sortedChildrenCallNodePairsNodeCol = new Uint32Array(
-      childRangeLength
-    );
+    // BEGIN Apply new ordering. Warning: Between here and "END Apply new ordering",
+    // orderingIndexForSelfNode and orderedSelfNodes will be in an inconsistent state.
 
+    // First, apply the new ordering to nodesWhichEndHere.
+    for (let i = 0; i < nodesWhichEndHere.length; i++) {
+      const selfNode = nodesWhichEndHere[i];
+      const orderingIndex = parentIndexRangeStart + i;
+      orderingIndexForSelfNode[selfNode] = orderingIndex;
+      orderedSelfNodes[orderingIndex] = selfNode;
+    }
+
+    // Then, apply the new ordering to childrenCallNodePairs.
+    const orderedCallNodesForChildren = new Uint32Array(childRangeLength);
     for (let i = 0; i < childrenCallNodePairsFuncCol.length; i++) {
       const func = childrenCallNodePairsFuncCol[i];
       const index = nextIndexPerFunc[func]++;
       const selfNode = childrenCallNodePairsSelfCol[i];
-      sortedChildrenCallNodePairsNodeCol[index] =
-        childrenCallNodePairsNodeCol[i];
+      orderedCallNodesForChildren[index] = childrenCallNodePairsNodeCol[i];
       const orderingIndex = childRangeStart + index;
       orderingIndexForSelfNode[selfNode] = orderingIndex;
       orderedSelfNodes[orderingIndex] = selfNode;
+    }
+
+    // END apply new ordering.
+    // The new ordering has been applied, and orderingIndexForSelfNode and
+    // orderedSelfNodes are well-defined bijections again.
+
+    // Clear nextIndexPerFunc so that we don't need to clear it next time when we reuse it.
+    for (let i = 0; i < childNodesFuncCol.length; i++) {
+      const func = childNodesFuncCol[i];
+      nextIndexPerFunc[func] = 0;
     }
 
     const childCallNodes = [];
@@ -969,27 +989,15 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       const orderingIndexRangeStart = childRangeStart + indexRangeStart;
       const orderingIndexRangeEnd = childRangeStart + indexRangeEnd;
 
-      const firstNodeNode = sortedChildrenCallNodePairsNodeCol[indexRangeStart];
-      const firstSelfNode = orderedSelfNodes[orderingIndexRangeStart];
+      const firstNodeNode = orderedCallNodesForChildren[indexRangeStart];
       let currentCategory = callNodeTable.category[firstNodeNode];
       let currentSubcategory = callNodeTable.subcategory[firstNodeNode];
       const currentInnerWindowID = callNodeTable.innerWindowID[firstNodeNode];
       let currentSourceFramesInlinedIntoSymbol =
         callNodeTable.sourceFramesInlinedIntoSymbol[firstNodeNode];
-      const orderedCallNodePairs = [];
-      orderedCallNodePairs.push({
-        nodeNode: firstNodeNode,
-        selfNode: firstSelfNode,
-      });
 
       for (let index = indexRangeStart + 1; index < indexRangeEnd; index++) {
-        const nodeNode = sortedChildrenCallNodePairsNodeCol[index];
-        const orderingIndex = childRangeStart + index;
-        const selfNode = orderedSelfNodes[orderingIndex];
-        orderedCallNodePairs.push({
-          nodeNode,
-          selfNode,
-        });
+        const nodeNode = orderedCallNodesForChildren[index];
 
         // Resolve category conflicts, by resetting a conflicting subcategory or
         // category to the default category.
@@ -1018,12 +1026,10 @@ export class CallNodeInfoInverted implements CallNodeInfo {
         // FIXME: Resolve conflicts of InnerWindowID
       }
 
-      if (
-        orderedCallNodePairs.length !==
-        orderingIndexRangeEnd - orderingIndexRangeStart
-      ) {
-        throw new Error('indexes out of sync');
-      }
+      const orderedCallNodes = orderedCallNodesForChildren.subarray(
+        indexRangeStart,
+        indexRangeEnd
+      );
 
       const newIndex = invertedCallNodeTable.length++;
 
@@ -1034,7 +1040,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       invertedCallNodeTable.innerWindowID[newIndex] = currentInnerWindowID;
       invertedCallNodeTable.sourceFramesInlinedIntoSymbol[newIndex] =
         currentSourceFramesInlinedIntoSymbol;
-      invertedCallNodeTable.callNodePairs[newIndex] = orderedCallNodePairs;
+      invertedCallNodeTable.orderedCallNodes[newIndex] = orderedCallNodes;
       invertedCallNodeTable.orderingIndexRangeStart[newIndex] =
         orderingIndexRangeStart;
       invertedCallNodeTable.orderingIndexRangeEnd[newIndex] =
@@ -1105,28 +1111,27 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     );
   }
 
-  _getOrderedCallNodePairsForInvertedNode(
+  _takeOrderedCallNodesForNode(
     nodeIndex: IndexIntoInvertedCallNodeTable
-  ): NonInvertedCallNodePair[] {
+  ): Uint32Array {
     if (nodeIndex < this._rootCount) {
       // This is a root.
       const rangeStart =
         this._invertedCallNodeTable.orderingIndexRangeStart[nodeIndex];
       const rangeEnd =
         this._invertedCallNodeTable.orderingIndexRangeEnd[nodeIndex];
-      const pairs = [];
-      for (let i = rangeStart; i < rangeEnd; i++) {
-        const selfNode = this._orderedSelfNodes[i];
-        pairs.push({ selfNode, nodeNode: selfNode });
-      }
-      return pairs;
+      return this._orderedSelfNodes.subarray(rangeStart, rangeEnd);
     }
 
     // nodeIndex is a non-root node.
-    return ensureExists(
-      this._invertedCallNodeTable.callNodePairs[nodeIndex],
-      'For all non-root nodes, we should have a non-null callNodePairs value'
+    const orderedCallNodes = ensureExists(
+      this._invertedCallNodeTable.orderedCallNodes[nodeIndex],
+      '_takeOrderedCallNodesForNode should only be called once for each node, and only after its parent prepared its children.'
     );
+    // Null it out, because we won't need it any more and because the order will
+    // be stale.
+    this._invertedCallNodeTable.orderedCallNodes[nodeIndex] = null;
+    return orderedCallNodes;
   }
 
   // This function returns a CallNodePath from a CallNodeIndex.
@@ -1263,15 +1268,17 @@ export function getInvertedCallNodeInfo(
   const callNodeTableFuncCol = nonInvertedCallNodeTable.func;
 
   // Compute, per func, how many non-inverted call nodes end in this func
-  const funcCounts = new Uint32Array(funcTable.length);
+  const nextIndexPerFunc = new Uint32Array(funcTable.length);
   for (let i = 0; i < callNodeTableFuncCol.length; i++) {
     const func = callNodeTableFuncCol[i];
-    funcCounts[func]++;
+    nextIndexPerFunc[func]++;
   }
   // Compute cumulative start index
-  const nextIndexPerFunc = new Uint32Array(funcTable.length);
-  for (let func = 1; func < funcCounts.length; func++) {
-    nextIndexPerFunc[func] = nextIndexPerFunc[func - 1] + funcCounts[func - 1];
+  let previousEndIndex = 0;
+  for (let func = 0; func < nextIndexPerFunc.length; func++) {
+    const count = nextIndexPerFunc[func];
+    nextIndexPerFunc[func] = previousEndIndex;
+    previousEndIndex += count;
   }
   const orderingIndexForSelfNode = new Uint32Array(callNodeTableFuncCol.length);
   for (let i = 0; i < callNodeTableFuncCol.length; i++) {
@@ -1298,7 +1305,8 @@ export function getInvertedCallNodeInfo(
     orderingIndexForSelfNode,
     rootOrderingIndexRangeStartCol,
     rootOrderingIndexRangeEndCol,
-    defaultCategory
+    defaultCategory,
+    nextIndexPerFunc
   );
 }
 
