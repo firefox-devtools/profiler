@@ -864,9 +864,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
 
   _prepareChildrenOfNode(
     parentNodeIndex: IndexIntoInvertedCallNodeTable,
-    parentNodeCallPathHash: string,
-    parentNodeCallNodePairs: NonInvertedCallNodePair[],
-    parentNodeDepth: number
+    parentNodeCallPathHash: string
   ): IndexIntoInvertedCallNodeTable[] {
     if (this._children.has(parentNodeIndex)) {
       throw new Error('Overwriting children!');
@@ -877,6 +875,9 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     const orderedSelfNodes = this._orderedSelfNodes;
     const orderingIndexForSelfNode = this._orderingIndexForSelfNode;
 
+    const parentNodeCallNodePairs =
+      this._getOrderedCallNodePairsForInvertedNode(parentNodeIndex);
+    const parentNodeDepth = invertedCallNodeTable.depth[parentNodeIndex];
     const parentIndexRangeStart =
       invertedCallNodeTable.orderingIndexRangeStart[parentNodeIndex];
     const parentIndexRangeEnd =
@@ -1080,24 +1081,14 @@ export class CallNodeInfoInverted implements CallNodeInfo {
         ancestorCallPath.length === 1
           ? ancestorCallPath[0]
           : ensureExists(this._cache.get(ancestorHash));
-      this._prepareChildrenOfNode(
-        ancestorNodeIndex,
-        ancestorHash,
-        this.getOrderedCallNodePairsForInvertedNode(ancestorNodeIndex),
-        ancestorCallPath.length - 1
-      );
+      this._prepareChildrenOfNode(ancestorNodeIndex, ancestorHash);
     }
     const nodePathHash = hashPath(callPath);
     const nodeIndex =
       callPath.length === 1
         ? callPath[0]
         : ensureExists(this._cache.get(nodePathHash));
-    return this._prepareChildrenOfNode(
-      nodeIndex,
-      nodePathHash,
-      this.getOrderedCallNodePairsForInvertedNode(nodeIndex),
-      callPath.length - 1
-    );
+    return this._prepareChildrenOfNode(nodeIndex, nodePathHash);
   }
 
   getChildren(
@@ -1110,13 +1101,11 @@ export class CallNodeInfoInverted implements CallNodeInfo {
 
     return this._prepareChildrenOfNode(
       nodeIndex,
-      hashPath(this.getCallNodePathFromIndex(nodeIndex)),
-      this.getOrderedCallNodePairsForInvertedNode(nodeIndex),
-      this.depthForNode(nodeIndex)
+      hashPath(this.getCallNodePathFromIndex(nodeIndex))
     );
   }
 
-  getOrderedCallNodePairsForInvertedNode(
+  _getOrderedCallNodePairsForInvertedNode(
     nodeIndex: IndexIntoInvertedCallNodeTable
   ): NonInvertedCallNodePair[] {
     if (nodeIndex < this._rootCount) {
