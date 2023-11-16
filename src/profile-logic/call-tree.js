@@ -788,32 +788,37 @@ export class CallTreeInverted implements CallTree {
       return [];
     }
 
-    const unpackedCallNodes =
-      this._callNodeInfo.getOrderedCallNodePairsForInvertedNode(callNodeIndex);
+    const nodeDistanceFromSelf = this._callNodeInfo.depthForNode(callNodeIndex);
+    const [rangeStart, rangeEnd] =
+      this._callNodeInfo.getOrderingIndexRangeForNode(callNodeIndex);
+    const orderedCallNodes = this._callNodeInfo.getOrderedSelfNodes();
 
     // Find the nodeNode in unpackedCallNodes with the highest self time.
-    let heaviestNonInvertedNode = -1;
+    let heaviestNonInvertedSelfNode = -1;
     let heaviestNonInvertedNodeSelf = 0;
-    for (let i = 0; i < unpackedCallNodes.length; i++) {
-      const { selfNode, nodeNode } = unpackedCallNodes[i];
+    for (let i = rangeStart; i < rangeEnd; i++) {
+      const selfNode = orderedCallNodes[i];
       const nodeSelf = this._callNodeSelf[selfNode];
       if (
-        heaviestNonInvertedNode === -1 ||
+        heaviestNonInvertedSelfNode === -1 ||
         nodeSelf > heaviestNonInvertedNodeSelf
       ) {
-        heaviestNonInvertedNode = nodeNode;
+        heaviestNonInvertedSelfNode = selfNode;
         heaviestNonInvertedNodeSelf = nodeSelf;
       }
     }
 
-    // Turn the found node into a call path that's valid in the non-inverted tree.
     const callPath = [];
     for (
-      let currentNode = heaviestNonInvertedNode;
+      let currentNode = heaviestNonInvertedSelfNode,
+        currentDistanceFromSelf = 0;
       currentNode !== -1;
-      currentNode = this._nonInvertedCallNodeTable.prefix[currentNode]
+      currentNode = this._nonInvertedCallNodeTable.prefix[currentNode],
+        currentDistanceFromSelf++
     ) {
-      callPath.push(this._nonInvertedCallNodeTable.func[currentNode]);
+      if (currentDistanceFromSelf >= nodeDistanceFromSelf) {
+        callPath.push(this._nonInvertedCallNodeTable.func[currentNode]);
+      }
     }
     return callPath.reverse();
   }
