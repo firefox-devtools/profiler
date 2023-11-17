@@ -38,6 +38,10 @@ export function concatHash(hash: string, extraFunc: IndexIntoFuncTable): string 
   return hash + '-' + extraFunc;
 }
 
+export function hashPathSingleFunc(func: IndexIntoFuncTable): string {
+  return '' + func;
+}
+
 // This class implements all of the methods of the native Set, but provides a
 // unique list of CallNodePaths. These paths can be different objects, but as
 // long as they contain the same data, they are considered to be the same.

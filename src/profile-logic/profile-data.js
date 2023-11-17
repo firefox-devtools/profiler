@@ -23,7 +23,11 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import { hashPath, concatHash } from 'firefox-profiler/utils/path';
+import {
+  hashPath,
+  concatHash,
+  hashPathSingleFunc,
+} from 'firefox-profiler/utils/path';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
@@ -655,6 +659,7 @@ type IndexIntoInvertedCallNodeTable = number;
 type InvertedCallNodeTable = {|
   prefix: Array<IndexIntoInvertedCallNodeTable | null>,
   func: IndexIntoFuncTable[], // IndexIntoCallNodeTable -> IndexIntoFuncTable
+  pathHash: string[],
   category: IndexIntoCategoryList[], // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: IndexIntoSubcategoryListForCategory[], // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: InnerWindowID[], // IndexIntoCallNodeTable -> InnerWindowID
@@ -680,6 +685,7 @@ function _createInitialInvertedCallNodeTableFromRoots(
   const funcCount = rootOrderingIndexRangeStartCol.length;
   const prefix = [];
   const func = [];
+  const pathHash = [];
   const category = [];
   const subcategory = [];
   const innerWindowID = [];
@@ -689,6 +695,7 @@ function _createInitialInvertedCallNodeTableFromRoots(
   for (let funcIndex = 0; funcIndex < funcCount; funcIndex++) {
     prefix[funcIndex] = null;
     func[funcIndex] = funcIndex;
+    pathHash[funcIndex] = hashPathSingleFunc(funcIndex);
     orderedCallNodes[funcIndex] = null;
     depth[funcIndex] = 0;
 
@@ -771,6 +778,7 @@ function _createInitialInvertedCallNodeTableFromRoots(
   return {
     prefix,
     func,
+    pathHash,
     category,
     subcategory,
     innerWindowID,
@@ -782,6 +790,13 @@ function _createInitialInvertedCallNodeTableFromRoots(
     length: funcCount,
   };
 }
+
+type PreparedChildrenAndSpecialChild = {|
+  // The node indexes in the inverted tree of this node's children.
+  childCallNodes: IndexIntoInvertedCallNodeTable[],
+  // The node index of the child corresponding to specialChildFunc, if found.
+  specialChild: IndexIntoInvertedCallNodeTable | null,
+|};
 
 export class CallNodeInfoInverted implements CallNodeInfo {
   _callNodeTable: CallNodeTable;
@@ -821,16 +836,21 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     this._orderedSelfNodes = orderedSelfNodes;
     this._orderingIndexForSelfNode = orderingIndexForSelfNode;
     this._defaultCategory = defaultCategory;
-    this._rootCount = rootOrderingIndexRangeStartCol.length;
+    const rootCount = rootOrderingIndexRangeStartCol.length;
+    this._rootCount = rootCount;
     this._funcCountBuf = funcCountBuf;
     this._funcCountBuf.fill(0);
-    this._invertedCallNodeTable = _createInitialInvertedCallNodeTableFromRoots(
+    const invertedCallNodeTable = _createInitialInvertedCallNodeTableFromRoots(
       callNodeTable,
       rootOrderingIndexRangeStartCol,
       rootOrderingIndexRangeEndCol,
       orderedSelfNodes,
       defaultCategory
     );
+    this._invertedCallNodeTable = invertedCallNodeTable;
+    for (let i = 0; i < rootCount; i++) {
+      this._cache.set(invertedCallNodeTable.pathHash[i], i);
+    }
   }
 
   isInverted(): boolean {
@@ -865,14 +885,10 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return [rangeStart, rangeEnd];
   }
 
-  _prepareChildrenOfNode(
+  _createChildren(
     parentNodeIndex: IndexIntoInvertedCallNodeTable,
-    parentNodeCallPathHash: string
-  ): IndexIntoInvertedCallNodeTable[] {
-    if (this._children.has(parentNodeIndex)) {
-      throw new Error('Overwriting children!');
-    }
-
+    specialChildFunc: IndexIntoFuncTable | null
+  ): PreparedChildrenAndSpecialChild {
     const invertedCallNodeTable = this._invertedCallNodeTable;
     const callNodeTable = this._callNodeTable;
     const orderedSelfNodes = this._orderedSelfNodes;
@@ -880,7 +896,6 @@ export class CallNodeInfoInverted implements CallNodeInfo {
 
     const parentNodeOrderedCallNodes =
       this._takeOrderedCallNodesForNode(parentNodeIndex);
-    const parentNodeDepth = invertedCallNodeTable.depth[parentNodeIndex];
     const parentIndexRangeStart =
       invertedCallNodeTable.orderingIndexRangeStart[parentNodeIndex];
     const parentIndexRangeEnd =
@@ -981,7 +996,12 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       nextIndexPerFunc[func] = 0;
     }
 
+    const parentNodeCallPathHash =
+      invertedCallNodeTable.pathHash[parentNodeIndex];
+    const childrenDepth = invertedCallNodeTable.depth[parentNodeIndex] + 1;
+
     const childCallNodes = [];
+    let specialChild = null; // will be set to the index corresponding to specialChildFunc
     for (let i = 0; i < childNodesFuncCol.length; i++) {
       const func = childNodesFuncCol[i];
       const indexRangeStart = childNodesIndexRangeStartCol[i];
@@ -1033,8 +1053,10 @@ export class CallNodeInfoInverted implements CallNodeInfo {
 
       const newIndex = invertedCallNodeTable.length++;
 
+      const pathHash = concatHash(parentNodeCallPathHash, func);
       invertedCallNodeTable.prefix[newIndex] = parentNodeIndex;
       invertedCallNodeTable.func[newIndex] = func;
+      invertedCallNodeTable.pathHash[newIndex] = pathHash;
       invertedCallNodeTable.category[newIndex] = currentCategory;
       invertedCallNodeTable.subcategory[newIndex] = currentSubcategory;
       invertedCallNodeTable.innerWindowID[newIndex] = currentInnerWindowID;
@@ -1045,70 +1067,81 @@ export class CallNodeInfoInverted implements CallNodeInfo {
         orderingIndexRangeStart;
       invertedCallNodeTable.orderingIndexRangeEnd[newIndex] =
         orderingIndexRangeEnd;
-      invertedCallNodeTable.depth[newIndex] = parentNodeDepth + 1;
+      invertedCallNodeTable.depth[newIndex] = childrenDepth;
       childCallNodes.push(newIndex);
 
-      const pathHash = concatHash(parentNodeCallPathHash, func);
       this._cache.set(pathHash, newIndex);
+
+      if (func === specialChildFunc) {
+        specialChild = newIndex;
+      }
     }
     this._children.set(parentNodeIndex, childCallNodes);
-    return childCallNodes;
+    return { childCallNodes, specialChild };
   }
 
-  _prepareChildrenUpToPreparedAncestor(
+  _getChildWithFunc(
+    childrenSortedByFunc: IndexIntoInvertedCallNodeTable[],
+    func: IndexIntoFuncTable
+  ): IndexIntoInvertedCallNodeTable | null {
+    // TODO: Use bisection
+    for (let i = 0; i < childrenSortedByFunc.length; i++) {
+      const childNodeIndex = childrenSortedByFunc[i];
+      if (this._invertedCallNodeTable.func[childNodeIndex] === func) {
+        return childNodeIndex;
+      }
+    }
+    return null;
+  }
+
+  _getOrCreateChildren(
+    parent: IndexIntoInvertedCallNodeTable,
+    specialChildFunc: IndexIntoFuncTable | null
+  ): PreparedChildrenAndSpecialChild {
+    const childCallNodes = this._children.get(parent);
+    if (childCallNodes === undefined) {
+      return this._createChildren(parent, specialChildFunc);
+    }
+
+    const specialChild =
+      specialChildFunc !== null
+        ? this._getChildWithFunc(childCallNodes, specialChildFunc)
+        : null;
+    return { childCallNodes, specialChild };
+  }
+
+  _findDeepestKnownAncestor(
     callPath: CallNodePath
-  ): IndexIntoInvertedCallNodeTable[] {
-    if (callPath.length === 0) {
-      throw new Error(
-        'Invalid call path in _prepareChildrenUpToPreparedAncestor'
-      );
+  ): IndexIntoInvertedCallNodeTable {
+    const completePathNode = this._cache.get(hashPath(callPath));
+    if (completePathNode !== undefined) {
+      return completePathNode;
     }
 
-    // Find the first ancestor node for which we have an index.
-    // Roots are always present, so this search will terminate.
-    // Then prepare children of all the encountered nodes on the way to that
-    // cached ancestor, from root-most up to nodeIndex's parent.
-    let currentAncestorCallPath = callPath;
-    let currentDepth = callPath.length - 1;
-    const ancestorsNeedingChildrenPreparation = [];
-    while (
-      currentDepth > 0 &&
-      !this._cache.has(hashPath(currentAncestorCallPath))
-    ) {
-      currentAncestorCallPath = currentAncestorCallPath.slice(0, currentDepth);
-      currentDepth--;
-      ancestorsNeedingChildrenPreparation.push(currentAncestorCallPath);
+    let bestNode = callPath[0];
+    let remainingDepthRangeStart = 1;
+    let remainingDepthRangeEnd = callPath.length - 1;
+    while (remainingDepthRangeStart < remainingDepthRangeEnd) {
+      const currentDepth =
+        (remainingDepthRangeStart + remainingDepthRangeEnd) >> 1;
+      // assert(currentDepth < remainingDepthRangeEnd);
+      const currentPartialPath = callPath.slice(0, currentDepth + 1);
+      const currentNode = this._cache.get(hashPath(currentPartialPath));
+      if (currentNode !== undefined) {
+        bestNode = currentNode;
+        remainingDepthRangeStart = currentDepth + 1;
+      } else {
+        remainingDepthRangeEnd = currentDepth;
+      }
     }
-
-    for (let i = ancestorsNeedingChildrenPreparation.length - 1; i >= 0; i--) {
-      const ancestorCallPath = ancestorsNeedingChildrenPreparation[i];
-      const ancestorHash = hashPath(ancestorCallPath);
-      const ancestorNodeIndex =
-        ancestorCallPath.length === 1
-          ? ancestorCallPath[0]
-          : ensureExists(this._cache.get(ancestorHash));
-      this._prepareChildrenOfNode(ancestorNodeIndex, ancestorHash);
-    }
-    const nodePathHash = hashPath(callPath);
-    const nodeIndex =
-      callPath.length === 1
-        ? callPath[0]
-        : ensureExists(this._cache.get(nodePathHash));
-    return this._prepareChildrenOfNode(nodeIndex, nodePathHash);
+    return bestNode;
   }
 
   getChildren(
     nodeIndex: IndexIntoInvertedCallNodeTable
   ): IndexIntoInvertedCallNodeTable[] {
-    const children = this._children.get(nodeIndex);
-    if (children !== undefined) {
-      return children;
-    }
-
-    return this._prepareChildrenOfNode(
-      nodeIndex,
-      hashPath(this.getCallNodePathFromIndex(nodeIndex))
-    );
+    const { childCallNodes } = this._getOrCreateChildren(nodeIndex, null);
+    return childCallNodes;
   }
 
   _takeOrderedCallNodesForNode(
@@ -1173,19 +1206,27 @@ export class CallNodeInfoInverted implements CallNodeInfo {
       return callNodePath[0]; // For roots, IndexIntoFuncTable === IndexIntoInvertedCallNodeTable
     }
 
-    const cachedIndex = this._cache.get(hashPath(callNodePath));
-    if (cachedIndex !== undefined) {
-      return cachedIndex;
-    }
+    const pathDepth = callNodePath.length - 1;
+    let deepestKnownAncestor = this._findDeepestKnownAncestor(callNodePath);
+    let deepestKnownAncestorDepth =
+      this._invertedCallNodeTable.depth[deepestKnownAncestor];
 
-    const parentPath = callNodePath.slice(0, callNodePath.length - 1);
-    const childFunc = callNodePath[callNodePath.length - 1];
-    this._prepareChildrenUpToPreparedAncestor(parentPath);
-    const parentIndex =
-      parentPath.length === 1
-        ? parentPath[0]
-        : ensureExists(this._cache.get(hashPath(parentPath)));
-    return this.getCallNodeIndexFromParentAndFunc(parentIndex, childFunc);
+    while (deepestKnownAncestorDepth < pathDepth) {
+      const currentChildFunc = callNodePath[deepestKnownAncestorDepth + 1];
+      const { specialChild } = this._getOrCreateChildren(
+        deepestKnownAncestor,
+        currentChildFunc
+      );
+      if (specialChild === null) {
+        // No child matches the func we were looking for.
+        // This can happen when the provided call path doesn't exist. In that case
+        // we return null.
+        return null;
+      }
+      deepestKnownAncestor = specialChild;
+      deepestKnownAncestorDepth++;
+    }
+    return deepestKnownAncestor;
   }
 
   // Returns the CallNodeIndex that matches the function `func` and whose parent's
@@ -1197,15 +1238,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     if (parent === -1) {
       return func; // For roots, IndexIntoFuncTable === IndexIntoInvertedCallNodeTable
     }
-    const children = this.getChildren(parent);
-    // TODO: Use bisection
-    for (let i = 0; i < children.length; i++) {
-      const childNodeIndex = children[i];
-      if (this._invertedCallNodeTable.func[childNodeIndex] === func) {
-        return childNodeIndex;
-      }
-    }
-    return null;
+    return this._getOrCreateChildren(parent, func).specialChild;
   }
 
   getParentCallNodeIndex(
