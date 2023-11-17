@@ -1257,18 +1257,16 @@ type CallNodeInfoComponents = {
 };
 
 export function getInvertedCallNodeInfo(
-  thread: Thread,
   nonInvertedCallNodeTable: CallNodeTable,
   stackIndexToNonInvertedCallNodeIndex: Int32Array,
-  defaultCategory: IndexIntoCategoryList
+  defaultCategory: IndexIntoCategoryList,
+  funcCount: number
 ): CallNodeInfo {
-  const { funcTable } = thread;
-
   const orderedSelfNodes = new Uint32Array(nonInvertedCallNodeTable.length);
   const callNodeTableFuncCol = nonInvertedCallNodeTable.func;
 
   // Compute, per func, how many non-inverted call nodes end in this func
-  const nextIndexPerFunc = new Uint32Array(funcTable.length);
+  const nextIndexPerFunc = new Uint32Array(funcCount);
   for (let i = 0; i < callNodeTableFuncCol.length; i++) {
     const func = callNodeTableFuncCol[i];
     nextIndexPerFunc[func]++;
@@ -1288,15 +1286,15 @@ export function getInvertedCallNodeInfo(
     orderingIndexForSelfNode[i] = nextIndex;
   }
 
-  const rootOrderingIndexRangeStartCol = new Array(funcTable.length);
-  const rootOrderingIndexRangeEndCol = new Array(funcTable.length);
+  const rootOrderingIndexRangeStartCol = new Array(funcCount);
+  const rootOrderingIndexRangeEndCol = new Array(funcCount);
   rootOrderingIndexRangeStartCol[0] = 0;
-  for (let func = 0; func < funcTable.length - 1; func++) {
+  for (let func = 0; func < funcCount - 1; func++) {
     const endIndex = nextIndexPerFunc[func];
     rootOrderingIndexRangeEndCol[func] = endIndex;
     rootOrderingIndexRangeStartCol[func + 1] = endIndex;
   }
-  rootOrderingIndexRangeEndCol[funcTable.length - 1] = orderedSelfNodes.length;
+  rootOrderingIndexRangeEndCol[funcCount - 1] = orderedSelfNodes.length;
 
   return new CallNodeInfoInverted(
     nonInvertedCallNodeTable,

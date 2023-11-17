@@ -1226,10 +1226,10 @@ describe('getNativeSymbolsForCallNode', function () {
       defaultCategory
     );
     const callNodeInfo = getInvertedCallNodeInfo(
-      thread,
       nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
       nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
-      defaultCategory
+      defaultCategory,
+      thread.funcTable.length
     );
     const c = callNodeInfo.getCallNodeIndexFromPath([funC]);
     expect(c).not.toBeNull();

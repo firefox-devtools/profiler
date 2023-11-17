@@ -166,10 +166,10 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     );
     const callNodeInfo = isInverted
       ? getInvertedCallNodeInfo(
-          thread,
           nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
           nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
-          defaultCat
+          defaultCat,
+          funcTable.length
         )
       : nonInvertedCallNodeInfo;
     const callNodeIndex = ensureExists(

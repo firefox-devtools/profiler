@@ -115,19 +115,19 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getCallNodeInfo: Selector<CallNodeInfo> =
     createSelectorWithTwoCacheSlots(
-      threadSelectors.getFilteredThread,
       getNonInvertedCallNodeInfo,
       UrlState.getInvertCallstack,
       ProfileSelectors.getDefaultCategory,
-      (thread, nonInvertedCallNodeInfo, invertCallStack, defaultCategory) => {
+      (state) => threadSelectors.getFilteredThread(state).funcTable.length,
+      (nonInvertedCallNodeInfo, invertCallStack, defaultCategory, funcCount) => {
         if (!invertCallStack) {
           return nonInvertedCallNodeInfo;
         }
         return ProfileData.getInvertedCallNodeInfo(
-          thread,
           nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
           nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
-          defaultCategory
+          defaultCategory,
+          funcCount
         );
       }
     );
