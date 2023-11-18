@@ -46,21 +46,23 @@ export type CallNodeSelfAndSummary = {|
 |};
 
 export type CallTreeTimingsNonInverted = {
-  callNodeChildCount: Uint32Array,
+  callNodeHasChildren: Uint8Array,
   callNodeSummary: CallNodeSummary,
   rootCount: number,
   rootTotalSummary: number,
 };
 
-export type InvertedCallTreeRootWithTotal = {|
-  total: number,
+type TotalAndHasChildren = {| total: number, hasChildren: boolean |};
+
+export type InvertedCallTreeRoot = {|
+  totalAndHasChildren: TotalAndHasChildren,
   func: IndexIntoFuncTable,
 |};
 
 export type CallTreeTimingsInverted = {|
   callNodeSelf: Float32Array,
   rootTotalSummary: number,
-  sortedRoots: InvertedCallTreeRootWithTotal[],
+  sortedRoots: InvertedCallTreeRoot[],
 |};
 
 export type CallTreeTimings =
@@ -96,6 +98,7 @@ export interface CallTree extends Tree<CallNodeDisplayData> {
 
 interface CallTreeInternal {
   getRoots(): CallNodeChildren;
+  hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean;
   createChildren(nodeIndex: IndexIntoCallNodeTable): CallNodeChildren;
   getTotal(nodeIndex: IndexIntoCallNodeTable): number;
   findHeaviestPathInSubtree(
@@ -107,29 +110,29 @@ class CallTreeInternalRegular implements CallTreeInternal {
   _callNodeInfo: CallNodeInfo;
   _callNodeTable: CallNodeTable;
   _callNodeSummary: CallNodeSummary;
-  _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
+  _callNodeHasChildren: Uint8Array; // A table column matching the callNodeTable
 
   constructor(
     callNodeInfo: CallNodeInfo,
     callNodeSummary: CallNodeSummary,
-    callNodeChildCount: Uint32Array
+    callNodeHasChildren: Uint8Array
   ) {
     this._callNodeInfo = callNodeInfo;
     this._callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     this._callNodeSummary = callNodeSummary;
-    this._callNodeChildCount = callNodeChildCount;
+    this._callNodeHasChildren = callNodeHasChildren;
   }
 
   getRoots(): CallNodeChildren {
     return this._createChildrenFromFirstChild(0);
   }
 
+  hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
+    return this._callNodeHasChildren[callNodeIndex] !== 0;
+  }
+
   createChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
-    if (
-      this._callNodeTable.nextAfterDescendants[callNodeIndex] ===
-      callNodeIndex + 1
-    ) {
-      // This node has no children.
+    if (!this.hasChildren(callNodeIndex)) {
       return [];
     }
     return this._createChildrenFromFirstChild(callNodeIndex + 1);
@@ -145,9 +148,9 @@ class CallTreeInternalRegular implements CallTreeInternal {
       childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
     ) {
       const childTotalSummary = this._callNodeSummary.total[childCallNodeIndex];
-      const childChildCount = this._callNodeChildCount[childCallNodeIndex];
+      const childHasChildren = this._callNodeHasChildren[childCallNodeIndex];
 
-      if (childTotalSummary !== 0 || childChildCount !== 0) {
+      if (childTotalSummary !== 0 || childHasChildren !== 0) {
         children.push(childCallNodeIndex);
       }
     }
@@ -189,7 +192,7 @@ export class CallTreeInternalInverted implements CallTreeInternal {
   _nonInvertedCallNodeTable: CallNodeTable;
   _callNodeSelf: Float32Array;
   _rootNodes: CallNodeIndex[];
-  _totalPerNode: Map<CallNodeIndex, number>;
+  _totalAndHasChildrenPerNode: Map<CallNodeIndex, TotalAndHasChildren>;
 
   constructor(
     callNodeInfo: ProfileData.CallNodeInfoInverted,
@@ -199,8 +202,11 @@ export class CallTreeInternalInverted implements CallTreeInternal {
     this._nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     this._callNodeSelf = callTreeTimingsInverted.callNodeSelf;
     const { sortedRoots } = callTreeTimingsInverted;
-    this._totalPerNode = new Map(
-      sortedRoots.map(({ func, total }) => [func, total])
+    this._totalAndHasChildrenPerNode = new Map(
+      sortedRoots.map(({ func, totalAndHasChildren }) => [
+        func,
+        totalAndHasChildren,
+      ])
     );
     this._rootNodes = sortedRoots.map(({ func }) => func);
   }
@@ -209,10 +215,21 @@ export class CallTreeInternalInverted implements CallTreeInternal {
     return this._rootNodes;
   }
 
+  hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
+    return this._getTotalAndHasChildren(callNodeIndex).hasChildren;
+  }
+
   createChildren(nodeIndex: CallNodeIndex): CallNodeChildren {
+    if (!this.hasChildren(nodeIndex)) {
+      return [];
+    }
+
     const children = this._callNodeInfo
       .getChildren(nodeIndex)
-      .filter((child) => this.getTotal(child) !== 0);
+      .filter((child) => {
+        const { total, hasChildren } = this._getTotalAndHasChildren(child);
+        return total !== 0 || hasChildren;
+      });
     children.sort(
       (a, b) => Math.max(this.getTotal(b)) - Math.max(this.getTotal(a))
     );
@@ -220,18 +237,22 @@ export class CallTreeInternalInverted implements CallTreeInternal {
   }
 
   getTotal(node: CallNodeIndex): number {
-    const cachedTotal = this._totalPerNode.get(node);
-    if (cachedTotal !== undefined) {
-      return cachedTotal;
+    return this._getTotalAndHasChildren(node).total;
+  }
+
+  _getTotalAndHasChildren(node: CallNodeIndex): TotalAndHasChildren {
+    const cached = this._totalAndHasChildrenPerNode.get(node);
+    if (cached !== undefined) {
+      return cached;
     }
 
-    const total = _getInvertedTreeNodeTotal(
+    const totalAndHasChildren = _getInvertedTreeNodeTotalAndHasChildren(
       node,
       this._callNodeInfo,
       this._callNodeSelf
     );
-    this._totalPerNode.set(node, total);
-    return total;
+    this._totalAndHasChildrenPerNode.set(node, totalAndHasChildren);
+    return totalAndHasChildren;
   }
 
   findHeaviestPathInSubtree(
@@ -314,7 +335,7 @@ export class CallTreeImpl implements CallTree {
   }
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
-    return this.getChildren(callNodeIndex).length !== 0;
+    return this._internal.hasChildren(callNodeIndex);
   }
 
   _addDescendantsToSet(
@@ -595,19 +616,33 @@ export function computeCallNodeSelfAndSummary(
   return { callNodeSelf, rootTotalSummary };
 }
 
-function _getInvertedTreeNodeTotal(
+function _getInvertedTreeNodeTotalAndHasChildren(
   nodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: ProfileData.CallNodeInfoInverted,
   callNodeSelf: Float32Array
-): number {
+): TotalAndHasChildren {
+  const nodeDepth = callNodeInfo.depthForNode(nodeIndex);
   const [rangeStart, rangeEnd] =
     callNodeInfo.getOrderingIndexRangeForNode(nodeIndex);
   const orderedCallNodes = callNodeInfo.getOrderedSelfNodes();
+  const callNodeTableDepthCol =
+    callNodeInfo.getNonInvertedCallNodeTable().depth;
   let total = 0;
+  let hasChildren = false;
   for (let i = rangeStart; i < rangeEnd; i++) {
-    total += callNodeSelf[orderedCallNodes[i]];
+    const selfNode = orderedCallNodes[i];
+    const self = callNodeSelf[selfNode];
+    total += self;
+
+    if (
+      !hasChildren &&
+      self !== 0 &&
+      callNodeTableDepthCol[selfNode] > nodeDepth
+    ) {
+      hasChildren = true;
+    }
   }
-  return total;
+  return { total, hasChildren };
 }
 
 export function computeCallTreeTimingsInverted(
@@ -617,12 +652,20 @@ export function computeCallTreeTimingsInverted(
   const rootCount = callNodeInfo.getRootCount();
   const sortedRoots = [];
   for (let func = 0; func < rootCount; func++) {
-    const total = _getInvertedTreeNodeTotal(func, callNodeInfo, callNodeSelf);
-    if (total !== 0) {
-      sortedRoots.push({ func, total });
+    const totalAndHasChildren = _getInvertedTreeNodeTotalAndHasChildren(
+      func,
+      callNodeInfo,
+      callNodeSelf
+    );
+    if (totalAndHasChildren.total !== 0 || totalAndHasChildren.hasChildren) {
+      sortedRoots.push({ func, totalAndHasChildren });
     }
   }
-  sortedRoots.sort((a, b) => Math.max(b.total) - Math.max(a.total));
+  sortedRoots.sort(
+    (a, b) =>
+      Math.max(b.totalAndHasChildren.total) -
+      Math.max(a.totalAndHasChildren.total)
+  );
   return {
     callNodeSelf,
     rootTotalSummary,
@@ -669,7 +712,7 @@ export function computeCallTreeTimingsNonInverted(
 
   // Compute the following variables:
   const callNodeTotalSummary = new Float32Array(callNodeTable.length);
-  const callNodeChildCount = new Uint32Array(callNodeTable.length);
+  const callNodeHasChildren = new Uint8Array(callNodeTable.length);
   let rootCount = 0;
 
   // We loop the call node table in reverse, so that we find the children
@@ -681,7 +724,7 @@ export function computeCallTreeTimingsNonInverted(
     callNodeIndex--
   ) {
     callNodeTotalSummary[callNodeIndex] += callNodeSelf[callNodeIndex];
-    const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
+    const hasChildren = callNodeHasChildren[callNodeIndex] !== 0;
     const hasTotalValue = callNodeTotalSummary[callNodeIndex] !== 0;
 
     if (!hasChildren && !hasTotalValue) {
@@ -694,7 +737,7 @@ export function computeCallTreeTimingsNonInverted(
     } else {
       callNodeTotalSummary[prefixCallNode] +=
         callNodeTotalSummary[callNodeIndex];
-      callNodeChildCount[prefixCallNode]++;
+      callNodeHasChildren[prefixCallNode] = 1;
     }
   }
 
@@ -703,7 +746,7 @@ export function computeCallTreeTimingsNonInverted(
       self: callNodeSelf,
       total: callNodeTotalSummary,
     },
-    callNodeChildCount,
+    callNodeHasChildren,
     rootTotalSummary,
     rootCount,
   };
@@ -722,7 +765,7 @@ export function getCallTree(
   return timeCode('getCallTree', () => {
     switch (callTreeTimings.type) {
       case 'NON_INVERTED': {
-        const { callNodeSummary, callNodeChildCount, rootTotalSummary } =
+        const { callNodeSummary, callNodeHasChildren, rootTotalSummary } =
           callTreeTimings.timings;
 
         return new CallTreeImpl(
@@ -732,7 +775,7 @@ export function getCallTree(
           new CallTreeInternalRegular(
             callNodeInfo,
             callNodeSummary,
-            callNodeChildCount
+            callNodeHasChildren
           ),
           rootTotalSummary,
           Boolean(thread.isJsTracer),
@@ -907,7 +950,8 @@ export function getSelfAndTotalForCallNode(
         if (root === undefined) {
           return { self: 0, total: 0 };
         }
-        return { self: root.total, total: root.total };
+        const total = root.totalAndHasChildren.total;
+        return { self: total, total };
       }
 
       // To compute the time for a non-root node in the inverted tree, sum up
