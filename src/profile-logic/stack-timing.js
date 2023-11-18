@@ -26,7 +26,7 @@ import type {
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and startDev
  * and sampleIndex times. This optimizes sample data for Stack Chart views. sampleIndext
- * makes it really easy to draw a large amount of boxes at once based on where the
+ * makes it really easy to draw a large amount of spans at once based on where the
  * viewport is in the stack frame data. Plus the endDev timings for frames need to be
  * reconstructed from the sample data, as the samples only contain startDev timings.
  *
@@ -48,7 +48,7 @@ import type {
  *
  *   {startDev: [10], endDev: [100], stack: [0]}
  *
- *   // This next object represents 3 boxes to draw, the first box being stack 1 in the
+ *   // This next object represents 3 spans to draw, the first box being stack 1 in the
  *   // stack table, and it starts at 20ms, and ends at 40ms.
  *
  *   {startDev: [20, 40, 60], endDev: [40, 60, 80], stack: [1, 2, 3]}
@@ -196,7 +196,7 @@ export function getStackTimingByDepth(
       );
 }
 
-type StackTimingOpenBox = {|
+type StackTimingOpenSpan = {|
   sampleIndex: IndexIntoSamplesTable,
   callNodeIndex: IndexIntoCallNodeTable | -1,
   startDev: DevicePixels,
@@ -223,12 +223,12 @@ export function getStackTimingByDepthNonInverted(
   const stackTimingByDepth = getEmptyStackTimingByDepth(maxDepth);
 
   // Must be called in order of decreasing depth.
-  function commitBox(
-    openBox: StackTimingOpenBox,
+  function createSpan(
+    currentSpan: StackTimingOpenSpan,
     depth: StackTimingDepth,
     currentPos: DevicePixels
   ) {
-    const { sampleIndex, startDev, callNodeIndex } = openBox;
+    const { sampleIndex, startDev, callNodeIndex } = currentSpan;
     if (startDev === currentPos) {
       return;
     }
@@ -242,8 +242,6 @@ export function getStackTimingByDepthNonInverted(
       callNodeTable.category[callNodeIndex];
     stackTimingForThisDepth.isSelectedPath[index] =
       callNodeIndex === selectedCallNode;
-    stackTimingForThisDepth.isSelectedPath[index] =
-      callNodeIndex === selectedCallNode;
     const parentIndexInPreviousRow =
       depth === 0 ? 0 : stackTimingByDepth[depth - 1].length;
     stackTimingForThisDepth.parentIndexInPreviousRow[index] =
@@ -252,7 +250,7 @@ export function getStackTimingByDepthNonInverted(
 
   let prevCallNodeIndex = null;
   let prevCallNodeDepth = -1;
-  const prevBoxByDepth: Array<StackTimingOpenBox> = Array.from(
+  const prevSpanByDepth: Array<StackTimingOpenSpan> = Array.from(
     { length: maxDepth },
     () => ({ sampleIndex: 0, callNodeIndex: -1, startDev: 0 })
   );
@@ -290,16 +288,16 @@ export function getStackTimingByDepthNonInverted(
       }
 
       if (prevCallNodeDepth !== -1) {
-        // Close boxes for current sample.
+        // Close spans for current sample.
         let currentDepth =
           currentCallNodeIndex === -1
             ? -1
             : callNodeTable.depth[currentCallNodeIndex];
 
-        // If this stack is smaller than the previous stack, close the excess boxes.
+        // If this stack is smaller than the previous stack, close the excess spans.
         while (prevCallNodeDepth > currentDepth) {
-          const openBox = prevBoxByDepth[prevCallNodeDepth];
-          commitBox(openBox, prevCallNodeDepth, currentPos);
+          const currentSpan = prevSpanByDepth[prevCallNodeDepth];
+          createSpan(currentSpan, prevCallNodeDepth, currentPos);
           prevCallNodeDepth--;
         }
 
@@ -310,15 +308,15 @@ export function getStackTimingByDepthNonInverted(
           currentDepth--;
         }
 
-        // Close all mismatching boxes. Don't open any new ones because this sample
+        // Close all mismatching spans. Don't open any new ones because this sample
         // doesn't have a width.
         while (currentDepth >= 0) {
-          const openBox = prevBoxByDepth[currentDepth];
-          if (openBox.callNodeIndex === currentCallNodeIndex) {
+          const currentSpan = prevSpanByDepth[currentDepth];
+          if (currentSpan.callNodeIndex === currentCallNodeIndex) {
             break;
           }
 
-          commitBox(openBox, currentDepth, currentPos);
+          createSpan(currentSpan, currentDepth, currentPos);
           currentCallNodeIndex =
             callNodeTablePrefixColumn[currentCallNodeIndex];
           currentDepth--;
@@ -341,50 +339,50 @@ export function getStackTimingByDepthNonInverted(
 
     // assert(currentDepth < maxDepth);
 
-    // If this stack is smaller than the previous stack, close the excess boxes.
+    // If this stack is smaller than the previous stack, close the excess spans.
     while (prevCallNodeDepth > currentDepth) {
-      const openBox = prevBoxByDepth[prevCallNodeDepth];
-      commitBox(openBox, prevCallNodeDepth, currentPos);
+      const currentSpan = prevSpanByDepth[prevCallNodeDepth];
+      createSpan(currentSpan, prevCallNodeDepth, currentPos);
       prevCallNodeDepth--;
     }
 
     const thisCallNodeIndex = currentCallNodeIndex;
     const thisCallNodeDepth = currentDepth;
 
-    // If this stack is larger than the previous stack, initialize the new boxes.
+    // If this stack is larger than the previous stack, initialize the new spans.
     while (currentDepth > prevCallNodeDepth) {
-      const openBox = prevBoxByDepth[currentDepth];
-      openBox.callNodeIndex = currentCallNodeIndex;
-      openBox.startDev = currentPos;
-      openBox.sampleIndex = sampleIndex;
+      const currentSpan = prevSpanByDepth[currentDepth];
+      currentSpan.callNodeIndex = currentCallNodeIndex;
+      currentSpan.startDev = currentPos;
+      currentSpan.sampleIndex = sampleIndex;
       currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
       currentDepth--;
     }
 
     // Now currentDepth === prevCallNodeDepth.
-    // Walk the common depth and check if the boxes differ.
+    // Walk the common depth and check if the spans differ.
 
     // First, walk the part for which the callNodeIndex has changed. Even if the
     // func in the row is unchanged, a differing callNodeIndex means that some
     // func further to the root of the stack has changed, so it wouldn't be the
     // same call to that function and we'd need to open a new box.
     while (currentDepth >= 0) {
-      const openBox = prevBoxByDepth[currentDepth];
-      if (openBox.callNodeIndex === currentCallNodeIndex) {
+      const currentSpan = prevSpanByDepth[currentDepth];
+      if (currentSpan.callNodeIndex === currentCallNodeIndex) {
         break;
       }
 
-      commitBox(openBox, currentDepth, currentPos);
-      openBox.callNodeIndex = currentCallNodeIndex;
-      openBox.startDev = currentPos;
-      openBox.sampleIndex = sampleIndex;
+      createSpan(currentSpan, currentDepth, currentPos);
+      currentSpan.callNodeIndex = currentCallNodeIndex;
+      currentSpan.startDev = currentPos;
+      currentSpan.sampleIndex = sampleIndex;
       currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
       currentDepth--;
     }
 
     // We're done with the part of the stack where the callNodeIndex per depth differs.
     // If currentDepth is still >= 0, the rest of the stack has matching call node
-    // indexes. These boxes can stay unchanged.
+    // indexes. These spans can stay unchanged.
 
     // We are done with this sample. Go to the next.
 
@@ -392,10 +390,10 @@ export function getStackTimingByDepthNonInverted(
     prevCallNodeDepth = thisCallNodeDepth;
   }
 
-  // Commit all open boxes.
+  // Commit all open spans.
   for (let depth = prevCallNodeDepth; depth >= 0; depth--) {
-    const openBox = prevBoxByDepth[depth];
-    commitBox(openBox, depth, endPos);
+    const currentSpan = prevSpanByDepth[depth];
+    createSpan(currentSpan, depth, endPos);
   }
 
   return stackTimingByDepth;
@@ -431,13 +429,14 @@ export function getStackTimingByDepthInverted(
   const stackIndexToNonInvertedCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
 
-  function commitBox(
-    openBox: StackTimingOpenBoxInverted,
+  function createSpan(
+    currentSpan: StackTimingOpenBoxInverted,
     depth: StackTimingDepth,
     currentPos: DevicePixels,
     parentBoxHasAlreadyBeenCommitted: boolean
   ) {
-    const { sampleIndex, startDev, func, category, isSelectedPath } = openBox;
+    const { sampleIndex, startDev, func, category, isSelectedPath } =
+      currentSpan;
     if (startDev === currentPos) {
       return;
     }
@@ -461,7 +460,7 @@ export function getStackTimingByDepthInverted(
   let prevCallNodeIndex = null;
   let prevCallNodeDepth = -1;
   let prevSampleWasVisible = true;
-  const prevBoxByDepth: Array<StackTimingOpenBoxInverted> = Array.from(
+  const prevSpanByDepth: Array<StackTimingOpenBoxInverted> = Array.from(
     { length: maxDepth },
     () => ({
       sampleIndex: 0,
@@ -491,10 +490,10 @@ export function getStackTimingByDepthInverted(
     }
 
     if (currentStack === null) {
-      // Commit all open boxes.
+      // Commit all open spans.
       for (let depth = 0; depth <= prevCallNodeDepth; depth++) {
-        const openBox = prevBoxByDepth[depth];
-        commitBox(openBox, depth, currentPos, true);
+        const currentSpan = prevSpanByDepth[depth];
+        createSpan(currentSpan, depth, currentPos, true);
       }
 
       prevCallNodeIndex = -1;
@@ -522,15 +521,15 @@ export function getStackTimingByDepthInverted(
       currentDepth <= prevCallNodeDepth &&
       currentDepth <= thisCallNodeDepth
     ) {
-      const openBox = prevBoxByDepth[currentDepth];
-      if (openBox.func !== currentFunc) {
+      const currentSpan = prevSpanByDepth[currentDepth];
+      if (currentSpan.func !== currentFunc) {
         break;
       }
 
       // Resolve category mismatches.
       const category = callNodeTable.category[currentCallNodeIndex];
-      if (openBox.category !== category) {
-        openBox.category = defaultCategory;
+      if (currentSpan.category !== category) {
+        currentSpan.category = defaultCategory;
       }
       currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
       currentFunc = callNodeTable.func[currentCallNodeIndex];
@@ -546,24 +545,24 @@ export function getStackTimingByDepthInverted(
       thisCallNodeDepth = currentDepth;
     }
 
-    // Step 2: Walk common depth after first func mismatch; close and reopen boxes
+    // Step 2: Walk common depth after first func mismatch; close and reopen spans
     let currentParentHasBeenCommitted = false;
     while (
       currentDepth <= prevCallNodeDepth &&
       currentDepth <= thisCallNodeDepth
     ) {
-      const openBox = prevBoxByDepth[currentDepth];
-      commitBox(
-        openBox,
+      const currentSpan = prevSpanByDepth[currentDepth];
+      createSpan(
+        currentSpan,
         currentDepth,
         currentPos,
         currentParentHasBeenCommitted
       );
-      openBox.sampleIndex = sampleIndex;
-      openBox.func = currentFunc;
-      openBox.startDev = currentPos;
-      openBox.category = callNodeTable.category[currentCallNodeIndex];
-      openBox.isSelectedPath =
+      currentSpan.sampleIndex = sampleIndex;
+      currentSpan.func = currentFunc;
+      currentSpan.startDev = currentPos;
+      currentSpan.category = callNodeTable.category[currentCallNodeIndex];
+      currentSpan.isSelectedPath =
         currentPathMatchesSelectedCallPath &&
         currentDepth === selectedCallPathDepth;
       currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
@@ -577,21 +576,21 @@ export function getStackTimingByDepthInverted(
       }
     }
 
-    // Step 3a: Previous stack was deeper - close extra boxes.
+    // Step 3a: Previous stack was deeper - close extra spans.
     for (let depth = currentDepth; depth <= prevCallNodeDepth; depth++) {
-      const openBox = prevBoxByDepth[depth];
-      commitBox(openBox, depth, currentPos, currentParentHasBeenCommitted);
+      const currentSpan = prevSpanByDepth[depth];
+      createSpan(currentSpan, depth, currentPos, currentParentHasBeenCommitted);
       currentParentHasBeenCommitted = true;
     }
 
-    // Step 3b: This stack is deeper - open extra boxes.
+    // Step 3b: This stack is deeper - open extra spans.
     while (currentDepth <= thisCallNodeDepth) {
-      const openBox = prevBoxByDepth[currentDepth];
-      openBox.sampleIndex = sampleIndex;
-      openBox.func = currentFunc;
-      openBox.startDev = currentPos;
-      openBox.category = callNodeTable.category[currentCallNodeIndex];
-      openBox.isSelectedPath =
+      const currentSpan = prevSpanByDepth[currentDepth];
+      currentSpan.sampleIndex = sampleIndex;
+      currentSpan.func = currentFunc;
+      currentSpan.startDev = currentPos;
+      currentSpan.category = callNodeTable.category[currentCallNodeIndex];
+      currentSpan.isSelectedPath =
         currentPathMatchesSelectedCallPath &&
         currentDepth === selectedCallPathDepth;
       currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
@@ -609,10 +608,10 @@ export function getStackTimingByDepthInverted(
     prevSampleWasVisible = thisSampleIsVisible;
   }
 
-  // Commit all open boxes.
+  // Commit all open spans.
   for (let depth = 0; depth <= prevCallNodeDepth; depth++) {
-    const openBox = prevBoxByDepth[depth];
-    commitBox(openBox, depth, endPos, true);
+    const currentSpan = prevSpanByDepth[depth];
+    createSpan(currentSpan, depth, endPos, true);
   }
 
   return stackTimingByDepth;
@@ -632,6 +631,20 @@ export function getTimeRangeForSpan(
     callNodeInfo,
     sampleCallNodes
   );
+  return getTimeRangeFromSampleRange(
+    sampleStartIndex,
+    sampleEndIndex,
+    sampleTimes,
+    interval
+  );
+}
+
+export function getTimeRangeFromSampleRange(
+  sampleStartIndex: IndexIntoSamplesTable,
+  sampleEndIndex: IndexIntoSamplesTable,
+  sampleTimes: Milliseconds[],
+  interval: Milliseconds
+): StartEndRange {
   const start = sampleTimes[sampleStartIndex];
   const end =
     sampleEndIndex < sampleTimes.length
@@ -649,18 +662,34 @@ export function getSampleIndexRangeForSpan(
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
   const callNodeInfoInverted = callNodeInfo.asInverted();
   return callNodeInfoInverted !== null
-    ? getTimeRangeForSpanInverted(
+    ? getSampleIndexRangeForSpanInverted(
         sampleIndex,
         depth,
         callNodeInfoInverted,
         sampleCallNodes
       )
-    : getTimeRangeForSpanNonInverted(
+    : getSampleIndexRangeForSpanNonInverted(
         sampleIndex,
         depth,
         callNodeInfo,
         sampleCallNodes
       );
+}
+
+function _enlargeSampleRangeWhile(
+  sampleIndex: IndexIntoSamplesTable,
+  sampleCount: number,
+  f: (IndexIntoSamplesTable) => boolean
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+  let rangeStart = sampleIndex;
+  while (rangeStart > 0 && f(rangeStart - 1)) {
+    rangeStart--;
+  }
+  let rangeEnd = sampleIndex + 1;
+  while (rangeEnd < sampleCount && f(rangeEnd)) {
+    rangeEnd++;
+  }
+  return [rangeStart, rangeEnd];
 }
 
 function getAncestorCallNodeAtDepth(
@@ -676,7 +705,7 @@ function getAncestorCallNodeAtDepth(
   return callNodeIndex;
 }
 
-function getTimeRangeForSpanNonInverted(
+function getSampleIndexRangeForSpanNonInverted(
   sampleIndex: IndexIntoSamplesTable,
   depth: StackTimingDepth,
   callNodeInfo: CallNodeInfo,
@@ -689,33 +718,19 @@ function getTimeRangeForSpanNonInverted(
     callNodeTable
   );
   const endIndex = callNodeTable.nextAfterDescendants[spanCallNodeIndex];
-  let firstMatchingSampleIndex = sampleIndex;
-  while (firstMatchingSampleIndex > 0) {
-    const previousSampleIndex = firstMatchingSampleIndex - 1;
-    const previousSampleCallNodeIndex = sampleCallNodes[previousSampleIndex];
-    if (
-      previousSampleCallNodeIndex === null ||
-      previousSampleCallNodeIndex < spanCallNodeIndex ||
-      previousSampleCallNodeIndex >= endIndex
-    ) {
-      break;
+
+  return _enlargeSampleRangeWhile(
+    sampleIndex,
+    sampleCallNodes.length,
+    (testedSampleIndex) => {
+      const callNodeIndex = sampleCallNodes[testedSampleIndex];
+      return (
+        callNodeIndex !== null &&
+        callNodeIndex >= spanCallNodeIndex &&
+        callNodeIndex < endIndex
+      );
     }
-    firstMatchingSampleIndex = previousSampleIndex;
-  }
-  let lastMatchingSampleIndex = sampleIndex;
-  while (lastMatchingSampleIndex < sampleCallNodes.length) {
-    const nextSampleIndex = lastMatchingSampleIndex + 1;
-    const nextSampleCallNodeIndex = sampleCallNodes[nextSampleIndex];
-    if (
-      nextSampleCallNodeIndex === null ||
-      nextSampleCallNodeIndex < spanCallNodeIndex ||
-      nextSampleCallNodeIndex >= endIndex
-    ) {
-      break;
-    }
-    lastMatchingSampleIndex = nextSampleIndex;
-  }
-  return [firstMatchingSampleIndex, lastMatchingSampleIndex + 1];
+  );
 }
 
 function getInvertedCallPathOfDepth(
@@ -735,7 +750,7 @@ function getInvertedCallPathOfDepth(
   return callNodePath;
 }
 
-function getTimeRangeForSpanInverted(
+function getSampleIndexRangeForSpanInverted(
   sampleIndex: IndexIntoSamplesTable,
   depth: StackTimingDepth,
   callNodeInfo: CallNodeInfoInverted,
@@ -753,39 +768,20 @@ function getTimeRangeForSpanInverted(
   const orderingIndexForSelfNode = callNodeInfo.getOrderingIndexForSelfNode();
   const [orderingIndexRangeStart, orderingIndexRangeEnd] =
     callNodeInfo.getOrderingIndexRangeForNode(callNodeIndex);
-  let firstMatchingSampleIndex = sampleIndex;
-  while (firstMatchingSampleIndex > 0) {
-    const previousSampleIndex = firstMatchingSampleIndex - 1;
-    const previousSampleCallNodeIndex = sampleCallNodes[previousSampleIndex];
-    if (previousSampleCallNodeIndex === null) {
-      break;
+
+  return _enlargeSampleRangeWhile(
+    sampleIndex,
+    sampleCallNodes.length,
+    (testedSampleIndex) => {
+      const callNodeIndex = sampleCallNodes[testedSampleIndex];
+      if (callNodeIndex === null) {
+        return false;
+      }
+      const orderingIndex = orderingIndexForSelfNode[callNodeIndex];
+      return (
+        orderingIndex >= orderingIndexRangeStart &&
+        orderingIndex < orderingIndexRangeEnd
+      );
     }
-    const previousSampleOrderingIndex =
-      orderingIndexForSelfNode[previousSampleCallNodeIndex];
-    if (
-      previousSampleOrderingIndex < orderingIndexRangeStart ||
-      previousSampleOrderingIndex >= orderingIndexRangeEnd
-    ) {
-      break;
-    }
-    firstMatchingSampleIndex = previousSampleIndex;
-  }
-  let lastMatchingSampleIndex = sampleIndex;
-  while (lastMatchingSampleIndex < sampleCallNodes.length) {
-    const nextSampleIndex = lastMatchingSampleIndex + 1;
-    const nextSampleCallNodeIndex = sampleCallNodes[nextSampleIndex];
-    if (nextSampleCallNodeIndex === null) {
-      break;
-    }
-    const nextSampleOrderingIndex =
-      orderingIndexForSelfNode[nextSampleCallNodeIndex];
-    if (
-      nextSampleOrderingIndex < orderingIndexRangeStart ||
-      nextSampleOrderingIndex >= orderingIndexRangeEnd
-    ) {
-      break;
-    }
-    lastMatchingSampleIndex = nextSampleIndex;
-  }
-  return [firstMatchingSampleIndex, lastMatchingSampleIndex + 1];
+  );
 }
