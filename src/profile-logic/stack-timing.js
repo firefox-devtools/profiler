@@ -219,6 +219,9 @@ export function getStackTimingByDepthNonInverted(
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const callNodeTablePrefixColumn = callNodeTable.prefix;
+  const callNodeTableNextAfterDescendantsColumn =
+    callNodeTable.nextAfterDescendants;
+  const callNodeTableDepthColumn = callNodeTable.depth;
 
   const stackTimingByDepth = getEmptyStackTimingByDepth(maxDepth);
 
@@ -226,16 +229,13 @@ export function getStackTimingByDepthNonInverted(
   function createSpan(
     currentSpan: StackTimingOpenSpan,
     depth: StackTimingDepth,
-    currentPos: DevicePixels
+    endDev: DevicePixels
   ) {
     const { sampleIndex, startDev, callNodeIndex } = currentSpan;
-    if (startDev === currentPos) {
-      return;
-    }
     const stackTimingForThisDepth = stackTimingByDepth[depth];
     const index = stackTimingForThisDepth.length++;
     stackTimingForThisDepth.startDev[index] = startDev;
-    stackTimingForThisDepth.endDev[index] = currentPos;
+    stackTimingForThisDepth.endDev[index] = endDev;
     stackTimingForThisDepth.sampleIndex[index] = sampleIndex;
     stackTimingForThisDepth.func[index] = callNodeTable.func[callNodeIndex];
     stackTimingForThisDepth.category[index] =
@@ -248,7 +248,7 @@ export function getStackTimingByDepthNonInverted(
       parentIndexInPreviousRow;
   }
 
-  let prevCallNodeIndex = null;
+  let prevCallNodeIndex = -1;
   let prevCallNodeDepth = -1;
   const prevSpanByDepth: Array<StackTimingOpenSpan> = Array.from(
     { length: maxDepth },
@@ -262,132 +262,57 @@ export function getStackTimingByDepthNonInverted(
     sampleIndex < sampleIndexRangeEnd;
     sampleIndex++
   ) {
-    const currentStack = samples.stack[sampleIndex];
-    let currentCallNodeIndex =
-      currentStack !== null ? stackIndexToCallNodeIndex[currentStack] : -1;
-    if (currentCallNodeIndex === prevCallNodeIndex) {
-      if (sampleIndex + 1 < sampleIndexRangeEnd) {
-        const nextSampleTime = samples.time[sampleIndex + 1];
-        nextSamplePos = snapValueToMultipleOfTwo(
-          (nextSampleTime - timeRangeStart) * devPxPerMs
-        );
-      }
-      continue;
-    }
+    const thisSamplePos = nextSamplePos;
+    const thisStack = samples.stack[sampleIndex];
+    const thisCallNodeIndex =
+      thisStack !== null ? stackIndexToCallNodeIndex[thisStack] : -1;
 
-    const currentPos = nextSamplePos;
-
-    while (sampleIndex + 1 < sampleIndexRangeEnd) {
+    if (sampleIndex + 1 < sampleIndexRangeEnd) {
       const nextSampleTime = samples.time[sampleIndex + 1];
       nextSamplePos = snapValueToMultipleOfTwo(
         (nextSampleTime - timeRangeStart) * devPxPerMs
       );
-
-      if (nextSamplePos !== currentPos) {
-        break;
-      }
-
-      if (prevCallNodeDepth !== -1) {
-        // Close spans for current sample.
-        let currentDepth =
-          currentCallNodeIndex === -1
-            ? -1
-            : callNodeTable.depth[currentCallNodeIndex];
-
-        // If this stack is smaller than the previous stack, close the excess spans.
-        while (prevCallNodeDepth > currentDepth) {
-          const currentSpan = prevSpanByDepth[prevCallNodeDepth];
-          createSpan(currentSpan, prevCallNodeDepth, currentPos);
-          prevCallNodeDepth--;
-        }
-
-        // If this stack is larger than the previous stack, walk up until we're at the same depth.
-        while (currentDepth > prevCallNodeDepth) {
-          currentCallNodeIndex =
-            callNodeTablePrefixColumn[currentCallNodeIndex];
-          currentDepth--;
-        }
-
-        // Close all mismatching spans. Don't open any new ones because this sample
-        // doesn't have a width.
-        while (currentDepth >= 0) {
-          const currentSpan = prevSpanByDepth[currentDepth];
-          if (currentSpan.callNodeIndex === currentCallNodeIndex) {
-            break;
-          }
-
-          createSpan(currentSpan, currentDepth, currentPos);
-          currentCallNodeIndex =
-            callNodeTablePrefixColumn[currentCallNodeIndex];
-          currentDepth--;
-        }
-
-        prevCallNodeDepth = currentDepth;
-        prevCallNodeIndex = currentCallNodeIndex;
-      }
-
-      sampleIndex++;
-      const currentStack = samples.stack[sampleIndex];
-      currentCallNodeIndex =
-        currentStack !== null ? stackIndexToCallNodeIndex[currentStack] : -1;
     }
 
-    let currentDepth =
-      currentCallNodeIndex === -1
-        ? -1
-        : callNodeTable.depth[currentCallNodeIndex];
+    if (thisCallNodeIndex === prevCallNodeIndex) {
+      continue;
+    }
 
-    // assert(currentDepth < maxDepth);
-
-    // If this stack is smaller than the previous stack, close the excess spans.
-    while (prevCallNodeDepth > currentDepth) {
+    // Phase 1: Commit open spans which don't contain the current call node.
+    while (
+      prevCallNodeDepth !== -1 &&
+      (thisCallNodeIndex < prevCallNodeIndex ||
+        thisCallNodeIndex >=
+          callNodeTableNextAfterDescendantsColumn[prevCallNodeIndex])
+    ) {
       const currentSpan = prevSpanByDepth[prevCallNodeDepth];
-      createSpan(currentSpan, prevCallNodeDepth, currentPos);
+      createSpan(currentSpan, prevCallNodeDepth, thisSamplePos);
+      prevCallNodeIndex = callNodeTablePrefixColumn[prevCallNodeIndex];
       prevCallNodeDepth--;
     }
 
-    const thisCallNodeIndex = currentCallNodeIndex;
-    const thisCallNodeDepth = currentDepth;
+    if (nextSamplePos !== thisSamplePos) {
+      // Phase 2: Enter new spans for the current call node. Start at the bottom
+      // and go up until we hit the common row.
+      const thisCallNodeDepth =
+        thisCallNodeIndex === -1
+          ? -1
+          : callNodeTableDepthColumn[thisCallNodeIndex];
+      let currentCallNodeIndex = thisCallNodeIndex;
+      let currentDepth = thisCallNodeDepth;
 
-    // If this stack is larger than the previous stack, initialize the new spans.
-    while (currentDepth > prevCallNodeDepth) {
-      const currentSpan = prevSpanByDepth[currentDepth];
-      currentSpan.callNodeIndex = currentCallNodeIndex;
-      currentSpan.startDev = currentPos;
-      currentSpan.sampleIndex = sampleIndex;
-      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
-      currentDepth--;
-    }
-
-    // Now currentDepth === prevCallNodeDepth.
-    // Walk the common depth and check if the spans differ.
-
-    // First, walk the part for which the callNodeIndex has changed. Even if the
-    // func in the row is unchanged, a differing callNodeIndex means that some
-    // func further to the root of the stack has changed, so it wouldn't be the
-    // same call to that function and we'd need to open a new box.
-    while (currentDepth >= 0) {
-      const currentSpan = prevSpanByDepth[currentDepth];
-      if (currentSpan.callNodeIndex === currentCallNodeIndex) {
-        break;
+      while (currentDepth !== prevCallNodeDepth) {
+        const currentSpan = prevSpanByDepth[currentDepth];
+        currentSpan.callNodeIndex = currentCallNodeIndex;
+        currentSpan.startDev = thisSamplePos;
+        currentSpan.sampleIndex = sampleIndex;
+        currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
+        currentDepth--;
       }
 
-      createSpan(currentSpan, currentDepth, currentPos);
-      currentSpan.callNodeIndex = currentCallNodeIndex;
-      currentSpan.startDev = currentPos;
-      currentSpan.sampleIndex = sampleIndex;
-      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
-      currentDepth--;
+      prevCallNodeIndex = thisCallNodeIndex;
+      prevCallNodeDepth = thisCallNodeDepth;
     }
-
-    // We're done with the part of the stack where the callNodeIndex per depth differs.
-    // If currentDepth is still >= 0, the rest of the stack has matching call node
-    // indexes. These spans can stay unchanged.
-
-    // We are done with this sample. Go to the next.
-
-    prevCallNodeIndex = thisCallNodeIndex;
-    prevCallNodeDepth = thisCallNodeDepth;
   }
 
   // Commit all open spans.
