@@ -332,6 +332,51 @@ type StackTimingOpenBoxInverted = {|
   isSelectedPath: boolean,
 |};
 
+/**
+ * Computes the StackTimingByDepth for the inverted stack chart.
+ *
+ *  Regular stack chart:                     Inverted stack chart:
+ *    [A   A   A   A   A]                      [C] [D] [E   E] [G]
+ *    [B   B] [E   E] [F]                      [B] [B] [A   A] [F]
+ *    [C] [D]         [G]                      [A] [A]         [A]
+ *
+ * The inverted stack chart is not very useful.
+ *
+ * Whenever the (non-inverted) call node of two consecutive samples differs,
+ * it's likely that their self function differs, too. And when that function is
+ * different, it means that none of the spans from the previous sample are
+ * extended; the entire stack of spans is "terminated" at the current sample,
+ * regardless of what's in the rest of the stack.
+ * In the end, you end up with just a grid of single-sample boxes.
+ * Longer boxes only appear when a thread is stuck in a single function, for
+ * example in a hot loop with no function calls, or when the thread is blocked.
+ *
+ * There are a few rare cases where two samples can have different self call
+ * nodes, but share the same self function. Example:
+ *
+ *  Regular stack chart:                     Inverted stack chart:
+ *    [A   A   A   A]                          [C   C   C   C]
+ *    [B   B] [D] [C]                          [C] [B] [D] [A]
+ *    [C   C] [C]                              [B] [A] [A]
+ *    [C]                                      [A]
+ *
+ * In these rare cases the current implementation shares the span for that self
+ * function between the consecutive samples. This matches what we do in the
+ * regular stack chart. But it's not clear that this is a useful thing to do;
+ * in the example above, there are four different calls to C which all end up
+ * sharing the same span, and the visualization misleadingly suggests that
+ * they're all the same call.
+ *
+ * But be that as it may; for now we maintain the long-standing behavior.
+ *
+ * Performance considerations:
+ *
+ * As described above, the two most common cases are "entire stack terminated"
+ * and "entire stack shared". So those are the cases that we optimize for.
+ * And, as with the regular stack chart, the fewer spans we create the better,
+ * so this implementation won't create any spans which have been "snapped away
+ * to nothing".
+ */
 export function getStackTimingByDepthInverted(
   samples: SamplesLikeTable,
   stackTable: StackTable,
