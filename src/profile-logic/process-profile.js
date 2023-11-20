@@ -64,6 +64,7 @@ import type {
   Milliseconds,
   Microseconds,
   Address,
+  GeckoCounter,
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoThread,
@@ -1384,6 +1385,28 @@ function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
   }
 
   return combinedSchemas;
+}
+
+export function insertExternalPowerCountersIntoProfile(
+  counters: GeckoCounter[],
+  geckoProfile: GeckoProfile
+): void {
+  for (const counter of counters) {
+    const samples = counter.sample_groups[0].samples;
+    const timeColumnIndex = samples.schema.time;
+    for (const sample of samples.data) {
+      // Adjust the sample times to be relative to meta.startTime,
+      // and limit the precision to nanoseconds
+      sample[timeColumnIndex] =
+        Math.round(
+          (sample[timeColumnIndex] + geckoProfile.meta.profilingStartTime) * 1e6
+        ) / 1e6;
+    }
+    if (!geckoProfile.counters) {
+      geckoProfile.counters = [];
+    }
+    geckoProfile.counters.push(counter);
+  }
 }
 
 /**
