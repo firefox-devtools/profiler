@@ -166,11 +166,12 @@ export function getStackTimingByDepth(
     snapValueToMultipleOfTwo((endTime - timeRangeStart) * devPxPerMs)
   );
 
-  return callNodeInfo.isInverted()
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
     ? getStackTimingByDepthInverted(
         samples,
         stackTable,
-        callNodeInfo,
+        callNodeInfoInverted,
         maxDepth,
         timeRangeStart,
         devPxPerMs,
@@ -248,9 +249,9 @@ export function getStackTimingByDepthNonInverted(
       parentIndexInPreviousRow;
   }
 
-  let prevCallNodeIndex = -1;
-  let prevCallNodeDepth = -1;
-  const prevSpanByDepth: Array<StackTimingOpenSpan> = Array.from(
+  let deepestOpenSpanCallNodeIndex = -1;
+  let deepestOpenSpanDepth = -1;
+  const openSpansByDepth: Array<StackTimingOpenSpan> = Array.from(
     { length: maxDepth },
     () => ({ sampleIndex: 0, callNodeIndex: -1, startDev: 0 })
   );
@@ -272,23 +273,26 @@ export function getStackTimingByDepthNonInverted(
       nextSamplePos = snapValueToMultipleOfTwo(
         (nextSampleTime - timeRangeStart) * devPxPerMs
       );
+    } else {
+      nextSamplePos = endPos;
     }
 
-    if (thisCallNodeIndex === prevCallNodeIndex) {
+    if (thisCallNodeIndex === deepestOpenSpanCallNodeIndex) {
       continue;
     }
 
     // Phase 1: Commit open spans which don't contain the current call node.
     while (
-      prevCallNodeDepth !== -1 &&
-      (thisCallNodeIndex < prevCallNodeIndex ||
+      deepestOpenSpanDepth !== -1 &&
+      (thisCallNodeIndex < deepestOpenSpanCallNodeIndex ||
         thisCallNodeIndex >=
-          callNodeTableNextAfterDescendantsColumn[prevCallNodeIndex])
+          callNodeTableNextAfterDescendantsColumn[deepestOpenSpanCallNodeIndex])
     ) {
-      const currentSpan = prevSpanByDepth[prevCallNodeDepth];
-      createSpan(currentSpan, prevCallNodeDepth, thisSamplePos);
-      prevCallNodeIndex = callNodeTablePrefixColumn[prevCallNodeIndex];
-      prevCallNodeDepth--;
+      const currentSpan = openSpansByDepth[deepestOpenSpanDepth];
+      createSpan(currentSpan, deepestOpenSpanDepth, thisSamplePos);
+      deepestOpenSpanCallNodeIndex =
+        callNodeTablePrefixColumn[deepestOpenSpanCallNodeIndex];
+      deepestOpenSpanDepth--;
     }
 
     if (nextSamplePos !== thisSamplePos) {
@@ -301,8 +305,8 @@ export function getStackTimingByDepthNonInverted(
       let currentCallNodeIndex = thisCallNodeIndex;
       let currentDepth = thisCallNodeDepth;
 
-      while (currentDepth !== prevCallNodeDepth) {
-        const currentSpan = prevSpanByDepth[currentDepth];
+      while (currentDepth !== deepestOpenSpanDepth) {
+        const currentSpan = openSpansByDepth[currentDepth];
         currentSpan.callNodeIndex = currentCallNodeIndex;
         currentSpan.startDev = thisSamplePos;
         currentSpan.sampleIndex = sampleIndex;
@@ -310,14 +314,14 @@ export function getStackTimingByDepthNonInverted(
         currentDepth--;
       }
 
-      prevCallNodeIndex = thisCallNodeIndex;
-      prevCallNodeDepth = thisCallNodeDepth;
+      deepestOpenSpanCallNodeIndex = thisCallNodeIndex;
+      deepestOpenSpanDepth = thisCallNodeDepth;
     }
   }
 
   // Commit all open spans.
-  for (let depth = prevCallNodeDepth; depth >= 0; depth--) {
-    const currentSpan = prevSpanByDepth[depth];
+  for (let depth = deepestOpenSpanDepth; depth >= 0; depth--) {
+    const currentSpan = openSpansByDepth[depth];
     createSpan(currentSpan, depth, endPos);
   }
 
@@ -380,7 +384,7 @@ type StackTimingOpenBoxInverted = {|
 export function getStackTimingByDepthInverted(
   samples: SamplesLikeTable,
   stackTable: StackTable,
-  callNodeInfo: CallNodeInfo,
+  callNodeInfo: CallNodeInfoInverted,
   maxDepth: number,
   timeRangeStart: Milliseconds,
   devPxPerMs: number,
@@ -391,36 +395,39 @@ export function getStackTimingByDepthInverted(
   firstPos: DevicePixels,
   endPos: DevicePixels
 ): StackTimingByDepth {
-  const selectedCallPath =
-    callNodeInfo.getCallNodePathFromIndex(selectedCallNode);
-  const selectedCallPathDepth = selectedCallPath.length - 1;
+  const selectedCallNodeDepth =
+    selectedCallNode !== null
+      ? callNodeInfo.depthForNode(selectedCallNode)
+      : -1;
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const callNodeTablePrefixColumn = callNodeTable.prefix;
   const stackIndexToNonInvertedCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+  const orderingIndexForSelfNode = callNodeInfo.getOrderingIndexForSelfNode();
 
+  const [selectedRangeStart, selectedRangeEnd] =
+    selectedCallNode !== null
+      ? callNodeInfo.getOrderingIndexRangeForNode(selectedCallNode)
+      : [0, 0];
+
+  // Must be called in order of decreasing depth.
   function createSpan(
     currentSpan: StackTimingOpenBoxInverted,
     depth: StackTimingDepth,
-    currentPos: DevicePixels,
-    parentBoxHasAlreadyBeenCommitted: boolean
+    endDev: DevicePixels
   ) {
     const { sampleIndex, startDev, func, category, isSelectedPath } =
       currentSpan;
-    if (startDev === currentPos) {
-      return;
-    }
     const stackTimingForThisDepth = stackTimingByDepth[depth];
     const index = stackTimingForThisDepth.length++;
     stackTimingForThisDepth.startDev[index] = startDev;
-    stackTimingForThisDepth.endDev[index] = currentPos;
+    stackTimingForThisDepth.endDev[index] = endDev;
     stackTimingForThisDepth.sampleIndex[index] = sampleIndex;
     stackTimingForThisDepth.func[index] = func;
     stackTimingForThisDepth.category[index] = category;
     stackTimingForThisDepth.isSelectedPath[index] = isSelectedPath;
-    const indexAdjust = parentBoxHasAlreadyBeenCommitted ? 1 : 0;
     const parentIndexInPreviousRow =
-      depth === 0 ? 0 : stackTimingByDepth[depth - 1].length - indexAdjust;
+      depth === 0 ? 0 : stackTimingByDepth[depth - 1].length;
     stackTimingForThisDepth.parentIndexInPreviousRow[index] =
       parentIndexInPreviousRow;
   }
@@ -428,9 +435,8 @@ export function getStackTimingByDepthInverted(
   const stackTimingByDepth = getEmptyStackTimingByDepth(maxDepth);
 
   let prevCallNodeIndex = null;
-  let prevCallNodeDepth = -1;
-  let prevSampleWasVisible = true;
-  const prevSpanByDepth: Array<StackTimingOpenBoxInverted> = Array.from(
+  let deepestOpenSpanDepth = -1;
+  const openSpansByDepth: Array<StackTimingOpenBoxInverted> = Array.from(
     { length: maxDepth },
     () => ({
       sampleIndex: 0,
@@ -449,49 +455,52 @@ export function getStackTimingByDepthInverted(
     sampleIndex++
   ) {
     const currentStack = samples.stack[sampleIndex];
-    const currentPos = nextSamplePos;
-    let thisSampleIsVisible = true;
+    const thisSamplePos = nextSamplePos;
 
     if (sampleIndex + 1 < sampleIndexRangeEnd) {
+      const nextSampleTime = samples.time[sampleIndex + 1];
       nextSamplePos = snapValueToMultipleOfTwo(
-        (samples.time[sampleIndex + 1] - timeRangeStart) * devPxPerMs
+        (nextSampleTime - timeRangeStart) * devPxPerMs
       );
-      thisSampleIsVisible = nextSamplePos !== currentPos;
+    } else {
+      nextSamplePos = endPos;
     }
 
     if (currentStack === null) {
       // Commit all open spans.
-      for (let depth = 0; depth <= prevCallNodeDepth; depth++) {
-        const currentSpan = prevSpanByDepth[depth];
-        createSpan(currentSpan, depth, currentPos, true);
+      while (deepestOpenSpanDepth >= 0) {
+        const currentSpan = openSpansByDepth[deepestOpenSpanDepth];
+        createSpan(currentSpan, deepestOpenSpanDepth, thisSamplePos);
+        deepestOpenSpanDepth--;
       }
 
       prevCallNodeIndex = -1;
-      prevCallNodeDepth = -1;
       continue;
     }
 
+    const isVisible = nextSamplePos !== thisSamplePos;
+
     const thisCallNodeIndex =
       stackIndexToNonInvertedCallNodeIndex[currentStack];
-    let thisCallNodeDepth = callNodeTable.depth[thisCallNodeIndex];
+    const thisCallNodeDepth = callNodeTable.depth[thisCallNodeIndex];
 
-    if (thisCallNodeIndex === prevCallNodeIndex && prevSampleWasVisible) {
+    if (
+      thisCallNodeIndex === prevCallNodeIndex &&
+      (!isVisible || deepestOpenSpanDepth === thisCallNodeDepth)
+    ) {
       continue;
     }
 
     let currentCallNodeIndex = thisCallNodeIndex;
     let currentFunc = callNodeTable.func[currentCallNodeIndex];
     let currentDepth = 0;
-    let currentPathMatchesSelectedCallPath =
-      currentDepth <= selectedCallPathDepth &&
-      currentFunc === selectedCallPath[currentDepth];
 
-    // Step 1: Walk common depth while funcs match
+    // Phase 1: Walk common depth while funcs match
     while (
-      currentDepth <= prevCallNodeDepth &&
+      currentDepth <= deepestOpenSpanDepth &&
       currentDepth <= thisCallNodeDepth
     ) {
-      const currentSpan = prevSpanByDepth[currentDepth];
+      const currentSpan = openSpansByDepth[currentDepth];
       if (currentSpan.func !== currentFunc) {
         break;
       }
@@ -504,84 +513,45 @@ export function getStackTimingByDepthInverted(
       currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
       currentFunc = callNodeTable.func[currentCallNodeIndex];
       currentDepth++;
-      if (currentPathMatchesSelectedCallPath) {
-        currentPathMatchesSelectedCallPath =
-          currentDepth <= selectedCallPathDepth &&
-          currentFunc === selectedCallPath[currentDepth];
+    }
+
+    // Now we have a mismatch at depth currentDepth.
+
+    // Phase 2: Commit remaining spans from the previous sample.
+    while (deepestOpenSpanDepth >= currentDepth) {
+      const currentSpan = openSpansByDepth[deepestOpenSpanDepth];
+      createSpan(currentSpan, deepestOpenSpanDepth, thisSamplePos);
+      deepestOpenSpanDepth--;
+    }
+
+    if (isVisible) {
+      // Phase 3: Open new spans, top to bottom, for the current sample.
+      const thisCallNodeOrderingIndex =
+        orderingIndexForSelfNode[thisCallNodeIndex];
+      while (currentDepth <= thisCallNodeDepth) {
+        const currentSpan = openSpansByDepth[currentDepth];
+        currentSpan.sampleIndex = sampleIndex;
+        currentSpan.func = currentFunc;
+        currentSpan.startDev = thisSamplePos;
+        currentSpan.category = callNodeTable.category[currentCallNodeIndex];
+        currentSpan.isSelectedPath =
+          currentDepth === selectedCallNodeDepth &&
+          thisCallNodeOrderingIndex >= selectedRangeStart &&
+          thisCallNodeOrderingIndex < selectedRangeEnd;
+        currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
+        currentFunc = callNodeTable.func[currentCallNodeIndex];
+        currentDepth++;
       }
-    }
-
-    if (!thisSampleIsVisible) {
-      thisCallNodeDepth = currentDepth;
-    }
-
-    // Step 2: Walk common depth after first func mismatch; close and reopen spans
-    let currentParentHasBeenCommitted = false;
-    while (
-      currentDepth <= prevCallNodeDepth &&
-      currentDepth <= thisCallNodeDepth
-    ) {
-      const currentSpan = prevSpanByDepth[currentDepth];
-      createSpan(
-        currentSpan,
-        currentDepth,
-        currentPos,
-        currentParentHasBeenCommitted
-      );
-      currentSpan.sampleIndex = sampleIndex;
-      currentSpan.func = currentFunc;
-      currentSpan.startDev = currentPos;
-      currentSpan.category = callNodeTable.category[currentCallNodeIndex];
-      currentSpan.isSelectedPath =
-        currentPathMatchesSelectedCallPath &&
-        currentDepth === selectedCallPathDepth;
-      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
-      currentFunc = callNodeTable.func[currentCallNodeIndex];
-      currentParentHasBeenCommitted = true;
-      currentDepth++;
-      if (currentPathMatchesSelectedCallPath) {
-        currentPathMatchesSelectedCallPath =
-          currentDepth <= selectedCallPathDepth &&
-          currentFunc === selectedCallPath[currentDepth];
-      }
-    }
-
-    // Step 3a: Previous stack was deeper - close extra spans.
-    for (let depth = currentDepth; depth <= prevCallNodeDepth; depth++) {
-      const currentSpan = prevSpanByDepth[depth];
-      createSpan(currentSpan, depth, currentPos, currentParentHasBeenCommitted);
-      currentParentHasBeenCommitted = true;
-    }
-
-    // Step 3b: This stack is deeper - open extra spans.
-    while (currentDepth <= thisCallNodeDepth) {
-      const currentSpan = prevSpanByDepth[currentDepth];
-      currentSpan.sampleIndex = sampleIndex;
-      currentSpan.func = currentFunc;
-      currentSpan.startDev = currentPos;
-      currentSpan.category = callNodeTable.category[currentCallNodeIndex];
-      currentSpan.isSelectedPath =
-        currentPathMatchesSelectedCallPath &&
-        currentDepth === selectedCallPathDepth;
-      currentCallNodeIndex = callNodeTablePrefixColumn[currentCallNodeIndex];
-      currentFunc = callNodeTable.func[currentCallNodeIndex];
-      currentDepth++;
-      if (currentPathMatchesSelectedCallPath) {
-        currentPathMatchesSelectedCallPath =
-          currentDepth <= selectedCallPathDepth &&
-          currentFunc === selectedCallPath[currentDepth];
-      }
+      deepestOpenSpanDepth = thisCallNodeDepth;
     }
 
     prevCallNodeIndex = thisCallNodeIndex;
-    prevCallNodeDepth = thisCallNodeDepth;
-    prevSampleWasVisible = thisSampleIsVisible;
   }
 
   // Commit all open spans.
-  for (let depth = 0; depth <= prevCallNodeDepth; depth++) {
-    const currentSpan = prevSpanByDepth[depth];
-    createSpan(currentSpan, depth, endPos, true);
+  for (let depth = deepestOpenSpanDepth; depth >= 0; depth--) {
+    const currentSpan = openSpansByDepth[depth];
+    createSpan(currentSpan, depth, endPos);
   }
 
   return stackTimingByDepth;
