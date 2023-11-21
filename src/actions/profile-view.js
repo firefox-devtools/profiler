@@ -105,26 +105,30 @@ export function changeSelectedCallNode(
   selectedCallNodePath: CallNodePath,
   context: SelectionContext = { source: 'auto' },
   optionalExpandedToCallNodePath?: CallNodePath
-): Action {
-  if (optionalExpandedToCallNodePath) {
-    for (let i = 0; i < selectedCallNodePath.length; i++) {
-      if (selectedCallNodePath[i] !== optionalExpandedToCallNodePath[i]) {
-        // This assertion ensures that the selectedCallNode will be correctly expanded.
-        throw new Error(
-          oneLine`
-            The optional expanded call node path provided to the changeSelectedCallNode
-            must contain the selected call node path.
-          `
-        );
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (optionalExpandedToCallNodePath) {
+      for (let i = 0; i < selectedCallNodePath.length; i++) {
+        if (selectedCallNodePath[i] !== optionalExpandedToCallNodePath[i]) {
+          // This assertion ensures that the selectedCallNode will be correctly expanded.
+          throw new Error(
+            oneLine`
+              The optional expanded call node path provided to the changeSelectedCallNode
+              must contain the selected call node path.
+            `
+          );
+        }
       }
     }
-  }
-  return {
-    type: 'CHANGE_SELECTED_CALL_NODE',
-    selectedCallNodePath,
-    optionalExpandedToCallNodePath,
-    threadsKey,
-    context,
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_SELECTED_CALL_NODE',
+      isInverted,
+      selectedCallNodePath,
+      optionalExpandedToCallNodePath,
+      threadsKey,
+      context,
+    });
   };
 }
 
@@ -1637,14 +1641,17 @@ export function expandAllCallNodeDescendants(
 export function changeExpandedCallNodes(
   threadsKey: ThreadsKey,
   expandedCallNodePaths: Array<CallNodePath>
-): Action {
-  return {
-    type: 'CHANGE_EXPANDED_CALL_NODES',
-    threadsKey,
-    expandedCallNodePaths,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_EXPANDED_CALL_NODES',
+      isInverted,
+      threadsKey,
+      expandedCallNodePaths,
+    });
   };
 }
-
 export function changeSelectedMarker(
   threadsKey: ThreadsKey,
   selectedMarker: MarkerIndex | null,

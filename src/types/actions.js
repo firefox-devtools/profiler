@@ -195,6 +195,7 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_SELECTED_CALL_NODE',
+      +isInverted: boolean,
       +threadsKey: ThreadsKey,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
@@ -216,6 +217,7 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_EXPANDED_CALL_NODES',
       +threadsKey: ThreadsKey,
+      +isInverted: boolean,
       +expandedCallNodePaths: Array<CallNodePath>,
     |}
   | {|

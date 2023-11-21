@@ -56,8 +56,10 @@ export type UploadedProfileInformation = ImportedUploadedProfileInformation;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
-  +selectedCallNodePath: CallNodePath,
-  +expandedCallNodePaths: PathSet,
+  +selectedNonInvertedCallNodePath: CallNodePath,
+  +selectedInvertedCallNodePath: CallNodePath,
+  +expandedNonInvertedCallNodePaths: PathSet,
+  +expandedInvertedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
   +selectedNetworkMarker: MarkerIndex | null,
 |};
