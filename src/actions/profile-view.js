@@ -36,7 +36,6 @@ import {
   getInvertCallstack,
   getHash,
 } from 'firefox-profiler/selectors/url-state';
-import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   assertExhaustiveCheck,
   getFirstItemFromSet,
@@ -145,80 +144,41 @@ export function changeRightClickedCallNode(
 }
 
 /**
- * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
- * of that sample's stack.
+ * Given a threadIndex and a sampleIndex, select the call node which carries the
+ * sample's self time. In the inverted tree, this will be a root node.
  */
-export function selectLeafCallNode(
+export function selectSelfCallNode(
   threadsKey: ThreadsKey,
   sampleIndex: IndexIntoSamplesTable | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const filteredThread = threadSelectors.getFilteredThread(getState());
-    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const sampleCallNodes =
+      threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
+        getState()
+      );
 
-    let newSelectedCallNode = -1;
-    if (sampleIndex !== null) {
-      // The newSelectedStack could be undefined if there are 0 samples.
-      const newSelectedStack = filteredThread.samples.stack[sampleIndex];
-
-      if (newSelectedStack !== null && newSelectedStack !== undefined) {
-        newSelectedCallNode =
-          callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
-      }
-    }
-
-    dispatch(
-      changeSelectedCallNode(
-        threadsKey,
-        getCallNodePathFromIndex(
-          newSelectedCallNode,
-          callNodeInfo.callNodeTable
-        )
-      )
-    );
-  };
-}
-
-/**
- * Given a threadIndex and a sampleIndex, select the call node at the bottom ("root")
- * of that sample's stack.
- */
-export function selectRootCallNode(
-  threadsKey: ThreadsKey,
-  sampleIndex: IndexIntoSamplesTable | null
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const filteredThread = threadSelectors.getFilteredThread(getState());
-    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
-
-    if (sampleIndex === null) {
+    if (
+      sampleIndex === null ||
+      sampleIndex < 0 ||
+      sampleIndex >= sampleCallNodes.length
+    ) {
       dispatch(changeSelectedCallNode(threadsKey, []));
       return;
     }
-    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
-    if (newSelectedStack === null || newSelectedStack === undefined) {
+
+    const nonInvertedSelfCallNode = sampleCallNodes[sampleIndex];
+    if (nonInvertedSelfCallNode === null) {
       dispatch(changeSelectedCallNode(threadsKey, []));
       return;
     }
-    const newSelectedCallNode =
-      callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
 
-    const selectedCallNodePath = getCallNodePathFromIndex(
-      newSelectedCallNode,
-      callNodeInfo.callNodeTable
-    );
-    const rootCallNodePath = [selectedCallNodePath[0]];
-
-    dispatch(
-      changeSelectedCallNode(
-        threadsKey,
-        rootCallNodePath,
-        { source: 'auto' },
-        selectedCallNodePath
-      )
-    );
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const selectedPath = callNodeInfo.isInverted()
+      ? [callNodeTable.func[nonInvertedSelfCallNode]]
+      : callNodeInfo.getCallNodePathFromIndex(nonInvertedSelfCallNode);
+    dispatch(changeSelectedCallNode(threadsKey, selectedPath));
   };
 }
 
@@ -1628,7 +1588,7 @@ export function expandAllCallNodeDescendants(
     });
 
     const expandedCallNodePaths = [...descendants].map((callNodeIndex) =>
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
     dispatch(changeExpandedCallNodes(threadsKey, expandedCallNodePaths));
   };
@@ -1772,13 +1732,17 @@ export function changeInvertCallstack(
       eventCategory: 'profile',
       eventAction: 'change invert callstack',
     });
+    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const selectedCallNode = selectedThreadSelectors.getSelectedCallNodeIndex(
+      getState()
+    );
+    const newSelectedCallNodePath =
+      callTree.findHeavyPathToSameFunctionAfterInversion(selectedCallNode);
     dispatch({
       type: 'CHANGE_INVERT_CALLSTACK',
       invertCallstack,
       selectedThreadIndexes: getSelectedThreadIndexes(getState()),
-      callTree: selectedThreadSelectors.getCallTree(getState()),
-      callNodeTable: selectedThreadSelectors.getCallNodeInfo(getState())
-        .callNodeTable,
+      newSelectedCallNodePath,
     });
   };
 }
@@ -1866,13 +1830,13 @@ export function addTransformToStack(
     const transformedThread =
       threadSelectors.getRangeAndTransformFilteredThread(getState());
 
-    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
     dispatch({
       type: 'ADD_TRANSFORM_TO_STACK',
       threadsKey,
       transform,
       transformedThread,
-      callNodeTable,
+      callNodeInfo,
     });
     sendAnalytics({
       hitType: 'event',
@@ -2029,12 +1993,12 @@ export function handleCallNodeTransformShortcut(
     }
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const unfilteredThread = threadSelectors.getThread(getState());
-    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
     const implementation = getImplementationFilter(getState());
     const inverted = getInvertCallstack(getState());
-    const callNodePath = getCallNodePathFromIndex(callNodeIndex, callNodeTable);
-    const funcIndex = callNodeTable.func[callNodeIndex];
-    const category = callNodeTable.category[callNodeIndex];
+    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
+    const category = callNodeInfo.categoryForNode(callNodeIndex);
 
     switch (event.key) {
       case 'F':

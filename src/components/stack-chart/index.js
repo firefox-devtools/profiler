@@ -18,6 +18,7 @@ import {
   getCategories,
   getInnerWindowIDToPageMap,
   getProfileUsesMultipleStackTypes,
+  getDefaultCategory,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
@@ -38,19 +39,17 @@ import {
   changeMouseTimePosition,
 } from '../../actions/profile-view';
 
-import {
-  getCallNodePathFromIndex,
-  getBottomBoxInfoForCallNode,
-} from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
 
 import type {
   Thread,
   CategoryList,
+  IndexIntoCategoryList,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  CombinedTimingRows,
   MarkerIndex,
   Marker,
+  MarkerTiming,
   Milliseconds,
   UnitIntervalOfProfileRange,
   StartEndRange,
@@ -70,10 +69,11 @@ const STACK_FRAME_HEIGHT = 16;
 
 type StateProps = {|
   +thread: Thread,
+  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +maxStackDepth: number,
-  +combinedTimingRows: CombinedTimingRows,
+  +defaultCategory: IndexIntoCategoryList,
   +timeRange: StartEndRange,
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
@@ -84,7 +84,7 @@ type StateProps = {|
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
   +getMarker: (MarkerIndex) => Marker,
-  +userTimings: MarkerIndex[],
+  +userTimingRows: MarkerTiming[] | null,
   +timelineMarginLeft: CssPixels,
   +displayStackType: boolean,
 |};
@@ -122,7 +122,7 @@ class StackChartImpl extends React.PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
   };
 
@@ -131,7 +131,7 @@ class StackChartImpl extends React.PureComponent<Props> {
 
     changeRightClickedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
   };
 
@@ -182,13 +182,9 @@ class StackChartImpl extends React.PureComponent<Props> {
   _onCopy = (event: ClipboardEvent) => {
     if (document.activeElement === this._viewport) {
       event.preventDefault();
-      const {
-        callNodeInfo: { callNodeTable },
-        selectedCallNodeIndex,
-        thread,
-      } = this.props;
+      const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
       if (selectedCallNodeIndex !== null) {
-        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );
@@ -209,9 +205,10 @@ class StackChartImpl extends React.PureComponent<Props> {
   render() {
     const {
       thread,
+      sampleNonInvertedCallNodes,
       threadsKey,
       maxStackDepth,
-      combinedTimingRows,
+      defaultCategory,
       timeRange,
       interval,
       previewSelection,
@@ -223,12 +220,13 @@ class StackChartImpl extends React.PureComponent<Props> {
       scrollToSelectionGeneration,
       innerWindowIDToPageMap,
       getMarker,
-      userTimings,
+      userTimingRows,
       weightType,
       timelineMarginLeft,
       displayStackType,
     } = this.props;
 
+    // TODO: Account for user timing rows + gap
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
@@ -240,7 +238,8 @@ class StackChartImpl extends React.PureComponent<Props> {
       >
         <StackSettings />
         <TransformNavigator />
-        {maxStackDepth === 0 && userTimings.length === 0 ? (
+        {maxStackDepth === 0 &&
+        (userTimingRows === null || userTimingRows.length === 0) ? (
           <StackChartEmptyReasons />
         ) : (
           <ContextMenuTrigger
@@ -264,17 +263,19 @@ class StackChartImpl extends React.PureComponent<Props> {
                 chartProps={{
                   interval,
                   thread,
+                  sampleNonInvertedCallNodes,
                   weightType,
+                  maxDepth: maxStackDepth,
+                  defaultCategory,
                   innerWindowIDToPageMap,
                   threadsKey,
-                  combinedTimingRows,
                   getMarker,
+                  userTimingRows,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
                   changeMouseTimePosition,
                   rangeStart: timeRange.start,
                   rangeEnd: timeRange.end,
-                  stackFrameHeight: STACK_FRAME_HEIGHT,
                   callNodeInfo,
                   categories,
                   selectedCallNodeIndex,
@@ -298,16 +299,21 @@ class StackChartImpl extends React.PureComponent<Props> {
 export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
     const showUserTimings = getShowUserTimings(state);
-    const combinedTimingRows = showUserTimings
-      ? selectedThreadSelectors.getCombinedTimingRows(state)
-      : selectedThreadSelectors.getStackTimingByDepth(state);
+    const userTimingRows = showUserTimings
+      ? selectedThreadSelectors.getUserTimingMarkerTiming(state)
+      : null;
 
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
+      sampleNonInvertedCallNodes:
+        selectedThreadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
+          state
+        ),
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
       maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
-      combinedTimingRows,
+      userTimingRows,
+      defaultCategory: getDefaultCategory(state),
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
@@ -321,7 +327,6 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
-      userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
       displayStackType: getProfileUsesMultipleStackTypes(state),
     };
@@ -338,9 +343,6 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
 });
 
 // This function is given the StackChartCanvas's chartProps.
-function viewportNeedsUpdate(
-  prevProps: { +combinedTimingRows: CombinedTimingRows },
-  newProps: { +combinedTimingRows: CombinedTimingRows }
-) {
-  return prevProps.combinedTimingRows !== newProps.combinedTimingRows;
+function viewportNeedsUpdate(_prevProps, _newProps) {
+  return false;
 }

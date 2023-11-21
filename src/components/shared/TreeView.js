@@ -16,7 +16,12 @@ import { VirtualList } from './VirtualList';
 
 import { ContextMenuTrigger } from './ContextMenuTrigger';
 
-import type { CssPixels, TableViewOptions } from 'firefox-profiler/types';
+import type {
+  CssPixels,
+  NodeIndex,
+  TableViewOptions,
+  Tree,
+} from 'firefox-profiler/types';
 
 import './TreeView.css';
 
@@ -43,7 +48,6 @@ function PermissiveLocalized(props: React.ElementConfig<typeof Localized>) {
 // This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
 // See https://github.com/facebook/flow/issues/4099
 type RegExpResult = null | ({ index: number, input: string } & string[]);
-type NodeIndex = number;
 type TableViewOptionsWithDefault = {|
   fixedColumnWidths: Array<CssPixels>,
 |};
@@ -425,16 +429,6 @@ class TreeViewRowScrolledColumns<
       </div>
     );
   }
-}
-
-interface Tree<DisplayData: Object> {
-  getDepth(NodeIndex): number;
-  getRoots(): NodeIndex[];
-  getDisplayData(NodeIndex): DisplayData;
-  getParent(NodeIndex): NodeIndex;
-  getChildren(NodeIndex): NodeIndex[];
-  hasChildren(NodeIndex): boolean;
-  getAllDescendants(NodeIndex): Set<NodeIndex>;
 }
 
 type TreeViewProps<DisplayData> = {|

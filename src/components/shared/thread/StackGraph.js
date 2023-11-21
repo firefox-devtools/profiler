@@ -16,13 +16,12 @@ import type {
   IndexIntoCallNodeTable,
   SelectedState,
 } from 'firefox-profiler/types';
-import type { HeightFunctionParams } from './HeightGraph';
 
 type Props = {|
   +className: string,
   +thread: Thread,
   +samplesSelectedStates: null | SelectedState[],
-  +sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -38,21 +37,21 @@ type Props = {|
 |};
 
 export class ThreadStackGraph extends PureComponent<Props> {
-  _heightFunction = ({
-    callNodeIndex,
-    yPixelsPerHeight,
-  }: HeightFunctionParams): number => {
-    const { callNodeInfo } = this.props;
-    const { callNodeTable } = callNodeInfo;
+  _heightFunction = (sampleIndex: IndexIntoSamplesTable): number | null => {
+    const { callNodeInfo, sampleNonInvertedCallNodes } = this.props;
+    const nonInvertedCallNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
+    if (nonInvertedCallNodeIndex === null) {
+      return null;
+    }
 
-    return callNodeTable.depth[callNodeIndex] * yPixelsPerHeight;
+    const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    return nonInvertedCallNodeTable.depth[nonInvertedCallNodeIndex];
   };
 
   render() {
     const {
       className,
       thread,
-      sampleCallNodes,
       samplesSelectedStates,
       interval,
       rangeStart,
@@ -62,12 +61,12 @@ export class ThreadStackGraph extends PureComponent<Props> {
       trackName,
       onSampleClick,
     } = this.props;
-    const { callNodeTable } = callNodeInfo;
+    const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     let maxDepth = 0;
-    for (let i = 0; i < callNodeTable.depth.length; i++) {
-      if (callNodeTable.depth[i] > maxDepth) {
-        maxDepth = callNodeTable.depth[i];
+    for (let i = 0; i < nonInvertedCallNodeTable.depth.length; i++) {
+      if (nonInvertedCallNodeTable.depth[i] > maxDepth) {
+        maxDepth = nonInvertedCallNodeTable.depth[i];
       }
     }
 
@@ -79,7 +78,6 @@ export class ThreadStackGraph extends PureComponent<Props> {
         trackName={trackName}
         interval={interval}
         thread={thread}
-        sampleCallNodes={sampleCallNodes}
         samplesSelectedStates={samplesSelectedStates}
         rangeStart={rangeStart}
         rangeEnd={rangeEnd}

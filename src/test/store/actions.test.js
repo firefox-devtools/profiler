@@ -19,7 +19,6 @@ import {
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-  getUserTiming,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
@@ -146,9 +145,10 @@ describe('selectors/getFlameGraphTiming', function () {
    * "FunctionName1 (StartTime:EndTime) | FunctionName2 (StartTime:EndTime)"
    */
   function getHumanReadableFlameGraphRanges(store, funcNames) {
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
@@ -176,9 +176,10 @@ describe('selectors/getFlameGraphTiming', function () {
    * "FunctionName1 (SelfTimeRelative) | ..."
    */
   function getHumanReadableFlameGraphTimings(store, funcNames) {
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
@@ -361,11 +362,11 @@ describe('actions/changeInvertCallstack', function () {
     profile,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
-      A  A  A  A  A
-      B  E  B  B  B
-      C  F  I  I  I
-      D  G  J  J  J
-         H
+      A  A  A  A  A  A
+      B  E  B  B  B  B
+      C  F  I  I  I  I
+      D  G  J  J  J  J
+         H           K
     `);
   const toFuncIndex = (funcName) => funcNames.indexOf(funcName);
   const threadIndex = 0;
@@ -414,7 +415,7 @@ describe('actions/changeInvertCallstack', function () {
       // Do not select the first alphabetical path:
       expect(selectedCallNodePath).not.toEqual(['D', 'C', 'B']);
 
-      // Pick the heaviest path:
+      // Pick the heaviest path, and stops short of K:
       expect(selectedCallNodePath).toEqual(['J', 'I', 'B']);
       expect(expandedCallNodePaths).toEqual([['J'], ['J', 'I']]);
     });
@@ -468,95 +469,6 @@ describe('actions/changeShowUserTimings', function () {
     expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(false);
     dispatch(changeShowUserTimings(true));
     expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(true);
-  });
-});
-
-describe('selectors/getCombinedTimingRows', function () {
-  function setupUserTimings() {
-    // Approximately generate this type of graph with the following user timings.
-    //
-    // [renderFunction---------------------]
-    //   [componentA---------------------]
-    //     [componentB----]  [componentD]
-    //      [componentC-]
-    return getProfileWithMarkers([
-      getUserTiming('renderFunction', 0, 10),
-      getUserTiming('componentA', 1, 8),
-      getUserTiming('componentB', 2, 4),
-      getUserTiming('componentC', 3, 1),
-      getUserTiming('componentD', 7, 1),
-    ]);
-  }
-
-  function setupSamples() {
-    const { profile } = getProfileFromTextSamples(
-      `
-        A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
-        B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
-        C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
-        D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
-        E[cat:Graphics]  G[cat:Graphics]
-      `
-    );
-
-    return profile;
-  }
-
-  it('combined timings includes user and call timings', () => {
-    const markerProfile = setupUserTimings();
-    const stackProfile = setupSamples();
-    stackProfile.threads[0].markers = markerProfile.threads[0].markers;
-    const store = storeWithProfile(stackProfile);
-
-    expect(
-      selectedThreadSelectors.getCombinedTimingRows(store.getState())
-    ).toEqual([
-      {
-        start: [0],
-        end: [10],
-        index: [0],
-        label: ['renderFunction'],
-        name: 'A',
-        bucket: 'None',
-        instantOnly: false,
-        length: 1,
-      },
-      {
-        start: [1],
-        end: [9],
-        index: [1],
-        label: ['componentA'],
-        name: 'A',
-        bucket: 'None',
-        instantOnly: false,
-        length: 1,
-      },
-      {
-        start: [2],
-        end: [6],
-        index: [2],
-        label: ['componentB'],
-        name: 'A',
-        bucket: 'None',
-        instantOnly: false,
-        length: 1,
-      },
-      {
-        bucket: 'None',
-        end: [4],
-        index: [3],
-        label: ['componentC'],
-        length: 1,
-        name: 'A',
-        start: [3],
-        instantOnly: false,
-      },
-      { start: [0], end: [3], callNode: [0], length: 1 },
-      { start: [0], end: [3], callNode: [1], length: 1 },
-      { start: [0, 2], end: [2, 3], callNode: [2, 7], length: 2 },
-      { start: [0, 1, 2], end: [1, 2, 3], callNode: [3, 5, 8], length: 3 },
-      { start: [0, 1], end: [1, 2], callNode: [4, 6], length: 2 },
-    ]);
   });
 });
 

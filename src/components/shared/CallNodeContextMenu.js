@@ -136,10 +136,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
@@ -173,10 +173,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const stringIndex = funcTable.fileName[funcIndex];
     if (stringIndex === null) {
       return null;
@@ -223,28 +223,29 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { funcTable, resourceTable, stringTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    let stack = '';
-    let curCallNodeIndex = callNodeIndex;
+    const callPath = callNodeInfo
+      .getCallNodePathFromIndex(callNodeIndex)
+      .reverse();
 
-    do {
-      // Match the style of MarkerContextMenu.js#convertStackToString which uses
-      // square brackets around [file:line:column] info. This isn't provided by
-      // getOriginAnnotationForFunc, so build the string in two parts:
-      const funcIndex = callNodeTable.func[curCallNodeIndex];
-      const funcNameIndex = funcTable.name[funcIndex];
-      const funcName = stringTable.getString(funcNameIndex);
-      const fileNameURL = getOriginAnnotationForFunc(
-        funcIndex,
-        funcTable,
-        resourceTable,
-        stringTable
-      );
-      stack += funcName + (fileNameURL ? ` [${fileNameURL}]\n` : '\n');
-      curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
-    } while (curCallNodeIndex !== -1);
+    const stack = callPath
+      .map((funcIndex) => {
+        // Match the style of MarkerContextMenu.js#convertStackToString which uses
+        // square brackets around [file:line:column] info. This isn't provided by
+        // getOriginAnnotationForFunc, so build the string in two parts:
+        const funcNameIndex = funcTable.name[funcIndex];
+        const funcName = stringTable.getString(funcNameIndex);
+        const fileNameURL = getOriginAnnotationForFunc(
+          funcIndex,
+          funcTable,
+          resourceTable,
+          stringTable
+        );
+        return funcName + (fileNameURL ? ` [${fileNameURL}]` : '');
+      })
+      .join('\n');
 
     copy(stack);
   }
@@ -297,15 +298,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const {
-      threadsKey,
-      callNodePath,
-      thread,
-      callNodeIndex,
-      callNodeInfo: { callNodeTable },
-    } = rightClickedCallNodeInfo;
+    const { threadsKey, callNodePath, thread, callNodeIndex, callNodeInfo } =
+      rightClickedCallNodeInfo;
     const selectedFunc = callNodePath[callNodePath.length - 1];
-    const category = callNodeTable.category[callNodeIndex];
+    const category = callNodeInfo.categoryForNode(callNodeIndex);
     switch (type) {
       case 'focus-subtree':
         addTransformToStack(threadsKey, {
@@ -517,11 +513,11 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const categoryIndex = callNodeTable.category[callNodeIndex];
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    const categoryIndex = callNodeInfo.categoryForNode(callNodeIndex);
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
     const isJS = funcTable.isJS[funcIndex];
     const hasCategory = categoryIndex !== -1;
     // This could be the C++ library, or the JS filename.

@@ -9,16 +9,13 @@ import {
 } from '../utils/uintarray-encoding';
 import {
   toValidImplementationFilter,
-  getCallNodeIndexFromPath,
   updateThreadStacks,
   updateThreadStacksByGeneratingNewStackColumns,
   getMapStackUpdater,
-  getCallNodeIndexFromParentAndFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { canonicalizeRangeSet } from '../utils/range-set';
-import { CallTree } from '../profile-logic/call-tree';
 import { getSearchFilteredMarkerIndexes } from '../profile-logic/marker-data';
 import { shallowCloneFrameTable, getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -33,7 +30,7 @@ import type {
   IndexIntoResourceTable,
   CallNodePath,
   CallNodeAndCategoryPath,
-  CallNodeTable,
+  CallNodeInfo,
   StackType,
   ImplementationFilter,
   Transform,
@@ -495,7 +492,7 @@ export function applyTransformToCallNodePath(
   callNodePath: CallNodePath,
   transform: Transform,
   transformedThread: Thread,
-  callNodeTable: CallNodeTable
+  callNodeInfo: CallNodeInfo
 ): CallNodePath {
   switch (transform.type) {
     case 'focus-subtree':
@@ -509,7 +506,7 @@ export function applyTransformToCallNodePath(
       return _removeOtherCategoryFunctionsInNodePathWithFunction(
         transform.category,
         callNodePath,
-        callNodeTable
+        callNodeInfo
       );
     case 'merge-call-node':
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
@@ -598,16 +595,15 @@ function _dropFunctionInCallNodePath(
 function _removeOtherCategoryFunctionsInNodePathWithFunction(
   category: IndexIntoCategoryList,
   callNodePath: CallNodePath,
-  callNodeTable: CallNodeTable
+  callNodeInfo: CallNodeInfo
 ): CallNodePath {
   const newCallNodePath = [];
 
   let prefix = -1;
   for (const funcIndex of callNodePath) {
-    const callNodeIndex = getCallNodeIndexFromParentAndFunc(
+    const callNodeIndex = callNodeInfo.getCallNodeIndexFromParentAndFunc(
       prefix,
-      funcIndex,
-      callNodeTable
+      funcIndex
     );
     if (callNodeIndex === null) {
       throw new Error(
@@ -615,7 +611,7 @@ function _removeOtherCategoryFunctionsInNodePathWithFunction(
       );
     }
 
-    if (callNodeTable.category[callNodeIndex] === category) {
+    if (callNodeInfo.categoryForNode(callNodeIndex) === category) {
       newCallNodePath.push(funcIndex);
     }
 
@@ -696,53 +692,6 @@ function _callNodePathHasPrefixPath(
   return (
     prefixPath.length <= callNodePath.length &&
     prefixPath.every((prefixFunc, i) => prefixFunc === callNodePath[i])
-  );
-}
-
-/**
- * Take a CallNodePath, and invert it given a CallTree. Note that if the CallTree
- * is itself inverted, you will get back the uninverted CallNodePath to the regular
- * CallTree.
- *
- * e.g:
- *   (invertedPath, invertedCallTree) => path
- *   (path, callTree) => invertedPath
- *
- * Call trees are sorted with the CallNodes with the heaviest total time as the first
- * entry. This function walks to the tip of the heaviest branches to find the leaf node,
- * then construct an inverted CallNodePath with the result. This gives a pretty decent
- * result, but it doesn't guarantee that it will select the heaviest CallNodePath for the
- * INVERTED call tree. This would require doing a round trip through the reducers or
- * some other mechanism in order to first calculate the next inverted call tree. This is
- * probably not worth it, so go ahead and use the uninverted call tree, as it's probably
- * good enough.
- */
-export function invertCallNodePath(
-  path: CallNodePath,
-  callTree: CallTree,
-  callNodeTable: CallNodeTable
-): CallNodePath {
-  let callNodeIndex = getCallNodeIndexFromPath(path, callNodeTable);
-  if (callNodeIndex === null) {
-    // No path was found, return an empty CallNodePath.
-    return [];
-  }
-  let children = [callNodeIndex];
-  const pathToLeaf = [];
-  do {
-    // Walk down the tree's depth to construct a path to the leaf node, this should
-    // be the heaviest branch of the tree.
-    callNodeIndex = children[0];
-    pathToLeaf.push(callNodeIndex);
-    children = callTree.getChildren(callNodeIndex);
-  } while (children && children.length > 0);
-
-  return (
-    pathToLeaf
-      // Map the CallNodeIndex to FuncIndex.
-      .map((index) => callNodeTable.func[index])
-      // Reverse it so that it's in the proper inverted order.
-      .reverse()
   );
 }
 

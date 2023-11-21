@@ -197,7 +197,7 @@ describe('calltree/CallNodeContextMenu', function () {
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy stack'));
       expect(copy).toHaveBeenCalledWith(
-        `B.js [https://example.com/script.js:2:222]\nA.js [https://example.com/script.js:1:111]\n`
+        `B.js [https://example.com/script.js:2:222]\nA.js [https://example.com/script.js:1:111]`
       );
     });
   });

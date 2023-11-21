@@ -24,7 +24,7 @@ import type {
   Tid,
 } from './profile';
 import type { IndexedArray } from './utils';
-import type { StackTiming } from '../profile-logic/stack-timing';
+export type { CallNodeInfo } from '../profile-logic/profile-data';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -54,6 +54,8 @@ export type IndexIntoCallNodeTable = number;
  */
 export type CallNodeTable = {
   prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+  nextAfterDescendants: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable
+  nextSibling: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
@@ -66,15 +68,17 @@ export type CallNodeTable = {
   length: number,
 };
 
-/**
- * Both the callNodeTable and a map that converts an IndexIntoStackTable
- * into an IndexIntoCallNodeTable.
- */
-export type CallNodeInfo = {
-  callNodeTable: CallNodeTable,
-  // IndexIntoStackTable -> IndexIntoCallNodeTable
-  stackIndexToCallNodeIndex: Uint32Array,
-};
+export type NodeIndex = number;
+
+export interface Tree<DisplayData> {
+  getDepth(NodeIndex): number;
+  getRoots(): NodeIndex[];
+  getDisplayData(NodeIndex): DisplayData;
+  getParent(NodeIndex): NodeIndex | -1;
+  getChildren(NodeIndex): NodeIndex[];
+  hasChildren(NodeIndex): boolean;
+  getAllDescendants(NodeIndex): Set<NodeIndex>;
+}
 
 export type LineNumber = number;
 
@@ -278,15 +282,6 @@ export type MarkerTiming = {|
 |};
 
 export type MarkerTimingRows = Array<MarkerTiming>;
-
-/**
- * Combined timing can be used in the Stack Chart. When this happens, the chart will
- * either take both marker timing and stack timing, or just the stack timing information.
- * This way, UserTiming markers can be shown together with the stack information.
- */
-export type CombinedTimingRows =
-  | Array<MarkerTiming | StackTiming>
-  | Array<StackTiming>;
 
 /**
  * This type contains the necessary information to fully draw the marker chart. Each
@@ -530,15 +525,17 @@ export type ProfileFilterPageData = {|
 |};
 
 /**
- * This struct contains the traced timing for each call node. The arrays are indexed
- * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
- * traced timing is computed by summing the distance between samples for a given call
- * node. See the `computeTracedTiming` for more details.
+ * This struct contains the timing for each call node. The arrays are indexed
+ * by the CallNodeIndex. The values in the Float32Arrays depend on the context:
+ *  - When used for "traced" timing, the values are Milliseconds.
+ *  - Otherwise, the values are in the same unit as the sample weight type.
  */
-export type TracedTiming = {|
-  +self: Float32Array,
-  +running: Float32Array,
+export type CallNodeSummary = {|
+  self: Float32Array,
+  total: Float32Array,
 |};
+
+export type SelfAndTotal = {| self: number, total: number |};
 
 /*
  * Event delay table that holds the pre-processed event delay values and other

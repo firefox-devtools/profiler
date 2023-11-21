@@ -9,7 +9,6 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
-import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
@@ -246,7 +245,7 @@ class CallTreeImpl extends PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable),
+      callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode),
       context
     );
   };
@@ -255,7 +254,7 @@ class CallTreeImpl extends PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
     changeRightClickedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode)
     );
   };
 
@@ -266,7 +265,7 @@ class CallTreeImpl extends PureComponent<Props> {
     changeExpandedCallNodes(
       threadsKey,
       newExpandedCallNodeIndexes.map((callNodeIndex) =>
-        getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+        callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
       )
     );
   };
@@ -301,7 +300,7 @@ class CallTreeImpl extends PureComponent<Props> {
       tree,
       expandedCallNodeIndexes,
       selectedCallNodeIndex,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       categories,
     } = this.props;
 
@@ -330,7 +329,8 @@ class CallTreeImpl extends PureComponent<Props> {
 
       // Let's find if there's a non idle children.
       const firstNonIdleNode = children.find(
-        (nodeIndex) => callNodeTable.category[nodeIndex] !== idleCategoryIndex
+        (nodeIndex) =>
+          callNodeInfo.categoryForNode(nodeIndex) !== idleCategoryIndex
       );
 
       // If there's a non idle children, use it; otherwise use the first
@@ -341,7 +341,7 @@ class CallTreeImpl extends PureComponent<Props> {
     }
     this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
 
-    const categoryIndex = callNodeTable.category[currentCallNodeIndex];
+    const categoryIndex = callNodeInfo.categoryForNode(currentCallNodeIndex);
     if (categoryIndex !== idleCategoryIndex) {
       // If we selected the call node with a "idle" category, we'd have a
       // completely dimmed activity graph because idle stacks are not drawn in

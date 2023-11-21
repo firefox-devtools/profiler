@@ -180,6 +180,24 @@ type ViewportOwnProps<ChartProps> = {|
   +chartProps: ChartProps,
 |};
 
+// Fully zoomed out:
+//   marginLeft                                        marginRight
+//         viewportLeft: 0                  viewportRight: 1
+//                           "inner box"
+// |<---------->|<--------------------------------->|<------------->|
+//              #####################################
+// |<-------------------------------------------------------------->|
+//                              canvas
+//
+// Zoomed in:
+//   marginLeft                                        marginRight
+//         viewportLeft: 0.3                  viewportRight: 0.7
+//                           "inner box"
+// |<---------->|<--------------------------------->|<------------->|
+// ##################################################################
+// |<-------------------------------------------------------------->|
+//                              canvas
+
 type HorizontalViewport = {|
   // The position of the profile range that should be drawn at the left edge of
   // the chart's "inner box", i.e. after the marginLeft.

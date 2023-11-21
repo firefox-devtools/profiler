@@ -33,7 +33,7 @@ import type {
   CallTreeSummaryStrategy,
   WeightType,
   SamplesLikeTable,
-  TracedTiming,
+  CallNodeSummary,
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
@@ -75,7 +75,7 @@ export type OwnProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: TracedTiming | null,
+  +tracedTiming: CallNodeSummary | null,
   +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
@@ -110,13 +110,12 @@ function snap(floatDeviceValue: DevicePixels): DevicePixels {
 }
 
 /**
- * Round the given value to a multiple of `integerFactor`.
+ * Round the given value to a multiple of 2.
  */
-function snapValueToMultipleOf(
-  floatDeviceValue: DevicePixels,
-  integerFactor: number
+function snapValueToMultipleOfTwo(
+  floatDeviceValue: DevicePixels
 ): DevicePixels {
-  return snap(floatDeviceValue / integerFactor) * integerFactor;
+  return snap(floatDeviceValue / 2) << 1;
 }
 
 class FlameGraphCanvasImpl extends React.PureComponent<Props> {
@@ -153,16 +152,13 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   }
 
   _scrollSelectionIntoView = () => {
-    const {
-      selectedCallNodeIndex,
-      maxStackDepth,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { selectedCallNodeIndex, maxStackDepth, callNodeInfo } = this.props;
 
     if (selectedCallNodeIndex === null) {
       return;
     }
 
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
     const y = (maxStackDepth - depth - 1) * ROW_HEIGHT;
 
@@ -184,7 +180,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     const {
       thread,
       flameGraphTiming,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       stackFrameHeight,
       maxStackDepth,
       rightClickedCallNodeIndex,
@@ -236,6 +232,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
 
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+
     const startDepth = Math.floor(
       maxStackDepth - viewportBottom / stackFrameHeight
     );
@@ -278,12 +276,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         const deviceBoxLeftUnsnapped = boxLeftFraction * deviceContainerWidth;
         const deviceBoxRightUnsnapped = boxRightFraction * deviceContainerWidth;
 
-        const deviceBoxLeft: DevicePixels = snapValueToMultipleOf(
-          deviceBoxLeftUnsnapped,
-          2
+        const deviceBoxLeft: DevicePixels = snapValueToMultipleOfTwo(
+          deviceBoxLeftUnsnapped
         );
         const deviceBoxRight: DevicePixels =
-          snapValueToMultipleOf(deviceBoxRightUnsnapped, 2) - 0.8;
+          snapValueToMultipleOfTwo(deviceBoxRightUnsnapped) - 0.8;
 
         const deviceBoxWidth: DevicePixels = deviceBoxRight - deviceBoxLeft;
         if (deviceBoxWidth <= 0) {
@@ -362,7 +359,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       shouldDisplayTooltips,
       categories,
       interval,
-      isInverted,
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
       weightType,
@@ -388,7 +384,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       const time = formatCallNodeNumberWithUnit(
         'tracing-ms',
         false,
-        tracedTiming.running[callNodeIndex]
+        tracedTiming.total[callNodeIndex]
       );
       percentage = `${time} (${percentage})`;
     }
@@ -400,6 +396,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       // This function could be made more generic to handle other summary
       // strategies, but it may not be worth implementing it.
       callTreeSummaryStrategy === 'timing';
+
+    const displayData = callTree.getDisplayData(callNodeIndex);
 
     return (
       // Important! Only pass in props that have been properly memoized so this component
@@ -413,7 +411,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         callNodeInfo={callNodeInfo}
         categories={categories}
         durationText={percentage}
-        callTree={callTree}
+        displayData={displayData}
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={
           shouldComputeTimings
@@ -421,7 +419,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 callNodeIndex,
                 callNodeInfo,
                 interval,
-                isInverted,
                 thread,
                 unfilteredThread,
                 sampleIndexOffset,

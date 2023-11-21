@@ -469,12 +469,8 @@ export function getThreadSelectorsWithMarkersPerThread(
 
   const getFilteredThread: Selector<Thread> = createSelector(
     _getImplementationAndSearchFilteredThread,
-    UrlState.getInvertCallstack,
-    ProfileSelectors.getDefaultCategory,
-    (thread, shouldInvertCallstack, defaultCategory) => {
-      return shouldInvertCallstack
-        ? ProfileData.invertCallstack(thread, defaultCategory)
-        : thread;
+    (thread) => {
+      return thread;
     }
   );
 

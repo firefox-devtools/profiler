@@ -7,6 +7,10 @@ import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
 import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import {
+  getStackTimingByDepth,
+  getTimeRangeForSpan,
+} from '../../profile-logic/stack-timing';
+import {
   withChartViewport,
   type WithChartViewport,
   type Viewport,
@@ -15,6 +19,9 @@ import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';
+import { ensureExists, assertExhaustiveCheck } from '../../utils/flow';
+import { snapValueToMultipleOfTwo } from '../../utils/coordinates';
+import { bisectionRight } from '../../utils/bisect';
 import {
   updatePreviewSelection,
   typeof changeMouseTimePosition as ChangeMouseTimePosition,
@@ -27,11 +34,10 @@ import type {
   Thread,
   CategoryList,
   ThreadsKey,
-  UserTimingMarkerPayload,
+  MarkerTiming,
   WeightType,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  CombinedTimingRows,
   Milliseconds,
   CssPixels,
   DevicePixels,
@@ -39,7 +45,9 @@ import type {
   MarkerIndex,
   Marker,
   InnerWindowID,
+  IndexIntoCategoryList,
   Page,
+  StartEndRange,
 } from 'firefox-profiler/types';
 
 import type {
@@ -49,25 +57,28 @@ import type {
 
 import type {
   StackTimingDepth,
+  StackTimingByDepth,
   IndexIntoStackTiming,
 } from '../../profile-logic/stack-timing';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {|
   +thread: Thread,
+  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +threadsKey: ThreadsKey,
   +interval: Milliseconds,
   +weightType: WeightType,
+  +maxDepth: StackTimingDepth,
+  +defaultCategory: IndexIntoCategoryList,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +combinedTimingRows: CombinedTimingRows,
-  +stackFrameHeight: CssPixels,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
   >,
   +changeMouseTimePosition: ChangeMouseTimePosition,
   +getMarker: (MarkerIndex) => Marker,
+  +userTimingRows: MarkerTiming[] | null,
   +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -84,22 +95,55 @@ type Props = $ReadOnly<{|
   +viewport: Viewport,
 |}>;
 
-type HoveredStackTiming = {|
-  +depth: StackTimingDepth,
-  +stackTimingIndex: IndexIntoStackTiming,
+type HoveredStackTiming =
+  | {|
+      type: 'STACK',
+      depth: StackTimingDepth,
+      stackTimingIndex: IndexIntoStackTiming,
+    |}
+  | {|
+      type: 'USER_TIMING',
+      rowIndex: number,
+      marker: IndexIntoStackTiming,
+    |};
+
+type HoveredPosition = {|
+  +x: CssPixels,
+  +y: CssPixels,
+|};
+
+type ItemInfo =
+  | {|
+      type: 'CALL_NODE',
+      callNodeIndex: IndexIntoCallNodeTable,
+      timeRange: StartEndRange,
+    |}
+  | {| type: 'MARKER', markerIndex: MarkerIndex |};
+
+type DrawInfo = {|
+  stackTimingRows: StackTimingByDepth,
+  cssToDeviceScale: number,
+  viewportTopDev: DevicePixels,
+  rowHeightDev: DevicePixels,
+  userTimingHeaderHeightDev: DevicePixels,
+  userTimingRows: MarkerTiming[] | null,
+  timeAtOuterStart: Milliseconds,
+  devPxPerMs: number,
 |};
 
 import './Canvas.css';
 
 const ROW_CSS_PIXELS_HEIGHT = 16;
+const GAP_HEIGHT_AFTER_USER_TIMING = 8;
 const TEXT_CSS_PIXELS_OFFSET_START = 3;
 const TEXT_CSS_PIXELS_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
-const BORDER_OPACITY = 0.4;
+const BORDER_OPACITY = 0.8;
 
 class StackChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
   _textMeasurementCssToDeviceScale: number = 1;
+  _lastDrawInfo: DrawInfo | null = null;
 
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
@@ -122,24 +166,39 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   }
 
   _scrollSelectionIntoView = () => {
-    const {
-      selectedCallNodeIndex,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { selectedCallNodeIndex, callNodeInfo } = this.props;
 
     if (selectedCallNodeIndex === null) {
       return;
     }
 
-    const depth = callNodeTable.depth[selectedCallNodeIndex];
-    const y = depth * ROW_CSS_PIXELS_HEIGHT;
+    const depth = callNodeInfo.depthForNode(selectedCallNodeIndex);
 
-    if (y < this.props.viewport.viewportTop) {
-      this.props.viewport.moveViewport(0, this.props.viewport.viewportTop - y);
-    } else if (y + ROW_CSS_PIXELS_HEIGHT > this.props.viewport.viewportBottom) {
+    const lastDrawInfo = this._lastDrawInfo ?? {
+      cssToDeviceScale: 1,
+      userTimingHeaderHeightDev:
+        (this.props.userTimingRows?.length ?? 0) * ROW_CSS_PIXELS_HEIGHT +
+        GAP_HEIGHT_AFTER_USER_TIMING,
+      rowHeightDev: ROW_CSS_PIXELS_HEIGHT,
+    };
+
+    const { cssToDeviceScale, userTimingHeaderHeightDev, rowHeightDev } =
+      lastDrawInfo;
+
+    const rowTopDev = userTimingHeaderHeightDev + depth * rowHeightDev;
+    const rowBottomDev = rowTopDev + rowHeightDev;
+    const rowTop = rowTopDev / cssToDeviceScale;
+    const rowBottom = rowBottomDev / cssToDeviceScale;
+
+    if (rowTop < this.props.viewport.viewportTop) {
       this.props.viewport.moveViewport(
         0,
-        this.props.viewport.viewportBottom - (y + ROW_CSS_PIXELS_HEIGHT)
+        this.props.viewport.viewportTop - rowTop
+      );
+    } else if (rowBottom > this.props.viewport.viewportBottom) {
+      this.props.viewport.moveViewport(
+        0,
+        this.props.viewport.viewportBottom - rowBottom
       );
     }
   };
@@ -156,18 +215,19 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   _drawCanvas = (
     ctx: CanvasRenderingContext2D,
     scale: ChartCanvasScale,
-    hoverInfo: ChartCanvasHoverInfo<HoveredStackTiming>
+    hoverInfo: ChartCanvasHoverInfo<HoveredPosition>
   ) => {
     const {
       thread,
+      userTimingRows,
       rangeStart,
       rangeEnd,
-      combinedTimingRows,
-      stackFrameHeight,
       selectedCallNodeIndex,
       categories,
-      callNodeInfo: { callNodeTable },
-      getMarker,
+      callNodeInfo,
+      interval,
+      maxDepth,
+      defaultCategory,
       marginLeft,
       viewport: {
         containerWidth,
@@ -178,7 +238,6 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         viewportBottom,
       },
     } = this.props;
-    const { hoveredItem } = hoverInfo;
 
     const fastFillStyle = new FastFillStyle(ctx);
 
@@ -207,51 +266,66 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     const textMeasurement = this._textMeasurement;
 
-    const devicePixelsWidth = containerWidth * cssToDeviceScale;
-    const devicePixelsHeight = containerHeight * cssToDeviceScale;
+    const canvasWidthDev = containerWidth * cssToDeviceScale;
+    const canvasHeightDev = containerHeight * cssToDeviceScale;
 
     fastFillStyle.set('#ffffff');
-    ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
+    ctx.fillRect(0, 0, canvasWidthDev, canvasHeightDev);
 
-    const viewportDevicePixelsTop = viewportTop * cssToDeviceScale;
+    // Length of the committed range
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
 
-    // Convert CssPixels to Stack Depth
-    const startDepth = Math.floor(viewportTop / stackFrameHeight);
-    const endDepth = Math.ceil(viewportBottom / stackFrameHeight);
-
-    // Convert between horizontal units: viewport units, milliseconds, CSS pixels, device pixels
+    // Fraction of the committed range that's currently in the viewport
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportRangeLength: Milliseconds = rangeLength * viewportLength;
 
-    const innerContainerWidth =
+    const innerContainerWidth: CssPixels =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
-    const innerDevicePixelsWidth = innerContainerWidth * cssToDeviceScale;
+    const outerViewportLeft =
+      (-marginLeft * viewportLength) / innerContainerWidth + viewportLeft;
+    const outerViewportRight =
+      ((innerContainerWidth + TIMELINE_MARGIN_RIGHT) * viewportLength) /
+        innerContainerWidth +
+      viewportLeft;
+    const timeAtOuterStart = rangeStart + outerViewportLeft * rangeLength;
+    const timeAtOuterEnd = rangeStart + outerViewportRight * rangeLength;
 
-    const timePerCssPixel = viewportRangeLength / innerContainerWidth;
+    const stackTimingRows = getStackTimingByDepth(
+      thread.samples,
+      thread.stackTable,
+      callNodeInfo,
+      maxDepth,
+      timeAtOuterStart,
+      timeAtOuterEnd,
+      canvasWidthDev,
+      selectedCallNodeIndex,
+      defaultCategory,
+      interval
+    );
 
-    // Compute the time range that's displayed on the canvas, including in the
-    // margins around the viewport.
-    const timeAtStart: Milliseconds =
-      rangeStart + rangeLength * viewportLeft - timePerCssPixel * marginLeft;
-    const timeAtEnd: Milliseconds =
-      rangeStart +
-      rangeLength * viewportRight +
-      timePerCssPixel * TIMELINE_MARGIN_RIGHT;
+    const rowHeightDev = Math.round(ROW_CSS_PIXELS_HEIGHT * cssToDeviceScale);
 
-    const pixelAtViewportPosition = (
-      viewportPosition: UnitIntervalOfProfileRange
-    ): DevicePixels =>
-      cssToDeviceScale *
-      // The right hand side of this formula is all in CSS pixels.
-      (marginLeft +
-        ((viewportPosition - viewportLeft) * innerContainerWidth) /
-          viewportLength);
+    const userTimingHeaderHeightDev =
+      userTimingRows === null
+        ? 0
+        : userTimingRows.length * rowHeightDev +
+          Math.round(GAP_HEIGHT_AFTER_USER_TIMING * cssToDeviceScale);
 
-    // Apply the device pixel ratio to various CssPixel constants.
-    const rowDevicePixelsHeight = ROW_CSS_PIXELS_HEIGHT * cssToDeviceScale;
-    const oneCssPixelInDevicePixels = 1 * cssToDeviceScale;
+    const viewportTopDev = viewportTop * cssToDeviceScale;
+    const viewportBottomDev = viewportBottom * cssToDeviceScale;
+    const devPxPerMs = canvasWidthDev / (timeAtOuterEnd - timeAtOuterStart);
+
+    this._lastDrawInfo = {
+      stackTimingRows,
+      cssToDeviceScale,
+      viewportTopDev,
+      rowHeightDev,
+      userTimingHeaderHeightDev,
+      userTimingRows,
+      timeAtOuterStart,
+      devPxPerMs,
+    };
+
     const textDevicePixelsOffsetStart =
       TEXT_CSS_PIXELS_OFFSET_START * cssToDeviceScale;
     const textDevicePixelsOffsetTop =
@@ -264,108 +338,51 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       categoryForUserTiming = 0;
     }
 
-    // Only draw the stack frames that are vertically within view.
-    for (let depth = startDepth; depth < endDepth; depth++) {
-      // Get the timing information for a row of stack frames.
-      const stackTiming = combinedTimingRows[depth];
+    const { hoveredItem: hoveredPosition } = hoverInfo;
+    const hoveredItem =
+      hoveredPosition !== null
+        ? this._itemAtPosition(hoveredPosition.x, hoveredPosition.y)
+        : null;
+    const [hoveredDepth, hoveredIndex] =
+      hoveredItem !== null && hoveredItem.type === 'STACK'
+        ? [hoveredItem.depth, hoveredItem.stackTimingIndex]
+        : [null, null];
 
-      if (!stackTiming) {
-        continue;
-      }
-      let lastDrawnPixelX = 0;
-      for (let i = 0; i < stackTiming.length; i++) {
-        // Only draw boxes that overlap with the canvas.
-        if (
-          stackTiming.end[i] > timeAtStart &&
-          stackTiming.start[i] < timeAtEnd
-        ) {
-          // Draw a box, but increase the size by a small portion in order to draw
-          // a single pixel at the end with a slight opacity.
-          //
-          // Legend:
-          // |======|  A stack frame's timing.
-          // |O|       A single fully opaque pixel.
-          // |.|       A slightly transparent pixel.
-          // | |       A fully transparent pixel.
-          //
-          // Drawing strategy:
-          //
-          // Frame timing   |=====||========|    |=====|    |=|     |=|=|=|=|
-          // Device Pixels  |O|O|.|O|O|O|O|.| | |O|O|O|.| | |O|.| | |O|.|O|.|
-          // CSS Pixels     |   |   |   |   |   |   |   |   |   |   |   |   |
+    if (userTimingRows !== null) {
+      const startRowIndex = Math.max(
+        0,
+        Math.floor(viewportTopDev / rowHeightDev)
+      );
+      const endRowIndex = Math.min(
+        userTimingRows.length,
+        Math.ceil(viewportBottomDev / rowHeightDev)
+      );
+      const [hoveredRowIndex, hoveredMarker] =
+        hoveredItem !== null && hoveredItem.type === 'USER_TIMING'
+          ? [hoveredItem.rowIndex, hoveredItem.marker]
+          : [null, null];
+      for (let rowIndex = startRowIndex; rowIndex < endRowIndex; rowIndex++) {
+        const row = userTimingRows[rowIndex];
+        const isHoveredRow = rowIndex === hoveredRowIndex;
 
-          // First compute the left and right sides of the box.
-          const viewportAtStartTime: UnitIntervalOfProfileRange =
-            (stackTiming.start[i] - rangeStart) / rangeLength;
-          const viewportAtEndTime: UnitIntervalOfProfileRange =
-            (stackTiming.end[i] - rangeStart) / rangeLength;
-          const floatX = pixelAtViewportPosition(viewportAtStartTime);
-          const floatW: DevicePixels =
-            ((viewportAtEndTime - viewportAtStartTime) *
-              innerDevicePixelsWidth) /
-              viewportLength -
-            1;
+        const intY = rowIndex * rowHeightDev - viewportTopDev;
+        const intH = rowHeightDev - 1;
 
-          // Determine if there is enough pixel space to draw this box, and snap the
-          // box to the pixels.
-          let snappedFloatX = floatX;
-          let snappedFloatW = floatW;
-          let skipDraw = true;
-          if (floatX >= lastDrawnPixelX) {
-            // The x value is past the last lastDrawnPixelX, so it can be drawn.
-            skipDraw = false;
-          } else if (floatX + floatW > lastDrawnPixelX) {
-            // The left side of the box is before the lastDrawnPixelX value, but the
-            // right hand side is within a range to be drawn. Truncate the box a little
-            // bit in order to draw it to the screen in the free space.
-            snappedFloatW = floatW - (lastDrawnPixelX - floatX);
-            snappedFloatX = lastDrawnPixelX;
-            skipDraw = false;
-          }
-
-          if (skipDraw) {
-            // This box didn't satisfy the constraints in the above if checks, so skip it.
+        for (let i = 0; i < row.length; i++) {
+          const leftDevFloat = (row.start[i] - timeAtOuterStart) * devPxPerMs;
+          const rightDevFloat = (row.end[i] - timeAtOuterStart) * devPxPerMs;
+          const leftDevInt = snapValueToMultipleOfTwo(leftDevFloat);
+          const rightDevInt = snapValueToMultipleOfTwo(rightDevFloat);
+          if (leftDevInt >= rightDevInt) {
             continue;
           }
-
-          // Convert or compute all of the integer values for drawing the box.
-          // Note, this should all be Math.round instead of floor and ceil, but some
-          // off by one errors appear to be creating gaps where there shouldn't be any.
-          const intX = Math.floor(snappedFloatX);
-          const intY = Math.round(
-            depth * rowDevicePixelsHeight - viewportDevicePixelsTop
-          );
-          const intW = Math.ceil(Math.max(1, snappedFloatW));
-          const intH = Math.round(
-            rowDevicePixelsHeight - oneCssPixelInDevicePixels
-          );
-
-          // Look up information about this stack frame.
-          let text, category, isSelected;
-          if (stackTiming.callNode) {
-            const callNodeIndex = stackTiming.callNode[i];
-            const funcIndex = callNodeTable.func[callNodeIndex];
-            const funcNameIndex = thread.funcTable.name[funcIndex];
-            text = thread.stringTable.getString(funcNameIndex);
-            const categoryIndex = callNodeTable.category[callNodeIndex];
-            category = categories[categoryIndex];
-            isSelected = selectedCallNodeIndex === callNodeIndex;
-          } else {
-            const markerIndex = stackTiming.index[i];
-            const markerPayload = ((getMarker(markerIndex)
-              .data: any): UserTimingMarkerPayload);
-            text = markerPayload.name;
-            category = categories[categoryForUserTiming];
-            isSelected = selectedCallNodeIndex === markerIndex;
-          }
-
-          const isHovered =
-            hoveredItem &&
-            depth === hoveredItem.depth &&
-            i === hoveredItem.stackTimingIndex;
+          const intX = leftDevInt;
+          const intW = rightDevInt - leftDevInt;
+          const isSelected = false;
+          const isHovered = isHoveredRow && i === hoveredMarker;
 
           const colorStyles = mapCategoryColorNameToStackChartStyles(
-            category.color
+            categories[categoryForUserTiming].color
           );
           // Draw the box.
           fastFillStyle.set(
@@ -373,30 +390,16 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
               ? colorStyles.selectedFillStyle
               : colorStyles.unselectedFillStyle
           );
-          ctx.fillRect(
-            intX,
-            intY,
-            // Add on a bit of BORDER_OPACITY to the end of the width, to draw a partial
-            // pixel. This will effectively draw a transparent version of the fill color
-            // without having to change the fill color. At the time of this writing it
-            // was the same performance cost as only providing integer values here.
-            intW + BORDER_OPACITY,
-            intH
-          );
-          lastDrawnPixelX =
-            intX +
-            intW +
-            // The border on the right is 1 device pixel wide.
-            1;
+          ctx.fillRect(intX, intY, intW - BORDER_OPACITY, intH);
 
-          // Draw the text label if it fits. Use the original float values here so that
-          // the text doesn't snap around when moving. Only the boxes should snap.
-          const textX: DevicePixels =
-            // Constrain the x coordinate to the leftmost area.
-            Math.max(floatX, 0) + textDevicePixelsOffsetStart;
-          const textW: DevicePixels = Math.max(0, floatW - (textX - floatX));
+          const textX: DevicePixels = intX + textDevicePixelsOffsetStart;
+          const textW: DevicePixels = Math.max(
+            0,
+            intW - textDevicePixelsOffsetStart
+          );
 
           if (textW > textMeasurement.minWidth) {
+            const text = row.label[i];
             const fittedText = textMeasurement.getFittedText(text, textW);
             if (fittedText) {
               fastFillStyle.set(
@@ -411,34 +414,98 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       }
     }
 
+    // Only draw the stack frames that are vertically within view.
+    const startDepth = Math.floor(
+      (viewportTopDev - userTimingHeaderHeightDev) / rowHeightDev
+    );
+    const endDepth = Math.ceil(
+      (viewportBottomDev - userTimingHeaderHeightDev) / rowHeightDev
+    );
+
+    for (let depth = startDepth; depth < endDepth; depth++) {
+      // Get the timing information for a row of stack frames.
+      const stackTiming = stackTimingRows[depth];
+
+      if (!stackTiming) {
+        continue;
+      }
+
+      const isHoveredDepth = hoveredDepth === depth;
+
+      const intY =
+        userTimingHeaderHeightDev + depth * rowHeightDev - viewportTopDev;
+      const intH = rowHeightDev - 1;
+
+      for (let i = 0; i < stackTiming.length; i++) {
+        const intX = stackTiming.startDev[i];
+        const intW = stackTiming.endDev[i] - intX;
+        const funcIndex = stackTiming.func[i];
+        const funcNameIndex = thread.funcTable.name[funcIndex];
+        const text = thread.stringTable.getString(funcNameIndex);
+        const categoryIndex = stackTiming.category[i];
+        const category = categories[categoryIndex];
+        const isSelected = stackTiming.isSelectedPath[i];
+        const isHovered = isHoveredDepth && i === hoveredIndex;
+
+        const colorStyles = mapCategoryColorNameToStackChartStyles(
+          category.color
+        );
+        // Draw the box.
+        fastFillStyle.set(
+          isHovered || isSelected
+            ? colorStyles.selectedFillStyle
+            : colorStyles.unselectedFillStyle
+        );
+        ctx.fillRect(intX, intY, intW - BORDER_OPACITY, intH);
+
+        const textX: DevicePixels = intX + textDevicePixelsOffsetStart;
+        const textW: DevicePixels = Math.max(
+          0,
+          intW - textDevicePixelsOffsetStart
+        );
+
+        if (textW > textMeasurement.minWidth) {
+          const fittedText = textMeasurement.getFittedText(text, textW);
+          if (fittedText) {
+            fastFillStyle.set(
+              isHovered || isSelected
+                ? colorStyles.selectedTextColor
+                : '#000000'
+            );
+            ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
+          }
+        }
+      }
+    }
+
     // Draw the borders on the left and right.
     fastFillStyle.set(GREY_30);
+    const oneCssPixelInDevicePixels = 1 * cssToDeviceScale;
     ctx.fillRect(
-      pixelAtViewportPosition(0),
+      cssToDeviceScale *
+        (marginLeft - (viewportLeft * innerContainerWidth) / viewportLength),
       0,
       oneCssPixelInDevicePixels,
-      devicePixelsHeight
+      canvasHeightDev
     );
     ctx.fillRect(
-      pixelAtViewportPosition(1),
+      cssToDeviceScale *
+        (marginLeft +
+          ((1 - viewportLeft) * innerContainerWidth) / viewportLength),
       0,
       oneCssPixelInDevicePixels,
-      devicePixelsHeight
+      canvasHeightDev
     );
   };
 
-  _getHoveredStackInfo = ({
-    depth,
-    stackTimingIndex,
-  }: HoveredStackTiming): React.Node | null => {
+  _getHoveredStackInfo = (
+    hoveredPosition: HoveredPosition
+  ): React.Node | null => {
     const {
       thread,
       weightType,
-      threadsKey,
-      combinedTimingRows,
       categories,
       callNodeInfo,
-      getMarker,
       shouldDisplayTooltips,
       interval,
       innerWindowIDToPageMap,
@@ -449,136 +516,243 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const timing = combinedTimingRows[depth];
-
-    if (timing.index) {
-      const markerIndex = timing.index[stackTimingIndex];
-
-      return (
-        <TooltipMarker
-          markerIndex={markerIndex}
-          marker={getMarker(markerIndex)}
-          threadsKey={threadsKey}
-          restrictHeightWidth={true}
-        />
-      );
+    const itemInfo = this._getItemInfoFromHoveredPosition(hoveredPosition);
+    if (!itemInfo) {
+      return null;
     }
 
-    const callNodeIndex = timing.callNode[stackTimingIndex];
-    const duration =
-      timing.end[stackTimingIndex] - timing.start[stackTimingIndex];
+    switch (itemInfo.type) {
+      case 'CALL_NODE': {
+        const { callNodeIndex, timeRange } = itemInfo;
+        const { start, end } = timeRange;
 
-    return (
-      <TooltipCallNode
-        thread={thread}
-        weightType={weightType}
-        innerWindowIDToPageMap={innerWindowIDToPageMap}
-        interval={interval}
-        callNodeIndex={callNodeIndex}
-        callNodeInfo={callNodeInfo}
-        categories={categories}
-        // The stack chart doesn't support other call tree summary types.
-        callTreeSummaryStrategy="timing"
-        durationText={formatMilliseconds(duration)}
-        displayStackType={displayStackType}
-      />
-    );
+        const duration = end - start;
+        return (
+          <TooltipCallNode
+            thread={thread}
+            weightType={weightType}
+            innerWindowIDToPageMap={innerWindowIDToPageMap}
+            interval={interval}
+            callNodeIndex={callNodeIndex}
+            callNodeInfo={callNodeInfo}
+            categories={categories}
+            // The stack chart doesn't support other call tree summary types.
+            callTreeSummaryStrategy="timing"
+            durationText={formatMilliseconds(duration)}
+            displayStackType={displayStackType}
+          />
+        );
+      }
+      case 'MARKER': {
+        const { markerIndex } = itemInfo;
+
+        return (
+          <TooltipMarker
+            markerIndex={markerIndex}
+            marker={this.props.getMarker(markerIndex)}
+            threadsKey={this.props.threadsKey}
+            restrictHeightWidth={true}
+          />
+        );
+      }
+      default:
+        throw assertExhaustiveCheck(itemInfo.type);
+    }
   };
 
-  _onDoubleClickStack = (hoveredItem: HoveredStackTiming | null) => {
-    if (hoveredItem === null) {
+  _onDoubleClick = (position: HoveredPosition | null) => {
+    if (position === null) {
       return;
     }
-    const { depth, stackTimingIndex } = hoveredItem;
-    const { combinedTimingRows, updatePreviewSelection } = this.props;
+
+    const item = this._itemAtPosition(position.x, position.y);
+    const lastDrawInfo = this._lastDrawInfo;
+    if (item === null || item.type !== 'STACK' || lastDrawInfo === null) {
+      return;
+    }
+
+    const { thread, callNodeInfo, sampleNonInvertedCallNodes, interval } =
+      this.props;
+    const { depth, stackTimingIndex } = item;
+    const { stackTimingRows } = lastDrawInfo;
+    const sampleIndex = stackTimingRows[depth].sampleIndex[stackTimingIndex];
+    const { start, end } = getTimeRangeForSpan(
+      sampleIndex,
+      depth,
+      callNodeInfo,
+      sampleNonInvertedCallNodes,
+      thread.samples.time,
+      interval
+    );
+
+    const { updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: combinedTimingRows[depth].start[stackTimingIndex],
-      selectionEnd: combinedTimingRows[depth].end[stackTimingIndex],
+      selectionStart: start,
+      selectionEnd: end,
     });
   };
 
-  _getCallNodeIndexOrMarkerIndexFromHoveredItem(
-    hoveredItem: HoveredStackTiming | null
-  ): {| index: number, type: 'marker' | 'call-node' |} | null {
-    if (hoveredItem === null) {
+  _getItemInfoFromHoveredPosition(
+    hoveredPosition: HoveredPosition | null
+  ): ItemInfo | null {
+    if (hoveredPosition === null) {
       return null;
     }
 
-    const { depth, stackTimingIndex } = hoveredItem;
-    const { combinedTimingRows } = this.props;
-
-    if (combinedTimingRows[depth].callNode) {
-      const callNodeIndex =
-        combinedTimingRows[depth].callNode[stackTimingIndex];
-      return { index: callNodeIndex, type: 'call-node' };
+    const hoveredItem = this._itemAtPosition(
+      hoveredPosition.x,
+      hoveredPosition.y
+    );
+    const lastDrawInfo = this._lastDrawInfo;
+    if (hoveredItem === null || lastDrawInfo === null) {
+      return null;
     }
 
-    const index = combinedTimingRows[depth].index[stackTimingIndex];
-    return { index, type: 'marker' };
+    switch (hoveredItem.type) {
+      case 'STACK': {
+        const { depth, stackTimingIndex } = hoveredItem;
+        const { stackTimingRows } = lastDrawInfo;
+        const { callNodeInfo, sampleNonInvertedCallNodes, thread, interval } =
+          this.props;
+        const sampleIndex =
+          stackTimingRows[depth].sampleIndex[stackTimingIndex];
+
+        const callPath = [];
+        let currentIndex = stackTimingIndex;
+        for (let currentDepth = depth; currentDepth >= 0; currentDepth--) {
+          const currentRow = stackTimingRows[currentDepth];
+          callPath.push(currentRow.func[currentIndex]);
+          currentIndex = currentRow.parentIndexInPreviousRow[currentIndex];
+        }
+        callPath.reverse();
+
+        const callNodeIndex = ensureExists(
+          callNodeInfo.getCallNodeIndexFromPath(callPath)
+        );
+        const timeRange = getTimeRangeForSpan(
+          sampleIndex,
+          depth,
+          callNodeInfo,
+          sampleNonInvertedCallNodes,
+          thread.samples.time,
+          interval
+        );
+        return { type: 'CALL_NODE', callNodeIndex, timeRange };
+      }
+      case 'USER_TIMING': {
+        const userTimingRows = ensureExists(lastDrawInfo.userTimingRows);
+        const markerIndex =
+          userTimingRows[hoveredItem.rowIndex].index[hoveredItem.marker];
+        return { type: 'MARKER', markerIndex };
+      }
+      default:
+        throw assertExhaustiveCheck(hoveredItem.type);
+    }
   }
 
-  _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
+  _onSelectItem = (hoveredItem: HoveredPosition | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
-    const result =
-      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);
-
-    if (!result) {
+    const itemInfo = this._getItemInfoFromHoveredPosition(hoveredItem);
+    if (!itemInfo) {
       this.props.onSelectionChange(null);
+      return;
     }
 
-    // TODO implement selecting user timing markers #2355
-    if (result && result.type === 'call-node') {
-      this.props.onSelectionChange(result.index);
+    switch (itemInfo.type) {
+      case 'CALL_NODE': {
+        this.props.onSelectionChange(itemInfo.callNodeIndex);
+        break;
+      }
+      case 'MARKER': {
+        // TODO implement selecting user timing markers #2355
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(itemInfo.type);
     }
   };
 
-  _onRightClick = (hoveredItem: HoveredStackTiming | null) => {
-    const result =
-      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);
+  _onRightClick = (hoveredItem: HoveredPosition | null) => {
+    const itemInfo = this._getItemInfoFromHoveredPosition(hoveredItem);
+    if (!itemInfo) {
+      return;
+    }
 
-    // TODO implement right clicking user timing markers #2354
-    if (result && result.type === 'call-node') {
-      this.props.onRightClick(result.index);
+    switch (itemInfo.type) {
+      case 'CALL_NODE': {
+        this.props.onRightClick(itemInfo.callNodeIndex);
+        break;
+      }
+      case 'MARKER': {
+        // TODO implement right clicking user timing markers #2354
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(itemInfo.type);
     }
   };
 
-  _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
-    const {
-      rangeStart,
-      rangeEnd,
-      combinedTimingRows,
-      marginLeft,
-      viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
-    } = this.props;
+  _hitTest = (x: CssPixels, y: CssPixels): HoveredPosition | null => {
+    return { x, y };
+  };
 
-    const innerDevicePixelsWidth =
-      containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange =
-      viewportRight - viewportLeft;
-    const unitIntervalTime: UnitIntervalOfProfileRange =
-      viewportLeft +
-      viewportLength * ((x - marginLeft) / innerDevicePixelsWidth);
-    const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
-    const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
-    const stackTiming = combinedTimingRows[depth];
-
-    if (!stackTiming) {
+  _itemAtPosition = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
+    const lastDrawInfo = this._lastDrawInfo;
+    if (lastDrawInfo === null) {
       return null;
     }
 
-    for (let i = 0; i < stackTiming.length; i++) {
-      const start = stackTiming.start[i];
-      const end = stackTiming.end[i];
-      if (start < time && end > time) {
-        return { depth, stackTimingIndex: i };
+    const {
+      stackTimingRows,
+      cssToDeviceScale,
+      viewportTopDev,
+      userTimingHeaderHeightDev,
+      rowHeightDev,
+      userTimingRows,
+      timeAtOuterStart,
+      devPxPerMs,
+    } = lastDrawInfo;
+
+    const xDev = x * cssToDeviceScale;
+    const yDev = viewportTopDev + y * cssToDeviceScale;
+
+    if (yDev < userTimingHeaderHeightDev) {
+      if (userTimingRows !== null) {
+        const rowIndex = Math.floor(yDev / rowHeightDev);
+        if (rowIndex < 0 || rowIndex >= userTimingRows.length) {
+          return null;
+        }
+        const row = userTimingRows[rowIndex];
+        for (let i = 0; i < row.length; i++) {
+          const startDev = snapValueToMultipleOfTwo(
+            (row.start[i] - timeAtOuterStart) * devPxPerMs
+          );
+          const endDev = snapValueToMultipleOfTwo(
+            (row.end[i] - timeAtOuterStart) * devPxPerMs
+          );
+          if (xDev >= startDev && xDev < endDev) {
+            return { type: 'USER_TIMING', rowIndex, marker: i };
+          }
+        }
       }
+      return null;
     }
 
-    return null;
+    const depth = Math.floor((yDev - userTimingHeaderHeightDev) / rowHeightDev);
+    if (depth >= stackTimingRows.length) {
+      return null;
+    }
+
+    const hoveredRow = stackTimingRows[depth];
+    const stackTimingIndex = bisectionRight(hoveredRow.startDev, xDev) - 1;
+    if (stackTimingIndex < 0 || hoveredRow.endDev[stackTimingIndex] <= xDev) {
+      return null;
+    }
+
+    return { type: 'STACK', depth, stackTimingIndex };
   };
 
   onMouseMove = (event: { nativeEvent: MouseEvent }) => {
@@ -589,7 +763,6 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       marginLeft,
       viewport: { viewportLeft, viewportRight, containerWidth },
     } = this.props;
-
     const innerDevicePixelsWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -621,7 +794,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
-        onDoubleClickItem={this._onDoubleClickStack}
+        onDoubleClickItem={this._onDoubleClick}
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}

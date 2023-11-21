@@ -16,15 +16,7 @@ import type {
   $ReturnType,
   Thread,
   JsTracerTable,
-  MarkerTimingRows,
-  CombinedTimingRows,
-  MarkerTiming,
 } from 'firefox-profiler/types';
-
-import type {
-  StackTiming,
-  StackTimingByDepth,
-} from '../../profile-logic/stack-timing';
 
 import { hasUsefulSamples } from '../../profile-logic/profile-data';
 
@@ -46,8 +38,6 @@ type NeededThreadSelectors = {
   getThread: Selector<Thread>,
   getIsNetworkChartEmptyInFullRange: Selector<boolean>,
   getJsTracerTable: Selector<JsTracerTable | null>,
-  getUserTimingMarkerTiming: Selector<MarkerTimingRows>,
-  getStackTimingByDepth: Selector<StackTimingByDepth>,
 };
 
 /**
@@ -98,24 +88,7 @@ export function getComposedSelectorsPerThread(
     }
   );
 
-  /**
-   * This selector combines the marker timing and stack timing for the stack chart.
-   * This way it displays UserTiming along with the stack chart.
-   */
-  const getCombinedTimingRows: Selector<CombinedTimingRows> = createSelector(
-    threadSelectors.getUserTimingMarkerTiming,
-    threadSelectors.getStackTimingByDepth,
-    (
-      userTimingMarkerTiming,
-      stackTimingByDepth
-    ): Array<MarkerTiming | StackTiming> => [
-      ...userTimingMarkerTiming,
-      ...stackTimingByDepth,
-    ]
-  );
-
   return {
     getUsefulTabs,
-    getCombinedTimingRows,
   };
 }
