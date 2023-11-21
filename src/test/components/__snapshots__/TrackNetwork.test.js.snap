@@ -20,7 +20,7 @@ exports[`VerticalIndicators displays tooltips 1`] = `
     <span
       class="timelineVerticalIndicatorsTime"
     >
-      0.001s
+      0.003s
     </span>
      
   </div>
