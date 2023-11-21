@@ -29,6 +29,7 @@ import {
   updatePreviewSelection,
   changeImplementationFilter,
 } from '../../actions/profile-view';
+import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 import {
@@ -67,17 +68,12 @@ describe('FlameGraph', function () {
     expect(drawCalls).toMatchSnapshot();
   });
 
-  it('renders a message instead of the graph when call stack is inverted', () => {
-    const { getByText, dispatch } = setupFlameGraph();
+  it('ignores invertCallstack and always displays non-inverted', () => {
+    const { getState, dispatch } = setupFlameGraph();
+    expect(getInvertCallstack(getState())).toBe(false);
     dispatch(changeInvertCallstack(true));
-    expect(getByText(/The Flame Graph is not available/)).toBeInTheDocument();
-  });
-
-  it('switches back to uninverted mode when clicking the button', () => {
-    const { getByText, dispatch, getState } = setupFlameGraph();
-    dispatch(changeInvertCallstack(true));
-    expect(getInvertCallstack(getState())).toBe(true);
-    fireFullClick(getByText(/Switch to the normal call stack/));
+    expect(getInvertCallstack(getState())).toBe(false);
+    dispatch(changeInvertCallstack(false));
     expect(getInvertCallstack(getState())).toBe(false);
   });
 
@@ -298,6 +294,7 @@ function setupFlameGraph(addImplementationData: boolean = true) {
   }
 
   const store = storeWithProfile(profile);
+  store.dispatch(changeSelectedTab('flame-graph'));
 
   const renderResult = render(
     <Provider store={store}>
