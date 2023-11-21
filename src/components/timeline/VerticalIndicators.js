@@ -128,7 +128,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
                     {' at '}
                   </span>
                   <span className="timelineVerticalIndicatorsTime">
-                    {formatSeconds(marker.start - zeroAt)}
+                    {formatSeconds(markerPos - zeroAt)}
                   </span>{' '}
                 </div>
                 {url}
