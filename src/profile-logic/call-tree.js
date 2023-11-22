@@ -22,6 +22,7 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   CallNodeInfo,
+  CallNodeInfoInverted,
   CallNodeData,
   CallNodeDisplayData,
   CallNodeSummary,
@@ -190,7 +191,7 @@ class CallTreeInternalRegular implements CallTreeInternal {
 }
 
 export class CallTreeInternalInverted implements CallTreeInternal {
-  _callNodeInfo: ProfileData.CallNodeInfoInverted;
+  _callNodeInfo: CallNodeInfoInverted;
   _nonInvertedCallNodeTable: CallNodeTable;
   _callNodeSelf: Float32Array;
   _rootNodes: CallNodeIndex[];
@@ -201,7 +202,7 @@ export class CallTreeInternalInverted implements CallTreeInternal {
     new Map();
 
   constructor(
-    callNodeInfo: ProfileData.CallNodeInfoInverted,
+    callNodeInfo: CallNodeInfoInverted,
     callTreeTimingsInverted: CallTreeTimingsInverted
   ) {
     this._callNodeInfo = callNodeInfo;
@@ -631,7 +632,7 @@ export function computeCallNodeSelfAndSummary(
 
 function _getInvertedTreeNodeTotalAndHasChildren(
   nodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: ProfileData.CallNodeInfoInverted,
+  callNodeInfo: CallNodeInfoInverted,
   callNodeSelf: Float32Array
 ): TotalAndHasChildren {
   const nodeDepth = callNodeInfo.depthForNode(nodeIndex);
@@ -660,7 +661,7 @@ function _getInvertedTreeNodeTotalAndHasChildren(
 
 export function computeCallTreeTimingsInverted(
   { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary,
-  callNodeInfo: ProfileData.CallNodeInfoInverted
+  callNodeInfo: CallNodeInfoInverted
 ): CallTreeTimingsInverted {
   const rootCount = callNodeInfo.getRootCount();
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();

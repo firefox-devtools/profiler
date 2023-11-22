@@ -85,6 +85,10 @@ import type {
   BottomBoxInfo,
   Bytes,
   ThreadWithReservedFunctions,
+  CallNodeInfo,
+  CallNodeInfoInverted,
+  CallNodeHandle,
+  IndexIntoInvertedOrdering,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -115,7 +119,10 @@ export function getCallNodeInfo(
       funcTable,
       defaultCategory
     );
-  return new CallNodeInfoNonInverted(callNodeTable, stackIndexToCallNodeIndex);
+  return new CallNodeInfoNonInvertedImpl(
+    callNodeTable,
+    stackIndexToCallNodeIndex
+  );
 }
 
 export function getUninvertedCallNodeInfoComponents(
@@ -399,54 +406,7 @@ function _createCallNodeInfoFromUnorderedComponents(
   });
 }
 
-export type IndexIntoInvertedOrdering = number;
-
-export interface CallNodeInfo {
-  isInverted(): boolean;
-  asInverted(): CallNodeInfoInverted | null;
-  getNonInvertedCallNodeTable(): CallNodeTable;
-  getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
-
-  getCallNodePathFromIndex(
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ): CallNodePath;
-
-  // Returns a list of CallNodeIndex from CallNodePaths.
-  getCallNodeIndicesFromPaths(
-    callNodePaths: CallNodePath[]
-  ): Array<IndexIntoCallNodeTable | null>;
-
-  // This function returns a CallNodeIndex from a CallNodePath.
-  getCallNodeIndexFromPath(
-    callNodePath: CallNodePath
-  ): IndexIntoCallNodeTable | null;
-
-  // Returns the CallNodeIndex that matches the function `func` and whose parent's
-  // CallNodeIndex is `parent`.
-  getCallNodeIndexFromParentAndFunc(
-    parent: IndexIntoCallNodeTable | -1,
-    func: IndexIntoFuncTable
-  ): IndexIntoCallNodeTable | null;
-
-  getParentCallNodeIndex(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoCallNodeTable | null;
-
-  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable;
-  categoryForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCategoryList;
-  subcategoryForNode(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoCategoryList;
-  innerWindowIDForNode(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoCategoryList;
-  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
-  sourceFramesInlinedIntoSymbolForNode(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoNativeSymbolTable | -1 | null;
-}
-
-class CallNodeInfoNonInverted implements CallNodeInfo {
+class CallNodeInfoNonInvertedImpl implements CallNodeInfo {
   _callNodeTable: CallNodeTable;
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
 
@@ -467,7 +427,7 @@ class CallNodeInfoNonInverted implements CallNodeInfo {
   isInverted(): boolean {
     return false;
   }
-  asInverted(): CallNodeInfoInverted | null {
+  asInverted(): CallNodeInfoInvertedImpl | null {
     return null;
   }
   getNonInvertedCallNodeTable(): CallNodeTable {
@@ -654,8 +614,7 @@ class CallNodeInfoNonInverted implements CallNodeInfo {
   }
 }
 
-type CallNodeHandle = number;
-type InvertedCallNodeHandle = number;
+type InvertedCallNodeHandle = CallNodeHandle;
 type IndexIntoInvertedNonRootCallNodeTable = number;
 
 type InvertedRootCallNodeTable = {|
@@ -810,7 +769,7 @@ type PreparedChildrenAndSpecialChild = {|
   specialChild: InvertedCallNodeHandle | null,
 |};
 
-export class CallNodeInfoInverted implements CallNodeInfo {
+export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
   _callNodeTable: CallNodeTable;
   _invertedRootCallNodeTable: InvertedRootCallNodeTable;
   _invertedNonRootCallNodeTable: InvertedNonRootCallNodeTable;
@@ -864,7 +823,7 @@ export class CallNodeInfoInverted implements CallNodeInfo {
   isInverted(): boolean {
     return true;
   }
-  asInverted(): CallNodeInfoInverted | null {
+  asInverted(): CallNodeInfoInvertedImpl | null {
     return this;
   }
   getNonInvertedCallNodeTable(): CallNodeTable {
@@ -1386,7 +1345,7 @@ export function getInvertedCallNodeInfo(
   }
   rootOrderingIndexRangeEndCol[funcCount - 1] = orderedSelfNodes.length;
 
-  return new CallNodeInfoInverted(
+  return new CallNodeInfoInvertedImpl(
     nonInvertedCallNodeTable,
     stackIndexToNonInvertedCallNodeIndex,
     orderedSelfNodes,

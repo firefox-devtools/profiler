@@ -6,12 +6,12 @@
 
 import { bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import type { CallNodeInfoInverted } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   SamplesLikeTable,
   Milliseconds,
   CallNodeInfo,
+  CallNodeInfoInverted,
   CallNodeTable,
   CallNodePath,
   StackTable,
