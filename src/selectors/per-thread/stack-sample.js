@@ -178,7 +178,11 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getSelectedCallNodePath: Selector<CallNodePath> = createSelector(
     threadSelectors.getViewOptions,
-    (threadViewOptions): CallNodePath => threadViewOptions.selectedCallNodePath
+    UrlState.getInvertCallstack,
+    (threadViewOptions, invertCallStack): CallNodePath =>
+      invertCallStack
+        ? threadViewOptions.selectedInvertedCallNodePath
+        : threadViewOptions.selectedNonInvertedCallNodePath
   );
 
   const getSelectedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> =
@@ -195,7 +199,11 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getExpandedCallNodePaths: Selector<PathSet> = createSelector(
     threadSelectors.getViewOptions,
-    (threadViewOptions) => threadViewOptions.expandedCallNodePaths
+    UrlState.getInvertCallstack,
+    (threadViewOptions, invertCallStack) =>
+      invertCallStack
+        ? threadViewOptions.expandedInvertedCallNodePaths
+        : threadViewOptions.expandedNonInvertedCallNodePaths
   );
 
   const getExpandedCallNodeIndexes: Selector<

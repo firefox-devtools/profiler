@@ -1933,6 +1933,69 @@ describe('snapshots of selectors/profile', function () {
   });
 });
 
+describe('changeSelectedCallNode', function () {
+  it('switching between the call tree and the flame graph always selects a reasonable node', function () {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(`
+      A  A  A  A
+      B  B  B  B
+      C  C  C  H
+      D  D  F  I
+      E  E  G
+    `);
+
+    const { A, B, C, D, E, F } = funcNamesDict;
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    dispatch(App.changeSelectedTab('calltree'));
+    dispatch(ProfileView.changeSelectedCallNode(0, [A, B, C]));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C]
+    );
+    dispatch(ProfileView.changeInvertCallstack(true));
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+
+    // Inverting the call stack should have picked the heaviest inverted stack
+    // as the new selected call node path.
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [E, D, C]
+    );
+
+    dispatch(App.changeSelectedTab('flame-graph'));
+    // In the flame graph, everything should still be non-inverted.
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+    // The original non-inverted selected call node should be selected.
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C]
+    );
+
+    // Now we select a different call node in the flame graph.
+    dispatch(ProfileView.changeSelectedCallNode(0, [A, B, C, F]));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C, F]
+    );
+
+    // Switch back to the call tree tab. In the call tree tab, we should still
+    // be looking at the inverted tree, with the unchanged inverted selection.
+    dispatch(App.changeSelectedTab('calltree'));
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [E, D, C]
+    );
+
+    // Switching back to non-inverted mode should pick a new non-inverted
+    // selected call node based on the selection in the inverted tree.
+    dispatch(ProfileView.changeInvertCallstack(false));
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C]
+    );
+  });
+});
+
 describe('getTimingsForSidebar', () => {
   function getGenericProfileString() {
     // Note that the first column won't be counted because a range is used,

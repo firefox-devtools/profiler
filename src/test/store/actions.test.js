@@ -361,11 +361,11 @@ describe('actions/changeInvertCallstack', function () {
     profile,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
-      A  A  A  A  A
-      B  E  B  B  B
-      C  F  I  I  I
-      D  G  J  J  J
-         H
+      A  A  A  A  A  A
+      B  E  B  B  B  B
+      C  F  I  I  I  I
+      D  G  J  J  J  J
+         H           K
     `);
   const toFuncIndex = (funcName) => funcNames.indexOf(funcName);
   const threadIndex = 0;
@@ -414,7 +414,7 @@ describe('actions/changeInvertCallstack', function () {
       // Do not select the first alphabetical path:
       expect(selectedCallNodePath).not.toEqual(['D', 'C', 'B']);
 
-      // Pick the heaviest path:
+      // Pick the heaviest path, and stops short of K:
       expect(selectedCallNodePath).toEqual(['J', 'I', 'B']);
       expect(expandedCallNodePaths).toEqual([['J'], ['J', 'I']]);
     });
