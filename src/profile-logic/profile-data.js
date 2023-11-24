@@ -258,91 +258,6 @@ export function getCallNodeInfo(
 }
 
 /**
- * Used in _createCallNodeInfoFromUnorderedComponents.
- *
- * Given an "unordered tree" whose structure is given by firstChild and nextSibling,
- * compute a reordering into a "sorted" order, where nodes are in depth-first
- * traversal order (also called DFS = "depth first search" order). The order of
- * siblings is maintained.
- */
-function _computeTreeOrderPermutationAndExtraColumns(
-  firstChild: IndexIntoCallNodeTable[],
-  nextSibling: IndexIntoCallNodeTable[]
-): {|
-  // "unsorted" index to "sorted" index
-  oldIndexToNewIndex: Uint32Array,
-  // "sorted" index to "unsorted" index
-  newIndexToOldIndex: Uint32Array,
-  // The new depth column for the sorted table
-  depthSorted: Array<number>,
-  // The new nextAfterDescendants column for the sorted table
-  nextAfterDescendants: Uint32Array,
-|} {
-  if (nextSibling.length === 0) {
-    throw new Error('Empty call node table');
-  }
-  const oldIndexToNewIndex = new Uint32Array(nextSibling.length);
-  const newIndexToOldIndex = new Uint32Array(nextSibling.length);
-  const depthSorted = new Array(nextSibling.length);
-  const nextAfterDescendants = new Uint32Array(nextSibling.length);
-  let nextNewIndex = 0;
-  let currentDepth = 0;
-  const currentStackOld = [];
-  const currentStackNew = [];
-  let currentOldIndex = 0;
-
-  // Traverse the entire tree, as follows:
-  //  1. currentOldIndex is the next noe in DFS order. Map it to its new index.
-  //  2. Find the next node in DFS order, set currentOldIndex to it, and continue
-  //     to the next loop iteration.
-  while (true) {
-    // currentOldIndex is the next node in DFS order. Map it to its new index.
-    const newIndex = nextNewIndex++;
-    oldIndexToNewIndex[currentOldIndex] = newIndex;
-    newIndexToOldIndex[newIndex] = currentOldIndex;
-
-    // Also write down the current depth, because it's easy to do.
-    depthSorted[newIndex] = currentDepth;
-
-    // Find the next index in DFS order: If we have children, then our first child
-    // is next. Otherwise, we need to advance to our next sibling, if we have one,
-    // otherwise to the next sibling of the first ancestor which has one.
-    const firstChildIndex = firstChild[currentOldIndex];
-    if (firstChildIndex !== -1) {
-      // We have children. Our first child is the next node in DFS order.
-      // Our nextAfterDescendants value will be set later, when we walk back up.
-      currentStackOld[currentDepth] = currentOldIndex;
-      currentStackNew[currentDepth] = newIndex;
-      currentDepth++;
-      currentOldIndex = firstChildIndex;
-      continue;
-    }
-
-    // We have no children.
-    nextAfterDescendants[newIndex] = newIndex + 1;
-    let nextSiblingIndex = nextSibling[currentOldIndex];
-    while (nextSiblingIndex === -1 && currentDepth !== 0) {
-      currentDepth--;
-      nextSiblingIndex = nextSibling[currentStackOld[currentDepth]];
-      nextAfterDescendants[currentStackNew[currentDepth]] = newIndex + 1;
-    }
-    if (nextSiblingIndex !== -1) {
-      // We've found the next child (of this node or of an ancestor). Advance to it.
-      currentOldIndex = nextSiblingIndex;
-      continue;
-    }
-    // This must have been the last node in DFS order. We are done.
-    break;
-  }
-  return {
-    oldIndexToNewIndex,
-    newIndexToOldIndex,
-    depthSorted,
-    nextAfterDescendants,
-  };
-}
-
-/**
  * Create a CallNodeInfo with an ordered call node table based on the pieces of
  * an unordered call node table.
  *
@@ -372,44 +287,87 @@ function _createCallNodeInfoFromUnorderedComponents(
       };
     }
 
-    // Compute the sorted order.
-    const {
-      oldIndexToNewIndex,
-      newIndexToOldIndex,
-      depthSorted,
-      nextAfterDescendants,
-    } = _computeTreeOrderPermutationAndExtraColumns(firstChild, nextSibling);
-
-    // Create typed arrays for the columns, and apply the reordering.
     const prefixSorted = new Int32Array(length);
     const nextSiblingSorted = new Int32Array(length);
+    const nextAfterDescendantsSorted = new Uint32Array(length);
     const funcSorted = new Int32Array(length);
     const categorySorted = new Int32Array(length);
     const subcategorySorted = new Int32Array(length);
     const innerWindowIDSorted = new Float64Array(length);
     const sourceFramesInlinedIntoSymbolSorted = new Array(length);
-    for (let newIndex = 0; newIndex < length; newIndex++) {
-      const oldIndex = newIndexToOldIndex[newIndex];
-      categorySorted[newIndex] = category[oldIndex];
-      const prefixOldIndex = prefix[oldIndex];
-      prefixSorted[newIndex] =
-        prefixOldIndex === -1 ? -1 : oldIndexToNewIndex[prefixOldIndex];
-      const nextSiblingOldIndex = nextSibling[oldIndex];
-      nextSiblingSorted[newIndex] =
-        nextSiblingOldIndex === -1
-          ? -1
-          : oldIndexToNewIndex[nextSiblingOldIndex];
+    const depthSorted = new Array(length);
+
+    // Traverse the entire tree, as follows:
+    //  1. nextOldIndex is the next node in DFS order. Copy over all values from
+    //     the unsorted columns into the sorted columns.
+    //  2. Find the next node in DFS order, set nextOldIndex to it, and continue
+    //     to the next loop iteration.
+    const oldIndexToNewIndex = new Uint32Array(length);
+    const currentStackOld = [];
+    const currentStackNew = [];
+    let nextOldIndex = 0;
+    let nextNewIndex = 0;
+    let currentDepth = 0;
+    let currentOldPrefix = -1;
+    let currentNewPrefix = -1;
+    while (nextOldIndex !== -1) {
+      const oldIndex = nextOldIndex;
+      const newIndex = nextNewIndex;
+      oldIndexToNewIndex[oldIndex] = newIndex;
+      nextNewIndex++;
+
+      prefixSorted[newIndex] = currentNewPrefix;
       funcSorted[newIndex] = func[oldIndex];
       categorySorted[newIndex] = category[oldIndex];
       subcategorySorted[newIndex] = subcategory[oldIndex];
       innerWindowIDSorted[newIndex] = innerWindowID[oldIndex];
       sourceFramesInlinedIntoSymbolSorted[newIndex] =
         sourceFramesInlinedIntoSymbol[oldIndex];
+      depthSorted[newIndex] = currentDepth;
+      // The remaining two columns, nextSiblingSorted and nextAfterDescendantsSorted,
+      // will be filled in when we get to the end of the current subtree.
+
+      // Find the next index in DFS order: If we have children, then our first child
+      // is next. Otherwise, we need to advance to our next sibling, if we have one,
+      // otherwise to the next sibling of the first ancestor which has one.
+      const oldFirstChild = firstChild[oldIndex];
+      if (oldFirstChild !== -1) {
+        // We have children. Our first child is the next node in DFS order.
+        currentStackOld[currentDepth] = oldIndex;
+        currentStackNew[currentDepth] = newIndex;
+        currentOldPrefix = oldIndex;
+        currentNewPrefix = newIndex;
+        nextOldIndex = oldFirstChild;
+        currentDepth++;
+        continue;
+      }
+
+      // We have no children. The next node is the next sibling of this node or
+      // of an ancestor node. Now is also a good time to fill in the values for
+      // nextAfterDescendants and nextSibling.
+      nextAfterDescendantsSorted[newIndex] = nextNewIndex;
+      nextOldIndex = nextSibling[oldIndex];
+      nextSiblingSorted[newIndex] = nextOldIndex === -1 ? -1 : nextNewIndex;
+      while (nextOldIndex === -1 && currentDepth !== 0) {
+        nextAfterDescendantsSorted[currentNewPrefix] = nextNewIndex;
+        const oldPrefixNextSibling = nextSibling[currentOldPrefix];
+        nextSiblingSorted[currentNewPrefix] =
+          oldPrefixNextSibling === -1 ? -1 : nextNewIndex;
+        nextOldIndex = oldPrefixNextSibling;
+        currentDepth--;
+        if (currentDepth === 0) {
+          currentOldPrefix = -1;
+          currentNewPrefix = -1;
+        } else {
+          currentOldPrefix = currentStackOld[currentDepth - 1];
+          currentNewPrefix = currentStackNew[currentDepth - 1];
+        }
+      }
     }
 
     const callNodeTable: CallNodeTable = {
       prefix: prefixSorted,
-      nextAfterDescendants,
+      nextAfterDescendants: nextAfterDescendantsSorted,
       nextSibling: nextSiblingSorted,
       func: funcSorted,
       category: categorySorted,
