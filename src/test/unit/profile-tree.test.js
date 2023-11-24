@@ -86,6 +86,7 @@ describe('unfiltered call tree', function () {
         callNodeChildCount: new Uint32Array([1, 2, 2, 1, 0, 1, 0, 1, 0]),
         callNodeSummary: {
           self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+          leaf: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
           total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
         },
       });
