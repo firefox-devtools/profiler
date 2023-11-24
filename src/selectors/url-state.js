@@ -73,8 +73,6 @@ export const getLastSelectedCallTreeSummaryStrategy: Selector<
   CallTreeSummaryStrategy,
 > = (state) =>
   getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
-export const getInvertCallstack: Selector<boolean> = (state) =>
-  getProfileSpecificState(state).invertCallstack;
 export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
 export const getSourceViewFile: Selector<string | null> = (state) =>
@@ -109,9 +107,12 @@ export const getMarkersSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).markersSearchString;
 export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
-
 export const getSelectedTab: Selector<TabSlug> = (state) =>
   getUrlState(state).selectedTab;
+export const getInvertCallstack: Selector<boolean> = (state) =>
+  getSelectedTab(state) === 'calltree' &&
+  getProfileSpecificState(state).invertCallstack;
+
 export const getSelectedThreadIndexesOrNull: Selector<
   Set<ThreadIndex> | null,
 > = (state) => getProfileSpecificState(state).selectedThreads;
