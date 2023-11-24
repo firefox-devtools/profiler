@@ -238,7 +238,7 @@ class StackChartImpl extends React.PureComponent<Props> {
         role="tabpanel"
         aria-labelledby="stack-chart-tab-button"
       >
-        <StackSettings />
+        <StackSettings hideInvertCallstack={true} />
         <TransformNavigator />
         {maxStackDepth === 0 && userTimings.length === 0 ? (
           <StackChartEmptyReasons />

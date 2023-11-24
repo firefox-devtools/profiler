@@ -4694,7 +4694,10 @@ Process: \\"default\\" (0)"
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `
 Object {
-  "expandedCallNodePaths": PathSet {
+  "expandedInvertedCallNodePaths": PathSet {
+    "_table": Map {},
+  },
+  "expandedNonInvertedCallNodePaths": PathSet {
     "_table": Map {
       "0" => Array [
         0,
@@ -4705,11 +4708,12 @@ Object {
       ],
     },
   },
-  "selectedCallNodePath": Array [
+  "selectedInvertedCallNodePath": Array [],
+  "selectedMarker": 1,
+  "selectedNetworkMarker": null,
+  "selectedNonInvertedCallNodePath": Array [
     0,
     1,
   ],
-  "selectedMarker": 1,
-  "selectedNetworkMarker": null,
 }
 `;

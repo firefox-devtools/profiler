@@ -16,6 +16,10 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './MaybeFlameGraph.css';
 
+// TODO: This component isn't needed any more. Whenever the selected tab
+// is "flame-graph", `invertCallstack` will be `false`. <MaybeFlameGraph /> is
+// only used in the "flame-graph" tab.
+
 type StateProps = {|
   +isPreviewSelectionEmpty: boolean,
   +invertCallstack: boolean,
