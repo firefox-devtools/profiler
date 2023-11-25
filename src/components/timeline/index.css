@@ -4,6 +4,7 @@
 
 .timelineOverflowEdgeIndicatorScrollbox {
   position: absolute;
+  overflow: hidden auto; /* if the platform scrollbar ends up being larger than --vertical-scrollbar-reserved-width (which is unexpected), make sure there is no horizontal scrollbar */
   width: 100%;
   height: 100%;
   padding-left: var(--thread-label-column-width);
@@ -17,8 +18,6 @@
     var(--grey-30) var(--vertical-scrollbar-reserved-width),
     transparent 0
   );
-  overflow-x: hidden; /* if the platform scrollbar ends up being larger than --vertical-scrollbar-reserved-width (which is unexpected), make sure there is no horizontal scrollbar */
-  overflow-y: auto;
 }
 
 .timelineThreadList {
