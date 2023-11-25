@@ -215,7 +215,6 @@ export class ActivityGraphFillComputer {
       greyCategoryIndex,
       enableCPUUsage,
       sampleIndexOffset,
-      rangeEnd,
       rangeStart,
       categoryDrawStyles,
       sampleSelectedStates,
@@ -257,10 +256,6 @@ export class ActivityGraphFillComputer {
         // step and eliminating all the null values.
         cpuBeforeSample = ensureExists(threadCPUDelta[i]);
         cpuAfterSample = ensureExists(threadCPUDelta[i + 1]);
-      }
-
-      if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
-        continue;
       }
 
       const categoryDrawStyle = categoryDrawStyles[category];
@@ -317,10 +312,6 @@ export class ActivityGraphFillComputer {
     const prevSampleTime = sampleTime;
     sampleTime = nextSampleTime;
     nextSampleTime = sampleTime + interval;
-
-    if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
-      return;
-    }
 
     const categoryDrawStyle = categoryDrawStyles[lastSampleCategory];
     const percentageBuffers = this.mutablePercentageBuffers[lastSampleCategory];
