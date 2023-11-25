@@ -319,7 +319,7 @@ export class ActivityGraphFillComputer {
     cpuBeforeSample: number | null,
     cpuAfterSample: number | null
   ) {
-    const { rangeEnd, rangeStart, categoryDrawStyles } =
+    const { rangeEnd, rangeStart, categoryDrawStyles, samplesSelectedStates } =
       this.renderedComponentSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
@@ -332,10 +332,8 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    const percentageBuffer = this._pickPercentageBuffer(
-      percentageBuffers,
-      sampleIndex
-    );
+    const selectedState = samplesSelectedStates[sampleIndex];
+    const percentageBuffer = percentageBuffers[selectedState];
 
     _accumulateInBuffer(
       percentageBuffer,
@@ -347,18 +345,6 @@ export class ActivityGraphFillComputer {
       cpuAfterSample,
       rangeStart
     );
-  }
-
-  /**
-   * Pick the correct percentage buffer based on the sample state.
-   */
-  _pickPercentageBuffer(
-    percentageBuffers: SelectedPercentageAtPixelBuffers,
-    sampleIndex: IndexIntoSamplesTable
-  ): Float32Array {
-    const { samplesSelectedStates } = this.renderedComponentSettings;
-    const selectedState = samplesSelectedStates[sampleIndex];
-    return percentageBuffers[selectedState];
   }
 }
 
