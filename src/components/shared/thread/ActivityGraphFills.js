@@ -942,13 +942,17 @@ function _accumulateInBuffer(
   const intStartPos = startPos | 0;
   const intEndPos = endPos | 0;
 
-  for (let i = intStartPos; i <= intEndPos; i++) {
-    percentageBuffer[i] += cpuRatio;
-  }
+  if (intStartPos === intEndPos) {
+    percentageBuffer[intStartPos] += cpuRatio * (endPos - startPos);
+  } else {
+    for (let i = intStartPos; i <= intEndPos; i++) {
+      percentageBuffer[i] += cpuRatio;
+    }
 
-  // Subtract the partial pixels from start and end of the first part.
-  percentageBuffer[intStartPos] -= cpuRatio * (startPos - intStartPos);
-  percentageBuffer[intEndPos] -= cpuRatio * (1 - (endPos - intEndPos));
+    // Subtract the partial pixels from start and end of the first part.
+    percentageBuffer[intStartPos] -= cpuRatio * (startPos - intStartPos);
+    percentageBuffer[intEndPos] -= cpuRatio * (1 - (endPos - intEndPos));
+  }
 }
 /**
  * Apply a 1d box blur to a destination array.
