@@ -76,14 +76,9 @@ export type CategoryDrawStyles = $ReadOnlyArray<{|
   +selectedTextColor: string,
 |}>;
 
-type SelectedPercentageAtPixelBuffers = {|
-  // These Float32Arrays are mutated in place during the computation step.
-  +beforeSelectedPercentageAtPixel: Float32Array,
-  +selectedPercentageAtPixel: Float32Array,
-  +afterSelectedPercentageAtPixel: Float32Array,
-  +filteredOutByTransformPercentageAtPixel: Float32Array,
-  +filteredOutByTabPercentageAtPixel: Float32Array,
-|};
+// These Float32Arrays are mutated in place during the computation step.
+// buffers[selectedState] is the buffer for the given SelectedState.
+type SelectedPercentageAtPixelBuffers = Float32Array[];
 
 export type CpuRatioInTimeRange = {|
   +cpuRatio: number,
@@ -362,20 +357,8 @@ export class ActivityGraphFillComputer {
     sampleIndex: IndexIntoSamplesTable
   ): Float32Array {
     const { samplesSelectedStates } = this.renderedComponentSettings;
-    switch (samplesSelectedStates[sampleIndex]) {
-      case 0 /* SelectedState.Selected */:
-        return percentageBuffers.selectedPercentageAtPixel;
-      case 1 /* SelectedState.BeforeSelected */:
-        return percentageBuffers.beforeSelectedPercentageAtPixel;
-      case 2 /* SelectedState.AfterSelected */:
-        return percentageBuffers.afterSelectedPercentageAtPixel;
-      case 3 /* SelectedState.FilteredOutByTransform */:
-        return percentageBuffers.filteredOutByTransformPercentageAtPixel;
-      case 4 /* SelectedState.FilteredOutByActiveTab */:
-        return percentageBuffers.filteredOutByTabPercentageAtPixel;
-      default:
-        throw new Error('Unexpected samplesSelectedStates value');
-    }
+    const selectedState = samplesSelectedStates[sampleIndex];
+    return percentageBuffers[selectedState];
   }
 }
 
@@ -756,25 +739,23 @@ function _createSelectedPercentageAtPixelBuffers({
   categoryDrawStyles,
   canvasPixelWidth,
 }): SelectedPercentageAtPixelBuffers[] {
-  return categoryDrawStyles.map(() => ({
-    beforeSelectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
-    selectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
-    afterSelectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
-    filteredOutByTransformPercentageAtPixel: new Float32Array(canvasPixelWidth),
-    // Unlike other fields, we do not mutate that array and we keep that zero
-    // array to indicate that we don't want to draw anything for this case.
-    filteredOutByTabPercentageAtPixel: new Float32Array(canvasPixelWidth),
-  }));
+  return categoryDrawStyles.map(() => [
+    new Float32Array(canvasPixelWidth), // SelectedState.Selected
+    new Float32Array(canvasPixelWidth), // SelectedState.BeforeSelected
+    new Float32Array(canvasPixelWidth), // SelectedState.AfterSelected
+    new Float32Array(canvasPixelWidth), // SelectedState.FilteredOutByTransform
+    new Float32Array(canvasPixelWidth), // SelectedState.FilteredOutByActiveTab
+  ]);
 }
 
 /**
  * For each category, create a fill style for each of 4 draw states. These fill styles
  * are sorted by their gravity.
  *
- * 'UNSELECTED_ORDERED_BEFORE_SELECTED',
- * 'SELECTED',
- * 'UNSELECTED_ORDERED_AFTER_SELECTED',
- * 'FILTERED_OUT_BY_TRANSFORM'
+ * SelectedState.BeforeSelected,
+ * SelectedState.Selected,
+ * SelectedState.AfterSelected,
+ * SelectedState.FilteredOutByTransform
  */
 function _getCategoryFills(
   categoryDrawStyles: CategoryDrawStyles,
@@ -791,39 +772,33 @@ function _getCategoryFills(
     (categoryIndex) => {
       const categoryDrawStyle = categoryDrawStyles[categoryIndex];
       const buffer = percentageBuffers[categoryIndex];
+      const sampleCount = buffer[0].length;
       // For every category we draw four fills, for the four selection kinds:
       return [
         {
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.unselectedFillStyle,
-          perPixelContribution: buffer.beforeSelectedPercentageAtPixel,
-          accumulatedUpperEdge: new Float32Array(
-            buffer.beforeSelectedPercentageAtPixel.length
-          ),
+          perPixelContribution: buffer[1 /* SelectedState.BeforeSelected */],
+          accumulatedUpperEdge: new Float32Array(sampleCount),
         },
         {
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.selectedFillStyle,
-          perPixelContribution: buffer.selectedPercentageAtPixel,
-          accumulatedUpperEdge: new Float32Array(
-            buffer.beforeSelectedPercentageAtPixel.length
-          ),
+          perPixelContribution: buffer[0 /* SelectedState.Selected */],
+          accumulatedUpperEdge: new Float32Array(sampleCount),
         },
         {
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.unselectedFillStyle,
-          perPixelContribution: buffer.afterSelectedPercentageAtPixel,
-          accumulatedUpperEdge: new Float32Array(
-            buffer.beforeSelectedPercentageAtPixel.length
-          ),
+          perPixelContribution: buffer[2 /* SelectedState.AfterSelected */],
+          accumulatedUpperEdge: new Float32Array(sampleCount),
         },
         {
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.filteredOutByTransformFillStyle,
-          perPixelContribution: buffer.filteredOutByTransformPercentageAtPixel,
-          accumulatedUpperEdge: new Float32Array(
-            buffer.beforeSelectedPercentageAtPixel.length
-          ),
+          perPixelContribution:
+            buffer[3 /* SelectedState.FilteredOutByTransform */],
+          accumulatedUpperEdge: new Float32Array(sampleCount),
         },
       ];
     }
