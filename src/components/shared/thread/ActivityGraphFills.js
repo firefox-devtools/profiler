@@ -226,21 +226,24 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    let prevSampleTime = samples.time[0] - interval;
-    let sampleTime = samples.time[0];
+    let sampleTime = samples.time[0] - interval;
 
     if (sampleIndexOffset > 0) {
       // If sampleIndexOffset is greater than zero, it means that we are zoomed
       // in the timeline and we are seeing a portion of it. In that case,
-      // rangeFilteredThread will not have the information of the first previous
-      // sample. So we need to get that information from the full thread.
-      prevSampleTime = fullThread.samples.time[sampleIndexOffset - 1];
+      // we can get the time of the first previous sample from the full thread.
+      sampleTime = fullThread.samples.time[sampleIndexOffset - 1];
     }
+
+    let nextSampleTime = samples.time[0];
 
     // Go through the samples and accumulate the category into the percentageBuffers.
     const { threadCPUDelta } = samples;
     for (let i = 0; i < samples.length - 1; i++) {
-      const nextSampleTime = samples.time[i + 1];
+      const prevSampleTime = sampleTime;
+      sampleTime = nextSampleTime;
+      nextSampleTime = samples.time[i + 1];
+
       const stackIndex = samples.stack[i];
       const category =
         stackIndex === null
@@ -257,8 +260,6 @@ export class ActivityGraphFillComputer {
       }
 
       if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
-        prevSampleTime = sampleTime;
-        sampleTime = nextSampleTime;
         continue;
       }
 
@@ -266,8 +267,6 @@ export class ActivityGraphFillComputer {
       const percentageBuffers = this.mutablePercentageBuffers[category];
 
       if (categoryDrawStyle.selectedFillStyle === 'transparent') {
-        prevSampleTime = sampleTime;
-        sampleTime = nextSampleTime;
         continue;
       }
 
@@ -285,9 +284,6 @@ export class ActivityGraphFillComputer {
         cpuAfterSample,
         rangeStart
       );
-
-      prevSampleTime = sampleTime;
-      sampleTime = nextSampleTime;
     }
 
     // Handle the last sample, which was not covered by the for loop above.
@@ -318,6 +314,10 @@ export class ActivityGraphFillComputer {
       }
     }
 
+    const prevSampleTime = sampleTime;
+    sampleTime = nextSampleTime;
+    nextSampleTime = sampleTime + interval;
+
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
     }
@@ -329,7 +329,7 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    const selectedState = sampleSelectedStates[samples.length - 1];
+    const selectedState = sampleSelectedStates[lastIdx];
     const percentageBuffer = percentageBuffers[selectedState];
 
     // Mutate the percentage buffers.
@@ -338,7 +338,7 @@ export class ActivityGraphFillComputer {
       this.renderedComponentSettings,
       prevSampleTime,
       sampleTime,
-      sampleTime + interval,
+      nextSampleTime,
       cpuBeforeSample,
       cpuAfterSample,
       rangeStart
