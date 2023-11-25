@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 48
+
+Removed the 'sampleGroups' object from the Counter structure.
+
 ### Version 47
 
 The `pid` field of the `Thread` type is changed from `string | number` to `string`. The same happened to the `data.otherPid` field of IPC markers, and to the pid fields in the `profiler.counters` and `profile.profilerOverhead` lists.
@@ -65,6 +69,10 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js).
 
 ## Gecko profile format
+
+### Version 29
+
+Removed the 'sample_groups' object from the GeckoCounter structure.
 
 ### Version 28
 

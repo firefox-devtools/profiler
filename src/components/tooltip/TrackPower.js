@@ -50,7 +50,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
   // This compute the sum of the power in the range. This returns a value in Wh.
   _computePowerSumForRange(start: Milliseconds, end: Milliseconds): number {
     const { counter } = this.props;
-    const samples = counter.sampleGroups[0].samples;
+    const samples = counter.samples;
     const [beginIndex, endIndex] = getSampleIndexRangeForSelection(
       samples,
       start,
@@ -144,7 +144,7 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
       committedRange,
       previewSelection,
     } = this.props;
-    const samples = counter.sampleGroups[0].samples;
+    const samples = counter.samples;
 
     const powerUsageInPwh = samples.count[counterSampleIndex]; // picowatt-hour
     const sampleTimeDeltaInMs =

@@ -1028,20 +1028,12 @@ function _processCounters(
   }
 
   return geckoCounters.reduce(
-    (result, { name, category, description, sample_groups }) => {
-      if (sample_groups.length === 0) {
+    (result, { name, category, description, samples }) => {
+      if (samples.data.length === 0) {
         // It's possible that no sample has been collected during our capture
         // session, ignore this counter if that's the case.
         return result;
       }
-
-      const sampleGroups = sample_groups.map((sampleGroup) => ({
-        id: sampleGroup.id,
-        samples: adjustTableTimestamps(
-          _toStructOfArrays(sampleGroup.samples),
-          delta
-        ),
-      }));
 
       result.push({
         name,
@@ -1049,7 +1041,7 @@ function _processCounters(
         description,
         pid: mainThreadPid,
         mainThreadIndex,
-        sampleGroups,
+        samples: adjustTableTimestamps(_toStructOfArrays(samples), delta),
       });
       return result;
     },
@@ -1392,7 +1384,7 @@ export function insertExternalPowerCountersIntoProfile(
   geckoProfile: GeckoProfile
 ): void {
   for (const counter of counters) {
-    const samples = counter.sample_groups[0].samples;
+    const { samples } = counter;
     const timeColumnIndex = samples.schema.time;
     for (const sample of samples.data) {
       // Adjust the sample times to be relative to meta.startTime,
