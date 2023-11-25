@@ -244,6 +244,7 @@ MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
 MenuButtons--index--show-moreInfo-button = Sken ugar
 MenuButtons--index--hide-moreInfo-button = Sken drus
+MenuButtons--metaInfo--profiling-started = Asekles yebda:
 MenuButtons--metaInfo--main-process-started = Asesfer agejdan yebda:
 MenuButtons--metaInfo--main-process-ended = Asesfer agejdan yekfa:
 MenuButtons--metaInfo--interval = Azilal:
