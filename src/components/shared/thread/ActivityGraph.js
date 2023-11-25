@@ -36,6 +36,8 @@ export type Props = {|
   +className: string,
   +trackName: string,
   +fullThread: Thread,
+  +fullThreadSampleCategories: Uint8Array,
+  +fullThreadSampleCPUPercentages: Uint8Array,
   +rangeFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
@@ -51,8 +53,6 @@ export type Props = {|
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
-  +enableCPUUsage: boolean,
-  +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
   +timelineType: TimelineType,
   ...SizeProps,
@@ -154,6 +154,8 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
   render() {
     const {
       fullThread,
+      fullThreadSampleCPUPercentages,
+      fullThreadSampleCategories,
       rangeFilteredThread,
       categories,
       trackName,
@@ -163,8 +165,6 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       sampleIndexOffset,
       sampleSelectedStates,
       treeOrderSampleComparator,
-      maxThreadCPUDeltaPerMs,
-      enableCPUUsage,
       implementationFilter,
       width,
       height,
@@ -185,6 +185,8 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           )}
           trackName={trackName}
           fullThread={fullThread}
+          fullThreadSampleCPUPercentages={fullThreadSampleCPUPercentages}
+          fullThreadSampleCategories={fullThreadSampleCategories}
           rangeFilteredThread={rangeFilteredThread}
           interval={interval}
           rangeStart={rangeStart}
@@ -195,8 +197,6 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           categories={categories}
           passFillsQuerier={this._setFillsQuerier}
           onClick={this._onClick}
-          enableCPUUsage={enableCPUUsage}
-          maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
           width={width}
           height={height}
         />

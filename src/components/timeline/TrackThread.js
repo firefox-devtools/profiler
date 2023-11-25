@@ -70,6 +70,8 @@ type OwnProps = {|
 
 type StateProps = {|
   +fullThread: Thread,
+  +fullThreadSampleCategories: Uint8Array,
+  +fullThreadSampleCPUPercentages: Uint8Array,
   +rangeFilteredThread: Thread,
   +filteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
@@ -88,7 +90,6 @@ type StateProps = {|
     IndexIntoSamplesTable
   ) => number,
   +selectedThreadIndexes: Set<ThreadIndex>,
-  +enableCPUUsage: boolean,
   +isExperimentalCPUGraphsEnabled: boolean,
   +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
@@ -172,6 +173,8 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
   render() {
     const {
       fullThread,
+      fullThreadSampleCPUPercentages,
+      fullThreadSampleCategories,
       filteredThread,
       rangeFilteredThread,
       threadsKey,
@@ -190,7 +193,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       treeOrderSampleComparator,
       trackType,
       trackName,
-      enableCPUUsage,
       maxThreadCPUDeltaPerMs,
       isExperimentalCPUGraphsEnabled,
       implementationFilter,
@@ -251,6 +253,8 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               trackName={trackName}
               interval={interval}
               fullThread={fullThread}
+              fullThreadSampleCPUPercentages={fullThreadSampleCPUPercentages}
+              fullThreadSampleCategories={fullThreadSampleCategories}
               rangeFilteredThread={rangeFilteredThread}
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
@@ -259,8 +263,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               categories={categories}
               sampleSelectedStates={sampleSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
-              enableCPUUsage={enableCPUUsage}
-              maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
               implementationFilter={implementationFilter}
               timelineType={timelineType}
             />
@@ -333,12 +335,11 @@ export const TimelineTrackThread = explicitConnect<
     const committedRange = getCommittedRange(state);
     const fullThread = selectors.getCPUProcessedThread(state);
     const timelineType = getTimelineType(state);
-    const enableCPUUsage =
-      timelineType === 'cpu-category' &&
-      fullThread.samples.threadCPUDelta !== undefined;
 
     return {
       fullThread,
+      fullThreadSampleCategories: selectors.getSampleCategoriesForCPUProcessedThread(state),
+      fullThreadSampleCPUPercentages: selectors.getSampleCPUPercentagesForCPUProcessedThread(state),
       filteredThread: selectors.getFilteredThread(state),
       rangeFilteredThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
@@ -361,7 +362,6 @@ export const TimelineTrackThread = explicitConnect<
       treeOrderSampleComparator:
         selectors.getTreeOrderComparatorInFilteredThread(state),
       selectedThreadIndexes,
-      enableCPUUsage,
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
       maxThreadCPUDeltaPerMs: getMaxThreadCPUDeltaPerMs(state),
       implementationFilter: getImplementationFilter(state),

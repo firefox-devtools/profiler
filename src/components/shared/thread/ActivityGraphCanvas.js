@@ -27,6 +27,8 @@ type CanvasProps = {|
   +className: string,
   +trackName: string,
   +fullThread: Thread,
+  +fullThreadSampleCategories: Uint8Array,
+  +fullThreadSampleCPUPercentages: Uint8Array,
   +rangeFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
@@ -40,8 +42,6 @@ type CanvasProps = {|
   +categories: CategoryList,
   +passFillsQuerier: (ActivityFillGraphQuerier) => void,
   +onClick: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
-  +enableCPUUsage: boolean,
-  +maxThreadCPUDeltaPerMs: number,
   ...SizeProps,
 |};
 
@@ -118,6 +118,8 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       fullThread,
+      fullThreadSampleCPUPercentages,
+      fullThreadSampleCategories,
       rangeFilteredThread,
       interval,
       rangeStart,
@@ -126,8 +128,6 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       sampleSelectedStates,
       treeOrderSampleComparator,
       categories,
-      enableCPUUsage,
-      maxThreadCPUDeltaPerMs,
       width,
       height,
     } = this.props;
@@ -142,14 +142,14 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       canvasPixelWidth,
       canvasPixelHeight,
       fullThread,
+      fullThreadSampleCPUPercentages,
+      fullThreadSampleCategories,
       rangeFilteredThread,
       interval,
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
       sampleSelectedStates,
-      enableCPUUsage,
-      maxThreadCPUDeltaPerMs,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
       greyCategoryIndex: categories.findIndex((c) => c.color === 'grey') || 0,

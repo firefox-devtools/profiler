@@ -4,7 +4,6 @@
 // @flow
 
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
-import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import './ActivityGraph.css';
 
@@ -32,14 +31,14 @@ type RenderedComponentSettings = {|
   +canvasPixelWidth: DevicePixels,
   +canvasPixelHeight: DevicePixels,
   +fullThread: Thread,
+  +fullThreadSampleCategories: Uint8Array,
+  +fullThreadSampleCPUPercentages: Uint8Array,
   +rangeFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +sampleIndexOffset: number,
   +xPixelsPerMs: number,
-  +enableCPUUsage: boolean,
-  +maxThreadCPUDeltaPerMs: number,
   +treeOrderSampleComparator: ?(
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -210,14 +209,14 @@ export class ActivityGraphFillComputer {
   _accumulateSampleCategories() {
     const {
       fullThread,
+      fullThreadSampleCPUPercentages,
+      fullThreadSampleCategories,
       rangeFilteredThread: { samples, stackTable },
       interval,
       greyCategoryIndex,
-      enableCPUUsage,
       sampleIndexOffset,
       rangeStart,
       sampleSelectedStates,
-      maxThreadCPUDeltaPerMs,
       xPixelsPerMs,
       canvasPixelWidth,
     } = this.renderedComponentSettings;
@@ -226,8 +225,6 @@ export class ActivityGraphFillComputer {
       // If we have no samples, there's nothing to do.
       return;
     }
-
-    const threadCPUDelta = enableCPUUsage ? samples.threadCPUDelta : undefined;
 
     let firstSampleTime = samples.time[0] - interval;
 
@@ -240,17 +237,10 @@ export class ActivityGraphFillComputer {
 
     let nextSampleTime = samples.time[0];
     const firstSampleTimeDelta = nextSampleTime - firstSampleTime;
-    // Get the CPU delta of the first sample. If we have CPU deltas, then every
-    // value in the array is non-null because we checked this in the processing
-    // step and eliminated all the null values.
-    const cpuAfterFirstSample =
-      threadCPUDelta !== undefined ? threadCPUDelta[0] : null;
     // A number between 0 and 1 for sample ratio. It changes depending on
     // the CPU usage per ms if it's given. If not, it uses 1 directly.
     let afterSampleCpuRatio =
-      cpuAfterFirstSample === null
-        ? 1
-        : cpuAfterFirstSample / firstSampleTimeDelta / maxThreadCPUDeltaPerMs;
+      fullThreadSampleCPUPercentages[sampleIndexOffset] / 100;
 
     const halfwayPointTimeAfterFirst =
       firstSampleTime + firstSampleTimeDelta / 2;
@@ -276,20 +266,15 @@ export class ActivityGraphFillComputer {
       nextSampleTime = samples.time[i + 1];
 
       const cpuRatio = afterSampleCpuRatio;
-
-      const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
-      const cpuAfterSample =
-        threadCPUDelta !== undefined ? threadCPUDelta[i + 1] : null;
       afterSampleCpuRatio =
-        cpuAfterSample === null
-          ? 1
-          : cpuAfterSample / sampleTimeDeltaAfter / maxThreadCPUDeltaPerMs;
+        fullThreadSampleCPUPercentages[sampleIndexOffset + i + 1] / 100;
 
       // Convert times to pixel positions.
       // The buffer covers the following time range: It starts at `rangeStart`
       // and ends at `rangeStart + canvasPixelWidth / xPixelsPerMs`.
       // Each sample contributes its category to the pixel interval created by
       // the halfway points with respect to the previous and next sample.
+      const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
       const halfwayPointPixelBefore = halfwayPointPixelAfter;
       const halfwayPointTimeAfter = sampleTime + sampleTimeDeltaAfter / 2;
       halfwayPointPixelAfter =
@@ -313,12 +298,7 @@ export class ActivityGraphFillComputer {
         continue;
       }
 
-      const stackIndex = samples.stack[i];
-      const category =
-        stackIndex === null
-          ? greyCategoryIndex
-          : stackTable.category[stackIndex];
-
+      const category = fullThreadSampleCategories[sampleIndexOffset + i];
       const percentageBuffers = this.mutablePercentageBuffers[category];
       const selectedState = sampleSelectedStates[i];
       const percentageBuffer = percentageBuffers[selectedState];
@@ -351,36 +331,19 @@ export class ActivityGraphFillComputer {
         ? stackTable.category[lastSampleStack]
         : greyCategoryIndex;
 
-    let cpuAfterSample = null;
-    if (threadCPUDelta !== undefined) {
-      const nextIdxInFullThread = sampleIndexOffset + lastIdx + 1;
-      if (nextIdxInFullThread < fullThread.samples.length) {
-        // Since we are zoomed in the timeline, we can get the next sample's
-        // CPU delta from the full thread.
-        cpuAfterSample = ensureExists(
-          ensureExists(fullThread.samples.threadCPUDelta)[nextIdxInFullThread]
-        );
-      } else {
-        // There is no CPU use after the last sample.
-        cpuAfterSample = 0;
-      }
-    }
-
     const sampleTime = nextSampleTime;
     nextSampleTime = sampleTime + interval;
 
     const cpuRatio = afterSampleCpuRatio;
-    const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
     afterSampleCpuRatio =
-      cpuAfterSample === null
-        ? 1
-        : cpuAfterSample / sampleTimeDeltaAfter / maxThreadCPUDeltaPerMs;
+      fullThreadSampleCPUPercentages[sampleIndexOffset + lastIdx + 1 / 100];
 
     if (cpuRatio === 0 && afterSampleCpuRatio === 0) {
       return;
     }
 
     const halfwayPointPixelBefore = halfwayPointPixelAfter;
+    const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
     const halfwayPointTimeAfter = sampleTime + sampleTimeDeltaAfter / 2;
     halfwayPointPixelAfter =
       (halfwayPointTimeAfter - rangeStart) * xPixelsPerMs;
@@ -711,13 +674,12 @@ export class ActivityFillGraphQuerier {
   ): number {
     const {
       rangeFilteredThread: { samples },
-      enableCPUUsage,
       interval,
       sampleIndexOffset,
       fullThread,
+      fullThreadSampleCPUPercentages,
       xPixelsPerMs,
       rangeStart,
-      maxThreadCPUDeltaPerMs,
     } = this.renderedComponentSettings;
     const kernelLength = SMOOTHING_KERNEL.length;
     const kernelPos = xPixel - SMOOTHING_RADIUS;
@@ -734,35 +696,10 @@ export class ActivityFillGraphQuerier {
         ? fullThread.samples.time[fullThreadSample + 1]
         : sampleTime + interval;
 
-    let cpuDeltaBeforeSample = null;
-    let cpuDeltaAfterSample = null;
-    const { threadCPUDelta } = samples;
-    if (enableCPUUsage && threadCPUDelta) {
-      // It must be non-null because we are checking this in the processing
-      // step and eliminating all the null values.
-      cpuDeltaBeforeSample = ensureExists(threadCPUDelta[sample]);
-      // Use the fullThread here to properly get the next in case zoomed in.
-      cpuDeltaAfterSample = ensureExists(fullThread.samples.threadCPUDelta)[
-        fullThreadSample + 1
-      ];
-      cpuDeltaAfterSample =
-        // It can be undefined if this is the last sample in the profile.
-        cpuDeltaAfterSample !== undefined && cpuDeltaAfterSample !== null
-          ? cpuDeltaAfterSample
-          : cpuDeltaBeforeSample;
-    }
-
     const sampleTimeDeltaBefore = sampleTime - prevSampleTime;
-    const cpuRatio =
-      cpuDeltaBeforeSample === null
-        ? 1
-        : cpuDeltaBeforeSample / sampleTimeDeltaBefore / maxThreadCPUDeltaPerMs;
-
-    const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
+    const cpuRatio = fullThreadSampleCPUPercentages[fullThreadSample] / 100;
     const afterSampleCpuRatio =
-      cpuDeltaAfterSample === null
-        ? 1
-        : cpuDeltaAfterSample / sampleTimeDeltaAfter / maxThreadCPUDeltaPerMs;
+      fullThreadSampleCPUPercentages[fullThreadSample + 1] / 100;
 
     const kernelRangeStartTime = rangeStart + kernelPos / xPixelsPerMs;
 
@@ -782,6 +719,7 @@ export class ActivityFillGraphQuerier {
     if (samplePixel >= kernelLength) {
       samplePixel = kernelLength - 0.1;
     }
+    const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
     const halfwayPointTimeAfter = sampleTime + sampleTimeDeltaAfter / 2;
     let halfwayPointPixelAfter =
       (halfwayPointTimeAfter - kernelRangeStartTime) * xPixelsPerMs;
