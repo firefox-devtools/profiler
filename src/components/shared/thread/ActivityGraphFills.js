@@ -215,6 +215,10 @@ export class ActivityGraphFillComputer {
       greyCategoryIndex,
       enableCPUUsage,
       sampleIndexOffset,
+      rangeEnd,
+      rangeStart,
+      categoryDrawStyles,
+      sampleSelectedStates,
     } = this.renderedComponentSettings;
 
     if (samples.length === 0) {
@@ -252,15 +256,34 @@ export class ActivityGraphFillComputer {
         cpuAfterSample = ensureExists(threadCPUDelta[i + 1]);
       }
 
+      if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
+        prevSampleTime = sampleTime;
+        sampleTime = nextSampleTime;
+        continue;
+      }
+
+      const categoryDrawStyle = categoryDrawStyles[category];
+      const percentageBuffers = this.mutablePercentageBuffers[category];
+
+      if (categoryDrawStyle.selectedFillStyle === 'transparent') {
+        prevSampleTime = sampleTime;
+        sampleTime = nextSampleTime;
+        continue;
+      }
+
+      const selectedState = sampleSelectedStates[i];
+      const percentageBuffer = percentageBuffers[selectedState];
+
       // Mutate the percentage buffers.
-      this._accumulateInCategory(
-        category,
-        i,
+      _accumulateInBuffer(
+        percentageBuffer,
+        this.renderedComponentSettings,
         prevSampleTime,
         sampleTime,
         nextSampleTime,
         cpuBeforeSample,
-        cpuAfterSample
+        cpuAfterSample,
+        rangeStart
       );
 
       prevSampleTime = sampleTime;
@@ -295,52 +318,27 @@ export class ActivityGraphFillComputer {
       }
     }
 
-    this._accumulateInCategory(
-      lastSampleCategory,
-      samples.length - 1,
-      prevSampleTime,
-      sampleTime,
-      sampleTime + interval,
-      cpuBeforeSample,
-      cpuAfterSample
-    );
-  }
-
-  /**
-   * Mutate the percentage buffers, by taking this category, and accumulating its
-   * percentage into the buffer.
-   */
-  _accumulateInCategory(
-    category: IndexIntoCategoryList,
-    sampleIndex: IndexIntoSamplesTable,
-    prevSampleTime: Milliseconds,
-    sampleTime: Milliseconds,
-    nextSampleTime: Milliseconds,
-    cpuBeforeSample: number | null,
-    cpuAfterSample: number | null
-  ) {
-    const { rangeEnd, rangeStart, categoryDrawStyles, sampleSelectedStates } =
-      this.renderedComponentSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
     }
 
-    const categoryDrawStyle = categoryDrawStyles[category];
-    const percentageBuffers = this.mutablePercentageBuffers[category];
+    const categoryDrawStyle = categoryDrawStyles[lastSampleCategory];
+    const percentageBuffers = this.mutablePercentageBuffers[lastSampleCategory];
 
     if (categoryDrawStyle.selectedFillStyle === 'transparent') {
       return;
     }
 
-    const selectedState = sampleSelectedStates[sampleIndex];
+    const selectedState = sampleSelectedStates[samples.length - 1];
     const percentageBuffer = percentageBuffers[selectedState];
 
+    // Mutate the percentage buffers.
     _accumulateInBuffer(
       percentageBuffer,
       this.renderedComponentSettings,
       prevSampleTime,
       sampleTime,
-      nextSampleTime,
+      sampleTime + interval,
       cpuBeforeSample,
       cpuAfterSample,
       rangeStart
