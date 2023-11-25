@@ -235,31 +235,33 @@ export class ActivityGraphFillComputer {
 
     let nextSampleTime = samples.time[0];
 
+    const threadCPUDelta = enableCPUUsage ? samples.threadCPUDelta : undefined;
+
+    // Get the CPU delta of the first sample. If we have CPU deltas, then every
+    // value in the array is non-null because we checked this in the processing
+    // step and eliminated all the null values.
+    let cpuAfterSample =
+      threadCPUDelta !== undefined ? threadCPUDelta[0] : null;
+
     // Go through the samples and accumulate the category into the percentageBuffers.
-    const { threadCPUDelta } = samples;
     for (let i = 0; i < samples.length - 1; i++) {
       const prevSampleTime = sampleTime;
       sampleTime = nextSampleTime;
       nextSampleTime = samples.time[i + 1];
+
+      const cpuBeforeSample = cpuAfterSample;
+      cpuAfterSample =
+        threadCPUDelta !== undefined ? threadCPUDelta[i + 1] : null;
+
+      if (cpuBeforeSample === 0 && cpuAfterSample === 0) {
+        continue;
+      }
 
       const stackIndex = samples.stack[i];
       const category =
         stackIndex === null
           ? greyCategoryIndex
           : stackTable.category[stackIndex];
-
-      let cpuBeforeSample = null;
-      let cpuAfterSample = null;
-      if (enableCPUUsage && threadCPUDelta) {
-        // It must be non-null because we are checking this in the processing
-        // step and eliminating all the null values.
-        cpuBeforeSample = ensureExists(threadCPUDelta[i]);
-        cpuAfterSample = ensureExists(threadCPUDelta[i + 1]);
-      }
-
-      if (cpuBeforeSample === 0 && cpuAfterSample === 0) {
-        continue;
-      }
 
       const percentageBuffers = this.mutablePercentageBuffers[category];
       const selectedState = sampleSelectedStates[i];
@@ -286,11 +288,8 @@ export class ActivityGraphFillComputer {
         ? stackTable.category[lastSampleStack]
         : greyCategoryIndex;
 
-    let cpuBeforeSample = null;
-    let cpuAfterSample = null;
-    if (enableCPUUsage && threadCPUDelta) {
-      cpuBeforeSample = ensureExists(threadCPUDelta[lastIdx]);
-
+    const cpuBeforeSample = cpuAfterSample;
+    if (threadCPUDelta !== undefined) {
       const nextIdxInFullThread = sampleIndexOffset + lastIdx + 1;
       if (nextIdxInFullThread < fullThread.samples.length) {
         // Since we are zoomed in the timeline, rangeFilteredThread will not
