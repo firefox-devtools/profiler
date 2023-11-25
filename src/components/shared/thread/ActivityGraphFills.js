@@ -277,6 +277,7 @@ export class ActivityGraphFillComputer {
    * with these methods.
    */
   _accumulateSampleCategories() {
+    const { mutablePercentageBuffers, renderedComponentSettings } = this;
     const {
       fullThreadSampleCPUPercentages,
       fullThreadSampleCategories,
@@ -284,7 +285,7 @@ export class ActivityGraphFillComputer {
       sampleIndexOffset,
       sampleSelectedStates,
       precomputedPositions: { samplePositions, halfwayPositions },
-    } = this.renderedComponentSettings;
+    } = renderedComponentSettings;
 
     if (samples.length === 0) {
       // If we have no samples, there's nothing to do.
@@ -316,7 +317,7 @@ export class ActivityGraphFillComputer {
       const category = fullThreadSampleCategories[sampleIndexOffset + i];
       const selectedState = sampleSelectedStates[i];
       const percentageBuffer =
-        this.mutablePercentageBuffers[category][selectedState];
+        mutablePercentageBuffers[category][selectedState];
       const samplePixel = samplePositions[i];
 
       // Samples have two parts to be able to present the different CPU usages properly.
