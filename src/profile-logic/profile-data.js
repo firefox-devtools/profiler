@@ -4640,3 +4640,57 @@ export function determineTimelineType(profile: Profile): TimelineType {
   // Have both category and CPU usage information. Use 'cpu-category'.
   return 'cpu-category';
 }
+
+export function computeSampleCategories(
+  sampleStacks: Array<IndexIntoStackTable | null>,
+  stackCategories: Array<IndexIntoCategoryList>,
+  defaultCategory: IndexIntoCategoryList
+): Uint8Array {
+  const sampleCount = sampleStacks.length;
+  const sampleCategories = new Uint8Array(sampleCount);
+  for (let i = 0; i < sampleCount; i++) {
+    const stackIndex = sampleStacks[i];
+    sampleCategories[i] =
+      stackIndex !== null ? stackCategories[stackIndex] : defaultCategory;
+  }
+  return sampleCategories;
+}
+
+/**
+ * Returns a Uint8Array containing integers from 0 to 100.
+ * The value at index i is the CPU percentage between sample i-1 and sample i.
+ * If no CPU usage information is available, we set everything to 100.
+ *
+ * The returned array has length sampleCount + 1, with the final value set to zero.
+ * This makes it more convenient to get the CPU percentage after the last sample.
+ */
+export function computeSampleCPUPercentages(
+  sampleCPUDeltas: Array<number | null> | void,
+  sampleTimes: Array<Milliseconds>,
+  interval: Milliseconds,
+  maxThreadCPUDeltaPerMs: number
+): Uint8Array {
+  const sampleCount = sampleTimes.length;
+  const sampleCPUPercentages = new Uint8Array(sampleCount + 1);
+  if (sampleCPUDeltas === undefined) {
+    sampleCPUPercentages.fill(100, 0, sampleCount);
+    return sampleCPUPercentages;
+  }
+  let sampleTime = sampleTimes[0] - interval;
+  for (let i = 0; i < sampleCount - 1; i++) {
+    const prevSampleTime = sampleTime;
+    sampleTime = sampleTimes[i];
+    const timeDelta = sampleTime - prevSampleTime;
+    const cpuDelta = sampleCPUDeltas[i] ?? 0;
+    const cpuRatio = cpuDelta / timeDelta / maxThreadCPUDeltaPerMs;
+    if (cpuRatio > 0) {
+      if (cpuRatio >= 1) {
+        sampleCPUPercentages[i] = 100;
+      } else {
+        sampleCPUPercentages[i] = cpuRatio * 100;
+      }
+    }
+  }
+  // Leave sampleCPUPercentages[sampleCount] at 0.
+  return sampleCPUPercentages;
+}
