@@ -216,7 +216,6 @@ export class ActivityGraphFillComputer {
       enableCPUUsage,
       sampleIndexOffset,
       rangeStart,
-      categoryDrawStyles,
       sampleSelectedStates,
     } = this.renderedComponentSettings;
 
@@ -258,13 +257,11 @@ export class ActivityGraphFillComputer {
         cpuAfterSample = ensureExists(threadCPUDelta[i + 1]);
       }
 
-      const categoryDrawStyle = categoryDrawStyles[category];
-      const percentageBuffers = this.mutablePercentageBuffers[category];
-
-      if (categoryDrawStyle.selectedFillStyle === 'transparent') {
+      if (cpuBeforeSample === 0 && cpuAfterSample === 0) {
         continue;
       }
 
+      const percentageBuffers = this.mutablePercentageBuffers[category];
       const selectedState = sampleSelectedStates[i];
       const percentageBuffer = percentageBuffers[selectedState];
 
@@ -309,17 +306,15 @@ export class ActivityGraphFillComputer {
       }
     }
 
+    if (cpuBeforeSample === 0 && cpuAfterSample === 0) {
+      return;
+    }
+
     const prevSampleTime = sampleTime;
     sampleTime = nextSampleTime;
     nextSampleTime = sampleTime + interval;
 
-    const categoryDrawStyle = categoryDrawStyles[lastSampleCategory];
     const percentageBuffers = this.mutablePercentageBuffers[lastSampleCategory];
-
-    if (categoryDrawStyle.selectedFillStyle === 'transparent') {
-      return;
-    }
-
     const selectedState = sampleSelectedStates[lastIdx];
     const percentageBuffer = percentageBuffers[selectedState];
 
