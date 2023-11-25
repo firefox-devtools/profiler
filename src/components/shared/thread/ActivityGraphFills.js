@@ -12,7 +12,6 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoCategoryList,
   Thread,
-  SelectedState,
   Milliseconds,
   DevicePixels,
   CssPixels,
@@ -46,7 +45,7 @@ type RenderedComponentSettings = {|
     IndexIntoSamplesTable
   ) => number,
   +greyCategoryIndex: IndexIntoCategoryList,
-  +samplesSelectedStates: null | Array<SelectedState>,
+  +samplesSelectedStates: Uint8Array,
   +categoryDrawStyles: CategoryDrawStyles,
 |};
 
@@ -363,20 +362,17 @@ export class ActivityGraphFillComputer {
     sampleIndex: IndexIntoSamplesTable
   ): Float32Array {
     const { samplesSelectedStates } = this.renderedComponentSettings;
-    if (!samplesSelectedStates) {
-      return percentageBuffers.selectedPercentageAtPixel;
-    }
     switch (samplesSelectedStates[sampleIndex]) {
-      case 'FILTERED_OUT_BY_TRANSFORM':
-        return percentageBuffers.filteredOutByTransformPercentageAtPixel;
-      case 'FILTERED_OUT_BY_ACTIVE_TAB':
-        return percentageBuffers.filteredOutByTabPercentageAtPixel;
-      case 'UNSELECTED_ORDERED_BEFORE_SELECTED':
-        return percentageBuffers.beforeSelectedPercentageAtPixel;
-      case 'SELECTED':
+      case 0 /* SelectedState.Selected */:
         return percentageBuffers.selectedPercentageAtPixel;
-      case 'UNSELECTED_ORDERED_AFTER_SELECTED':
+      case 1 /* SelectedState.BeforeSelected */:
+        return percentageBuffers.beforeSelectedPercentageAtPixel;
+      case 2 /* SelectedState.AfterSelected */:
         return percentageBuffers.afterSelectedPercentageAtPixel;
+      case 3 /* SelectedState.FilteredOutByTransform */:
+        return percentageBuffers.filteredOutByTransformPercentageAtPixel;
+      case 4 /* SelectedState.FilteredOutByActiveTab */:
+        return percentageBuffers.filteredOutByTabPercentageAtPixel;
       default:
         throw new Error('Unexpected samplesSelectedStates value');
     }

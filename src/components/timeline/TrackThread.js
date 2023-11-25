@@ -55,7 +55,6 @@ import type {
   CallNodeInfo,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  SelectedState,
   State,
   ThreadsKey,
 } from 'firefox-profiler/types';
@@ -82,7 +81,7 @@ type StateProps = {|
   +categories: CategoryList,
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
-  +samplesSelectedStates: null | SelectedState[],
+  +samplesSelectedStates: Uint8Array,
   +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,

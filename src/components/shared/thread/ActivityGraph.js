@@ -23,7 +23,6 @@ import type {
   CategoryList,
   ImplementationFilter,
   IndexIntoSamplesTable,
-  SelectedState,
   Milliseconds,
   CssPixels,
   TimelineType,
@@ -47,7 +46,7 @@ export type Props = {|
     sampleIndex: IndexIntoSamplesTable | null
   ) => void,
   +categories: CategoryList,
-  +samplesSelectedStates: null | SelectedState[],
+  +samplesSelectedStates: Uint8Array,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable

@@ -37,7 +37,6 @@ import type {
   AddressTimings,
   IndexIntoCallNodeTable,
   IndexIntoNativeSymbolTable,
-  SelectedState,
   StartEndRange,
   Selector,
   $ReturnType,
@@ -246,27 +245,26 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
-  const getSamplesSelectedStatesInFilteredThread: Selector<
-    null | SelectedState[],
-  > = createSelector(
-    getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
-    getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread,
-    getCallNodeInfo,
-    getSelectedCallNodeIndex,
-    (
-      sampleIndexToNonInvertedCallNodeIndex,
-      activeTabFilteredNonInvertedCallNodeIndex,
-      callNodeInfo,
-      selectedCallNode
-    ) => {
-      return ProfileData.getSamplesSelectedStates(
-        callNodeInfo,
+  const getSamplesSelectedStatesInFilteredThread: Selector<Uint8Array> =
+    createSelector(
+      getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
+      getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread,
+      getCallNodeInfo,
+      getSelectedCallNodeIndex,
+      (
         sampleIndexToNonInvertedCallNodeIndex,
         activeTabFilteredNonInvertedCallNodeIndex,
+        callNodeInfo,
         selectedCallNode
-      );
-    }
-  );
+      ) => {
+        return ProfileData.getSamplesSelectedStates(
+          callNodeInfo,
+          sampleIndexToNonInvertedCallNodeIndex,
+          activeTabFilteredNonInvertedCallNodeIndex,
+          selectedCallNode
+        );
+      }
+    );
 
   const getTreeOrderComparatorInFilteredThread: Selector<
     (IndexIntoSamplesTable, IndexIntoSamplesTable) => number,

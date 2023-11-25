@@ -16,7 +16,6 @@ import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 import type {
   Thread,
   Milliseconds,
-  SelectedState,
   IndexIntoSamplesTable,
   CategoryList,
 } from 'firefox-profiler/types';
@@ -33,7 +32,7 @@ type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +sampleIndexOffset: number,
-  +samplesSelectedStates: null | SelectedState[],
+  +samplesSelectedStates: Uint8Array,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable

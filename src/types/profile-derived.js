@@ -549,22 +549,27 @@ export type RemoveProfileInformation = {|
 /**
  * This type is used to decide how to highlight and stripe areas in the
  * timeline.
+ *
+ * ```typescript
+ * const enum SelectedState {
+ *   // Samples can be filtered through various operations, like searching, or
+ *   // call tree transforms.
+ *   FilteredOutByTransform = 0,
+ *   // Samples can be filtered out if they are not part of the active tab.
+ *   FilteredOutByActiveTab = 1,
+ *   // This sample is selected because either the tip or an ancestor call node matches
+ *   // the currently selected call node.
+ *   Selected = 2,
+ *   // This call node is not selected, and the stacks are ordered before the selected
+ *   // call node as sorted by the getTreeOrderComparator.
+ *   BeforeSelected = 3,
+ *   // This call node is not selected, and the stacks are ordered after the selected
+ *   // call node as sorted by the getTreeOrderComparator.
+ *   AfterSelected = 4,
+ * }
+ * ```
  */
-export type SelectedState =
-  // Samples can be filtered through various operations, like searching, or
-  // call tree transforms.
-  | 'FILTERED_OUT_BY_TRANSFORM'
-  // Samples can be filtered out if they are not part of the active tab.
-  | 'FILTERED_OUT_BY_ACTIVE_TAB'
-  // This sample is selected because either the tip or an ancestor call node matches
-  // the currently selected call node.
-  | 'SELECTED'
-  // This call node is not selected, and the stacks are ordered before the selected
-  // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
-  // This call node is not selected, and the stacks are ordered after the selected
-  // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+export type SelectedState = number;
 
 /**
  * It holds the initially selected track's HTMLElement. This allows the timeline

@@ -14,13 +14,12 @@ import type {
   Milliseconds,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  SelectedState,
 } from 'firefox-profiler/types';
 
 type Props = {|
   +className: string,
   +thread: Thread,
-  +samplesSelectedStates: null | SelectedState[],
+  +samplesSelectedStates: Uint8Array,
   +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,

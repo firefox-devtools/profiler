@@ -1458,8 +1458,8 @@ export function getSampleIndexToCallNodeIndex(
 function getSamplesSelectedStatesForNoSelection(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>
-): SelectedState[] {
-  const result = new Array(sampleNonInvertedCallNodes.length);
+): Uint8Array {
+  const result = new Uint8Array(sampleNonInvertedCallNodes.length);
   for (
     let sampleIndex = 0;
     sampleIndex < sampleNonInvertedCallNodes.length;
@@ -1469,7 +1469,7 @@ function getSamplesSelectedStatesForNoSelection(
     // because everything is unselected. So let's pretend that
     // everything is selected so that anything not filtered out will be nicely
     // visible.
-    let sampleSelectedState = 'SELECTED';
+    let sampleSelectedState = 0; /* SelectedState.Selected */
 
     // But we still want to display filtered-out samples differently.
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
@@ -1477,9 +1477,9 @@ function getSamplesSelectedStatesForNoSelection(
       sampleSelectedState =
         activeTabFilteredNonInvertedCallNodes[sampleIndex] === null
           ? // This sample was not part of the active tab.
-            'FILTERED_OUT_BY_ACTIVE_TAB'
+            4 /* SelectedState.FilteredOutByActiveTab */
           : // This sample was filtered out in the transform pipeline.
-            'FILTERED_OUT_BY_TRANSFORM';
+            3 /* SelectedState.FilteredOutByTransform */;
     }
 
     result[sampleIndex] = sampleSelectedState;
@@ -1492,31 +1492,31 @@ function _getSamplesSelectedStatesNonInverted(
   activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
-): SelectedState[] {
+): Uint8Array {
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const selectedCallNodeDescendantsEndIndex =
     callNodeTable.nextAfterDescendants[selectedCallNodeIndex];
   const sampleCount = sampleCallNodes.length;
-  const samplesSelectedStates = new Array(sampleCount);
+  const samplesSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = 'SELECTED';
+    let sampleSelectedState: SelectedState = 0; /* SelectedState.Selected */
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       if (callNodeIndex < selectedCallNodeIndex) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+        sampleSelectedState = 1 /* SelectedState.BeforeSelected */;
       } else if (callNodeIndex < selectedCallNodeDescendantsEndIndex) {
-        sampleSelectedState = 'SELECTED';
+        sampleSelectedState = 0 /* SelectedState.Selected */;
       } else {
-        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+        sampleSelectedState = 2 /* SelectedState.AfterSelected */;
       }
     } else {
       // This sample was filtered out.
       sampleSelectedState =
         activeTabFilteredCallNodes[sampleIndex] === null
           ? // This sample was not part of the active tab.
-            'FILTERED_OUT_BY_ACTIVE_TAB'
+            4 /* SelectedState.FilteredOutByActiveTab */
           : // This sample was filtered out in the transform pipeline.
-            'FILTERED_OUT_BY_TRANSFORM';
+            3 /* SelectedState.FilteredOutByTransform */;
     }
     samplesSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -1532,30 +1532,30 @@ function _getSamplesSelectedStatesInverted(
   activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted
-): SelectedState[] {
+): Uint8Array {
   const orderingIndexForSelfNode = callNodeInfo.getOrderingIndexForSelfNode();
   const [orderingIndexRangeStart, orderingIndexRangeEnd] =
     callNodeInfo.getOrderingIndexRangeForNode(selectedInvertedCallNodeIndex);
   const sampleCount = sampleNonInvertedCallNodes.length;
-  const samplesSelectedStates = new Array(sampleCount);
+  const samplesSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = 'SELECTED';
+    let sampleSelectedState: SelectedState = 0; /* SelectedState.Selected */
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const orderingIndex = orderingIndexForSelfNode[callNodeIndex];
       if (orderingIndex < orderingIndexRangeStart) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+        sampleSelectedState = 1 /* SelectedState.BeforeSelected */;
       } else if (orderingIndex >= orderingIndexRangeEnd) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+        sampleSelectedState = 2 /* SelectedState.AfterSelected */;
       }
     } else {
       // This sample was filtered out.
       sampleSelectedState =
         activeTabFilteredNonInvertedCallNodes[sampleIndex] === null
           ? // This sample was not part of the active tab.
-            'FILTERED_OUT_BY_ACTIVE_TAB'
+            4 /* SelectedState.FilteredOutByActiveTab */
           : // This sample was filtered out in the transform pipeline.
-            'FILTERED_OUT_BY_TRANSFORM';
+            3 /* SelectedState.FilteredOutByTransform */;
     }
     samplesSelectedStates[sampleIndex] = sampleSelectedState;
   }
@@ -1574,7 +1574,7 @@ export function getSamplesSelectedStates(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
-): SelectedState[] {
+): Uint8Array {
   if (selectedCallNodeIndex === null || selectedCallNodeIndex === -1) {
     return getSamplesSelectedStatesForNoSelection(
       sampleNonInvertedCallNodes,
