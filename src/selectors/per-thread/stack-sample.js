@@ -119,7 +119,12 @@ export function getStackAndSampleSelectorsPerThread(
       UrlState.getInvertCallstack,
       ProfileSelectors.getDefaultCategory,
       (state) => threadSelectors.getFilteredThread(state).funcTable.length,
-      (nonInvertedCallNodeInfo, invertCallStack, defaultCategory, funcCount) => {
+      (
+        nonInvertedCallNodeInfo,
+        invertCallStack,
+        defaultCategory,
+        funcCount
+      ) => {
         if (!invertCallStack) {
           return nonInvertedCallNodeInfo;
         }

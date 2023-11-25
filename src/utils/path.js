@@ -34,7 +34,10 @@ export function hashPath(a: CallNodePath): string {
   return a.join('-');
 }
 
-export function concatHash(hash: string, extraFunc: IndexIntoFuncTable): string {
+export function concatHash(
+  hash: string,
+  extraFunc: IndexIntoFuncTable
+): string {
   return hash + '-' + extraFunc;
 }
 
