@@ -46,6 +46,18 @@ type RenderedComponentSettings = {|
   +greyCategoryIndex: IndexIntoCategoryList,
   +sampleSelectedStates: Uint8Array,
   +categoryDrawStyles: CategoryDrawStyles,
+  +precomputedPositions: PrecomputedPositions,
+|};
+
+export type PrecomputedPositions = {|
+  // The fractional device pixel position per sample in the range-filtered thread.
+  // Each position is clamped such that 0 <= pos < canvasPixelWidth.
+  samplePositions: Float32Array, // DevicePixel[]
+  // The fractional device pixel position of the half-way point *before* the sample,
+  // per sample in the range-filtered thread. Has one extra element at the end for
+  // the half-way position after the last sample.
+  // Each position is clamped such that 0 <= pos < canvasPixelWidth.
+  halfwayPositions: Float32Array, // DevicePixel[]
 |};
 
 type SampleContributionToPixel = {|
@@ -90,6 +102,64 @@ const SMOOTHING_KERNEL: Float32Array = _getSmoothingKernel(
   SMOOTHING_RADIUS,
   BOX_BLUR_RADII
 );
+
+export function precomputePositions(
+  fullThreadSampleTimes: Milliseconds[],
+  sampleIndexOffset: number,
+  sampleCount: number,
+  rangeStart: Milliseconds,
+  xPixelsPerMs: number,
+  interval: Milliseconds,
+  canvasPixelWidth: DevicePixels
+): PrecomputedPositions {
+  function convertTimeToClampedPosition(time: Milliseconds): DevicePixels {
+    const pos = (time - rangeStart) * xPixelsPerMs;
+    if (pos < 0) {
+      return 0;
+    }
+    if (pos > canvasPixelWidth - 0.1) {
+      return canvasPixelWidth - 0.1;
+    }
+    return pos;
+  }
+
+  // The fractional device pixel position per sample in the range-filtered thread.
+  const samplePositions = new Float32Array(sampleCount); // DevicePixel[]
+
+  // The fractional device pixel position of the half-way point *before* the sample,
+  // per sample in the range-filtered thread. Has one extra element at the end for
+  // the half-way position after the last sample.
+  const halfwayPositions = new Float32Array(sampleCount + 1); // DevicePixel[]
+
+  let previousSampleTime =
+    sampleIndexOffset > 0
+      ? fullThreadSampleTimes[sampleIndexOffset - 1]
+      : fullThreadSampleTimes[0] - interval;
+  // Go through the samples and accumulate the category into the percentageBuffers.
+  for (let i = 0; i < sampleCount; i++) {
+    const sampleTime = fullThreadSampleTimes[sampleIndexOffset + i];
+    samplePositions[i] = convertTimeToClampedPosition(sampleTime);
+
+    const halfwayPointTimeBefore = (previousSampleTime + sampleTime) / 2;
+    halfwayPositions[i] = convertTimeToClampedPosition(halfwayPointTimeBefore);
+
+    previousSampleTime = sampleTime;
+  }
+
+  // Add another half-way point for after the last sample.
+  const afterLastSampleTime =
+    sampleIndexOffset + sampleCount < fullThreadSampleTimes.length
+      ? fullThreadSampleTimes[sampleIndexOffset + sampleCount]
+      : previousSampleTime + interval;
+  const halfwayPointTime = (previousSampleTime + afterLastSampleTime) / 2;
+  halfwayPositions[sampleCount] =
+    convertTimeToClampedPosition(halfwayPointTime);
+
+  return {
+    samplePositions,
+    halfwayPositions,
+  };
+}
 
 export function computeActivityGraphFills(
   renderedComponentSettings: RenderedComponentSettings
@@ -208,17 +278,12 @@ export class ActivityGraphFillComputer {
    */
   _accumulateSampleCategories() {
     const {
-      fullThread,
       fullThreadSampleCPUPercentages,
       fullThreadSampleCategories,
-      rangeFilteredThread: { samples, stackTable },
-      interval,
-      greyCategoryIndex,
+      rangeFilteredThread: { samples },
       sampleIndexOffset,
-      rangeStart,
       sampleSelectedStates,
-      xPixelsPerMs,
-      canvasPixelWidth,
+      precomputedPositions: { samplePositions, halfwayPositions },
     } = this.renderedComponentSettings;
 
     if (samples.length === 0) {
@@ -226,82 +291,33 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    let firstSampleTime = samples.time[0] - interval;
+    let halfwayPointPixelAfter = halfwayPositions[0];
 
-    if (sampleIndexOffset > 0) {
-      // If sampleIndexOffset is greater than zero, it means that we are zoomed
-      // in the timeline and we are seeing a portion of it. In that case,
-      // we can get the time of the first previous sample from the full thread.
-      firstSampleTime = fullThread.samples.time[sampleIndexOffset - 1];
-    }
-
-    let nextSampleTime = samples.time[0];
-    const firstSampleTimeDelta = nextSampleTime - firstSampleTime;
     // A number between 0 and 1 for sample ratio. It changes depending on
     // the CPU usage per ms if it's given. If not, it uses 1 directly.
     let afterSampleCpuRatio =
       fullThreadSampleCPUPercentages[sampleIndexOffset] / 100;
 
-    const halfwayPointTimeAfterFirst =
-      firstSampleTime + firstSampleTimeDelta / 2;
-    let halfwayPointPixelAfter =
-      (halfwayPointTimeAfterFirst - rangeStart) * xPixelsPerMs;
-    if (halfwayPointPixelAfter < 0) {
-      halfwayPointPixelAfter = 0;
-    }
-    if (halfwayPointPixelAfter >= canvasPixelWidth) {
-      halfwayPointPixelAfter = canvasPixelWidth - 0.1;
-    }
-    let nextSamplePixel = (nextSampleTime - rangeStart) * xPixelsPerMs;
-    if (nextSamplePixel < 0) {
-      nextSamplePixel = 0;
-    }
-    if (nextSamplePixel >= canvasPixelWidth) {
-      nextSamplePixel = canvasPixelWidth - 0.1;
-    }
-
     // Go through the samples and accumulate the category into the percentageBuffers.
-    for (let i = 0; i < samples.length - 1; i++) {
-      const sampleTime = nextSampleTime;
-      nextSampleTime = samples.time[i + 1];
-
+    for (let i = 0; i < samples.length; i++) {
       const cpuRatio = afterSampleCpuRatio;
       afterSampleCpuRatio =
         fullThreadSampleCPUPercentages[sampleIndexOffset + i + 1] / 100;
 
-      // Convert times to pixel positions.
-      // The buffer covers the following time range: It starts at `rangeStart`
-      // and ends at `rangeStart + canvasPixelWidth / xPixelsPerMs`.
       // Each sample contributes its category to the pixel interval created by
       // the halfway points with respect to the previous and next sample.
-      const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
       const halfwayPointPixelBefore = halfwayPointPixelAfter;
-      const halfwayPointTimeAfter = sampleTime + sampleTimeDeltaAfter / 2;
-      halfwayPointPixelAfter =
-        (halfwayPointTimeAfter - rangeStart) * xPixelsPerMs;
-      if (halfwayPointPixelAfter < 0) {
-        halfwayPointPixelAfter = 0;
-      }
-      if (halfwayPointPixelAfter >= canvasPixelWidth) {
-        halfwayPointPixelAfter = canvasPixelWidth - 0.1;
-      }
-      const samplePixel = nextSamplePixel;
-      nextSamplePixel = (nextSampleTime - rangeStart) * xPixelsPerMs;
-      if (nextSamplePixel < 0) {
-        nextSamplePixel = 0;
-      }
-      if (nextSamplePixel >= canvasPixelWidth) {
-        nextSamplePixel = canvasPixelWidth - 0.1;
-      }
+      halfwayPointPixelAfter = halfwayPositions[i + 1];
 
       if (cpuRatio === 0 && afterSampleCpuRatio === 0) {
         continue;
       }
 
       const category = fullThreadSampleCategories[sampleIndexOffset + i];
-      const percentageBuffers = this.mutablePercentageBuffers[category];
       const selectedState = sampleSelectedStates[i];
-      const percentageBuffer = percentageBuffers[selectedState];
+      const percentageBuffer =
+        this.mutablePercentageBuffers[category][selectedState];
+      const samplePixel = samplePositions[i];
 
       // Samples have two parts to be able to present the different CPU usages properly.
       // This is because CPU usage number of a sample represents the CPU usage
@@ -322,62 +338,6 @@ export class ActivityGraphFillComputer {
         afterSampleCpuRatio
       );
     }
-
-    // Handle the last sample, which was not covered by the for loop above.
-    const lastIdx = samples.length - 1;
-    const lastSampleStack = samples.stack[lastIdx];
-    const lastSampleCategory =
-      lastSampleStack !== null
-        ? stackTable.category[lastSampleStack]
-        : greyCategoryIndex;
-
-    const sampleTime = nextSampleTime;
-    nextSampleTime = sampleTime + interval;
-
-    const cpuRatio = afterSampleCpuRatio;
-    afterSampleCpuRatio =
-      fullThreadSampleCPUPercentages[sampleIndexOffset + lastIdx + 1 / 100];
-
-    if (cpuRatio === 0 && afterSampleCpuRatio === 0) {
-      return;
-    }
-
-    const halfwayPointPixelBefore = halfwayPointPixelAfter;
-    const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
-    const halfwayPointTimeAfter = sampleTime + sampleTimeDeltaAfter / 2;
-    halfwayPointPixelAfter =
-      (halfwayPointTimeAfter - rangeStart) * xPixelsPerMs;
-    if (halfwayPointPixelAfter < 0) {
-      halfwayPointPixelAfter = 0;
-    }
-    if (halfwayPointPixelAfter >= canvasPixelWidth) {
-      halfwayPointPixelAfter = canvasPixelWidth - 0.1;
-    }
-    const samplePixel = nextSamplePixel;
-    nextSamplePixel = (nextSampleTime - rangeStart) * xPixelsPerMs;
-    if (nextSamplePixel < 0) {
-      nextSamplePixel = 0;
-    }
-    if (nextSamplePixel >= canvasPixelWidth) {
-      nextSamplePixel = canvasPixelWidth - 0.1;
-    }
-
-    const percentageBuffers = this.mutablePercentageBuffers[lastSampleCategory];
-    const selectedState = sampleSelectedStates[lastIdx];
-    const percentageBuffer = percentageBuffers[selectedState];
-
-    _accumulateInBuffer(
-      percentageBuffer,
-      halfwayPointPixelBefore,
-      samplePixel,
-      cpuRatio
-    );
-    _accumulateInBuffer(
-      percentageBuffer,
-      samplePixel,
-      halfwayPointPixelAfter,
-      afterSampleCpuRatio
-    );
   }
 }
 
