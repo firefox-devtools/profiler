@@ -19,7 +19,7 @@ import {
   convertStackToCallNodeAndCategoryPath,
   getSampleIndexToCallNodeIndex,
   getTreeOrderComparator,
-  getSamplesSelectedStates,
+  getSampleSelectedStates,
   extractProfileFilterPageData,
   findAddressProofForFile,
   calculateFunctionSizeLowerBound,
@@ -879,7 +879,7 @@ describe('convertStackToCallNodeAndCategoryPath', function () {
   });
 });
 
-describe('getSamplesSelectedStates', function () {
+describe('getSampleSelectedStates', function () {
   const {
     profile,
     funcNamesDictPerThread: [{ A, B, D, E, F }],
@@ -909,7 +909,7 @@ describe('getSamplesSelectedStates', function () {
 
   it('determines the selection status of all the samples', function () {
     expect(
-      getSamplesSelectedStates(
+      getSampleSelectedStates(
         callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
@@ -923,7 +923,7 @@ describe('getSamplesSelectedStates', function () {
       'UNSELECTED_ORDERED_AFTER_SELECTED',
     ]);
     expect(
-      getSamplesSelectedStates(
+      getSampleSelectedStates(
         callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
@@ -937,7 +937,7 @@ describe('getSamplesSelectedStates', function () {
       'SELECTED',
     ]);
     expect(
-      getSamplesSelectedStates(
+      getSampleSelectedStates(
         callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
@@ -951,7 +951,7 @@ describe('getSamplesSelectedStates', function () {
       'UNSELECTED_ORDERED_AFTER_SELECTED',
     ]);
     expect(
-      getSamplesSelectedStates(
+      getSampleSelectedStates(
         callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,

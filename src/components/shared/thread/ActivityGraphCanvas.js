@@ -32,7 +32,7 @@ type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +sampleIndexOffset: number,
-  +samplesSelectedStates: Uint8Array,
+  +sampleSelectedStates: Uint8Array,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -123,7 +123,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      samplesSelectedStates,
+      sampleSelectedStates,
       treeOrderSampleComparator,
       categories,
       enableCPUUsage,
@@ -147,7 +147,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      samplesSelectedStates,
+      sampleSelectedStates,
       enableCPUUsage,
       maxThreadCPUDeltaPerMs,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),

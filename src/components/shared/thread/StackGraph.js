@@ -19,7 +19,7 @@ import type {
 type Props = {|
   +className: string,
   +thread: Thread,
-  +samplesSelectedStates: Uint8Array,
+  +sampleSelectedStates: Uint8Array,
   +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
@@ -51,7 +51,7 @@ export class ThreadStackGraph extends PureComponent<Props> {
     const {
       className,
       thread,
-      samplesSelectedStates,
+      sampleSelectedStates,
       interval,
       rangeStart,
       rangeEnd,
@@ -77,7 +77,7 @@ export class ThreadStackGraph extends PureComponent<Props> {
         trackName={trackName}
         interval={interval}
         thread={thread}
-        samplesSelectedStates={samplesSelectedStates}
+        sampleSelectedStates={sampleSelectedStates}
         rangeStart={rangeStart}
         rangeEnd={rangeEnd}
         categories={categories}

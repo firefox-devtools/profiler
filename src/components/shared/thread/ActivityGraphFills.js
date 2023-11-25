@@ -45,7 +45,7 @@ type RenderedComponentSettings = {|
     IndexIntoSamplesTable
   ) => number,
   +greyCategoryIndex: IndexIntoCategoryList,
-  +samplesSelectedStates: Uint8Array,
+  +sampleSelectedStates: Uint8Array,
   +categoryDrawStyles: CategoryDrawStyles,
 |};
 
@@ -319,7 +319,7 @@ export class ActivityGraphFillComputer {
     cpuBeforeSample: number | null,
     cpuAfterSample: number | null
   ) {
-    const { rangeEnd, rangeStart, categoryDrawStyles, samplesSelectedStates } =
+    const { rangeEnd, rangeStart, categoryDrawStyles, sampleSelectedStates } =
       this.renderedComponentSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
@@ -332,7 +332,7 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    const selectedState = samplesSelectedStates[sampleIndex];
+    const selectedState = sampleSelectedStates[sampleIndex];
     const percentageBuffer = percentageBuffers[selectedState];
 
     _accumulateInBuffer(

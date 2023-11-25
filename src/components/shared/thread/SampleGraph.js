@@ -25,7 +25,7 @@ import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 type Props = {|
   +className: string,
   +thread: Thread,
-  +samplesSelectedStates: Uint8Array,
+  +sampleSelectedStates: Uint8Array,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -90,7 +90,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
       interval,
       rangeStart,
       rangeEnd,
-      samplesSelectedStates,
+      sampleSelectedStates,
       categories,
       width,
       height,
@@ -147,8 +147,8 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
         (sampleTime - range[0]) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
       if (
-        samplesSelectedStates !== null &&
-        samplesSelectedStates[i] === 0 /* SelectedState.Selected */
+        sampleSelectedStates !== null &&
+        sampleSelectedStates[i] === 0 /* SelectedState.Selected */
       ) {
         samplesBucket = highlightedSamples;
       } else {

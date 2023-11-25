@@ -81,7 +81,7 @@ type StateProps = {|
   +categories: CategoryList,
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
-  +samplesSelectedStates: Uint8Array,
+  +sampleSelectedStates: Uint8Array,
   +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
@@ -186,7 +186,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       hasFileIoMarkers,
       showMemoryMarkers,
       sampleNonInvertedCallNodes,
-      samplesSelectedStates,
+      sampleSelectedStates,
       treeOrderSampleComparator,
       trackType,
       trackName,
@@ -257,7 +257,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               sampleIndexOffset={sampleIndexOffset}
               onSampleClick={this._onSampleClick}
               categories={categories}
-              samplesSelectedStates={samplesSelectedStates}
+              sampleSelectedStates={sampleSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
               enableCPUUsage={enableCPUUsage}
               maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
@@ -272,7 +272,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 thread={filteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                samplesSelectedStates={samplesSelectedStates}
+                sampleSelectedStates={sampleSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
               />
@@ -287,7 +287,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
                 callNodeInfo={callNodeInfo}
-                samplesSelectedStates={samplesSelectedStates}
+                sampleSelectedStates={sampleSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
                 maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
@@ -304,7 +304,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
             sampleNonInvertedCallNodes={sampleNonInvertedCallNodes}
-            samplesSelectedStates={samplesSelectedStates}
+            sampleSelectedStates={sampleSelectedStates}
             categories={categories}
             onSampleClick={this._onSampleClick}
           />
@@ -356,8 +356,8 @@ export const TimelineTrackThread = explicitConnect<
       timelineType,
       hasFileIoMarkers:
         selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
-      samplesSelectedStates:
-        selectors.getSamplesSelectedStatesInFilteredThread(state),
+      sampleSelectedStates:
+        selectors.getSampleSelectedStatesInFilteredThread(state),
       treeOrderSampleComparator:
         selectors.getTreeOrderComparatorInFilteredThread(state),
       selectedThreadIndexes,
