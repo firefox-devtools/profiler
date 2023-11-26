@@ -300,7 +300,8 @@ export class ActivityGraphFillComputer {
       fullThreadSampleCPUPercentages[sampleIndexOffset] / 100;
 
     // Go through the samples and accumulate the category into the percentageBuffers.
-    for (let i = 0; i < samples.length; i++) {
+    const sampleCount = samples.length;
+    for (let i = 0; i < sampleCount; i++) {
       const beforeSampleCpuRatio = afterSampleCpuRatio;
       afterSampleCpuRatio =
         fullThreadSampleCPUPercentages[sampleIndexOffset + i + 1] / 100;
