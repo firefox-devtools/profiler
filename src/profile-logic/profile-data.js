@@ -1904,7 +1904,11 @@ export function getTimingsForCallNodeIndex(
       const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
       const thisNodeOrderingIndex = orderingIndexForSelfNode[thisNodeIndex];
       const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      rootTime += Math.abs(weight);
+      if (weight >= 0) {
+        rootTime += weight;
+      } else {
+        rootTime += -weight;
+      }
 
       if (
         thisNodeOrderingIndex >= orderingIndexRangeStart &&
@@ -1938,7 +1942,11 @@ export function getTimingsForCallNodeIndex(
       }
       const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
       const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      rootTime += Math.abs(weight);
+      if (weight >= 0) {
+        rootTime += weight;
+      } else {
+        rootTime += -weight;
+      }
 
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
