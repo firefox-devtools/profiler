@@ -346,8 +346,12 @@ export class ActivityGraphFillComputer {
         if (intStartPos === intEndPos) {
           buffer[baseIndex + intStartPos] += cpuRatio * (endPos - startPos);
         } else {
-          for (let i = intStartPos + 1; i < intEndPos; i++) {
-            buffer[baseIndex + i] += cpuRatio;
+          if (intStartPos + 1 < intEndPos) {
+            buffer.fill(
+              cpuRatio,
+              baseIndex + intStartPos + 1,
+              baseIndex + intEndPos
+            );
           }
 
           buffer[baseIndex + intStartPos] +=
@@ -366,8 +370,12 @@ export class ActivityGraphFillComputer {
         if (intStartPos === intEndPos) {
           buffer[baseIndex + intStartPos] += cpuRatio * (endPos - startPos);
         } else {
-          for (let i = intStartPos + 1; i < intEndPos; i++) {
-            buffer[baseIndex + i] += cpuRatio;
+          if (intStartPos + 1 < intEndPos) {
+            buffer.fill(
+              cpuRatio,
+              baseIndex + intStartPos + 1,
+              baseIndex + intEndPos
+            );
           }
 
           buffer[baseIndex + intStartPos] +=
