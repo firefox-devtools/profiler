@@ -344,13 +344,13 @@ export class ActivityGraphFillComputer {
         if (intStartPos === intEndPos) {
           percentageBuffer[intStartPos] += cpuRatio * (endPos - startPos);
         } else {
-          for (let i = intStartPos; i <= intEndPos; i++) {
+          for (let i = intStartPos + 1; i < intEndPos; i++) {
             percentageBuffer[i] += cpuRatio;
           }
 
-          // Subtract the partial pixels from start and end of the first part.
-          percentageBuffer[intStartPos] -= cpuRatio * (startPos - intStartPos);
-          percentageBuffer[intEndPos] -= cpuRatio * (1 - (endPos - intEndPos));
+          percentageBuffer[intStartPos] +=
+            cpuRatio * (1 - (startPos - intStartPos));
+          percentageBuffer[intEndPos] += cpuRatio * (endPos - intEndPos);
         }
       }
       {
@@ -364,13 +364,13 @@ export class ActivityGraphFillComputer {
         if (intStartPos === intEndPos) {
           percentageBuffer[intStartPos] += cpuRatio * (endPos - startPos);
         } else {
-          for (let i = intStartPos; i <= intEndPos; i++) {
+          for (let i = intStartPos + 1; i < intEndPos; i++) {
             percentageBuffer[i] += cpuRatio;
           }
 
-          // Subtract the partial pixels from start and end of the first part.
-          percentageBuffer[intStartPos] -= cpuRatio * (startPos - intStartPos);
-          percentageBuffer[intEndPos] -= cpuRatio * (1 - (endPos - intEndPos));
+          percentageBuffer[intStartPos] +=
+            cpuRatio * (1 - (startPos - intStartPos));
+          percentageBuffer[intEndPos] += cpuRatio * (endPos - intEndPos);
         }
       }
     }
