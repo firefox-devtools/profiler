@@ -241,6 +241,12 @@ export function getBasicThreadSelectorsPerThread(
       }
     );
 
+  const getMaxThreadCPUDeltaPerMs: Selector<number> = createSelector(
+    getCPUProcessedThread,
+    ProfileSelectors.getProfileInterval,
+    (thread, interval) => Cpu.computeMaxThreadCPUDeltaPerMs([thread], interval)
+  );
+
   const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> =
     createSelector(
       getThread,
@@ -388,6 +394,7 @@ export function getBasicThreadSelectorsPerThread(
     getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
     getCPUProcessedThread,
+    getMaxThreadCPUDeltaPerMs,
     getFunctionsReservedThread,
     getTabFilteredThread,
     getActiveTabFilteredThread,

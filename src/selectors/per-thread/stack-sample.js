@@ -14,7 +14,6 @@ import * as FlameGraph from '../../profile-logic/flame-graph';
 import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
-import * as CpuSelectors from '../cpu';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
 import {
   getStackLineInfo,
@@ -262,7 +261,7 @@ export function getStackAndSampleSelectorsPerThread(
         threadSelectors.getCPUProcessedThread(state).samples.threadCPUDelta,
       (state) => threadSelectors.getCPUProcessedThread(state).samples.time,
       ProfileSelectors.getProfileInterval,
-      CpuSelectors.getMaxThreadCPUDeltaPerMs,
+      threadSelectors.getMaxThreadCPUDeltaPerMs,
       ProfileData.computeSampleCPUPercentages
     );
 
