@@ -687,7 +687,7 @@ export function computeCallTreeTimingsInverted(
     }
   }
   sortedRoots.sort(
-    (a, b) => Math.max(totalPerRootFunc[b]) - Math.max(totalPerRootFunc[a])
+    (a, b) => Math.abs(totalPerRootFunc[b]) - Math.abs(totalPerRootFunc[a])
   );
   return {
     callNodeSelf,
