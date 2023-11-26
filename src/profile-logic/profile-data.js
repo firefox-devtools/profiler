@@ -1843,36 +1843,6 @@ export function getTimingsForCallNodeIndex(
 
     return implementation;
   }
-
-  /**
-   * This is a small utility function to more easily add data to breakdowns.
-   */
-  function accumulateDataToTimings(
-    implementationSummary: BreakdownByImplementation | null,
-    categorySummary: Float32Array,
-    subcategorySummaries: Float32Array[],
-    sampleIndex: IndexIntoSamplesTable,
-    duration: Milliseconds
-  ): void {
-    // Contribute to the implementation breakdown, if desired.
-    if (implementationSummary !== null) {
-      const implementation = getImplementationForStack(sampleIndex);
-      implementationSummary[implementation] =
-        (implementationSummary[implementation] ?? 0) + duration;
-    }
-
-    // Contribute to the category breakdown.
-    // We want to use the category of the unfilteredThread.
-    const unfilteredStackIndex =
-      unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
-    if (unfilteredStackIndex !== null) {
-      const categoryIndex = unfilteredStackTable.category[unfilteredStackIndex];
-      const subcategoryIndex =
-        unfilteredStackTable.subcategory[unfilteredStackIndex];
-      categorySummary[categoryIndex] += duration;
-      subcategorySummaries[categoryIndex][subcategoryIndex] += duration;
-    }
-  }
   /* ------------- End of function definitions ------------- */
 
   /* ------------ Start of the algorithm itself ------------ */
@@ -1923,16 +1893,29 @@ export function getTimingsForCallNodeIndex(
         thisNodeOrderingIndex >= orderingIndexRangeStart &&
         thisNodeOrderingIndex < orderingIndexRangeEnd
       ) {
-        // One of the parents is the exact passed path.
-        accumulateDataToTimings(
-          totalImplementationSummary,
-          totalCategorySummary,
-          totalSubcategorySummaries,
-          sampleIndex,
-          weight
-        );
+        // We're in the selected subtree.
         totalValue += weight;
         hasTotal = true;
+
+        // Contribute to the implementation breakdown, if desired.
+        if (totalImplementationSummary !== null) {
+          const implementation = getImplementationForStack(sampleIndex);
+          totalImplementationSummary[implementation] =
+            (totalImplementationSummary[implementation] ?? 0) + weight;
+        }
+
+        // Contribute to the category breakdown.
+        // We want to use the category of the unfilteredThread.
+        const unfilteredStackIndex =
+          unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
+        if (unfilteredStackIndex !== null) {
+          const categoryIndex =
+            unfilteredStackTable.category[unfilteredStackIndex];
+          const subcategoryIndex =
+            unfilteredStackTable.subcategory[unfilteredStackIndex];
+          totalCategorySummary[categoryIndex] += weight;
+          totalSubcategorySummaries[categoryIndex][subcategoryIndex] += weight;
+        }
 
         if (needleNodeIsRootOfInvertedTree) {
           // This root node matches the passed call node path.
@@ -1966,33 +1949,68 @@ export function getTimingsForCallNodeIndex(
         rootTime += -weight;
       }
 
-      // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
-        accumulateDataToTimings(
-          selfImplementationSummary,
-          selfCategorySummary,
-          selfSubcategorySummaries,
-          sampleIndex,
-          weight
-        );
+        // Contribute both to the self and to the total breakdowns.
+        totalValue += weight;
         selfValue += weight;
+        hasTotal = true;
         hasSelf = true;
+
+        // Contribute to the implementation breakdown, if desired.
+        if (
+          totalImplementationSummary !== null &&
+          selfImplementationSummary !== null
+        ) {
+          const implementation = getImplementationForStack(sampleIndex);
+          totalImplementationSummary[implementation] =
+            (totalImplementationSummary[implementation] ?? 0) + weight;
+          selfImplementationSummary[implementation] =
+            (selfImplementationSummary[implementation] ?? 0) + weight;
+        }
+
+        // Contribute to the category breakdown.
+        // We want to use the category of the unfilteredThread.
+        const unfilteredStackIndex =
+          unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
+        if (unfilteredStackIndex !== null) {
+          const categoryIndex =
+            unfilteredStackTable.category[unfilteredStackIndex];
+          const subcategoryIndex =
+            unfilteredStackTable.subcategory[unfilteredStackIndex];
+          totalCategorySummary[categoryIndex] += weight;
+          selfCategorySummary[categoryIndex] += weight;
+          totalSubcategorySummaries[categoryIndex][subcategoryIndex] += weight;
+          selfSubcategorySummaries[categoryIndex][subcategoryIndex] += weight;
+        }
       }
 
       if (
         thisNodeIndex >= needleNodeIndex &&
         thisNodeIndex < needleDescendantsEndIndex
       ) {
-        // One of the parents is the exact passed path.
-        accumulateDataToTimings(
-          totalImplementationSummary,
-          totalCategorySummary,
-          totalSubcategorySummaries,
-          sampleIndex,
-          weight
-        );
+        // We're in the selected subtree. Contribute to the total timings.
         totalValue += weight;
         hasTotal = true;
+
+        // Contribute to the implementation breakdown, if desired.
+        if (totalImplementationSummary !== null) {
+          const implementation = getImplementationForStack(sampleIndex);
+          totalImplementationSummary[implementation] =
+            (totalImplementationSummary[implementation] ?? 0) + weight;
+        }
+
+        // Contribute to the category breakdown.
+        // We want to use the category of the unfilteredThread.
+        const unfilteredStackIndex =
+          unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
+        if (unfilteredStackIndex !== null) {
+          const categoryIndex =
+            unfilteredStackTable.category[unfilteredStackIndex];
+          const subcategoryIndex =
+            unfilteredStackTable.subcategory[unfilteredStackIndex];
+          totalCategorySummary[categoryIndex] += weight;
+          totalSubcategorySummaries[categoryIndex][subcategoryIndex] += weight;
+        }
       }
     }
   }
