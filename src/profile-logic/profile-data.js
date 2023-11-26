@@ -154,41 +154,6 @@ export function getUninvertedCallNodeInfoComponents(
     const currentLastChild: Array<IndexIntoFuncTable> = [];
     let currentLastRoot = -1;
 
-    function addCallNode(
-      prefixIndex: IndexIntoCallNodeTable,
-      funcIndex: IndexIntoFuncTable,
-      categoryIndex: IndexIntoCategoryList,
-      subcategoryIndex: IndexIntoSubcategoryListForCategory,
-      windowID: InnerWindowID,
-      inlinedIntoSymbol: IndexIntoNativeSymbolTable | -1 | -2
-    ) {
-      const index = length++;
-      prefix[index] = prefixIndex;
-      func[index] = funcIndex;
-      category[index] = categoryIndex;
-      subcategory[index] = subcategoryIndex;
-      innerWindowID[index] = windowID;
-      sourceFramesInlinedIntoSymbol[index] = inlinedIntoSymbol;
-      currentLastChild[index] = -1;
-      nextSibling[index] = -1;
-      firstChild[index] = -1;
-      if (prefixIndex === -1) {
-        const prevSiblingIndex = currentLastRoot;
-        if (prevSiblingIndex !== -1) {
-          nextSibling[prevSiblingIndex] = index;
-        }
-        currentLastRoot = index;
-      } else {
-        const prevSiblingIndex = currentLastChild[prefixIndex];
-        if (prevSiblingIndex === -1) {
-          firstChild[prefixIndex] = index;
-        } else {
-          nextSibling[prevSiblingIndex] = index;
-        }
-        currentLastChild[prefixIndex] = index;
-      }
-    }
-
     // Go through each stack, and create a new callNode table, which is based off of
     // functions rather than frames.
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
@@ -208,27 +173,44 @@ export function getUninvertedCallNodeInfoComponents(
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
 
       // Check if the call node for this stack already exists.
-      let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
+      const callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
         prefixCallNodeAndFuncIndex
       );
       if (callNodeIndex === undefined) {
-        const windowID = frameTable.innerWindowID[frameIndex] || 0;
-
         // New call node.
-        callNodeIndex = length;
-        addCallNode(
-          prefixCallNode,
-          funcIndex,
-          categoryIndex,
-          subcategoryIndex,
-          windowID,
-          inlinedIntoSymbol
-        );
+        const index = length++;
+        stackIndexToCallNodeIndex[stackIndex] = index;
+
+        prefix[index] = prefixCallNode;
+        func[index] = funcIndex;
+        category[index] = categoryIndex;
+        subcategory[index] = subcategoryIndex;
+        innerWindowID[index] = frameTable.innerWindowID[frameIndex] || 0;
+        sourceFramesInlinedIntoSymbol[index] = inlinedIntoSymbol;
+        currentLastChild[index] = -1;
+        nextSibling[index] = -1;
+        firstChild[index] = -1;
+        if (prefixCallNode === -1) {
+          const prevSiblingIndex = currentLastRoot;
+          if (prevSiblingIndex !== -1) {
+            nextSibling[prevSiblingIndex] = index;
+          }
+          currentLastRoot = index;
+        } else {
+          const prevSiblingIndex = currentLastChild[prefixCallNode];
+          if (prevSiblingIndex === -1) {
+            firstChild[prefixCallNode] = index;
+          } else {
+            nextSibling[prevSiblingIndex] = index;
+          }
+          currentLastChild[prefixCallNode] = index;
+        }
         prefixCallNodeAndFuncToCallNodeMap.set(
           prefixCallNodeAndFuncIndex,
-          callNodeIndex
+          index
         );
       } else {
+        stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
         // There is already a call node for this function. Use it, and check if
         // there are any conflicts between the various stack nodes that have been
         // merged into it.
@@ -256,7 +238,6 @@ export function getUninvertedCallNodeInfoComponents(
           sourceFramesInlinedIntoSymbol[callNodeIndex] = -1;
         }
       }
-      stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
     return _createCallNodeInfoFromUnorderedComponents(
       prefix,
