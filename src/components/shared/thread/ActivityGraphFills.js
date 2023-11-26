@@ -301,7 +301,7 @@ export class ActivityGraphFillComputer {
 
     // Go through the samples and accumulate the category into the percentageBuffers.
     for (let i = 0; i < samples.length; i++) {
-      const cpuRatio = afterSampleCpuRatio;
+      const beforeSampleCpuRatio = afterSampleCpuRatio;
       afterSampleCpuRatio =
         fullThreadSampleCPUPercentages[sampleIndexOffset + i + 1] / 100;
 
@@ -310,7 +310,7 @@ export class ActivityGraphFillComputer {
       const halfwayPointPixelBefore = halfwayPointPixelAfter;
       halfwayPointPixelAfter = halfwayPositions[i + 1];
 
-      if (cpuRatio === 0 && afterSampleCpuRatio === 0) {
+      if (beforeSampleCpuRatio === 0 && afterSampleCpuRatio === 0) {
         continue;
       }
 
@@ -326,18 +326,49 @@ export class ActivityGraphFillComputer {
       // These parts will be:
       // - Between `halfwayPointPixelBefore` and `samplePixel` with cpuRatio.
       // - Between `samplePixel` and `halfwayPointPixelAfter` with afterSampleCpuRatio.
-      _accumulateInBuffer(
-        percentageBuffer,
-        halfwayPointPixelBefore,
-        samplePixel,
-        cpuRatio
-      );
-      _accumulateInBuffer(
-        percentageBuffer,
-        samplePixel,
-        halfwayPointPixelAfter,
-        afterSampleCpuRatio
-      );
+
+      // Below we have two manually-inlined calls to _accumulateInBuffer.
+      // Inlining them made a big difference for performance in Firefox.
+      {
+        const startPos = halfwayPointPixelBefore;
+        const endPos = samplePixel;
+        const cpuRatio = beforeSampleCpuRatio;
+
+        const intStartPos = startPos | 0;
+        const intEndPos = endPos | 0;
+
+        if (intStartPos === intEndPos) {
+          percentageBuffer[intStartPos] += cpuRatio * (endPos - startPos);
+        } else {
+          for (let i = intStartPos; i <= intEndPos; i++) {
+            percentageBuffer[i] += cpuRatio;
+          }
+
+          // Subtract the partial pixels from start and end of the first part.
+          percentageBuffer[intStartPos] -= cpuRatio * (startPos - intStartPos);
+          percentageBuffer[intEndPos] -= cpuRatio * (1 - (endPos - intEndPos));
+        }
+      }
+      {
+        const startPos = samplePixel;
+        const endPos = halfwayPointPixelAfter;
+        const cpuRatio = afterSampleCpuRatio;
+
+        const intStartPos = startPos | 0;
+        const intEndPos = endPos | 0;
+
+        if (intStartPos === intEndPos) {
+          percentageBuffer[intStartPos] += cpuRatio * (endPos - startPos);
+        } else {
+          for (let i = intStartPos; i <= intEndPos; i++) {
+            percentageBuffer[i] += cpuRatio;
+          }
+
+          // Subtract the partial pixels from start and end of the first part.
+          percentageBuffer[intStartPos] -= cpuRatio * (startPos - intStartPos);
+          percentageBuffer[intEndPos] -= cpuRatio * (1 - (endPos - intEndPos));
+        }
+      }
     }
   }
 }
