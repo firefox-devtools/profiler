@@ -1877,6 +1877,7 @@ export function getTimingsForCallNodeIndex(
     return { forPath: pathTimings, rootTime };
   }
 
+  const sampleCount = samples.length;
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
@@ -1892,7 +1893,7 @@ export function getTimingsForCallNodeIndex(
 
     // Loop over each sample and accumulate the self time, running time, and
     // the implementation breakdown.
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
       // Get the call node for this sample.
       // TODO: Consider using sampleCallNodes for this, to save one indirection on
       // a hot path.
@@ -1927,7 +1928,7 @@ export function getTimingsForCallNodeIndex(
 
     // Loop over each sample and accumulate the self time, running time, and
     // the implementation breakdown.
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
       // Get the call node for this sample.
       // TODO: Consider using sampleCallNodes for this, to save one indirection on
       // a hot path.
