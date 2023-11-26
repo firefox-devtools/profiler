@@ -174,8 +174,11 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     }
 
     function drawSamples(samplePositions: number[], color: string) {
+      if (samplePositions.length === 0) {
+        return;
+      }
+      ctx.fillStyle = color;
       for (let i = 0; i < samplePositions.length; i++) {
-        ctx.fillStyle = color;
         const startY = 0;
         const xPos = samplePositions[i];
         ctx.fillRect(xPos, startY, drawnSampleWidth, canvas.height);
