@@ -1625,18 +1625,16 @@ export type OneCategoryBreakdown = {|
 |};
 export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
 export type ItemTimings = {|
-  selfTime: {|
-    // time spent excluding children
-    value: Milliseconds,
-    breakdownByImplementation: BreakdownByImplementation | null,
-    breakdownByCategory: BreakdownByCategory | null,
-  |},
-  totalTime: {|
-    // time spent including children
-    value: Milliseconds,
-    breakdownByImplementation: BreakdownByImplementation | null,
-    breakdownByCategory: BreakdownByCategory | null,
-  |},
+  // time spent excluding children
+  selfTime: ItemTimingsGroup,
+  // time spent including children
+  totalTime: ItemTimingsGroup,
+|};
+
+export type ItemTimingsGroup = {|
+  value: Milliseconds,
+  breakdownByImplementation: BreakdownByImplementation | null,
+  breakdownByCategory: BreakdownByCategory | null,
 |};
 
 export type TimingsForPath = {|
@@ -1717,18 +1715,18 @@ export function getTimingsForCallNodeIndex(
 
   // This object holds the timings for the current call node path, specified by
   // needleNodeIndex.
-  const pathTimings: ItemTimings = {
-    selfTime: {
-      value: 0,
-      breakdownByImplementation: null,
-      breakdownByCategory: null,
-    },
-    totalTime: {
-      value: 0,
-      breakdownByImplementation: null,
-      breakdownByCategory: null,
-    },
-  };
+  let selfValue = 0;
+  const selfImplementationSummary = displayImplementation ? {} : null;
+  const selfCategorySummary = new Float32Array(categories.length);
+  const selfSubcategorySummaries = categories.map(
+    (category) => new Float32Array(category.subcategories.length)
+  );
+  let totalValue = 0;
+  const totalImplementationSummary = displayImplementation ? {} : null;
+  const totalCategorySummary = new Float32Array(categories.length);
+  const totalSubcategorySummaries = categories.map(
+    (category) => new Float32Array(category.subcategories.length)
+  );
 
   // This holds the root time, it's incremented for all samples and is useful to
   // have an absolute value to compare the other values with.
@@ -1739,6 +1737,37 @@ export function getTimingsForCallNodeIndex(
   /* ------------ Functions definitions --------- *
    * We define functions here so that they have easy access to the variables and
    * the algorithm's parameters. */
+
+  function createEmptyGroup(): ItemTimingsGroup {
+    return {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    };
+  }
+
+  function convertGroup(
+    hasSample: boolean,
+    value: number,
+    implementationSummary: BreakdownByImplementation | null,
+    categorySummary: Float32Array,
+    subcategorySummaries: Float32Array[]
+  ): ItemTimingsGroup {
+    if (!hasSample) {
+      return createEmptyGroup();
+    }
+    return {
+      value,
+      breakdownByImplementation: implementationSummary,
+      breakdownByCategory: categories.map((category, categoryIndex) => ({
+        entireCategoryValue: categorySummary[categoryIndex],
+        subcategoryBreakdown: category.subcategories.map(
+          (_subcategory, subcategoryIndex) =>
+            subcategorySummaries[categoryIndex][subcategoryIndex]
+        ),
+      })),
+    };
+  }
 
   /**
    * This function is called for native stacks. If the native stack has the
@@ -1819,54 +1848,29 @@ export function getTimingsForCallNodeIndex(
    * This is a small utility function to more easily add data to breakdowns.
    */
   function accumulateDataToTimings(
-    timings: {
-      breakdownByImplementation: BreakdownByImplementation | null,
-      breakdownByCategory: BreakdownByCategory | null,
-      value: number,
-    },
+    implementationSummary: BreakdownByImplementation | null,
+    categorySummary: Float32Array,
+    subcategorySummaries: Float32Array[],
     sampleIndex: IndexIntoSamplesTable,
     duration: Milliseconds
   ): void {
-    // Step 1: increment the total value
-    timings.value += duration;
-
-    if (displayImplementation) {
-      // Step 2: find the implementation value for this sample
+    // Contribute to the implementation breakdown, if desired.
+    if (implementationSummary !== null) {
       const implementation = getImplementationForStack(sampleIndex);
-
-      // Step 3: increment the right value in the implementation breakdown
-      if (timings.breakdownByImplementation === null) {
-        timings.breakdownByImplementation = {};
-      }
-      if (timings.breakdownByImplementation[implementation] === undefined) {
-        timings.breakdownByImplementation[implementation] = 0;
-      }
-      timings.breakdownByImplementation[implementation] += duration;
-    } else {
-      timings.breakdownByImplementation = null;
+      implementationSummary[implementation] =
+        (implementationSummary[implementation] ?? 0) + duration;
     }
 
-    // step 4: find the category value for this stack. We want to use the
-    // category of the unfilteredThread.
+    // Contribute to the category breakdown.
+    // We want to use the category of the unfilteredThread.
     const unfilteredStackIndex =
       unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
     if (unfilteredStackIndex !== null) {
       const categoryIndex = unfilteredStackTable.category[unfilteredStackIndex];
       const subcategoryIndex =
         unfilteredStackTable.subcategory[unfilteredStackIndex];
-
-      // step 5: increment the right value in the category breakdown
-      if (timings.breakdownByCategory === null) {
-        timings.breakdownByCategory = categories.map((category) => ({
-          entireCategoryValue: 0,
-          subcategoryBreakdown: Array(category.subcategories.length).fill(0),
-        }));
-      }
-      timings.breakdownByCategory[categoryIndex].entireCategoryValue +=
-        duration;
-      timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
-        subcategoryIndex
-      ] += duration;
+      categorySummary[categoryIndex] += duration;
+      subcategorySummaries[categoryIndex][subcategoryIndex] += duration;
     }
   }
   /* ------------- End of function definitions ------------- */
@@ -1874,9 +1878,14 @@ export function getTimingsForCallNodeIndex(
   /* ------------ Start of the algorithm itself ------------ */
   if (needleNodeIndex === null) {
     // No index was provided, return empty timing information.
-    return { forPath: pathTimings, rootTime };
+    return {
+      forPath: { selfTime: createEmptyGroup(), totalTime: createEmptyGroup() },
+      rootTime,
+    };
   }
 
+  let hasTotal = false;
+  let hasSelf = false;
   const sampleCount = samples.length;
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const stackIndexToCallNodeIndex =
@@ -1915,13 +1924,22 @@ export function getTimingsForCallNodeIndex(
         thisNodeOrderingIndex < orderingIndexRangeEnd
       ) {
         // One of the parents is the exact passed path.
-        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
+        accumulateDataToTimings(
+          totalImplementationSummary,
+          totalCategorySummary,
+          totalSubcategorySummaries,
+          sampleIndex,
+          weight
+        );
+        totalValue += weight;
+        hasTotal = true;
 
         if (needleNodeIsRootOfInvertedTree) {
           // This root node matches the passed call node path.
           // This is the only place where we don't accumulate timings, mainly
           // because this would be the same as for the total time.
-          pathTimings.selfTime.value += weight;
+          selfValue += weight;
+          hasSelf = true;
         }
       }
     }
@@ -1950,17 +1968,51 @@ export function getTimingsForCallNodeIndex(
 
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
-        accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
+        accumulateDataToTimings(
+          selfImplementationSummary,
+          selfCategorySummary,
+          selfSubcategorySummaries,
+          sampleIndex,
+          weight
+        );
+        selfValue += weight;
+        hasSelf = true;
       }
+
       if (
         thisNodeIndex >= needleNodeIndex &&
         thisNodeIndex < needleDescendantsEndIndex
       ) {
         // One of the parents is the exact passed path.
-        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
+        accumulateDataToTimings(
+          totalImplementationSummary,
+          totalCategorySummary,
+          totalSubcategorySummaries,
+          sampleIndex,
+          weight
+        );
+        totalValue += weight;
+        hasTotal = true;
       }
     }
   }
+
+  const pathTimings: ItemTimings = {
+    selfTime: convertGroup(
+      hasSelf,
+      selfValue,
+      selfImplementationSummary,
+      selfCategorySummary,
+      selfSubcategorySummaries
+    ),
+    totalTime: convertGroup(
+      hasTotal,
+      totalValue,
+      totalImplementationSummary,
+      totalCategorySummary,
+      totalSubcategorySummaries
+    ),
+  };
 
   return { forPath: pathTimings, rootTime };
 }
