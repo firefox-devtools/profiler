@@ -71,7 +71,7 @@ export interface CallNodeInfo {
   depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
   sourceFramesInlinedIntoSymbolForNode(
     callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoNativeSymbolTable | -1 | null;
+  ): IndexIntoNativeSymbolTable | -1 | -2;
 }
 
 export interface CallNodeInfoInverted extends CallNodeInfo {
@@ -117,10 +117,10 @@ export type CallNodeTable = {
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
-  // null: no inlining
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
-  // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -1: some, but not all, frames that collapsed into this call node were inlined, or they are from different symbols
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Int32Array,
   depth: number[],
   length: number,
 };
@@ -552,20 +552,20 @@ export type RemoveProfileInformation = {|
  *
  * ```typescript
  * const enum SelectedState {
- *   // Samples can be filtered through various operations, like searching, or
- *   // call tree transforms.
- *   FilteredOutByTransform = 0,
- *   // Samples can be filtered out if they are not part of the active tab.
- *   FilteredOutByActiveTab = 1,
  *   // This sample is selected because either the tip or an ancestor call node matches
  *   // the currently selected call node.
- *   Selected = 2,
+ *   Selected = 0,
  *   // This call node is not selected, and the stacks are ordered before the selected
  *   // call node as sorted by the getTreeOrderComparator.
- *   BeforeSelected = 3,
+ *   BeforeSelected = 1,
  *   // This call node is not selected, and the stacks are ordered after the selected
  *   // call node as sorted by the getTreeOrderComparator.
- *   AfterSelected = 4,
+ *   AfterSelected = 2,
+ *   // Samples can be filtered through various operations, like searching, or
+ *   // call tree transforms.
+ *   FilteredOutByTransform = 3,
+ *   // Samples can be filtered out if they are not part of the active tab.
+ *   FilteredOutByActiveTab = 4,
  * }
  * ```
  */

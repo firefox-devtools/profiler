@@ -338,8 +338,10 @@ export const TimelineTrackThread = explicitConnect<
 
     return {
       fullThread,
-      fullThreadSampleCategories: selectors.getSampleCategoriesForCPUProcessedThread(state),
-      fullThreadSampleCPUPercentages: selectors.getSampleCPUPercentagesForCPUProcessedThread(state),
+      fullThreadSampleCategories:
+        selectors.getSampleCategoriesForCPUProcessedThread(state),
+      fullThreadSampleCPUPercentages:
+        selectors.getSampleCPUPercentagesForCPUProcessedThread(state),
       filteredThread: selectors.getFilteredThread(state),
       rangeFilteredThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),

@@ -147,7 +147,7 @@ export function getUninvertedCallNodeInfoComponents(
     const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
     const innerWindowID: Array<InnerWindowID> = [];
     const sourceFramesInlinedIntoSymbol: Array<
-      IndexIntoNativeSymbolTable | -1 | null,
+      IndexIntoNativeSymbolTable | -1 | -2,
     > = [];
     let length = 0;
 
@@ -160,7 +160,7 @@ export function getUninvertedCallNodeInfoComponents(
       categoryIndex: IndexIntoCategoryList,
       subcategoryIndex: IndexIntoSubcategoryListForCategory,
       windowID: InnerWindowID,
-      inlinedIntoSymbol: IndexIntoNativeSymbolTable | null
+      inlinedIntoSymbol: IndexIntoNativeSymbolTable | -1 | -2
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
@@ -202,8 +202,8 @@ export function getUninvertedCallNodeInfoComponents(
       const subcategoryIndex = stackTable.subcategory[stackIndex];
       const inlinedIntoSymbol =
         frameTable.inlineDepth[frameIndex] > 0
-          ? frameTable.nativeSymbol[frameIndex]
-          : null;
+          ? frameTable.nativeSymbol[frameIndex] ?? -2
+          : -2;
       const funcIndex = frameTable.func[frameIndex];
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
 
@@ -291,7 +291,7 @@ function _createCallNodeInfoFromUnorderedComponents(
   category: Array<IndexIntoCategoryList>,
   subcategory: Array<IndexIntoSubcategoryListForCategory>,
   innerWindowID: Array<InnerWindowID>,
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | -2>,
   length: number,
   stackIndexToCallNodeIndex: Int32Array
 ): CallNodeInfoComponents {
@@ -364,7 +364,7 @@ function _createCallNodeInfoFromUnorderedComponents(
     const categorySorted = new Int32Array(length);
     const subcategorySorted = new Int32Array(length);
     const innerWindowIDSorted = new Float64Array(length);
-    const sourceFramesInlinedIntoSymbolSorted = new Array(length);
+    const sourceFramesInlinedIntoSymbolSorted = new Int32Array(length);
     for (let newIndex = 0; newIndex < length; newIndex++) {
       const oldIndex = newIndexToOldIndex[newIndex];
       categorySorted[newIndex] = category[oldIndex];
@@ -609,7 +609,7 @@ class CallNodeInfoNonInvertedImpl implements CallNodeInfo {
 
   sourceFramesInlinedIntoSymbolForNode(
     callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoNativeSymbolTable | -1 | null {
+  ): IndexIntoNativeSymbolTable | -1 | -2 {
     return this._callNodeTable.sourceFramesInlinedIntoSymbol[callNodeIndex];
   }
 }
@@ -621,10 +621,10 @@ type InvertedRootCallNodeTable = {|
   category: Int32Array, // IndexIntoFuncTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoFuncTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoFuncTable -> InnerWindowID
-  // null: no inlining
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
-  // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -1: divergent: some, but not all, frames that collapsed into this call node were inlined, or they are from different symbols
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Int32Array,
   orderingIndexRangeEnd: Uint32Array, // IndexIntoFuncTable -> IndexIntoInvertedOrdering,
   length: number,
 |};
@@ -636,10 +636,10 @@ type InvertedNonRootCallNodeTable = {|
   category: IndexIntoCategoryList[], // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoCategoryList
   subcategory: IndexIntoSubcategoryListForCategory[], // IndexIntoInvertedNonRootCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: InnerWindowID[], // IndexIntoInvertedNonRootCallNodeTable -> InnerWindowID
-  // null: no inlining
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
-  // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -1: divergent: some, but not all, frames that collapsed into this call node were inlined, or they are from different symbols
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | -2>,
   // Non-null for non-root nodes whose children haven't been prepared yet.
   orderedCallNodes: Array<Uint32Array | null>,
   orderingIndexRangeStart: IndexIntoInvertedOrdering[],
@@ -658,7 +658,7 @@ function _createInvertedRootCallNodeTable(
   const category = new Int32Array(funcCount);
   const subcategory = new Int32Array(funcCount);
   const innerWindowID = new Float64Array(funcCount);
-  const sourceFramesInlinedIntoSymbol = new Array(funcCount);
+  const sourceFramesInlinedIntoSymbol = new Int32Array(funcCount);
   let previousRootOrderingIndexRangeEnd = 0;
   for (let funcIndex = 0; funcIndex < funcCount; funcIndex++) {
     const callNodeOrderingIndexRangeStart = previousRootOrderingIndexRangeEnd;
@@ -666,7 +666,7 @@ function _createInvertedRootCallNodeTable(
       rootOrderingIndexRangeEndCol[funcIndex];
     previousRootOrderingIndexRangeEnd = callNodeOrderingIndexRangeEnd;
     if (callNodeOrderingIndexRangeStart === callNodeOrderingIndexRangeEnd) {
-      sourceFramesInlinedIntoSymbol[funcIndex] = null;
+      sourceFramesInlinedIntoSymbol[funcIndex] = -2;
       // Leave the remaining columns at zero for this root.
       continue;
     }
@@ -1288,7 +1288,7 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
 
   sourceFramesInlinedIntoSymbolForNode(
     callNodeHandle: CallNodeHandle
-  ): IndexIntoNativeSymbolTable | -1 | null {
+  ): IndexIntoNativeSymbolTable | -1 | -2 {
     if (callNodeHandle < this._rootCount) {
       const rootFunc = callNodeHandle;
       return this._invertedRootCallNodeTable.sourceFramesInlinedIntoSymbol[
