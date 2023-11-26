@@ -133,10 +133,6 @@ export function getUninvertedCallNodeInfoComponents(
 ): CallNodeInfoComponents {
   return timeCode('getCallNodeInfo', () => {
     const stackIndexToCallNodeIndex = new Int32Array(stackTable.length);
-    const funcCount = funcTable.length;
-    // Maps can't key off of two items, so combine the prefixCallNode and the funcIndex
-    // using the following formula: prefixCallNode * funcCount + funcIndex => callNode
-    const prefixCallNodeAndFuncToCallNodeMap = new Map();
 
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
@@ -170,12 +166,32 @@ export function getUninvertedCallNodeInfoComponents(
           ? frameTable.nativeSymbol[frameIndex] ?? -2
           : -2;
       const funcIndex = frameTable.func[frameIndex];
-      const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
 
       // Check if the call node for this stack already exists.
-      const callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
-        prefixCallNodeAndFuncIndex
-      );
+      let callNodeIndex;
+      const currentLastSibling =
+        prefixCallNode === -1
+          ? currentLastRoot
+          : currentLastChild[prefixCallNode];
+      if (currentLastSibling !== -1) {
+        if (func[currentLastSibling] === funcIndex) {
+          callNodeIndex = currentLastSibling;
+        } else {
+          const currentFirstSibling =
+            prefixCallNode === -1 ? 0 : firstChild[prefixCallNode];
+          for (
+            let currentSibling = currentFirstSibling;
+            currentSibling !== currentLastSibling;
+            currentSibling = nextSibling[currentSibling]
+          ) {
+            if (func[currentSibling] === funcIndex) {
+              callNodeIndex = currentSibling;
+              break;
+            }
+          }
+        }
+      }
+
       if (callNodeIndex === undefined) {
         // New call node.
         const index = length++;
@@ -205,10 +221,6 @@ export function getUninvertedCallNodeInfoComponents(
           }
           currentLastChild[prefixCallNode] = index;
         }
-        prefixCallNodeAndFuncToCallNodeMap.set(
-          prefixCallNodeAndFuncIndex,
-          index
-        );
       } else {
         stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
         // There is already a call node for this function. Use it, and check if
