@@ -559,31 +559,34 @@ describe('inverted call tree', function () {
 
 describe('diffing trees', function () {
   function getProfile() {
-    const { profile } = getMergedProfileFromTextSamples([
+    return getMergedProfileFromTextSamples([
       `
-        A  A  A
-        B  B  C
-        D  E  F
+        A  A  A  A  A  A  A
+        B  B  B  B  C  B  B
+        D  D  D  E  F  D  D
+        F  F  F           F
       `,
       `
-        A  A  A
-        B  B  B
-        G  I  E
+        A  A  A  A  A  A  A
+        B  B  B  B  B  B  B
+        D  D  D  G  I  E  I
+        D  D  D
       `,
     ]);
-    return profile;
   }
 
   it('displays a proper call tree, including nodes with total = 0', () => {
-    const profile = getProfile();
+    const { profile } = getProfile();
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
     const formattedTree = formatTree(callTree);
     expect(formattedTree).toEqual([
       '- A (total: —, self: —)',
       '  - B (total: 1, self: —)',
-      '    - D (total: -1, self: -1)',
+      '    - D (total: -2, self: -1)',
+      '      - F (total: -4, self: -4)',
+      '      - D (total: 3, self: 3)',
+      '    - I (total: 2, self: 2)',
       '    - G (total: 1, self: 1)',
-      '    - I (total: 1, self: 1)',
       '  - C (total: -1, self: —)',
       '    - F (total: -1, self: -1)',
     ]);
@@ -593,9 +596,9 @@ describe('diffing trees', function () {
   });
 
   it('displays a proper call tree, even for range-filtered threads', () => {
-    const profile = getProfile();
-    const rangeStart = 1;
-    const rangeEnd = 3;
+    const { profile } = getProfile();
+    const rangeStart = 4;
+    const rangeEnd = 5;
     profile.threads = profile.threads.map((thread) =>
       filterThreadSamplesToRange(thread, rangeStart, rangeEnd)
     );
@@ -611,8 +614,18 @@ describe('diffing trees', function () {
     ]);
   });
 
+  it('finds the heaviest call path even when it has ancestors with low totals', () => {
+    const { profile, funcNamesDictPerThread } = getProfile();
+    const { B, D, F } = funcNamesDictPerThread[2];
+    const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
+    // Get the call node index for the node A -> B. TODO: Make this more reliable
+    const AB = callTree.getChildren(callTree.getRoots()[0])[0];
+    const invertedPath = callTree.findHeavyPathToSameFunctionAfterInversion(AB);
+    expect(invertedPath).toEqual([F, D, B]);
+  });
+
   it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
-    const profile = getProfile();
+    const { profile } = getProfile();
 
     const thread = profile.threads[2];
     const defaultCategory = ensureExists(
@@ -634,7 +647,7 @@ describe('diffing trees', function () {
       callNodeInfo,
       false
     );
-    expect(callTreeCountsAndSummary.rootTotalSummary).toBe(4);
+    expect(callTreeCountsAndSummary.rootTotalSummary).toBe(12);
   });
 });
 
