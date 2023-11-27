@@ -4099,14 +4099,8 @@ export function gatherStackReferences(thread: Thread): StackReferences {
  */
 export function replaceStackReferences(
   thread: Thread,
-  mapForSamplingSelfStacks: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  >,
-  mapForBacktraceSelfStacks: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  >
+  mapForSamplingSelfStacks: Uint32Array,
+  mapForBacktraceSelfStacks: Uint32Array
 ): Thread {
   const {
     samples: oldSamples,
@@ -4122,13 +4116,7 @@ export function replaceStackReferences(
       if (oldStackIndex === null) {
         return null;
       }
-      const newStack = mapForSamplingSelfStacks.get(oldStackIndex);
-      if (newStack === undefined) {
-        throw new Error(
-          `Missing mapForSamplingSelfStacks entry for stack ${oldStackIndex}`
-        );
-      }
-      return newStack;
+      return mapForSamplingSelfStacks[oldStackIndex];
     }),
   };
 
@@ -4136,13 +4124,7 @@ export function replaceStackReferences(
     if (oldStackIndex === null) {
       return null;
     }
-    const newStack = mapForBacktraceSelfStacks.get(oldStackIndex);
-    if (newStack === undefined) {
-      throw new Error(
-        `Missing mapForBacktraceSelfStacks entry for stack ${oldStackIndex}`
-      );
-    }
-    return newStack;
+    return mapForBacktraceSelfStacks[oldStackIndex];
   }
 
   // Markers
@@ -4408,8 +4390,8 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
 
   // Make a new stack table which refers to the adjusted frames.
   const newStackTable = getEmptyStackTable();
-  const mapForSamplingSelfStacks = new Map();
-  const mapForBacktraceSelfStacks = new Map();
+  const mapForSamplingSelfStacks = new Uint32Array(stackTable.length);
+  const mapForBacktraceSelfStacks = new Uint32Array(stackTable.length);
   const prefixMap = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
@@ -4429,7 +4411,7 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
       prefixMap[stack] = newStackIndex;
-      mapForBacktraceSelfStacks.set(stack, newStackIndex);
+      mapForBacktraceSelfStacks[stack] = newStackIndex;
     }
 
     if (samplingSelfStacks.has(stack)) {
@@ -4442,7 +4424,7 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       newStackTable.subcategory.push(subcategory);
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
-      mapForSamplingSelfStacks.set(stack, newStackIndex);
+      mapForSamplingSelfStacks[stack] = newStackIndex;
     }
   }
 
