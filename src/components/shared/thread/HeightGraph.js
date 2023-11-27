@@ -190,6 +190,9 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       xPos: number[],
     };
     function drawSamples(samplesBucket: SamplesBucket, color: string) {
+      if (samplesBucket.xPos.length === 0) {
+        return;
+      }
       ctx.fillStyle = color;
       for (let i = 0; i < samplesBucket.height.length; i++) {
         const height = samplesBucket.height[i];

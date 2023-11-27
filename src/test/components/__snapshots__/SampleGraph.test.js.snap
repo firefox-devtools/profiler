@@ -25,19 +25,11 @@ Array [
     10,
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
     "fillRect",
     5,
     0,
     10,
     10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
   ],
   Array [
     "fillRect",
@@ -47,19 +39,11 @@ Array [
     10,
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
     "fillRect",
     25,
     0,
     10,
     10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
   ],
   Array [
     "fillRect",
@@ -69,10 +53,6 @@ Array [
     10,
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
     "fillRect",
     45,
     0,
@@ -80,19 +60,11 @@ Array [
     10,
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
     "fillRect",
     55,
     0,
     10,
     10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
   ],
   Array [
     "fillRect",
