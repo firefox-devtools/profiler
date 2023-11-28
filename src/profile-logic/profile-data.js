@@ -311,8 +311,6 @@ function _createCallNodeInfoFromUnorderedComponents(
     //  2. Find the next node in DFS order, set nextOldIndex to it, and continue
     //     to the next loop iteration.
     const oldIndexToNewIndex = new Uint32Array(length);
-    const currentStackOld = [];
-    const currentStackNew = [];
     let nextOldIndex = 0;
     let nextNewIndex = 0;
     let currentDepth = 0;
@@ -341,8 +339,6 @@ function _createCallNodeInfoFromUnorderedComponents(
       const oldFirstChild = firstChild[oldIndex];
       if (oldFirstChild !== -1) {
         // We have children. Our first child is the next node in DFS order.
-        currentStackOld[currentDepth] = oldIndex;
-        currentStackNew[currentDepth] = newIndex;
         currentOldPrefix = oldIndex;
         currentNewPrefix = newIndex;
         nextOldIndex = oldFirstChild;
@@ -356,20 +352,15 @@ function _createCallNodeInfoFromUnorderedComponents(
       nextAfterDescendantsSorted[newIndex] = nextNewIndex;
       nextOldIndex = nextSibling[oldIndex];
       nextSiblingSorted[newIndex] = nextOldIndex === -1 ? -1 : nextNewIndex;
-      while (nextOldIndex === -1 && currentDepth !== 0) {
+      while (nextOldIndex === -1 && currentOldPrefix !== -1) {
         nextAfterDescendantsSorted[currentNewPrefix] = nextNewIndex;
         const oldPrefixNextSibling = nextSibling[currentOldPrefix];
         nextSiblingSorted[currentNewPrefix] =
           oldPrefixNextSibling === -1 ? -1 : nextNewIndex;
         nextOldIndex = oldPrefixNextSibling;
+        currentOldPrefix = prefix[currentOldPrefix];
+        currentNewPrefix = prefixSorted[currentNewPrefix];
         currentDepth--;
-        if (currentDepth === 0) {
-          currentOldPrefix = -1;
-          currentNewPrefix = -1;
-        } else {
-          currentOldPrefix = currentStackOld[currentDepth - 1];
-          currentNewPrefix = currentStackNew[currentDepth - 1];
-        }
       }
     }
 
