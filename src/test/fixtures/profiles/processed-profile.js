@@ -71,14 +71,14 @@ export type TestDefinedMarkers = Array<
   | [
       MarkerName,
       MarkerTime, // start time
-      MarkerTime | null // end time
+      MarkerTime | null, // end time
     ]
   | [
       MarkerName,
       MarkerTime, // start time
       MarkerTime | null, // end time
-      MarkerPayload | MockPayload | null
-    ]
+      MarkerPayload | MockPayload | null,
+    ],
 >;
 
 // This type is used when needing to create a specific RawMarkerTable.
@@ -97,7 +97,7 @@ export type TestDefinedJsTracerEvent = [
   // Start time:
   Milliseconds,
   // End time:
-  Milliseconds
+  Milliseconds,
 ];
 
 export function addRawMarkersToThread(
@@ -439,9 +439,9 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
 }
 
 export type ProfileWithDicts = {
-  profile: Profile;
-  funcNamesPerThread: Array<string[]>;
-  funcNamesDictPerThread: Array<{ [funcName: string]: number }>;
+  profile: Profile,
+  funcNamesPerThread: Array<string[]>,
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
   nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
 };
 
@@ -569,7 +569,9 @@ function getStack(thread, stackIndex) {
 getStack(filteredThread, filteredThread.samples.stack[0])
 ```
 */
-export function getProfileFromTextSamples(...allTextSamples: string[]): ProfileWithDicts {
+export function getProfileFromTextSamples(
+  ...allTextSamples: string[]
+): ProfileWithDicts {
   let profile = getEmptyProfile();
   // Provide a useful marker schema, rather than an empty one.
   profile.meta.markerSchema = markerSchemaForTests;
@@ -1037,7 +1039,10 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
-export function getFuncNamesDictForThread(thread: Thread): { funcNames: string[], funcNamesDict: { [funcName: string]: number } } {
+export function getFuncNamesDictForThread(thread: Thread): {
+  funcNames: string[],
+  funcNamesDict: { [funcName: string]: number },
+} {
   const { funcTable, stringTable } = thread;
   const funcNames = [];
   const funcNamesDict = {};
@@ -1046,10 +1051,12 @@ export function getFuncNamesDictForThread(thread: Thread): { funcNames: string[]
     funcNames[i] = funcName;
     funcNamesDict[funcName] = i;
   }
-  return {funcNames, funcNamesDict};
+  return { funcNames, funcNamesDict };
 }
 
-export function getNativeSymbolsDictForThread(thread: Thread): { [nativeSymbolName: string]: number } {
+export function getNativeSymbolsDictForThread(thread: Thread): {
+  [nativeSymbolName: string]: number,
+} {
   const { nativeSymbols, stringTable } = thread;
   const nativeSymbolsDict = {};
   for (let i = 0; i < nativeSymbols.length; i++) {
@@ -1062,10 +1069,19 @@ export function getNativeSymbolsDictForThread(thread: Thread): { [nativeSymbolNa
 export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
   const funcNameDicts = profile.threads.map(getFuncNamesDictForThread);
   const funcNamesPerThread = funcNameDicts.map(({ funcNames }) => funcNames);
-  const funcNamesDictPerThread = funcNameDicts.map(({ funcNamesDict }) => funcNamesDict);
-  const nativeSymbolsDictPerThread = profile.threads.map(getNativeSymbolsDictForThread);
+  const funcNamesDictPerThread = funcNameDicts.map(
+    ({ funcNamesDict }) => funcNamesDict
+  );
+  const nativeSymbolsDictPerThread = profile.threads.map(
+    getNativeSymbolsDictForThread
+  );
 
-  return { profile, funcNamesPerThread, funcNamesDictPerThread, nativeSymbolsDictPerThread };
+  return {
+    profile,
+    funcNamesPerThread,
+    funcNamesDictPerThread,
+    nativeSymbolsDictPerThread,
+  };
 }
 
 /**
