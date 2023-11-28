@@ -211,6 +211,9 @@ export function getFlameGraphTiming(
   // Keep track of time offset by depth level.
   const timeOffset = [0.0];
 
+  // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
+  const abs = Math.abs;
+
   while (stack.length) {
     const { depth, nodeIndex } = stack.pop();
 
@@ -228,10 +231,10 @@ export function getFlameGraphTiming(
     }
 
     // Take the absolute value, as native deallocations can be negative.
-    const totalRelative = Math.abs(
+    const totalRelative = abs(
       callNodeSummary.total[nodeIndex] / rootTotalSummary
     );
-    const selfRelative = Math.abs(
+    const selfRelative = abs(
       callNodeSummary.self[nodeIndex] / rootTotalSummary
     );
 
