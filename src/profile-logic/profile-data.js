@@ -125,7 +125,14 @@ export function getCallNodeInfo(
     > = [];
     let length = 0;
 
+    // An extra column that only gets used while the table is built up: For each
+    // node A, currentLastChild[A] tracks the last currently-known child node of A.
+    // It is updated whenever a new node is created; e.g. creating node B updates
+    // currentLastChild[prefix[B]].
+    // currentLastChild[A] is -1 while A has no children.
     const currentLastChild: Array<IndexIntoCallNodeTable> = [];
+
+    // The last currently-known root node, i.e. the last known "child of -1".
     let currentLastRoot = -1;
 
     function addCallNode(
@@ -154,17 +161,18 @@ export function getCallNodeInfo(
       // our prefix (if we're the first child).
       // Also set this node's depth.
       if (prefixIndex === -1) {
-        // This node is a root. Just update the previous root's nextSibling; we have
-        // no prefix whose firstChild would need to be updated.
-        const prevSiblingIndex = currentLastRoot;
-        if (prevSiblingIndex !== -1) {
-          nextSibling[prevSiblingIndex] = index;
+        // This node is a root. Just update the previous root's nextSibling. Because
+        // this node has no parent, there's also no firstChild information to update.
+        if (currentLastRoot !== -1) {
+          nextSibling[currentLastRoot] = index;
         }
         currentLastRoot = index;
       } else {
-        // This node is not a root.
+        // This node is not a root: update both firstChild and nextSibling information
+        // when appropriate.
         const prevSiblingIndex = currentLastChild[prefixIndex];
         if (prevSiblingIndex === -1) {
+          // This is the first child for this prefix.
           firstChild[prefixIndex] = index;
         } else {
           nextSibling[prevSiblingIndex] = index;
