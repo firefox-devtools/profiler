@@ -137,9 +137,8 @@ describe('FlameGraph', function () {
     const div = getContentDiv();
 
     function selectedNode() {
-      const callNodeIndex = selectedThreadSelectors.getSelectedCallNodeIndex(
-        getState()
-      );
+      const callNodeIndex =
+        selectedThreadSelectors.getSelectedCallNodeIndex(getState());
       return callNodeIndex && funcNames[callNodeIndex];
     }
 

@@ -321,9 +321,8 @@ describe('url handling tracks', function () {
         'localTrackOrderByPid=222-10'
       );
 
-      const previousOrder = urlStateSelectors.getLocalTrackOrderByPid(
-        getState()
-      );
+      const previousOrder =
+        urlStateSelectors.getLocalTrackOrderByPid(getState());
       // This simulates a page reload.
       const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(getState());
       expect(
@@ -743,9 +742,8 @@ describe('committed ranges', function () {
         search: '?range=1678123900n100',
       });
 
-      const [committedRange] = urlStateSelectors.getAllCommittedRanges(
-        getState()
-      );
+      const [committedRange] =
+        urlStateSelectors.getAllCommittedRanges(getState());
       expect(committedRange.start).toBeCloseTo(1678.1239);
       expect(committedRange.end).toBeCloseTo(1678.124);
     });
@@ -1221,9 +1219,8 @@ describe('url upgrading', function () {
       const { getState } = _getStoreWithURL({
         v: 4,
       });
-      const committedRanges = urlStateSelectors.getAllCommittedRanges(
-        getState()
-      );
+      const committedRanges =
+        urlStateSelectors.getAllCommittedRanges(getState());
       expect(committedRanges).toEqual([]);
     });
 
@@ -1233,9 +1230,8 @@ describe('url upgrading', function () {
         v: 4,
       });
 
-      const committedRanges = urlStateSelectors.getAllCommittedRanges(
-        getState()
-      );
+      const committedRanges =
+        urlStateSelectors.getAllCommittedRanges(getState());
       expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
     });
 
@@ -1245,9 +1241,8 @@ describe('url upgrading', function () {
         v: 4,
       });
 
-      const committedRanges = urlStateSelectors.getAllCommittedRanges(
-        getState()
-      );
+      const committedRanges =
+        urlStateSelectors.getAllCommittedRanges(getState());
       expect(committedRanges).toEqual([
         { start: 245, end: 18470 },
         { start: 1451, end: 1453 },
@@ -1260,9 +1255,8 @@ describe('url upgrading', function () {
         v: 4,
       });
 
-      const committedRanges = urlStateSelectors.getAllCommittedRanges(
-        getState()
-      );
+      const committedRanges =
+        urlStateSelectors.getAllCommittedRanges(getState());
       expect(committedRanges).toEqual([{ start: 0, end: 278 }]);
     });
 
@@ -1275,9 +1269,8 @@ describe('url upgrading', function () {
         v: 4,
       });
 
-      const committedRanges = urlStateSelectors.getAllCommittedRanges(
-        getState()
-      );
+      const committedRanges =
+        urlStateSelectors.getAllCommittedRanges(getState());
       expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
       expect(console.error).toHaveBeenCalled();
     });
@@ -1437,9 +1430,8 @@ describe('URL serialization of the transform stack', function () {
   });
 
   it('deserializes focus subtree transforms', function () {
-    const transformStack = selectedThreadSelectors.getTransformStack(
-      getState()
-    );
+    const transformStack =
+      selectedThreadSelectors.getTransformStack(getState());
 
     // The indexes don't necessarily map to anything logical in the profile fixture.
     expect(transformStack).toEqual([

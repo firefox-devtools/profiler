@@ -1780,9 +1780,8 @@ export function changeInvertCallstack(
       eventAction: 'change invert callstack',
     });
     const callTree = selectedThreadSelectors.getCallTree(getState());
-    const selectedCallNode = selectedThreadSelectors.getSelectedCallNodeIndex(
-      getState()
-    );
+    const selectedCallNode =
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState());
     const newSelectedCallNodePath =
       callTree.findHeavyPathToSameFunctionAfterInversion(selectedCallNode);
     dispatch({
