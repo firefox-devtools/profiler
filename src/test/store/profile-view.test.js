@@ -58,6 +58,7 @@ import type {
   Milliseconds,
   TabID,
   Thread,
+  StartEndRange,
 } from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function () {
@@ -3263,7 +3264,13 @@ describe('pages and active tab selectors', function () {
 });
 
 describe('traced timing', function () {
-  function setup({ inverted }: {| inverted: boolean |}, textSamples: string) {
+  function setup(
+    {
+      inverted,
+      previewSelection,
+    }: {| inverted: boolean, previewSelection?: StartEndRange |},
+    textSamples: string
+  ) {
     const { profile, funcNamesDictPerThread } =
       getProfileFromTextSamples(textSamples);
 
@@ -3271,6 +3278,19 @@ describe('traced timing', function () {
 
     const { getState, dispatch } = storeWithProfile(profile);
     dispatch(ProfileView.changeInvertCallstack(inverted));
+
+    if (previewSelection) {
+      const { start, end } = previewSelection;
+      dispatch(
+        ProfileView.updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: start,
+          selectionEnd: end,
+        })
+      );
+    }
+
     const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
       getState()
     );
@@ -3376,6 +3396,39 @@ describe('traced timing', function () {
 
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
+  });
+
+  it('computes traced timing based on the preview selection', function () {
+    const {
+      funcNames: { A, B, C },
+      getCallNode,
+      running,
+      self,
+      profile,
+    } = setup(
+      { inverted: false, previewSelection: { start: 1, end: 5.5 } },
+      `
+        0  1  5  6
+        A  A  A  C
+           B
+      `
+    );
+
+    // The preview range only contains the sample at 1 and the sample at 5.
+    // The first sample will have a "traced duration" of 4ms (5ms - 1ms), and
+    // the second sample will have a "traced duration" of the interval, because
+    // it's the last sample in the range.
+
+    expect(running[getCallNode(A)]).toBe(4 + profile.meta.interval);
+    expect(self[getCallNode(A)]).toBe(profile.meta.interval);
+
+    expect(running[getCallNode(A, B)]).toBe(4);
+    expect(self[getCallNode(A, B)]).toBe(4);
+
+    // Call node [C] is fully outside the preview range, so we should have no
+    // traced duration for it.
+    expect(running[getCallNode(C)]).toBe(0);
+    expect(self[getCallNode(C)]).toBe(0);
   });
 });
 

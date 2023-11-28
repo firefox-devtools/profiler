@@ -267,19 +267,8 @@ export function getStackAndSampleSelectorsPerThread(
   const getTreeOrderComparatorInFilteredThread: Selector<
     (IndexIntoSamplesTable, IndexIntoSamplesTable) => number,
   > = createSelector(
-    threadSelectors.getFilteredThread,
-    getCallNodeInfo,
-    (thread, { callNodeTable, stackIndexToCallNodeIndex }) => {
-      const sampleIndexToCallNodeIndex =
-        ProfileData.getSampleIndexToCallNodeIndex(
-          thread.samples.stack,
-          stackIndexToCallNodeIndex
-        );
-      return ProfileData.getTreeOrderComparator(
-        callNodeTable,
-        sampleIndexToCallNodeIndex
-      );
-    }
+    getSampleIndexToCallNodeIndexForFilteredThread,
+    ProfileData.getTreeOrderComparator
   );
 
   const getFilteredCallNodeMaxDepth: Selector<number> = createSelector(
@@ -350,7 +339,7 @@ export function getStackAndSampleSelectorsPerThread(
     );
 
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
-    threadSelectors.getFilteredSamplesForCallTree,
+    threadSelectors.getPreviewFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
