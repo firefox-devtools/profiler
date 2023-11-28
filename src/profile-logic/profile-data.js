@@ -2595,9 +2595,22 @@ export function getFuncNamesAndOriginsForPath(
 }
 
 /**
- * Return a function that can compare two samples' call nodes, and determine a sort order.
- * Call nodes are ordered by their index.
- * "Ordered after" means "swims on top in the activity graph"
+ * Return a function that can compare two samples' call nodes, and determine
+ * which node is "before" the other.
+ * We use the call node index for this order. In the call node table, call nodes
+ * are ordered in depth-first traversal order, so we can just compare those
+ * indexes.
+ *
+ * This order is used for the activity graph. The tree order comparator is used
+ * specifically for hit testing, but we also compare call nodes in the same way
+ * in mapCallNodeSelectedStatesToSamples, which is what gets used for determining
+ * which areas of the graph to draw in with the selection highlight fill.
+ *
+ * "Ordered after" means "swims on top in the activity graph".
+ *
+ * The depth-first traversal order has the nice property that the nodes of a
+ * subtree are located in a contiguous index range. This means that the
+ * highlighted area for a selected subtree is contiguous in the graph.
  */
 export function getTreeOrderComparator(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
