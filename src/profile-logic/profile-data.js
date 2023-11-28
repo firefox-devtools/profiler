@@ -297,7 +297,7 @@ function _createCallNodeInfoFromUnorderedComponents(
 
     const prefixSorted = new Int32Array(length);
     const nextSiblingSorted = new Int32Array(length);
-    const nextAfterDescendantsSorted = new Uint32Array(length);
+    const subtreeRangeEndSorted = new Uint32Array(length);
     const funcSorted = new Int32Array(length);
     const categorySorted = new Int32Array(length);
     const subcategorySorted = new Int32Array(length);
@@ -330,7 +330,7 @@ function _createCallNodeInfoFromUnorderedComponents(
       sourceFramesInlinedIntoSymbolSorted[newIndex] =
         sourceFramesInlinedIntoSymbol[oldIndex];
       depthSorted[newIndex] = currentDepth;
-      // The remaining two columns, nextSiblingSorted and nextAfterDescendantsSorted,
+      // The remaining two columns, nextSiblingSorted and subtreeRangeEndSorted,
       // will be filled in when we get to the end of the current subtree.
 
       // Find the next index in DFS order: If we have children, then our first child
@@ -348,12 +348,12 @@ function _createCallNodeInfoFromUnorderedComponents(
 
       // We have no children. The next node is the next sibling of this node or
       // of an ancestor node. Now is also a good time to fill in the values for
-      // nextAfterDescendants and nextSibling.
-      nextAfterDescendantsSorted[newIndex] = nextNewIndex;
+      // subtreeRangeEnd and nextSibling.
+      subtreeRangeEndSorted[newIndex] = nextNewIndex;
       nextOldIndex = nextSibling[oldIndex];
       nextSiblingSorted[newIndex] = nextOldIndex === -1 ? -1 : nextNewIndex;
       while (nextOldIndex === -1 && currentOldPrefix !== -1) {
-        nextAfterDescendantsSorted[currentNewPrefix] = nextNewIndex;
+        subtreeRangeEndSorted[currentNewPrefix] = nextNewIndex;
         const oldPrefixNextSibling = nextSibling[currentOldPrefix];
         nextSiblingSorted[currentNewPrefix] =
           oldPrefixNextSibling === -1 ? -1 : nextNewIndex;
@@ -366,7 +366,7 @@ function _createCallNodeInfoFromUnorderedComponents(
 
     const callNodeTable: CallNodeTable = {
       prefix: prefixSorted,
-      nextAfterDescendants: nextAfterDescendantsSorted,
+      subtreeRangeEnd: subtreeRangeEndSorted,
       nextSibling: nextSiblingSorted,
       func: funcSorted,
       category: categorySorted,
@@ -541,7 +541,7 @@ export function getSamplesSelectedStates(
     sampleCallNodes,
     activeTabFilteredCallNodes,
     selectedCallNodeIndex,
-    callNodeTable.nextAfterDescendants[selectedCallNodeIndex]
+    callNodeTable.subtreeRangeEnd[selectedCallNodeIndex]
   );
 }
 
@@ -827,7 +827,7 @@ export function getTimingsForCallNodeIndex(
   }
 
   const needleDescendantsEndIndex =
-    callNodeTable.nextAfterDescendants[needleNodeIndex];
+    callNodeTable.subtreeRangeEnd[needleNodeIndex];
 
   const needleNodeIsRootOfInvertedTree =
     isInvertedTree && callNodeTable.prefix[needleNodeIndex] === -1;
@@ -1970,7 +1970,7 @@ export function getCallNodeIndexFromParentAndFunc(
     if (callNodeTable.length === 0) {
       return null;
     }
-  } else if (callNodeTable.nextAfterDescendants[parent] === parent + 1) {
+  } else if (callNodeTable.subtreeRangeEnd[parent] === parent + 1) {
     // parent has no children.
     return null;
   }
