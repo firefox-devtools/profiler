@@ -440,6 +440,49 @@ function getSamplesSelectedStatesForNoSelection(
 /**
  * Given the call node for each sample and the call node selected states,
  * compute each sample's selected state.
+ *
+ * For samples that are not filtered out, the sample's selected state is based
+ * on the relation of the sample's call node to the selected call node: Any call
+ * nodes in the selected node's subtree are "selected"; all other nodes are
+ * either "before" or "after" the selected subtree.
+ *
+ * Call node tables are ordered in depth-first traversal order, so we can
+ * determine whether a node is before, inside or after a subtree simply by
+ * comparing the call node index to the "selected index range". Example:
+ *
+ * ```
+ * before, 0
+ *   before, 1
+ *     before, 2
+ *   before, 3
+ * before, 4
+ *   before, 5
+ *     before, 6
+ *     before, 7
+ *       before, 8
+ *   before, 9
+ *     before, 10
+ *       before, 11
+ *     before, 12
+ *     selected, 13 <-- selected node
+ *       selected, 14
+ *         selected, 15
+ *           selected, 16
+ *         selected, 17
+ *       selected, 18
+ *         selected, 19
+ *         selected, 20
+ *     after, 21
+ *       after, 22
+ *     after, 23
+ *   after, 24
+ *     after, 25
+ * after, 26
+ *   after, 27
+ * ```
+ *
+ * In this example, the selected node has index 13 and the "selected index range"
+ * is the range from 13 to 21 (not including 21).
  */
 function mapCallNodeSelectedStatesToSamples(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
