@@ -2407,6 +2407,16 @@ CallTree {
     ],
   },
   "_callNodeSummary": Object {
+    "leaf": Float32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+    ],
     "self": Float32Array [
       0,
       0,

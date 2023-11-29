@@ -396,9 +396,8 @@ describe('actions/changeInvertCallstack', function () {
 
     it('starts with a selectedCallNodePath', function () {
       const { getState } = storeWithNormalCallTree();
-      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
-        getState()
-      );
+      const { selectedCallNodePath, expandedCallNodePaths } =
+        getPaths(getState());
       expect(selectedCallNodePath).toEqual(['A', 'B']);
       expect(expandedCallNodePaths).toEqual([['A']]);
     });
@@ -407,9 +406,8 @@ describe('actions/changeInvertCallstack', function () {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(changeSelectedCallNode(threadIndex, callNodePath));
       dispatch(changeInvertCallstack(true));
-      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
-        getState()
-      );
+      const { selectedCallNodePath, expandedCallNodePaths } =
+        getPaths(getState());
 
       // Do not select the first alphabetical path:
       expect(selectedCallNodePath).not.toEqual(['D', 'C', 'B']);
@@ -431,9 +429,8 @@ describe('actions/changeInvertCallstack', function () {
 
     it('starts with a selectedCallNodePath', function () {
       const { getState } = storeWithInvertedCallTree();
-      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
-        getState()
-      );
+      const { selectedCallNodePath, expandedCallNodePaths } =
+        getPaths(getState());
       expect(selectedCallNodePath).toEqual(['J', 'I', 'B']);
       expect(expandedCallNodePaths).toEqual([['J'], ['J', 'I']]);
     });
@@ -441,9 +438,8 @@ describe('actions/changeInvertCallstack', function () {
     it('uninverts the selectedCallNodePath', function () {
       const { dispatch, getState } = storeWithInvertedCallTree();
       dispatch(changeInvertCallstack(false));
-      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
-        getState()
-      );
+      const { selectedCallNodePath, expandedCallNodePaths } =
+        getPaths(getState());
 
       expect(selectedCallNodePath).toEqual(['A', 'B']);
       expect(expandedCallNodePaths).toEqual([['A']]);

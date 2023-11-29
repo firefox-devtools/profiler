@@ -10,6 +10,7 @@ import {
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
   getBottomBoxInfoForCallNode,
+  getCallNodePathFromIndex,
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -41,6 +42,7 @@ import type { CallTreeSummaryStrategy } from '../types/actions';
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeSummary = {
   self: Float32Array,
+  leaf: Float32Array,
   total: Float32Array,
 };
 export type CallTreeCountsAndSummary = {
@@ -391,34 +393,29 @@ export class CallTree {
     if (callNodeIndex === null) {
       return [];
     }
-    let parentSelf = 0;
-    let children = [callNodeIndex];
-    const pathToLeaf = [];
-    do {
-      // Walk down the tree's depth to construct a path to the leaf node, this should
-      // be the heaviest branch of the tree.
-      const firstChild = children[0];
-      const { total, self } = this.getNodeData(firstChild);
-      if (total < parentSelf) {
-        // The parent node was the node with the highest self time. We don't need
-        // to descend any deeper because we won't find another node with higher
-        // self time in this subtree because this subtree's total is already lower.
-        // ... except if we have negative weights, i.e. a diff profile, but we
-        // don't bother to handle those separately.
-        break;
-      }
-      parentSelf = self;
-      pathToLeaf.push(firstChild);
-      children = this.getChildren(firstChild);
-    } while (children && children.length > 0);
+    const heaviestPath = this.findHeaviestPathInSubtree(callNodeIndex);
+    const startingDepth = this._callNodeTable.depth[callNodeIndex];
+    const partialPath = heaviestPath.slice(startingDepth);
+    return partialPath.reverse();
+  }
 
-    return (
-      pathToLeaf
-        // Map the CallNodeIndex to FuncIndex.
-        .map((index) => this._callNodeTable.func[index])
-        // Reverse it so that it's in the proper inverted order.
-        .reverse()
-    );
+  findHeaviestPathInSubtree(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): CallNodePath {
+    const rangeEnd = this._callNodeTable.subtreeRangeEnd[callNodeIndex];
+
+    // Find the call node with the highest leaf time.
+    let maxNode = -1;
+    let maxAbs = 0;
+    for (let nodeIndex = callNodeIndex; nodeIndex < rangeEnd; nodeIndex++) {
+      const nodeLeaf = Math.abs(this._callNodeSummary.leaf[nodeIndex]);
+      if (maxNode === -1 || nodeLeaf > maxAbs) {
+        maxNode = nodeIndex;
+        maxAbs = nodeLeaf;
+      }
+    }
+
+    return getCallNodePathFromIndex(maxNode, this._callNodeTable);
   }
 }
 
@@ -562,6 +559,7 @@ export function computeCallTreeCountsAndSummary(
   return {
     callNodeSummary: {
       self: callNodeSelf,
+      leaf: callNodeLeaf,
       total: callNodeTotalSummary,
     },
     callNodeChildCount,

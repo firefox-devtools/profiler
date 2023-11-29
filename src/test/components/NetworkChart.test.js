@@ -629,9 +629,8 @@ describe('Network Chart/tooltip behavior', () => {
   afterEach(removeRootOverlayElement);
 
   it('shows a tooltip when the mouse hovers the line', () => {
-    const { rowItem, queryByTestId, getByTestId } = setupWithPayload(
-      getNetworkMarkers()
-    );
+    const { rowItem, queryByTestId, getByTestId } =
+      setupWithPayload(getNetworkMarkers());
 
     expect(queryByTestId('tooltip')).not.toBeInTheDocument();
     // React uses mouseover/mouseout events to implement mouseenter/mouseleave.

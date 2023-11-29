@@ -1206,9 +1206,8 @@ describe('"collapse-direct-recursion" transform', function () {
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(addTransformToStack(threadIndex, collapseDirectRecursion));
-      const filteredThread = selectedThreadSelectors.getFilteredThread(
-        getState()
-      );
+      const filteredThread =
+        selectedThreadSelectors.getFilteredThread(getState());
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
@@ -1390,9 +1389,8 @@ describe('"collapse-recursion" transform', function () {
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(addTransformToStack(threadIndex, collapseRecursion));
-      const filteredThread = selectedThreadSelectors.getFilteredThread(
-        getState()
-      );
+      const filteredThread =
+        selectedThreadSelectors.getFilteredThread(getState());
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
@@ -1503,9 +1501,8 @@ describe('"collapse-recursion" transform', function () {
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(addTransformToStack(threadIndex, collapseRecursion));
-      const filteredThread = selectedThreadSelectors.getFilteredThread(
-        getState()
-      );
+      const filteredThread =
+        selectedThreadSelectors.getFilteredThread(getState());
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
@@ -1639,9 +1636,8 @@ describe('"collapse-recursion" transform', function () {
     it('keeps the line number and address of the innermost frame', function () {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(addTransformToStack(threadIndex, collapseRecursion));
-      const filteredThread = selectedThreadSelectors.getFilteredThread(
-        getState()
-      );
+      const filteredThread =
+        selectedThreadSelectors.getFilteredThread(getState());
       const { stackTable, frameTable, funcTable, samples, stringTable } =
         filteredThread;
       const fileStringIndex = stringTable.indexForString('b');
