@@ -529,6 +529,9 @@ export function computeCallTreeCountsAndSummary(
   let rootTotalSummary = 0;
   let rootCount = 0;
 
+  // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
+  const abs = Math.abs;
+
   // We loop the call node table in reverse, so that we find the children
   // before their parents, and the total is known at the time we reach a
   // node.
@@ -538,7 +541,7 @@ export function computeCallTreeCountsAndSummary(
     callNodeIndex--
   ) {
     callNodeTotalSummary[callNodeIndex] += callNodeLeaf[callNodeIndex];
-    rootTotalSummary += Math.abs(callNodeLeaf[callNodeIndex]);
+    rootTotalSummary += abs(callNodeLeaf[callNodeIndex]);
     const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
     const hasTotalValue = callNodeTotalSummary[callNodeIndex] !== 0;
 
