@@ -279,7 +279,7 @@ describe('selectors/getFlameGraphTiming', function () {
   });
 });
 
-describe('selectors/getCallNodeMaxDepthForFlameGraph', function () {
+describe('selectors/getCallNodeMaxDepthPlusOneForFlameGraph', function () {
   it('calculates the max call node depth', function () {
     const { profile } = getProfileFromTextSamples(`
       A  A  A
@@ -290,7 +290,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function () {
 
     const store = storeWithProfile(profile);
     const allSamplesMaxDepth =
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
         store.getState()
       );
     expect(allSamplesMaxDepth).toEqual(4);
@@ -300,7 +300,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function () {
     const { profile } = getProfileFromTextSamples(` `);
     const store = storeWithProfile(profile);
     const allSamplesMaxDepth =
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
         store.getState()
       );
     expect(allSamplesMaxDepth).toEqual(0);

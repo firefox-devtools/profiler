@@ -57,7 +57,7 @@ export type OwnProps = {|
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
-  +maxStackDepth: number,
+  +maxStackDepthPlusOne: number,
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
   +callTree: CallTree,
@@ -128,10 +128,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     // selection or applying a transform), move the viewport
     // vertically so that its offset from the base of the flame graph
     // is maintained.
-    if (prevProps.maxStackDepth !== this.props.maxStackDepth) {
+    if (prevProps.maxStackDepthPlusOne !== this.props.maxStackDepthPlusOne) {
       this.props.viewport.moveViewport(
         0,
-        (prevProps.maxStackDepth - this.props.maxStackDepth) * ROW_HEIGHT
+        (prevProps.maxStackDepthPlusOne - this.props.maxStackDepthPlusOne) *
+          ROW_HEIGHT
       );
     }
 
@@ -155,7 +156,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   _scrollSelectionIntoView = () => {
     const {
       selectedCallNodeIndex,
-      maxStackDepth,
+      maxStackDepthPlusOne,
       callNodeInfo: { callNodeTable },
     } = this.props;
 
@@ -164,7 +165,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     }
 
     const depth = callNodeTable.depth[selectedCallNodeIndex];
-    const y = (maxStackDepth - depth - 1) * ROW_HEIGHT;
+    const y = (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT;
 
     if (y < this.props.viewport.viewportTop) {
       this.props.viewport.moveViewport(0, this.props.viewport.viewportTop - y);
@@ -186,7 +187,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       flameGraphTiming,
       callNodeInfo: { callNodeTable },
       stackFrameHeight,
-      maxStackDepth,
+      maxStackDepthPlusOne,
       rightClickedCallNodeIndex,
       selectedCallNodeIndex,
       categories,
@@ -237,9 +238,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
 
     const startDepth = Math.floor(
-      maxStackDepth - viewportBottom / stackFrameHeight
+      maxStackDepthPlusOne - viewportBottom / stackFrameHeight
     );
-    const endDepth = Math.ceil(maxStackDepth - viewportTop / stackFrameHeight);
+    const endDepth = Math.ceil(
+      maxStackDepthPlusOne - viewportTop / stackFrameHeight
+    );
 
     // Only draw the stack frames that are vertically within view.
     // The graph is drawn from bottom to top, in order of increasing depth.
@@ -252,9 +255,9 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       }
 
       const cssRowTop: CssPixels =
-        (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
+        (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT - viewportTop;
       const cssRowBottom: CssPixels =
-        (maxStackDepth - depth) * ROW_HEIGHT - viewportTop;
+        (maxStackDepthPlusOne - depth) * ROW_HEIGHT - viewportTop;
       const deviceRowTop: DevicePixels = snap(cssRowTop * cssToDeviceScale);
       const deviceRowBottom: DevicePixels =
         snap(cssRowBottom * cssToDeviceScale) - 1;
@@ -473,11 +476,13 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
     const {
       flameGraphTiming,
-      maxStackDepth,
+      maxStackDepthPlusOne,
       viewport: { viewportTop, containerWidth },
     } = this.props;
     const pos = x / containerWidth;
-    const depth = Math.floor(maxStackDepth - (y + viewportTop) / ROW_HEIGHT);
+    const depth = Math.floor(
+      maxStackDepthPlusOne - (y + viewportTop) / ROW_HEIGHT
+    );
     const stackTiming = flameGraphTiming[depth];
 
     if (!stackTiming) {

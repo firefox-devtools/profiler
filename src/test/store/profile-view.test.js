@@ -1816,17 +1816,19 @@ describe('snapshots of selectors/profile', function () {
     ).toMatchSnapshot();
   });
 
-  it('matches the last stored run of selectedThreadSelector.getFilteredCallNodeMaxDepth', function () {
+  it('matches the last stored run of selectedThreadSelector.getFilteredCallNodeMaxDepthPlusOne', function () {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getFilteredCallNodeMaxDepth(getState())
+      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(getState())
     ).toEqual(4);
   });
 
-  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepth', function () {
+  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepthPlusOne', function () {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(getState())
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
+        getState()
+      )
     ).toEqual(4);
   });
 

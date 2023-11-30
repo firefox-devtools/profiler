@@ -68,11 +68,11 @@ type LastSeen = {
 export function getStackTimingByDepth(
   samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo,
-  maxDepth: number,
+  maxDepthPlusOne: number,
   interval: Milliseconds
 ): StackTimingByDepth {
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-  const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
+  const stackTimingByDepth = Array.from({ length: maxDepthPlusOne }, () => ({
     start: [],
     end: [],
     callNode: [],
