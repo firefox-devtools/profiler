@@ -308,6 +308,7 @@ function _createCallNodeInfoFromUnorderedComponents(
     const innerWindowIDSorted = new Float64Array(length);
     const sourceFramesInlinedIntoSymbolSorted = new Array(length);
     const depthSorted = new Array(length);
+    let maxDepth = 0;
 
     // Traverse the entire tree, as follows:
     //  1. nextOldIndex is the next node in DFS order. Copy over all values from
@@ -347,6 +348,9 @@ function _createCallNodeInfoFromUnorderedComponents(
         currentNewPrefix = newIndex;
         nextOldIndex = oldFirstChild;
         currentDepth++;
+        if (currentDepth > maxDepth) {
+          maxDepth = currentDepth;
+        }
         continue;
       }
 
@@ -378,6 +382,7 @@ function _createCallNodeInfoFromUnorderedComponents(
       innerWindowID: innerWindowIDSorted,
       sourceFramesInlinedIntoSymbol: sourceFramesInlinedIntoSymbolSorted,
       depth: depthSorted,
+      maxDepth,
       length,
     };
 

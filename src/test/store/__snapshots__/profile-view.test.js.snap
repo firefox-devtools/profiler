@@ -2225,6 +2225,7 @@ Object {
       0,
     ],
     "length": 8,
+    "maxDepth": 3,
     "nextSibling": Int32Array [
       -1,
       -1,
@@ -2344,6 +2345,7 @@ CallTree {
         0,
       ],
       "length": 8,
+      "maxDepth": 3,
       "nextSibling": Int32Array [
         -1,
         -1,
@@ -2480,6 +2482,7 @@ CallTree {
       0,
     ],
     "length": 8,
+    "maxDepth": 3,
     "nextSibling": Int32Array [
       -1,
       -1,

@@ -430,6 +430,7 @@ export function getEmptyCallNodeTable(): CallNodeTable {
     innerWindowID: new Float64Array(0),
     sourceFramesInlinedIntoSymbol: [],
     depth: [],
+    maxDepth: -1,
     length: 0,
   };
 }
