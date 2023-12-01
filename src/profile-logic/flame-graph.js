@@ -88,8 +88,7 @@ export function computeFlameGraphRows(
   funcTable: FuncTable,
   stringTable: UniqueStringArray
 ): FlameGraphRows {
-  const callNodeCount = callNodeTable.length;
-  if (callNodeCount === 0) {
+  if (callNodeTable.length === 0) {
     return [[]];
   }
 
@@ -97,8 +96,7 @@ export function computeFlameGraphRows(
   const funcTableNameColumn = funcTable.name;
 
   // flameGraphRows is what we'll return from this function. We add a row to
-  // flameGraphRows any time we descend to a call node that's deeper than
-  // flameGraphRows.length - 1.
+  // flameGraphRows any time we go to a deeper level than flameGraphRows.length - 1.
   //
   // Each row is conceptually partitioned into two parts: "Finished nodes" and
   // "pending nodes".
@@ -160,37 +158,60 @@ export function computeFlameGraphRows(
     }
 
     // Now currentCallNode and all its siblings have been added to the row, and
-    // they are ordered correctly. Find a queued up node in this row which has
-    // children, and descend into it.
+    // they are ordered correctly. They are all marked as pending;
+    // pendingRangeStartAtDepth has not been advanced.
+
+    // In the remainder of this loop iteration, all we'll be doing is to find
+    // the next node for processing. Starting at the current depth, but going to
+    // to more shallow depths if needed, we want to find the first pending node
+    // which has children.
+
+    // We know that the current row has at least one remaining pending node
+    // (currentCallNode) so we start with this row.
     let candidateDepth = currentDepth;
     let candidateRow = rowAtThisDepth;
     let indexInCandidateRow = pendingRangeStartAtDepth[candidateDepth];
     let candidateNode = candidateRow[indexInCandidateRow];
-    // "while (!hasChildren(candidateNode)) {"
+
+    // candidateNode may not have any children. Keep searching, in this row and
+    // in more shallow rows, until we find a node which does have children.
+
+    // At the end of this loop, candidateNode will be set to a node which has
+    // children, and the following will be true:
+    // candidateNode === flameGraphRows[candidateDepth][pendingRangeStartAtDepth[candidateDepth]]
+    //
+    // "while (!hasChildren(candidateNode))"
     while (subtreeRangeEnd[candidateNode] === candidateNode + 1) {
       // candidateNode does not have any children.
       // "Finish" candidateNode by incrementing pendingRangeStartAtDepth[candidateDepth].
       indexInCandidateRow++;
       pendingRangeStartAtDepth[candidateDepth] = indexInCandidateRow;
 
-      // Check if the current row contains any other pending call nodes.
+      // Find the next row which still has pending nodes, going to shallower
+      // depths until we hit the end.
       while (indexInCandidateRow === candidateRow.length) {
-        // There are no more pending nodes in the current row.
+        // There are no more pending nodes in the current row - all nodes at
+        // this depth are already finished.
         if (candidateDepth === 0) {
-          // We're completely done.
+          // We must have processed the entire tree at this point, and we are done.
           break outer;
         }
-        // Go up a level and continue the search there.
+        // Go to a shallower depth and continue the search there.
         candidateDepth--;
         candidateRow = flameGraphRows[candidateDepth];
         indexInCandidateRow = pendingRangeStartAtDepth[candidateDepth];
       }
 
-      // We have found a pending call node.
+      // candidateRow now has at least one pending node left.
       candidateNode = candidateRow[indexInCandidateRow];
     }
 
     // Now candidateNode is a pending node which has at least one child.
+    // assert(candidateNode === flameGraphRows[candidateDepth][pendingRangeStartAtDepth[candidateDepth]])
+    // assert(subtreeRangeEnd[candidateNode] !== candidateNode + 1)
+
+    // We have now decided to process this node, i.e. we know that we will add
+    // this node's children in the next loop iteration.
     // "Finish" candidateNode by incrementing pendingRangeStartAtDepth[candidateDepth].
     pendingRangeStartAtDepth[candidateDepth] = indexInCandidateRow + 1;
 
@@ -248,7 +269,7 @@ export function getFlameGraphTiming(
     // Previous row: [B          ][D      ]       [G        ]
     // Current row:  [C][E][F]    [I    ]
     // (Note that this is upside down from how the flame graph is usually displayed)
-    let currentStart = 0.0;
+    let currentStart = 0;
     let previousPrefixCallNode = -1;
     for (let indexInRow = 0; indexInRow < rowNodes.length; indexInRow++) {
       const nodeIndex = rowNodes[indexInRow];
