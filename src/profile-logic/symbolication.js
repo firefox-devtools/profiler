@@ -21,10 +21,8 @@ import type {
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
-  IndexIntoStackTable,
   Address,
   CallNodePath,
-  StackTable,
   Lib,
 } from 'firefox-profiler/types';
 import type {
@@ -33,7 +31,6 @@ import type {
   LibSymbolicationRequest,
 } from './symbol-store';
 import { PathSet } from '../utils/path';
-import { ensureExists } from '../utils/flow';
 import { updateThreadStacks } from './profile-data';
 
 // Contains functions to symbolicate a profile.
@@ -389,49 +386,12 @@ function finishSymbolicationForLib(
   }
 }
 
-// Create a new stack table where all stack nodes with frames for which
-// shouldStacksWithThisFrameBeRemoved[frameIndex] is not zero are removed.
-// Their child nodes are reparented to the closest non-removed ancestor.
-function _removeFramesFromStackTable(
-  stackTable: StackTable,
-  shouldStacksWithThisFrameBeRemoved: Uint8Array
-): {
-  stackTable: StackTable,
-  oldStackToNewStack: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  > | null,
-} {
-  const newStackTable = getEmptyStackTable();
-  const oldStackToNewStack: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  > = new Map();
-  for (let stack = 0; stack < stackTable.length; stack++) {
-    const frame = stackTable.frame[stack];
-    const prefix = stackTable.prefix[stack];
-    const newPrefix =
-      prefix === null ? null : oldStackToNewStack.get(prefix) ?? null;
-    if (shouldStacksWithThisFrameBeRemoved[frame] !== 0) {
-      // Don't add this stack node to the new stack table. Instead, make it
-      // so that this node's children use our prefix as their prefix.
-      oldStackToNewStack.set(stack, newPrefix);
-      continue;
-    }
-    const newStackIndex = newStackTable.length;
-    newStackTable.frame.push(frame);
-    newStackTable.prefix.push(newPrefix);
-    newStackTable.category.push(stackTable.category[stack]);
-    newStackTable.subcategory.push(stackTable.subcategory[stack]);
-    newStackTable.length++;
-    oldStackToNewStack.set(stack, newStackIndex);
-  }
-  return { stackTable: newStackTable, oldStackToNewStack };
-}
-
 // Create a new stack table where all stack nodes with frames in
 // frameIndexToInlineExpansionFrames have been replaced by a straight path
 // of stack nodes for that frame's new inline frames.
+// In addition, old stacks with frames for which shouldStacksWithThisOldFrameBeRemoved
+// is not zero will be removed, i.e. merged away so that their children are
+// reparented to the merged-away stack's parent.
 //
 // Example:
 //  stack table:
@@ -458,6 +418,7 @@ function _removeFramesFromStackTable(
 //      - stack F with frame 5
 function _computeThreadWithAddedExpansionStacks(
   thread: Thread,
+  shouldStacksWithThisOldFrameBeRemoved: Uint8Array,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
     IndexIntoFrameTable[],
@@ -472,13 +433,21 @@ function _computeThreadWithAddedExpansionStacks(
   for (let stack = 0; stack < stackTable.length; stack++) {
     const oldFrame = stackTable.frame[stack];
     const oldPrefix = stackTable.prefix[stack];
+    const newPrefixOrMinusOne =
+      oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
+    if (shouldStacksWithThisOldFrameBeRemoved[oldFrame] !== 0) {
+      // Don't add this stack node to the new stack table. Instead, make it
+      // so that this node's children use our prefix as their prefix.
+      oldStackToNewStack[stack] = newPrefixOrMinusOne;
+      continue;
+    }
     const category = stackTable.category[stack];
     const subcategory = stackTable.subcategory[stack];
     let expansionFrames = frameIndexToInlineExpansionFrames.get(oldFrame);
     if (expansionFrames === undefined) {
       expansionFrames = [oldFrame];
     }
-    let prefix = oldPrefix === null ? null : oldStackToNewStack[oldPrefix];
+    let prefix = newPrefixOrMinusOne !== -1 ? newPrefixOrMinusOne : null;
     for (
       let inlineDepth = 0;
       inlineDepth < expansionFrames.length;
@@ -493,13 +462,15 @@ function _computeThreadWithAddedExpansionStacks(
       newStackTable.length++;
       prefix = newStack;
     }
-    if (prefix !== null) {
-      oldStackToNewStack[stack] = prefix;
-    }
+    oldStackToNewStack[stack] = prefix ?? -1;
   }
-  return updateThreadStacks(thread, newStackTable, (oldStack) =>
-    oldStack === null ? null : oldStackToNewStack[oldStack]
-  );
+  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const newStack = oldStackToNewStack[oldStack];
+    return newStack !== -1 ? newStack : null;
+  });
 }
 
 /**
@@ -522,7 +493,6 @@ export function applySymbolicationStep(
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     nativeSymbols: oldNativeSymbols,
-    stackTable: oldStackTable,
     stringTable,
   } = thread;
   const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
@@ -563,13 +533,6 @@ export function applySymbolicationStep(
       nonInlinedFrames.push(frameIndex);
     }
   }
-  const { stackTable, oldStackToNewStack } =
-    inlinedFrames.length !== 0
-      ? _removeFramesFromStackTable(
-          oldStackTable,
-          shouldStacksWithThisFrameBeRemoved
-        )
-      : { stackTable: oldStackTable, oldStackToNewStack: null };
 
   // We want to group frames into nativeSymbols, and give each nativeSymbol a name.
   // We group frames to the same nativeSymbol if the addresses for these frames resolve
@@ -843,27 +806,16 @@ export function applySymbolicationStep(
   let newThread = {
     ...thread,
     frameTable,
-    stackTable,
     funcTable,
     nativeSymbols,
     stringTable,
   };
 
-  if (oldStackToNewStack !== null) {
-    newThread = updateThreadStacks(
-      newThread,
-      newThread.stackTable,
-      (oldStack) =>
-        oldStack === null
-          ? null
-          : ensureExists(oldStackToNewStack.get(oldStack))
-    );
-  }
-
   // We have the finished new frameTable and new funcTable.
   // Build a thread with a new stackTable.
   newThread = _computeThreadWithAddedExpansionStacks(
     newThread,
+    shouldStacksWithThisFrameBeRemoved,
     frameIndexToInlineExpansionFrames
   );
 
