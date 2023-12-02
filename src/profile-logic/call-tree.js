@@ -45,7 +45,7 @@ type CallNodeSummary = {
   leaf: Float32Array,
   total: Float32Array,
 };
-export type CallTreeCountsAndSummary = {
+export type CallTreeTimings = {
   callNodeHasChildren: Uint8Array,
   callNodeSummary: CallNodeSummary,
   rootCount: number,
@@ -512,12 +512,12 @@ function _getStackSelf(
  * what type of weight is in the SamplesLikeTable. For instance, it could be
  * milliseconds, sample counts, or bytes.
  */
-export function computeCallTreeCountsAndSummary(
+export function computeCallTreeTimings(
   samples: SamplesLikeTable,
   sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
   { callNodeTable }: CallNodeInfo,
   invertCallstack: boolean
-): CallTreeCountsAndSummary {
+): CallTreeTimings {
   // Inverted trees need a different method for computing the timing.
   const { callNodeSelf, callNodeLeaf } = invertCallstack
     ? _getInvertedStackSelf(samples, callNodeTable, sampleIndexToCallNodeIndex)
@@ -578,7 +578,7 @@ export function getCallTree(
   thread: Thread,
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
-  callTreeCountsAndSummary: CallTreeCountsAndSummary,
+  callTreeTimings: CallTreeTimings,
   weightType: WeightType
 ): CallTree {
   return timeCode('getCallTree', () => {
@@ -587,7 +587,7 @@ export function getCallTree(
       callNodeHasChildren,
       rootTotalSummary,
       rootCount,
-    } = callTreeCountsAndSummary;
+    } = callTreeTimings;
 
     return new CallTree(
       thread,
@@ -674,7 +674,7 @@ export function extractSamplesLikeTable(
 }
 
 /**
- * This function is extremely similar to computeCallTreeCountsAndSummary,
+ * This function is extremely similar to computeCallTreeTimings,
  * but is specialized for converting sample counts into traced timing. Samples
  * don't have duration information associated with them, it's mostly how long they
  * were observed to be running. This function computes the timing the exact same

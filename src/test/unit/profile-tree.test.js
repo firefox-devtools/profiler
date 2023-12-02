@@ -8,7 +8,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import {
   getCallTree,
-  computeCallTreeCountsAndSummary,
+  computeCallTreeTimings,
 } from '../../profile-logic/call-tree';
 import { computeFlameGraphRows } from '../../profile-logic/flame-graph';
 import {
@@ -71,7 +71,7 @@ describe('unfiltered call tree', function () {
 
     it('yields expected results', function () {
       expect(
-        computeCallTreeCountsAndSummary(
+        computeCallTreeTimings(
           thread.samples,
           getSampleIndexToCallNodeIndex(
             thread.samples.stack,
@@ -436,7 +436,7 @@ describe('inverted call tree', function () {
       thread.funcTable,
       defaultCategory
     );
-    const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
+    const callTreeTimings = computeCallTreeTimings(
       thread.samples,
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
@@ -449,7 +449,7 @@ describe('inverted call tree', function () {
       thread,
       callNodeInfo,
       categories,
-      callTreeCountsAndSummary,
+      callTreeTimings,
       'samples'
     );
 
@@ -477,7 +477,7 @@ describe('inverted call tree', function () {
       invertedThread.funcTable,
       defaultCategory
     );
-    const invertedCallTreeCountsAndSummary = computeCallTreeCountsAndSummary(
+    const invertedCallTreeTimings = computeCallTreeTimings(
       invertedThread.samples,
       getSampleIndexToCallNodeIndex(
         invertedThread.samples.stack,
@@ -490,7 +490,7 @@ describe('inverted call tree', function () {
       invertedThread,
       invertedCallNodeInfo,
       categories,
-      invertedCallTreeCountsAndSummary,
+      invertedCallTreeTimings,
       'samples'
     );
 
@@ -627,7 +627,7 @@ describe('diffing trees', function () {
       thread.funcTable,
       defaultCategory
     );
-    const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
+    const callTreeTimings = computeCallTreeTimings(
       thread.samples,
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
@@ -636,7 +636,7 @@ describe('diffing trees', function () {
       callNodeInfo,
       false
     );
-    expect(callTreeCountsAndSummary.rootTotalSummary).toBe(12);
+    expect(callTreeTimings.rootTotalSummary).toBe(12);
   });
 });
 
