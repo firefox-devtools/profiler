@@ -115,6 +115,9 @@ export type CallNodeTable = {
   sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
   // The depth of the call node. Roots have depth 0.
   depth: number[],
+  // The maximum value in the depth column, or -1 if this table is empty.
+  maxDepth: number,
+  // The number of call nodes. All columns in this table have this length.
   length: number,
 };
 

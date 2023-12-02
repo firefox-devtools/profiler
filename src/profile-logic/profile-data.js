@@ -308,6 +308,7 @@ function _createCallNodeInfoFromUnorderedComponents(
     const innerWindowIDSorted = new Float64Array(length);
     const sourceFramesInlinedIntoSymbolSorted = new Array(length);
     const depthSorted = new Array(length);
+    let maxDepth = 0;
 
     // Traverse the entire tree, as follows:
     //  1. nextOldIndex is the next node in DFS order. Copy over all values from
@@ -347,6 +348,9 @@ function _createCallNodeInfoFromUnorderedComponents(
         currentNewPrefix = newIndex;
         nextOldIndex = oldFirstChild;
         currentDepth++;
+        if (currentDepth > maxDepth) {
+          maxDepth = currentDepth;
+        }
         continue;
       }
 
@@ -378,6 +382,7 @@ function _createCallNodeInfoFromUnorderedComponents(
       innerWindowID: innerWindowIDSorted,
       sourceFramesInlinedIntoSymbol: sourceFramesInlinedIntoSymbolSorted,
       depth: depthSorted,
+      maxDepth,
       length,
     };
 
@@ -2050,22 +2055,24 @@ export function convertStackToCallNodeAndCategoryPath(
 }
 
 /**
- * Compute maximum depth of call stack for a given thread.
+ * Compute maximum depth of call stack for a given thread, and return maxDepth+1.
+ * This value can be used as the length for any per-depth arrays.
  *
- * Returns the depth of the deepest call node, but with a one-based
- * depth instead of a zero-based.
+ * The depth for a root node is zero.
+ * So if you only a single sample whose call node is a root node, this function
+ * returns 1.
  *
- * If there are no samples, or the stacks are all filtered out for the samples, then
- * 0 is returned.
+ * If there are no samples, or the stacks are all filtered out for the samples,
+ * then 0 is returned.
  */
-export function computeCallNodeMaxDepth(
+export function computeCallNodeMaxDepthPlusOne(
   samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo
 ): number {
   // Compute the depth on a per-sample basis. This is done since the callNodeInfo is
   // computed for the filtered thread, but a samples-like table can use the preview
   // filtered thread, which involves a subset of the total call nodes.
-  let max = -1;
+  let maxDepth = -1;
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
@@ -2074,10 +2081,12 @@ export function computeCallNodeMaxDepth(
     }
     const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
     const depth = callNodeTable.depth[callNodeIndex];
-    max = Math.max(max, depth);
+    if (depth > maxDepth) {
+      maxDepth = depth;
+    }
   }
 
-  return max + 1;
+  return maxDepth + 1;
 }
 
 export function invertCallstack(

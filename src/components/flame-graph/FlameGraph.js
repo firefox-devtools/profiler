@@ -72,7 +72,7 @@ type StateProps = {|
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
-  +maxStackDepth: number,
+  +maxStackDepthPlusOne: number,
   +timeRange: StartEndRange,
   +previewSelection: PreviewSelection,
   +flameGraphTiming: FlameGraphTiming,
@@ -327,7 +327,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       unfilteredThread,
       sampleIndexOffset,
       threadsKey,
-      maxStackDepth,
+      maxStackDepthPlusOne,
       flameGraphTiming,
       callTree,
       callNodeInfo,
@@ -349,7 +349,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       displayStackType,
     } = this.props;
 
-    const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
+    const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
 
     return (
       <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
@@ -381,7 +381,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               weightType,
               unfilteredThread,
               sampleIndexOffset,
-              maxStackDepth,
+              maxStackDepthPlusOne,
               flameGraphTiming,
               callTree,
               callNodeInfo,
@@ -427,7 +427,8 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
       selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(state),
     // Use the filtered call node max depth, rather than the preview filtered one, so
     // that the viewport height is stable across preview selections.
-    maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
+    maxStackDepthPlusOne:
+      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
     flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
     callTree: selectedThreadSelectors.getCallTree(state),
     timeRange: getCommittedRange(state),

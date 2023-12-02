@@ -92,11 +92,10 @@ export function computeFlameGraphRows(
     return [[]];
   }
 
-  const { func, nextSibling, subtreeRangeEnd } = callNodeTable;
+  const { func, nextSibling, subtreeRangeEnd, maxDepth } = callNodeTable;
   const funcTableNameColumn = funcTable.name;
 
-  // flameGraphRows is what we'll return from this function. We add a row to
-  // flameGraphRows any time we go to a deeper level than flameGraphRows.length - 1.
+  // flameGraphRows is what we'll return from this function.
   //
   // Each row is conceptually partitioned into two parts: "Finished nodes" and
   // "pending nodes".
@@ -114,8 +113,8 @@ export function computeFlameGraphRows(
   // children.
   // We need to queue up nodes before we can process their children because
   // we can only process children once their parents are in the right order.
-  const flameGraphRows = [[]];
-  const pendingRangeStartAtDepth = [0];
+  const flameGraphRows = Array.from({ length: maxDepth + 1 }, () => []);
+  const pendingRangeStartAtDepth = new Int32Array(maxDepth + 1);
 
   // At the beginning of each turn of this loop, add currentCallNode and all its
   // siblings as "pending" to row[currentDepth], ordered by name. Then find the
@@ -219,13 +218,6 @@ export function computeFlameGraphRows(
     // the first child of x (if present) is always at x + 1.
     currentCallNode = candidateNode + 1; // "currentCallNode = firstChild[candidateNode];"
     currentDepth = candidateDepth + 1;
-
-    // Make sure flameGraphRows and pendingRangeStartAtDepth are initialized for
-    // the new currentDepth.
-    if (currentDepth === flameGraphRows.length) {
-      flameGraphRows[currentDepth] = [];
-      pendingRangeStartAtDepth[currentDepth] = 0;
-    }
   }
 
   return flameGraphRows;
