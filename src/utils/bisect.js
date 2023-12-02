@@ -122,6 +122,7 @@ export function bisectionRight(
 /**
  * Like bisectionRight, but accepts a "key" function which maps an element of
  * the array to a number "key". The array must be sorted by that key.
+ * The looked-up element `x` will be compared to the keys.
  */
 export function bisectionRightByKey<T>(
   array: T[],
@@ -150,9 +151,11 @@ export function bisectionRightByKey<T>(
   return low;
 }
 
-// This is the same as bisectionRightByKey but uses string as the key type.
-// If you can find a way to make Flow accept a single function that handles
-// both string and number keys, please remove this duplication.
+/**
+ * This is the same as bisectionRightByKey but uses string as the key type.
+ * If you can find a way to make Flow accept a single function that handles
+ * both string and number keys, please remove this duplication.
+ */
 export function bisectionRightByStrKey<T>(
   array: T[],
   x: string,

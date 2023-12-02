@@ -107,10 +107,6 @@ export function getCallNodeInfo(
 ): CallNodeInfo {
   return timeCode('getCallNodeInfo', () => {
     const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
-    const funcCount = funcTable.length;
-    // Maps can't key off of two items, so combine the prefixCallNode and the funcIndex
-    // using the following formula: prefixCallNode * funcCount + funcIndex => callNode
-    const prefixCallNodeAndFuncToCallNodeMap = new Map();
 
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
@@ -197,13 +193,25 @@ export function getCallNodeInfo(
           ? frameTable.nativeSymbol[frameIndex]
           : null;
       const funcIndex = frameTable.func[frameIndex];
-      const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
 
       // Check if the call node for this stack already exists.
-      let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
-        prefixCallNodeAndFuncIndex
-      );
-      if (callNodeIndex === undefined) {
+      let callNodeIndex = -1;
+      if (stackIndex !== 0) {
+        const currentFirstSibling =
+          prefixCallNode === -1 ? 0 : firstChild[prefixCallNode];
+        for (
+          let currentSibling = currentFirstSibling;
+          currentSibling !== -1;
+          currentSibling = nextSibling[currentSibling]
+        ) {
+          if (func[currentSibling] === funcIndex) {
+            callNodeIndex = currentSibling;
+            break;
+          }
+        }
+      }
+
+      if (callNodeIndex === -1) {
         const windowID = frameTable.innerWindowID[frameIndex] || 0;
 
         // New call node.
@@ -215,10 +223,6 @@ export function getCallNodeInfo(
           subcategoryIndex,
           windowID,
           inlinedIntoSymbol
-        );
-        prefixCallNodeAndFuncToCallNodeMap.set(
-          prefixCallNodeAndFuncIndex,
-          callNodeIndex
         );
       } else {
         // There is already a call node for this function. Use it, and check if
