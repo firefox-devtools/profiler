@@ -33,7 +33,8 @@ import type {
   LibSymbolicationRequest,
 } from './symbol-store';
 import { PathSet } from '../utils/path';
-import { replaceStackReferences } from './profile-data';
+import { ensureExists } from '../utils/flow';
+import { updateThreadStacks } from './profile-data';
 
 // Contains functions to symbolicate a profile.
 
@@ -850,10 +851,13 @@ export function applySymbolicationStep(
   };
 
   if (oldStackToNewStack !== null) {
-    newThread = replaceStackReferences(
+    newThread = updateThreadStacks(
       newThread,
-      oldStackToNewStack,
-      oldStackToNewStack
+      newThread.stackTable,
+      (oldStack) =>
+        oldStack === null
+          ? null
+          : ensureExists(oldStackToNewStack.get(oldStack))
     );
   }
 
@@ -867,10 +871,10 @@ export function applySymbolicationStep(
     frameIndexToInlineExpansionFrames
   );
   if (finalOldStackToNewStack !== null) {
-    newThread = replaceStackReferences(
-      { ...newThread, stackTable: finalStackTable },
-      finalOldStackToNewStack,
-      finalOldStackToNewStack
+    newThread = updateThreadStacks(newThread, finalStackTable, (oldStack) =>
+      oldStack === null
+        ? null
+        : ensureExists(finalOldStackToNewStack.get(oldStack))
     );
   }
 
