@@ -389,11 +389,12 @@ function finishSymbolicationForLib(
   }
 }
 
-// Create a new stack table where all stack nodes with frames in framesToRemove
-// are removed. Their child nodes are reparented to the removed node's parent.
+// Create a new stack table where all stack nodes with frames for which
+// shouldStacksWithThisFrameBeRemoved[frameIndex] is not zero are removed.
+// Their child nodes are reparented to the closest non-removed ancestor.
 function _removeFramesFromStackTable(
   stackTable: StackTable,
-  framesToRemove: Set<IndexIntoFrameTable>
+  shouldStacksWithThisFrameBeRemoved: Uint8Array
 ): {
   stackTable: StackTable,
   oldStackToNewStack: Map<
@@ -401,9 +402,6 @@ function _removeFramesFromStackTable(
     IndexIntoStackTable | null,
   > | null,
 } {
-  if (framesToRemove.size === 0) {
-    return { stackTable, oldStackToNewStack: null };
-  }
   const newStackTable = getEmptyStackTable();
   const oldStackToNewStack: Map<
     IndexIntoStackTable,
@@ -414,7 +412,7 @@ function _removeFramesFromStackTable(
     const prefix = stackTable.prefix[stack];
     const newPrefix =
       prefix === null ? null : oldStackToNewStack.get(prefix) ?? null;
-    if (framesToRemove.has(frame)) {
+    if (shouldStacksWithThisFrameBeRemoved[frame] !== 0) {
       // Don't add this stack node to the new stack table. Instead, make it
       // so that this node's children use our prefix as their prefix.
       oldStackToNewStack.set(stack, newPrefix);
@@ -552,19 +550,26 @@ export function applySymbolicationStep(
   // in non-inlined frames. Then remove any stack nodes for inline frames from the stack
   // table, because and having a "clean" stack table with no inline frames makes the
   // rest of symbolication easier.
-  const inlinedFrames = new Set();
-  const nonInlinedFrames = new Set();
+  const shouldStacksWithThisFrameBeRemoved = new Uint8Array(
+    oldFrameTable.length
+  );
+  const inlinedFrames = [];
+  const nonInlinedFrames = [];
   for (const frameIndex of allFramesForThisLib) {
     if (oldFrameTable.inlineDepth[frameIndex] > 0) {
-      inlinedFrames.add(frameIndex);
+      inlinedFrames.push(frameIndex);
+      shouldStacksWithThisFrameBeRemoved[frameIndex] = 1;
     } else {
-      nonInlinedFrames.add(frameIndex);
+      nonInlinedFrames.push(frameIndex);
     }
   }
-  const { stackTable, oldStackToNewStack } = _removeFramesFromStackTable(
-    oldStackTable,
-    inlinedFrames
-  );
+  const { stackTable, oldStackToNewStack } =
+    inlinedFrames.length !== 0
+      ? _removeFramesFromStackTable(
+          oldStackTable,
+          shouldStacksWithThisFrameBeRemoved
+        )
+      : { stackTable: oldStackTable, oldStackToNewStack: null };
 
   // We want to group frames into nativeSymbols, and give each nativeSymbol a name.
   // We group frames to the same nativeSymbol if the addresses for these frames resolve
