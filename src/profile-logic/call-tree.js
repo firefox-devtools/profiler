@@ -156,7 +156,7 @@ export class CallTree {
   }
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
-    return this.getChildren(callNodeIndex).length !== 0;
+    return this._callNodeHasChildren[callNodeIndex] !== 0;
   }
 
   _addDescendantsToSet(
