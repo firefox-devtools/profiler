@@ -14,7 +14,7 @@ import {
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
-  applySymbolicationStep,
+  applySymbolicationSteps,
 } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
 import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
@@ -764,15 +764,10 @@ export function bulkProcessSymbolicationSteps(
       if (symbolicationSteps === undefined) {
         return oldThread;
       }
-      const oldFuncToNewFuncsMap = new Map();
-      let thread = oldThread;
-      for (const symbolicationStep of symbolicationSteps) {
-        thread = applySymbolicationStep(
-          thread,
-          symbolicationStep,
-          oldFuncToNewFuncsMap
-        );
-      }
+      const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
+        oldThread,
+        symbolicationSteps
+      );
       oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
       return thread;
     });

@@ -4,7 +4,7 @@
 // @flow
 import {
   symbolicateProfile,
-  applySymbolicationStep,
+  applySymbolicationSteps,
 } from '../../profile-logic/symbolication';
 import { AddressLocator } from '../../profile-logic/address-locator';
 import {
@@ -673,11 +673,11 @@ describe('symbolication', function () {
           if (!symbolicatedProfile) {
             throw new Error('symbolicatedProfile cannot be null');
           }
-          symbolicatedProfile.threads[threadIndex] = applySymbolicationStep(
+          const { thread } = applySymbolicationSteps(
             symbolicatedProfile.threads[threadIndex],
-            symbolicationStepInfo,
-            new Map()
+            [symbolicationStepInfo]
           );
+          symbolicatedProfile.threads[threadIndex] = thread;
         }
       );
       return symbolicationPromise;

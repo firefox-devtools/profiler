@@ -126,7 +126,7 @@ import { updateThreadStacks } from './profile-data';
  * III. Symbol lookup: Handled by the AbstractSymbolStore.
  *
  * IV. Symbol result processing: Forwards the symbol lookup result to the caller,
- * expecting a future call to applySymbolicationStep.
+ * expecting a future call to applySymbolicationSteps.
  *
  * V. Profile substitution: Invoked from from a thunk action. Processes the
  * symbolication result, groups frame addresses by symbol addresses, finds or
@@ -366,7 +366,7 @@ function buildLibSymbolicationRequestsForAllThreads(
 // With the symbolication results for the library given by libKey, call
 // symbolicationStepCallback for each thread. Those calls will
 // ensure that the symbolication information eventually makes it into the thread.
-// This function leaves all the actual work to applySymbolicationStep.
+// This function leaves all the actual work to applySymbolicationSteps.
 function finishSymbolicationForLib(
   profile: Profile,
   symbolicationInfo: ThreadSymbolicationInfo[],
@@ -474,6 +474,37 @@ function _computeThreadWithAddedExpansionStacks(
 }
 
 /**
+ * This implements step V, Profile substitution. The information from
+ * symbolicationSteps is used to create a new thread with the new symbols.
+ */
+export function applySymbolicationSteps(
+  oldThread: Thread,
+  symbolicationSteps: SymbolicationStepInfo[]
+): { thread: Thread, oldFuncToNewFuncsMap: FuncToFuncsMap } {
+  const oldFuncToNewFuncsMap = new Map();
+  const frameCount = oldThread.frameTable.length;
+  const shouldStacksWithThisFrameBeRemoved = new Uint8Array(frameCount);
+  const frameIndexToInlineExpansionFrames = new Map();
+  let thread = oldThread;
+  for (const symbolicationStep of symbolicationSteps) {
+    thread = _partiallyApplySymbolicationStep(
+      thread,
+      symbolicationStep,
+      oldFuncToNewFuncsMap,
+      shouldStacksWithThisFrameBeRemoved,
+      frameIndexToInlineExpansionFrames
+    );
+  }
+  thread = _computeThreadWithAddedExpansionStacks(
+    thread,
+    shouldStacksWithThisFrameBeRemoved,
+    frameIndexToInlineExpansionFrames
+  );
+
+  return { thread, oldFuncToNewFuncsMap };
+}
+
+/**
  * Apply symbolication to the thread, based on the information that was prepared
  * in symbolicationStepInfo. This involves updating the funcTable to contain the
  * right symbol string and funcAddress, and updating the frameTable to assign
@@ -483,11 +514,30 @@ function _computeThreadWithAddedExpansionStacks(
  * this symbolication step. oldFuncToNewFuncsMap is allowed to contain existing
  * content; the existing entries are assumed to be for other libs, i.e. they're
  * expected to have no overlap with allFuncsForThisLib.
+ *
+ * What this function doesn't do is update the stackTable to point to the new
+ * frames and funcs; after this function returns, the stackTable still points to
+ * old frames which may have been repurposed into different frames. To fully
+ * conclude symbolication of this thread, the caller needs to apply the
+ * modifications written down in shouldStacksWithThisFrameBeRemoved and in
+ * frameIndexToInlineExpansionFrames to the stackTable. Those two parameters are
+ * mutated in this function. Just like oldFuncToNewFuncsMap, these parameters
+ * may contain existing mappings from the symbolication of other libraries in
+ * this thread.
+ *
+ * Creating a new stackTable can be very expensive; doing it in the caller allows
+ * the caller to delay the creation of the new stackTable until the symbolication
+ * steps from multiple libraries have been processed. This can be much faster.
  */
-export function applySymbolicationStep(
+function _partiallyApplySymbolicationStep(
   thread: Thread,
   symbolicationStepInfo: SymbolicationStepInfo,
-  oldFuncToNewFuncsMap: FuncToFuncsMap
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  shouldStacksWithThisFrameBeRemoved: Uint8Array,
+  frameIndexToInlineExpansionFrames: Map<
+    IndexIntoFrameTable,
+    IndexIntoFrameTable[],
+  >
 ): Thread {
   const {
     frameTable: oldFrameTable,
@@ -520,9 +570,6 @@ export function applySymbolicationStep(
   // in non-inlined frames. Then remove any stack nodes for inline frames from the stack
   // table, because and having a "clean" stack table with no inline frames makes the
   // rest of symbolication easier.
-  const shouldStacksWithThisFrameBeRemoved = new Uint8Array(
-    oldFrameTable.length
-  );
   const inlinedFrames = [];
   const nonInlinedFrames = [];
   for (const frameIndex of allFramesForThisLib) {
@@ -672,10 +719,6 @@ export function applySymbolicationStep(
   const funcKeyToFuncMap = new Map();
 
   const availableFrameIter = inlinedFrames.values();
-  const frameIndexToInlineExpansionFrames: Map<
-    IndexIntoFrameTable,
-    IndexIntoFrameTable[],
-  > = new Map();
   const oldFuncToNewFuncsEntries: Array<[IndexIntoFuncTable, string]> = [];
 
   for (const frameIndex of nonInlinedFrames) {
@@ -803,7 +846,7 @@ export function applySymbolicationStep(
     );
   }
 
-  let newThread = {
+  const newThread = {
     ...thread,
     frameTable,
     funcTable,
@@ -812,13 +855,7 @@ export function applySymbolicationStep(
   };
 
   // We have the finished new frameTable and new funcTable.
-  // Build a thread with a new stackTable.
-  newThread = _computeThreadWithAddedExpansionStacks(
-    newThread,
-    shouldStacksWithThisFrameBeRemoved,
-    frameIndexToInlineExpansionFrames
-  );
-
+  // The new stackTable will be built by the caller.
   return newThread;
 }
 
@@ -826,7 +863,7 @@ export function applySymbolicationStep(
  * Symbolicates the profile. Symbols are obtained from the symbolStore.
  * This function performs steps II-IV (see the comment at the beginning of
  * this file); step V is outsourced to symbolicationStepCallback
- * which can call applySymbolicationStep to complete step V.
+ * which can call applySymbolicationSteps to complete step V.
  */
 export async function symbolicateProfile(
   profile: Profile,
