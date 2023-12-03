@@ -71,7 +71,7 @@ type StateProps = {|
   +disableOverscan: boolean,
   +invertCallstack: boolean,
   +implementationFilter: ImplementationFilter,
-  +callNodeMaxDepth: number,
+  +callNodeMaxDepthPlusOne: number,
   +weightType: WeightType,
   +tableViewOptions: TableViewOptions,
 |};
@@ -359,7 +359,7 @@ class CallTreeImpl extends PureComponent<Props> {
       expandedCallNodeIndexes,
       searchStringsRegExp,
       disableOverscan,
-      callNodeMaxDepth,
+      callNodeMaxDepthPlusOne,
       weightType,
       tableViewOptions,
       onTableViewOptionsChange,
@@ -383,7 +383,7 @@ class CallTreeImpl extends PureComponent<Props> {
         disableOverscan={disableOverscan}
         ref={this._takeTreeViewRef}
         contextMenuId="CallNodeContextMenu"
-        maxNodeDepth={callNodeMaxDepth}
+        maxNodeDepth={callNodeMaxDepthPlusOne}
         rowHeight={16}
         indentWidth={10}
         onKeyDown={this._onKeyDown}
@@ -417,8 +417,8 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     // Use the filtered call node max depth, rather than the preview filtered call node
     // max depth so that the width of the TreeView component is stable across preview
     // selections.
-    callNodeMaxDepth:
-      selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
+    callNodeMaxDepthPlusOne:
+      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     tableViewOptions: getCurrentTableViewOptions(state),
   }),

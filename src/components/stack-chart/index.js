@@ -72,7 +72,7 @@ type StateProps = {|
   +thread: Thread,
   +weightType: WeightType,
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
-  +maxStackDepth: number,
+  +maxStackDepthPlusOne: number,
   +combinedTimingRows: CombinedTimingRows,
   +timeRange: StartEndRange,
   +interval: Milliseconds,
@@ -210,7 +210,7 @@ class StackChartImpl extends React.PureComponent<Props> {
     const {
       thread,
       threadsKey,
-      maxStackDepth,
+      maxStackDepthPlusOne,
       combinedTimingRows,
       timeRange,
       interval,
@@ -229,7 +229,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       displayStackType,
     } = this.props;
 
-    const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
+    const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
 
     return (
       <div
@@ -240,7 +240,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       >
         <StackSettings hideInvertCallstack={true} />
         <TransformNavigator />
-        {maxStackDepth === 0 && userTimings.length === 0 ? (
+        {maxStackDepthPlusOne === 0 && userTimings.length === 0 ? (
           <StackChartEmptyReasons />
         ) : (
           <ContextMenuTrigger
@@ -306,7 +306,8 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       thread: selectedThreadSelectors.getFilteredThread(state),
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
-      maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
+      maxStackDepthPlusOne:
+        selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
       combinedTimingRows,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
