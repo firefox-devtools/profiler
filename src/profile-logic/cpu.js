@@ -38,8 +38,13 @@ export function computeMaxThreadCPUDeltaPerMs(
     for (let i = 1; i < samples.length; i++) {
       const sampleTimeDeltaInMs =
         i === 0 ? profileInterval : samples.time[i] - samples.time[i - 1];
-      const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
-      maxThreadCPUDeltaPerMs = Math.max(maxThreadCPUDeltaPerMs, cpuDeltaPerMs);
+      if (sampleTimeDeltaInMs !== 0) {
+        const cpuDeltaPerMs = (threadCPUDelta[i] || 0) / sampleTimeDeltaInMs;
+        maxThreadCPUDeltaPerMs = Math.max(
+          maxThreadCPUDeltaPerMs,
+          cpuDeltaPerMs
+        );
+      }
     }
   }
 
