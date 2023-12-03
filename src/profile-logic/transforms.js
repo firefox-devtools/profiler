@@ -1235,85 +1235,33 @@ const FUNC_MATCHES = {
 
 export function collapseFunctionSubtree(
   thread: Thread,
-  funcToCollapse: IndexIntoFuncTable,
-  defaultCategory: IndexIntoCategoryList
+  funcToCollapse: IndexIntoFuncTable
 ): Thread {
   const { stackTable, frameTable } = thread;
-  const oldStackToNewStack: Map<
-    IndexIntoStackTable | null,
-    IndexIntoStackTable | null,
-  > = new Map();
-  // A root stack's prefix will be null. Maintain that relationship from old to new
-  // stacks by mapping from null to null.
-  oldStackToNewStack.set(null, null);
-  const collapsedStacks = new Set();
-  const newStackTable = getEmptyStackTable();
+  const oldStackToNewStack = new Int32Array(stackTable.length);
+  const isInCollapsedSubtree = new Uint8Array(stackTable.length);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
-    if (
-      // The previous stack was collapsed, this one is collapsed too.
-      collapsedStacks.has(prefix)
-    ) {
-      // Only remember that this stack is collapsed.
-      const newPrefixStackIndex = oldStackToNewStack.get(prefix);
-      if (newPrefixStackIndex === undefined) {
-        throw new Error('newPrefixStackIndex cannot be undefined');
-      }
-      // Many collapsed stacks will potentially all point to the first stack that used the
-      // funcToCollapse, so newPrefixStackIndex will potentially be assigned to many
-      // stacks. This is what actually "collapses" a stack.
-      oldStackToNewStack.set(stackIndex, newPrefixStackIndex);
-      collapsedStacks.add(stackIndex);
-
-      // Fall back to the default category when stack categories conflict.
-      if (newPrefixStackIndex !== null) {
-        if (
-          newStackTable.category[newPrefixStackIndex] !==
-          stackTable.category[stackIndex]
-        ) {
-          newStackTable.category[newPrefixStackIndex] = defaultCategory;
-          newStackTable.subcategory[newPrefixStackIndex] = 0;
-        } else if (
-          newStackTable.subcategory[newPrefixStackIndex] !==
-          stackTable.subcategory[stackIndex]
-        ) {
-          newStackTable.subcategory[newPrefixStackIndex] = 0;
-        }
-      }
+    if (prefix !== null && isInCollapsedSubtree[prefix] !== 0) {
+      oldStackToNewStack[stackIndex] = oldStackToNewStack[prefix];
+      isInCollapsedSubtree[stackIndex] = 1;
     } else {
-      // Add this stack.
-      const newStackIndex = newStackTable.length++;
-      const newStackPrefix = oldStackToNewStack.get(prefix);
-      if (newStackPrefix === undefined) {
-        throw new Error(
-          'The newStackPrefix must exist because prefix < stackIndex as the StackTable is ordered.'
-        );
-      }
-
+      oldStackToNewStack[stackIndex] = stackIndex;
       const frameIndex = stackTable.frame[stackIndex];
-      const category = stackTable.category[stackIndex];
-      const subcategory = stackTable.subcategory[stackIndex];
-      newStackTable.prefix[newStackIndex] = newStackPrefix;
-      newStackTable.frame[newStackIndex] = frameIndex;
-      newStackTable.category[newStackIndex] = category;
-      newStackTable.subcategory[newStackIndex] = subcategory;
-      oldStackToNewStack.set(stackIndex, newStackIndex);
-
-      // If this is the function to collapse, keep the stack, but note that its children
-      // should be discarded.
       const funcIndex = frameTable.func[frameIndex];
       if (funcToCollapse === funcIndex) {
-        collapsedStacks.add(stackIndex);
+        isInCollapsedSubtree[stackIndex] = 1;
       }
     }
   }
 
-  return updateThreadStacks(
-    thread,
-    newStackTable,
-    getMapStackUpdater(oldStackToNewStack)
-  );
+  return updateThreadStacks(thread, thread.stackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    return oldStackToNewStack[oldStack];
+  });
 }
 
 /**
@@ -1843,11 +1791,7 @@ export function applyTransform(
     case 'collapse-recursion':
       return collapseRecursion(thread, transform.funcIndex);
     case 'collapse-function-subtree':
-      return collapseFunctionSubtree(
-        thread,
-        transform.funcIndex,
-        defaultCategory
-      );
+      return collapseFunctionSubtree(thread, transform.funcIndex);
     case 'filter-samples':
       return filterSamples(
         thread,
