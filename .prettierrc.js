@@ -15,7 +15,7 @@ module.exports = {
       },
     },
     {
-      files: 'bin/*',
+      files: 'bin/*.js',
       options: {
         // Files in bin/ are javascript files that may use Flow comments. We
         // don't want the content of these Flow comments to be output outside of

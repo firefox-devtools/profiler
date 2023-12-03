@@ -1628,9 +1628,8 @@ describe('actions/receive-profile', function () {
       expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
         'VIEW_PROFILE_IN_ZIP_FILE'
       );
-      const errorMessage = ZippedProfilesSelectors.getZipFileErrorMessage(
-        getState()
-      );
+      const errorMessage =
+        ZippedProfilesSelectors.getZipFileErrorMessage(getState());
       expect(errorMessage).toEqual(null);
     });
 
@@ -1658,9 +1657,8 @@ describe('actions/receive-profile', function () {
       expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
         'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE'
       );
-      const errorMessage = ZippedProfilesSelectors.getZipFileErrorMessage(
-        getState()
-      );
+      const errorMessage =
+        ZippedProfilesSelectors.getZipFileErrorMessage(getState());
       expect(typeof errorMessage).toEqual('string');
       expect(errorMessage).toMatchSnapshot();
     });

@@ -5,12 +5,14 @@
 // @flow
 import type {
   UnitIntervalOfProfileRange,
-  CallNodeInfo,
   CallNodeTable,
+  FuncTable,
   IndexIntoCallNodeTable,
-  Thread,
 } from 'firefox-profiler/types';
+import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 import type { CallTreeCountsAndSummary } from './call-tree';
+
+import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
 
 export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
@@ -38,226 +40,270 @@ export type FlameGraphTiming = Array<{
   length: number,
 }>;
 
-type RootsAndChildren = {
-  /**
-   * Conceptually, `children` is a collection of arrays, one for each
-   * callnode in the tree. Each array contains all immediate callnode
-   * children (with a non-zero total time) of a given callnode.
-   *
-   * To avoid heavy allocations for large call trees, the elements of
-   * this collection are not real array instances. Instead, one has to
-   * work with slices of one large array.
-   *
-   * Given a callnode `p` with callnode index `pi`, and `start` and
-   * `end` defined as:
-   * let start = children.offsets[pi];
-   * let end = children.offsets[pi + 1];
-   *
-   * then children.array.slice(start, end) is a sorted list of all
-   * callnode indices whose callnodes have `p` as their direct parent.
-   * The list is sorted in descending order with respect to the
-   * function names of the callnodes.
-   */
-  children: {
-    // Array of IndexIntoCallNodeTable. This is a concatenation of all
-    // children sub-arrays.
-    array: Uint32Array,
-    // This array maps a given IndexIntoCallNodeTable to a slice
-    // within `array` by providing start and end indices.
-    offsets: Uint32Array,
-  },
-
-  // A list of every root CallNodeIndex in the call tree.
-  roots: IndexIntoCallNodeTable[],
-};
+/**
+ * FlameGraphRows is an array of rows, where each row is an array of call node
+ * indexes. This is a timing-invariant representation of the flame graph and can
+ * be cached independently of the sample / timing information.
+ *
+ * When combined with the timing information, it is used to produce FlameGraphTiming.
+ *
+ * In FlameGraphRows, rows[depth] contains all the call nodes of that depth.
+ * The call nodes are ordered in the same order that they'll be displayed in the
+ * flame graph:
+ *
+ *  - Siblings are ordered by function name.
+ *  - Siblings are grouped, i.e. all nodes with the same prefix are next to each other.
+ *  - The order of these groups with respect to each other is determined by how
+ *    their prefix call nodes are ordered in the previous row.
+ *
+ * # Example ([call node index] [function name])
+ *
+ * ```
+ *  - 0 A
+ *    - 1 D
+ *      - 2 I
+ *    - 3 B
+ *      - 4 C
+ *      - 5 F
+ *      - 6 E
+ *    - 7 G
+ *  - 8 H
+ * ```
+ *
+ * The call node table above produces the following FlameGraphRows:
+ * Depth 0: [0, 8]       // ["A", "H"]
+ * Depth 1: [3, 1, 7]    // ["B", "D", "G"]
+ * Depth 2: [4, 6, 5, 2] // ["C", "E", "F", "I"]
+ *
+ * Note that [4, 6, 5] are the children of 3 ("B"), sorted by name, and these
+ * children have been moved before 2 ("I") to match the order of their parents.
+ */
+export type FlameGraphRows = IndexIntoCallNodeTable[][];
 
 /**
- * Obtain collections of callnode indices needed for building the
- * flame graph.
- *
- * The returned object contains two arrays, one for the roots and one
- * for all children of the call tree. Along with the children array is
- * an offset array used to index into it.
+ * Compute the FlameGraphRows. The result is independent of timing information.
  */
-export function getRootsAndChildren(
-  thread: Thread,
+export function computeFlameGraphRows(
   callNodeTable: CallNodeTable,
-  callNodeChildCount: Uint32Array,
-  totalTime: Float32Array
-): RootsAndChildren {
-  const roots = [];
-  const array = new Uint32Array(callNodeTable.length);
-  const offsets = new Uint32Array(callNodeTable.length + 1);
+  funcTable: FuncTable,
+  stringTable: UniqueStringArray
+): FlameGraphRows {
+  if (callNodeTable.length === 0) {
+    return [[]];
+  }
 
-  /* For performance reasons the array is of type Uint32Array. This
-   * means we cannot use values such as `undefined` or `null` to
-   * indicate uninitialized values, as we build up the array. But
-   * since `callNodeTable` is ordered is such a way that a given
-   * callnode index always comes _after_ its parent callnode index, we
-   * know that callnode index zero never can be a child. It is always
-   * a root. (Not counting the special -1 root, but we don't need it
-   * here). Hence, we are free to use the value 0 in the children
-   * array to mark elements as not initialized, since 0 is never a
-   * valid child. Since the default values of Uint32Array is 0, we
-   * conveniently get an array where all its values are uninitialized
-   * from start. */
+  const { func, nextSibling, subtreeRangeEnd, maxDepth } = callNodeTable;
+  const funcTableNameColumn = funcTable.name;
 
-  let callNodeIndex = 0;
-  let ptr = 0;
-  for (; callNodeIndex < callNodeTable.length; callNodeIndex++) {
-    offsets[callNodeIndex] = ptr;
-    ptr += callNodeChildCount[callNodeIndex];
+  // flameGraphRows is what we'll return from this function.
+  //
+  // Each row is conceptually partitioned into two parts: "Finished nodes" and
+  // "pending nodes".
+  //
+  // For row d, flameGraphRows[d] is partitioned as follows (a..b is the half-open
+  // range which includes a but excludes b):
+  //
+  //  - flameGraphRows[d][0..pendingRangeStartAtDepth[d]] are "finished"
+  //  - flameGraphRows[d][pendingRangeStartAtDepth[d]..] are "pending"
+  //
+  // A node starts out as "pending" when we initially add it to the row.
+  // A node becomes "finished" once we've decided to process its children.
+  //
+  // This is used to queue up a bunch of siblings before we process their
+  // children.
+  // We need to queue up nodes before we can process their children because
+  // we can only process children once their parents are in the right order.
+  const flameGraphRows = Array.from({ length: maxDepth + 1 }, () => []);
+  const pendingRangeStartAtDepth = new Int32Array(maxDepth + 1);
 
-    if (totalTime[callNodeIndex] === 0) {
-      continue;
+  // At the beginning of each turn of this loop, add currentCallNode and all its
+  // siblings as "pending" to row[currentDepth], ordered by name. Then find the
+  // first pending call node with children, and go to the next iteration.
+  let currentCallNode = 0;
+  let currentDepth = 0; // always set to depth[currentCallNode]
+  outer: while (true) {
+    // assert(depth[currentCallNode] === currentDepth);
+
+    // Add currentCallNode and all its siblings to the current row. Ensure correct
+    // ordering when inserting each sibling.
+    const rowAtThisDepth = flameGraphRows[currentDepth];
+    const siblingIndexRangeStart = rowAtThisDepth.length; // index into rowAtThisDepth
+    for (
+      let currentSibling = currentCallNode;
+      currentSibling !== -1;
+      currentSibling = nextSibling[currentSibling]
+    ) {
+      const siblingIndexRangeEnd = rowAtThisDepth.length;
+      if (siblingIndexRangeStart === siblingIndexRangeEnd) {
+        // This is the first sibling that we see. We don't need to compute an
+        // insertion index because we don't have any other siblings to compare
+        // to yet.
+        rowAtThisDepth.push(currentSibling);
+      } else {
+        // There are other siblings already present in rowAtThisDepth[siblingIndexRangeStart..].
+        // Do an ordered insert, to keep siblings ordered by function name.
+        // assert(siblingIndexRangeStart < siblingIndexRangeEnd)
+        const thisFunc = func[currentSibling];
+        const funcName = stringTable.getString(funcTableNameColumn[thisFunc]);
+        const insertionIndex = bisectionRightByStrKey(
+          rowAtThisDepth,
+          funcName,
+          (cn) => stringTable.getString(funcTableNameColumn[func[cn]]),
+          siblingIndexRangeStart,
+          siblingIndexRangeEnd
+        );
+        rowAtThisDepth.splice(insertionIndex, 0, currentSibling);
+      }
     }
 
-    const parent = callNodeTable.prefix[callNodeIndex];
-    if (parent === -1) {
-      roots.push(callNodeIndex);
-      continue;
-    }
+    // Now currentCallNode and all its siblings have been added to the row, and
+    // they are ordered correctly. They are all marked as pending;
+    // pendingRangeStartAtDepth has not been advanced.
 
-    const funcName = thread.stringTable.getString(
-      thread.funcTable.name[callNodeTable.func[callNodeIndex]]
-    );
+    // In the remainder of this loop iteration, all we'll be doing is to find
+    // the next node for processing. Starting at the current depth, but going to
+    // to more shallow depths if needed, we want to find the first pending node
+    // which has children.
 
-    /* From the parent, we can now know the slice allotted for all
-     * its children. */
-    const start = offsets[parent];
-    const end = offsets[parent] + callNodeChildCount[parent] - 1;
+    // We know that the current row has at least one remaining pending node
+    // (currentCallNode) so we start with this row.
+    let candidateDepth = currentDepth;
+    let candidateRow = rowAtThisDepth;
+    let indexInCandidateRow = pendingRangeStartAtDepth[candidateDepth];
+    let candidateNode = candidateRow[indexInCandidateRow];
 
-    /* Find the place in `array` where this callnode should be
-     * inserted, swapping elements in the array as we go
-     * along. Continue as long as this callnode's function name is
-     * lexically smaller than the function names of the callnodes
-     * already placed in the array. This ensures that all slices have
-     * children in descending order. Any callnode indices equal to 0
-     * means that they are uninitialized, so just breeze through
-     * them. When we stop, when have found the right position to
-     * insert our callnode.
-     *
-     * This effectively is an insertion sort, which is O(n^2), but
-     * since n is typically small (the number of children of a given
-     * callnode), it should be just fine.
-     */
-    let i = start;
-    while (i < end) {
-      if (
-        array[i + 1] !== 0 &&
-        funcName >
-          thread.stringTable.getString(
-            thread.funcTable.name[callNodeTable.func[array[i + 1]]]
-          )
-      ) {
-        // We've found our spot if the next slot in the array is
-        // occupied with a callnode whose function name is less than
-        // ours.
-        break;
+    // candidateNode may not have any children. Keep searching, in this row and
+    // in more shallow rows, until we find a node which does have children.
+
+    // At the end of this loop, candidateNode will be set to a node which has
+    // children, and the following will be true:
+    // candidateNode === flameGraphRows[candidateDepth][pendingRangeStartAtDepth[candidateDepth]]
+    //
+    // "while (!hasChildren(candidateNode))"
+    while (subtreeRangeEnd[candidateNode] === candidateNode + 1) {
+      // candidateNode does not have any children.
+      // "Finish" candidateNode by incrementing pendingRangeStartAtDepth[candidateDepth].
+      indexInCandidateRow++;
+      pendingRangeStartAtDepth[candidateDepth] = indexInCandidateRow;
+
+      // Find the next row which still has pending nodes, going to shallower
+      // depths until we hit the end.
+      while (indexInCandidateRow === candidateRow.length) {
+        // There are no more pending nodes in the current row - all nodes at
+        // this depth are already finished.
+        if (candidateDepth === 0) {
+          // We must have processed the entire tree at this point, and we are done.
+          break outer;
+        }
+        // Go to a shallower depth and continue the search there.
+        candidateDepth--;
+        candidateRow = flameGraphRows[candidateDepth];
+        indexInCandidateRow = pendingRangeStartAtDepth[candidateDepth];
       }
 
-      array[i] = array[i + 1];
-      i++;
+      // candidateRow now has at least one pending node left.
+      candidateNode = candidateRow[indexInCandidateRow];
     }
-    array[i] = callNodeIndex;
-  }
-  offsets[callNodeIndex] = ptr;
 
-  // The children are already sorted, but the roots aren't.
-  // Let's sort the roots in descending order, just like the children.
-  roots.sort((rootA, rootB) => {
-    const [nameA, nameB] = [rootA, rootB].map((callNodeIndex) =>
-      thread.stringTable.getString(
-        thread.funcTable.name[callNodeTable.func[callNodeIndex]]
-      )
-    );
-    if (nameA < nameB) {
-      return 1;
-    }
-    if (nameA === nameB) {
-      return 0;
-    }
-    return -1;
-  });
-  return { roots, children: { array, offsets } };
+    // Now candidateNode is a pending node which has at least one child.
+    // assert(candidateNode === flameGraphRows[candidateDepth][pendingRangeStartAtDepth[candidateDepth]])
+    // assert(subtreeRangeEnd[candidateNode] !== candidateNode + 1)
+
+    // We have now decided to process this node, i.e. we know that we will add
+    // this node's children in the next loop iteration.
+    // "Finish" candidateNode by incrementing pendingRangeStartAtDepth[candidateDepth].
+    pendingRangeStartAtDepth[candidateDepth] = indexInCandidateRow + 1;
+
+    // Advance to candidateNode's first child. Due to the way call nodes are ordered,
+    // the first child of x (if present) is always at x + 1.
+    currentCallNode = candidateNode + 1; // "currentCallNode = firstChild[candidateNode];"
+    currentDepth = candidateDepth + 1;
+  }
+
+  return flameGraphRows;
 }
 
 /**
  * Build a FlameGraphTiming table from a call tree.
  */
 export function getFlameGraphTiming(
-  thread: Thread,
-  callNodeInfo: CallNodeInfo,
+  flameGraphRows: FlameGraphRows,
+  callNodeTable: CallNodeTable,
   callTreeCountsAndSummary: CallTreeCountsAndSummary
 ): FlameGraphTiming {
-  const { callNodeChildCount, callNodeSummary, rootTotalSummary } =
-    callTreeCountsAndSummary;
+  const { callNodeSummary, rootTotalSummary } = callTreeCountsAndSummary;
+  const { total, self } = callNodeSummary;
+  const { prefix } = callNodeTable;
 
-  const { roots, children } = getRootsAndChildren(
-    thread,
-    callNodeInfo.callNodeTable,
-    callNodeChildCount,
-    callNodeSummary.total
-  );
+  // This is where we build up the return value, one row at a time.
   const timing = [];
 
-  // Array of call nodes to recursively process in the loop below.
-  // Start with the roots of the call tree.
-  const stack: Array<{
-    depth: number,
-    nodeIndex: IndexIntoCallNodeTable,
-  }> = roots.map((nodeIndex) => ({ nodeIndex, depth: 0 }));
+  // This is used to adjust the start position of a call node's box based on the
+  // start position of its prefix node's box.
+  const startPerCallNode = new Float32Array(callNodeTable.length);
 
-  // Keep track of time offset by depth level.
-  const timeOffset = [0.0];
+  // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
+  const abs = Math.abs;
 
-  while (stack.length) {
-    const { depth, nodeIndex } = stack.pop();
+  // Go row by row.
+  for (let depth = 0; depth < flameGraphRows.length; depth++) {
+    const rowNodes = flameGraphRows[depth];
 
-    // Select an existing row, or create a new one.
-    let row = timing[depth];
-    if (row === undefined) {
-      row = {
-        start: [],
-        end: [],
-        selfRelative: [],
-        callNode: [],
-        length: 0,
-      };
-      timing[depth] = row;
+    const start = [];
+    const end = [];
+    const selfRelative = [];
+    const timingCallNodes = [];
+
+    // Process the call nodes in this row. Sibling boxes are adjacent to each other.
+    // Whenever the prefix changes, we need to add a gap so that the child boxes
+    // start at the same position as the parent box.
+    //
+    // Previous row: [B          ][D      ]       [G        ]
+    // Current row:  [C][E][F]    [I    ]
+    // (Note that this is upside down from how the flame graph is usually displayed)
+    let currentStart = 0;
+    let previousPrefixCallNode = -1;
+    for (let indexInRow = 0; indexInRow < rowNodes.length; indexInRow++) {
+      const nodeIndex = rowNodes[indexInRow];
+      const totalVal = total[nodeIndex];
+      if (totalVal === 0) {
+        // Skip boxes with zero width.
+        continue;
+      }
+
+      const nodePrefix = prefix[nodeIndex];
+      if (nodePrefix !== previousPrefixCallNode) {
+        // We have advanced to a node with a different parent, so we need to
+        // jump ahead to the parent box's start position.
+        currentStart = startPerCallNode[nodePrefix];
+        previousPrefixCallNode = nodePrefix;
+      }
+
+      // Write down the start position of this call node so that it can be
+      // checked later by this node's children.
+      startPerCallNode[nodeIndex] = currentStart;
+
+      // Take the absolute value, as native deallocations can be negative.
+      const totalRelativeVal = abs(totalVal / rootTotalSummary);
+      const selfRelativeVal = abs(self[nodeIndex] / rootTotalSummary);
+
+      const currentEnd = currentStart + totalRelativeVal;
+      start.push(currentStart);
+      end.push(currentEnd);
+      selfRelative.push(selfRelativeVal);
+      timingCallNodes.push(nodeIndex);
+
+      // The start position of the next box is the end position of the current box.
+      currentStart = currentEnd;
     }
-
-    // Take the absolute value, as native deallocations can be negative.
-    const totalRelative = Math.abs(
-      callNodeSummary.total[nodeIndex] / rootTotalSummary
-    );
-    const selfRelative = Math.abs(
-      callNodeSummary.self[nodeIndex] / rootTotalSummary
-    );
-
-    // Compute the timing information.
-    row.start.push(timeOffset[depth]);
-    row.end.push(timeOffset[depth] + totalRelative);
-    row.selfRelative.push(selfRelative);
-    row.callNode.push(nodeIndex);
-    row.length++;
-
-    // Before we add the total time of this node to the time offset,
-    // we'll make sure that the first child (if any) begins with the
-    // same time offset.
-    timeOffset[depth + 1] = timeOffset[depth];
-    timeOffset[depth] += totalRelative;
-
-    // The items in the children array are sorted in descending order,
-    // but since they are popped from the stack at the top of the
-    // while loop they'll be processed in ascending order.
-    for (
-      let offset = children.offsets[nodeIndex];
-      offset < children.offsets[nodeIndex + 1];
-      offset++
-    ) {
-      stack.push({ nodeIndex: children.array[offset], depth: depth + 1 });
-    }
+    timing[depth] = {
+      start,
+      end,
+      selfRelative,
+      callNode: timingCallNodes,
+      length: timingCallNodes.length,
+    };
   }
+
   return timing;
 }

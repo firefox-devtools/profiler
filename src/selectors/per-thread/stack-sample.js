@@ -267,32 +267,22 @@ export function getStackAndSampleSelectorsPerThread(
   const getTreeOrderComparatorInFilteredThread: Selector<
     (IndexIntoSamplesTable, IndexIntoSamplesTable) => number,
   > = createSelector(
-    threadSelectors.getFilteredThread,
-    getCallNodeInfo,
-    (thread, { callNodeTable, stackIndexToCallNodeIndex }) => {
-      const sampleIndexToCallNodeIndex =
-        ProfileData.getSampleIndexToCallNodeIndex(
-          thread.samples.stack,
-          stackIndexToCallNodeIndex
-        );
-      return ProfileData.getTreeOrderComparator(
-        callNodeTable,
-        sampleIndexToCallNodeIndex
-      );
-    }
+    getSampleIndexToCallNodeIndexForFilteredThread,
+    ProfileData.getTreeOrderComparator
   );
 
-  const getFilteredCallNodeMaxDepth: Selector<number> = createSelector(
+  const getFilteredCallNodeMaxDepthPlusOne: Selector<number> = createSelector(
     threadSelectors.getFilteredSamplesForCallTree,
     getCallNodeInfo,
-    ProfileData.computeCallNodeMaxDepth
+    ProfileData.computeCallNodeMaxDepthPlusOne
   );
 
-  const getPreviewFilteredCallNodeMaxDepth: Selector<number> = createSelector(
-    threadSelectors.getPreviewFilteredSamplesForCallTree,
-    getCallNodeInfo,
-    ProfileData.computeCallNodeMaxDepth
-  );
+  const getPreviewFilteredCallNodeMaxDepthPlusOne: Selector<number> =
+    createSelector(
+      threadSelectors.getPreviewFilteredSamplesForCallTree,
+      getCallNodeInfo,
+      ProfileData.computeCallNodeMaxDepthPlusOne
+    );
 
   /**
    * When computing the call tree, a "samples" table is used, which
@@ -350,7 +340,7 @@ export function getStackAndSampleSelectorsPerThread(
     );
 
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
-    threadSelectors.getFilteredSamplesForCallTree,
+    threadSelectors.getPreviewFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
@@ -360,16 +350,24 @@ export function getStackAndSampleSelectorsPerThread(
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
     createSelector(
       threadSelectors.getFilteredSamplesForCallTree,
+      getSampleIndexToCallNodeIndexForFilteredThread,
       getCallNodeInfo,
-      getFilteredCallNodeMaxDepth,
+      getFilteredCallNodeMaxDepthPlusOne,
       ProfileSelectors.getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
 
+  const getFlameGraphRows: Selector<FlameGraph.FlameGraphRows> = createSelector(
+    (state) => getCallNodeInfo(state).callNodeTable,
+    (state) => threadSelectors.getFilteredThread(state).funcTable,
+    (state) => threadSelectors.getFilteredThread(state).stringTable,
+    FlameGraph.computeFlameGraphRows
+  );
+
   const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
     createSelector(
-      threadSelectors.getPreviewFilteredThread,
-      getCallNodeInfo,
+      getFlameGraphRows,
+      (state) => getCallNodeInfo(state).callNodeTable,
       getCallTreeCountsAndSummary,
       FlameGraph.getFlameGraphTiming
     );
@@ -413,8 +411,8 @@ export function getStackAndSampleSelectorsPerThread(
     getAssemblyViewAddressTimings,
     getTracedTiming,
     getStackTimingByDepth,
-    getFilteredCallNodeMaxDepth,
-    getPreviewFilteredCallNodeMaxDepth,
+    getFilteredCallNodeMaxDepthPlusOne,
+    getPreviewFilteredCallNodeMaxDepthPlusOne,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
   };

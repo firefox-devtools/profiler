@@ -18,6 +18,7 @@ import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 import {
   getBottomBoxInfoForCallNode,
   getOriginAnnotationForFunc,
+  getCallNodePathFromIndex,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
 
@@ -226,25 +227,28 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       callNodeInfo: { callNodeTable },
     } = rightClickedCallNodeInfo;
 
-    let stack = '';
-    let curCallNodeIndex = callNodeIndex;
+    const callPath = getCallNodePathFromIndex(
+      callNodeIndex,
+      callNodeTable
+    ).reverse();
 
-    do {
-      // Match the style of MarkerContextMenu.js#convertStackToString which uses
-      // square brackets around [file:line:column] info. This isn't provided by
-      // getOriginAnnotationForFunc, so build the string in two parts:
-      const funcIndex = callNodeTable.func[curCallNodeIndex];
-      const funcNameIndex = funcTable.name[funcIndex];
-      const funcName = stringTable.getString(funcNameIndex);
-      const fileNameURL = getOriginAnnotationForFunc(
-        funcIndex,
-        funcTable,
-        resourceTable,
-        stringTable
-      );
-      stack += funcName + (fileNameURL ? ` [${fileNameURL}]\n` : '\n');
-      curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
-    } while (curCallNodeIndex !== -1);
+    const stack = callPath
+      .map((funcIndex) => {
+        // Match the style of MarkerContextMenu.js#convertStackToString which uses
+        // square brackets around [file:line:column] info.
+        // The square brackets aren't included in the string that's returned from
+        // getOriginAnnotationForFunc, so build the string in two parts:
+        const funcNameIndex = funcTable.name[funcIndex];
+        const funcName = stringTable.getString(funcNameIndex);
+        const originAnnotation = getOriginAnnotationForFunc(
+          funcIndex,
+          funcTable,
+          resourceTable,
+          stringTable
+        );
+        return funcName + (originAnnotation ? ` [${originAnnotation}]` : '');
+      })
+      .join('\n');
 
     copy(stack);
   }

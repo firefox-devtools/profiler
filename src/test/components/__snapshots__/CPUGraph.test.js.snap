@@ -4,10 +4,6 @@ exports[`CPUGraph matches the 2d canvas draw snapshot 1`] = `
 Array [
   Array [
     "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "set fillStyle",
     "#003eaa",
   ],
   Array [
@@ -65,10 +61,6 @@ Array [
     10,
     10,
     0,
-  ],
-  Array [
-    "set fillStyle",
-    "#c5e1fe",
   ],
   Array [
     "clearRect",

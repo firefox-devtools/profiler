@@ -10,7 +10,7 @@ import {
   getCallTree,
   computeCallTreeCountsAndSummary,
 } from '../../profile-logic/call-tree';
-import { getRootsAndChildren } from '../../profile-logic/flame-graph';
+import { computeFlameGraphRows } from '../../profile-logic/flame-graph';
 import {
   getCallNodeInfo,
   invertCallstack,
@@ -86,14 +86,15 @@ describe('unfiltered call tree', function () {
         callNodeChildCount: new Uint32Array([1, 2, 2, 1, 0, 1, 0, 1, 0]),
         callNodeSummary: {
           self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+          leaf: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
           total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
         },
       });
     });
   });
 
-  describe('roots and children for flame graph', function () {
-    it('returns roots and children', function () {
+  describe('ordered rows of call node indexes for flame graph', function () {
+    it('returns ordered rows', function () {
       // On purpose, we build a profile where the call node indexes won't be in
       // the same order than the function names.
       const {
@@ -109,46 +110,35 @@ describe('unfiltered call tree', function () {
         profile.meta.categories,
         'Expected to find categories'
       ).findIndex((c) => c.name === 'Other');
-      const callNodeInfo = getCallNodeInfo(
+      const { callNodeTable } = getCallNodeInfo(
         thread.stackTable,
         thread.frameTable,
         thread.funcTable,
         defaultCategory
       );
+      const cnZ = getCallNodeIndexFromPath([Z], callNodeTable);
+      const cnZX = getCallNodeIndexFromPath([Z, X], callNodeTable);
+      const cnZXY = getCallNodeIndexFromPath([Z, X, Y], callNodeTable);
+      const cnZXW = getCallNodeIndexFromPath([Z, X, W], callNodeTable);
+      const cnG = getCallNodeIndexFromPath([G], callNodeTable);
+      const cnGH = getCallNodeIndexFromPath([G, H], callNodeTable);
+      const cnGHI = getCallNodeIndexFromPath([G, H, I], callNodeTable);
+      const cnGHJ = getCallNodeIndexFromPath([G, H, J], callNodeTable);
+      const cnK = getCallNodeIndexFromPath([K], callNodeTable);
+      const cnKM = getCallNodeIndexFromPath([K, M], callNodeTable);
+      const cnKN = getCallNodeIndexFromPath([K, N], callNodeTable);
 
-      const { callNodeChildCount, callNodeSummary } =
-        computeCallTreeCountsAndSummary(
-          thread.samples,
-          getSampleIndexToCallNodeIndex(
-            thread.samples.stack,
-            callNodeInfo.stackIndexToCallNodeIndex
-          ),
-          callNodeInfo,
-          false /* inverted */
-        );
-
-      expect(
-        getRootsAndChildren(
-          thread,
-          callNodeInfo.callNodeTable,
-          callNodeChildCount,
-          callNodeSummary.total
-        )
-      ).toEqual({
-        // Roots are ordered in lexically descending order.
-        roots: [Z, K, G],
-        children: {
-          // Children are ordered in lexically descending order
-          array: new Uint32Array([X, Y, W, H, J, I, N, M, 0, 0, 0]),
-          offsets: new Uint32Array([0, 1, 3, 3, 3, 4, 6, 6, 6, 8, 8, 8]),
-          /*                        Z, X, Y, W, G, H, I, J, K, M, N, <end> */
-          /* offsets represent where children of a parent are located in "array".
-           * For example:
-           *   children of G are located between indexes 3 and 4 (excluded). That is H.
-           *   children of H are located between indexes 4 and 6 (excluded). That is J and I.
-           */
-        },
-      });
+      const rows = computeFlameGraphRows(
+        callNodeTable,
+        thread.funcTable,
+        thread.stringTable
+      );
+      expect(rows).toEqual([
+        // Siblings are ordered in lexically ascending order.
+        [cnG, cnK, cnZ],
+        [cnGH, cnKM, cnKN, cnZX],
+        [cnGHI, cnGHJ, cnZXW, cnZXY],
+      ]);
     });
   });
 
@@ -558,31 +548,34 @@ describe('inverted call tree', function () {
 
 describe('diffing trees', function () {
   function getProfile() {
-    const { profile } = getMergedProfileFromTextSamples([
+    return getMergedProfileFromTextSamples([
       `
-        A  A  A
-        B  B  C
-        D  E  F
+        A  A  A  A  A  A  A
+        B  B  B  B  C  B  B
+        D  D  D  E  F  D  D
+        F  F  F           F
       `,
       `
-        A  A  A
-        B  B  B
-        G  I  E
+        A  A  A  A  A  A  A
+        B  B  B  B  B  B  B
+        D  D  D  G  I  E  I
+        D  D  D
       `,
     ]);
-    return profile;
   }
 
   it('displays a proper call tree, including nodes with total = 0', () => {
-    const profile = getProfile();
+    const { profile } = getProfile();
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
     const formattedTree = formatTree(callTree);
     expect(formattedTree).toEqual([
       '- A (total: —, self: —)',
       '  - B (total: 1, self: —)',
-      '    - D (total: -1, self: -1)',
+      '    - D (total: -2, self: -1)',
+      '      - F (total: -4, self: -4)',
+      '      - D (total: 3, self: 3)',
+      '    - I (total: 2, self: 2)',
       '    - G (total: 1, self: 1)',
-      '    - I (total: 1, self: 1)',
       '  - C (total: -1, self: —)',
       '    - F (total: -1, self: -1)',
     ]);
@@ -592,9 +585,9 @@ describe('diffing trees', function () {
   });
 
   it('displays a proper call tree, even for range-filtered threads', () => {
-    const profile = getProfile();
-    const rangeStart = 1;
-    const rangeEnd = 3;
+    const { profile } = getProfile();
+    const rangeStart = 4;
+    const rangeEnd = 5;
     profile.threads = profile.threads.map((thread) =>
       filterThreadSamplesToRange(thread, rangeStart, rangeEnd)
     );
@@ -610,8 +603,18 @@ describe('diffing trees', function () {
     ]);
   });
 
+  it('finds the heaviest call path even when it has ancestors with low totals', () => {
+    const { profile, funcNamesDictPerThread } = getProfile();
+    const { B, D, F } = funcNamesDictPerThread[2];
+    const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
+    // Get the call node index for the node A -> B. TODO: Make this more reliable
+    const AB = callTree.getChildren(callTree.getRoots()[0])[0];
+    const invertedPath = callTree.findHeavyPathToSameFunctionAfterInversion(AB);
+    expect(invertedPath).toEqual([F, D, B]);
+  });
+
   it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
-    const profile = getProfile();
+    const { profile } = getProfile();
 
     const thread = profile.threads[2];
     const defaultCategory = ensureExists(
@@ -633,7 +636,7 @@ describe('diffing trees', function () {
       callNodeInfo,
       false
     );
-    expect(callTreeCountsAndSummary.rootTotalSummary).toBe(4);
+    expect(callTreeCountsAndSummary.rootTotalSummary).toBe(12);
   });
 });
 

@@ -58,6 +58,7 @@ import type {
   Milliseconds,
   TabID,
   Thread,
+  StartEndRange,
 } from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function () {
@@ -937,27 +938,24 @@ describe('actions/ProfileView', function () {
       // Tests the filename, but with a substring
       dispatch(ProfileView.changeMarkersSearchString('foo'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
 
       // Tests the operation
       dispatch(ProfileView.changeMarkersSearchString('open'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
 
       // Tests the source
       dispatch(ProfileView.changeMarkersSearchString('Interposer'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
     });
@@ -1032,17 +1030,15 @@ describe('actions/ProfileView', function () {
       // Tests otherPid
       dispatch(ProfileView.changeMarkersSearchString('3333'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
 
       dispatch(ProfileView.changeMarkersSearchString('9'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('IPCOut')).toBeTruthy();
     });
@@ -1159,18 +1155,16 @@ describe('actions/ProfileView', function () {
       // Tests searching for the DOMEVent type
       dispatch(ProfileView.changeMarkersSearchString('mouse'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
 
       // This tests searching in the category.
       dispatch(ProfileView.changeMarkersSearchString('dom'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
     });
@@ -1822,17 +1816,19 @@ describe('snapshots of selectors/profile', function () {
     ).toMatchSnapshot();
   });
 
-  it('matches the last stored run of selectedThreadSelector.getFilteredCallNodeMaxDepth', function () {
+  it('matches the last stored run of selectedThreadSelector.getFilteredCallNodeMaxDepthPlusOne', function () {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getFilteredCallNodeMaxDepth(getState())
+      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(getState())
     ).toEqual(4);
   });
 
-  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepth', function () {
+  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepthPlusOne', function () {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(getState())
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
+        getState()
+      )
     ).toEqual(4);
   });
 
@@ -3263,7 +3259,13 @@ describe('pages and active tab selectors', function () {
 });
 
 describe('traced timing', function () {
-  function setup({ inverted }: {| inverted: boolean |}, textSamples: string) {
+  function setup(
+    {
+      inverted,
+      previewSelection,
+    }: {| inverted: boolean, previewSelection?: StartEndRange |},
+    textSamples: string
+  ) {
     const { profile, funcNamesDictPerThread } =
       getProfileFromTextSamples(textSamples);
 
@@ -3271,9 +3273,21 @@ describe('traced timing', function () {
 
     const { getState, dispatch } = storeWithProfile(profile);
     dispatch(ProfileView.changeInvertCallstack(inverted));
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
-      getState()
-    );
+
+    if (previewSelection) {
+      const { start, end } = previewSelection;
+      dispatch(
+        ProfileView.updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: start,
+          selectionEnd: end,
+        })
+      );
+    }
+
+    const { callNodeTable } =
+      selectedThreadSelectors.getCallNodeInfo(getState());
 
     const { running, self } = ensureExists(
       selectedThreadSelectors.getTracedTiming(getState()),
@@ -3376,6 +3390,39 @@ describe('traced timing', function () {
 
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
+  });
+
+  it('computes traced timing based on the preview selection', function () {
+    const {
+      funcNames: { A, B, C },
+      getCallNode,
+      running,
+      self,
+      profile,
+    } = setup(
+      { inverted: false, previewSelection: { start: 1, end: 5.5 } },
+      `
+        0  1  5  6
+        A  A  A  C
+           B
+      `
+    );
+
+    // The preview range only contains the sample at 1 and the sample at 5.
+    // The first sample will have a "traced duration" of 4ms (5ms - 1ms), and
+    // the second sample will have a "traced duration" of the interval, because
+    // it's the last sample in the range.
+
+    expect(running[getCallNode(A)]).toBe(4 + profile.meta.interval);
+    expect(self[getCallNode(A)]).toBe(profile.meta.interval);
+
+    expect(running[getCallNode(A, B)]).toBe(4);
+    expect(self[getCallNode(A, B)]).toBe(4);
+
+    // Call node [C] is fully outside the preview range, so we should have no
+    // traced duration for it.
+    expect(running[getCallNode(C)]).toBe(0);
+    expect(self[getCallNode(C)]).toBe(0);
   });
 });
 

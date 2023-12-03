@@ -204,9 +204,8 @@ describe('selected and expanded zip files', function () {
         ...zipFileTree.getAllDescendants(null),
       ])
     );
-    const expanded = ZippedProfilesSelectors.getExpandedZipFileIndexes(
-      getState()
-    );
+    const expanded =
+      ZippedProfilesSelectors.getExpandedZipFileIndexes(getState());
     const expandedNames = expanded.map(
       (index) => zipFileTable.path[ensureExists(index)]
     );

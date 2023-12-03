@@ -17,34 +17,15 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  IndexIntoCallNodeTable,
   SelectedState,
 } from 'firefox-profiler/types';
 
-/**
- * Parameters for the height function of the HeightGraph component.
- * Shared HeightGraph component gets a `heightFunc` as a prop and executes this
- * function for each sample to determine the height of the given sample in the graph.
- * Therefore, each height per sample is determined by the parent component. This
- * helps us reuse the same height graph component with different values.
- *
- * These parameters are exposed because the parent component needs them to find
- * out the height of the sample with different logics. These parameters are added
- * on an as-needed basis.
- */
-export type HeightFunctionParams = {|
-  +sampleIndex: number,
-  +callNodeIndex: number,
-  +yPixelsPerHeight: number,
-|};
-
 type Props = {|
-  +heightFunc: (HeightFunctionParams) => number,
+  +heightFunc: (IndexIntoSamplesTable) => number | null,
   +maxValue: number,
   +className: string,
   +thread: Thread,
   +samplesSelectedStates: null | SelectedState[],
-  +sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -86,7 +67,6 @@ export class ThreadHeightGraph extends PureComponent<Props> {
     const {
       thread,
       samplesSelectedStates,
-      sampleCallNodes,
       interval,
       rangeStart,
       rangeEnd,
@@ -149,16 +129,12 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       if (sampleTime < nextMinTime) {
         continue;
       }
-      const callNodeIndex = sampleCallNodes[i];
-      if (callNodeIndex === null) {
+      const heightFuncResult = heightFunc(i);
+      if (heightFuncResult === null) {
         continue;
       }
 
-      const height = heightFunc({
-        sampleIndex: i,
-        callNodeIndex,
-        yPixelsPerHeight,
-      });
+      const height = heightFuncResult * yPixelsPerHeight;
 
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
       let samplesBucket;
@@ -190,6 +166,9 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       xPos: number[],
     };
     function drawSamples(samplesBucket: SamplesBucket, color: string) {
+      if (samplesBucket.xPos.length === 0) {
+        return;
+      }
       ctx.fillStyle = color;
       for (let i = 0; i < samplesBucket.height.length; i++) {
         const height = samplesBucket.height[i];
