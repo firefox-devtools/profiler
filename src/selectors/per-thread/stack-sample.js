@@ -296,32 +296,31 @@ export function getStackAndSampleSelectorsPerThread(
     (samples) => samples.weightType || 'samples'
   );
 
-  const getCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> =
-    createSelector(
-      threadSelectors.getPreviewFilteredSamplesForCallTree,
-      getCallNodeInfo,
-      ProfileSelectors.getProfileInterval,
-      UrlState.getInvertCallstack,
-      (samples, callNodeInfo, interval, invertCallStack) => {
-        const sampleIndexToCallNodeIndex =
-          ProfileData.getSampleIndexToCallNodeIndex(
-            samples.stack,
-            callNodeInfo.stackIndexToCallNodeIndex
-          );
-        return CallTree.computeCallTreeCountsAndSummary(
-          samples,
-          sampleIndexToCallNodeIndex,
-          callNodeInfo,
-          invertCallStack
+  const getCallTreeTimings: Selector<CallTree.CallTreeTimings> = createSelector(
+    threadSelectors.getPreviewFilteredSamplesForCallTree,
+    getCallNodeInfo,
+    ProfileSelectors.getProfileInterval,
+    UrlState.getInvertCallstack,
+    (samples, callNodeInfo, interval, invertCallStack) => {
+      const sampleIndexToCallNodeIndex =
+        ProfileData.getSampleIndexToCallNodeIndex(
+          samples.stack,
+          callNodeInfo.stackIndexToCallNodeIndex
         );
-      }
-    );
+      return CallTree.computeCallTreeTimings(
+        samples,
+        sampleIndexToCallNodeIndex,
+        callNodeInfo,
+        invertCallStack
+      );
+    }
+  );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
-    getCallTreeCountsAndSummary,
+    getCallTreeTimings,
     getWeightTypeForCallTree,
     CallTree.getCallTree
   );
@@ -368,7 +367,7 @@ export function getStackAndSampleSelectorsPerThread(
     createSelector(
       getFlameGraphRows,
       (state) => getCallNodeInfo(state).callNodeTable,
-      getCallTreeCountsAndSummary,
+      getCallTreeTimings,
       FlameGraph.getFlameGraphTiming
     );
 
