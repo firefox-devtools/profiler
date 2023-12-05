@@ -12,6 +12,7 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
   getEmptyStackTable,
+  getEmptyCallNodeTable,
   shallowCloneFrameTable,
   shallowCloneFuncTable,
 } from './data-structures';
@@ -106,22 +107,29 @@ export function getCallNodeInfo(
 ): CallNodeInfo {
   return timeCode('getCallNodeInfo', () => {
     const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
-    const funcCount = funcTable.length;
-    // Maps can't key off of two items, so combine the prefixCallNode and the funcIndex
-    // using the following formula: prefixCallNode * funcCount + funcIndex => callNode
-    const prefixCallNodeAndFuncToCallNodeMap = new Map();
 
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
+    const firstChild: Array<IndexIntoCallNodeTable> = [];
+    const nextSibling: Array<IndexIntoCallNodeTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
     const category: Array<IndexIntoCategoryList> = [];
     const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
     const innerWindowID: Array<InnerWindowID> = [];
-    const depth: Array<number> = [];
     const sourceFramesInlinedIntoSymbol: Array<
       IndexIntoNativeSymbolTable | -1 | null,
     > = [];
     let length = 0;
+
+    // An extra column that only gets used while the table is built up: For each
+    // node A, currentLastChild[A] tracks the last currently-known child node of A.
+    // It is updated whenever a new node is created; e.g. creating node B updates
+    // currentLastChild[prefix[B]].
+    // currentLastChild[A] is -1 while A has no children.
+    const currentLastChild: Array<IndexIntoCallNodeTable> = [];
+
+    // The last currently-known root node, i.e. the last known "child of -1".
+    let currentLastRoot = -1;
 
     function addCallNode(
       prefixIndex: IndexIntoCallNodeTable,
@@ -138,10 +146,34 @@ export function getCallNodeInfo(
       subcategory[index] = subcategoryIndex;
       innerWindowID[index] = windowID;
       sourceFramesInlinedIntoSymbol[index] = inlinedIntoSymbol;
+
+      // Initialize these firstChild and nextSibling to -1. They will be updated
+      // once this node's first child or next sibling gets created.
+      firstChild[index] = -1;
+      nextSibling[index] = -1;
+      currentLastChild[index] = -1;
+
+      // Update the next sibling of our previous sibling, and the first child of
+      // our prefix (if we're the first child).
+      // Also set this node's depth.
       if (prefixIndex === -1) {
-        depth[index] = 0;
+        // This node is a root. Just update the previous root's nextSibling. Because
+        // this node has no parent, there's also no firstChild information to update.
+        if (currentLastRoot !== -1) {
+          nextSibling[currentLastRoot] = index;
+        }
+        currentLastRoot = index;
       } else {
-        depth[index] = depth[prefixIndex] + 1;
+        // This node is not a root: update both firstChild and nextSibling information
+        // when appropriate.
+        const prevSiblingIndex = currentLastChild[prefixIndex];
+        if (prevSiblingIndex === -1) {
+          // This is the first child for this prefix.
+          firstChild[prefixIndex] = index;
+        } else {
+          nextSibling[prevSiblingIndex] = index;
+        }
+        currentLastChild[prefixIndex] = index;
       }
     }
 
@@ -156,19 +188,32 @@ export function getCallNodeInfo(
       const frameIndex = stackTable.frame[stackIndex];
       const categoryIndex = stackTable.category[stackIndex];
       const subcategoryIndex = stackTable.subcategory[stackIndex];
-      const windowID = frameTable.innerWindowID[frameIndex] || 0;
       const inlinedIntoSymbol =
         frameTable.inlineDepth[frameIndex] > 0
           ? frameTable.nativeSymbol[frameIndex]
           : null;
       const funcIndex = frameTable.func[frameIndex];
-      const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
 
       // Check if the call node for this stack already exists.
-      let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
-        prefixCallNodeAndFuncIndex
-      );
-      if (callNodeIndex === undefined) {
+      let callNodeIndex = -1;
+      if (stackIndex !== 0) {
+        const currentFirstSibling =
+          prefixCallNode === -1 ? 0 : firstChild[prefixCallNode];
+        for (
+          let currentSibling = currentFirstSibling;
+          currentSibling !== -1;
+          currentSibling = nextSibling[currentSibling]
+        ) {
+          if (func[currentSibling] === funcIndex) {
+            callNodeIndex = currentSibling;
+            break;
+          }
+        }
+      }
+
+      if (callNodeIndex === -1) {
+        const windowID = frameTable.innerWindowID[frameIndex] || 0;
+
         // New call node.
         callNodeIndex = length;
         addCallNode(
@@ -178,10 +223,6 @@ export function getCallNodeInfo(
           subcategoryIndex,
           windowID,
           inlinedIntoSymbol
-        );
-        prefixCallNodeAndFuncToCallNodeMap.set(
-          prefixCallNodeAndFuncIndex,
-          callNodeIndex
         );
       } else {
         // There is already a call node for this function. Use it, and check if
@@ -213,19 +254,144 @@ export function getCallNodeInfo(
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
+    return _createCallNodeInfoFromUnorderedComponents(
+      prefix,
+      firstChild,
+      nextSibling,
+      func,
+      category,
+      subcategory,
+      innerWindowID,
+      sourceFramesInlinedIntoSymbol,
+      length,
+      stackIndexToCallNodeIndex
+    );
+  });
+}
+
+/**
+ * Create a CallNodeInfo with an ordered call node table based on the pieces of
+ * an unordered call node table.
+ *
+ * The order of siblings is maintained.
+ * If a node A has children, its first child B directly follows A.
+ * Otherwise, the node following A is A's next sibling (if it has one), or the
+ * next sibling of the closest ancestor which has a next sibling.
+ * This means that any node and all its descendants are laid out contiguously.
+ */
+function _createCallNodeInfoFromUnorderedComponents(
+  prefix: Array<IndexIntoCallNodeTable>,
+  firstChild: Array<IndexIntoFuncTable>,
+  nextSibling: Array<IndexIntoFuncTable>,
+  func: Array<IndexIntoFuncTable>,
+  category: Array<IndexIntoCategoryList>,
+  subcategory: Array<IndexIntoSubcategoryListForCategory>,
+  innerWindowID: Array<InnerWindowID>,
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  length: number,
+  stackIndexToCallNodeIndex: Uint32Array
+): CallNodeInfo {
+  return timeCode('createCallNodeInfoFromUnorderedComponents', () => {
+    if (length === 0) {
+      return {
+        callNodeTable: getEmptyCallNodeTable(),
+        stackIndexToCallNodeIndex: new Uint32Array(0),
+      };
+    }
+
+    const prefixSorted = new Int32Array(length);
+    const nextSiblingSorted = new Int32Array(length);
+    const subtreeRangeEndSorted = new Uint32Array(length);
+    const funcSorted = new Int32Array(length);
+    const categorySorted = new Int32Array(length);
+    const subcategorySorted = new Int32Array(length);
+    const innerWindowIDSorted = new Float64Array(length);
+    const sourceFramesInlinedIntoSymbolSorted = new Array(length);
+    const depthSorted = new Array(length);
+    let maxDepth = 0;
+
+    // Traverse the entire tree, as follows:
+    //  1. nextOldIndex is the next node in DFS order. Copy over all values from
+    //     the unsorted columns into the sorted columns.
+    //  2. Find the next node in DFS order, set nextOldIndex to it, and continue
+    //     to the next loop iteration.
+    const oldIndexToNewIndex = new Uint32Array(length);
+    let nextOldIndex = 0;
+    let nextNewIndex = 0;
+    let currentDepth = 0;
+    let currentOldPrefix = -1;
+    let currentNewPrefix = -1;
+    while (nextOldIndex !== -1) {
+      const oldIndex = nextOldIndex;
+      const newIndex = nextNewIndex;
+      oldIndexToNewIndex[oldIndex] = newIndex;
+      nextNewIndex++;
+
+      prefixSorted[newIndex] = currentNewPrefix;
+      funcSorted[newIndex] = func[oldIndex];
+      categorySorted[newIndex] = category[oldIndex];
+      subcategorySorted[newIndex] = subcategory[oldIndex];
+      innerWindowIDSorted[newIndex] = innerWindowID[oldIndex];
+      sourceFramesInlinedIntoSymbolSorted[newIndex] =
+        sourceFramesInlinedIntoSymbol[oldIndex];
+      depthSorted[newIndex] = currentDepth;
+      // The remaining two columns, nextSiblingSorted and subtreeRangeEndSorted,
+      // will be filled in when we get to the end of the current subtree.
+
+      // Find the next index in DFS order: If we have children, then our first child
+      // is next. Otherwise, we need to advance to our next sibling, if we have one,
+      // otherwise to the next sibling of the first ancestor which has one.
+      const oldFirstChild = firstChild[oldIndex];
+      if (oldFirstChild !== -1) {
+        // We have children. Our first child is the next node in DFS order.
+        currentOldPrefix = oldIndex;
+        currentNewPrefix = newIndex;
+        nextOldIndex = oldFirstChild;
+        currentDepth++;
+        if (currentDepth > maxDepth) {
+          maxDepth = currentDepth;
+        }
+        continue;
+      }
+
+      // We have no children. The next node is the next sibling of this node or
+      // of an ancestor node. Now is also a good time to fill in the values for
+      // subtreeRangeEnd and nextSibling.
+      subtreeRangeEndSorted[newIndex] = nextNewIndex;
+      nextOldIndex = nextSibling[oldIndex];
+      nextSiblingSorted[newIndex] = nextOldIndex === -1 ? -1 : nextNewIndex;
+      while (nextOldIndex === -1 && currentOldPrefix !== -1) {
+        subtreeRangeEndSorted[currentNewPrefix] = nextNewIndex;
+        const oldPrefixNextSibling = nextSibling[currentOldPrefix];
+        nextSiblingSorted[currentNewPrefix] =
+          oldPrefixNextSibling === -1 ? -1 : nextNewIndex;
+        nextOldIndex = oldPrefixNextSibling;
+        currentOldPrefix = prefix[currentOldPrefix];
+        currentNewPrefix = prefixSorted[currentNewPrefix];
+        currentDepth--;
+      }
+    }
 
     const callNodeTable: CallNodeTable = {
-      prefix: new Int32Array(prefix),
-      func: new Int32Array(func),
-      category: new Int32Array(category),
-      subcategory: new Int32Array(subcategory),
-      innerWindowID: new Float64Array(innerWindowID),
-      sourceFramesInlinedIntoSymbol,
-      depth,
+      prefix: prefixSorted,
+      subtreeRangeEnd: subtreeRangeEndSorted,
+      nextSibling: nextSiblingSorted,
+      func: funcSorted,
+      category: categorySorted,
+      subcategory: subcategorySorted,
+      innerWindowID: innerWindowIDSorted,
+      sourceFramesInlinedIntoSymbol: sourceFramesInlinedIntoSymbolSorted,
+      depth: depthSorted,
+      maxDepth,
       length,
     };
 
-    return { callNodeTable, stackIndexToCallNodeIndex };
+    return {
+      callNodeTable,
+      stackIndexToCallNodeIndex: stackIndexToCallNodeIndex.map(
+        (oldIndex) => oldIndexToNewIndex[oldIndex]
+      ),
+    };
   });
 }
 
@@ -281,129 +447,57 @@ function getSamplesSelectedStatesForNoSelection(
 }
 
 /**
- * Compute a Map<IndexIntoCallNodeTable, CallNodeFlag>, represented as a
- * Uint8Array, which describes the relation of each call node with respect to
- * the selected call node:
- *
- * ```typescript
- * const enum CallNodeFlag {
- *   Unvisited = 0,
- *   InsideSelectedSubtree = 1,
- *   AncestorOfSelectedNode = 2,
- *   BeforeSelected = 3,
- *   AfterSelected = 4,
- * }
- * ```
- *
- * The ordering BeforeSelected / AfterSelected is determined in the same way
- * as in the function compareCallNodes in getTreeOrderComparator: Any nodes that
- * would be visited before the selected subtree in a depth-first traversal are
- * "before", and sibling nodes are ordered by call node index.
- *
- * Example:
- *
- * Here's an example tree where each node is represented as [flag], [callNodeIndex].
- * The tree nodes are written down in depth-first traversal order, but their call
- * node indexes are not in that order. The only guaranteed relationship between
- * call node indexes is, as usual, that every node has a higher index than its
- * prefix node.
- *
- * In this example, call node 14 is the selected call node. All descendants of
- * that node (including the selected node itself) are InsideSelectedSubtree.
- *
- * ```
- * BeforeSelected, 0
- *   BeforeSelected, 1
- *     BeforeSelected, 3
- *   BeforeSelected, 4
- * AncestorOfSelectedNode, 2
- *   BeforeSelected, 6
- *     BeforeSelected, 10
- *     BeforeSelected, 11
- *       BeforeSelected, 12
- *   AncestorOfSelectedNode, 7
- *     BeforeSelected, 13
- *       BeforeSelected, 22
- *     BeforeSelected, 23
- *     InsideSelectedSubtree, 14
- *       InsideSelectedSubtree, 15
- *         InsideSelectedSubtree, 17
- *           InsideSelectedSubtree, 18
- *         InsideSelectedSubtree, 20
- *       InsideSelectedSubtree, 16
- *         InsideSelectedSubtree, 19
- *         InsideSelectedSubtree, 27
- *     AfterSelected, 21
- *       AfterSelected, 24
- *     AfterSelected, 25
- *   AfterSelected, 8
- *     AfterSelected, 9
- * AfterSelected, 5
- *   AfterSelected, 26
- * ```
- *
- * The activity graph treats AncestorOfSelectedNode and BeforeSelected the
- * same; both are "before the selection". They just have two different flag values
- * here because the loop in this function needs to treat them differently.
- */
-function getCallNodeSelectedStates(
-  callNodeTable: CallNodeTable,
-  selectedCallNodeIndex: IndexIntoCallNodeTable
-): Uint8Array {
-  // Precompute an array containing the call node indexes for the selected call
-  // node and its ancestors.
-  const selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
-  const selectionAncestorAtDepth: IndexIntoCallNodeTable[] = new Array(
-    selectedCallNodeDepth
-  );
-  for (
-    let callNodeIndex = selectedCallNodeIndex, depth = selectedCallNodeDepth;
-    depth >= 0;
-    depth--, callNodeIndex = callNodeTable.prefix[callNodeIndex]
-  ) {
-    selectionAncestorAtDepth[depth] = callNodeIndex;
-  }
-
-  // Do a single pass over the call nodes and compute each node's selected state.
-  const callNodeCount = callNodeTable.length;
-  const callNodePrefixes = callNodeTable.prefix;
-  const callNodeDepths = callNodeTable.depth;
-  const callNodeSelectedStates = new Uint8Array(callNodeCount);
-  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
-    const prefix = callNodePrefixes[callNodeIndex];
-    let callNodeFlag = prefix !== -1 ? callNodeSelectedStates[prefix] : 2;
-    if (callNodeFlag === 2 /* CallNodeFlag.AncestorOfSelectedNode */) {
-      const depth = callNodeDepths[callNodeIndex];
-      // assert(depth <= selectedCallNodeDepth);
-      const selectionAncestorAtThisDepth = selectionAncestorAtDepth[depth];
-      if (callNodeIndex === selectionAncestorAtThisDepth) {
-        if (depth === selectedCallNodeDepth) {
-          callNodeFlag = 1 /* CallNodeFlag.InsideSelectedSubtree */;
-        } else {
-          callNodeFlag = 2 /* CallNodeFlag.AncestorOfSelectedNode */;
-        }
-      } else if (callNodeIndex < selectionAncestorAtThisDepth) {
-        callNodeFlag = 3 /* CallNodeFlag.BeforeSelected */;
-      } else {
-        callNodeFlag = 4 /* CallNodeFlag.AfterSelected */;
-      }
-    } else {
-      // All other flags are inherited. For example, if the parent is
-      // BeforeSelected, then so is its entire subtree. Do nothing.
-    }
-    callNodeSelectedStates[callNodeIndex] = callNodeFlag;
-  }
-  return callNodeSelectedStates;
-}
-
-/**
  * Given the call node for each sample and the call node selected states,
  * compute each sample's selected state.
+ *
+ * For samples that are not filtered out, the sample's selected state is based
+ * on the relation of the sample's call node to the selected call node: Any call
+ * nodes in the selected node's subtree are "selected"; all other nodes are
+ * either "before" or "after" the selected subtree.
+ *
+ * Call node tables are ordered in depth-first traversal order, so we can
+ * determine whether a node is before, inside or after a subtree simply by
+ * comparing the call node index to the "selected index range". Example:
+ *
+ * ```
+ * before, 0
+ *   before, 1
+ *     before, 2
+ *   before, 3
+ * before, 4
+ *   before, 5
+ *     before, 6
+ *     before, 7
+ *       before, 8
+ *   before, 9
+ *     before, 10
+ *       before, 11
+ *     before, 12
+ *     selected, 13 <-- selected node
+ *       selected, 14
+ *         selected, 15
+ *           selected, 16
+ *         selected, 17
+ *       selected, 18
+ *         selected, 19
+ *         selected, 20
+ *     after, 21
+ *       after, 22
+ *     after, 23
+ *   after, 24
+ *     after, 25
+ * after, 26
+ *   after, 27
+ * ```
+ *
+ * In this example, the selected node has index 13 and the "selected index range"
+ * is the range from 13 to 21 (not including 21).
  */
 function mapCallNodeSelectedStatesToSamples(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
-  callNodeSelectedStates: Uint8Array
+  selectedCallNodeIndex: IndexIntoCallNodeTable,
+  selectedCallNodeDescendantsEndIndex: IndexIntoCallNodeTable
 ): SelectedState[] {
   const sampleCount = sampleCallNodes.length;
   const samplesSelectedStates = new Array(sampleCount);
@@ -411,21 +505,12 @@ function mapCallNodeSelectedStatesToSamples(
     let sampleSelectedState: SelectedState = 'SELECTED';
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
-      switch (callNodeSelectedStates[callNodeIndex]) {
-        case 1 /* CallNodeFlags.InsideSelectedSubtree */:
-          sampleSelectedState = 'SELECTED';
-          break;
-        case 2 /* CallNodeFlags.AncestorOfSelectedNode */:
-        case 3 /* CallNodeFlags.BeforeSelected */:
-          sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
-          break;
-        case 4 /* CallNodeFlags.AfterSelected */:
-          sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
-          break;
-        default:
-          throw new Error(
-            `Unexpected value ${callNodeSelectedStates[callNodeIndex]} at callNodeSelectedStates[${callNodeIndex}]`
-          );
+      if (callNodeIndex < selectedCallNodeIndex) {
+        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+      } else if (callNodeIndex < selectedCallNodeDescendantsEndIndex) {
+        sampleSelectedState = 'SELECTED';
+      } else {
+        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
       }
     } else {
       // This sample was filtered out.
@@ -461,14 +546,11 @@ export function getSamplesSelectedStates(
     );
   }
 
-  const callNodeSelectedStates = getCallNodeSelectedStates(
-    callNodeTable,
-    selectedCallNodeIndex
-  );
   return mapCallNodeSelectedStatesToSamples(
     sampleCallNodes,
     activeTabFilteredCallNodes,
-    callNodeSelectedStates
+    selectedCallNodeIndex,
+    callNodeTable.subtreeRangeEnd[selectedCallNodeIndex]
   );
 }
 
@@ -482,30 +564,6 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   }
 
   return path[path.length - 1];
-}
-
-/**
- * Compute the descendants of a call node. Each item of the returned array is
- * either 0 or 1; 1 means "this node is a descendant of subtreeRoot".
- */
-export function computeDescendantCallNodes(
-  callNodeTable: CallNodeTable,
-  subtreeRoot: IndexIntoCallNodeTable
-): Uint8Array {
-  const callNodeCount = callNodeTable.length;
-  const callNodePrefixes = callNodeTable.prefix;
-  const result = new Uint8Array(callNodeCount);
-  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
-    if (callNodeIndex === subtreeRoot) {
-      result[callNodeIndex] = 1;
-    } else {
-      const callNodePrefix = callNodePrefixes[callNodeIndex];
-      const isDescendant =
-        callNodePrefix !== -1 && result[callNodePrefix] === 1;
-      result[callNodeIndex] = isDescendant ? 1 : 0;
-    }
-  }
-  return result;
 }
 
 export type JsImplementation =
@@ -777,12 +835,8 @@ export function getTimingsForCallNodeIndex(
     return { forPath: pathTimings, rootTime };
   }
 
-  // Do one pass over the call node table to compute which call nodes are
-  // descendants of needleNodeIndex.
-  const isDescendantOfNeedle = computeDescendantCallNodes(
-    callNodeTable,
-    needleNodeIndex
-  );
+  const needleDescendantsEndIndex =
+    callNodeTable.subtreeRangeEnd[needleNodeIndex];
 
   const needleNodeIsRootOfInvertedTree =
     isInvertedTree && callNodeTable.prefix[needleNodeIndex] === -1;
@@ -810,7 +864,10 @@ export function getTimingsForCallNodeIndex(
       }
     }
 
-    if (isDescendantOfNeedle[thisNodeIndex] === 1) {
+    if (
+      thisNodeIndex >= needleNodeIndex &&
+      thisNodeIndex < needleDescendantsEndIndex
+    ) {
       // One of the parents is the exact passed path.
       accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
 
@@ -1880,6 +1937,7 @@ function _getCallNodeIndexFromPathWithCache(
   // start from the start, and use `-1` which is the prefix we use to indicate
   // the root node.
   if (index === undefined) {
+    // assert(i === 0);
     index = -1;
   }
 
@@ -1913,23 +1971,29 @@ function _getCallNodeIndexFromPathWithCache(
 // Returns the CallNodeIndex that matches the function `func` and whose parent's
 // CallNodeIndex is `parent`.
 export function getCallNodeIndexFromParentAndFunc(
-  parent: IndexIntoCallNodeTable,
+  parent: IndexIntoCallNodeTable | -1,
   func: IndexIntoFuncTable,
   callNodeTable: CallNodeTable
 ): IndexIntoCallNodeTable | null {
+  if (parent === -1) {
+    if (callNodeTable.length === 0) {
+      return null;
+    }
+  } else if (callNodeTable.subtreeRangeEnd[parent] === parent + 1) {
+    // parent has no children.
+    return null;
+  }
   // Node children always come after their parents in the call node table,
   // that's why we start looping at `parent + 1`.
   // Note that because the root parent is `-1`, we correctly start at `0` when
-  // we look for a top-level item.
+  // we look for a root.
+  const firstChild = parent + 1;
   for (
-    let callNodeIndex = parent + 1; // the root parent is -1
-    callNodeIndex < callNodeTable.length;
-    callNodeIndex++
+    let callNodeIndex = firstChild;
+    callNodeIndex !== -1;
+    callNodeIndex = callNodeTable.nextSibling[callNodeIndex]
   ) {
-    if (
-      callNodeTable.prefix[callNodeIndex] === parent &&
-      callNodeTable.func[callNodeIndex] === func
-    ) {
+    if (callNodeTable.func[callNodeIndex] === func) {
       return callNodeIndex;
     }
   }
@@ -1991,22 +2055,24 @@ export function convertStackToCallNodeAndCategoryPath(
 }
 
 /**
- * Compute maximum depth of call stack for a given thread.
+ * Compute maximum depth of call stack for a given thread, and return maxDepth+1.
+ * This value can be used as the length for any per-depth arrays.
  *
- * Returns the depth of the deepest call node, but with a one-based
- * depth instead of a zero-based.
+ * The depth for a root node is zero.
+ * So if you only a single sample whose call node is a root node, this function
+ * returns 1.
  *
- * If there are no samples, or the stacks are all filtered out for the samples, then
- * 0 is returned.
+ * If there are no samples, or the stacks are all filtered out for the samples,
+ * then 0 is returned.
  */
-export function computeCallNodeMaxDepth(
+export function computeCallNodeMaxDepthPlusOne(
   samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo
 ): number {
   // Compute the depth on a per-sample basis. This is done since the callNodeInfo is
   // computed for the filtered thread, but a samples-like table can use the preview
   // filtered thread, which involves a subset of the total call nodes.
-  let max = -1;
+  let maxDepth = -1;
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
@@ -2015,10 +2081,12 @@ export function computeCallNodeMaxDepth(
     }
     const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
     const depth = callNodeTable.depth[callNodeIndex];
-    max = Math.max(max, depth);
+    if (depth > maxDepth) {
+      maxDepth = depth;
+    }
   }
 
-  return max + 1;
+  return maxDepth + 1;
 }
 
 export function invertCallstack(
@@ -2540,61 +2608,26 @@ export function getFuncNamesAndOriginsForPath(
 }
 
 /**
- * Return a function that can compare two samples' call nodes, and determine a sort order.
+ * Return a function that can compare two samples' call nodes, and determine
+ * which node is "before" the other.
+ * We use the call node index for this order. In the call node table, call nodes
+ * are ordered in depth-first traversal order, so we can just compare those
+ * indexes.
  *
- * The order is determined as follows:
- *  - Ancestor call nodes are ordered before their descendants.
- *  - Sibling call nodes are ordered by their call node index.
- * This order can be different than the order of the rows that are displayed in the
- * call tree, because it does not take any sample information into account. This
- * makes it independent of any range selection and cheaper to compute.
+ * This order is used for the activity graph. The tree order comparator is used
+ * specifically for hit testing, but we also compare call nodes in the same way
+ * in mapCallNodeSelectedStatesToSamples, which is what gets used for determining
+ * which areas of the graph to draw in with the selection highlight fill.
+ *
+ * "Ordered after" means "swims on top in the activity graph".
+ *
+ * The depth-first traversal order has the nice property that the nodes of a
+ * subtree are located in a contiguous index range. This means that the
+ * highlighted area for a selected subtree is contiguous in the graph.
  */
 export function getTreeOrderComparator(
-  callNodeTable: CallNodeTable,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
-  /**
-   * Determine the ordering of two non-null call nodes.
-   */
-  function compareCallNodes(
-    callNodeA: IndexIntoCallNodeTable,
-    callNodeB: IndexIntoCallNodeTable
-  ): number {
-    const initialDepthA = callNodeTable.depth[callNodeA];
-    const initialDepthB = callNodeTable.depth[callNodeB];
-    let depthA = initialDepthA;
-    let depthB = initialDepthB;
-
-    // Walk call tree towards the roots until the call nodes are at the same depth.
-    while (depthA > depthB) {
-      callNodeA = callNodeTable.prefix[callNodeA];
-      depthA--;
-    }
-    while (depthB > depthA) {
-      callNodeB = callNodeTable.prefix[callNodeB];
-      depthB--;
-    }
-
-    // Sort the call nodes by the initial depth.
-    if (callNodeA === callNodeB) {
-      return initialDepthA - initialDepthB;
-    }
-
-    // The call nodes are at the same depth, walk towards the roots until a match is
-    // is found, then sort them based on stack order.
-    while (true) {
-      const parentNodeA = callNodeTable.prefix[callNodeA];
-      const parentNodeB = callNodeTable.prefix[callNodeB];
-      if (parentNodeA === parentNodeB) {
-        break;
-      }
-      callNodeA = parentNodeA;
-      callNodeB = parentNodeB;
-    }
-
-    return callNodeA - callNodeB;
-  }
-
   /**
    * Determine the ordering of (possibly null) call nodes for two given samples.
    * Returns a value < 0 if sampleA is ordered before sampleB,
@@ -2622,7 +2655,7 @@ export function getTreeOrderComparator(
       // B filtered out, A not filtered out. B goes after A.
       return -1;
     }
-    return compareCallNodes(callNodeA, callNodeB);
+    return callNodeA - callNodeB;
   };
 }
 

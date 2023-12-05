@@ -4,11 +4,14 @@
 // @flow
 import {
   getCallTree,
-  computeCallTreeCountsAndSummary,
+  computeCallTreeTimings,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
-import { getCallNodeInfo, getSampleIndexToCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getCallNodeInfo,
+  getSampleIndexToCallNodeIndex,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   IndexIntoCallNodeTable,
@@ -124,9 +127,12 @@ export function callTreeFromProfile(
     thread.funcTable,
     defaultCategory
   );
-  const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
+  const callTreeTimings = computeCallTreeTimings(
     thread.samples,
-    getSampleIndexToCallNodeIndex(thread.samples.stack, callNodeInfo.stackIndexToCallNodeIndex),
+    getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      callNodeInfo.stackIndexToCallNodeIndex
+    ),
     callNodeInfo,
     false
   );
@@ -134,7 +140,7 @@ export function callTreeFromProfile(
     thread,
     callNodeInfo,
     categories,
-    callTreeCountsAndSummary,
+    callTreeTimings,
     'samples'
   );
 }

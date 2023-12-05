@@ -70,19 +70,6 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-          <span
-            title="Sort by the time spent in a call node, ignoring its children."
-          >
-            Invert call stack
-          </span>
-        </label>
-        <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
           Show user timing
         </label>
       </li>
@@ -570,19 +557,6 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-          <span
-            title="Sort by the time spent in a call node, ignoring its children."
-          >
-            Invert call stack
-          </span>
-        </label>
-        <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
           Show user timing
         </label>
       </li>
@@ -1028,19 +1002,6 @@ exports[`StackChart matches the snapshot 1`] = `
       <li
         class="panelSettingsListItem"
       >
-        <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-          <span
-            title="Sort by the time spent in a call node, ignoring its children."
-          >
-            Invert call stack
-          </span>
-        </label>
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >

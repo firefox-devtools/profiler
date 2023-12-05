@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { CallTree } from '../profile-logic/call-tree';
 import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
 import type {
@@ -196,6 +195,7 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_SELECTED_CALL_NODE',
+      +isInverted: boolean,
       +threadsKey: ThreadsKey,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
@@ -217,6 +217,7 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_EXPANDED_CALL_NODES',
       +threadsKey: ThreadsKey,
+      +isInverted: boolean,
       +expandedCallNodePaths: Array<CallNodePath>,
     |}
   | {|
@@ -500,8 +501,7 @@ type UrlStateAction =
   | {|
       +type: 'CHANGE_INVERT_CALLSTACK',
       +invertCallstack: boolean,
-      +callTree: CallTree,
-      +callNodeTable: CallNodeTable,
+      +newSelectedCallNodePath: CallNodePath,
       +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|

@@ -2225,6 +2225,17 @@ Object {
       0,
     ],
     "length": 8,
+    "maxDepth": 3,
+    "nextSibling": Int32Array [
+      -1,
+      -1,
+      4,
+      -1,
+      6,
+      -1,
+      -1,
+      -1,
+    ],
     "prefix": Int32Array [
       -1,
       0,
@@ -2255,6 +2266,16 @@ Object {
       0,
       0,
     ],
+    "subtreeRangeEnd": Uint32Array [
+      8,
+      8,
+      4,
+      4,
+      6,
+      6,
+      8,
+      8,
+    ],
   },
   "stackIndexToCallNodeIndex": Uint32Array [
     0,
@@ -2271,7 +2292,7 @@ Object {
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCallTree 1`] = `
 CallTree {
-  "_callNodeChildCount": Uint32Array [
+  "_callNodeHasChildren": Uint8Array [
     1,
     1,
     0,
@@ -2324,6 +2345,17 @@ CallTree {
         0,
       ],
       "length": 8,
+      "maxDepth": 3,
+      "nextSibling": Int32Array [
+        -1,
+        -1,
+        4,
+        -1,
+        6,
+        -1,
+        -1,
+        -1,
+      ],
       "prefix": Int32Array [
         -1,
         0,
@@ -2354,6 +2386,16 @@ CallTree {
         0,
         0,
       ],
+      "subtreeRangeEnd": Uint32Array [
+        8,
+        8,
+        4,
+        4,
+        6,
+        6,
+        8,
+        8,
+      ],
     },
     "stackIndexToCallNodeIndex": Uint32Array [
       0,
@@ -2367,6 +2409,16 @@ CallTree {
     ],
   },
   "_callNodeSummary": Object {
+    "leaf": Float32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+    ],
     "self": Float32Array [
       0,
       0,
@@ -2430,6 +2482,17 @@ CallTree {
       0,
     ],
     "length": 8,
+    "maxDepth": 3,
+    "nextSibling": Int32Array [
+      -1,
+      -1,
+      4,
+      -1,
+      6,
+      -1,
+      -1,
+      -1,
+    ],
     "prefix": Int32Array [
       -1,
       0,
@@ -2459,6 +2522,16 @@ CallTree {
       0,
       0,
       0,
+    ],
+    "subtreeRangeEnd": Uint32Array [
+      8,
+      8,
+      4,
+      4,
+      6,
+      6,
+      8,
+      8,
     ],
   },
   "_categories": Array [
@@ -4694,7 +4767,10 @@ Process: \\"default\\" (0)"
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `
 Object {
-  "expandedCallNodePaths": PathSet {
+  "expandedInvertedCallNodePaths": PathSet {
+    "_table": Map {},
+  },
+  "expandedNonInvertedCallNodePaths": PathSet {
     "_table": Map {
       "0" => Array [
         0,
@@ -4705,11 +4781,12 @@ Object {
       ],
     },
   },
-  "selectedCallNodePath": Array [
+  "selectedInvertedCallNodePath": Array [],
+  "selectedMarker": 1,
+  "selectedNetworkMarker": null,
+  "selectedNonInvertedCallNodePath": Array [
     0,
     1,
   ],
-  "selectedMarker": 1,
-  "selectedNetworkMarker": null,
 }
 `;

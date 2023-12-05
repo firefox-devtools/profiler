@@ -10,6 +10,7 @@ import {
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
   getBottomBoxInfoForCallNode,
+  getCallNodePathFromIndex,
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -20,6 +21,7 @@ import type {
   SamplesLikeTable,
   WeightType,
   CallNodeTable,
+  CallNodePath,
   IndexIntoCallNodeTable,
   CallNodeInfo,
   CallNodeData,
@@ -40,10 +42,11 @@ import type { CallTreeSummaryStrategy } from '../types/actions';
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeSummary = {
   self: Float32Array,
+  leaf: Float32Array,
   total: Float32Array,
 };
-export type CallTreeCountsAndSummary = {
-  callNodeChildCount: Uint32Array,
+export type CallTreeTimings = {
+  callNodeHasChildren: Uint8Array,
   callNodeSummary: CallNodeSummary,
   rootCount: number,
   rootTotalSummary: number,
@@ -71,7 +74,7 @@ export class CallTree {
   _callNodeInfo: CallNodeInfo;
   _callNodeTable: CallNodeTable;
   _callNodeSummary: CallNodeSummary;
-  _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
+  _callNodeHasChildren: Uint8Array; // A table column matching the callNodeTable
   _thread: Thread;
   _rootTotalSummary: number;
   _rootCount: number;
@@ -87,7 +90,7 @@ export class CallTree {
     categories: CategoryList,
     callNodeInfo: CallNodeInfo,
     callNodeSummary: CallNodeSummary,
-    callNodeChildCount: Uint32Array,
+    callNodeHasChildren: Uint8Array,
     rootTotalSummary: number,
     rootCount: number,
     isHighPrecision: boolean,
@@ -97,7 +100,7 @@ export class CallTree {
     this._callNodeInfo = callNodeInfo;
     this._callNodeTable = callNodeInfo.callNodeTable;
     this._callNodeSummary = callNodeSummary;
-    this._callNodeChildCount = callNodeChildCount;
+    this._callNodeHasChildren = callNodeHasChildren;
     this._thread = thread;
     this._rootTotalSummary = rootTotalSummary;
     this._rootCount = rootCount;
@@ -107,6 +110,19 @@ export class CallTree {
     this._weightType = weightType;
   }
 
+  _getFirstChildIndex(
+    callNodeIndex: IndexIntoCallNodeTable | -1
+  ): IndexIntoCallNodeTable | -1 {
+    if (callNodeIndex === -1) {
+      return this._callNodeTable.length !== 0 ? 0 : -1;
+    }
+    const subtreeRangeEnd = this._callNodeTable.subtreeRangeEnd[callNodeIndex];
+    if (subtreeRangeEnd !== callNodeIndex + 1) {
+      return callNodeIndex + 1;
+    }
+    return -1;
+  }
+
   getRoots() {
     return this.getChildren(-1);
   }
@@ -114,26 +130,18 @@ export class CallTree {
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
     let children = this._children[callNodeIndex];
     if (children === undefined) {
-      const childCount =
-        callNodeIndex === -1
-          ? this._rootCount
-          : this._callNodeChildCount[callNodeIndex];
       children = [];
+      const firstChild = this._getFirstChildIndex(callNodeIndex);
       for (
-        let childCallNodeIndex = callNodeIndex + 1;
-        childCallNodeIndex < this._callNodeTable.length &&
-        children.length < childCount;
-        childCallNodeIndex++
+        let childCallNodeIndex = firstChild;
+        childCallNodeIndex !== -1;
+        childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
       ) {
-        const childPrefixIndex = this._callNodeTable.prefix[childCallNodeIndex];
         const childTotalSummary =
           this._callNodeSummary.total[childCallNodeIndex];
-        const childChildCount = this._callNodeChildCount[childCallNodeIndex];
+        const childHasChildren = this._callNodeHasChildren[childCallNodeIndex];
 
-        if (
-          childPrefixIndex === callNodeIndex &&
-          (childTotalSummary !== 0 || childChildCount !== 0)
-        ) {
+        if (childTotalSummary !== 0 || childHasChildren !== 0) {
           children.push(childCallNodeIndex);
         }
       }
@@ -148,7 +156,7 @@ export class CallTree {
   }
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
-    return this.getChildren(callNodeIndex).length !== 0;
+    return this._callNodeHasChildren[callNodeIndex] !== 0;
   }
 
   _addDescendantsToSet(
@@ -362,6 +370,53 @@ export class CallTree {
       this._thread
     );
   }
+
+  /**
+   * Take a CallNodeIndex, and compute an inverted path for it.
+   *
+   * e.g:
+   *   (invertedPath, invertedCallTree) => path
+   *   (path, callTree) => invertedPath
+   *
+   * Call trees are sorted with the CallNodes with the heaviest total time as the first
+   * entry. This function walks to the tip of the heaviest branches to find the leaf node,
+   * then construct an inverted CallNodePath with the result. This gives a pretty decent
+   * result, but it doesn't guarantee that it will select the heaviest CallNodePath for the
+   * INVERTED call tree. This would require doing a round trip through the reducers or
+   * some other mechanism in order to first calculate the next inverted call tree. This is
+   * probably not worth it, so go ahead and use the uninverted call tree, as it's probably
+   * good enough.
+   */
+  findHeavyPathToSameFunctionAfterInversion(
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ): CallNodePath {
+    if (callNodeIndex === null) {
+      return [];
+    }
+    const heaviestPath = this.findHeaviestPathInSubtree(callNodeIndex);
+    const startingDepth = this._callNodeTable.depth[callNodeIndex];
+    const partialPath = heaviestPath.slice(startingDepth);
+    return partialPath.reverse();
+  }
+
+  findHeaviestPathInSubtree(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): CallNodePath {
+    const rangeEnd = this._callNodeTable.subtreeRangeEnd[callNodeIndex];
+
+    // Find the call node with the highest leaf time.
+    let maxNode = -1;
+    let maxAbs = 0;
+    for (let nodeIndex = callNodeIndex; nodeIndex < rangeEnd; nodeIndex++) {
+      const nodeLeaf = Math.abs(this._callNodeSummary.leaf[nodeIndex]);
+      if (maxNode === -1 || nodeLeaf > maxAbs) {
+        maxNode = nodeIndex;
+        maxAbs = nodeLeaf;
+      }
+    }
+
+    return getCallNodePathFromIndex(maxNode, this._callNodeTable);
+  }
 }
 
 function _getInvertedStackSelf(
@@ -457,12 +512,12 @@ function _getStackSelf(
  * what type of weight is in the SamplesLikeTable. For instance, it could be
  * milliseconds, sample counts, or bytes.
  */
-export function computeCallTreeCountsAndSummary(
+export function computeCallTreeTimings(
   samples: SamplesLikeTable,
   sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
   { callNodeTable }: CallNodeInfo,
   invertCallstack: boolean
-): CallTreeCountsAndSummary {
+): CallTreeTimings {
   // Inverted trees need a different method for computing the timing.
   const { callNodeSelf, callNodeLeaf } = invertCallstack
     ? _getInvertedStackSelf(samples, callNodeTable, sampleIndexToCallNodeIndex)
@@ -470,9 +525,12 @@ export function computeCallTreeCountsAndSummary(
 
   // Compute the following variables:
   const callNodeTotalSummary = new Float32Array(callNodeTable.length);
-  const callNodeChildCount = new Uint32Array(callNodeTable.length);
+  const callNodeHasChildren = new Uint8Array(callNodeTable.length);
   let rootTotalSummary = 0;
   let rootCount = 0;
+
+  // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
+  const abs = Math.abs;
 
   // We loop the call node table in reverse, so that we find the children
   // before their parents, and the total is known at the time we reach a
@@ -483,8 +541,8 @@ export function computeCallTreeCountsAndSummary(
     callNodeIndex--
   ) {
     callNodeTotalSummary[callNodeIndex] += callNodeLeaf[callNodeIndex];
-    rootTotalSummary += Math.abs(callNodeLeaf[callNodeIndex]);
-    const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
+    rootTotalSummary += abs(callNodeLeaf[callNodeIndex]);
+    const hasChildren = callNodeHasChildren[callNodeIndex] !== 0;
     const hasTotalValue = callNodeTotalSummary[callNodeIndex] !== 0;
 
     if (!hasChildren && !hasTotalValue) {
@@ -497,16 +555,17 @@ export function computeCallTreeCountsAndSummary(
     } else {
       callNodeTotalSummary[prefixCallNode] +=
         callNodeTotalSummary[callNodeIndex];
-      callNodeChildCount[prefixCallNode]++;
+      callNodeHasChildren[prefixCallNode] = 1;
     }
   }
 
   return {
     callNodeSummary: {
       self: callNodeSelf,
+      leaf: callNodeLeaf,
       total: callNodeTotalSummary,
     },
-    callNodeChildCount,
+    callNodeHasChildren,
     rootTotalSummary,
     rootCount,
   };
@@ -519,19 +578,23 @@ export function getCallTree(
   thread: Thread,
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
-  callTreeCountsAndSummary: CallTreeCountsAndSummary,
+  callTreeTimings: CallTreeTimings,
   weightType: WeightType
 ): CallTree {
   return timeCode('getCallTree', () => {
-    const { callNodeSummary, callNodeChildCount, rootTotalSummary, rootCount } =
-      callTreeCountsAndSummary;
+    const {
+      callNodeSummary,
+      callNodeHasChildren,
+      rootTotalSummary,
+      rootCount,
+    } = callTreeTimings;
 
     return new CallTree(
       thread,
       categories,
       callNodeInfo,
       callNodeSummary,
-      callNodeChildCount,
+      callNodeHasChildren,
       rootTotalSummary,
       rootCount,
       Boolean(thread.isJsTracer),
@@ -611,7 +674,7 @@ export function extractSamplesLikeTable(
 }
 
 /**
- * This function is extremely similar to computeCallTreeCountsAndSummary,
+ * This function is extremely similar to computeCallTreeTimings,
  * but is specialized for converting sample counts into traced timing. Samples
  * don't have duration information associated with them, it's mostly how long they
  * were observed to be running. This function computes the timing the exact same
@@ -671,7 +734,7 @@ export function computeTracedTiming(
 
   // Compute the following variables:
   const callNodeTotalSummary = new Float32Array(callNodeTable.length);
-  const callNodeChildCount = new Uint32Array(callNodeTable.length);
+  const callNodeHasChildren = new Uint8Array(callNodeTable.length);
 
   // We loop the call node table in reverse, so that we find the children
   // before their parents, and the total time is known at the time we reach a
@@ -682,7 +745,7 @@ export function computeTracedTiming(
     callNodeIndex--
   ) {
     callNodeTotalSummary[callNodeIndex] += callNodeLeaf[callNodeIndex];
-    const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
+    const hasChildren = callNodeHasChildren[callNodeIndex] !== 0;
     const hasTotalValue = callNodeTotalSummary[callNodeIndex] !== 0;
 
     if (!hasChildren && !hasTotalValue) {
@@ -693,7 +756,7 @@ export function computeTracedTiming(
     if (prefixCallNode !== -1) {
       callNodeTotalSummary[prefixCallNode] +=
         callNodeTotalSummary[callNodeIndex];
-      callNodeChildCount[prefixCallNode]++;
+      callNodeHasChildren[prefixCallNode] = 1;
     }
   }
 

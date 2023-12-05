@@ -217,9 +217,8 @@ describe('getTimelineVerticalMarkers', function () {
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     const markerIndexes =
       selectedThreadSelectors.getTimelineVerticalMarkerIndexes(getState());
-    const allMarkers = selectedThreadSelectors.getFullMarkerListIndexes(
-      getState()
-    );
+    const allMarkers =
+      selectedThreadSelectors.getFullMarkerListIndexes(getState());
 
     expect(allMarkers.length).toBeGreaterThan(markerIndexes.length);
     expect(markerIndexes).toHaveLength(5);
