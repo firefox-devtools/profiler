@@ -458,22 +458,17 @@ function _removeFramesFromStackTable(
 //      - stack E with frame 4
 //        - stack E' with frame 8
 //      - stack F with frame 5
-function _addExpansionStacksToStackTable(
-  stackTable: StackTable,
+function _computeThreadWithAddedExpansionStacks(
+  thread: Thread,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
     IndexIntoFrameTable[],
   >
-): {
-  stackTable: StackTable,
-  oldStackToNewStack: Int32Array | null,
-} {
+): Thread {
   if (frameIndexToInlineExpansionFrames.size === 0) {
-    return {
-      stackTable: stackTable,
-      oldStackToNewStack: null,
-    };
+    return thread;
   }
+  const { stackTable } = thread;
   const newStackTable = getEmptyStackTable();
   const oldStackToNewStack = new Int32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
@@ -504,7 +499,9 @@ function _addExpansionStacksToStackTable(
       oldStackToNewStack[stack] = prefix;
     }
   }
-  return { stackTable: newStackTable, oldStackToNewStack };
+  return updateThreadStacks(thread, newStackTable, (oldStack) =>
+    oldStack === null ? null : oldStackToNewStack[oldStack]
+  );
 }
 
 /**
@@ -859,19 +856,11 @@ export function applySymbolicationStep(
   }
 
   // We have the finished new frameTable and new funcTable.
-  // Build a new stackTable.
-  const {
-    stackTable: finalStackTable,
-    oldStackToNewStack: finalOldStackToNewStack,
-  } = _addExpansionStacksToStackTable(
-    stackTable,
+  // Build a thread with a new stackTable.
+  newThread = _computeThreadWithAddedExpansionStacks(
+    newThread,
     frameIndexToInlineExpansionFrames
   );
-  if (finalOldStackToNewStack !== null) {
-    newThread = updateThreadStacks(newThread, finalStackTable, (oldStack) =>
-      oldStack === null ? null : finalOldStackToNewStack[oldStack]
-    );
-  }
 
   return newThread;
 }
