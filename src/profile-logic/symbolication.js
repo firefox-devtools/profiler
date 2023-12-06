@@ -466,10 +466,7 @@ function _addExpansionStacksToStackTable(
   >
 ): {
   stackTable: StackTable,
-  oldStackToNewStack: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  > | null,
+  oldStackToNewStack: Int32Array | null,
 } {
   if (frameIndexToInlineExpansionFrames.size === 0) {
     return {
@@ -478,7 +475,7 @@ function _addExpansionStacksToStackTable(
     };
   }
   const newStackTable = getEmptyStackTable();
-  const prefixMap = new Map();
+  const oldStackToNewStack = new Int32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const oldFrame = stackTable.frame[stack];
     const oldPrefix = stackTable.prefix[stack];
@@ -488,7 +485,7 @@ function _addExpansionStacksToStackTable(
     if (expansionFrames === undefined) {
       expansionFrames = [oldFrame];
     }
-    let prefix = oldPrefix === null ? null : prefixMap.get(oldPrefix) ?? null;
+    let prefix = oldPrefix === null ? null : oldStackToNewStack[oldPrefix];
     for (
       let inlineDepth = 0;
       inlineDepth < expansionFrames.length;
@@ -504,10 +501,10 @@ function _addExpansionStacksToStackTable(
       prefix = newStack;
     }
     if (prefix !== null) {
-      prefixMap.set(stack, prefix);
+      oldStackToNewStack[stack] = prefix;
     }
   }
-  return { stackTable: newStackTable, oldStackToNewStack: prefixMap };
+  return { stackTable: newStackTable, oldStackToNewStack };
 }
 
 /**
@@ -872,9 +869,7 @@ export function applySymbolicationStep(
   );
   if (finalOldStackToNewStack !== null) {
     newThread = updateThreadStacks(newThread, finalStackTable, (oldStack) =>
-      oldStack === null
-        ? null
-        : ensureExists(finalOldStackToNewStack.get(oldStack))
+      oldStack === null ? null : finalOldStackToNewStack[oldStack]
     );
   }
 
