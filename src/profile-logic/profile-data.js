@@ -1082,44 +1082,31 @@ export function toValidCallTreeSummaryStrategy(
 
 export function filterThreadByImplementation(
   thread: Thread,
-  implementation: string,
-  defaultCategory: IndexIntoCategoryList
+  implementation: string
 ): Thread {
   const { funcTable, stringTable } = thread;
 
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(
-        thread,
-        (funcIndex) => {
-          // Return quickly if this is a JS frame.
-          if (funcTable.isJS[funcIndex]) {
-            return false;
-          }
-          // Regular C++ functions are associated with a resource that describes the
-          // shared library that these C++ functions were loaded from. Jitcode is not
-          // loaded from shared libraries but instead generated at runtime, so Jitcode
-          // frames are not associated with a shared library and thus have no resource
-          const locationString = stringTable.getString(
-            funcTable.name[funcIndex]
-          );
-          const isProbablyJitCode =
-            funcTable.resource[funcIndex] === -1 &&
-            locationString.startsWith('0x');
-          return !isProbablyJitCode;
-        },
-        defaultCategory
-      );
+      return _filterThreadByFunc(thread, (funcIndex) => {
+        // Return quickly if this is a JS frame.
+        if (funcTable.isJS[funcIndex]) {
+          return false;
+        }
+        // Regular C++ functions are associated with a resource that describes the
+        // shared library that these C++ functions were loaded from. Jitcode is not
+        // loaded from shared libraries but instead generated at runtime, so Jitcode
+        // frames are not associated with a shared library and thus have no resource
+        const locationString = stringTable.getString(funcTable.name[funcIndex]);
+        const isProbablyJitCode =
+          funcTable.resource[funcIndex] === -1 &&
+          locationString.startsWith('0x');
+        return !isProbablyJitCode;
+      });
     case 'js':
-      return _filterThreadByFunc(
-        thread,
-        (funcIndex) => {
-          return (
-            funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
-          );
-        },
-        defaultCategory
-      );
+      return _filterThreadByFunc(thread, (funcIndex) => {
+        return funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex];
+      });
     default:
       return thread;
   }
@@ -1127,10 +1114,9 @@ export function filterThreadByImplementation(
 
 function _filterThreadByFunc(
   thread: Thread,
-  filter: (IndexIntoFuncTable) => boolean,
-  defaultCategory: IndexIntoCallNodeTable
+  shouldIncludeFuncInFilteredThread: (IndexIntoFuncTable) => boolean
 ): Thread {
-  return timeCode('filterThread', () => {
+  return timeCode('_filterThreadByFunc', () => {
     const { stackTable, frameTable } = thread;
 
     const newStackTable = {
@@ -1140,55 +1126,34 @@ function _filterThreadByFunc(
       category: [],
       subcategory: [],
     };
+    const oldStackToNewStack = new Int32Array(stackTable.length);
 
-    const oldStackToNewStack = new Map();
-    const frameCount = frameTable.length;
-    const prefixStackAndFrameToStack = new Map(); // prefixNewStack * frameCount + frame => newStackIndex
-
-    function convertStack(stackIndex) {
-      if (stackIndex === null) {
-        return null;
+    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+      const oldPrefix = stackTable.prefix[stackIndex];
+      const frame = stackTable.frame[stackIndex];
+      const func = frameTable.func[frame];
+      const newPrefix = oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
+      if (shouldIncludeFuncInFilteredThread(func)) {
+        const newStackIndex = newStackTable.length++;
+        newStackTable.frame[newStackIndex] = frame;
+        newStackTable.prefix[newStackIndex] =
+          newPrefix !== -1 ? newPrefix : null;
+        newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
+        newStackTable.subcategory[newStackIndex] =
+          stackTable.subcategory[stackIndex];
+        oldStackToNewStack[stackIndex] = newStackIndex;
+      } else {
+        oldStackToNewStack[stackIndex] = newPrefix;
       }
-      let newStack = oldStackToNewStack.get(stackIndex);
-      if (newStack === undefined) {
-        const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
-        const frameIndex = stackTable.frame[stackIndex];
-        const funcIndex = frameTable.func[frameIndex];
-        if (filter(funcIndex)) {
-          const prefixStackAndFrameIndex =
-            (prefixNewStack === null ? -1 : prefixNewStack) * frameCount +
-            frameIndex;
-          newStack = prefixStackAndFrameToStack.get(prefixStackAndFrameIndex);
-          if (newStack === undefined) {
-            newStack = newStackTable.length++;
-            newStackTable.prefix[newStack] = prefixNewStack;
-            newStackTable.frame[newStack] = frameIndex;
-            newStackTable.category[newStack] = stackTable.category[stackIndex];
-            newStackTable.subcategory[newStack] =
-              stackTable.subcategory[stackIndex];
-          } else if (
-            newStackTable.category[newStack] !== stackTable.category[stackIndex]
-          ) {
-            // Conflicting origin stack categories -> default category + subcategory.
-            newStackTable.category[newStack] = defaultCategory;
-            newStackTable.subcategory[newStack] = 0;
-          } else if (
-            newStackTable.subcategory[stackIndex] !==
-            stackTable.subcategory[stackIndex]
-          ) {
-            // Conflicting origin stack subcategories -> "Other" subcategory.
-            newStackTable.subcategory[stackIndex] = 0;
-          }
-          oldStackToNewStack.set(stackIndex, newStack);
-          prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
-        } else {
-          newStack = prefixNewStack;
-        }
-      }
-      return newStack;
     }
 
-    return updateThreadStacks(thread, newStackTable, convertStack);
+    return updateThreadStacks(thread, newStackTable, (oldStack) => {
+      if (oldStack === null) {
+        return null;
+      }
+      const newStack = oldStackToNewStack[oldStack];
+      return newStack !== -1 ? newStack : null;
+    });
   });
 }
 
