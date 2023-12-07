@@ -195,6 +195,11 @@ MarkerContextMenu--copy-url = Nɣel URL
 MarkerContextMenu--copy-page-url = Nɣel URL n usebter
 MarkerContextMenu--copy-as-json = Nɣel am JSON
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
@@ -208,8 +213,8 @@ MarkerContextMenu--copy-as-json = Nɣel am JSON
 
 MarkerTable--start = Bdu
 MarkerTable--duration = Tangazt
-MarkerTable--type = Anaw
-MarkerTable--description = Aglam
+MarkerTable--name = Isem
+MarkerTable--details = Aglam leqqayen
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -239,6 +244,7 @@ MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
 MenuButtons--index--show-moreInfo-button = Sken ugar
 MenuButtons--index--hide-moreInfo-button = Sken drus
+MenuButtons--metaInfo--profiling-started = Asekles yebda:
 MenuButtons--metaInfo--main-process-started = Asesfer agejdan yebda:
 MenuButtons--metaInfo--main-process-ended = Asesfer agejdan yekfa:
 MenuButtons--metaInfo--interval = Azilal:

@@ -714,10 +714,6 @@ describe('symbolication', function () {
 
 describe('filter-by-implementation', function () {
   const profile = processGeckoProfile(createGeckoProfileWithJsTimings());
-  const defaultCategory = ensureExists(
-    profile.meta.categories,
-    'Expected to find categories'
-  ).findIndex((c) => c.name === 'Other');
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
@@ -730,17 +726,11 @@ describe('filter-by-implementation', function () {
   }
 
   it('will return the same thread if filtering to "all"', function () {
-    expect(
-      filterThreadByImplementation(thread, 'combined', defaultCategory)
-    ).toEqual(thread);
+    expect(filterThreadByImplementation(thread, 'combined')).toEqual(thread);
   });
 
   it('will return only JS samples if filtering to "js"', function () {
-    const jsOnlyThread = filterThreadByImplementation(
-      thread,
-      'js',
-      defaultCategory
-    );
+    const jsOnlyThread = filterThreadByImplementation(thread, 'js');
     const nonNullSampleStacks = jsOnlyThread.samples.stack.filter(
       (stack) => stack !== null
     );
@@ -753,11 +743,7 @@ describe('filter-by-implementation', function () {
   });
 
   it('will return only C++ samples if filtering to "cpp"', function () {
-    const cppOnlyThread = filterThreadByImplementation(
-      thread,
-      'cpp',
-      defaultCategory
-    );
+    const cppOnlyThread = filterThreadByImplementation(thread, 'cpp');
     const nonNullSampleStacks = cppOnlyThread.samples.stack.filter(
       (stack) => stack !== null
     );
@@ -775,16 +761,8 @@ describe('get-sample-index-closest-to-time', function () {
     const { profile } = getProfileFromTextSamples(
       Array(10).fill('A').join('  ')
     );
-    const defaultCategory = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
     const thread = profile.threads[0];
-    const { samples } = filterThreadByImplementation(
-      thread,
-      'js',
-      defaultCategory
-    );
+    const { samples } = filterThreadByImplementation(thread, 'js');
 
     const interval = profile.meta.interval;
     expect(getSampleIndexClosestToStartTime(samples, 0, interval)).toBe(0);
