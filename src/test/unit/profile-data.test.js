@@ -774,68 +774,69 @@ describe('get-sample-index-closest-to-time', function () {
   });
 });
 
-describe('funcHasDirectRecursiveCall', function () {
-  const {
-    profile,
-    funcNamesPerThread: [funcNames],
-  } = getProfileFromTextSamples(`
-    A.js
-    B.js
-    C.cpp
-    B.js
-    D.js
-  `);
-  const [thread] = profile.threads;
-
-  it('correctly identifies directly recursive functions based taking into account implementation', function () {
-    expect([
-      funcHasDirectRecursiveCall(thread, 'combined', funcNames.indexOf('A.js')),
-      funcHasDirectRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
-      funcHasDirectRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
-    ]).toEqual([false, false, true]);
-  });
-});
-
-describe('funcHasRecursiveCall', function () {
-  it('correctly identifies directly recursive functions', function () {
-    // Same test case as funcHasDirectRecursiveCall
+describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
+  function setup(textSamples) {
     const {
       profile,
       funcNamesPerThread: [funcNames],
-    } = getProfileFromTextSamples(`
+    } = getProfileFromTextSamples(textSamples);
+    const [thread] = profile.threads;
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex((c) => c.name === 'Other');
+    const { callNodeTable } = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const jsOnlyThread = filterThreadByImplementation(thread, 'js');
+    const { callNodeTable: jsOnlyCallNodeTable } = getCallNodeInfo(
+      jsOnlyThread.stackTable,
+      jsOnlyThread.frameTable,
+      jsOnlyThread.funcTable,
+      defaultCategory
+    );
+    return { callNodeTable, jsOnlyCallNodeTable, funcNames };
+  }
+
+  it('correctly identifies directly recursive functions based on the filtered call node table, which takes into account implementation', function () {
+    const { callNodeTable, jsOnlyCallNodeTable, funcNames } = setup(`
       A.js
       B.js
       C.cpp
       B.js
       D.js
     `);
-    const [thread] = profile.threads;
-
-    expect([
-      funcHasRecursiveCall(thread, funcNames.indexOf('A.js')),
-      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
-      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
-    ]).toEqual([false, true, true]);
+    expect(
+      funcHasDirectRecursiveCall(callNodeTable, funcNames.indexOf('A.js'))
+    ).toBeFalse();
+    expect(
+      funcHasDirectRecursiveCall(callNodeTable, funcNames.indexOf('B.js'))
+    ).toBeFalse();
+    expect(
+      funcHasDirectRecursiveCall(jsOnlyCallNodeTable, funcNames.indexOf('B.js'))
+    ).toBeTrue();
   });
 
-  it('correctly identifies indirectly recursive functions', function () {
-    const {
-      profile,
-      funcNamesPerThread: [funcNames],
-    } = getProfileFromTextSamples(`
+  it('funcHasRecursiveCall correctly identifies directly recursive functions', function () {
+    const { callNodeTable, funcNames } = setup(`
       A.js
       B.js
       C.cpp
       B.js
       D.js
-      B.js
     `);
-    const [thread] = profile.threads;
-
-    expect([
-      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
-      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
-    ]).toEqual([true, true]);
+    expect(
+      funcHasRecursiveCall(callNodeTable, funcNames.indexOf('A.js'))
+    ).toBeFalse();
+    expect(
+      funcHasRecursiveCall(callNodeTable, funcNames.indexOf('B.js'))
+    ).toBeTrue();
+    expect(
+      funcHasRecursiveCall(callNodeTable, funcNames.indexOf('C.cpp'))
+    ).toBeFalse();
   });
 });
 

@@ -1564,34 +1564,18 @@ export function filterCallNodeAndCategoryPathByImplementation(
 }
 
 /**
- * Search through the entire call stack and see if there are any examples of
- * direct recursion.
+ * Search through the entire call node table and see if there are any examples of
+ * direct recursion of funcToCheck.
  */
 export function funcHasDirectRecursiveCall(
-  thread: Thread,
-  implementation: ImplementationFilter,
+  callNodeTable: CallNodeTable,
   funcToCheck: IndexIntoFuncTable
 ) {
-  const { stackTable, frameTable } = thread;
-  // Set of stack indices that are funcToCheck or have a funcToCheck parent, ignoring other implementations.
-  const recursiveStacks = new Set<IndexIntoStackTable>();
-  const funcMatchesImplementation = FUNC_MATCHES[implementation];
-
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const frameIndex = stackTable.frame[stackIndex];
-    const prefix = stackTable.prefix[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
-    const recursivePrefix = prefix !== null && recursiveStacks.has(prefix);
-
-    if (funcToCheck === funcIndex) {
-      if (recursivePrefix) {
-        // This function matches and so did its prefix of the same implementation.
+  for (let i = 0; i < callNodeTable.length; i++) {
+    if (callNodeTable.func[i] === funcToCheck) {
+      const prefix = callNodeTable.prefix[i];
+      if (prefix !== null && callNodeTable.func[prefix] === funcToCheck) {
         return true;
-      }
-      recursiveStacks.add(stackIndex);
-    } else {
-      if (recursivePrefix && !funcMatchesImplementation(thread, funcIndex)) {
-        recursiveStacks.add(stackIndex);
       }
     }
   }
@@ -1599,31 +1583,32 @@ export function funcHasDirectRecursiveCall(
 }
 
 /**
- * Search through the entire call stack and see if there are any examples of
- * recursion (direct or indirect).
+ * Search through the entire call node table and see if there are any examples of
+ * recursion of funcToCheck (direct or indirect).
  */
 export function funcHasRecursiveCall(
-  thread: Thread,
+  callNodeTable: CallNodeTable,
   funcToCheck: IndexIntoFuncTable
 ) {
-  const { stackTable, frameTable } = thread;
   // Set of stack indices that are funcToCheck or have a funcToCheck ancestor.
-  const recursiveStacks = new Set<IndexIntoStackTable>();
+  const ancestorOfCallNodeContainsFuncToCheck = new Uint8Array(
+    callNodeTable.length
+  );
 
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const frameIndex = stackTable.frame[stackIndex];
-    const prefix = stackTable.prefix[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
-    const recursivePrefix = prefix !== null && recursiveStacks.has(prefix);
+  for (let i = 0; i < callNodeTable.length; i++) {
+    const prefix = callNodeTable.prefix[i];
+    const funcIndex = callNodeTable.func[i];
+    const recursivePrefix =
+      prefix !== -1 && ancestorOfCallNodeContainsFuncToCheck[prefix] !== 0;
 
     if (funcToCheck === funcIndex) {
       if (recursivePrefix) {
         // This function matches and so did one of its ancestors.
         return true;
       }
-      recursiveStacks.add(stackIndex);
+      ancestorOfCallNodeContainsFuncToCheck[i] = 1;
     } else if (recursivePrefix) {
-      recursiveStacks.add(stackIndex);
+      ancestorOfCallNodeContainsFuncToCheck[i] = 1;
     }
   }
   return false;
