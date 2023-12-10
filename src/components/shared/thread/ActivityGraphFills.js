@@ -900,11 +900,11 @@ function _accumulateInBuffer(
   // A number between 0 and 1 for sample ratio. It changes depending on
   // the CPU usage per ms if it's given. If not, it uses 1 directly.
   const beforeSampleCpuRatio =
-    cpuDeltaBeforeSample === null
+    cpuDeltaBeforeSample === null || sampleTimeDeltaBefore === 0
       ? 1
       : cpuDeltaBeforeSample / sampleTimeDeltaBefore / maxThreadCPUDeltaPerMs;
   const afterSampleCpuRatio =
-    cpuDeltaAfterSample === null
+    cpuDeltaAfterSample === null || sampleTimeDeltaAfter === 0
       ? 1
       : cpuDeltaAfterSample / sampleTimeDeltaAfter / maxThreadCPUDeltaPerMs;
 

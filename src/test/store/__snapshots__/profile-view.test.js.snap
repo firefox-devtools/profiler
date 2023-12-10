@@ -2292,7 +2292,7 @@ Object {
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCallTree 1`] = `
 CallTree {
-  "_callNodeChildCount": Uint32Array [
+  "_callNodeHasChildren": Uint8Array [
     1,
     1,
     0,
