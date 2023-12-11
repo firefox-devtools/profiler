@@ -336,9 +336,9 @@ export function computeLocalTracksByPid(
   const { counters } = profile;
   if (counters) {
     for (let counterIndex = 0; counterIndex < counters.length; counterIndex++) {
-      const { pid, category, sampleGroups } = counters[counterIndex];
+      const { pid, category, samples } = counters[counterIndex];
       if (category === 'Memory' || category === 'power') {
-        if (category === 'power' && sampleGroups[0].samples.length <= 2) {
+        if (category === 'power' && samples.length <= 2) {
           // If we have only 2 samples, they are likely both 0 and we don't have a real counter.
           continue;
         }

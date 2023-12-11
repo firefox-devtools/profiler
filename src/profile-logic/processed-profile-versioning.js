@@ -2255,6 +2255,15 @@ const _upgraders = {
       }
     }
   },
+  [48]: (profile) => {
+    // Remove the 'sampleGroups' object from the Counter structure.
+    if (profile.counters && profile.counters.length > 0) {
+      for (const counter of profile.counters) {
+        counter.samples = counter.sampleGroups[0].samples;
+        delete counter.sampleGroups;
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

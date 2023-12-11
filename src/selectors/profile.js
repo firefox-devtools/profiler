@@ -10,7 +10,7 @@ import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   accumulateCounterSamples,
   extractProfileFilterPageData,
-  computeMaxCounterSampleCountsPerMs,
+  computeMaxCounterSampleCountPerMs,
   getFriendlyThreadName,
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
@@ -296,62 +296,51 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
 
   const getPid: Selector<Pid> = (state) => getCounter(state).pid;
 
-  const getCommittedRangeCounterSampleRanges: Selector<
-    Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>,
+  const getCommittedRangeCounterSampleRange: Selector<
+    [IndexIntoSamplesTable, IndexIntoSamplesTable],
   > = createSelector(getCounter, getCommittedRange, (counter, range) =>
-    counter.sampleGroups.map((group) =>
-      getInclusiveSampleIndexRangeForSelection(
-        group.samples,
-        range.start,
-        range.end
-      )
+    getInclusiveSampleIndexRangeForSelection(
+      counter.samples,
+      range.start,
+      range.end
     )
   );
 
-  const getAccumulateCounterSamples: Selector<
-    Array<AccumulatedCounterSamples>,
-  > = createSelector(
+  const getAccumulateCounterSamples: Selector<AccumulatedCounterSamples> =
+    createSelector(
+      getCounter,
+      getCommittedRangeCounterSampleRange,
+      (counter, sampleRange) =>
+        accumulateCounterSamples(counter.samples, sampleRange)
+    );
+
+  const getMaxCounterSampleCountPerMs: Selector<number> = createSelector(
     getCounter,
-    getCommittedRangeCounterSampleRanges,
-    (counters, sampleRanges) =>
-      accumulateCounterSamples(
-        counters.sampleGroups.map((group) => group.samples),
-        sampleRanges
-      )
+    getProfileInterval,
+    (counter, profileInterval) =>
+      computeMaxCounterSampleCountPerMs(counter.samples, profileInterval)
   );
 
-  const getMaxCounterSampleCountsPerMs: Selector<Array<number>> =
-    createSelector(
-      getCounter,
-      getProfileInterval,
-      (counters, profileInterval) =>
-        computeMaxCounterSampleCountsPerMs(
-          counters.sampleGroups.map((group) => group.samples),
-          profileInterval
-        )
-    );
-
-  const getMaxRangeCounterSampleCountsPerMs: Selector<Array<number>> =
-    createSelector(
-      getCounter,
-      getProfileInterval,
-      getCommittedRangeCounterSampleRanges,
-      (counters, profileInterval, sampleRange) =>
-        computeMaxCounterSampleCountsPerMs(
-          counters.sampleGroups.map((group) => group.samples),
-          profileInterval,
-          sampleRange
-        )
-    );
+  const getMaxRangeCounterSampleCountPerMs: Selector<number> = createSelector(
+    getCounter,
+    getProfileInterval,
+    getCommittedRangeCounterSampleRange,
+    (counter, profileInterval, sampleRange) =>
+      computeMaxCounterSampleCountPerMs(
+        counter.samples,
+        profileInterval,
+        sampleRange
+      )
+  );
 
   return {
     getCounter,
     getDescription,
     getPid,
     getAccumulateCounterSamples,
-    getMaxCounterSampleCountsPerMs,
-    getMaxRangeCounterSampleCountsPerMs,
-    getCommittedRangeCounterSampleRanges,
+    getMaxCounterSampleCountPerMs,
+    getMaxRangeCounterSampleCountPerMs,
+    getCommittedRangeCounterSampleRange,
   };
 }
 
