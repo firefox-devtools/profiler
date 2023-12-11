@@ -90,7 +90,7 @@
     "react-transition-group": "^4.4.5",
     "redux": "^4.2.1",
     "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.4.2",
+    "redux-thunk": "^3.1.0",
     "reselect": "^4.1.8",
     "url": "^0.11.3",
     "weaktuplemap": "^1.0.0",
