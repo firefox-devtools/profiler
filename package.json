@@ -74,7 +74,7 @@
     "core-js": "^3.33.3",
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.3.3",
-    "idb": "^7.1.1",
+    "idb": "^8.0.0",
     "jszip": "^3.10.1",
     "memoize-immutable": "^3.0.0",
     "memoize-one": "^6.0.0",
