@@ -11,10 +11,8 @@ RUN mkdir /builds && \
 RUN apk update
 
 # Setup Python
-RUN apk add --no-cache python3 && \
-    ln -sf python3 /usr/bin/python && \
-    python3 -m ensurepip && \
-    pip3 install --no-cache --upgrade pip setuptools
+RUN apk add --no-cache python3 py3-pip && \
+    python3 -m pip install --no-cache --upgrade --break-system-packages pip setuptools
 
 # Setup other dependencies
 RUN apk add bash git

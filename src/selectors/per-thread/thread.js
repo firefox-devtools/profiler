@@ -454,7 +454,6 @@ export function getThreadSelectorsWithMarkersPerThread(
   const _getImplementationFilteredThread: Selector<Thread> = createSelector(
     getRangeAndTransformFilteredThread,
     UrlState.getImplementationFilter,
-    ProfileSelectors.getDefaultCategory,
     ProfileData.filterThreadByImplementation
   );
 

@@ -50,7 +50,6 @@ import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  IndexIntoFuncTable,
   CallNodeInfo,
   CallNodePath,
   Thread,
@@ -442,37 +441,6 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     return stringTable.getString(resNameStringIndex);
   }
 
-  /**
-   * Determine if this CallNode represent a recursive function call.
-   */
-  isRecursiveCall(
-    funcHasRecursiveCall: (Thread, IndexIntoFuncTable) => boolean
-  ): boolean {
-    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
-
-    if (rightClickedCallNodeInfo === null) {
-      console.error(
-        "The context menu assumes there is a selected call node and there wasn't one."
-      );
-      return false;
-    }
-
-    const { callNodePath, thread } = rightClickedCallNodeInfo;
-    const funcIndex = callNodePath[callNodePath.length - 1];
-
-    if (funcIndex === undefined) {
-      return false;
-    }
-
-    // Do the easy thing first, see if this function was called by itself.
-    if (callNodePath[callNodePath.length - 2] === funcIndex) {
-      return true;
-    }
-
-    // Do a full check of the stackTable for recursion.
-    return funcHasRecursiveCall(thread, funcIndex);
-  }
-
   getRightClickedCallNodeInfo(): null | {|
     +thread: Thread,
     +threadsKey: ThreadsKey,
@@ -646,7 +614,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             })
           : null}
 
-        {this.isRecursiveCall(funcHasRecursiveCall)
+        {funcHasRecursiveCall(callNodeTable, funcIndex)
           ? this.renderTransformMenuItem({
               l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
               shortcut: 'r',
@@ -658,13 +626,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             })
           : null}
 
-        {this.isRecursiveCall((thread, funcIndex) =>
-          funcHasDirectRecursiveCall(
-            thread,
-            this.props.implementation,
-            funcIndex
-          )
-        )
+        {funcHasDirectRecursiveCall(callNodeTable, funcIndex)
           ? this.renderTransformMenuItem({
               l10nId:
                 'CallNodeContextMenu--transform-collapse-direct-recursion-only',
