@@ -1452,6 +1452,28 @@ const _upgraders = {
     // marker data with unique-string typed data, and no modification is needed in the
     // frontend to display older formats.
   },
+  [29]: (profile) => {
+    // Remove the 'sample_groups' object from the GeckoCounter structure.
+    function convertToVersion29Recursive(p) {
+      if (p.counters && p.counters.length > 0) {
+        for (const counter of p.counters) {
+          if (!counter.sample_groups) {
+            // Running Firefox 121 with external power counters coming from an
+            // already updated script may result in this code seeing already
+            // upgraded counters; ignore them.
+            continue;
+          }
+          counter.samples = counter.sample_groups[0].samples;
+          delete counter.sample_groups;
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion29Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion29Recursive(profile);
+  },
+
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
