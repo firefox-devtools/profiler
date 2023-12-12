@@ -533,10 +533,7 @@ export type Counter = {|
   color?: GraphColor,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
-  sampleGroups: $ReadOnlyArray<{|
-    id: number,
-    samples: CounterSamplesTable,
-  |}>,
+  samples: CounterSamplesTable,
 |};
 
 /**

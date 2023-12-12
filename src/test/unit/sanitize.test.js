@@ -195,8 +195,7 @@ describe('sanitizePII', function () {
     // Make sure that we still have the same number of counters.
     expect(ensureExists(originalProfile.counters).length).toEqual(1);
     expect(ensureExists(sanitizedProfile.counters).length).toEqual(1);
-    const counterSamples = ensureExists(sanitizedProfile.counters)[0]
-      .sampleGroups[0].samples;
+    const counterSamples = ensureExists(sanitizedProfile.counters)[0].samples;
 
     // Make sure that all the table fields are consistent.
     expect(counterSamples.time).toHaveLength(counterSamples.length);

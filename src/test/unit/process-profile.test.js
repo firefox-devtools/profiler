@@ -200,7 +200,14 @@ describe('gecko counters processing', function () {
       name: 'Empty counter',
       category: 'Some category',
       description: 'Some description',
-      sample_groups: [],
+      samples: {
+        schema: {
+          time: 0,
+          count: 1,
+          number: 2,
+        },
+        data: [],
+      },
     };
 
     parentGeckoProfile.counters = [parentCounter, emptyCounterEntry];
@@ -247,23 +254,19 @@ describe('gecko counters processing', function () {
     const offsetTime = originalTime.map((n) => n + 1000);
 
     const extractTime = (counter) => {
-      if (counter.sample_groups.length === 0) {
+      if (counter.samples.data.length === 0) {
         return [];
       }
-      return counter.sample_groups[0].samples.data.map((tuple) => tuple[0]);
+      return counter.samples.data.map((tuple) => tuple[0]);
     };
 
     // The original times and parent process are not offset.
     expect(extractTime(parentCounter)).toEqual(originalTime);
     expect(extractTime(childCounter)).toEqual(originalTime);
-    expect(processedCounters[0].sampleGroups[0].samples.time).toEqual(
-      originalTime
-    );
+    expect(processedCounters[0].samples.time).toEqual(originalTime);
 
     // The subprocess times are offset when processed:
-    expect(processedCounters[1].sampleGroups[0].samples.time).toEqual(
-      offsetTime
-    );
+    expect(processedCounters[1].samples.time).toEqual(offsetTime);
   });
 });
 
