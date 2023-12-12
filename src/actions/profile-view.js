@@ -2103,7 +2103,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'r': {
-        if (funcHasRecursiveCall(unfilteredThread, funcIndex)) {
+        if (funcHasRecursiveCall(callNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-recursion',
@@ -2114,13 +2114,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'R': {
-        if (
-          funcHasDirectRecursiveCall(
-            unfilteredThread,
-            implementation,
-            funcIndex
-          )
-        ) {
+        if (funcHasDirectRecursiveCall(callNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-direct-recursion',

@@ -1467,23 +1467,16 @@ export function getCounterForThread(
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
-    sampleGroups: [
-      {
-        id: 0,
-        samples: {
-          time: thread.samples.time.slice(),
-          // Create some arbitrary (positive integer) values for the number.
-          number: config.hasCountNumber
-            ? thread.samples.time.map((_, i) =>
-                Math.floor(50 * Math.sin(i) + 50)
-              )
-            : undefined,
-          // Create some arbitrary values for the count.
-          count: thread.samples.time.map((_, i) => Math.sin(i)),
-          length: thread.samples.length,
-        },
-      },
-    ],
+    samples: {
+      time: thread.samples.time.slice(),
+      // Create some arbitrary (positive integer) values for the number.
+      number: config.hasCountNumber
+        ? thread.samples.time.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
+        : undefined,
+      // Create some arbitrary values for the count.
+      count: thread.samples.time.map((_, i) => Math.sin(i)),
+      length: thread.samples.length,
+    },
   };
   return counter;
 }
@@ -1520,12 +1513,7 @@ export function getCounterForThreadWithSamples(
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
-    sampleGroups: [
-      {
-        id: 0,
-        samples: newSamples,
-      },
-    ],
+    samples: newSamples,
   };
   return counter;
 }
