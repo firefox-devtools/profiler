@@ -21,10 +21,8 @@ import type {
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoLibs,
-  IndexIntoStackTable,
   Address,
   CallNodePath,
-  StackTable,
   Lib,
 } from 'firefox-profiler/types';
 import type {
@@ -33,7 +31,7 @@ import type {
   LibSymbolicationRequest,
 } from './symbol-store';
 import { PathSet } from '../utils/path';
-import { replaceStackReferences } from './profile-data';
+import { updateThreadStacks } from './profile-data';
 
 // Contains functions to symbolicate a profile.
 
@@ -128,7 +126,7 @@ import { replaceStackReferences } from './profile-data';
  * III. Symbol lookup: Handled by the AbstractSymbolStore.
  *
  * IV. Symbol result processing: Forwards the symbol lookup result to the caller,
- * expecting a future call to applySymbolicationStep.
+ * expecting a future call to applySymbolicationSteps.
  *
  * V. Profile substitution: Invoked from from a thunk action. Processes the
  * symbolication result, groups frame addresses by symbol addresses, finds or
@@ -368,7 +366,7 @@ function buildLibSymbolicationRequestsForAllThreads(
 // With the symbolication results for the library given by libKey, call
 // symbolicationStepCallback for each thread. Those calls will
 // ensure that the symbolication information eventually makes it into the thread.
-// This function leaves all the actual work to applySymbolicationStep.
+// This function leaves all the actual work to applySymbolicationSteps.
 function finishSymbolicationForLib(
   profile: Profile,
   symbolicationInfo: ThreadSymbolicationInfo[],
@@ -388,51 +386,12 @@ function finishSymbolicationForLib(
   }
 }
 
-// Create a new stack table where all stack nodes with frames in framesToRemove
-// are removed. Their child nodes are reparented to the removed node's parent.
-function _removeFramesFromStackTable(
-  stackTable: StackTable,
-  framesToRemove: Set<IndexIntoFrameTable>
-): {
-  stackTable: StackTable,
-  oldStackToNewStack: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  > | null,
-} {
-  if (framesToRemove.size === 0) {
-    return { stackTable, oldStackToNewStack: null };
-  }
-  const newStackTable = getEmptyStackTable();
-  const oldStackToNewStack: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  > = new Map();
-  for (let stack = 0; stack < stackTable.length; stack++) {
-    const frame = stackTable.frame[stack];
-    const prefix = stackTable.prefix[stack];
-    const newPrefix =
-      prefix === null ? null : oldStackToNewStack.get(prefix) ?? null;
-    if (framesToRemove.has(frame)) {
-      // Don't add this stack node to the new stack table. Instead, make it
-      // so that this node's children use our prefix as their prefix.
-      oldStackToNewStack.set(stack, newPrefix);
-      continue;
-    }
-    const newStackIndex = newStackTable.length;
-    newStackTable.frame.push(frame);
-    newStackTable.prefix.push(newPrefix);
-    newStackTable.category.push(stackTable.category[stack]);
-    newStackTable.subcategory.push(stackTable.subcategory[stack]);
-    newStackTable.length++;
-    oldStackToNewStack.set(stack, newStackIndex);
-  }
-  return { stackTable: newStackTable, oldStackToNewStack };
-}
-
 // Create a new stack table where all stack nodes with frames in
 // frameIndexToInlineExpansionFrames have been replaced by a straight path
 // of stack nodes for that frame's new inline frames.
+// In addition, old stacks with frames for which shouldStacksWithThisOldFrameBeRemoved
+// is not zero will be removed, i.e. merged away so that their children are
+// reparented to the merged-away stack's parent.
 //
 // Example:
 //  stack table:
@@ -457,37 +416,38 @@ function _removeFramesFromStackTable(
 //      - stack E with frame 4
 //        - stack E' with frame 8
 //      - stack F with frame 5
-function _addExpansionStacksToStackTable(
-  stackTable: StackTable,
+function _computeThreadWithAddedExpansionStacks(
+  thread: Thread,
+  shouldStacksWithThisOldFrameBeRemoved: Uint8Array,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
     IndexIntoFrameTable[],
   >
-): {
-  stackTable: StackTable,
-  oldStackToNewStack: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  > | null,
-} {
+): Thread {
   if (frameIndexToInlineExpansionFrames.size === 0) {
-    return {
-      stackTable: stackTable,
-      oldStackToNewStack: null,
-    };
+    return thread;
   }
+  const { stackTable } = thread;
   const newStackTable = getEmptyStackTable();
-  const prefixMap = new Map();
+  const oldStackToNewStack = new Int32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const oldFrame = stackTable.frame[stack];
     const oldPrefix = stackTable.prefix[stack];
+    const newPrefixOrMinusOne =
+      oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
+    if (shouldStacksWithThisOldFrameBeRemoved[oldFrame] !== 0) {
+      // Don't add this stack node to the new stack table. Instead, make it
+      // so that this node's children use our prefix as their prefix.
+      oldStackToNewStack[stack] = newPrefixOrMinusOne;
+      continue;
+    }
     const category = stackTable.category[stack];
     const subcategory = stackTable.subcategory[stack];
     let expansionFrames = frameIndexToInlineExpansionFrames.get(oldFrame);
     if (expansionFrames === undefined) {
       expansionFrames = [oldFrame];
     }
-    let prefix = oldPrefix === null ? null : prefixMap.get(oldPrefix) ?? null;
+    let prefix = newPrefixOrMinusOne !== -1 ? newPrefixOrMinusOne : null;
     for (
       let inlineDepth = 0;
       inlineDepth < expansionFrames.length;
@@ -502,11 +462,46 @@ function _addExpansionStacksToStackTable(
       newStackTable.length++;
       prefix = newStack;
     }
-    if (prefix !== null) {
-      prefixMap.set(stack, prefix);
-    }
+    oldStackToNewStack[stack] = prefix ?? -1;
   }
-  return { stackTable: newStackTable, oldStackToNewStack: prefixMap };
+  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const newStack = oldStackToNewStack[oldStack];
+    return newStack !== -1 ? newStack : null;
+  });
+}
+
+/**
+ * This implements step V, Profile substitution. The information from
+ * symbolicationSteps is used to create a new thread with the new symbols.
+ */
+export function applySymbolicationSteps(
+  oldThread: Thread,
+  symbolicationSteps: SymbolicationStepInfo[]
+): { thread: Thread, oldFuncToNewFuncsMap: FuncToFuncsMap } {
+  const oldFuncToNewFuncsMap = new Map();
+  const frameCount = oldThread.frameTable.length;
+  const shouldStacksWithThisFrameBeRemoved = new Uint8Array(frameCount);
+  const frameIndexToInlineExpansionFrames = new Map();
+  let thread = oldThread;
+  for (const symbolicationStep of symbolicationSteps) {
+    thread = _partiallyApplySymbolicationStep(
+      thread,
+      symbolicationStep,
+      oldFuncToNewFuncsMap,
+      shouldStacksWithThisFrameBeRemoved,
+      frameIndexToInlineExpansionFrames
+    );
+  }
+  thread = _computeThreadWithAddedExpansionStacks(
+    thread,
+    shouldStacksWithThisFrameBeRemoved,
+    frameIndexToInlineExpansionFrames
+  );
+
+  return { thread, oldFuncToNewFuncsMap };
 }
 
 /**
@@ -519,17 +514,35 @@ function _addExpansionStacksToStackTable(
  * this symbolication step. oldFuncToNewFuncsMap is allowed to contain existing
  * content; the existing entries are assumed to be for other libs, i.e. they're
  * expected to have no overlap with allFuncsForThisLib.
+ *
+ * What this function doesn't do is update the stackTable to point to the new
+ * frames and funcs; after this function returns, the stackTable still points to
+ * old frames which may have been repurposed into different frames. To fully
+ * conclude symbolication of this thread, the caller needs to apply the
+ * modifications written down in shouldStacksWithThisFrameBeRemoved and in
+ * frameIndexToInlineExpansionFrames to the stackTable. Those two parameters are
+ * mutated in this function. Just like oldFuncToNewFuncsMap, these parameters
+ * may contain existing mappings from the symbolication of other libraries in
+ * this thread.
+ *
+ * Creating a new stackTable can be very expensive; doing it in the caller allows
+ * the caller to delay the creation of the new stackTable until the symbolication
+ * steps from multiple libraries have been processed. This can be much faster.
  */
-export function applySymbolicationStep(
+function _partiallyApplySymbolicationStep(
   thread: Thread,
   symbolicationStepInfo: SymbolicationStepInfo,
-  oldFuncToNewFuncsMap: FuncToFuncsMap
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  shouldStacksWithThisFrameBeRemoved: Uint8Array,
+  frameIndexToInlineExpansionFrames: Map<
+    IndexIntoFrameTable,
+    IndexIntoFrameTable[],
+  >
 ): Thread {
   const {
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     nativeSymbols: oldNativeSymbols,
-    stackTable: oldStackTable,
     stringTable,
   } = thread;
   const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
@@ -557,19 +570,16 @@ export function applySymbolicationStep(
   // in non-inlined frames. Then remove any stack nodes for inline frames from the stack
   // table, because and having a "clean" stack table with no inline frames makes the
   // rest of symbolication easier.
-  const inlinedFrames = new Set();
-  const nonInlinedFrames = new Set();
+  const inlinedFrames = [];
+  const nonInlinedFrames = [];
   for (const frameIndex of allFramesForThisLib) {
     if (oldFrameTable.inlineDepth[frameIndex] > 0) {
-      inlinedFrames.add(frameIndex);
+      inlinedFrames.push(frameIndex);
+      shouldStacksWithThisFrameBeRemoved[frameIndex] = 1;
     } else {
-      nonInlinedFrames.add(frameIndex);
+      nonInlinedFrames.push(frameIndex);
     }
   }
-  const { stackTable, oldStackToNewStack } = _removeFramesFromStackTable(
-    oldStackTable,
-    inlinedFrames
-  );
 
   // We want to group frames into nativeSymbols, and give each nativeSymbol a name.
   // We group frames to the same nativeSymbol if the addresses for these frames resolve
@@ -709,10 +719,6 @@ export function applySymbolicationStep(
   const funcKeyToFuncMap = new Map();
 
   const availableFrameIter = inlinedFrames.values();
-  const frameIndexToInlineExpansionFrames: Map<
-    IndexIntoFrameTable,
-    IndexIntoFrameTable[],
-  > = new Map();
   const oldFuncToNewFuncsEntries: Array<[IndexIntoFuncTable, string]> = [];
 
   for (const frameIndex of nonInlinedFrames) {
@@ -840,40 +846,16 @@ export function applySymbolicationStep(
     );
   }
 
-  let newThread = {
+  const newThread = {
     ...thread,
     frameTable,
-    stackTable,
     funcTable,
     nativeSymbols,
     stringTable,
   };
 
-  if (oldStackToNewStack !== null) {
-    newThread = replaceStackReferences(
-      newThread,
-      oldStackToNewStack,
-      oldStackToNewStack
-    );
-  }
-
   // We have the finished new frameTable and new funcTable.
-  // Build a new stackTable.
-  const {
-    stackTable: finalStackTable,
-    oldStackToNewStack: finalOldStackToNewStack,
-  } = _addExpansionStacksToStackTable(
-    stackTable,
-    frameIndexToInlineExpansionFrames
-  );
-  if (finalOldStackToNewStack !== null) {
-    newThread = replaceStackReferences(
-      { ...newThread, stackTable: finalStackTable },
-      finalOldStackToNewStack,
-      finalOldStackToNewStack
-    );
-  }
-
+  // The new stackTable will be built by the caller.
   return newThread;
 }
 
@@ -881,7 +863,7 @@ export function applySymbolicationStep(
  * Symbolicates the profile. Symbols are obtained from the symbolStore.
  * This function performs steps II-IV (see the comment at the beginning of
  * this file); step V is outsourced to symbolicationStepCallback
- * which can call applySymbolicationStep to complete step V.
+ * which can call applySymbolicationSteps to complete step V.
  */
 export async function symbolicateProfile(
   profile: Profile,
