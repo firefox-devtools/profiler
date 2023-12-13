@@ -407,8 +407,8 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
               <span className="timelineTrackMemoryTooltipNumber">
                 {formatNumber(operations, 2, 0)}
               </span>
-              <Localized id="TrackMemoryGraph--operations-since-the-previous-sample">
-                operations since the previous sample
+              <Localized id="TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample">
+                allocations and deallocations since the previous sample
               </Localized>
             </div>
           ) : null}

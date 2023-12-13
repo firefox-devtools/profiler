@@ -39,7 +39,7 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     >
       36
     </span>
-    operations since the previous sample
+    allocations and deallocations since the previous sample
   </div>
 </div>
 `;
