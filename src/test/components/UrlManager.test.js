@@ -334,8 +334,7 @@ describe('UrlManager', function () {
     const { getState, waitUntilUrlSetupPhase, createUrlManager } = setup(
       '/from-post-message/'
     );
-    const log = console.log;
-    (console: any).log = jest.fn();
+    jest.spyOn(console, 'log').mockImplementation(() => {});
 
     expect(getProfileOrNull(getState())).toBeFalsy();
 
@@ -368,8 +367,5 @@ describe('UrlManager', function () {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(getProfileOrNull(getState())).toBeTruthy();
-
-    // Restore the console.log.
-    (console: any).log = log;
   });
 });

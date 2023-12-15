@@ -54,8 +54,6 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return 'unpublished';
     case 'SET_DATA_SOURCE':
       return action.dataSource;
-    case 'PROFILE_LOADED':
-      return action.dataSource ?? state;
     default:
       return state;
   }

@@ -400,7 +400,6 @@ type ReceiveProfileAction =
       +pathInZipFile: ?string,
       +implementationFilter: ?ImplementationFilter,
       +transformStacks: ?TransformStacksPerThread,
-      +dataSource: ?DataSource,
     |}
   | {|
       +type: 'VIEW_FULL_PROFILE',

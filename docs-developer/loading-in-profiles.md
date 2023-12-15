@@ -147,7 +147,7 @@ function openProfile(profile) {
 
   window.addEventListener('message', listener);
   while (!isReady) {
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     profilerWindow.postMessage({ name: 'is-ready' }, origin);
   }
 
@@ -161,8 +161,6 @@ Then you can inject the profile via a postMessage.
 await waitForProfilerReady();
 window.postMessage({ name: 'inject-profile', profile }, '*');
 ```
-
-This
 
 ### File
 

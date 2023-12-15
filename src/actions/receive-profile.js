@@ -82,7 +82,6 @@ import type {
   InnerWindowID,
   Pid,
   OriginsTimelineRoot,
-  DataSource,
 } from 'firefox-profiler/types';
 
 import type {
@@ -127,7 +126,6 @@ export function loadProfile(
     transformStacks: TransformStacksPerThread,
     browserConnection: BrowserConnection | null,
     skipSymbolication: boolean, // Please use this in tests only.
-    dataSource: DataSource,
   |}> = {},
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
@@ -157,7 +155,6 @@ export function loadProfile(
       pathInZipFile: config.pathInZipFile,
       implementationFilter: config.implementationFilter,
       transformStacks: config.transformStacks,
-      dataSource: config.dataSource,
     });
 
     // During initial load, we are upgrading the URL and generating the UrlState
@@ -716,7 +713,6 @@ export function viewProfile(
     transformStacks: TransformStacksPerThread,
     skipSymbolication: boolean,
     browserConnection: BrowserConnection | null,
-    dataSource: DataSource,
   |}> = {}
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
@@ -1659,6 +1655,11 @@ export function retrieveProfileForRawUrl(
               dispatch(viewProfileFromPostMessage(data.profile));
               break;
             case 'is-ready': {
+              // The "inject-profile" event could be coming from a variety of locations.
+              // It could come from a `window.open` call on another page. It could come
+              // from an addon. It could come from being embedded in an iframe. In order
+              // to generically support these cases allow the opener to poll for the
+              // "is-ready" message.
               console.log(
                 'Responding via postMessage that the profiler is ready.'
               );
