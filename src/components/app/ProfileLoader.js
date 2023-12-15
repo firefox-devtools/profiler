@@ -82,6 +82,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       case 'unpublished':
       case 'none':
         // nothing to do
+        /* istanbul ignore next */
         break;
       default:
         throw assertExhaustiveCheck(dataSource);

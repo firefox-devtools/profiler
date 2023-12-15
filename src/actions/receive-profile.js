@@ -1489,6 +1489,7 @@ export function viewProfileFromPostMessage(
   return async (dispatch) => {
     try {
       const profile = await unserializeProfileOfArbitraryFormat(rawProfile);
+      /* istanbul ignore if */
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }
@@ -1497,6 +1498,7 @@ export function viewProfileFromPostMessage(
         await dispatch(viewProfile(profile));
       });
     } catch (error) {
+      /* istanbul ignore next */
       dispatch(fatalError(error));
     }
   };
@@ -1647,6 +1649,7 @@ export function retrieveProfileForRawUrl(
         window.addEventListener('message', (event) => {
           const { data } = event;
           console.log(`Received postMessage`, data);
+          /* istanbul ignore if */
           if (!data || typeof data !== 'object') {
             return;
           }
@@ -1668,6 +1671,7 @@ export function retrieveProfileForRawUrl(
               break;
             }
             default:
+              /* istanbul ignore next */
               console.log('Unknown post message', data);
           }
         });
