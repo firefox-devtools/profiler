@@ -37,20 +37,22 @@ declare class Window {
   persistTooltips?: boolean;
 
   // WebChannel events.
-  // https://searchfox.org/mozilla-central/source/toolkit/modules/WebChannel.jsm
+  // https://searchfox.org/mozilla-central/source/toolkit/modules/WebChannel.sys.mjs
   addEventListener: $PropertyType<EventTarget, 'addEventListener'> &
     ((
       'WebChannelMessageToContent',
       (event: WebChannelEvent) => void,
       true
-    ) => void);
+    ) => void) &
+    (('message', (event: MessageEvent) => void) => void);
 
   removeEventListener: $PropertyType<EventTarget, 'removeEventListener'> &
     ((
       'WebChannelMessageToContent',
       (event: WebChannelEvent) => void,
       true
-    ) => void);
+    ) => void) &
+    (('message', (event: MessageEvent) => void) => void);
 
   // Built-ins.
   dispatchEvent: $PropertyType<EventTarget, 'dispatchEvent'>;
@@ -87,6 +89,7 @@ declare class Window {
     userAgent: string,
     platform: string,
   };
+  postMessage: (message: any, targetOrigin: string) => void;
 }
 
 declare var window: Window;
