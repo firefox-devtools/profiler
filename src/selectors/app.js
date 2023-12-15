@@ -25,6 +25,7 @@ import {
   ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT,
   TRACK_NETWORK_HEIGHT,
   TRACK_MEMORY_HEIGHT,
+  TRACK_BANDWIDTH_HEIGHT,
   TRACK_IPC_HEIGHT,
   TRACK_PROCESS_BLANK_HEIGHT,
   TIMELINE_RULER_HEIGHT,
@@ -287,6 +288,9 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                   break;
                 case 'memory':
                   height += TRACK_MEMORY_HEIGHT + border;
+                  break;
+                case 'bandwidth':
+                  height += TRACK_BANDWIDTH_HEIGHT + border;
                   break;
                 case 'event-delay':
                   height += TRACK_EVENT_DELAY_HEIGHT + border;
