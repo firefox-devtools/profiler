@@ -27,6 +27,7 @@ import {
   changeCallTreeSearchString,
   setDataSource,
 } from 'firefox-profiler/actions/profile-view';
+import { getProfileOrNull } from '../../selectors/profile';
 
 jest.mock('../../profile-logic/symbol-store');
 
@@ -327,5 +328,44 @@ describe('UrlManager', function () {
     // It should successfully preserve the view query string and update the
     // timeline track organization state.
     expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
+  });
+
+  it('can handle a from-post-message data source', async () => {
+    const { getState, waitUntilUrlSetupPhase, createUrlManager } = setup(
+      '/from-post-message/'
+    );
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    expect(getProfileOrNull(getState())).toBeFalsy();
+
+    const profile = getSerializableProfile();
+    const targetOrigin = '*';
+
+    await createUrlManager();
+    await waitUntilUrlSetupPhase('done');
+
+    await new Promise((resolve) => {
+      function listener({ data }) {
+        if (data && typeof data === 'object' && data.name === 'is-ready') {
+          resolve();
+          window.removeEventListener('message', listener);
+        }
+      }
+      window.addEventListener('message', listener);
+      window.postMessage({ name: 'is-ready' }, '*');
+    });
+
+    window.postMessage(
+      {
+        name: 'inject-profile',
+        profile,
+      },
+      targetOrigin
+    );
+
+    // Wait a tick so that postMessage has time to be processed.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(getProfileOrNull(getState())).toBeTruthy();
   });
 });
