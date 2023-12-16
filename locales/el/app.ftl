@@ -746,7 +746,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = σχετική μνήμη αυτήν τη στιγμή
 TrackMemoryGraph--memory-range-in-graph = εύρος μνήμης στο γράφημα
-TrackMemoryGraph--operations-since-the-previous-sample = λειτουργίες από το προηγούμενο δείγμα
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = κατανομές και αποδεσμεύσεις από το προηγούμενο δείγμα
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
