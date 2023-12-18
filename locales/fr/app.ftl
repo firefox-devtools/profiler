@@ -675,7 +675,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = mémoire relative à ce moment
 TrackMemoryGraph--memory-range-in-graph = plage mémoire dans le graphique
-TrackMemoryGraph--operations-since-the-previous-sample = opérations depuis l’échantillon précédent
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allocations et désallocations depuis l’échantillon précédent
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
