@@ -746,7 +746,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = relativa minnet vid denna tidpunkt
 TrackMemoryGraph--memory-range-in-graph = minnesintervall i grafen
-TrackMemoryGraph--operations-since-the-previous-sample = operationer sedan föregående prov
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allokeringar och deallokeringar sedan föregående prov
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,

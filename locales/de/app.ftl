@@ -727,7 +727,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = Relativer Speicherverbrauch zu diesem Zeitpunkt
 TrackMemoryGraph--memory-range-in-graph = Speicherbereich im Diagramm
-TrackMemoryGraph--operations-since-the-previous-sample = Operationen seit der vorherigen Stichprobe
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = Allokationen und Aufhebungen von Allokationen seit der vorherigen Stichprobe
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
