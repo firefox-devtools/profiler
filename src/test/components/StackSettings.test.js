@@ -6,7 +6,7 @@ import * as React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { StackSettings } from '../../components/shared/StackSettings';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -88,7 +88,7 @@ describe('StackSettings', function () {
       target: { value: searchText },
     });
 
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
     expect(getCurrentSearchString(getState())).toEqual(searchText);
     expect(input.value).toEqual(searchText);
   });

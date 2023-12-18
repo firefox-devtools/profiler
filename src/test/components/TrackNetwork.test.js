@@ -13,6 +13,7 @@ import {
   render,
   fireEvent,
   screen,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 
 import { TrackNetwork } from 'firefox-profiler/components/timeline/TrackNetwork';
@@ -191,7 +192,7 @@ describe('timeline/TrackNetwork', function () {
     expect(copy).toHaveBeenLastCalledWith('Load 0: https://mozilla.org');
     expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
 
     expect(document.querySelector('.react-contextmenu')).toBeFalsy();
   });
@@ -235,7 +236,7 @@ describe('timeline/TrackNetwork', function () {
 
     // And then right clicks again => In this case the context menu should disappear!
     fireFullContextMenu(canvas);
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
     expect(document.querySelector('.react-contextmenu')).toBeFalsy();
   });
 
@@ -291,7 +292,9 @@ describe('timeline/TrackNetwork', function () {
       selectedThreadSelectors.getSelectedNetworkMarkerIndex(getState())
     ).toBe(null);
 
-    dispatch(changeSelectedNetworkMarker(0, 2));
+    act(() => {
+      dispatch(changeSelectedNetworkMarker(0, 2));
+    });
 
     // Check that we redrew with a selected style.
     const drawCalls = getContextDrawCalls();
@@ -352,7 +355,7 @@ describe('VerticalIndicators', function () {
     expect(copy).toHaveBeenLastCalledWith('DOMContentLoaded');
     expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
 
     expect(document.querySelector('.react-contextmenu')).toBeFalsy();
   });

@@ -14,6 +14,7 @@ import {
   render,
   screen,
   fireEvent,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import {
@@ -484,7 +485,7 @@ describe('MarkerChart', function () {
       expect(copy).toHaveBeenLastCalledWith('UserTiming — UserTiming A');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
-      jest.runAllTimers();
+      act(() => jest.runAllTimers());
       expect(document.querySelector('react-contextmenu')).toBeFalsy();
     });
 
@@ -648,7 +649,9 @@ describe('MarkerChart', function () {
       flushDrawLog();
 
       // Update the chart with a search string.
-      dispatch(changeMarkersSearchString(searchString));
+      act(() => {
+        dispatch(changeMarkersSearchString(searchString));
+      });
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
@@ -669,8 +672,12 @@ describe('MarkerChart', function () {
       const profile = getProfileWithMarkers(MARKERS);
       const { dispatch, container } = setupWithProfile(profile);
 
-      dispatch(changeSelectedTab('marker-chart'));
-      dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      act(() => {
+        dispatch(changeSelectedTab('marker-chart'));
+      });
+      act(() => {
+        dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      });
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
   });
@@ -712,12 +719,14 @@ describe('MarkerChart', function () {
 
       const setupResult = setupWithProfile(profile);
       // Switch to active tab view.
-      setupResult.dispatch(
-        changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID: firstTabTabID,
-        })
-      );
+      act(() => {
+        setupResult.dispatch(
+          changeTimelineTrackOrganization({
+            type: 'active-tab',
+            tabID: firstTabTabID,
+          })
+        );
+      });
 
       return {
         ...setupResult,

@@ -7,7 +7,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { WindowTitle } from 'firefox-profiler/components/app/WindowTitle';
 import {
   getEmptyProfile,
@@ -79,7 +79,9 @@ describe('WindowTitle', () => {
 
     expect(document.title).toBe('good profile – Firefox Profiler');
 
-    store.dispatch(changeProfileName('awesome profile'));
+    act(() => {
+      store.dispatch(changeProfileName('awesome profile'));
+    });
     expect(document.title).toBe('awesome profile – Firefox Profiler');
   });
 
@@ -126,7 +128,9 @@ describe('WindowTitle', () => {
 
     expect(document.title).toBe('Firefox Profiler');
 
-    store.dispatch(setDataSource('compare'));
+    act(() => {
+      store.dispatch(setDataSource('compare'));
+    });
 
     expect(document.title).toBe('Compare Profiles – Firefox Profiler');
   });
@@ -160,9 +164,11 @@ describe('WindowTitle', () => {
 
     expect(document.title).toBe('Zip File Contents – Firefox Profiler');
 
-    await store.dispatch(
-      ZippedProfilesActions.viewProfileFromPathInZipFile(
-        'foo/bar/profile1.json'
+    await act(() =>
+      store.dispatch(
+        ZippedProfilesActions.viewProfileFromPathInZipFile(
+          'foo/bar/profile1.json'
+        )
       )
     );
 

@@ -8,6 +8,7 @@ import {
   fireEvent,
   screen,
   waitForElementToBeRemoved,
+  act,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
@@ -142,7 +143,9 @@ describe('app/MenuButtons', function () {
         search: '',
         hash: '',
       });
-      store.dispatch(updateUrlState(newUrlState));
+      act(() => {
+        store.dispatch(updateUrlState(newUrlState));
+      });
     };
 
     async function waitForPanelToBeRemoved() {
@@ -355,12 +358,14 @@ describe('app/MenuButtons', function () {
       );
       const { getRemoveOtherTabsCheckbox, openPublishPanel, dispatch } =
         setupForPublish(profile);
-      dispatch(
-        changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID: null,
-        })
-      );
+      act(() => {
+        dispatch(
+          changeTimelineTrackOrganization({
+            type: 'active-tab',
+            tabID: null,
+          })
+        );
+      });
       await openPublishPanel();
       expect(getRemoveOtherTabsCheckbox()).toBeInTheDocument();
     });
@@ -828,12 +833,14 @@ describe('app/MenuButtons', function () {
       const { dispatch, getState, getByText, container } =
         setupForFullViewButton();
 
-      dispatch(
-        changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID: null,
-        })
-      );
+      act(() => {
+        dispatch(
+          changeTimelineTrackOrganization({
+            type: 'active-tab',
+            tabID: null,
+          })
+        );
+      });
 
       // Make sure that we are in the active tab view and the button is there.
       expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
@@ -845,12 +852,14 @@ describe('app/MenuButtons', function () {
       const { dispatch, getState, getByText, queryByText } =
         setupForFullViewButton();
 
-      dispatch(
-        changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID: null,
-        })
-      );
+      act(() => {
+        dispatch(
+          changeTimelineTrackOrganization({
+            type: 'active-tab',
+            tabID: null,
+          })
+        );
+      });
 
       // Make sure that we are in the active tab view already.
       expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');

@@ -4,13 +4,16 @@
 
 // @flow
 import * as React from 'react';
-import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  fireEvent,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeNetworkSearchString,
   commitRange,
@@ -164,7 +167,7 @@ describe('NetworkChart', function () {
     expect(copy).toHaveBeenLastCalledWith('https://mozilla.org/1');
     expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
     expect(document.querySelector('react-contextmenu')).toBeFalsy();
   });
 });
@@ -238,7 +241,9 @@ describe('NetworkChartRowBar phase calculations', function () {
 
     // Note: "10" here means "20" in the profile, because this is the delta
     // since the start of the profile (aka zeroAt), and not an absolute value.
-    dispatch(commitRange(10, 50));
+    act(() => {
+      dispatch(commitRange(10, 50));
+    });
 
     // The width is bigger than the mocked available width (which is 200px) but
     // this is expected.
@@ -279,14 +284,16 @@ describe('NetworkChartRowBar phase calculations', function () {
     // be in sight, but that the second marker will be out of the view.
     // Still, because it's a preview selection, the second marker will have a
     // dedicated line.
-    dispatch(
-      updatePreviewSelection({
-        hasSelection: true,
-        isModifying: false,
-        selectionStart: 20,
-        selectionEnd: 40,
-      })
-    );
+    act(() => {
+      dispatch(
+        updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 20,
+          selectionEnd: 40,
+        })
+      );
+    });
 
     const [firstMarker, secondMarker] = getBarElements();
 
@@ -619,7 +626,9 @@ describe('EmptyReasons', () => {
   it("shows a reason when a profile's network markers have been filtered out", () => {
     const { dispatch, container } = setupWithPayload([...NETWORK_MARKERS]);
 
-    dispatch(changeNetworkSearchString('MATCH_NOTHING'));
+    act(() => {
+      dispatch(changeNetworkSearchString('MATCH_NOTHING'));
+    });
     expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
   });
 });

@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { withChartViewport } from '../../components/shared/chart/Viewport';
 import {
   getCommittedRange,
@@ -599,7 +599,9 @@ describe('Viewport', function () {
       ...INITIAL_ELEMENT_SIZE,
       width: BOUNDING_BOX_WIDTH - boundingWidthDiff,
     });
-    dispatch(changeSidebarOpenState('calltree', true));
+    act(() => {
+      dispatch(changeSidebarOpenState('calltree', true));
+    });
     flushRafCalls();
 
     expect(getChartViewport()).toMatchObject({
@@ -614,7 +616,8 @@ describe('Viewport', function () {
 });
 
 function setup(profileOverrides: MixedObject = {}) {
-  const flushRafCalls = mockRaf();
+  const realFlushRafCalls = mockRaf();
+  const flushRafCalls = (...args) => act(() => realFlushRafCalls(...args));
 
   // Hook up a dummy chart with a viewport.
   const DummyChart = jest.fn(() => <div id="dummy-chart" />);

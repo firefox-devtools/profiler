@@ -10,6 +10,7 @@ import {
   render,
   fireEvent,
   screen,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
 import {
@@ -91,7 +92,9 @@ describe('Timeline multiple thread selection', function () {
         ) {
           const localTrack = localTracks[trackIndex];
           if (localTrack.type === 'ipc') {
-            store.dispatch(showLocalTrack(pid, trackIndex));
+            act(() => {
+              store.dispatch(showLocalTrack(pid, trackIndex));
+            });
           }
         }
       }
