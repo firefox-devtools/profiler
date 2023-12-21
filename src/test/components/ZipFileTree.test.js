@@ -7,7 +7,11 @@ import * as React from 'react';
 import { ZipFileViewer } from '../../components/app/ZipFileViewer';
 import { Provider } from 'react-redux';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 
@@ -74,11 +78,13 @@ describe('calltree/ZipFileTree', function () {
       const profile1OpenLink = screen.getByText('profile1.json');
 
       const waitUntilDoneProcessingZip = () =>
-        waitUntilState(
-          store,
-          (state) =>
-            ZippedProfileSelectors.getZipFileState(state).phase ===
-            'VIEW_PROFILE_IN_ZIP_FILE'
+        act(() =>
+          waitUntilState(
+            store,
+            (state) =>
+              ZippedProfileSelectors.getZipFileState(state).phase ===
+              'VIEW_PROFILE_IN_ZIP_FILE'
+          )
         );
 
       function profileViewer() {

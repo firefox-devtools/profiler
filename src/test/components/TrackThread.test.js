@@ -10,7 +10,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { oneLine } from 'common-tags';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeTimelineType,
   changeInvertCallstack,
@@ -208,9 +208,13 @@ describe('timeline/TrackThread', function () {
 
     function changeInvertCallstackAndGetDrawLog(value) {
       // We don't want a selected stack graph to change fillRect ordering.
-      dispatch(changeSelectedCallNode(0, []));
+      act(() => {
+        dispatch(changeSelectedCallNode(0, []));
+      });
       flushDrawLog();
-      dispatch(changeInvertCallstack(value));
+      act(() => {
+        dispatch(changeInvertCallstack(value));
+      });
       return flushDrawLog();
     }
 

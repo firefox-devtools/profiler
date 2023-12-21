@@ -13,7 +13,7 @@ import type {
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineType, getSelectedTab } from '../../selectors/url-state';
 import { getLastVisibleThreadTabSlug } from '../../selectors/app';
@@ -238,7 +238,9 @@ describe('ThreadActivityGraph', function () {
     const { getState, dispatch } = setup(profile);
 
     // Commit a range that contains only the second sample.
-    dispatch(commitRange(0.1, 2.0));
+    act(() => {
+      dispatch(commitRange(0.1, 2.0));
+    });
 
     // If there are CPU values, it should be automatically defaulted to this view.
     expect(getTimelineType(getState())).toBe('cpu-category');
@@ -303,7 +305,9 @@ describe('ThreadActivityGraph', function () {
     flushDrawLog();
 
     // Commit a thin range which contains no samples
-    dispatch(commitRange(0.5, 0.6));
+    act(() => {
+      dispatch(commitRange(0.5, 0.6));
+    });
     const drawCalls = flushDrawLog();
     // We use the presence of 'globalCompositeOperation' to know
     // whether the canvas was redrawn or not.
@@ -349,7 +353,9 @@ describe('ThreadActivityGraph', function () {
     flushDrawLog();
 
     // Commit a range that starts right after the missing sample.
-    dispatch(commitRange(9, 14));
+    act(() => {
+      dispatch(commitRange(9, 14));
+    });
 
     const drawCalls = flushDrawLog();
     // Activity graph uses lineTo to draw the lines for the samples.

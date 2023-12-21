@@ -10,6 +10,7 @@ import {
   render,
   fireEvent,
   screen,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import * as UrlStateSelectors from '../../selectors/url-state';
 
@@ -84,7 +85,9 @@ describe('StackChart', function () {
       setupSamples();
 
     // Start out deselected
-    dispatch(changeSelectedCallNode(0, []));
+    act(() => {
+      dispatch(changeSelectedCallNode(0, []));
+    });
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null
     );
@@ -113,7 +116,9 @@ describe('StackChart', function () {
     const { dispatch, funcNames, getState, stackChartCanvas } = setupSamples(
       `A[file:${sourceViewFile}]`
     );
-    dispatch(changeSelectedCallNode(0, [funcNames.indexOf('A')]));
+    act(() => {
+      dispatch(changeSelectedCallNode(0, [funcNames.indexOf('A')]));
+    });
 
     expect(UrlStateSelectors.getSourceViewFile(getState())).toBeNull();
     fireFullKeyPress(stackChartCanvas, { key: 'Enter' });
@@ -139,7 +144,7 @@ describe('StackChart', function () {
     expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
     // Run the timers to have a clean state.
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
 
     // Try another to make sure the menu works for other stacks too.
     rightClick(findFillTextPosition('B'));
@@ -167,12 +172,14 @@ describe('StackChart', function () {
 
     // Select the last frame, 'Z', and then make sure we can "see" the
     // drawn 'Z', but not 'A'.
-    dispatch(
-      changeSelectedCallNode(
-        0,
-        frames.map((name) => funcNames.indexOf(name))
-      )
-    );
+    act(() => {
+      dispatch(
+        changeSelectedCallNode(
+          0,
+          frames.map((name) => funcNames.indexOf(name))
+        )
+      );
+    });
     flushRafCalls();
 
     let drawnFrames = getDrawnFrames();
@@ -181,7 +188,9 @@ describe('StackChart', function () {
 
     // Now select the first frame, 'A', and check that we also can
     // scroll up again and see 'A', but not 'Z'.
-    dispatch(changeSelectedCallNode(0, [funcNames.indexOf('A')]));
+    act(() => {
+      dispatch(changeSelectedCallNode(0, [funcNames.indexOf('A')]));
+    });
     flushRafCalls();
 
     drawnFrames = getDrawnFrames();
@@ -210,13 +219,17 @@ describe('StackChart', function () {
 
     it('shows reasons when samples are out of range', () => {
       const { dispatch, container } = setupSamples();
-      dispatch(commitRange(5, 10));
+      act(() => {
+        dispatch(commitRange(5, 10));
+      });
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
     it('shows reasons when samples have been completely filtered out', function () {
       const { dispatch, container } = setupSamples();
-      dispatch(changeImplementationFilter('js'));
+      act(() => {
+        dispatch(changeImplementationFilter('js'));
+      });
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
   });

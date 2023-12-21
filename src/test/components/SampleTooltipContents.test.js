@@ -8,7 +8,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
 import { changeImplementationFilter as actionChangeImplementationFilter } from 'firefox-profiler/actions/profile-view';
-import { render, screen, fireEvent } from '../fixtures/testing-library';
+import { render, screen, fireEvent, act } from '../fixtures/testing-library';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -145,7 +145,10 @@ describe('SampleTooltipContents', function () {
 
     const changeImplementationFilter = (
       implementationFilter: ImplementationFilter
-    ) => store.dispatch(actionChangeImplementationFilter(implementationFilter));
+    ) =>
+      act(() => {
+        store.dispatch(actionChangeImplementationFilter(implementationFilter));
+      });
 
     const getBacktrace = () =>
       Array.from(document.querySelectorAll('.backtraceStackFrame')).map(
