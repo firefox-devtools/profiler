@@ -24,6 +24,7 @@ import {
   updatePreviewSelection,
   changeRightClickedMarker,
   changeMouseTimePosition,
+  changeSelectedMarker,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
@@ -49,6 +50,7 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
   +changeMouseTimePosition: typeof changeMouseTimePosition,
+  +changeSelectedMarker: typeof changeSelectedMarker,
 |};
 
 type StateProps = {|
@@ -59,6 +61,7 @@ type StateProps = {|
   +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
   +rightClickedMarkerIndex: MarkerIndex | null,
+  +selectedMarkerIndex: MarkerIndex | null,
   +timelineMarginLeft: CssPixels,
   +timelineTrackOrganization: TimelineTrackOrganization,
 |};
@@ -111,6 +114,8 @@ class MarkerChartImpl extends React.PureComponent<Props> {
       changeMouseTimePosition,
       changeRightClickedMarker,
       rightClickedMarkerIndex,
+      selectedMarkerIndex,
+      changeSelectedMarker,
       timelineMarginLeft,
       timelineTrackOrganization,
     } = this.props;
@@ -161,6 +166,8 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 threadsKey,
                 marginLeft: timelineMarginLeft,
                 marginRight: TIMELINE_MARGIN_RIGHT,
+                changeSelectedMarker,
+                selectedMarkerIndex,
                 rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
                 timelineTrackOrganization,
@@ -194,6 +201,8 @@ export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
       previewSelection: getPreviewSelection(state),
       rightClickedMarkerIndex:
         selectedThreadSelectors.getRightClickedMarkerIndex(state),
+      selectedMarkerIndex:
+        selectedThreadSelectors.getSelectedMarkerIndex(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
       timelineTrackOrganization: getTimelineTrackOrganization(state),
     };
@@ -202,6 +211,7 @@ export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
     updatePreviewSelection,
     changeMouseTimePosition,
     changeRightClickedMarker,
+    changeSelectedMarker,
   },
   component: MarkerChartImpl,
 });
