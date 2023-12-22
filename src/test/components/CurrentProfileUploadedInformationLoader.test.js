@@ -5,9 +5,12 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { waitFor } from '@testing-library/react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  waitFor,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
 import { getCurrentProfileUploadedInformation } from 'firefox-profiler/selectors/app';
 import { updateUrlState } from 'firefox-profiler/actions/app';
@@ -39,7 +42,9 @@ describe('app/CurrentProfileUploadedInformationLoader', () => {
         search: '',
         hash: '',
       });
-      store.dispatch(updateUrlState(newUrlState));
+      act(() => {
+        store.dispatch(updateUrlState(newUrlState));
+      });
     }
 
     return {

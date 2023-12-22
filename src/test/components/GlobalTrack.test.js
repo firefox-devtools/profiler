@@ -8,7 +8,11 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { stripIndent } from 'common-tags';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeSelectedThreads,
   hideGlobalTrack,
@@ -234,7 +238,9 @@ describe('timeline/GlobalTrack', function () {
 
   it('will render a stub div if the track is hidden', () => {
     const { container, trackIndex, dispatch } = setup();
-    dispatch(hideGlobalTrack(trackIndex));
+    act(() => {
+      dispatch(hideGlobalTrack(trackIndex));
+    });
     expect(container.querySelector('.timelineTrackHidden')).toBeTruthy();
     expect(container.querySelector('.timelineTrack')).toBeFalsy();
   });

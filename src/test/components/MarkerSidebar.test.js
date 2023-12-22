@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { MarkerSidebar } from '../../components/sidebar/MarkerSidebar';
 import { changeSelectedMarker } from '../../actions/profile-view';
 
@@ -34,14 +34,16 @@ describe('MarkerSidebar', function () {
   it('matches the snapshots when displaying data about the currently selected node', () => {
     const { dispatch, profile, container } = setup();
 
-    dispatch(
-      changeSelectedMarker(
-        0,
-        profile.threads[0].markers.data.findIndex(
-          (data) => data && data.type === 'IPC'
+    act(() => {
+      dispatch(
+        changeSelectedMarker(
+          0,
+          profile.threads[0].markers.data.findIndex(
+            (data) => data && data.type === 'IPC'
+          )
         )
-      )
-    );
+      );
+    });
 
     expect(container.firstChild).toMatchSnapshot();
   });

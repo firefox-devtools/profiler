@@ -16,6 +16,7 @@ import {
   render,
   fireEvent,
   screen,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { commitRange } from '../../actions/profile-view';
 import { TimelineTrackScreenshots } from '../../components/timeline/TrackScreenshots';
@@ -212,12 +213,14 @@ describe('timeline/TrackScreenshots', function () {
     _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
 
     const { dispatch, container } = setup(profile);
-    dispatch(
-      commitRange(
-        ensureExists(thread.markers.startTime[markerIndexA]),
-        ensureExists(thread.markers.startTime[markerIndexB])
-      )
-    );
+    act(() => {
+      dispatch(
+        commitRange(
+          ensureExists(thread.markers.startTime[markerIndexA]),
+          ensureExists(thread.markers.startTime[markerIndexB])
+        )
+      );
+    });
 
     const firstImage = ensureExists(
       container.querySelector('.timelineTrackScreenshotImgContainer'),
@@ -236,12 +239,14 @@ describe('timeline/TrackScreenshots', function () {
     _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
 
     const { dispatch, container } = setup(profile);
-    dispatch(
-      commitRange(
-        ensureExists(thread.markers.startTime[markerIndexA]),
-        ensureExists(thread.markers.startTime[markerIndexB])
-      )
-    );
+    act(() => {
+      dispatch(
+        commitRange(
+          ensureExists(thread.markers.startTime[markerIndexA]),
+          ensureExists(thread.markers.startTime[markerIndexB])
+        )
+      );
+    });
     expect(container.querySelector('.timelineTrackScreenshotImg')).toBeFalsy();
   });
 
