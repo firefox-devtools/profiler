@@ -14,7 +14,7 @@ import {
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
-  applySymbolicationStep,
+  applySymbolicationSteps,
 } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
 import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
@@ -764,15 +764,10 @@ export function bulkProcessSymbolicationSteps(
       if (symbolicationSteps === undefined) {
         return oldThread;
       }
-      const oldFuncToNewFuncsMap = new Map();
-      let thread = oldThread;
-      for (const symbolicationStep of symbolicationSteps) {
-        thread = applySymbolicationStep(
-          thread,
-          symbolicationStep,
-          oldFuncToNewFuncsMap
-        );
-      }
+      const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
+        oldThread,
+        symbolicationSteps
+      );
       oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
       return thread;
     });
@@ -1487,6 +1482,31 @@ export function retrieveProfileFromFile(
 }
 
 /**
+ * View a profile that was injected via a "postMessage". A website can
+ * inject a profile to the profiler.
+ */
+export function viewProfileFromPostMessage(
+  rawProfile: any
+): ThunkAction<Promise<void>> {
+  return async (dispatch) => {
+    try {
+      const profile = await unserializeProfileOfArbitraryFormat(rawProfile);
+      /* istanbul ignore if */
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      await withHistoryReplaceStateAsync(async () => {
+        await dispatch(viewProfile(profile));
+      });
+    } catch (error) {
+      /* istanbul ignore next */
+      dispatch(fatalError(error));
+    }
+  };
+}
+
+/**
  * This action retrieves several profiles and push them into 1 profile using the
  * information contained in the query.
  */
@@ -1625,6 +1645,38 @@ export function retrieveProfileForRawUrl(
         if (Array.isArray(query.profiles)) {
           await dispatch(retrieveProfilesToCompare(query.profiles, true));
         }
+        break;
+      }
+      case 'from-post-message': {
+        window.addEventListener('message', (event) => {
+          const { data } = event;
+          console.log(`Received postMessage`, data);
+          /* istanbul ignore if */
+          if (!data || typeof data !== 'object') {
+            return;
+          }
+          switch (data.name) {
+            case 'inject-profile':
+              dispatch(viewProfileFromPostMessage(data.profile));
+              break;
+            case 'is-ready': {
+              // The "inject-profile" event could be coming from a variety of locations.
+              // It could come from a `window.open` call on another page. It could come
+              // from an addon. It could come from being embedded in an iframe. In order
+              // to generically support these cases allow the opener to poll for the
+              // "is-ready" message.
+              console.log(
+                'Responding via postMessage that the profiler is ready.'
+              );
+              const otherWindow = event.source ?? window;
+              otherWindow.postMessage({ name: 'is-ready' }, '*');
+              break;
+            }
+            default:
+              /* istanbul ignore next */
+              console.log('Unknown post message', data);
+          }
+        });
         break;
       }
       case 'uploaded-recordings':

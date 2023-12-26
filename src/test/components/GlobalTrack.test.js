@@ -8,7 +8,11 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { stripIndent } from 'common-tags';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeSelectedThreads,
   hideGlobalTrack,
@@ -17,14 +21,21 @@ import { TimelineGlobalTrack } from '../../components/timeline/GlobalTrack';
 import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
-import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+} from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 describe('timeline/GlobalTrack', function () {
   autoMockCanvasContext();
@@ -46,7 +57,8 @@ describe('timeline/GlobalTrack', function () {
   const NO_THREAD_TRACK_INDEX = 2;
   const PRIVATE_TRACK_INDEX = 3;
   const CONTAINER_TRACK_INDEX = 4;
-  function setup(trackIndex = GECKOMAIN_TAB_TRACK_INDEX) {
+
+  function getGlobalTrackProfile() {
     const profile = getProfileWithNiceTracks();
     {
       // Add another thread to highlight a thread-less global process track.
@@ -89,6 +101,13 @@ describe('timeline/GlobalTrack', function () {
       thread.userContextId = 3;
       profile.threads.push(thread);
     }
+    return profile;
+  }
+
+  function setup(
+    trackIndex = GECKOMAIN_TAB_TRACK_INDEX,
+    profile = getGlobalTrackProfile()
+  ) {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const trackReference = { type: 'global', trackIndex };
@@ -219,8 +238,72 @@ describe('timeline/GlobalTrack', function () {
 
   it('will render a stub div if the track is hidden', () => {
     const { container, trackIndex, dispatch } = setup();
-    dispatch(hideGlobalTrack(trackIndex));
+    act(() => {
+      dispatch(hideGlobalTrack(trackIndex));
+    });
     expect(container.querySelector('.timelineTrackHidden')).toBeTruthy();
     expect(container.querySelector('.timelineTrack')).toBeFalsy();
+  });
+
+  function getTaskProfile(showMarkersInTimeline) {
+    const profile = getProfileWithMarkers([
+      ['Task 1', 0, 10, ({ type: 'task' }: any)],
+      ['Task 2', 20, 30, ({ type: 'task' }: any)],
+      ['Task 3', 40, 50, ({ type: 'task' }: any)],
+      ['Task 4', 60, 70, ({ type: 'task' }: any)],
+    ]);
+    profile.meta.markerSchema = [
+      {
+        name: 'task',
+        display: ['timeline-overview'],
+        data: [],
+      },
+    ];
+    const [thread] = profile.threads;
+    thread.name = 'Task Thread';
+    thread.showMarkersInTimeline = showMarkersInTimeline;
+    return profile;
+  }
+
+  it('will render markers with a timeline-overview schema', () => {
+    const showMarkersInTimeline = true;
+    const trackIndex = 0;
+    const profile = getTaskProfile(showMarkersInTimeline);
+
+    const { container, getState } = setup(trackIndex, profile);
+
+    // The markers overview graph is present.
+    expect(screen.getByTestId('TimelineMarkersOverview')).toBeInTheDocument();
+
+    // The markers are present in the track.
+    expect(
+      selectedThreadSelectors.getTimelineOverviewMarkerIndexes(getState())
+    ).toEqual([0, 1, 2, 3]);
+
+    // Check the snapshots, as this will capture all of the draw calls for the markers.
+    expect(container.firstChild).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
+  });
+
+  it('will not render markers to the timeline-overview when showMarkersInTimeline is not set', () => {
+    const showMarkersInTimeline = false;
+    const trackIndex = 0;
+    const profile = getTaskProfile(showMarkersInTimeline);
+
+    const { container, getState } = setup(trackIndex, profile);
+
+    // The markers overview graph is now not present.
+    expect(
+      screen.queryByTestId('TimelineMarkersOverview')
+    ).not.toBeInTheDocument();
+
+    // The markers are still present here.
+    expect(
+      selectedThreadSelectors.getTimelineOverviewMarkerIndexes(getState())
+    ).toEqual([0, 1, 2, 3]);
+
+    // Check the snapshots, as this will capture the fact that nothing is rendered.
+    expect(container.firstChild).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 });

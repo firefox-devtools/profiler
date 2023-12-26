@@ -104,7 +104,7 @@ export function getStackTimingByDepth(
   // deepestOpenBoxCallNodeIndex.
   let deepestOpenBoxCallNodeIndex = -1;
   let deepestOpenBoxDepth = -1;
-  const openBoxStartTimeByDepth = new Float32Array(maxDepthPlusOne);
+  const openBoxStartTimeByDepth = new Float64Array(maxDepthPlusOne);
 
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const sampleTime = samples.time[sampleIndex];

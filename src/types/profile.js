@@ -637,6 +637,7 @@ export type Thread = {|
   registerTime: Milliseconds,
   unregisterTime: Milliseconds | null,
   pausedRanges: PausedRange[],
+  showMarkersInTimeline?: boolean,
   name: string,
   isMainThread: boolean,
   // The eTLD+1 of the isolated content process if provided by the back-end.

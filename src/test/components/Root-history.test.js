@@ -10,6 +10,7 @@ import {
   render,
   screen,
   cleanup,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { Root } from '../../components/app/Root';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
@@ -121,7 +122,7 @@ describe('Root with history', function () {
     expect(window.history.length).toBe(1);
 
     // Going back doesn't do anything.
-    window.history.back();
+    act(() => window.history.back());
     expect(window.history.length).toBe(1);
 
     // Trigger a history event by clicking a tab.
@@ -137,7 +138,7 @@ describe('Root with history', function () {
     expect(window.history.length).toBe(2);
 
     // Now go back to the call tree.
-    window.history.back();
+    act(() => window.history.back());
 
     await waitForTab({ name: 'Call Tree', selected: true });
     await waitForTab({ name: 'Marker Chart', selected: false });
@@ -173,17 +174,18 @@ describe('Root with history', function () {
     await waitForTab({ name: 'Marker Chart', selected: true });
 
     // Now go back to the call tree.
-    window.history.back();
+    act(() => window.history.back());
 
     await waitForTab({ name: 'Call Tree', selected: true });
     await waitForTab({ name: 'Marker Chart', selected: false });
   });
 
   it('resets the history length between tests', async function () {
-    setup({
+    const { waitForTab } = setup({
       profileHash: 'FAKEHASH',
     });
     expect(window.history.length).toBe(1);
+    await waitForTab({ name: 'Call Tree', selected: true });
   });
 });
 

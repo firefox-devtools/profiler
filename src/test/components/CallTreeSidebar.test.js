@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { CallTreeSidebar } from '../../components/sidebar/CallTreeSidebar';
 import {
   changeSelectedCallNode,
@@ -75,10 +75,13 @@ describe('CallTreeSidebar', function () {
     const store = storeWithProfile(profile);
 
     const selectNode = (nodePath: CallNodePath) => {
-      store.dispatch(changeSelectedCallNode(0, nodePath));
+      act(() => {
+        store.dispatch(changeSelectedCallNode(0, nodePath));
+      });
     };
 
-    const invertCallstack = () => store.dispatch(changeInvertCallstack(true));
+    const invertCallstack = () =>
+      act(() => store.dispatch(changeInvertCallstack(true)));
 
     const renderResult = render(
       <Provider store={store}>
@@ -172,12 +175,18 @@ describe('CallTreeSidebar', function () {
       ])
     );
 
-    dispatch(changeSelectedThreads(new Set([2])));
-    dispatch(changeSelectedCallNode(2, [A]));
+    act(() => {
+      dispatch(changeSelectedThreads(new Set([2])));
+    });
+    act(() => {
+      dispatch(changeSelectedCallNode(2, [A]));
+    });
 
     expect(queryByText(/Implementation/)).not.toBeInTheDocument();
 
-    dispatch(changeSelectedCallNode(2, [A, B, D]));
+    act(() => {
+      dispatch(changeSelectedCallNode(2, [A, B, D]));
+    });
     expect(getAllByText(/Implementation/).length).toBeGreaterThan(0);
   });
 

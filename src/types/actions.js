@@ -54,6 +54,9 @@ export type DataSource =
   // This datasource is used to fetch a profile from Firefox via a frame script.
   // This is the first entry-point when a profile is captured in the browser.
   | 'from-browser'
+  // Websites can inject profiles via a postMessage call:
+  // postMessage({ name: "inject-profile", profile: Profile })
+  | 'from-post-message'
   // This is used for profiles that have been shared / uploaded to the Profiler
   // Server.
   | 'public'

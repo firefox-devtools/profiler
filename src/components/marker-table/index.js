@@ -188,6 +188,9 @@ class MarkerTableImpl extends PureComponent<Props> {
 
   componentDidMount() {
     this.focus();
+    if (this._treeView) {
+      this._treeView.scrollSelectionIntoView();
+    }
   }
 
   componentDidUpdate(prevProps) {

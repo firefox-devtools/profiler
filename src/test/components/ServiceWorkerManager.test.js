@@ -7,7 +7,11 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import * as WorkboxModule from 'workbox-window';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { ServiceWorkerManager } from '../../components/app/ServiceWorkerManager';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from '../../actions/app';
@@ -100,7 +104,9 @@ describe('app/ServiceWorkerManager', () => {
         search: '',
         hash: '',
       });
-      store.dispatch(updateUrlState(newUrlState));
+      act(() => {
+        store.dispatch(updateUrlState(newUrlState));
+      });
     }
 
     function navigateToFromBrowserProfileLoadingPage() {
@@ -109,7 +115,9 @@ describe('app/ServiceWorkerManager', () => {
         search: '',
         hash: '',
       });
-      store.dispatch(updateUrlState(newUrlState));
+      act(() => {
+        store.dispatch(updateUrlState(newUrlState));
+      });
     }
 
     function navigateToFileLoadingPage() {
@@ -118,7 +126,9 @@ describe('app/ServiceWorkerManager', () => {
         search: '',
         hash: '',
       });
-      store.dispatch(updateUrlState(newUrlState));
+      act(() => {
+        store.dispatch(updateUrlState(newUrlState));
+      });
     }
 
     function navigateToFromUrlLoadingPage(url: string) {
@@ -127,7 +137,9 @@ describe('app/ServiceWorkerManager', () => {
         search: '',
         hash: '',
       });
-      store.dispatch(updateUrlState(newUrlState));
+      act(() => {
+        store.dispatch(updateUrlState(newUrlState));
+      });
     }
 
     function getWorkboxInstance() {
@@ -225,7 +237,7 @@ describe('app/ServiceWorkerManager', () => {
         navigateToStoreLoadingPage,
       } = setup();
       navigateToStoreLoadingPage();
-      await dispatch(viewProfile(_getSimpleProfile()));
+      await act(() => dispatch(viewProfile(_getSimpleProfile())));
 
       expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
         updateViaCache: 'none',
@@ -278,7 +290,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
       expect(container).toBeEmptyDOMElement();
 
-      await dispatch(viewProfile(_getSimpleProfile()));
+      await act(() => dispatch(viewProfile(_getSimpleProfile())));
       expect(container).not.toBeEmptyDOMElement();
     });
 
@@ -293,8 +305,10 @@ describe('app/ServiceWorkerManager', () => {
       } = setup();
 
       navigateToStoreLoadingPage();
-      await dispatch(viewProfile(_getSimpleProfile()));
-      dispatch(startSymbolicating());
+      await act(() => dispatch(viewProfile(_getSimpleProfile())));
+      act(() => {
+        dispatch(startSymbolicating());
+      });
 
       const instance = getWorkboxInstance();
       // There's a new update!
@@ -305,7 +319,9 @@ describe('app/ServiceWorkerManager', () => {
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
       expect(container).toBeEmptyDOMElement();
 
-      dispatch(doneSymbolicating());
+      act(() => {
+        dispatch(doneSymbolicating());
+      });
       expect(container).not.toBeEmptyDOMElement();
     });
 
@@ -322,8 +338,10 @@ describe('app/ServiceWorkerManager', () => {
       } = setup();
 
       navigateToStoreLoadingPage();
-      await dispatch(viewProfile(_getSimpleProfile()));
-      dispatch(startSymbolicating());
+      await act(() => dispatch(viewProfile(_getSimpleProfile())));
+      act(() => {
+        dispatch(startSymbolicating());
+      });
 
       const instance = getWorkboxInstance();
       instance.dispatchEvent('installing');
@@ -343,7 +361,9 @@ describe('app/ServiceWorkerManager', () => {
       // There's a reload button for the `public` datasource only once we're ready.
       expect(queryByText(/reload/i)).not.toBeInTheDocument();
 
-      dispatch(doneSymbolicating());
+      act(() => {
+        dispatch(doneSymbolicating());
+      });
       expect(getReloadButton()).toBeInTheDocument();
     });
   });
@@ -359,7 +379,7 @@ describe('app/ServiceWorkerManager', () => {
         getWorkboxInstance,
       } = setup();
       navigateToFromBrowserProfileLoadingPage();
-      await dispatch(viewProfile(_getSimpleProfile()));
+      await act(() => dispatch(viewProfile(_getSimpleProfile())));
 
       const instance = getWorkboxInstance();
 
@@ -408,7 +428,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(container.firstChild).toMatchSnapshot();
 
       // The notice stays if we're getting ready after that.
-      await dispatch(viewProfile(_getSimpleProfile()));
+      await act(() => dispatch(viewProfile(_getSimpleProfile())));
       expect(container).not.toBeEmptyDOMElement();
     });
   });
@@ -426,7 +446,7 @@ describe('app/ServiceWorkerManager', () => {
       navigateToFromUrlLoadingPage(
         'https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task…DbtMVxw/runs/0/artifacts/public/test_info/profile_amazon.zip'
       );
-      await dispatch(viewProfile(_getSimpleProfile()));
+      await act(() => dispatch(viewProfile(_getSimpleProfile())));
 
       expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
         updateViaCache: 'none',
@@ -464,7 +484,7 @@ describe('app/ServiceWorkerManager', () => {
       const { dispatch, getWorkboxInstance, navigateToFromUrlLoadingPage } =
         setup();
       navigateToFromUrlLoadingPage('http://localhost:5656/profile_amazon.zip');
-      await dispatch(viewProfile(_getSimpleProfile()));
+      await act(() => dispatch(viewProfile(_getSimpleProfile())));
 
       expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
         updateViaCache: 'none',
@@ -491,7 +511,9 @@ describe('app/ServiceWorkerManager', () => {
 
       const instance = getWorkboxInstance();
 
-      dispatch(fatalError(new Error('Error while loading profile')));
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
       expect(window.location.reload).not.toHaveBeenCalled();
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
       // Dispatch the events that an update is ready.
@@ -508,7 +530,9 @@ describe('app/ServiceWorkerManager', () => {
       const { dispatch, getWorkboxInstance } = setup();
       const instance = getWorkboxInstance();
 
-      dispatch(fatalError(new Error('Error while loading profile')));
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
       expect(window.location.reload).not.toHaveBeenCalled();
       // Dispatch the event that an update has been activated in another tab.
       instance.dispatchEvent('controlling');
@@ -523,7 +547,9 @@ describe('app/ServiceWorkerManager', () => {
 
       instance.dispatchEvent('controlling');
       expect(window.location.reload).not.toHaveBeenCalled();
-      dispatch(fatalError(new Error('Error while loading profile')));
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
       expect(window.location.reload).toHaveBeenCalled();
     });
 
@@ -536,7 +562,9 @@ describe('app/ServiceWorkerManager', () => {
 
       const instance = getWorkboxInstance();
 
-      dispatch(fatalError(new Error('Error while loading profile')));
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
       expect(window.location.reload).not.toHaveBeenCalled();
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
       instance.dispatchEvent('installing');

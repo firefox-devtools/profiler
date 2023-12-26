@@ -77,10 +77,12 @@ class ProfileLoaderImpl extends PureComponent<Props> {
           retrieveProfilesToCompare(profilesToCompare);
         }
         break;
+      case 'from-post-message':
       case 'uploaded-recordings':
       case 'unpublished':
       case 'none':
         // nothing to do
+        /* istanbul ignore next */
         break;
       default:
         throw assertExhaustiveCheck(dataSource);
