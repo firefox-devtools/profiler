@@ -698,9 +698,8 @@ async function processTracingEvents(
         // Assume profiling starts exactly on profile start time.
         threadInfo.lastSeenTime = profile.meta.profilingStartTime = 0;
         profile.meta.profilingEndTime =
-          (profileEvent.args.data.cpuProfile.endTime -
-            profileEvent.args.data.cpuProfile.startTime) /
-          1000;
+          profileEvent.args.data.cpuProfile.endTime / 1000 -
+          profileEvent.args.data.cpuProfile.startTime / 1000;
       }
 
       // Chrome profiles sample much more frequently than Gecko ones do, and they store
