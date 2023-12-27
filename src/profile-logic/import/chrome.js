@@ -685,8 +685,12 @@ async function processTracingEvents(
         // timestamp is of profile save instead of profile start, but one can generate a
         // more accurate start timestamp through e.g. handling the Chrome DevTools
         // Protocol `Profiler.consoleProfileStarted` event.
-        const timeStampRe = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/;
-        const match = timeStampRe.exec(profileUrl ?? '');
+        const timeStampRe = /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/g;
+        let match;
+        let curMatch;
+        while ((curMatch = timeStampRe.exec(profileUrl ?? '')) !== null) {
+          match = curMatch;
+        }
         if (match) {
           const dateTimeString = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`;
           const startTime = new Date(dateTimeString);
