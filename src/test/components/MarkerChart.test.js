@@ -14,6 +14,7 @@ import {
   render,
   screen,
   fireEvent,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import {
@@ -26,7 +27,7 @@ import { changeSelectedTab } from '../../actions/app';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import { getPreviewSelection } from '../../selectors/profile';
 import { ensureExists } from '../../utils/flow';
-
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   autoMockCanvasContext,
   flushDrawLog,
@@ -420,6 +421,19 @@ describe('MarkerChart', function () {
         return positioningOptions;
       }
 
+      function leftClick(where: { x: CssPixels, y: CssPixels }) {
+        const positioningOptions = getPositioningOptions(where);
+        const canvas = ensureExists(
+          container.querySelector('canvas'),
+          `Couldn't find the canvas element`
+        );
+        // Because different components listen to different events, we trigger
+        // all the right events, to be as close as possible to the real stuff.
+        fireMouseEvent('mousemove', positioningOptions);
+        fireFullClick(canvas, positioningOptions);
+        flushRafCalls();
+      }
+
       function rightClick(where: { x: CssPixels, y: CssPixels }) {
         const positioningOptions = getPositioningOptions(where);
         const canvas = ensureExists(
@@ -459,6 +473,7 @@ describe('MarkerChart', function () {
 
       return {
         ...setupResult,
+        leftClick,
         rightClick,
         mouseOver,
         getContextMenu,
@@ -484,7 +499,7 @@ describe('MarkerChart', function () {
       expect(copy).toHaveBeenLastCalledWith('UserTiming — UserTiming A');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
-      jest.runAllTimers();
+      act(() => jest.runAllTimers());
       expect(document.querySelector('react-contextmenu')).toBeFalsy();
     });
 
@@ -525,6 +540,34 @@ describe('MarkerChart', function () {
           operation === 'set fillStyle' && argument === BLUE_60
       );
       expect(callsWithHighlightColor).toHaveLength(2);
+    });
+
+    it('allows selecting markers and highlights them', () => {
+      const { leftClick, findFillTextPosition, getState } =
+        setupForContextMenus();
+
+      function getHighlightCalls() {
+        const drawCalls = flushDrawLog();
+        return drawCalls.filter(
+          ([operation, argument]) =>
+            operation === 'set fillStyle' && argument === BLUE_60
+        );
+      }
+
+      // No highlights have been drawn yet.
+      expect(getHighlightCalls()).toHaveLength(0);
+      expect(selectedThreadSelectors.getSelectedMarker(getState())).toBe(null);
+
+      // Clicking on a marker highlights it.
+      leftClick(findFillTextPosition('UserTiming A'));
+      expect(getHighlightCalls()).toHaveLength(1);
+      const marker: any = selectedThreadSelectors.getSelectedMarker(getState());
+      expect(marker.data.name).toBe('UserTiming A');
+
+      // Clicking off of a marker unselects it.
+      leftClick({ x: 0, y: 0 });
+      expect(getHighlightCalls()).toHaveLength(0);
+      expect(selectedThreadSelectors.getSelectedMarker(getState())).toBe(null);
     });
 
     it('changes selection range when clicking on submenu', () => {
@@ -648,7 +691,9 @@ describe('MarkerChart', function () {
       flushDrawLog();
 
       // Update the chart with a search string.
-      dispatch(changeMarkersSearchString(searchString));
+      act(() => {
+        dispatch(changeMarkersSearchString(searchString));
+      });
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
@@ -669,8 +714,12 @@ describe('MarkerChart', function () {
       const profile = getProfileWithMarkers(MARKERS);
       const { dispatch, container } = setupWithProfile(profile);
 
-      dispatch(changeSelectedTab('marker-chart'));
-      dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      act(() => {
+        dispatch(changeSelectedTab('marker-chart'));
+      });
+      act(() => {
+        dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      });
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
   });
@@ -712,12 +761,14 @@ describe('MarkerChart', function () {
 
       const setupResult = setupWithProfile(profile);
       // Switch to active tab view.
-      setupResult.dispatch(
-        changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID: firstTabTabID,
-        })
-      );
+      act(() => {
+        setupResult.dispatch(
+          changeTimelineTrackOrganization({
+            type: 'active-tab',
+            tabID: firstTabTabID,
+          })
+        );
+      });
 
       return {
         ...setupResult,

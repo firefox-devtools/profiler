@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { Details } from '../../components/app/Details';
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { storeWithProfile } from '../fixtures/stores';
@@ -69,7 +69,9 @@ describe('app/Details', function () {
   tabSlugs.forEach((tabSlug: TabSlug) => {
     it(`renders an initial view with the right panel for tab ${tabSlug}`, () => {
       const { container, store } = setup();
-      store.dispatch(changeSelectedTab(tabSlug));
+      act(() => {
+        store.dispatch(changeSelectedTab(tabSlug));
+      });
       // The call tree has a special handling, see the comment above for more information.
       const expectedCustomName = tabSlug === 'calltree' ? 'call-tree' : tabSlug;
       expect(container.querySelector(expectedCustomName)).toBeTruthy();
@@ -79,12 +81,20 @@ describe('app/Details', function () {
   it('show the correct state for the sidebar open button', function () {
     const { store, getByTitle } = setup();
     expect(getByTitle(/sidebar/i)).toMatchSnapshot();
-    store.dispatch(changeSidebarOpenState('calltree', false));
+    act(() => {
+      store.dispatch(changeSidebarOpenState('calltree', false));
+    });
     expect(getByTitle(/sidebar/i)).toMatchSnapshot();
-    store.dispatch(changeSelectedTab('flame-graph'));
+    act(() => {
+      store.dispatch(changeSelectedTab('flame-graph'));
+    });
     expect(getByTitle(/sidebar/i)).toMatchSnapshot();
-    store.dispatch(changeSidebarOpenState('calltree', false));
-    store.dispatch(changeSelectedTab('calltree'));
+    act(() => {
+      store.dispatch(changeSidebarOpenState('calltree', false));
+    });
+    act(() => {
+      store.dispatch(changeSelectedTab('calltree'));
+    });
     expect(getByTitle(/sidebar/i)).toMatchSnapshot();
   });
 });
