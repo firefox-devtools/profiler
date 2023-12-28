@@ -1466,7 +1466,10 @@ export function retrieveProfileFromFile(
           arrayBuffer = decompressedProfile.buffer;
         }
 
-        const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+        const profile = await unserializeProfileOfArbitraryFormat(
+          arrayBuffer,
+          file.name
+        );
         if (profile === undefined) {
           throw new Error('Unable to parse the profile.');
         }
