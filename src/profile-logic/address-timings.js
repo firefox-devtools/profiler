@@ -82,6 +82,8 @@ import type {
   Address,
 } from 'firefox-profiler/types';
 
+import { getMatchingAncestorStackForInvertedCallNode } from './profile-data';
+
 /**
  * For each stack in `stackTable`, and one specific native symbol, compute the
  * sets of addresses for frames belonging to that native symbol that are hit by
@@ -92,31 +94,6 @@ import type {
  *       Answer: result.selfAddress[stack] === X
  *  - "Does this stack contribute to address X's total time?"
  *       Answer: result.stackAddresses[stack].has(X)
- */
-export function getStackAddressInfo(
-  stackTable: StackTable,
-  frameTable: FrameTable,
-  funcTable: FuncTable,
-  nativeSymbol: IndexIntoNativeSymbolTable,
-  isInvertedTree: boolean
-): StackAddressInfo {
-  return isInvertedTree
-    ? getStackAddressInfoInverted(
-        stackTable,
-        frameTable,
-        funcTable,
-        nativeSymbol
-      )
-    : getStackAddressInfoNonInverted(
-        stackTable,
-        frameTable,
-        funcTable,
-        nativeSymbol
-      );
-}
-
-/**
- * This function handles the non-inverted case of getStackAddressInfo.
  *
  * Compute the sets of instruction addresses for the given native symbol that
  * are hit by each stack.
@@ -154,7 +131,7 @@ export function getStackAddressInfo(
  *     For all other stacks this is the same as the stackAddresses set of the
  *     stack's prefix.
  */
-export function getStackAddressInfoNonInverted(
+export function getStackAddressInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
@@ -206,99 +183,6 @@ export function getStackAddressInfoNonInverted(
 }
 
 /**
- * This function handles the inverted case of getStackAddressInfo.
- *
- * The return value should exactly match what you'd get if you called
- * `getStackAddressInfo` on the corresponding non-inverted thread.
- * This function can probably be removed once we handle call tree inversion
- * differently.
- *
- * Reminder about inverted threads: The self time is in the *root* nodes. Example:
- *
- * Stack node A, address 0x20
- *   (called by) Stack node B, address 0x30
- *
- * The inverted stack [A, B] contributes to the self time of address 0x20.
- *
- * The returned StackAddressInfo is computed as follows:
- *   selfAddress[stack]:
- *     For (inverted thread) root stack nodes whose stack.frame.nativeSymbol is
- *     the given native symbol, this is stack.frame.address.
- *     For (inverted thread) root stack nodes whose frame is in a different
- *     native symbol, this is null.
- *     For (inverted thread) *non-root* stack nodes, this is the same as the
- *     selfAddress of the stack's prefix. This way, the selfAddress is always
- *     inherited from the subtree root.
- *   stackAddresses[stack]:
- *     For stacks whose stack.frame.nativeSymbol is the given native symbol,
- *     this is the stackAddresses of its (inverted thread) prefix stack, plus
- *     stack.frame.address added to the set.
- *     For all other stacks this is the same as the stackAddresses set of the
- *     stack's prefix.
- */
-export function getStackAddressInfoInverted(
-  stackTable: StackTable,
-  frameTable: FrameTable,
-  funcTable: FuncTable,
-  nativeSymbol: IndexIntoNativeSymbolTable
-): StackAddressInfo {
-  // "self address" == "the address which a stack's self time is contributed to"
-  const selfAddressForAllStacks = [];
-  // "total addresses" == "the set of addresses whose total time this stack contributes to"
-  const totalAddressesForAllStacks = [];
-
-  // This loop takes advantage of the fact that the stack table is topologically ordered:
-  // Prefix stacks are always visited before their descendants.
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const frame = stackTable.frame[stackIndex];
-    const prefixStack = stackTable.prefix[stackIndex];
-    const nativeSymbolOfThisStack = frameTable.nativeSymbol[frame];
-
-    let selfAddress: Address | null = null;
-    let totalAddresses: Set<Address> | null = null;
-
-    if (prefixStack === null) {
-      // This stack node is a root of the inverted tree. That means that this stack's
-      // frame's address is where the self time is assigned, for the entire subtree of
-      // the inverted stack tree at this root.
-      if (nativeSymbolOfThisStack === nativeSymbol) {
-        selfAddress = frameTable.address[frame];
-        if (selfAddress !== -1) {
-          totalAddresses = new Set([selfAddress]);
-        }
-      }
-    } else {
-      // This stack node has a prefix, which, in inverted mode, means that *this node
-      // calls someone else, and that's where the time is spent*. The prefix is the callee.
-      // So this stack node contributes its time to its root node's address.
-      // We inherit the prefix's self address.
-      selfAddress = selfAddressForAllStacks[prefixStack];
-
-      // Add this stack's address to the totalAddresses set.
-      totalAddresses = totalAddressesForAllStacks[prefixStack];
-      if (nativeSymbolOfThisStack === nativeSymbol) {
-        const thisStackAddress = frameTable.address[frame];
-        if (thisStackAddress !== -1) {
-          if (totalAddresses === null) {
-            totalAddresses = new Set([thisStackAddress]);
-          } else if (!totalAddresses.has(thisStackAddress)) {
-            totalAddresses = new Set(totalAddresses);
-            totalAddresses.add(thisStackAddress);
-          }
-        }
-      }
-    }
-
-    selfAddressForAllStacks.push(selfAddress);
-    totalAddressesForAllStacks.push(totalAddresses);
-  }
-  return {
-    selfAddress: selfAddressForAllStacks,
-    stackAddresses: totalAddressesForAllStacks,
-  };
-}
-
-/**
  * Gathers the addresses which are hit by a given call node.
  * This is different from `getStackAddressInfo`: `getStackAddressInfo` counts
  * address hits anywhere in the stack, and this function only counts hits *in
@@ -316,10 +200,9 @@ export function getStackAddressInfoForCallNode(
   frameTable: FrameTable,
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo,
-  nativeSymbol: IndexIntoNativeSymbolTable,
-  isInvertedTree: boolean
+  nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
-  return isInvertedTree
+  return callNodeInfo.isInverted
     ? getStackAddressInfoForCallNodeInverted(
         stackTable,
         frameTable,
@@ -443,7 +326,7 @@ export function getStackAddressInfoForCallNode(
  *
  * All stacks can contribute no more than one address in the given call node.
  * This is different from the getStackAddressInfo function above, where each
- * stack can hit many addreses in the same library, because all of the ancestor
+ * stack can hit many addresses of the same native symbol, because all of the ancestor
  * stacks are taken into account, rather than just one of them. Concretely,
  * this means that in the returned StackAddressInfo, each stackAddresses[stack]
  * set will only contain at most one element.
@@ -523,8 +406,8 @@ export function getStackAddressInfoForCallNodeNonInverted(
  * The returned StackAddressInfo is computed as follows:
  *   selfAddress[stack]:
  *     For (inverted thread) root stack nodes that map to the given call node
- *     and whose stack.frame.nativeSymbol is the given library, this is stack.frame.address.
- *     For (inverted thread) root stack nodes whose frame is in a different library,
+ *     and whose stack.frame.nativeSymbol is the given symbol, this is stack.frame.address.
+ *     For (inverted thread) root stack nodes whose frame with a different symbol,
  *     or which don't map to the given call node, this is null.
  *     For (inverted thread) *non-root* stack nodes, this is the same as the selfAddress
  *     of the stack's prefix. This way, the selfAddress is always inherited from the
@@ -540,54 +423,53 @@ export function getStackAddressInfoForCallNodeInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
   callNodeIndex: IndexIntoCallNodeTable,
-  { stackIndexToCallNodeIndex }: CallNodeInfo,
+  callNodeInfo: CallNodeInfo,
   nativeSymbol: IndexIntoNativeSymbolTable
 ): StackAddressInfo {
+  const invertedCallNodeTable = callNodeInfo.callNodeTable;
+  const depth = invertedCallNodeTable.depth[callNodeIndex];
+  const endIndex = invertedCallNodeTable.subtreeRangeEnd[callNodeIndex];
+  const callNodeIsRootOfInvertedTree =
+    invertedCallNodeTable.prefix[callNodeIndex] === -1;
+  const { stackIndexToCallNodeIndex } = callNodeInfo;
+  const stackTablePrefixCol = stackTable.prefix;
+
   // "self address" == "the address which a stack's self time is contributed to"
   const callNodeSelfAddressForAllStacks = [];
   // "total addresses" == "the set of addresses whose total time this stack contributes to"
   // Either null or a single-element set.
   const callNodeTotalAddressesForAllStacks = [];
 
-  // This loop takes advantage of the fact that the stack table is topologically ordered:
-  // Prefix stacks are always visited before their descendants.
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     let selfAddress: Address | null = null;
     let totalAddresses: Set<Address> | null = null;
 
-    const prefixStack = stackTable.prefix[stackIndex];
-    if (
-      stackIndexToCallNodeIndex[stackIndex] === callNodeIndex &&
-      frameTable.nativeSymbol[stackTable.frame[stackIndex]] === nativeSymbol
-    ) {
-      // This stack contributes to the call node's self time for the right
-      // native symbol. We needed to check both, because multiple stacks for the
-      // same call node can have different native symbols.
-      const frame = stackTable.frame[stackIndex];
-      const address = frameTable.address[frame];
-      if (address !== -1) {
-        totalAddresses = new Set([address]);
-        if (prefixStack === null) {
-          // This is a root of the inverted tree, and it is the given
-          // call node. That means that we have a self address.
-          selfAddress = address;
-        } else {
-          // This is not a root stack node, so no self time is spent
-          // in the given call node for this stack node.
+    const stackForCallNode = getMatchingAncestorStackForInvertedCallNode(
+      stackIndex,
+      callNodeIndex,
+      endIndex,
+      depth,
+      stackIndexToCallNodeIndex,
+      stackTablePrefixCol
+    );
+    if (stackForCallNode !== null) {
+      const frameForCallNode = stackTable.frame[stackForCallNode];
+      if (frameTable.nativeSymbol[frameForCallNode] === nativeSymbol) {
+        // This stack contributes to the call node's total time for the right
+        // native symbol. We needed to check both, because multiple stacks for the
+        // same call node can have different native symbols.
+        const address = frameTable.address[frameForCallNode];
+        if (address !== -1) {
+          totalAddresses = new Set([address]);
+          if (callNodeIsRootOfInvertedTree) {
+            // This is a root of the inverted tree, and it is the given
+            // call node. That means that we have a self address.
+            selfAddress = address;
+          } else {
+            // This is not a root stack node, so no self time is spent
+            // in the given call node for this stack node.
+          }
         }
-      }
-    } else {
-      if (prefixStack === null) {
-        // This is a root of the inverted tree, but it doesn't map
-        // to the given call node. It doesn't contribute to the call node's
-        // self time or total time.
-      } else {
-        // This is not a root stack node. Samples that hit this stack node
-        // spend their time in the root node of our subtree. If that root
-        // maps to the given call node, we may have self time.
-        // Inherit both self and total time contribution from the parent stack.
-        selfAddress = callNodeSelfAddressForAllStacks[prefixStack];
-        totalAddresses = callNodeTotalAddressesForAllStacks[prefixStack];
       }
     }
 
