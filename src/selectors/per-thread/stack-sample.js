@@ -93,7 +93,7 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  // A selector for getCallNodeInfo.
+  // A selector for the non-inverted call node info.
   // getCallNodeInfo can be very expensive, so we want to minimize the number of
   // times it gets called, in particular when transforms are applied and unapplied
   // or when the filtered time range changes.
@@ -104,7 +104,7 @@ export function getStackAndSampleSelectorsPerThread(
   // In addition, we use createSelectorWithTwoCacheSlots so that removing the last
   // transform is fast. This lets you quickly go back and forth between a focused
   // function and the whole profile.
-  const getCallNodeInfo: Selector<CallNodeInfo> =
+  const _getNonInvertedCallNodeInfo: Selector<CallNodeInfo> =
     createSelectorWithTwoCacheSlots(
       (state) => threadSelectors.getFilteredThread(state).stackTable,
       (state) => threadSelectors.getFilteredThread(state).frameTable,
@@ -113,15 +113,27 @@ export function getStackAndSampleSelectorsPerThread(
       ProfileData.getCallNodeInfo
     );
 
+  const _getInvertedCallNodeInfo: Selector<CallNodeInfo> =
+    createSelectorWithTwoCacheSlots(
+      threadSelectors.getFilteredThread,
+      ProfileSelectors.getDefaultCategory,
+      ProfileData.getInvertedCallNodeInfo
+    );
+
+  const getCallNodeInfo: Selector<CallNodeInfo> = (state) => {
+    if (UrlState.getInvertCallstack(state)) {
+      return _getInvertedCallNodeInfo(state);
+    }
+    return _getNonInvertedCallNodeInfo(state);
+  };
+
   const getSourceViewStackLineInfo: Selector<StackLineInfo | null> =
     createSelector(
       threadSelectors.getFilteredThread,
       UrlState.getSourceViewFile,
-      UrlState.getInvertCallstack,
       (
         { stackTable, frameTable, funcTable, stringTable }: Thread,
-        sourceViewFile,
-        invertCallStack
+        sourceViewFile
       ): StackLineInfo | null => {
         if (sourceViewFile === null) {
           return null;
@@ -130,8 +142,7 @@ export function getStackAndSampleSelectorsPerThread(
           stackTable,
           frameTable,
           funcTable,
-          stringTable.indexForString(sourceViewFile),
-          invertCallStack
+          stringTable.indexForString(sourceViewFile)
         );
       }
     );
@@ -157,11 +168,9 @@ export function getStackAndSampleSelectorsPerThread(
     createSelector(
       threadSelectors.getFilteredThread,
       getAssemblyViewNativeSymbolIndex,
-      UrlState.getInvertCallstack,
       (
         { stackTable, frameTable, funcTable }: Thread,
-        nativeSymbolIndex,
-        invertCallStack
+        nativeSymbolIndex
       ): StackAddressInfo | null => {
         if (nativeSymbolIndex === null) {
           return null;
@@ -170,8 +179,7 @@ export function getStackAndSampleSelectorsPerThread(
           stackTable,
           frameTable,
           funcTable,
-          nativeSymbolIndex,
-          invertCallStack
+          nativeSymbolIndex
         );
       }
     );
