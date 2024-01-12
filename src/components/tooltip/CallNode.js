@@ -15,11 +15,11 @@ import {
 } from 'firefox-profiler/profile-logic/profile-data';
 import { countPositiveValues } from 'firefox-profiler/utils';
 
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 import type {
   Thread,
   CategoryList,
   IndexIntoCallNodeTable,
+  CallNodeDisplayData,
   CallNodeInfo,
   WeightType,
   Milliseconds,
@@ -53,7 +53,7 @@ type Props = {|
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
   +durationText: string,
-  +callTree?: CallTree,
+  +displayData?: CallNodeDisplayData,
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +displayStackType: boolean,
@@ -303,7 +303,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     if (!maybeTimings) {
       return false;
     }
-    return Boolean(maybeTimings.forPath.totalTime.breakdownByImplementation);
+    return maybeTimings.forPath.totalTime.breakdownByImplementation !== null;
   }
 
   _renderImplementationTimings(maybeTimings: ?TimingsForPath) {
@@ -426,7 +426,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       thread,
       durationText,
       categories,
-      callTree,
+      displayData,
       timings,
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
@@ -440,11 +440,6 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const innerWindowID = callNodeTable.innerWindowID[callNodeIndex];
     const funcStringIndex = thread.funcTable.name[funcIndex];
     const funcName = thread.stringTable.getString(funcStringIndex);
-
-    let displayData;
-    if (callTree) {
-      displayData = callTree.getDisplayData(callNodeIndex);
-    }
 
     let fileName = null;
 

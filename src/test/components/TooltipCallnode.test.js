@@ -27,6 +27,13 @@ describe('TooltipCallNode', function () {
     const { getState, dispatch } = store;
 
     function renderTooltip() {
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callNodeIndex = ensureExists(
+        selectedThreadSelectors.getSelectedCallNodeIndex(getState()),
+        'Unable to find a selected call node index.'
+      );
+      const displayData = callTree.getDisplayData(callNodeIndex);
+
       // This component is not currently connected.
       return render(
         <Provider store={store}>
@@ -36,15 +43,12 @@ describe('TooltipCallNode', function () {
             innerWindowIDToPageMap={ProfileSelectors.getInnerWindowIDToPageMap(
               getState()
             )}
-            callNodeIndex={ensureExists(
-              selectedThreadSelectors.getSelectedCallNodeIndex(getState()),
-              'Unable to find a selected call node index.'
-            )}
+            callNodeIndex={callNodeIndex}
             callNodeInfo={selectedThreadSelectors.getCallNodeInfo(getState())}
+            displayData={displayData}
             categories={ProfileSelectors.getCategories(getState())}
             interval={ProfileSelectors.getProfileInterval(getState())}
             durationText="Fake Duration Text"
-            callTree={selectedThreadSelectors.getCallTree(getState())}
             callTreeSummaryStrategy={selectedThreadSelectors.getCallTreeSummaryStrategy(
               getState()
             )}
