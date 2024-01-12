@@ -105,7 +105,13 @@ export function getCallNodeInfo(
     funcTable,
     defaultCategory
   );
-  return new CallNodeInfoImpl(callNodeTable, stackIndexToCallNodeIndex, false);
+  return new CallNodeInfoImpl(
+    callNodeTable,
+    callNodeTable,
+    stackIndexToCallNodeIndex,
+    stackIndexToCallNodeIndex,
+    false
+  );
 }
 
 type CallNodeTableAndStackMap = {
@@ -423,6 +429,8 @@ function _createCallNodeTableFromUnorderedComponents(
  */
 export function getInvertedCallNodeInfo(
   thread: Thread,
+  nonInvertedCallNodeTable: CallNodeTable,
+  stackIndexToNonInvertedCallNodeIndex: Int32Array,
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   // We compute an inverted stack table, but we don't let it escape this function.
@@ -468,7 +476,9 @@ export function getInvertedCallNodeInfo(
   }
   return new CallNodeInfoImpl(
     callNodeTable,
+    nonInvertedCallNodeTable,
     nonInvertedStackIndexToCallNodeIndex,
+    stackIndexToNonInvertedCallNodeIndex,
     true
   );
 }

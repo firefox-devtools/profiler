@@ -21,11 +21,22 @@ export class CallNodeInfoImpl implements CallNodeInfo {
   // If true, call node indexes describe nodes in the inverted call tree.
   _isInverted: boolean;
 
-  // The call node table.
+  // The call node table. This is either the inverted or the non-inverted call
+  // node table, depending on _isInverted.
   _callNodeTable: CallNodeTable;
 
-  // The mapping of stack index to corresponding call node index.
+  // The non-inverted call node table, regardless of _isInverted.
+  _nonInvertedCallNodeTable: CallNodeTable;
+
+  // The mapping of stack index to corresponding call node index. This maps to
+  // either the inverted or the non-inverted call node table, depending on
+  // _isInverted.
   _stackIndexToCallNodeIndex: Int32Array;
+
+  // The mapping of stack index to corresponding non-inverted call node index.
+  // This always maps to the non-inverted call node table, regardless of
+  // _isInverted.
+  _stackIndexToNonInvertedCallNodeIndex: Int32Array;
 
   // This is a Map<CallNodePathHash, IndexIntoCallNodeTable>. This map speeds up
   // the look-up process by caching every CallNodePath we handle which avoids
@@ -34,11 +45,16 @@ export class CallNodeInfoImpl implements CallNodeInfo {
 
   constructor(
     callNodeTable: CallNodeTable,
+    nonInvertedCallNodeTable: CallNodeTable,
     stackIndexToCallNodeIndex: Int32Array,
+    stackIndexToNonInvertedCallNodeIndex: Int32Array,
     isInverted: boolean
   ) {
     this._callNodeTable = callNodeTable;
+    this._nonInvertedCallNodeTable = nonInvertedCallNodeTable;
     this._stackIndexToCallNodeIndex = stackIndexToCallNodeIndex;
+    this._stackIndexToNonInvertedCallNodeIndex =
+      stackIndexToNonInvertedCallNodeIndex;
     this._isInverted = isInverted;
   }
 
@@ -52,6 +68,14 @@ export class CallNodeInfoImpl implements CallNodeInfo {
 
   getStackIndexToCallNodeIndex(): Int32Array {
     return this._stackIndexToCallNodeIndex;
+  }
+
+  getNonInvertedCallNodeTable(): CallNodeTable {
+    return this._nonInvertedCallNodeTable;
+  }
+
+  getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
+    return this._stackIndexToNonInvertedCallNodeIndex;
   }
 
   getCallNodePathFromIndex(
