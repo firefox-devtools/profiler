@@ -1195,7 +1195,18 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const callNodeInfo = getInvertedCallNodeInfo(thread, defaultCategory);
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const callNodeInfo = getInvertedCallNodeInfo(
+      thread,
+      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      defaultCategory
+    );
     const c = callNodeInfo.getCallNodeIndexFromPath([funC]);
     expect(c).not.toBeNull();
 

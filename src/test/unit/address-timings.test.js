@@ -158,9 +158,20 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     isInverted: boolean
   ) {
     const { stackTable, frameTable, funcTable, samples } = thread;
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      stackTable,
+      frameTable,
+      funcTable,
+      defaultCat
+    );
     const callNodeInfo = isInverted
-      ? getInvertedCallNodeInfo(thread, defaultCat)
-      : getCallNodeInfo(stackTable, frameTable, funcTable, defaultCat);
+      ? getInvertedCallNodeInfo(
+          thread,
+          nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+          nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+          defaultCat
+        )
+      : nonInvertedCallNodeInfo;
     const callNodeIndex = ensureExists(
       callNodeInfo.getCallNodeIndexFromPath(callNodePath),
       'invalid call node path'
