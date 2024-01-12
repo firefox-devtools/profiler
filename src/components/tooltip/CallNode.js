@@ -20,7 +20,6 @@ import type {
   Thread,
   CategoryList,
   IndexIntoCallNodeTable,
-  CallNodeDisplayData,
   CallNodeInfo,
   WeightType,
   Milliseconds,
@@ -227,11 +226,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     return rows;
   }
 
-  _renderCategoryTimings(
-    maybeTimings: ?TimingsForPath,
-    maybeDisplayData: ?CallNodeDisplayData
-  ) {
-    if (!maybeTimings || !maybeDisplayData) {
+  _renderCategoryTimings(maybeTimings: ?TimingsForPath) {
+    if (!maybeTimings) {
       return null;
     }
     const { totalTime, selfTime } = maybeTimings.forPath;
@@ -303,21 +299,15 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     );
   }
 
-  _canRenderImplementationTimings(
-    maybeTimings: ?TimingsForPath,
-    maybeDisplayData: ?CallNodeDisplayData
-  ) {
-    if (!maybeTimings || !maybeDisplayData) {
+  _canRenderImplementationTimings(maybeTimings: ?TimingsForPath) {
+    if (!maybeTimings) {
       return false;
     }
     return Boolean(maybeTimings.forPath.totalTime.breakdownByImplementation);
   }
 
-  _renderImplementationTimings(
-    maybeTimings: ?TimingsForPath,
-    maybeDisplayData: ?CallNodeDisplayData
-  ) {
-    if (!maybeTimings || !maybeDisplayData) {
+  _renderImplementationTimings(maybeTimings: ?TimingsForPath) {
+    if (!maybeTimings) {
       return null;
     }
     const { totalTime, selfTime } = maybeTimings.forPath;
@@ -589,9 +579,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           </div>
         </div>
         <div className="tooltipCallNodeDetails">
-          {this._canRenderImplementationTimings(timings, displayData)
-            ? this._renderImplementationTimings(timings, displayData)
-            : this._renderCategoryTimings(timings, displayData)}
+          {this._canRenderImplementationTimings(timings)
+            ? this._renderImplementationTimings(timings)
+            : this._renderCategoryTimings(timings)}
           {callTreeSummaryStrategy !== 'timing' && displayData ? (
             <div className="tooltipDetails tooltipCallNodeDetailsLeft">
               {/* Everything in this div needs to come in pairs of two in order to
