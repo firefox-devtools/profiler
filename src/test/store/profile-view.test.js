@@ -3294,10 +3294,12 @@ describe('traced timing', function () {
 
     return {
       funcNames: funcNamesDictPerThread[0],
-      getCallNode: (...callNodePath) =>
-        ensureExists(callNodeInfo.getCallNodeIndexFromPath(callNodePath)),
-      running,
-      self,
+      getSelfAndTotal: (...callNodePath) => {
+        const callNodeIndex = ensureExists(
+          callNodeInfo.getCallNodeIndexFromPath(callNodePath)
+        );
+        return { self: self[callNodeIndex], total: running[callNodeIndex] };
+      },
       profile,
     };
   }
@@ -3305,9 +3307,7 @@ describe('traced timing', function () {
   it('computes traced timing', function () {
     const {
       funcNames: { A, B, C },
-      getCallNode,
-      running,
-      self,
+      getSelfAndTotal,
       profile,
     } = setup(
       { inverted: false },
@@ -3318,24 +3318,18 @@ describe('traced timing', function () {
       `
     );
 
-    expect(running[getCallNode(A)]).toBe(6);
-    expect(self[getCallNode(A)]).toBe(2);
-
-    expect(running[getCallNode(A, B)]).toBe(4);
-    expect(self[getCallNode(A, B)]).toBe(4);
+    expect(getSelfAndTotal(A)).toEqual({ self: 2, total: 6 });
+    expect(getSelfAndTotal(A, B)).toEqual({ self: 4, total: 4 });
 
     // This is the last sample, which is deduced to be the interval length.
-    expect(running[getCallNode(C)]).toBe(profile.meta.interval);
-    expect(self[getCallNode(C)]).toBe(profile.meta.interval);
+    const interval = profile.meta.interval;
+    expect(getSelfAndTotal(C)).toEqual({ self: interval, total: interval });
   });
 
   it('computes traced timing for an inverted tree', function () {
     const {
       funcNames: { A, B, C },
-      getCallNode,
-      running,
-      // Rename self to make the assertions more readable.
-      self: self___,
+      getSelfAndTotal,
     } = setup(
       { inverted: true },
       `
@@ -3356,23 +3350,12 @@ describe('traced timing', function () {
     // Running: [ 1, 4, 4, 1.5, 1, 1 ]
     // Self:    [ 1, 4, 0, 1.5, 0, 0 ]
 
-    expect(running[getCallNode(A)]).toBe(1);
-    expect(self___[getCallNode(A)]).toBe(1);
-
-    expect(running[getCallNode(B)]).toBe(4);
-    expect(self___[getCallNode(B)]).toBe(4);
-
-    expect(running[getCallNode(B, A)]).toBe(4);
-    expect(self___[getCallNode(B, A)]).toBe(0);
-
-    expect(running[getCallNode(C)]).toBe(1.5);
-    expect(self___[getCallNode(C)]).toBe(1.5);
-
-    expect(running[getCallNode(C, B)]).toBe(1);
-    expect(self___[getCallNode(C, B)]).toBe(0);
-
-    expect(running[getCallNode(C, B, A)]).toBe(1);
-    expect(self___[getCallNode(C, B, A)]).toBe(0);
+    expect(getSelfAndTotal(A)).toEqual({ self: 1, total: 1 });
+    expect(getSelfAndTotal(B)).toEqual({ self: 4, total: 4 });
+    expect(getSelfAndTotal(B, A)).toEqual({ self: 0, total: 4 });
+    expect(getSelfAndTotal(C)).toEqual({ self: 1.5, total: 1.5 });
+    expect(getSelfAndTotal(C, B)).toEqual({ self: 0, total: 1 });
+    expect(getSelfAndTotal(C, B, A)).toEqual({ self: 0, total: 1 });
   });
 
   it('does not compute traced timing for other types', function () {
@@ -3393,9 +3376,7 @@ describe('traced timing', function () {
   it('computes traced timing based on the preview selection', function () {
     const {
       funcNames: { A, B, C },
-      getCallNode,
-      running,
-      self,
+      getSelfAndTotal,
       profile,
     } = setup(
       { inverted: false, previewSelection: { start: 1, end: 5.5 } },
@@ -3411,16 +3392,15 @@ describe('traced timing', function () {
     // the second sample will have a "traced duration" of the interval, because
     // it's the last sample in the range.
 
-    expect(running[getCallNode(A)]).toBe(4 + profile.meta.interval);
-    expect(self[getCallNode(A)]).toBe(profile.meta.interval);
-
-    expect(running[getCallNode(A, B)]).toBe(4);
-    expect(self[getCallNode(A, B)]).toBe(4);
+    expect(getSelfAndTotal(A)).toEqual({
+      self: profile.meta.interval,
+      total: 4 + profile.meta.interval,
+    });
+    expect(getSelfAndTotal(A, B)).toEqual({ self: 4, total: 4 });
 
     // Call node [C] is fully outside the preview range, so we should have no
     // traced duration for it.
-    expect(running[getCallNode(C)]).toBe(0);
-    expect(self[getCallNode(C)]).toBe(0);
+    expect(getSelfAndTotal(C)).toEqual({ self: 0, total: 0 });
   });
 });
 

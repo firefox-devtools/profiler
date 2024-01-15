@@ -655,6 +655,16 @@ export type ProfileFilterPageData = {|
 |};
 
 /**
+ * The self and total time, usually for a single call node.
+ * As with most places where the terms "self" and "total" are used, the meaning
+ * of the numbers depends on the context:
+ *  - When used for "traced" timing, the values are Milliseconds.
+ *  - Otherwise, the values are in the same unit as the sample weight type. For
+ *    example, they could be sample counts, weights, or bytes.
+ */
+export type SelfAndTotal = {| self: number, total: number |};
+
+/**
  * This struct contains the traced timing for each call node. The arrays are indexed
  * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
  * traced timing is computed by summing the distance between samples for a given call
