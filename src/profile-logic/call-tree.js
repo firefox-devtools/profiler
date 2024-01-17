@@ -6,7 +6,6 @@
 import { oneLine } from 'common-tags';
 import { timeCode } from '../utils/time-code';
 import {
-  getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
   getBottomBoxInfoForCallNode,
@@ -26,8 +25,6 @@ import type {
   CallNodeData,
   CallNodeDisplayData,
   Milliseconds,
-  TracedTiming,
-  SamplesTable,
   ExtraBadgeInfo,
   BottomBoxInfo,
   CallNodeLeafAndSummary,
@@ -628,7 +625,7 @@ export function extractSamplesLikeTable(
 }
 
 /**
- * This function is extremely similar to computeCallTreeTimings,
+ * This function is extremely similar to computeCallNodeLeafAndSummary,
  * but is specialized for converting sample counts into traced timing. Samples
  * don't have duration information associated with them, it's mostly how long they
  * were observed to be running. This function computes the timing the exact same
@@ -638,15 +635,12 @@ export function extractSamplesLikeTable(
  * did not agree. In order to remove confusion, we can show the sample counts,
  * plus the traced timing, which is a compromise between correctness, and consistency.
  */
-export function computeTracedTiming(
+export function computeCallNodeTracedLeafAndSummary(
   samples: SamplesLikeTable,
-  callNodeInfo: CallNodeInfo,
-  interval: Milliseconds,
-  _invertCallstack: boolean
-): TracedTiming | null {
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
-
+  sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
+  callNodeCount: number,
+  interval: Milliseconds
+): CallNodeLeafAndSummary | null {
   if (samples.weightType !== 'samples' || samples.weight) {
     // Only compute for the samples weight types that have no weights. If a samples
     // table has weights then it's a diff profile. Currently, we aren't calculating
@@ -658,63 +652,28 @@ export function computeTracedTiming(
     return null;
   }
 
-  // Compute the timing duration, which is the time between this sample and the next.
-  const weight = [];
+  const callNodeLeaf = new Float32Array(callNodeCount);
+  let rootTotalSummary = 0;
+
   for (let sampleIndex = 0; sampleIndex < samples.length - 1; sampleIndex++) {
-    weight.push(samples.time[sampleIndex + 1] - samples.time[sampleIndex]);
+    const callNodeIndex = sampleIndexToCallNodeIndex[sampleIndex];
+    if (callNodeIndex !== null) {
+      const sampleTracedTime =
+        samples.time[sampleIndex + 1] - samples.time[sampleIndex];
+      callNodeLeaf[callNodeIndex] += sampleTracedTime;
+      rootTotalSummary += sampleTracedTime;
+    }
   }
+
   if (samples.length > 0) {
-    // Use the sampling interval for the last sample.
-    weight.push(interval);
-  }
-  const samplesWithWeight: SamplesTable = {
-    ...samples,
-    weight,
-  };
-
-  const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
-    samples.stack,
-    stackIndexToCallNodeIndex
-  );
-  const { callNodeLeaf } = computeCallNodeLeafAndSummary(
-    samplesWithWeight,
-    sampleIndexToCallNodeIndex,
-    callNodeTable.length
-  );
-  const callNodeSelf = callNodeInfo.isInverted()
-    ? _getInvertedCallNodeSelf(callNodeLeaf, callNodeTable)
-    : callNodeLeaf;
-
-  // Compute the following variables:
-  const callNodeTotalSummary = new Float32Array(callNodeTable.length);
-  const callNodeHasChildren = new Uint8Array(callNodeTable.length);
-
-  // We loop the call node table in reverse, so that we find the children
-  // before their parents, and the total time is known at the time we reach a
-  // node.
-  for (
-    let callNodeIndex = callNodeTable.length - 1;
-    callNodeIndex >= 0;
-    callNodeIndex--
-  ) {
-    callNodeTotalSummary[callNodeIndex] += callNodeLeaf[callNodeIndex];
-    const hasChildren = callNodeHasChildren[callNodeIndex] !== 0;
-    const hasTotalValue = callNodeTotalSummary[callNodeIndex] !== 0;
-
-    if (!hasChildren && !hasTotalValue) {
-      continue;
-    }
-
-    const prefixCallNode = callNodeTable.prefix[callNodeIndex];
-    if (prefixCallNode !== -1) {
-      callNodeTotalSummary[prefixCallNode] +=
-        callNodeTotalSummary[callNodeIndex];
-      callNodeHasChildren[prefixCallNode] = 1;
+    const callNodeIndex = sampleIndexToCallNodeIndex[samples.length - 1];
+    if (callNodeIndex !== null) {
+      // Use the sampling interval for the last sample.
+      const sampleTracedTime = interval;
+      callNodeLeaf[callNodeIndex] += sampleTracedTime;
+      rootTotalSummary += sampleTracedTime;
     }
   }
 
-  return {
-    self: callNodeSelf,
-    running: callNodeTotalSummary,
-  };
+  return { callNodeLeaf, rootTotalSummary };
 }

@@ -3287,7 +3287,7 @@ describe('traced timing', function () {
 
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
 
-    const { running, self } = ensureExists(
+    const { total, self } = ensureExists(
       selectedThreadSelectors.getTracedTiming(getState()),
       'Expected to get a traced timing.'
     );
@@ -3298,7 +3298,7 @@ describe('traced timing', function () {
         const callNodeIndex = ensureExists(
           callNodeInfo.getCallNodeIndexFromPath(callNodePath)
         );
-        return { self: self[callNodeIndex], total: running[callNodeIndex] };
+        return { self: self[callNodeIndex], total: total[callNodeIndex] };
       },
       profile,
     };
@@ -3347,8 +3347,8 @@ describe('traced timing', function () {
     );
 
     // This test is a bit hard to assert in a really readable fasshion.
-    // Running: [ 1, 4, 4, 1.5, 1, 1 ]
-    // Self:    [ 1, 4, 0, 1.5, 0, 0 ]
+    // total: [ 1, 4, 4, 1.5, 1, 1 ]
+    // Self:  [ 1, 4, 0, 1.5, 0, 0 ]
 
     expect(getSelfAndTotal(A)).toEqual({ self: 1, total: 1 });
     expect(getSelfAndTotal(B)).toEqual({ self: 4, total: 4 });

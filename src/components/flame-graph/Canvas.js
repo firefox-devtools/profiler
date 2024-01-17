@@ -33,7 +33,6 @@ import type {
   CallTreeSummaryStrategy,
   WeightType,
   SamplesLikeTable,
-  TracedTiming,
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
@@ -49,7 +48,10 @@ import type {
   ChartCanvasHoverInfo,
 } from '../shared/chart/Canvas';
 
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import type {
+  CallTree,
+  CallTreeTimings,
+} from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -75,7 +77,7 @@ export type OwnProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: TracedTiming | null,
+  +tracedTiming: CallTreeTimings | null,
   +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
@@ -391,7 +393,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       const time = formatCallNodeNumberWithUnit(
         'tracing-ms',
         false,
-        tracedTiming.running[callNodeIndex]
+        tracedTiming.total[callNodeIndex]
       );
       percentage = `${time} (${percentage})`;
     }

@@ -42,7 +42,6 @@ import type {
   StartEndRange,
   Selector,
   $ReturnType,
-  TracedTiming,
   ThreadsKey,
   SelfAndTotal,
 } from 'firefox-profiler/types';
@@ -344,13 +343,33 @@ export function getStackAndSampleSelectorsPerThread(
       getAddressTimings
     );
 
-  const getTracedTiming: Selector<TracedTiming | null> = createSelector(
-    threadSelectors.getPreviewFilteredSamplesForCallTree,
-    getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
-    UrlState.getInvertCallstack,
-    CallTree.computeTracedTiming
-  );
+  const getTracedTiming: Selector<CallTree.CallTreeTimings | null> =
+    createSelector(
+      threadSelectors.getPreviewFilteredSamplesForCallTree,
+      getCallNodeInfo,
+      ProfileSelectors.getProfileInterval,
+      (samples, callNodeInfo, interval) => {
+        const sampleIndexToCallNodeIndex =
+          ProfileData.getSampleIndexToCallNodeIndex(
+            samples.stack,
+            callNodeInfo.getStackIndexToCallNodeIndex()
+          );
+        const callNodeLeafAndSummary =
+          CallTree.computeCallNodeTracedLeafAndSummary(
+            samples,
+            sampleIndexToCallNodeIndex,
+            callNodeInfo.getCallNodeTable().length,
+            interval
+          );
+        if (callNodeLeafAndSummary === null) {
+          return null;
+        }
+        return CallTree.computeCallTreeTimings(
+          callNodeInfo,
+          callNodeLeafAndSummary
+        );
+      }
+    );
 
   const getTracedSelfAndTotalForSelectedCallNode: Selector<SelfAndTotal | null> =
     createSelector(
@@ -360,7 +379,7 @@ export function getStackAndSampleSelectorsPerThread(
         if (selectedCallNodeIndex === null || tracedTiming === null) {
           return null;
         }
-        const total = tracedTiming.running[selectedCallNodeIndex];
+        const total = tracedTiming.total[selectedCallNodeIndex];
         const self = tracedTiming.self[selectedCallNodeIndex];
         return { total, self };
       }

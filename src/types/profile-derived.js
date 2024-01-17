@@ -673,17 +673,6 @@ export type CallNodeLeafAndSummary = {|
  */
 export type SelfAndTotal = {| self: number, total: number |};
 
-/**
- * This struct contains the traced timing for each call node. The arrays are indexed
- * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
- * traced timing is computed by summing the distance between samples for a given call
- * node. See the `computeTracedTiming` for more details.
- */
-export type TracedTiming = {|
-  +self: Float32Array,
-  +running: Float32Array,
-|};
-
 /*
  * Event delay table that holds the pre-processed event delay values and other
  * statistics about it.
