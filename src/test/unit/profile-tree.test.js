@@ -82,11 +82,9 @@ describe('unfiltered call tree', function () {
       ).toEqual({
         rootTotalSummary: 3,
         callNodeHasChildren: new Uint8Array([1, 1, 1, 1, 0, 1, 0, 1, 0]),
-        callNodeSummary: {
-          self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
-          leaf: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
-          total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
-        },
+        self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+        leaf: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+        total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
       });
     });
   });

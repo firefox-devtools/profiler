@@ -40,14 +40,12 @@ import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
-type CallNodeSummary = {
+
+export type CallTreeTimings = {
+  callNodeHasChildren: Uint8Array,
   self: Float32Array,
   leaf: Float32Array,
   total: Float32Array,
-};
-export type CallTreeTimings = {
-  callNodeHasChildren: Uint8Array,
-  callNodeSummary: CallNodeSummary,
   rootTotalSummary: number,
 };
 
@@ -72,7 +70,7 @@ export class CallTree {
   _categories: CategoryList;
   _callNodeInfo: CallNodeInfo;
   _callNodeTable: CallNodeTable;
-  _callNodeSummary: CallNodeSummary;
+  _callTreeTimings: CallTreeTimings;
   _callNodeHasChildren: Uint8Array; // A table column matching the callNodeTable
   _thread: Thread;
   _rootTotalSummary: number;
@@ -87,19 +85,17 @@ export class CallTree {
     thread: Thread,
     categories: CategoryList,
     callNodeInfo: CallNodeInfo,
-    callNodeSummary: CallNodeSummary,
-    callNodeHasChildren: Uint8Array,
-    rootTotalSummary: number,
+    callTreeTimings: CallTreeTimings,
     isHighPrecision: boolean,
     weightType: WeightType
   ) {
     this._categories = categories;
     this._callNodeInfo = callNodeInfo;
     this._callNodeTable = callNodeInfo.getCallNodeTable();
-    this._callNodeSummary = callNodeSummary;
-    this._callNodeHasChildren = callNodeHasChildren;
+    this._callTreeTimings = callTreeTimings;
+    this._callNodeHasChildren = callTreeTimings.callNodeHasChildren;
     this._thread = thread;
-    this._rootTotalSummary = rootTotalSummary;
+    this._rootTotalSummary = callTreeTimings.rootTotalSummary;
     this._displayDataByIndex = new Map();
     this._children = [];
     this._isHighPrecision = isHighPrecision;
@@ -134,7 +130,7 @@ export class CallTree {
         childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
       ) {
         const childTotalSummary =
-          this._callNodeSummary.total[childCallNodeIndex];
+          this._callTreeTimings.total[childCallNodeIndex];
         const childHasChildren = this._callNodeHasChildren[childCallNodeIndex];
 
         if (childTotalSummary !== 0 || childHasChildren !== 0) {
@@ -143,8 +139,8 @@ export class CallTree {
       }
       children.sort(
         (a, b) =>
-          Math.abs(this._callNodeSummary.total[b]) -
-          Math.abs(this._callNodeSummary.total[a])
+          Math.abs(this._callTreeTimings.total[b]) -
+          Math.abs(this._callTreeTimings.total[a])
       );
       this._children[callNodeIndex] = children;
     }
@@ -188,9 +184,9 @@ export class CallTree {
     const funcName = this._thread.stringTable.getString(
       this._thread.funcTable.name[funcIndex]
     );
-    const total = this._callNodeSummary.total[callNodeIndex];
+    const total = this._callTreeTimings.total[callNodeIndex];
     const totalRelative = total / this._rootTotalSummary;
-    const self = this._callNodeSummary.self[callNodeIndex];
+    const self = this._callTreeTimings.self[callNodeIndex];
     const selfRelative = self / this._rootTotalSummary;
 
     return {
@@ -404,7 +400,7 @@ export class CallTree {
     let maxNode = -1;
     let maxAbs = 0;
     for (let nodeIndex = callNodeIndex; nodeIndex < rangeEnd; nodeIndex++) {
-      const nodeLeaf = Math.abs(this._callNodeSummary.leaf[nodeIndex]);
+      const nodeLeaf = Math.abs(this._callTreeTimings.leaf[nodeIndex]);
       if (maxNode === -1 || nodeLeaf > maxAbs) {
         maxNode = nodeIndex;
         maxAbs = nodeLeaf;
@@ -546,11 +542,9 @@ export function computeCallTreeTimings(
   }
 
   return {
-    callNodeSummary: {
-      self: callNodeSelf,
-      leaf: callNodeLeaf,
-      total: callNodeTotalSummary,
-    },
+    self: callNodeSelf,
+    leaf: callNodeLeaf,
+    total: callNodeTotalSummary,
     callNodeHasChildren,
     rootTotalSummary,
   };
@@ -567,16 +561,11 @@ export function getCallTree(
   weightType: WeightType
 ): CallTree {
   return timeCode('getCallTree', () => {
-    const { callNodeSummary, callNodeHasChildren, rootTotalSummary } =
-      callTreeTimings;
-
     return new CallTree(
       thread,
       categories,
       callNodeInfo,
-      callNodeSummary,
-      callNodeHasChildren,
-      rootTotalSummary,
+      callTreeTimings,
       Boolean(thread.isJsTracer),
       weightType
     );
