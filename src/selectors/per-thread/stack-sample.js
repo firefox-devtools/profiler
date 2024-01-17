@@ -234,6 +234,15 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
+  const getSampleIndexToCallNodeIndexForPreviewFilteredThread: Selector<
+    Array<IndexIntoCallNodeTable | null>,
+  > = createSelector(
+    (state) =>
+      threadSelectors.getPreviewFilteredSamplesForCallTree(state).stack,
+    (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
+    ProfileData.getSampleIndexToCallNodeIndex
+  );
+
   const getSampleIndexToCallNodeIndexForTabFilteredThread: Selector<
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
@@ -302,13 +311,9 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getCallTreeTimings: Selector<CallTree.CallTreeTimings> = createSelector(
     threadSelectors.getPreviewFilteredSamplesForCallTree,
+    getSampleIndexToCallNodeIndexForPreviewFilteredThread,
     getCallNodeInfo,
-    (samples, callNodeInfo) => {
-      const sampleIndexToCallNodeIndex =
-        ProfileData.getSampleIndexToCallNodeIndex(
-          samples.stack,
-          callNodeInfo.getStackIndexToCallNodeIndex()
-        );
+    (samples, sampleIndexToCallNodeIndex, callNodeInfo) => {
       const callNodeLeafAndSummary = CallTree.computeCallNodeLeafAndSummary(
         samples,
         sampleIndexToCallNodeIndex,
@@ -346,14 +351,10 @@ export function getStackAndSampleSelectorsPerThread(
   const getTracedTiming: Selector<CallTree.CallTreeTimings | null> =
     createSelector(
       threadSelectors.getPreviewFilteredSamplesForCallTree,
+      getSampleIndexToCallNodeIndexForPreviewFilteredThread,
       getCallNodeInfo,
       ProfileSelectors.getProfileInterval,
-      (samples, callNodeInfo, interval) => {
-        const sampleIndexToCallNodeIndex =
-          ProfileData.getSampleIndexToCallNodeIndex(
-            samples.stack,
-            callNodeInfo.getStackIndexToCallNodeIndex()
-          );
+      (samples, sampleIndexToCallNodeIndex, callNodeInfo, interval) => {
         const callNodeLeafAndSummary =
           CallTree.computeCallNodeTracedLeafAndSummary(
             samples,
