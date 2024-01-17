@@ -1927,10 +1927,10 @@
     "@testing-library/dom" "^9.0.0"
     "@types/react-dom" "^18.0.0"
 
-"@tgwf/co2@^0.13.10":
-  version "0.13.10"
-  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.13.10.tgz#4f516cc4d9048fe601ec715f21d6ad1d94296a4b"
-  integrity sha512-iQZMYdLP+l1Kyi03EEE4jAZgzlAA8HRAbfgT3GgN6sUgbSoNS/UHijICUqgkum9aHIkDSOrtwkgbB/x3Gc/cQA==
+"@tgwf/co2@^0.14.1":
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.14.1.tgz#75ed912c475d8db17577ba0ad8a65b189a297cca"
+  integrity sha512-XL1J/o9/0NjB21xBImg6HkNV1Mj3Owts8Hb53fu4xpR9BmNYuUlOabLiAYBESmLL9OXnu8fxHVQEvTrT08mfaw==
 
 "@tootallnate/once@1":
   version "1.1.2"
