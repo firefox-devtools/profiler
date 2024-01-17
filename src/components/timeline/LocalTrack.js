@@ -29,6 +29,7 @@ import { TimelineTrackThread } from './TrackThread';
 import { TrackEventDelay } from './TrackEventDelay';
 import { TrackNetwork } from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
+import { TrackBandwidth } from './TrackBandwidth';
 import { TrackIPC } from './TrackIPC';
 import { TrackProcessCPU } from './TrackProcessCPU';
 import { TrackPower } from './TrackPower';
@@ -110,6 +111,8 @@ class LocalTrackComponent extends PureComponent<Props> {
         return <TrackNetwork threadIndex={localTrack.threadIndex} />;
       case 'memory':
         return <TrackMemory counterIndex={localTrack.counterIndex} />;
+      case 'bandwidth':
+        return <TrackBandwidth counterIndex={localTrack.counterIndex} />;
       case 'ipc':
         return <TrackIPC threadIndex={localTrack.threadIndex} />;
       case 'event-delay':
@@ -219,12 +222,6 @@ export const TimelineLocalTrack = explicitConnect<
           selectedTab === 'network-chart';
         break;
       }
-      case 'memory': {
-        titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
-          state
-        );
-        break;
-      }
       case 'marker':
       case 'ipc': {
         const threadIndex = localTrack.threadIndex;
@@ -243,6 +240,8 @@ export const TimelineLocalTrack = explicitConnect<
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
         break;
       }
+      case 'memory':
+      case 'bandwidth':
       case 'process-cpu':
       case 'power': {
         titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
