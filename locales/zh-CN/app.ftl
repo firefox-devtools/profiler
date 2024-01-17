@@ -664,7 +664,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = 此时的相对内存用量
 TrackMemoryGraph--memory-range-in-graph = 图表里的内存范围
-TrackMemoryGraph--operations-since-the-previous-sample = 自前一次采样以来的操作次数
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = 自上次采样以来的分配和释放情况
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
