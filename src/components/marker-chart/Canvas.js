@@ -19,6 +19,7 @@ import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
   typeof changeMouseTimePosition as ChangeMouseTimePosition,
+  typeof changeSelectedMarker as ChangeSelectedMarker,
 } from 'firefox-profiler/actions/profile-view';
 import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
@@ -81,9 +82,11 @@ type OwnProps = {|
   +threadsKey: ThreadsKey,
   +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
   +changeMouseTimePosition: ChangeMouseTimePosition,
+  +changeSelectedMarker: ChangeSelectedMarker,
   +changeRightClickedMarker: ChangeRightClickedMarker,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
+  +selectedMarkerIndex: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +shouldDisplayTooltips: () => boolean,
   +timelineTrackOrganization: TimelineTrackOrganization,
@@ -394,6 +397,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       marginLeft,
       marginRight,
       rightClickedMarkerIndex,
+      selectedMarkerIndex,
       viewport: {
         containerWidth,
         containerHeight,
@@ -474,7 +478,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
 
           const isHighlighted =
             rightClickedMarkerIndex === markerIndex ||
-            hoveredItem === markerIndex;
+            hoveredItem === markerIndex ||
+            selectedMarkerIndex === markerIndex;
 
           if (isHighlighted) {
             highlightedMarkers.push({ x, y, w, h, isInstantMarker, text });
@@ -812,6 +817,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     });
   };
 
+  onSelectItem = (hoveredItems: HoveredMarkerChartItems | null) => {
+    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
+    const { changeSelectedMarker, threadsKey } = this.props;
+    changeSelectedMarker(threadsKey, markerIndex, { source: 'pointer' });
+  };
+
   onRightClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
     const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
     const { changeRightClickedMarker, threadsKey } = this.props;
@@ -846,6 +857,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         containerHeight={containerHeight}
         isDragging={isDragging}
         scaleCtxToCssPixels={true}
+        onSelectItem={this.onSelectItem}
         onDoubleClickItem={this.onDoubleClickMarker}
         onRightClick={this.onRightClickMarker}
         getHoveredItemInfo={this.getHoveredMarkerInfo}

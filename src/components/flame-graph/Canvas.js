@@ -416,7 +416,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         callNodeInfo={callNodeInfo}
         categories={categories}
         durationText={percentage}
-        callTree={callTree}
+        displayData={callTree.getDisplayData(callNodeIndex)}
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={
           shouldComputeTimings

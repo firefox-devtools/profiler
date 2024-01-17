@@ -1,0 +1,184 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TrackBandwidth draws a dot that matches the snapshot 1`] = `
+<div
+  class="timelineTrackBandwidthGraphDot"
+  style="left: 15px; top: 24.872px; background-color: rgb(0, 96, 223);"
+/>
+`;
+
+exports[`TrackBandwidth has a tooltip that matches the snapshot 1`] = `
+<div
+  class="timelineTrackBandwidthTooltip"
+>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Transfer speed for this sample
+      :
+    </div>
+    ⁨4.66GB⁩ per second
+    <div
+      class="tooltipLabel"
+    >
+      read/write operations since the previous sample
+      :
+    </div>
+    0
+    <div
+      class="tooltipDetailSeparator"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      Data transferred up to this time
+      :
+    </div>
+    ⁨6.86MB⁩ (⁨1.2⁩ g CO₂e)
+    <div
+      class="tooltipLabel"
+    >
+      Data transferred in the visible range
+      :
+    </div>
+    ⁨7.97MB⁩ (⁨1.4⁩ g CO₂e)
+  </div>
+</div>
+`;
+
+exports[`TrackBandwidth matches the 2d canvas draw snapshot 1`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    120,
+    25,
+  ],
+  Array [
+    "set lineWidth",
+    2,
+  ],
+  Array [
+    "set lineJoin",
+    "bevel",
+  ],
+  Array [
+    "set strokeStyle",
+    "#0a84ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#0a84ff88",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    26,
+  ],
+  Array [
+    "lineTo",
+    15,
+    23.877333333333333,
+  ],
+  Array [
+    "lineTo",
+    20,
+    23.54,
+  ],
+  Array [
+    "lineTo",
+    30,
+    23.54,
+  ],
+  Array [
+    "lineTo",
+    40,
+    14.799999999999999,
+  ],
+  Array [
+    "lineTo",
+    50,
+    1,
+  ],
+  Array [
+    "lineTo",
+    60,
+    23.862,
+  ],
+  Array [
+    "lineTo",
+    71,
+    19.700934579439256,
+  ],
+  Array [
+    "lineTo",
+    71,
+    23.99954,
+  ],
+  Array [
+    "lineTo",
+    71,
+    14.799999999999804,
+  ],
+  Array [
+    "lineTo",
+    71,
+    18.479999999999883,
+  ],
+  Array [
+    "lineTo",
+    110,
+    23.882051282051282,
+  ],
+  Array [
+    "lineTo",
+    120,
+    23.882051282051282,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "lineTo",
+    120,
+    25,
+  ],
+  Array [
+    "lineTo",
+    0,
+    25,
+  ],
+  Array [
+    "fill",
+  ],
+]
+`;
+
+exports[`TrackBandwidth matches the component snapshot 1`] = `
+<div
+  class="timelineTrackBandwidth"
+  style="height: 25px; --graph-height: 25px;"
+>
+  <div
+    class="timelineTrackBandwidthGraph"
+  >
+    <div>
+      <canvas
+        class="timelineTrackBandwidthCanvas"
+        height="25"
+        width="120"
+      />
+    </div>
+    <div
+      class="timelineEmptyThreadIndicator"
+    />
+  </div>
+</div>
+`;

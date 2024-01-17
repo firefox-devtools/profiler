@@ -13,6 +13,7 @@ import {
   render,
   screen,
   fireEvent,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { MarkerTable } from '../../components/marker-table';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
@@ -96,14 +97,16 @@ describe('MarkerTable', function () {
     expect(container.firstChild).toMatchSnapshot();
 
     /* Check that the table updates properly despite the memoisation. */
-    dispatch(
-      updatePreviewSelection({
-        hasSelection: true,
-        isModifying: false,
-        selectionStart: 10,
-        selectionEnd: 20,
-      })
-    );
+    act(() => {
+      dispatch(
+        updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 10,
+          selectionEnd: 20,
+        })
+      );
+    });
 
     expect(fixedRows()).toHaveLength(2);
     expect(scrolledRows()).toHaveLength(2);
@@ -144,7 +147,7 @@ describe('MarkerTable', function () {
     expect(getRowElement(/setTimeout/)).toHaveClass('isRightClicked');
 
     // Wait that all timers are done before trying again.
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
 
     // Now try it again by right clicking 2 nodes in sequence.
     fireFullContextMenu(getByText(/setTimeout/));
@@ -154,13 +157,13 @@ describe('MarkerTable', function () {
     expect(getRowElement('foobar')).toHaveClass('isRightClicked');
 
     // Wait that all timers are done before trying again.
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
 
     // And now let's do it again, but this time waiting for timers before
     // clicking, because the timer can impact the menu being displayed.
     fireFullContextMenu(getByText('NotifyDidPaint'));
     fireFullContextMenu(getByText('foobar'));
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
     checkMenuIsDisplayedForNode('foobar');
     expect(getRowElement('foobar')).toHaveClass('isRightClicked');
   });
@@ -243,7 +246,9 @@ describe('MarkerTable', function () {
 
     it('shows reasons when all non-network markers have been filtered out', function () {
       const { dispatch, container } = setup();
-      dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      act(() => {
+        dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      });
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
   });
@@ -330,7 +335,9 @@ describe('MarkerTable', function () {
     it('can switch to a hidden global track', function () {
       const { getState, dispatch } = setupWithTracksAndIPCMarker();
       // Hide the global track first.
-      dispatch(hideGlobalTrack(parentTrackReference.trackIndex));
+      act(() => {
+        dispatch(hideGlobalTrack(parentTrackReference.trackIndex));
+      });
       // Make sure that it's hidden.
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain default]',
@@ -364,7 +371,9 @@ describe('MarkerTable', function () {
 
     it('can switch to a local track', function () {
       const { getState, dispatch } = setupWithTracksAndIPCMarker();
-      dispatch(selectTrackWithModifiers(parentTrackReference));
+      act(() => {
+        dispatch(selectTrackWithModifiers(parentTrackReference));
+      });
       // Make sure that we are in the parent process thread.
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([parentThreadIndex])
@@ -381,14 +390,18 @@ describe('MarkerTable', function () {
 
     it('can switch to a hidden local track', function () {
       const { getState, dispatch } = setupWithTracksAndIPCMarker();
-      dispatch(selectTrackWithModifiers(parentTrackReference));
+      act(() => {
+        dispatch(selectTrackWithModifiers(parentTrackReference));
+      });
       // Make sure that we are in the parent process thread.
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([parentThreadIndex])
       );
       // Hide the global and local tracks.
-      dispatch(hideLocalTrack(tabPid, domWorkerTrackReference.trackIndex));
-      dispatch(hideGlobalTrack(tabTrackReference.trackIndex));
+      act(() => {
+        dispatch(hideLocalTrack(tabPid, domWorkerTrackReference.trackIndex));
+        dispatch(hideGlobalTrack(tabTrackReference.trackIndex));
+      });
       // Make sure that they are hidden.
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
@@ -422,7 +435,9 @@ describe('MarkerTable', function () {
 
     it('does not render when the other thread is not profiled', function () {
       const { getState, dispatch } = setupWithTracksAndIPCMarker();
-      dispatch(selectTrackWithModifiers(styleTrackReference));
+      act(() => {
+        dispatch(selectTrackWithModifiers(styleTrackReference));
+      });
       // Make sure that we are in the Style thread.
       expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
         new Set([styleThreadIndex])

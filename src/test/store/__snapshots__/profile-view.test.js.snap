@@ -2277,7 +2277,8 @@ Object {
       8,
     ],
   },
-  "stackIndexToCallNodeIndex": Uint32Array [
+  "isInverted": false,
+  "stackIndexToCallNodeIndex": Int32Array [
     0,
     1,
     2,
@@ -2397,7 +2398,8 @@ CallTree {
         8,
       ],
     },
-    "stackIndexToCallNodeIndex": Uint32Array [
+    "isInverted": false,
+    "stackIndexToCallNodeIndex": Int32Array [
       0,
       1,
       2,

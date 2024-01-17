@@ -13,7 +13,7 @@ import {
 } from '../../profile-logic/process-profile';
 import {
   getCallNodeInfo,
-  invertCallstack,
+  getInvertedCallNodeInfo,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
   getSampleIndexClosestToStartTime,
@@ -1200,13 +1200,7 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const invertedThread = invertCallstack(thread, defaultCategory);
-    const callNodeInfo = getCallNodeInfo(
-      invertedThread.stackTable,
-      invertedThread.frameTable,
-      invertedThread.funcTable,
-      defaultCategory
-    );
+    const callNodeInfo = getInvertedCallNodeInfo(thread, defaultCategory);
     const c = getCallNodeIndexFromPath([funC], callNodeInfo.callNodeTable);
     expect(c).not.toBeNull();
 
@@ -1219,8 +1213,8 @@ describe('getNativeSymbolsForCallNode', function () {
         getNativeSymbolsForCallNode(
           ensureExists(c),
           callNodeInfo,
-          invertedThread.stackTable,
-          invertedThread.frameTable
+          thread.stackTable,
+          thread.frameTable
         )
       )
     ).toEqual(new Set([symB, symD]));

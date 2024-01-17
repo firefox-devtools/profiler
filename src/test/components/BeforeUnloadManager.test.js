@@ -7,7 +7,7 @@ import * as React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { BeforeUnloadManager } from '../../components/app/BeforeUnloadManager';
 import { blankStore } from '../fixtures/stores';
 import { uploadStarted } from 'firefox-profiler/actions/publish';
@@ -32,7 +32,9 @@ describe('app/BeforeUnloadManager', () => {
     createBeforeUnloadManager();
 
     // simulate profile upload phase
-    dispatch(uploadStarted());
+    act(() => {
+      dispatch(uploadStarted());
+    });
     expect(getUploadPhase(getState())).toBe('uploading');
 
     const event = new Event('beforeunload');

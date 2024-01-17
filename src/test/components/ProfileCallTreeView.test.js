@@ -9,7 +9,11 @@ import { fireEvent } from '@testing-library/react';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  act,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getScrollToSelectionGeneration } from 'firefox-profiler/selectors/profile';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
@@ -143,19 +147,29 @@ describe('calltree/ProfileCallTreeView', function () {
 
     expect(container.firstChild).toMatchSnapshot();
 
-    dispatch(changeCallTreeSearchString('C'));
+    act(() => {
+      dispatch(changeCallTreeSearchString('C'));
+    });
     expect(container.firstChild).toMatchSnapshot();
 
-    dispatch(changeCallTreeSearchString('C,'));
+    act(() => {
+      dispatch(changeCallTreeSearchString('C,'));
+    });
     expect(container.firstChild).toMatchSnapshot();
 
-    dispatch(changeCallTreeSearchString('C, F'));
+    act(() => {
+      dispatch(changeCallTreeSearchString('C, F'));
+    });
     expect(container.firstChild).toMatchSnapshot();
 
-    dispatch(changeCallTreeSearchString('C, F,E'));
+    act(() => {
+      dispatch(changeCallTreeSearchString('C, F,E'));
+    });
     expect(container.firstChild).toMatchSnapshot();
 
-    dispatch(changeCallTreeSearchString(' C , E   '));
+    act(() => {
+      dispatch(changeCallTreeSearchString(' C , E   '));
+    });
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -208,7 +222,7 @@ describe('calltree/ProfileCallTreeView', function () {
     checkMenuIsDisplayedForNode('A');
 
     // Wait that all timers are done before trying again.
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
 
     // Now try it again by right clicking 2 nodes in sequence.
     fireFullContextMenu(getByText('A'));
@@ -217,13 +231,13 @@ describe('calltree/ProfileCallTreeView', function () {
     checkMenuIsDisplayedForNode('C');
 
     // Wait that all timers are done before trying again.
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
 
     // And now let's do it again, but this time waiting for timers before
     // clicking, because the timer can impact the menu being displayed.
     fireFullContextMenu(getByText('A'));
     fireFullContextMenu(getByText('C'));
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
     expect(getRowElement('C')).toHaveClass('isRightClicked');
     checkMenuIsDisplayedForNode('C');
   });
@@ -239,7 +253,7 @@ describe('calltree/ProfileCallTreeView', function () {
     fireFullClick(getByText('C'));
     expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
     expect(container.querySelector('.react-contextmenu')).toBeFalsy();
   });
 
@@ -278,7 +292,7 @@ describe('calltree/ProfileCallTreeView', function () {
 
     // After a timeout, the menu publicizes that it's hidden and the right click
     // information is removed.
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
     expect(getRowElement('A')).toHaveClass('isSelected');
     expect(getRowElement('A')).not.toHaveClass('isRightClicked');
   });
@@ -314,7 +328,9 @@ describe('calltree/ProfileCallTreeView', function () {
     expect(getRowElement('A', { expanded: true })).toBeInTheDocument();
 
     // now switch to the other thread
-    dispatch(selectTrackWithModifiers({ type: 'global', trackIndex: 1 }));
+    act(() => {
+      dispatch(selectTrackWithModifiers({ type: 'global', trackIndex: 1 }));
+    });
     expect(getRowElement('K', { selected: true })).toHaveClass('isSelected');
     expect(getRowElement('I', { expanded: true })).toBeInTheDocument();
   });

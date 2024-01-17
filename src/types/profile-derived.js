@@ -127,26 +127,56 @@ export type CallNodeTable = {
  */
 export type CallNodeInfo = {
   callNodeTable: CallNodeTable,
-  // IndexIntoStackTable -> IndexIntoCallNodeTable
-  stackIndexToCallNodeIndex: Uint32Array,
+  // IndexIntoStackTable -> IndexIntoCallNodeTable | -1
+  // If this CallNodeInfo is for the non-inverted tree, this maps the stack index
+  // to its corresponding call node index, and all entries are >= 0.
+  // If this CallNodeInfo is for the inverted tree, this maps the non-inverted
+  // stack index to the inverted call node index. For example, the stack
+  // A -> B -> C -> D is mapped to the inverted call node describing the
+  // call path D <- C <- B <- A, i.e. the node with function A under the D root
+  // of the inverted tree. Stacks which are only used as prefixes are not mapped
+  // to an inverted call node; for those, the entry will be -1. In the example
+  // above, if the stack node A -> B -> C only exists so that it can be the prefix
+  // of the A -> B -> C -> D stack and no sample / marker / allocation has
+  // A -> B -> C as its stack, then there is no need to have a call node
+  // C <- B <- A in the inverted call node table.
+  stackIndexToCallNodeIndex: Int32Array,
+  // Whether the call node table in this call node info describes the inverted
+  // call tree.
+  isInverted: boolean,
 };
 
 export type LineNumber = number;
 
-// Stores, for all stacks of a thread and for one specific file, the line
-// numbers in that file that are hit by each stack.
-// This can be computed once for a filtered thread, and then queried cheaply
-// as the preview selection changes.
+// Stores the line numbers which are hit by each stack, for one specific source
+// file.
+// Used to compute LineTimings in combination with a SamplesLikeTable.
+//
+// StackLineInfo can be computed once for a filtered thread. Then it is reused
+// for the computation of different LineTimings as the preview selection changes.
+//
 // The order of these arrays is the same as the order of thread.stackTable;
-// the array index is a stackIndex.
+// the array index is a stackIndex. Not all stacks are guaranteed to have a useful
+// value; only stacks which are used as "self" stacks, i.e. stacks which are used
+// in thread.samples.stack or in marker stacks / allocation stacks, are required
+// to have their values computed - only these values will be accessed during the
+// LineTimings computation.
+//
+// For stacks which are only used as prefix stack nodes, selfLine and
+// stackLine may be null. This is fine because their values are not accessed
+// during the LineTimings computation.
 export type StackLineInfo = {|
-  // An array that contains, for each stack, the line number that this stack
+  // An array that contains, for each "self" stack, the line number that this stack
   // spends its self time in, in this file, or null if the self time of the
   // stack is in a different file or if the line number is not known.
+  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
+  // never referred to from a SamplesLikeTable, the value may be null.
   selfLine: Array<LineNumber | null>,
-  // An array that contains, for each stack, all the lines that the frames in
+  // An array that contains, for each "self" stack, all the lines that the frames in
   // this stack hit in this file, or null if this stack does not hit any line
   // in the given file.
+  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
+  // never referred to from a SamplesLikeTable, the value may be null.
   stackLines: Array<Set<LineNumber> | null>,
 |};
 
@@ -158,20 +188,35 @@ export type LineTimings = {|
   selfLineHits: Map<LineNumber, number>,
 |};
 
-// Stores, for all stacks of a thread and for one specific file, the addresses
-// in that file that are hit by each stack.
-// This can be computed once for a filtered thread, and then queried cheaply
-// as the preview selection changes.
+// Stores the addresses which are hit by each stack, for addresses belonging to
+// one specific native symbol.
+// Used to compute AddressTimings in combination with a SamplesLikeTable.
+//
+// StackAddressInfo can be computed once for a filtered thread. Then it is reused
+// for the computation of different AddressTimings as the preview selection changes.
+//
 // The order of these arrays is the same as the order of thread.stackTable;
-// the array index is a stackIndex.
+// the array index is a stackIndex. Not all stacks are guaranteed to have a useful
+// value; only stacks which are used as "self" stacks, i.e. stacks which are used
+// in thread.samples.stack or in marker stacks / allocation stacks, are required
+// to have their values computed - only these values will be accessed during the
+// AddressTimings computation.
+//
+// For stacks which are only used as prefix stack nodes, selfAddress and
+// stackAddress may be null. This is fine because their values are not accessed
+// during the AddressTimings computation.
 export type StackAddressInfo = {|
-  // An array that contains, for each stack, the address that this stack
-  // spends its self time in, in this library, or null if the self time of the
-  // stack is in a different library or if the address is not known.
+  // An array that contains, for each "self" stack, the address that this stack
+  // spends its self time in, in this native symbol, or null if the self time of
+  // the stack is in a different native symbol or if the address is not known.
+  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
+  // never referred to from a SamplesLikeTable, the value may be null.
   selfAddress: Array<Address | null>,
-  // An array that contains, for each stack, all the addresses that the frames
-  // in this stack hit in this library, or null if this stack does not hit any
-  // address in the given library.
+  // An array that contains, for each "self" stack, all the addresses that the
+  // frames in this stack hit in this native symbol, or null if this stack does
+  // not hit any address in the given native symbol.
+  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
+  // never referred to from a SamplesLikeTable, the value may be null.
   stackAddresses: Array<Set<Address> | null>,
 |};
 
@@ -406,6 +451,7 @@ export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}
   | {| +type: 'network', +threadIndex: ThreadIndex |}
   | {| +type: 'memory', +counterIndex: CounterIndex |}
+  | {| +type: 'bandwidth', +counterIndex: CounterIndex |}
   | {| +type: 'ipc', +threadIndex: ThreadIndex |}
   | {| +type: 'event-delay', +threadIndex: ThreadIndex |}
   | {| +type: 'process-cpu', +counterIndex: CounterIndex |}

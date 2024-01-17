@@ -14,7 +14,7 @@ import type {
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeSelectedThreads,
   hideLocalTrack,
@@ -100,7 +100,9 @@ describe('timeline/LocalTrack', function () {
 
     it('will render a stub div if the track is hidden', () => {
       const { container, pid, trackReference, dispatch } = setupThreadTrack();
-      dispatch(hideLocalTrack(pid, trackReference.trackIndex));
+      act(() => {
+        dispatch(hideLocalTrack(pid, trackReference.trackIndex));
+      });
       expect(container.querySelector('.timelineTrackHidden')).toBeTruthy();
       expect(container.querySelector('.timelineTrack')).toBeFalsy();
     });
@@ -145,7 +147,9 @@ describe('timeline/LocalTrack', function () {
       expect(container.querySelector('.timelineTrack')).toBeFalsy();
 
       // Now make it visible and check it.
-      dispatch(showLocalTrack(pid, trackReference.trackIndex));
+      act(() => {
+        dispatch(showLocalTrack(pid, trackReference.trackIndex));
+      });
       expect(container.querySelector('.timelineTrackHidden')).toBeFalsy();
       expect(container.querySelector('.timelineTrack')).toBeTruthy();
     });
@@ -153,14 +157,18 @@ describe('timeline/LocalTrack', function () {
     it('correctly renders the IPC label', function () {
       const { dispatch, pid, trackReference, getLocalTrackLabel } =
         setupWithIPC();
-      dispatch(showLocalTrack(pid, trackReference.trackIndex));
+      act(() => {
+        dispatch(showLocalTrack(pid, trackReference.trackIndex));
+      });
       expect(getLocalTrackLabel()).toHaveTextContent('IPC — Empty');
     });
 
     it('matches the snapshot of the IPC track', () => {
       const { pid, dispatch, trackReference, container, flushRafCalls } =
         setupWithIPC();
-      dispatch(showLocalTrack(pid, trackReference.trackIndex));
+      act(() => {
+        dispatch(showLocalTrack(pid, trackReference.trackIndex));
+      });
       flushRafCalls();
       expect(container.firstChild).toMatchSnapshot();
     });

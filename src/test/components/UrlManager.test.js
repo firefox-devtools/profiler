@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import { UrlManager } from '../../components/app/UrlManager';
@@ -55,7 +55,9 @@ describe('UrlManager', function () {
       );
 
     const waitUntilUrlSetupPhase = (phase) =>
-      waitUntilState(store, (state) => getUrlSetupPhase(state) === phase);
+      act(() =>
+        waitUntilState(store, (state) => getUrlSetupPhase(state) === phase)
+      );
 
     return { dispatch, getState, createUrlManager, waitUntilUrlSetupPhase };
   }
@@ -219,17 +221,19 @@ describe('UrlManager', function () {
     expect(window.history.length).toBe(1);
 
     // The user changes is looking for some specific call node.
-    dispatch(changeCallTreeSearchString('B'));
+    act(() => {
+      dispatch(changeCallTreeSearchString('B'));
+    });
     expect(getCurrentSearchString(getState())).toBe('B');
     expect(window.history.length).toBe(2);
 
     // The user can't find anything, he goes back in history.
-    window.history.back();
+    act(() => window.history.back());
     expect(getCurrentSearchString(getState())).toBe('');
     expect(window.history.length).toBe(2);
 
     // Look again at this search.
-    window.history.forward();
+    act(() => window.history.forward());
     expect(getCurrentSearchString(getState())).toBe('B');
   });
 
@@ -246,27 +250,33 @@ describe('UrlManager', function () {
 
     // Now the user clicks on the "all recordings" link. This will change the
     // datasource, we're simulating that.
-    dispatch(setDataSource('uploaded-recordings'));
+    act(() => {
+      dispatch(setDataSource('uploaded-recordings'));
+    });
     expect(getDataSource(getState())).toBe('uploaded-recordings');
     expect(window.history.length).toBe(2);
 
     // The user goes back to the home by pressing the browser's back button.
-    window.history.back();
+    act(() => window.history.back());
     expect(getDataSource(getState())).toBe('none');
 
     // Now the user goes to the compare form clicking a link on the homepage,
     // we're simulating that by changing the data source.
-    dispatch(setDataSource('compare'));
+    act(() => {
+      dispatch(setDataSource('compare'));
+    });
     expect(getDataSource(getState())).toBe('compare');
     // Click on the header
-    dispatch(setDataSource('none'));
+    act(() => {
+      dispatch(setDataSource('none'));
+    });
     expect(window.history.length).toBe(3);
 
     // The user goes back to the compare form using the browser's back button.
-    window.history.back();
+    act(() => window.history.back());
     expect(getDataSource(getState())).toBe('compare');
     // The user goes back to the home using the browser's back button.
-    window.history.back();
+    act(() => window.history.back());
     expect(getDataSource(getState())).toBe('none');
   });
 
@@ -280,14 +290,16 @@ describe('UrlManager', function () {
     expect(window.history.length).toBe(1);
 
     // Now the user publishes.
-    dispatch(profilePublished('SOME_HASH', '', null));
+    act(() => {
+      dispatch(profilePublished('SOME_HASH', '', null));
+    });
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_HASH');
     expect(window.history.length).toBe(2);
 
     // Then wants to go back in history. This shouldn't work!
     let previousLocation = window.location.href;
-    window.history.back();
+    act(() => window.history.back());
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_HASH');
     expect(previousLocation).toEqual(window.location.href);
@@ -297,7 +309,9 @@ describe('UrlManager', function () {
     expect(window.history.length).toBe(2);
 
     // Now let's publish again
-    dispatch(profilePublished('SOME_OTHER_HASH', '', null));
+    act(() => {
+      dispatch(profilePublished('SOME_OTHER_HASH', '', null));
+    });
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
 
@@ -307,7 +321,7 @@ describe('UrlManager', function () {
 
     // The user wants to go back, but this won't work!
     previousLocation = window.location.href;
-    window.history.back();
+    act(() => window.history.back());
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
     expect(previousLocation).toEqual(window.location.href);
@@ -364,7 +378,7 @@ describe('UrlManager', function () {
     );
 
     // Wait a tick so that postMessage has time to be processed.
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
     expect(getProfileOrNull(getState())).toBeTruthy();
   });

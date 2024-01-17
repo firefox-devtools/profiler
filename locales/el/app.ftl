@@ -228,7 +228,7 @@ ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο
 
 FooterLinks--legal = Νομικά
 FooterLinks--Privacy = Απόρρητο
-FooterLinks--Cookies = Cookies
+FooterLinks--Cookies = Cookie
 FooterLinks--languageSwitcher--select =
     .title = Αλλαγή γλώσσας
 FooterLinks--hide-button =

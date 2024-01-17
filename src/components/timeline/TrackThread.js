@@ -212,7 +212,8 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
     const processType = filteredThread.processType;
     const displayJank = processType !== 'plugin';
     const displayMarkers =
-      (filteredThread.name === 'GeckoMain' ||
+      (filteredThread.showMarkersInTimeline ||
+        filteredThread.name === 'GeckoMain' ||
         filteredThread.name === 'Compositor' ||
         filteredThread.name === 'Renderer' ||
         filteredThread.name === 'AndroidUI (JVM)' ||

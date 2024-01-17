@@ -10,6 +10,7 @@ import {
   render,
   fireEvent,
   screen,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNavigatorBar';
 import { ProfileFilterNavigator } from '../../components/app/ProfileFilterNavigator';
@@ -108,18 +109,22 @@ describe('app/ProfileFilterNavigator', () => {
     expect(container.firstChild).toMatchSnapshot();
 
     // With committed range
-    dispatch(ProfileView.commitRange(0, 40));
+    act(() => {
+      dispatch(ProfileView.commitRange(0, 40));
+    });
     expect(container.firstChild).toMatchSnapshot();
 
     // With preview selection
-    dispatch(
-      ProfileView.updatePreviewSelection({
-        hasSelection: true,
-        isModifying: false,
-        selectionStart: 10,
-        selectionEnd: 10.1,
-      })
-    );
+    act(() => {
+      dispatch(
+        ProfileView.updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 10,
+          selectionEnd: 10.1,
+        })
+      );
+    });
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -130,23 +135,28 @@ describe('app/ProfileFilterNavigator', () => {
 
   it('renders the site hostname as its first element in the single tab view', () => {
     const { dispatch, container } = setup();
-    dispatch(
-      ReceiveProfile.changeTimelineTrackOrganization({
-        type: 'active-tab',
-        tabID,
-      })
-    );
+    act(() => {
+      dispatch(
+        ReceiveProfile.changeTimelineTrackOrganization({
+          type: 'active-tab',
+          tabID,
+        })
+      );
+    });
+
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('displays the site hostname as its first element in the single tab view', () => {
     const { dispatch, queryByText, getByText } = setup();
-    dispatch(
-      ReceiveProfile.changeTimelineTrackOrganization({
-        type: 'active-tab',
-        tabID,
-      })
-    );
+    act(() => {
+      dispatch(
+        ReceiveProfile.changeTimelineTrackOrganization({
+          type: 'active-tab',
+          tabID,
+        })
+      );
+    });
     expect(queryByText(/Full Range/)).not.toBeInTheDocument();
     // Using regexp because searching for a partial text.
     expect(getByText(/developer\.mozilla\.org/)).toBeInTheDocument();

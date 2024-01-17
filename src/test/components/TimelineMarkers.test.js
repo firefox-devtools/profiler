@@ -13,6 +13,7 @@ import {
   render,
   screen,
   fireEvent,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   TimelineMarkersOverview,
@@ -281,7 +282,7 @@ describe('TimelineMarkers', function () {
       // The "DOMEvent" marker is drawn from 0,0 to 5,200.
       rightClick({ x: 50, y: 2 });
 
-      jest.runAllTimers();
+      act(() => jest.runAllTimers());
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
@@ -289,7 +290,7 @@ describe('TimelineMarkers', function () {
       expect(copy).toHaveBeenLastCalledWith('DOMEvent — mousedown');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
-      jest.runAllTimers();
+      act(() => jest.runAllTimers());
 
       expect(document.querySelector('react-contextmenu')).toBeFalsy();
     });
@@ -305,11 +306,11 @@ describe('TimelineMarkers', function () {
 
       // The "DOMEvent" marker is drawn from 0,0 to 5,60.
       rightClick({ x: 30, y: 2 });
-      jest.runAllTimers();
+      act(() => jest.runAllTimers());
 
       // The "Navigation" marker is drawn from 0,120 to 5,200.
       rightClick({ x: 160, y: 2 });
-      jest.runAllTimers();
+      act(() => jest.runAllTimers());
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
@@ -318,7 +319,7 @@ describe('TimelineMarkers', function () {
 
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
-      jest.runAllTimers();
+      act(() => jest.runAllTimers());
       expect(document.querySelector('react-contextmenu')).toBeFalsy();
     });
 

@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -186,10 +186,15 @@ const pressKeyBuilder = (className) => (options: KeyPressOptions) => {
   fireFullKeyPress(div, options);
 };
 
+/* eslint-disable jest/no-standalone-expect */
+// Disable the jest/no-standalone-expect rule because eslint doesn't know that
+// these expectations will run in a test block later.
 // These actions will be used to generate use cases for each of the supported panels.
 const actions = {
   'a selected node': ({ dispatch, getState }, { A, B }) => {
-    dispatch(changeSelectedCallNode(0, [A, B]));
+    act(() => {
+      dispatch(changeSelectedCallNode(0, [A, B]));
+    });
 
     // We also check expectations after these dispatch, because if the node path
     // is invalid, we can have null values, which would give a useless test.
@@ -201,8 +206,12 @@ const actions = {
     ).toBeNull();
   },
   'a right clicked node': ({ dispatch, getState }, { A, B }) => {
-    dispatch(changeSelectedCallNode(0, []));
-    dispatch(changeRightClickedCallNode(0, [A, B]));
+    act(() => {
+      dispatch(changeSelectedCallNode(0, []));
+    });
+    act(() => {
+      dispatch(changeRightClickedCallNode(0, [A, B]));
+    });
 
     // We also check expectations after these dispatch, because if the node path
     // is invalid, we can have null values, which would give a useless test.
@@ -217,8 +226,12 @@ const actions = {
     { dispatch, getState },
     { A, B, H }
   ) => {
-    dispatch(changeSelectedCallNode(0, [A, B, B, B, H]));
-    dispatch(changeRightClickedCallNode(0, [A, B]));
+    act(() => {
+      dispatch(changeSelectedCallNode(0, [A, B, B, B, H]));
+    });
+    act(() => {
+      dispatch(changeRightClickedCallNode(0, [A, B]));
+    });
 
     // We also check expectations after these dispatch, because if the node path
     // is invalid, we can have null values, which would give a useless test.
@@ -230,6 +243,7 @@ const actions = {
     ).not.toBeNull();
   },
 };
+/* eslint-enable jest/no-standalone-expect */
 
 autoMockCanvasContext();
 
