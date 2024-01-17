@@ -30,6 +30,7 @@ import type {
   SamplesTable,
   ExtraBadgeInfo,
   BottomBoxInfo,
+  CallNodeLeafAndSummary,
 } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
@@ -414,22 +415,18 @@ export class CallTree {
   }
 }
 
-function _getInvertedStackSelf(
-  // The samples could either be a SamplesTable, or a JsAllocationsTable.
-  samples: SamplesLikeTable,
-  callNodeTable: CallNodeTable,
-  sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>
-): {
-  // In an inverted profile, all the amount of self unit (time, bytes, count, etc.) is
-  // accounted to the root nodes. So `callNodeSelf` will be 0 for all non-root nodes.
-  callNodeSelf: Float32Array,
-  // This property stores the amount of unit (time, bytes, count, etc.) spent in the
-  // stacks' leaf nodes. Later these values will make it possible to compute the
-  // total for all nodes by summing up the values up the tree.
+// In an inverted profile, all the amount of self unit (time, bytes, count, etc.) is
+// accounted to the root nodes. So `callNodeSelf` will be 0 for all non-root nodes.
+function _getInvertedCallNodeSelf(
   callNodeLeaf: Float32Array,
-} {
+  callNodeTable: CallNodeTable
+): Float32Array {
   // Compute an array that maps the callNodeIndex to its root.
   const callNodeToRoot = new Int32Array(callNodeTable.length);
+
+  // Compute the self time during the same loop.
+  const callNodeSelf = new Float32Array(callNodeTable.length);
+
   for (
     let callNodeIndex = 0;
     callNodeIndex < callNodeTable.length;
@@ -449,10 +446,21 @@ function _getInvertedStackSelf(
       // recursively is the value we're looking for.
       callNodeToRoot[callNodeIndex] = callNodeToRoot[prefixCallNode];
     }
+    callNodeSelf[callNodeToRoot[callNodeIndex]] += callNodeLeaf[callNodeIndex];
   }
 
-  // Calculate the timing information by going through each sample.
-  const callNodeSelf = new Float32Array(callNodeTable.length);
+  return callNodeSelf;
+}
+
+/**
+ * Compute the leaf time for each call node, and the sum of the absolute leaf
+ * values.
+ */
+function _getCallNodeLeafAndSummary(
+  samples: SamplesLikeTable,
+  callNodeTable: CallNodeTable,
+  sampleIndexToCallNodeIndex: Array<null | IndexIntoCallNodeTable>
+): CallNodeLeafAndSummary {
   const callNodeLeaf = new Float32Array(callNodeTable.length);
   for (
     let sampleIndex = 0;
@@ -461,42 +469,24 @@ function _getInvertedStackSelf(
   ) {
     const callNodeIndex = sampleIndexToCallNodeIndex[sampleIndex];
     if (callNodeIndex !== null) {
-      const rootIndex = callNodeToRoot[callNodeIndex];
       const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      callNodeSelf[rootIndex] += weight;
       callNodeLeaf[callNodeIndex] += weight;
     }
   }
 
-  return { callNodeSelf, callNodeLeaf };
-}
+  // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
+  const abs = Math.abs;
 
-/**
- * This is a helper function to get the stack timings for un-inverted call trees.
- */
-function _getStackSelf(
-  samples: SamplesLikeTable,
-  callNodeTable: CallNodeTable,
-  sampleIndexToCallNodeIndex: Array<null | IndexIntoCallNodeTable>
-): {
-  callNodeSelf: Float32Array, // Milliseconds[]
-  callNodeLeaf: Float32Array, // Milliseconds[]
-} {
-  const callNodeSelf = new Float32Array(callNodeTable.length);
-
+  let rootTotalSummary = 0;
   for (
-    let sampleIndex = 0;
-    sampleIndex < sampleIndexToCallNodeIndex.length;
-    sampleIndex++
+    let callNodeIndex = 0;
+    callNodeIndex < callNodeTable.length;
+    callNodeIndex++
   ) {
-    const callNodeIndex = sampleIndexToCallNodeIndex[sampleIndex];
-    if (callNodeIndex !== null) {
-      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
-      callNodeSelf[callNodeIndex] += weight;
-    }
+    rootTotalSummary += abs(callNodeLeaf[callNodeIndex]);
   }
 
-  return { callNodeSelf, callNodeLeaf: callNodeSelf };
+  return { callNodeLeaf, rootTotalSummary };
 }
 
 /**
@@ -511,22 +501,25 @@ export function computeCallTreeTimings(
   samples: SamplesLikeTable,
   sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfo,
-  invertCallstack: boolean
+  _invertCallstack: boolean
 ): CallTreeTimings {
   const callNodeTable = callNodeInfo.getCallNodeTable();
 
-  // Inverted trees need a different method for computing the timing.
-  const { callNodeSelf, callNodeLeaf } = invertCallstack
-    ? _getInvertedStackSelf(samples, callNodeTable, sampleIndexToCallNodeIndex)
-    : _getStackSelf(samples, callNodeTable, sampleIndexToCallNodeIndex);
+  const { callNodeLeaf, rootTotalSummary } = _getCallNodeLeafAndSummary(
+    samples,
+    callNodeTable,
+    sampleIndexToCallNodeIndex
+  );
+
+  // The self values depend on whether the call tree is inverted: In an inverted
+  // tree, all the self time is in the roots.
+  const callNodeSelf = callNodeInfo.isInverted()
+    ? _getInvertedCallNodeSelf(callNodeLeaf, callNodeTable)
+    : callNodeLeaf;
 
   // Compute the following variables:
   const callNodeTotalSummary = new Float32Array(callNodeTable.length);
   const callNodeHasChildren = new Uint8Array(callNodeTable.length);
-  let rootTotalSummary = 0;
-
-  // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
-  const abs = Math.abs;
 
   // We loop the call node table in reverse, so that we find the children
   // before their parents, and the total is known at the time we reach a
@@ -537,7 +530,6 @@ export function computeCallTreeTimings(
     callNodeIndex--
   ) {
     callNodeTotalSummary[callNodeIndex] += callNodeLeaf[callNodeIndex];
-    rootTotalSummary += abs(callNodeLeaf[callNodeIndex]);
     const hasChildren = callNodeHasChildren[callNodeIndex] !== 0;
     const hasTotalValue = callNodeTotalSummary[callNodeIndex] !== 0;
 
@@ -676,7 +668,7 @@ export function computeTracedTiming(
   samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  invertCallstack: boolean
+  _invertCallstack: boolean
 ): TracedTiming | null {
   const callNodeTable = callNodeInfo.getCallNodeTable();
   const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
@@ -710,18 +702,14 @@ export function computeTracedTiming(
     samples.stack,
     stackIndexToCallNodeIndex
   );
-  // Inverted trees need a different method for computing the timing.
-  const { callNodeSelf, callNodeLeaf } = invertCallstack
-    ? _getInvertedStackSelf(
-        samplesWithWeight,
-        callNodeTable,
-        sampleIndexToCallNodeIndex
-      )
-    : _getStackSelf(
-        samplesWithWeight,
-        callNodeTable,
-        sampleIndexToCallNodeIndex
-      );
+  const { callNodeLeaf } = _getCallNodeLeafAndSummary(
+    samplesWithWeight,
+    callNodeTable,
+    sampleIndexToCallNodeIndex
+  );
+  const callNodeSelf = callNodeInfo.isInverted()
+    ? _getInvertedCallNodeSelf(callNodeLeaf, callNodeTable)
+    : callNodeLeaf;
 
   // Compute the following variables:
   const callNodeTotalSummary = new Float32Array(callNodeTable.length);
