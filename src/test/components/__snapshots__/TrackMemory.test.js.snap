@@ -3,7 +3,7 @@
 exports[`TrackMemory draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackMemoryGraphDot"
-  style="left: 20px; top: 2.697563250235465px;"
+  style="left: 20px; top: 2.697563250235465px; background-color: rgb(215, 110, 0);"
 />
 `;
 

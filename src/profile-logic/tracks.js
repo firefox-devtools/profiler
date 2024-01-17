@@ -61,20 +61,22 @@ const LOCAL_TRACK_INDEX_ORDER = {
   'process-cpu': 5,
   power: 6,
   marker: 7,
+  bandwidth: 8,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
-  memory: 1,
-  power: 2,
+  bandwidth: 1,
+  memory: 2,
+  power: 3,
   // IPC tracks that belong to the global track will appear right after network
   // and counter tracks. But we want to show the IPC tracks that belong to the
   // local threads right after their track. This special handling happens inside
   // the sort function.
-  ipc: 3,
-  thread: 4,
-  'event-delay': 5,
-  'process-cpu': 6,
-  marker: 7,
+  ipc: 4,
+  thread: 5,
+  'event-delay': 6,
+  'process-cpu': 7,
+  marker: 8,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -337,7 +339,7 @@ export function computeLocalTracksByPid(
   if (counters) {
     for (let counterIndex = 0; counterIndex < counters.length; counterIndex++) {
       const { pid, category, samples } = counters[counterIndex];
-      if (category === 'Memory' || category === 'power') {
+      if (['Memory', 'power', 'Bandwidth'].includes(category)) {
         if (category === 'power' && samples.length <= 2) {
           // If we have only 2 samples, they are likely both 0 and we don't have a real counter.
           continue;
@@ -349,6 +351,8 @@ export function computeLocalTracksByPid(
         }
         if (category === 'Memory') {
           tracks.push({ type: 'memory', counterIndex });
+        } else if (category === 'Bandwidth') {
+          tracks.push({ type: 'bandwidth', counterIndex });
         } else {
           tracks.push({ type: 'power', counterIndex });
         }
@@ -883,6 +887,8 @@ export function getLocalTrackName(
       return 'Network';
     case 'memory':
       return 'Memory';
+    case 'bandwidth':
+      return 'Bandwidth';
     case 'ipc':
       return `IPC — ${getFriendlyThreadName(
         threads,
@@ -1274,6 +1280,7 @@ export function getSearchFilteredLocalTracksByPid(
         }
         case 'network':
         case 'memory':
+        case 'bandwidth':
         case 'marker':
         case 'ipc':
         case 'event-delay':
@@ -1415,6 +1422,7 @@ function _isLocalTrackVisible(
     case 'marker':
     case 'network':
     case 'memory':
+    case 'bandwidth':
     // 'event-delay' and 'process-cpu' tracks are experimental and they should
     // be visible by default whenever they are included in a profile. (fallthrough)
     case 'event-delay':
