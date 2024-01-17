@@ -304,19 +304,20 @@ export function getStackAndSampleSelectorsPerThread(
   const getCallTreeTimings: Selector<CallTree.CallTreeTimings> = createSelector(
     threadSelectors.getPreviewFilteredSamplesForCallTree,
     getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
-    UrlState.getInvertCallstack,
-    (samples, callNodeInfo, interval, invertCallStack) => {
+    (samples, callNodeInfo) => {
       const sampleIndexToCallNodeIndex =
         ProfileData.getSampleIndexToCallNodeIndex(
           samples.stack,
           callNodeInfo.getStackIndexToCallNodeIndex()
         );
-      return CallTree.computeCallTreeTimings(
+      const callNodeLeafAndSummary = CallTree.computeCallNodeLeafAndSummary(
         samples,
         sampleIndexToCallNodeIndex,
+        callNodeInfo.getCallNodeTable().length
+      );
+      return CallTree.computeCallTreeTimings(
         callNodeInfo,
-        invertCallStack
+        callNodeLeafAndSummary
       );
     }
   );

@@ -452,12 +452,12 @@ function _getInvertedCallNodeSelf(
  * Compute the leaf time for each call node, and the sum of the absolute leaf
  * values.
  */
-function _getCallNodeLeafAndSummary(
+export function computeCallNodeLeafAndSummary(
   samples: SamplesLikeTable,
-  callNodeTable: CallNodeTable,
-  sampleIndexToCallNodeIndex: Array<null | IndexIntoCallNodeTable>
+  sampleIndexToCallNodeIndex: Array<null | IndexIntoCallNodeTable>,
+  callNodeCount: number
 ): CallNodeLeafAndSummary {
-  const callNodeLeaf = new Float32Array(callNodeTable.length);
+  const callNodeLeaf = new Float32Array(callNodeCount);
   for (
     let sampleIndex = 0;
     sampleIndex < sampleIndexToCallNodeIndex.length;
@@ -474,11 +474,7 @@ function _getCallNodeLeafAndSummary(
   const abs = Math.abs;
 
   let rootTotalSummary = 0;
-  for (
-    let callNodeIndex = 0;
-    callNodeIndex < callNodeTable.length;
-    callNodeIndex++
-  ) {
+  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
     rootTotalSummary += abs(callNodeLeaf[callNodeIndex]);
   }
 
@@ -488,24 +484,13 @@ function _getCallNodeLeafAndSummary(
 /**
  * This computes all of the count and timing information displayed in the calltree.
  * It takes into account both the normal tree, and the inverted tree.
- *
- * Note: The "timionmgs" could have a number of different meanings based on the
- * what type of weight is in the SamplesLikeTable. For instance, it could be
- * milliseconds, sample counts, or bytes.
  */
 export function computeCallTreeTimings(
-  samples: SamplesLikeTable,
-  sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfo,
-  _invertCallstack: boolean
+  callNodeLeafAndSummary: CallNodeLeafAndSummary
 ): CallTreeTimings {
   const callNodeTable = callNodeInfo.getCallNodeTable();
-
-  const { callNodeLeaf, rootTotalSummary } = _getCallNodeLeafAndSummary(
-    samples,
-    callNodeTable,
-    sampleIndexToCallNodeIndex
-  );
+  const { callNodeLeaf, rootTotalSummary } = callNodeLeafAndSummary;
 
   // The self values depend on whether the call tree is inverted: In an inverted
   // tree, all the self time is in the roots.
@@ -691,10 +676,10 @@ export function computeTracedTiming(
     samples.stack,
     stackIndexToCallNodeIndex
   );
-  const { callNodeLeaf } = _getCallNodeLeafAndSummary(
+  const { callNodeLeaf } = computeCallNodeLeafAndSummary(
     samplesWithWeight,
-    callNodeTable,
-    sampleIndexToCallNodeIndex
+    sampleIndexToCallNodeIndex,
+    callNodeTable.length
   );
   const callNodeSelf = callNodeInfo.isInverted()
     ? _getInvertedCallNodeSelf(callNodeLeaf, callNodeTable)
