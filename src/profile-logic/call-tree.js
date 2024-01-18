@@ -28,6 +28,7 @@ import type {
   ExtraBadgeInfo,
   BottomBoxInfo,
   CallNodeLeafAndSummary,
+  SelfAndTotal,
 } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
@@ -63,40 +64,27 @@ function extractFaviconFromLibname(libname: string): string | null {
   }
 }
 
-export class CallTree {
-  _categories: CategoryList;
+interface CallTreeInternal {
+  hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean;
+  createChildren(nodeIndex: IndexIntoCallNodeTable): CallNodeChildren;
+  createRoots(): CallNodeChildren;
+  getSelfAndTotal(nodeIndex: IndexIntoCallNodeTable): SelfAndTotal;
+  findHeaviestPathInSubtree(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): CallNodePath;
+}
+
+export class CallTreeInternalImpl implements CallTreeInternal {
   _callNodeInfo: CallNodeInfo;
   _callNodeTable: CallNodeTable;
   _callTreeTimings: CallTreeTimings;
   _callNodeHasChildren: Uint8Array; // A table column matching the callNodeTable
-  _thread: Thread;
-  _rootTotalSummary: number;
-  _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
-  // _children is indexed by IndexIntoCallNodeTable. Since they are
-  // integers, using an array directly is faster than going through a Map.
-  _children: Array<CallNodeChildren>;
-  _isHighPrecision: boolean;
-  _weightType: WeightType;
 
-  constructor(
-    thread: Thread,
-    categories: CategoryList,
-    callNodeInfo: CallNodeInfo,
-    callTreeTimings: CallTreeTimings,
-    isHighPrecision: boolean,
-    weightType: WeightType
-  ) {
-    this._categories = categories;
+  constructor(callNodeInfo: CallNodeInfo, callTreeTimings: CallTreeTimings) {
     this._callNodeInfo = callNodeInfo;
     this._callNodeTable = callNodeInfo.getCallNodeTable();
     this._callTreeTimings = callTreeTimings;
     this._callNodeHasChildren = callTreeTimings.callNodeHasChildren;
-    this._thread = thread;
-    this._rootTotalSummary = callTreeTimings.rootTotalSummary;
-    this._displayDataByIndex = new Map();
-    this._children = [];
-    this._isHighPrecision = isHighPrecision;
-    this._weightType = weightType;
   }
 
   _getFirstChildIndex(
@@ -112,40 +100,115 @@ export class CallTree {
     return -1;
   }
 
+  createRoots() {
+    return this.createChildren(-1);
+  }
+
+  createChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
+    const firstChild = this._getFirstChildIndex(callNodeIndex);
+    const children = [];
+    for (
+      let childCallNodeIndex = firstChild;
+      childCallNodeIndex !== -1;
+      childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
+    ) {
+      const childTotalSummary = this._callTreeTimings.total[childCallNodeIndex];
+      const childHasChildren = this._callNodeHasChildren[childCallNodeIndex];
+
+      if (childTotalSummary !== 0 || childHasChildren !== 0) {
+        children.push(childCallNodeIndex);
+      }
+    }
+    children.sort(
+      (a, b) =>
+        Math.abs(this._callTreeTimings.total[b]) -
+        Math.abs(this._callTreeTimings.total[a])
+    );
+    return children;
+  }
+
+  hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
+    return this._callNodeHasChildren[callNodeIndex] !== 0;
+  }
+
+  getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
+    const self = this._callTreeTimings.self[callNodeIndex];
+    const total = this._callTreeTimings.total[callNodeIndex];
+    return { self, total };
+  }
+
+  findHeaviestPathInSubtree(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): CallNodePath {
+    const rangeEnd = this._callNodeTable.subtreeRangeEnd[callNodeIndex];
+
+    // Find the call node with the highest leaf time.
+    let maxNode = -1;
+    let maxAbs = 0;
+    for (let nodeIndex = callNodeIndex; nodeIndex < rangeEnd; nodeIndex++) {
+      const nodeLeaf = Math.abs(this._callTreeTimings.leaf[nodeIndex]);
+      if (maxNode === -1 || nodeLeaf > maxAbs) {
+        maxNode = nodeIndex;
+        maxAbs = nodeLeaf;
+      }
+    }
+
+    return this._callNodeInfo.getCallNodePathFromIndex(maxNode);
+  }
+}
+
+export class CallTree {
+  _categories: CategoryList;
+  _internal: CallTreeInternal;
+  _callNodeInfo: CallNodeInfo;
+  _callNodeTable: CallNodeTable;
+  _thread: Thread;
+  _rootTotalSummary: number;
+  _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
+  // _children is indexed by IndexIntoCallNodeTable. Since they are
+  // integers, using an array directly is faster than going through a Map.
+  _children: Array<CallNodeChildren>;
+  _roots: IndexIntoCallNodeTable[];
+  _isHighPrecision: boolean;
+  _weightType: WeightType;
+
+  constructor(
+    thread: Thread,
+    categories: CategoryList,
+    callNodeInfo: CallNodeInfo,
+    internal: CallTreeInternal,
+    rootTotalSummary: number,
+    isHighPrecision: boolean,
+    weightType: WeightType
+  ) {
+    this._categories = categories;
+    this._internal = internal;
+    this._callNodeInfo = callNodeInfo;
+    this._callNodeTable = callNodeInfo.getCallNodeTable();
+    this._thread = thread;
+    this._rootTotalSummary = rootTotalSummary;
+    this._displayDataByIndex = new Map();
+    this._children = [];
+    this._roots = internal.createRoots();
+    this._isHighPrecision = isHighPrecision;
+    this._weightType = weightType;
+  }
+
   getRoots() {
-    return this.getChildren(-1);
+    return this._roots;
   }
 
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
     let children = this._children[callNodeIndex];
     if (children === undefined) {
-      children = [];
-      const firstChild = this._getFirstChildIndex(callNodeIndex);
-      for (
-        let childCallNodeIndex = firstChild;
-        childCallNodeIndex !== -1;
-        childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
-      ) {
-        const childTotalSummary =
-          this._callTreeTimings.total[childCallNodeIndex];
-        const childHasChildren = this._callNodeHasChildren[childCallNodeIndex];
-
-        if (childTotalSummary !== 0 || childHasChildren !== 0) {
-          children.push(childCallNodeIndex);
-        }
-      }
-      children.sort(
-        (a, b) =>
-          Math.abs(this._callTreeTimings.total[b]) -
-          Math.abs(this._callTreeTimings.total[a])
-      );
+      children = this._internal.createChildren(callNodeIndex);
       this._children[callNodeIndex] = children;
     }
     return children;
   }
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
-    return this._callNodeHasChildren[callNodeIndex] !== 0;
+    return this._internal.hasChildren(callNodeIndex);
   }
 
   _addDescendantsToSet(
@@ -181,9 +244,9 @@ export class CallTree {
     const funcName = this._thread.stringTable.getString(
       this._thread.funcTable.name[funcIndex]
     );
-    const total = this._callTreeTimings.total[callNodeIndex];
+
+    const { self, total } = this._internal.getSelfAndTotal(callNodeIndex);
     const totalRelative = total / this._rootTotalSummary;
-    const self = this._callTreeTimings.self[callNodeIndex];
     const selfRelative = self / this._rootTotalSummary;
 
     return {
@@ -382,29 +445,11 @@ export class CallTree {
     if (callNodeIndex === null) {
       return [];
     }
-    const heaviestPath = this.findHeaviestPathInSubtree(callNodeIndex);
+    const heaviestPath =
+      this._internal.findHeaviestPathInSubtree(callNodeIndex);
     const startingDepth = this._callNodeTable.depth[callNodeIndex];
     const partialPath = heaviestPath.slice(startingDepth);
     return partialPath.reverse();
-  }
-
-  findHeaviestPathInSubtree(
-    callNodeIndex: IndexIntoCallNodeTable
-  ): CallNodePath {
-    const rangeEnd = this._callNodeTable.subtreeRangeEnd[callNodeIndex];
-
-    // Find the call node with the highest leaf time.
-    let maxNode = -1;
-    let maxAbs = 0;
-    for (let nodeIndex = callNodeIndex; nodeIndex < rangeEnd; nodeIndex++) {
-      const nodeLeaf = Math.abs(this._callTreeTimings.leaf[nodeIndex]);
-      if (maxNode === -1 || nodeLeaf > maxAbs) {
-        maxNode = nodeIndex;
-        maxAbs = nodeLeaf;
-      }
-    }
-
-    return this._callNodeInfo.getCallNodePathFromIndex(maxNode);
   }
 }
 
@@ -547,7 +592,8 @@ export function getCallTree(
       thread,
       categories,
       callNodeInfo,
-      callTreeTimings,
+      new CallTreeInternalImpl(callNodeInfo, callTreeTimings),
+      callTreeTimings.rootTotalSummary,
       Boolean(thread.isJsTracer),
       weightType
     );
