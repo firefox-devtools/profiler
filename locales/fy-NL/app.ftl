@@ -850,6 +850,11 @@ TrackBandwidthGraph--speed = { $value } per sekonde
     .label = Oersetsnelheid foar dizze opname
 # This is used in the tooltip of the bandwidth track.
 # Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = lês/skriuw-útfieringen sûnt de lêste opname
+# This is used in the tooltip of the bandwidth track.
+# Variables:
 #   $value (String) - the total of transfered data until the hovered time.
 #                     Will contain the unit (eg. B, KB, MB)
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
