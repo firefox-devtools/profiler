@@ -689,7 +689,7 @@ export function getSampleIndexToCallNodeIndex(
  * This is an implementation of getSamplesSelectedStates for just the case where
  * no call node is selected.
  */
-function getSamplesSelectedStatesForNoSelection(
+function _getSamplesSelectedStatesForNoSelection(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>
 ): SelectedState[] {
@@ -722,7 +722,7 @@ function getSamplesSelectedStatesForNoSelection(
 }
 
 /**
- * Given the call node for each sample and the call node selected states,
+ * Given the call node for each sample and the selected call node,
  * compute each sample's selected state.
  *
  * For samples that are not filtered out, the sample's selected state is based
@@ -768,12 +768,15 @@ function getSamplesSelectedStatesForNoSelection(
  * In this example, the selected node has index 13 and the "selected index range"
  * is the range from 13 to 21 (not including 21).
  */
-function mapCallNodeSelectedStatesToSamples(
+function _getSamplesSelectedStatesNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable,
-  selectedCallNodeDescendantsEndIndex: IndexIntoCallNodeTable
+  callNodeInfo: CallNodeInfo
 ): SelectedState[] {
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const selectedCallNodeDescendantsEndIndex =
+    callNodeTable.subtreeRangeEnd[selectedCallNodeIndex];
   const sampleCount = sampleCallNodes.length;
   const samplesSelectedStates = new Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
@@ -802,6 +805,48 @@ function mapCallNodeSelectedStatesToSamples(
 }
 
 /**
+ * The implementation of getSamplesSelectedStates for the inverted tree.
+ *
+ * This uses the suffix order, see the documentation of CallNodeInfoInverted.
+ */
+function _getSamplesSelectedStatesInverted(
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfoInverted
+): SelectedState[] {
+  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
+  const [selectedSubtreeRangeStart, selectedSubtreeRangeEnd] =
+    callNodeInfo.getSuffixOrderIndexRangeForCallNode(
+      selectedInvertedCallNodeIndex
+    );
+  const sampleCount = sampleNonInvertedCallNodes.length;
+  const samplesSelectedStates = new Array(sampleCount);
+  for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
+    let sampleSelectedState: SelectedState = 'SELECTED';
+    const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
+    if (callNodeIndex !== null) {
+      const suffixOrderIndex = suffixOrderIndexes[callNodeIndex];
+      if (suffixOrderIndex < selectedSubtreeRangeStart) {
+        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+      } else if (suffixOrderIndex >= selectedSubtreeRangeEnd) {
+        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+      }
+    } else {
+      // This sample was filtered out.
+      sampleSelectedState =
+        activeTabFilteredNonInvertedCallNodes[sampleIndex] === null
+          ? // This sample was not part of the active tab.
+            'FILTERED_OUT_BY_ACTIVE_TAB'
+          : // This sample was filtered out in the transform pipeline.
+            'FILTERED_OUT_BY_TRANSFORM';
+    }
+    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+  }
+  return samplesSelectedStates;
+}
+
+/**
  * Go through the samples, and determine their current state with respect to
  * the selection.
  *
@@ -810,24 +855,31 @@ function mapCallNodeSelectedStatesToSamples(
  */
 export function getSamplesSelectedStates(
   callNodeInfo: CallNodeInfo,
-  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
-  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
 ): SelectedState[] {
   if (selectedCallNodeIndex === null || selectedCallNodeIndex === -1) {
-    return getSamplesSelectedStatesForNoSelection(
-      sampleCallNodes,
-      activeTabFilteredCallNodes
+    return _getSamplesSelectedStatesForNoSelection(
+      sampleNonInvertedCallNodes,
+      activeTabFilteredNonInvertedCallNodes
     );
   }
 
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  return mapCallNodeSelectedStatesToSamples(
-    sampleCallNodes,
-    activeTabFilteredCallNodes,
-    selectedCallNodeIndex,
-    callNodeTable.subtreeRangeEnd[selectedCallNodeIndex]
-  );
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
+    ? _getSamplesSelectedStatesInverted(
+        sampleNonInvertedCallNodes,
+        activeTabFilteredNonInvertedCallNodes,
+        selectedCallNodeIndex,
+        callNodeInfoInverted
+      )
+    : _getSamplesSelectedStatesNonInverted(
+        sampleNonInvertedCallNodes,
+        activeTabFilteredNonInvertedCallNodes,
+        selectedCallNodeIndex,
+        callNodeInfo
+      );
 }
 
 /**
