@@ -179,6 +179,9 @@ export interface CallNodeInfo {
     parent: IndexIntoCallNodeTable | -1,
     func: IndexIntoFuncTable
   ): IndexIntoCallNodeTable | null;
+
+  // Returns whether the given node is a root node.
+  isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean;
 }
 
 // An index into SuffixOrderedCallNodes.
