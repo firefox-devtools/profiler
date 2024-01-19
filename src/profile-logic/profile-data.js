@@ -96,6 +96,7 @@ import type {
   Bytes,
   ThreadWithReservedFunctions,
   TabID,
+  SuffixOrderIndex,
 } from 'firefox-profiler/types';
 
 /**
@@ -586,6 +587,17 @@ export function compareNonInvertedCallNodesInSuffixOrderWithPath(
 //
 // Also returns null for any stacks which aren't used as self stacks.
 //
+// Note: This function doesn't actually have a parameter named `invertedCallTreeNode`.
+// Instead, it has two parameters for the node's suffix order index range. This
+// range is obtained by the caller and is enough to check whether a stack's call
+// path ends with the path suffix represented by the inverted call node. The caller
+// gets the suffix order index range as follows:
+//
+// ```
+// const [rangeStart, rangeEnd] =
+//     callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
+// ```
+//
 // Example:
 //
 //    Stack table (`<func>:<line>`):        Inverted call tree:
@@ -613,33 +625,32 @@ export function compareNonInvertedCallNodesInSuffixOrderWithPath(
 // that frame, for example the frame's address or line.
 export function getMatchingAncestorStackForInvertedCallNode(
   needleStack: IndexIntoStackTable,
-  invertedTreeCallNode: IndexIntoCallNodeTable,
-  invertedTreeCallNodeSubtreeEnd: IndexIntoCallNodeTable,
+  suffixOrderIndexRangeStart: SuffixOrderIndex,
+  suffixOrderIndexRangeEnd: SuffixOrderIndex,
+  suffixOrderIndexes: Uint32Array,
   invertedTreeCallNodeDepth: number,
-  stackIndexToInvertedCallNodeIndex: Int32Array,
+  stackIndexToCallNodeIndex: Int32Array,
   stackTablePrefixCol: Array<IndexIntoStackTable | null>
 ): IndexIntoStackTable | null {
-  // Get the inverted call tree node for the (non-inverted) stack.
+  // Get the non-inverted call tree node for the (non-inverted) stack.
   // For example, if the stack has the call path A -> B -> C,
-  // this will give us the node C <- B <- A in the inverted tree.
-  const needleCallNode = stackIndexToInvertedCallNodeIndex[needleStack];
+  // this will give us the node A -> B -> C in the non-inverted tree.
+  const needleCallNode = stackIndexToCallNodeIndex[needleStack];
+  const needleSuffixOrderIndex = suffixOrderIndexes[needleCallNode];
 
-  // Check if needleCallNode is a descendant of invertedTreeCallNode in the
-  // inverted tree.
+  // Check if needleCallNode's call path ends with the call path suffix represented
+  // by the inverted call node.
   if (
-    needleCallNode >= invertedTreeCallNode &&
-    needleCallNode < invertedTreeCallNodeSubtreeEnd
+    needleSuffixOrderIndex >= suffixOrderIndexRangeStart &&
+    needleSuffixOrderIndex < suffixOrderIndexRangeEnd
   ) {
-    // needleCallNode is a descendant of invertedTreeCallNode in the inverted tree.
-    // That means that needleStack's self time contributes to the total time of
-    // invertedTreeCallNode. It also means that the non-inverted call path of
-    // needleStack "ends with" the suffix described by invertedTreeCallNode.
-    // For example, if invertedTreeCallNode is C <- B, and needleStack has the
+    // Yes, needleCallNode's call path ends with the call path suffix represented
+    // by the inverted call node.
+    // For example, if our node is C <- B in the inverted tree, and needleStack has the
     // non-inverted call path A -> B -> C, then we now know that A -> B -> C ends
     // with B -> C.
-    // Now we strip off this suffix. In the example, we strip off "-> C" at the
-    // end so that we end up with a stack for A -> B.
-    // Stripping off the suffix is equivalent to "walking down" in the inverted tree.
+    // Now we strip off this suffix. In the example, invertedTreeCallNodeDepth is 1
+    // so we strip off "-> C" at the end and return a stack for A -> B.
     return getNthPrefixStack(
       needleStack,
       invertedTreeCallNodeDepth,
@@ -647,7 +658,7 @@ export function getMatchingAncestorStackForInvertedCallNode(
     );
   }
 
-  // Not a descendant; return null.
+  // The stack's call path doesn't end with the suffix we were looking for; return null.
   return null;
 }
 
@@ -3970,20 +3981,20 @@ export function getNativeSymbolsForCallNode(
   stackTable: StackTable,
   frameTable: FrameTable
 ): IndexIntoNativeSymbolTable[] {
-  if (callNodeInfo.isInverted()) {
-    return getNativeSymbolsForCallNodeInverted(
-      callNodeIndex,
-      callNodeInfo,
-      stackTable,
-      frameTable
-    );
-  }
-  return getNativeSymbolsForCallNodeNonInverted(
-    callNodeIndex,
-    callNodeInfo,
-    stackTable,
-    frameTable
-  );
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
+    ? getNativeSymbolsForCallNodeInverted(
+        callNodeIndex,
+        callNodeInfoInverted,
+        stackTable,
+        frameTable
+      )
+    : getNativeSymbolsForCallNodeNonInverted(
+        callNodeIndex,
+        callNodeInfo,
+        stackTable,
+        frameTable
+      );
 }
 
 export function getNativeSymbolsForCallNodeNonInverted(
@@ -4009,21 +4020,24 @@ export function getNativeSymbolsForCallNodeNonInverted(
 
 export function getNativeSymbolsForCallNodeInverted(
   callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
+  callNodeInfo: CallNodeInfoInverted,
   stackTable: StackTable,
   frameTable: FrameTable
 ): IndexIntoNativeSymbolTable[] {
-  const invertedCallNodeTable = callNodeInfo.getCallNodeTable();
-  const depth = invertedCallNodeTable.depth[callNodeIndex];
-  const endIndex = invertedCallNodeTable.subtreeRangeEnd[callNodeIndex];
+  const depth = callNodeInfo.getCallNodeTable().depth[callNodeIndex];
+  const [rangeStart, rangeEnd] =
+    callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
   const stackTablePrefixCol = stackTable.prefix;
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
   const set = new Set();
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const stackForNode = getMatchingAncestorStackForInvertedCallNode(
       stackIndex,
-      callNodeIndex,
-      endIndex,
+      rangeStart,
+      rangeEnd,
+      suffixOrderIndexes,
       depth,
       stackIndexToCallNodeIndex,
       stackTablePrefixCol

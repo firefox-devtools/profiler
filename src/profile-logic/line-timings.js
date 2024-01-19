@@ -10,6 +10,7 @@ import type {
   StackTable,
   SamplesLikeTable,
   CallNodeInfo,
+  CallNodeInfoInverted,
   IndexIntoCallNodeTable,
   IndexIntoStringTable,
   StackLineInfo,
@@ -125,12 +126,13 @@ export function getStackLineInfoForCallNode(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): StackLineInfo {
-  return callNodeInfo.isInverted()
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
     ? getStackLineInfoForCallNodeInverted(
         stackTable,
         frameTable,
         callNodeIndex,
-        callNodeInfo
+        callNodeInfoInverted
       )
     : getStackLineInfoForCallNodeNonInverted(
         stackTable,
@@ -282,15 +284,16 @@ export function getStackLineInfoForCallNodeInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
   callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo
+  callNodeInfo: CallNodeInfoInverted
 ): StackLineInfo {
-  const invertedCallNodeTable = callNodeInfo.getCallNodeTable();
-  const depth = invertedCallNodeTable.depth[callNodeIndex];
-  const endIndex = invertedCallNodeTable.subtreeRangeEnd[callNodeIndex];
-  const callNodeIsRootOfInvertedTree =
-    invertedCallNodeTable.prefix[callNodeIndex] === -1;
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const depth = callNodeInfo.getCallNodeTable().depth[callNodeIndex];
+  const [rangeStart, rangeEnd] =
+    callNodeInfo.getSuffixOrderIndexRangeForCallNode(callNodeIndex);
+  const callNodeIsRootOfInvertedTree = callNodeInfo.isRoot(callNodeIndex);
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const stackTablePrefixCol = stackTable.prefix;
+  const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
 
   // "self line" == "the line which a stack's self time is contributed to"
   const callNodeSelfLineForAllStacks = [];
@@ -304,8 +307,9 @@ export function getStackLineInfoForCallNodeInverted(
 
     const stackForCallNode = getMatchingAncestorStackForInvertedCallNode(
       stackIndex,
-      callNodeIndex,
-      endIndex,
+      rangeStart,
+      rangeEnd,
+      suffixOrderIndexes,
       depth,
       stackIndexToCallNodeIndex,
       stackTablePrefixCol
