@@ -8,7 +8,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import {
   getCallTree,
-  computeCallNodeLeafAndSummary,
+  computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
 } from '../../profile-logic/call-tree';
 import { computeFlameGraphRows } from '../../profile-logic/flame-graph';
@@ -72,7 +72,7 @@ describe('unfiltered call tree', function () {
     it('yields expected results', function () {
       const callTreeTimings = computeCallTreeTimings(
         callNodeInfo,
-        computeCallNodeLeafAndSummary(
+        computeCallNodeSelfAndSummary(
           thread.samples,
           getSampleIndexToCallNodeIndex(
             thread.samples.stack,
@@ -87,7 +87,6 @@ describe('unfiltered call tree', function () {
           rootTotalSummary: 3,
           callNodeHasChildren: new Uint8Array([1, 1, 1, 1, 0, 1, 0, 1, 0]),
           self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
-          leaf: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
           total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
         },
       });
@@ -437,7 +436,7 @@ describe('inverted call tree', function () {
     );
     const callTreeTimings = computeCallTreeTimings(
       callNodeInfo,
-      computeCallNodeLeafAndSummary(
+      computeCallNodeSelfAndSummary(
         thread.samples,
         getSampleIndexToCallNodeIndex(
           thread.samples.stack,
@@ -479,7 +478,7 @@ describe('inverted call tree', function () {
     );
     const invertedCallTreeTimings = computeCallTreeTimings(
       invertedCallNodeInfo,
-      computeCallNodeLeafAndSummary(
+      computeCallNodeSelfAndSummary(
         thread.samples,
         getSampleIndexToCallNodeIndex(
           thread.samples.stack,
@@ -631,7 +630,7 @@ describe('diffing trees', function () {
     );
     const callTreeTimings = computeCallTreeTimings(
       callNodeInfo,
-      computeCallNodeLeafAndSummary(
+      computeCallNodeSelfAndSummary(
         thread.samples,
         getSampleIndexToCallNodeIndex(
           thread.samples.stack,
