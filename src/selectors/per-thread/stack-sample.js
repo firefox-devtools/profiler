@@ -44,7 +44,7 @@ import type {
   $ReturnType,
   ThreadsKey,
   SelfAndTotal,
-  CallNodeLeafAndSummary,
+  CallNodeSelfAndSummary,
 } from 'firefox-profiler/types';
 
 import type { ThreadSelectorsPerThread } from './thread';
@@ -330,13 +330,13 @@ export function getStackAndSampleSelectorsPerThread(
     (samples) => samples.weightType || 'samples'
   );
 
-  const getCallNodeLeafAndSummary: Selector<CallNodeLeafAndSummary> =
+  const getCallNodeSelfAndSummary: Selector<CallNodeSelfAndSummary> =
     createSelector(
       threadSelectors.getPreviewFilteredSamplesForCallTree,
       getSampleIndexToNonInvertedCallNodeIndexForPreviewFilteredThread,
       getCallNodeInfo,
       (samples, sampleIndexToCallNodeIndex, callNodeInfo) => {
-        return CallTree.computeCallNodeLeafAndSummary(
+        return CallTree.computeCallNodeSelfAndSummary(
           samples,
           sampleIndexToCallNodeIndex,
           callNodeInfo.getNonInvertedCallNodeTable().length
@@ -346,14 +346,14 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getCallTreeTimings: Selector<CallTree.CallTreeTimings> = createSelector(
     getCallNodeInfo,
-    getCallNodeLeafAndSummary,
+    getCallNodeSelfAndSummary,
     CallTree.computeCallTreeTimings
   );
 
   const getCallTreeTimingsNonInverted: Selector<CallTree.CallTreeTimingsNonInverted> =
     createSelector(
       getCallNodeInfo,
-      getCallNodeLeafAndSummary,
+      getCallNodeSelfAndSummary,
       CallTree.computeCallTreeTimingsNonInverted
     );
 
@@ -386,19 +386,19 @@ export function getStackAndSampleSelectorsPerThread(
       getCallNodeInfo,
       ProfileSelectors.getProfileInterval,
       (samples, sampleIndexToCallNodeIndex, callNodeInfo, interval) => {
-        const callNodeLeafAndSummary =
-          CallTree.computeCallNodeTracedLeafAndSummary(
+        const CallNodeSelfAndSummary =
+          CallTree.computeCallNodeTracedSelfAndSummary(
             samples,
             sampleIndexToCallNodeIndex,
             callNodeInfo.getNonInvertedCallNodeTable().length,
             interval
           );
-        if (callNodeLeafAndSummary === null) {
+        if (CallNodeSelfAndSummary === null) {
           return null;
         }
         return CallTree.computeCallTreeTimings(
           callNodeInfo,
-          callNodeLeafAndSummary
+          CallNodeSelfAndSummary
         );
       }
     );

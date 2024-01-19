@@ -776,11 +776,11 @@ export type ProfileFilterPageData = {|
   favicon: string | null,
 |};
 
-export type CallNodeLeafAndSummary = {|
+export type CallNodeSelfAndSummary = {|
   // This property stores the amount of unit (time, bytes, count, etc.) spent in the
   // stacks' leaf nodes.
-  callNodeLeaf: Float32Array,
-  // The sum of absolute values in callNodeLeaf.
+  callNodeSelf: Float32Array,
+  // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number,
 |};

@@ -2928,7 +2928,6 @@ CallTree {
           9,
         ],
       },
-      "_isInverted": false,
       "_nonInvertedCallNodeTable": Object {
         "category": Int32Array [
           0,
@@ -3167,17 +3166,6 @@ CallTree {
         0,
         1,
         0,
-        0,
-        0,
-      ],
-      "leaf": Float32Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        2,
         0,
         0,
       ],
