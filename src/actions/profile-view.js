@@ -368,6 +368,7 @@ function getInformationFromTrackReference(
             relatedTab: null,
           };
         case 'memory':
+        case 'bandwidth':
         case 'process-cpu':
         case 'power': {
           const counterSelectors = getCounterSelectors(localTrack.counterIndex);

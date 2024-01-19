@@ -41,6 +41,11 @@ export const TRACK_MEMORY_HEIGHT =
 export const TRACK_MEMORY_LINE_WIDTH = 2;
 export const TRACK_MEMORY_COLOR = 'orange';
 
+// The following values are for the bandwidth track.
+export const TRACK_BANDWIDTH_HEIGHT = 25;
+export const TRACK_BANDWIDTH_LINE_WIDTH = 2;
+export const TRACK_BANDWIDTH_COLOR = 'blue';
+
 // The following values are for experimental event delay track.
 export const TRACK_EVENT_DELAY_HEIGHT = 40;
 export const TRACK_EVENT_DELAY_LINE_WIDTH = 2;

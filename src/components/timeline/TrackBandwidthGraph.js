@@ -22,12 +22,20 @@ import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
   getCounterSelectors,
+  getPreviewSelection,
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
+import {
+  TooltipDetails,
+  TooltipDetail,
+  TooltipDetailSeparator,
+} from 'firefox-profiler/components/tooltip/TooltipDetails';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
-import { TRACK_MEMORY_COLOR } from 'firefox-profiler/app-logic/constants';
+import { TRACK_BANDWIDTH_COLOR } from 'firefox-profiler/app-logic/constants';
+import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
+import { co2 } from '@tgwf/co2';
 
 import type {
   CounterIndex,
@@ -36,6 +44,7 @@ import type {
   ThreadIndex,
   AccumulatedCounterSamples,
   Milliseconds,
+  PreviewSelection,
   CssPixels,
   StartEndRange,
   IndexIntoSamplesTable,
@@ -44,7 +53,7 @@ import type {
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackMemory.css';
+import './TrackBandwidth.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.
@@ -55,6 +64,7 @@ type CanvasProps = {|
   +counter: Counter,
   +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +accumulatedSamples: AccumulatedCounterSamples,
+  +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
   +width: CssPixels,
   +height: CssPixels,
@@ -66,7 +76,7 @@ type CanvasProps = {|
  * React triggers a new canvas render. Because of this, it's important to only pass
  * in the props that are needed for the canvas draw call.
  */
-class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
+class TrackBandwidthCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
   _requestedAnimationFrame: boolean = false;
   _canvasState: {| renderScheduled: boolean, inView: boolean |} = {
@@ -83,7 +93,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       width,
       lineWidth,
       interval,
-      accumulatedSamples,
+      maxCounterSampleCountPerMs,
       counterSampleRange,
     } = this.props;
     if (width === 0) {
@@ -116,8 +126,8 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     // Take the sample information, and convert it into chart coordinates. Use a slightly
     // smaller space than the deviceHeight, so that the stroke will be fully visible
     // both at the top and bottom of the chart.
-    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
     const [sampleStart, sampleEnd] = counterSampleRange;
+    const countRangePerMs = maxCounterSampleCountPerMs;
 
     {
       // Draw the chart.
@@ -128,39 +138,86 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       //  4                        3
       //
       // Start by drawing from 1 - 2. This will be the top of all the peaks of the
-      // memory graph.
+      // bandwidth graph.
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = getStrokeColor(TRACK_MEMORY_COLOR);
-      ctx.fillStyle = getFillColor(TRACK_MEMORY_COLOR);
+      ctx.strokeStyle = getStrokeColor(TRACK_BANDWIDTH_COLOR);
+      ctx.fillStyle = getFillColor(TRACK_BANDWIDTH_COLOR);
       ctx.beginPath();
 
-      // The x and y are used after the loop.
-      let x = 0;
-      let y = 0;
-      let firstX = 0;
-      for (let i = sampleStart; i < sampleEnd; i++) {
-        // Create a path for the top of the chart. This is the line that will have
-        // a stroke applied to it.
-        x = (samples.time[i] - rangeStart) * millisecondWidth;
-        // Add on half the stroke's line width so that it won't be cut off the edge
-        // of the graph.
-        const unitGraphCount = (accumulatedCounts[i] - minCount) / countRange;
-        y =
+      const getX = (i) =>
+        Math.round((samples.time[i] - rangeStart) * millisecondWidth);
+      const getY = (i) => {
+        const sampleTimeDeltaInMs =
+          i === 0 ? interval : samples.time[i] - samples.time[i - 1];
+        const unitGraphCount =
+          samples.count[i] / sampleTimeDeltaInMs / countRangePerMs;
+        if (!unitGraphCount) {
+          // Make the 0 values invisible so that 'almost 0' is noticeable.
+          return deviceHeight + deviceLineHalfWidth;
+        }
+
+        return (
           innerDeviceHeight -
           innerDeviceHeight * unitGraphCount +
-          deviceLineHalfWidth;
-        if (i === 0) {
-          // This is the first iteration, only move the line, do not draw it. Also
-          // remember this first X, as the bottom of the graph will need to connect
-          // back up to it.
-          firstX = x;
-          ctx.moveTo(x, y);
-        } else {
+          // Add on half the stroke's line width so that it won't be cut off the edge
+          // of the graph.
+          deviceLineHalfWidth
+        );
+      };
+
+      // The x and y are used after the loop.
+      const firstX = getX(sampleStart);
+      let x = firstX;
+      let y = getY(sampleStart);
+
+      // For the first sample, only move the line, do not draw it. Also
+      // remember this first X, as the bottom of the graph will need to connect
+      // back up to it.
+      ctx.moveTo(x, y);
+
+      // Create a path for the top of the chart. This is the line that will have
+      // a stroke applied to it.
+      for (let i = sampleStart + 1; i < sampleEnd; i++) {
+        x = getX(i);
+        y = getY(i);
+        ctx.lineTo(x, y);
+
+        // If we have multiple samples to draw on the same horizontal pixel,
+        // we process all of them together with a max-min decimation algorithm
+        // to save time:
+        // - We draw the first and last samples to ensure the display is
+        //   correct if there are sampling gaps.
+        // - For the values in between, we only draw the min and max values,
+        //   to draw a vertical line covering all the other sample values.
+        const values = [y];
+        while (i + 1 < sampleEnd && getX(i + 1) === x) {
+          values.push(getY(++i));
+        }
+
+        // Looking for the min and max only makes sense if we have more than 2
+        // samples to draw.
+        if (values.length > 2) {
+          const maxY = Math.max(...values);
+          if (maxY !== y) {
+            y = maxY;
+            ctx.lineTo(x, y);
+          }
+          const minY = Math.min(...values);
+          if (minY !== y) {
+            y = minY;
+            ctx.lineTo(x, y);
+          }
+        }
+
+        const lastY = values[values.length - 1];
+        if (lastY !== y) {
+          y = lastY;
           ctx.lineTo(x, y);
         }
       }
+
       // The samples range ends at the time of the last sample, plus the interval.
       // Draw this last bit.
       ctx.lineTo(x + intervalWidth, y);
@@ -232,7 +289,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     return (
       <InView onChange={this._observerCallback}>
         <canvas
-          className="timelineTrackMemoryCanvas"
+          className="timelineTrackBandwidthCanvas"
           ref={this._takeCanvasRef}
         />
       </InView>
@@ -253,9 +310,11 @@ type StateProps = {|
   +counter: Counter,
   +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
   +accumulatedSamples: AccumulatedCounterSamples,
+  +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
+  +previewSelection: PreviewSelection,
 |};
 
 type DispatchProps = {||};
@@ -272,10 +331,10 @@ type State = {|
 |};
 
 /**
- * The memory track graph takes memory information from counters, and renders it as a
+ * The bandwidth track graph takes bandwidth information from counters, and renders it as a
  * graph in the timeline.
  */
-class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
+class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
   state = {
     hoveredCounter: null,
     mouseX: 0,
@@ -310,7 +369,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     if (counter.samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      throw new Error('No sample group found for memory counter');
+      throw new Error('No sample group found for bandwidth counter');
     }
     const { samples } = counter;
 
@@ -340,6 +399,32 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
           // Right point is closer
           hoveredCounter = bisectionCounter;
         }
+
+        // If there are samples before or after hoveredCounter that fall
+        // horizontally on the same pixel, move hoveredCounter to the sample
+        // with the highest power value.
+        const mouseAtTime = (t) =>
+          Math.round(((t - rangeStart) / rangeLength) * width + left);
+        for (
+          let currentIndex = hoveredCounter - 1;
+          mouseAtTime(samples.time[currentIndex]) === mouseX &&
+          currentIndex > 0;
+          --currentIndex
+        ) {
+          if (samples.count[currentIndex] > samples.count[hoveredCounter]) {
+            hoveredCounter = currentIndex;
+          }
+        }
+        for (
+          let currentIndex = hoveredCounter + 1;
+          mouseAtTime(samples.time[currentIndex]) === mouseX &&
+          currentIndex < samples.time.length;
+          ++currentIndex
+        ) {
+          if (samples.count[currentIndex] > samples.count[hoveredCounter]) {
+            hoveredCounter = currentIndex;
+          }
+        }
       } else {
         hoveredCounter = bisectionCounter;
       }
@@ -359,14 +444,47 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
+  _co2 = null;
+  _formatDataTransferValue(bytes: number, l10nId: string) {
+    if (!this._co2) {
+      this._co2 = new co2();
+    }
+    // By default when estimating emissions per byte, co2.js takes into account
+    // emissions for the user device, the data center and the network.
+    // Because we already have power tracks showing the power use and estimated
+    // emissions of the device, set the 'device' grid intensity to 0 to avoid
+    // double counting.
+    const co2eq = this._co2.perByteTrace(bytes, false, {
+      gridIntensity: { device: 0 },
+    });
+    const carbonValue = formatNumber(co2eq.co2);
+    const value = formatBytes(bytes);
+    return (
+      <Localized
+        id={l10nId}
+        vars={{ value, carbonValue }}
+        attrs={{ label: true }}
+      >
+        <TooltipDetail label="">{value}</TooltipDetail>
+      </Localized>
+    );
+  }
+
   _renderTooltip(counterIndex: number): React.Node {
-    const { accumulatedSamples, counter, rangeStart, rangeEnd } = this.props;
+    const {
+      accumulatedSamples,
+      counter,
+      rangeStart,
+      rangeEnd,
+      interval,
+      previewSelection,
+    } = this.props;
     const { mouseX, mouseY } = this.state;
     const { samples } = counter;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      throw new Error('No accumulated sample found for memory counter');
+      throw new Error('No accumulated sample found for bandwidth counter');
     }
 
     const sampleTime = samples.time[counterIndex];
@@ -382,36 +500,68 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     const bytes = accumulatedCounts[counterIndex] - minCount;
     const operations =
       samples.number !== undefined ? samples.number[counterIndex] : null;
+
+    const sampleTimeDeltaInMs =
+      counterIndex === 0
+        ? interval
+        : samples.time[counterIndex] - samples.time[counterIndex - 1];
+    const unitGraphCount = samples.count[counterIndex] / sampleTimeDeltaInMs;
+
+    let rangeTotal = 0;
+    if (previewSelection.hasSelection) {
+      const [beginIndex, endIndex] = getSampleIndexRangeForSelection(
+        samples,
+        previewSelection.selectionStart,
+        previewSelection.selectionEnd
+      );
+
+      for (
+        let counterSampleIndex = beginIndex;
+        counterSampleIndex < endIndex;
+        counterSampleIndex++
+      ) {
+        rangeTotal += samples.count[counterSampleIndex];
+      }
+    }
+
+    let ops;
+    if (operations !== null) {
+      ops = formatNumber(operations, 2, 0);
+    }
+
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <div className="timelineTrackMemoryTooltip">
-          <div className="timelineTrackMemoryTooltipLine">
-            <span className="timelineTrackMemoryTooltipNumber">
-              {formatBytes(bytes)}
-            </span>
-            <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
-              relative memory at this time
-            </Localized>
-          </div>
-
-          <div className="timelineTrackMemoryTooltipLine">
-            <span className="timelineTrackMemoryTooltipNumber">
-              {formatBytes(countRange)}
-            </span>
-            <Localized id="TrackMemoryGraph--memory-range-in-graph">
-              memory range in graph
-            </Localized>
-          </div>
-          {operations !== null ? (
-            <div className="timelineTrackMemoryTooltipLine">
-              <span className="timelineTrackMemoryTooltipNumber">
-                {formatNumber(operations, 2, 0)}
-              </span>
-              <Localized id="TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample">
-                allocations and deallocations since the previous sample
+        <div className="timelineTrackBandwidthTooltip">
+          <TooltipDetails>
+            {this._formatDataTransferValue(
+              unitGraphCount * 1000 /* ms -> s */,
+              'TrackBandwidthGraph--speed'
+            )}
+            {operations !== null ? (
+              <Localized
+                id="TrackBandwidthGraph--read-write-operations-since-the-previous-sample"
+                vars={{ value: ops }}
+                attrs={{ label: true }}
+              >
+                <TooltipDetail label="">{ops}</TooltipDetail>
               </Localized>
-            </div>
-          ) : null}
+            ) : null}
+            <TooltipDetailSeparator />
+            {this._formatDataTransferValue(
+              bytes,
+              'TrackBandwidthGraph--cumulative-bandwidth-at-this-time'
+            )}
+            {this._formatDataTransferValue(
+              countRange,
+              'TrackBandwidthGraph--total-bandwidth-in-graph'
+            )}
+            {previewSelection.hasSelection
+              ? this._formatDataTransferValue(
+                  rangeTotal,
+                  'TrackBandwidthGraph--total-bandwidth-in-range'
+                )
+              : null}
+          </TooltipDetails>
         </div>
       </Tooltip>
     );
@@ -421,7 +571,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
    * Create a div that is a dot on top of the graph representing the current
    * height of the graph.
    */
-  _renderMemoryDot(counterIndex: number): React.Node {
+  _renderBandwidthDot(counterIndex: number): React.Node {
     const {
       counter,
       rangeStart,
@@ -429,14 +579,15 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      accumulatedSamples,
+      maxCounterSampleCountPerMs,
+      interval,
     } = this.props;
 
     const { samples } = counter;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      throw new Error('No sample found for memory counter');
+      throw new Error('No sample found for bandwidth counter');
     }
     const rangeLength = rangeEnd - rangeStart;
     const sampleTime = samples.time[counterIndex];
@@ -450,10 +601,13 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     }
 
     const left = (width * (sampleTime - rangeStart)) / rangeLength;
-
-    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
+    const countRangePerMs = maxCounterSampleCountPerMs;
+    const sampleTimeDeltaInMs =
+      counterIndex === 0
+        ? interval
+        : samples.time[counterIndex] - samples.time[counterIndex - 1];
     const unitSampleCount =
-      (accumulatedCounts[counterIndex] - minCount) / countRange;
+      samples.count[counterIndex] / sampleTimeDeltaInMs / countRangePerMs;
     const innerTrackHeight = graphHeight - lineWidth / 2;
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
@@ -463,9 +617,9 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
         style={{
           left,
           top,
-          backgroundColor: getDotColor(TRACK_MEMORY_COLOR),
+          backgroundColor: getDotColor(TRACK_BANDWIDTH_COLOR),
         }}
-        className="timelineTrackMemoryGraphDot"
+        className="timelineTrackBandwidthGraphDot"
       />
     );
   }
@@ -484,15 +638,16 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       width,
       lineWidth,
       accumulatedSamples,
+      maxCounterSampleCountPerMs,
     } = this.props;
 
     return (
       <div
-        className="timelineTrackMemoryGraph"
+        className="timelineTrackBandwidthGraph"
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
       >
-        <TrackMemoryCanvas
+        <TrackBandwidthCanvas
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           counter={counter}
@@ -502,10 +657,11 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
           lineWidth={lineWidth}
           interval={interval}
           accumulatedSamples={accumulatedSamples}
+          maxCounterSampleCountPerMs={maxCounterSampleCountPerMs}
         />
         {hoveredCounter === null ? null : (
           <>
-            {this._renderMemoryDot(hoveredCounter)}
+            {this._renderBandwidthDot(hoveredCounter)}
             {this._renderTooltip(hoveredCounter)}
           </>
         )}
@@ -521,7 +677,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const TrackMemoryGraph = explicitConnect<
+export const TrackBandwidthGraph = explicitConnect<
   OwnProps,
   StateProps,
   DispatchProps,
@@ -537,6 +693,8 @@ export const TrackMemoryGraph = explicitConnect<
     return {
       counter,
       threadIndex: counter.mainThreadIndex,
+      maxCounterSampleCountPerMs:
+        counterSelectors.getMaxRangeCounterSampleCountPerMs(state),
       accumulatedSamples: counterSelectors.getAccumulateCounterSamples(state),
       rangeStart: start,
       rangeEnd: end,
@@ -544,7 +702,8 @@ export const TrackMemoryGraph = explicitConnect<
       interval: getProfileInterval(state),
       filteredThread: selectors.getFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
+      previewSelection: getPreviewSelection(state),
     };
   },
-  component: withSize<Props>(TrackMemoryGraphImpl),
+  component: withSize<Props>(TrackBandwidthGraphImpl),
 });
