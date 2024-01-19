@@ -1116,6 +1116,7 @@ describe('getSamplesSelectedStates', function () {
      *  */
     const {
       callNodeInfoInverted,
+      sampleCallNodes,
       sampleInvertedCallNodes,
       funcNamesDict: { A, B, C },
     } = setup(`
@@ -1132,8 +1133,8 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(
           callNodeInfoInverted,
-          sampleInvertedCallNodes,
-          sampleInvertedCallNodes,
+          sampleCallNodes,
+          sampleCallNodes,
           inBA
         )
       ).toEqual([
@@ -1148,8 +1149,8 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(
           callNodeInfoInverted,
-          sampleInvertedCallNodes,
-          sampleInvertedCallNodes,
+          sampleCallNodes,
+          sampleCallNodes,
           inCBA
         )
       ).toEqual([
@@ -1164,8 +1165,8 @@ describe('getSamplesSelectedStates', function () {
       expect(
         getSamplesSelectedStates(
           callNodeInfoInverted,
-          sampleInvertedCallNodes,
-          sampleInvertedCallNodes,
+          sampleCallNodes,
+          sampleCallNodes,
           inB
         )
       ).toEqual([
