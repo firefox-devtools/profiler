@@ -3157,17 +3157,6 @@ CallTree {
         0,
         0,
       ],
-      "leaf": Float32Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        2,
-        0,
-        0,
-      ],
       "rootTotalSummary": 2,
       "self": Float32Array [
         0,
