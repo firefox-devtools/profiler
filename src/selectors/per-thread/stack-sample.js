@@ -262,35 +262,35 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
-  const getSampleIndexToCallNodeIndexForTabFilteredThread: Selector<
+  const _getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread: Selector<
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
     (state) => threadSelectors.getTabFilteredThread(state).samples.stack,
-    (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
-    (tabFilteredThreadSampleStacks, stackIndexToCallNodeIndex) =>
+    (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
+    (tabFilteredThreadSampleStacks, stackIndexToNonInvertedCallNodeIndex) =>
       ProfileData.getSampleIndexToCallNodeIndex(
         tabFilteredThreadSampleStacks,
-        stackIndexToCallNodeIndex
+        stackIndexToNonInvertedCallNodeIndex
       )
   );
 
   const getSamplesSelectedStatesInFilteredThread: Selector<
     null | SelectedState[],
   > = createSelector(
-    getSampleIndexToCallNodeIndexForFilteredThread,
-    getSampleIndexToCallNodeIndexForTabFilteredThread,
+    getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
+    _getSampleIndexToNonInvertedCallNodeIndexForTabFilteredThread,
     getCallNodeInfo,
     getSelectedCallNodeIndex,
     (
-      sampleIndexToCallNodeIndex,
-      activeTabFilteredCallNodeIndex,
+      sampleIndexToNonInvertedCallNodeIndex,
+      activeTabFilteredNonInvertedCallNodes,
       callNodeInfo,
       selectedCallNode
     ) => {
       return ProfileData.getSamplesSelectedStates(
         callNodeInfo,
-        sampleIndexToCallNodeIndex,
-        activeTabFilteredCallNodeIndex,
+        sampleIndexToNonInvertedCallNodeIndex,
+        activeTabFilteredNonInvertedCallNodes,
         selectedCallNode
       );
     }
@@ -454,7 +454,6 @@ export function getStackAndSampleSelectorsPerThread(
     getExpandedCallNodeIndexes,
     getSampleIndexToCallNodeIndexForFilteredThread,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
-    getSampleIndexToCallNodeIndexForTabFilteredThread,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
