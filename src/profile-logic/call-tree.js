@@ -47,7 +47,6 @@ type CallNodeSummary = {
 export type CallTreeTimings = {
   callNodeHasChildren: Uint8Array,
   callNodeSummary: CallNodeSummary,
-  rootCount: number,
   rootTotalSummary: number,
 };
 
@@ -76,7 +75,6 @@ export class CallTree {
   _callNodeHasChildren: Uint8Array; // A table column matching the callNodeTable
   _thread: Thread;
   _rootTotalSummary: number;
-  _rootCount: number;
   _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
   // _children is indexed by IndexIntoCallNodeTable. Since they are
   // integers, using an array directly is faster than going through a Map.
@@ -91,7 +89,6 @@ export class CallTree {
     callNodeSummary: CallNodeSummary,
     callNodeHasChildren: Uint8Array,
     rootTotalSummary: number,
-    rootCount: number,
     isHighPrecision: boolean,
     weightType: WeightType
   ) {
@@ -102,7 +99,6 @@ export class CallTree {
     this._callNodeHasChildren = callNodeHasChildren;
     this._thread = thread;
     this._rootTotalSummary = rootTotalSummary;
-    this._rootCount = rootCount;
     this._displayDataByIndex = new Map();
     this._children = [];
     this._isHighPrecision = isHighPrecision;
@@ -528,7 +524,6 @@ export function computeCallTreeTimings(
   const callNodeTotalSummary = new Float32Array(callNodeTable.length);
   const callNodeHasChildren = new Uint8Array(callNodeTable.length);
   let rootTotalSummary = 0;
-  let rootCount = 0;
 
   // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
   const abs = Math.abs;
@@ -551,9 +546,7 @@ export function computeCallTreeTimings(
     }
 
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
-    if (prefixCallNode === -1) {
-      rootCount++;
-    } else {
+    if (prefixCallNode !== -1) {
       callNodeTotalSummary[prefixCallNode] +=
         callNodeTotalSummary[callNodeIndex];
       callNodeHasChildren[prefixCallNode] = 1;
@@ -568,7 +561,6 @@ export function computeCallTreeTimings(
     },
     callNodeHasChildren,
     rootTotalSummary,
-    rootCount,
   };
 }
 
@@ -583,12 +575,8 @@ export function getCallTree(
   weightType: WeightType
 ): CallTree {
   return timeCode('getCallTree', () => {
-    const {
-      callNodeSummary,
-      callNodeHasChildren,
-      rootTotalSummary,
-      rootCount,
-    } = callTreeTimings;
+    const { callNodeSummary, callNodeHasChildren, rootTotalSummary } =
+      callTreeTimings;
 
     return new CallTree(
       thread,
@@ -597,7 +585,6 @@ export function getCallTree(
       callNodeSummary,
       callNodeHasChildren,
       rootTotalSummary,
-      rootCount,
       Boolean(thread.isJsTracer),
       weightType
     );

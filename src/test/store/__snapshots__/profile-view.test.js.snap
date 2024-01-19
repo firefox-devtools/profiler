@@ -2632,7 +2632,6 @@ CallTree {
   "_children": Array [],
   "_displayDataByIndex": Map {},
   "_isHighPrecision": false,
-  "_rootCount": 1,
   "_rootTotalSummary": 2,
   "_thread": Object {
     "frameTable": Object {

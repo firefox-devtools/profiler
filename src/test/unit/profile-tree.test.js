@@ -80,7 +80,6 @@ describe('unfiltered call tree', function () {
           false
         )
       ).toEqual({
-        rootCount: 1,
         rootTotalSummary: 3,
         callNodeHasChildren: new Uint8Array([1, 1, 1, 1, 0, 1, 0, 1, 0]),
         callNodeSummary: {
