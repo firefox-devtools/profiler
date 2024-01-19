@@ -210,6 +210,10 @@ export class CallNodeInfoImpl implements CallNodeInfo {
 
     return null;
   }
+
+  isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean {
+    return this._callNodeTable.prefix[callNodeIndex] === -1;
+  }
 }
 
 /**
