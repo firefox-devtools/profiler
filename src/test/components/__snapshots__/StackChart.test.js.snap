@@ -755,6 +755,14 @@ Array [
     "componentD",
   ],
   Array [
+    "measureText",
+    "c",
+  ],
+  Array [
+    "measureText",
+    "co",
+  ],
+  Array [
     "set fillStyle",
     "#000000",
   ],
