@@ -262,8 +262,12 @@ Array [
     "#000000",
   ],
   Array [
+    "measureText",
+    " (1)",
+  ],
+  Array [
     "fillText",
-    "UserTiming",
+    "UserTiming (1)",
     5,
     139,
   ],
@@ -1263,14 +1267,22 @@ Array [
     "#000000",
   ],
   Array [
+    "measureText",
+    " (1)",
+  ],
+  Array [
     "set fillStyle",
     "#ffffffbf",
+  ],
+  Array [
+    "measureText",
+    "Marker DomEvent (1)",
   ],
   Array [
     "fillRect",
     0,
     16,
-    85,
+    105,
     16,
   ],
   Array [
@@ -1279,7 +1291,7 @@ Array [
   ],
   Array [
     "fillText",
-    "Marker DomEvent",
+    "Marker DomEvent (1)",
     5,
     27,
   ],
