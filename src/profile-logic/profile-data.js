@@ -16,7 +16,10 @@ import {
   shallowCloneFrameTable,
   shallowCloneFuncTable,
 } from './data-structures';
-import { CallNodeInfoImpl, CallNodeInfoInvertedImpl } from './call-node-info';
+import {
+  CallNodeInfoNonInvertedImpl,
+  CallNodeInfoInvertedImpl,
+} from './call-node-info';
 import {
   INSTANT,
   INTERVAL,
@@ -24,11 +27,7 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import {
-  bisectionRight,
-  bisectionLeft,
-  bisectEqualRange,
-} from 'firefox-profiler/utils/bisect';
+import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   assertExhaustiveCheck,
@@ -111,8 +110,7 @@ export function getCallNodeInfo(
     funcTable,
     defaultCategory
   );
-  return new CallNodeInfoImpl(
-    callNodeTable,
+  return new CallNodeInfoNonInvertedImpl(
     callNodeTable,
     stackIndexToCallNodeIndex
   );
@@ -432,80 +430,51 @@ function _createCallNodeTableFromUnorderedComponents(
  * Generate the inverted CallNodeInfo for a thread.
  */
 export function getInvertedCallNodeInfo(
-  thread: Thread,
   nonInvertedCallNodeTable: CallNodeTable,
   stackIndexToNonInvertedCallNodeIndex: Int32Array,
-  defaultCategory: IndexIntoCategoryList
+  defaultCategory: IndexIntoCategoryList,
+  funcCount: number
 ): CallNodeInfoInverted {
-  // We compute an inverted stack table, but we don't let it escape this function.
-  const { invertedThread } = _computeThreadWithInvertedStackTable(
-    thread,
-    defaultCategory
-  );
+  const callNodeCount = nonInvertedCallNodeTable.length;
+  const suffixOrderedCallNodes = new Uint32Array(callNodeCount);
+  const suffixOrderingIndexes = new Uint32Array(callNodeCount);
+  const callNodeTableFuncCol = nonInvertedCallNodeTable.func;
 
-  // Create an inverted call node table based on the inverted stack table.
-  const { callNodeTable } = computeCallNodeTable(
-    invertedThread.stackTable,
-    invertedThread.frameTable,
-    invertedThread.funcTable,
-    defaultCategory
-  );
+  // Compute, per func, how many non-inverted call nodes end in this func
+  const nextIndexPerFunc = new Uint32Array(funcCount);
+  for (let i = 0; i < callNodeTableFuncCol.length; i++) {
+    const func = callNodeTableFuncCol[i];
+    nextIndexPerFunc[func]++;
+  }
+  // Compute cumulative start index
+  let previousEndIndex = 0;
+  for (let func = 0; func < nextIndexPerFunc.length; func++) {
+    const count = nextIndexPerFunc[func];
+    nextIndexPerFunc[func] = previousEndIndex;
+    previousEndIndex += count;
+  }
+  for (let i = 0; i < callNodeTableFuncCol.length; i++) {
+    const func = callNodeTableFuncCol[i];
+    const nextIndex = nextIndexPerFunc[func]++;
+    suffixOrderedCallNodes[nextIndex] = i;
+    suffixOrderingIndexes[i] = nextIndex;
+  }
 
-  const nonInvertedCallNodeCount = nonInvertedCallNodeTable.length;
-  const invertedCallNodeCount = callNodeTable.length;
-  const suffixOrderedCallNodes = new Uint32Array(nonInvertedCallNodeCount);
-  const suffixOrderIndexes = new Uint32Array(nonInvertedCallNodeCount);
-  const suffixOrderIndexRangeStartCol = new Uint32Array(invertedCallNodeCount);
-  const suffixOrderIndexRangeEndCol = new Uint32Array(invertedCallNodeCount);
-  for (let i = 0; i < nonInvertedCallNodeCount; i++) {
-    suffixOrderedCallNodes[i] = i;
+  const rootOrderingIndexRangeEndCol = new Uint32Array(funcCount);
+  for (let func = 0; func < funcCount - 1; func++) {
+    const endIndex = nextIndexPerFunc[func];
+    rootOrderingIndexRangeEndCol[func] = endIndex;
   }
-  suffixOrderedCallNodes.sort((a, b) =>
-    _compareNonInvertedCallNodesInSuffixOrder(a, b, nonInvertedCallNodeTable)
-  );
-  for (let i = 0; i < suffixOrderedCallNodes.length; i++) {
-    suffixOrderIndexes[suffixOrderedCallNodes[i]] = i;
-  }
-  for (
-    let invertedCallNodeIndex = 0;
-    invertedCallNodeIndex < invertedCallNodeCount;
-    invertedCallNodeIndex++
-  ) {
-    const suffixPath = [];
-    for (let i = invertedCallNodeIndex; i !== -1; i = callNodeTable.prefix[i]) {
-      suffixPath.push(callNodeTable.func[i]);
-    }
-    suffixPath.reverse();
-
-    const [rangeStart, rangeEnd] =
-      _getOrderingIndexRangeForDescendantsOfInvertedCallPath(
-        suffixPath,
-        suffixOrderedCallNodes,
-        nonInvertedCallNodeTable
-      );
-    suffixOrderIndexRangeStartCol[invertedCallNodeIndex] = rangeStart;
-    suffixOrderIndexRangeEndCol[invertedCallNodeIndex] = rangeEnd;
-  }
-  const invertedRoots = [];
-  if (nonInvertedCallNodeCount !== 0) {
-    for (
-      let invertedRoot = 0;
-      invertedRoot !== -1;
-      invertedRoot = callNodeTable.nextSibling[invertedRoot]
-    ) {
-      invertedRoots.push(invertedRoot);
-    }
-  }
+  rootOrderingIndexRangeEndCol[funcCount - 1] = suffixOrderedCallNodes.length;
 
   return new CallNodeInfoInvertedImpl(
-    callNodeTable,
     nonInvertedCallNodeTable,
     stackIndexToNonInvertedCallNodeIndex,
-    invertedRoots,
     suffixOrderedCallNodes,
-    suffixOrderIndexes,
-    suffixOrderIndexRangeStartCol,
-    suffixOrderIndexRangeEndCol
+    suffixOrderingIndexes,
+    rootOrderingIndexRangeEndCol,
+    defaultCategory,
+    nextIndexPerFunc
   );
 }
 
@@ -547,37 +516,6 @@ function _compareNonInvertedCallNodesInSuffixOrder(
     }
   }
   return 0;
-}
-
-function _getOrderingIndexRangeForDescendantsOfInvertedCallPath(
-  callPath: CallNodePath,
-  orderedSelfNodes: Uint32Array,
-  callNodeTable: CallNodeTable
-): [number, number] {
-  return bisectEqualRange(
-    orderedSelfNodes,
-    (callNodeIndex: IndexIntoCallNodeTable) => {
-      let currentCallNodeIndex = callNodeIndex;
-      for (let i = 0; i < callPath.length - 1; i++) {
-        const expectedFunc = callPath[i];
-        const currentFunc = callNodeTable.func[currentCallNodeIndex];
-        if (currentFunc < expectedFunc) {
-          return -1;
-        }
-        if (currentFunc > expectedFunc) {
-          return 1;
-        }
-        const prefix = callNodeTable.prefix[currentCallNodeIndex];
-        if (prefix === -1) {
-          return -1;
-        }
-        currentCallNodeIndex = prefix;
-      }
-      const expectedFunc = callPath[callPath.length - 1];
-      const currentFunc = callNodeTable.func[currentCallNodeIndex];
-      return currentFunc - expectedFunc;
-    }
-  );
 }
 
 // Given a stack index `needleStack` and a call node in the inverted tree
@@ -2221,98 +2159,6 @@ export function computeCallNodeMaxDepthPlusOne(
   }
 
   return maxDepth + 1;
-}
-
-function _computeThreadWithInvertedStackTable(
-  thread: Thread,
-  defaultCategory: IndexIntoCategoryList
-): {
-  invertedThread: Thread,
-  oldStackToNewStack: Map<IndexIntoStackTable, IndexIntoStackTable>,
-} {
-  return timeCode('_computeThreadWithInvertedStackTable', () => {
-    const { stackTable, frameTable } = thread;
-
-    const newStackTable = {
-      length: 0,
-      frame: [],
-      category: [],
-      subcategory: [],
-      prefix: [],
-    };
-    // Create a Map that keys off of two values, both the prefix and frame combination
-    // by using a bit of math: prefix * frameCount + frame => stackIndex
-    const prefixAndFrameToStack = new Map();
-    const frameCount = frameTable.length;
-
-    // Returns the stackIndex for a specific frame (that is, a function and its
-    // context), and a specific prefix. If it doesn't exist yet it will create
-    // a new stack entry and return its index.
-    function stackFor(prefix, frame, category, subcategory) {
-      const prefixAndFrameIndex =
-        (prefix === null ? -1 : prefix) * frameCount + frame;
-      let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
-      if (stackIndex === undefined) {
-        stackIndex = newStackTable.length++;
-        newStackTable.prefix[stackIndex] = prefix;
-        newStackTable.frame[stackIndex] = frame;
-        newStackTable.category[stackIndex] = category;
-        newStackTable.subcategory[stackIndex] = subcategory;
-        prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
-      } else if (newStackTable.category[stackIndex] !== category) {
-        // If two stack nodes from the non-inverted stack tree with different
-        // categories happen to collapse into the same stack node in the
-        // inverted tree, discard their category and set the category to the
-        // default category.
-        newStackTable.category[stackIndex] = defaultCategory;
-        newStackTable.subcategory[stackIndex] = 0;
-      } else if (newStackTable.subcategory[stackIndex] !== subcategory) {
-        // If two stack nodes from the non-inverted stack tree with the same
-        // category but different subcategories happen to collapse into the same
-        // stack node in the inverted tree, discard their subcategory and set it
-        // to the "Other" subcategory.
-        newStackTable.subcategory[stackIndex] = 0;
-      }
-      return stackIndex;
-    }
-
-    const oldStackToNewStack = new Map();
-
-    // For one specific stack, this will ensure that stacks are created for all
-    // of its ancestors, by walking its prefix chain up to the root.
-    function convertStack(stackIndex) {
-      if (stackIndex === null) {
-        return null;
-      }
-      let newStack = oldStackToNewStack.get(stackIndex);
-      if (newStack === undefined) {
-        newStack = null;
-        for (
-          let currentStack = stackIndex;
-          currentStack !== null;
-          currentStack = stackTable.prefix[currentStack]
-        ) {
-          // Notice how we reuse the previous stack as the prefix. This is what
-          // effectively inverts the call tree.
-          newStack = stackFor(
-            newStack,
-            stackTable.frame[currentStack],
-            stackTable.category[currentStack],
-            stackTable.subcategory[currentStack]
-          );
-        }
-        oldStackToNewStack.set(stackIndex, ensureExists(newStack));
-      }
-      return newStack;
-    }
-
-    const invertedThread = updateThreadStacks(
-      thread,
-      newStackTable,
-      convertStack
-    );
-    return { invertedThread, oldStackToNewStack };
-  });
 }
 
 /**
