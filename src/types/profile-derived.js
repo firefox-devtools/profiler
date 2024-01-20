@@ -131,10 +131,6 @@ export interface CallNodeInfo {
   // Returns this object as CallNodeInfoInverted if isInverted(), otherwise null.
   asInverted(): CallNodeInfoInverted | null;
 
-  // Returns the call node table. If isInverted() is true, this is an inverted
-  // call node table, otherwise this is the non-inverted call node table.
-  getCallNodeTable(): CallNodeTable;
-
   // Returns the non-inverted call node table.
   // This is always the non-inverted call node table, regardless of isInverted().
   getNonInvertedCallNodeTable(): CallNodeTable;
