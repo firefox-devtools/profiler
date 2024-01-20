@@ -284,16 +284,16 @@ export type SuffixOrderIndex = number;
  * ```
  *                                                 Represents call paths ending in
  * - [in0] A  (so:0..3)        =  A             =            ... A (cn0, cn4, cn2)
- *   - [in1] A  (so:1..2)      =  A <- A        =       ... A -> A (cn4)
- *   - [in2] B  (so:2..3)      =  A <- B        =       ... B -> A (cn2)
- *     - [in3] A  (so:2..3)    =  A <- B <- A   =  ... A -> B -> A (cn2)
- * - [in4] B  (so:3..5)        =  B             =            ... B (cn1, cn5)
+ *   - [in3] A  (so:1..2)      =  A <- A        =       ... A -> A (cn4)
+ *   - [in4] B  (so:2..3)      =  A <- B        =       ... B -> A (cn2)
+ *     - [in6] A  (so:2..3)    =  A <- B <- A   =  ... A -> B -> A (cn2)
+ * - [in1] B  (so:3..5)        =  B             =            ... B (cn1, cn5)
  *   - [in5] A  (so:3..5)      =  B <- A        =       ... A -> B (cn1, cn5)
- *     - [in6] A  (so:4..5)    =  B <- A <- A   =  ... A -> A -> B (cn5)
- * - [in7] C  (so:5..7)        =  C             =            ... C (cn6, cn3)
- *   - [in8] A  (so:5..6)      =  C <- A        =       ... A -> C (cn6)
- *   - [in9] B  (so:6..7)      =  C <- B        =       ... B -> C (cn3)
- *     - [in10] A  (so:6..7)   =  C <- B <- A   =  ... A -> B -> C (cn3)
+ *     - [in10] A  (so:4..5)   =  B <- A <- A   =  ... A -> A -> B (cn5)
+ * - [in2] C  (so:5..7)        =  C             =            ... C (cn6, cn3)
+ *   - [in7] A  (so:5..6)      =  C <- A        =       ... A -> C (cn6)
+ *   - [in8] B  (so:6..7)      =  C <- B        =       ... B -> C (cn3)
+ *     - [in9] A  (so:6..7)    =  C <- B <- A   =  ... A -> B -> C (cn3)
  * ```
  *
  * In the suffix order, call paths become grouped in such a way that call paths
@@ -314,15 +314,41 @@ export type SuffixOrderIndex = number;
  * soX:     Suffix order index X
  * inX:     Inverted call node index X
  * so:X..Y: Suffix order index range soX..soY (soY excluded)
+ *
+ * ## Incremental order refinement
+ *
+ * Sorting all non-inverted nodes upfront would take a long time on large profiles.
+ * So we don't do that. Instead, we refine the order as new inverted tree nodes
+ * are materialized on demand.
+ *
+ * The ground rules are:
+ *  - For any inverted call node X, getSuffixOrderIndexRangeForCallNode(X) must
+ *    always return the same range.
+ *  - For any inverted call node X, the *set* of suffix ordered call nodes in the
+ *    range returned by getSuffixOrderIndexRangeForCallNode(X) must always be the
+ *    same. Notably, the order in the range does *not* necessarily need to remain
+ *    the same.
+ *
+ * This means that, whenever you have a handle X of an inverted call node, you
+ * can be confident that your checks of the form "is non-inverted call node Y
+ * part of X's range" will work correctly.
  */
 export interface CallNodeInfoInverted extends CallNodeInfo {
   // Get a mapping SuffixOrderIndex -> IndexIntoNonInvertedCallNodeTable.
   // This array contains all non-inverted call node indexes, ordered by
   // call path suffix. See "suffix order" in the documentation above.
+  // Note that the contents of this array will be mutated by CallNodeInfoInverted
+  // when new inverted nodes are created on demand (e.g. during a call to
+  // getChildren or to getCallNodeIndexFromPath). So callers should not hold on
+  // to this array across calls which can create new inverted call nodes.
   getSuffixOrderedCallNodes(): Uint32Array;
 
   // Returns the inverse of getSuffixOrderedCallNodes(), i.e. a mapping
   // IndexIntoNonInvertedCallNodeTable -> SuffixOrderIndex.
+  // Note that the contents of this array will be mutated by CallNodeInfoInverted
+  // when new inverted nodes are created on demand (e.g. during a call to
+  // getChildren or to getCallNodeIndexFromPath). So callers should not hold on
+  // to this array across calls which can create new inverted call nodes.
   getSuffixOrderIndexes(): Uint32Array;
 
   // Get the [start, exclusiveEnd] range of suffix order indexes for this
