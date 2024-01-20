@@ -194,23 +194,6 @@ export class CallNodeInfoNonInvertedImpl implements CallNodeInfo {
     return null;
   }
 
-  getRoots(): IndexIntoCallNodeTable[] {
-    const roots = [];
-    if (this._callNodeTable.length !== 0) {
-      // The call node with index 0 is guaruanteed to be a root, by construction
-      // of the call node table.
-      // Start with node 0 and add its siblings.
-      for (
-        let root = 0;
-        root !== -1;
-        root = this._callNodeTable.nextSibling[root]
-      ) {
-        roots.push(root);
-      }
-    }
-    return roots;
-  }
-
   isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean {
     return this._callNodeTable.prefix[callNodeIndex] === -1;
   }
@@ -689,12 +672,15 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
   // The mapping of non-inverted stack index to non-inverted call node index.
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
 
-  // The number of roots, i.e. this._roots.length.
+  // The number of roots, which is also the number of functions. Each root of
+  // the inverted tree represents a "self" function, i.e. all call paths which
+  // end in a certain function.
+  // We have roots even for functions which aren't used as "self" functions in
+  // any sampled stacks, for simplicity. The actual displayed number of roots
+  // in the call tree will usually be lower because roots with a zero total sample
+  // count will be filtered out. But any data in this class is fully independent
+  // from sample counts.
   _rootCount: number;
-
-  // All inverted call tree roots. The roots of the inverted call tree are the
-  // "self" functions of the non-inverted call paths.
-  _roots: InvertedCallNodeHandle[];
 
   // This is a Map<SuffixOrderIndex, IndexIntoNonInvertedCallNodeTable>.
   // It lists the non-inverted call nodes in "suffix order", i.e. ordered by
@@ -732,15 +718,7 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
     this._suffixOrderedCallNodes = suffixOrderedCallNodes;
     this._suffixOrderIndexes = suffixOrderIndexes;
     this._defaultCategory = defaultCategory;
-
-    const rootCount = funcCount;
-    this._rootCount = rootCount;
-
-    const roots = new Array(rootCount);
-    for (let i = 0; i < rootCount; i++) {
-      roots[i] = i;
-    }
-    this._roots = roots;
+    this._rootCount = funcCount;
 
     const rootSuffixOrderIndexRangeEndCol =
       _computeInvertedRootSuffixOrderIndexRanges(
@@ -783,8 +761,8 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
     return this._suffixOrderIndexes;
   }
 
-  getRoots(): Array<InvertedCallNodeHandle> {
-    return this._roots;
+  getFuncCount(): number {
+    return this._rootCount;
   }
 
   isRoot(nodeHandle: InvertedCallNodeHandle): boolean {
