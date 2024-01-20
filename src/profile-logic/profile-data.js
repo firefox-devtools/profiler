@@ -151,7 +151,7 @@ export function computeCallNodeTable(
     const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
     const innerWindowID: Array<InnerWindowID> = [];
     const sourceFramesInlinedIntoSymbol: Array<
-      IndexIntoNativeSymbolTable | -1 | null,
+      IndexIntoNativeSymbolTable | -1 | -2,
     > = [];
     let length = 0;
 
@@ -171,7 +171,7 @@ export function computeCallNodeTable(
       categoryIndex: IndexIntoCategoryList,
       subcategoryIndex: IndexIntoSubcategoryListForCategory,
       windowID: InnerWindowID,
-      inlinedIntoSymbol: IndexIntoNativeSymbolTable | null
+      inlinedIntoSymbol: IndexIntoNativeSymbolTable | -1 | -2
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
@@ -224,8 +224,8 @@ export function computeCallNodeTable(
       const subcategoryIndex = stackTable.subcategory[stackIndex];
       const inlinedIntoSymbol =
         frameTable.inlineDepth[frameIndex] > 0
-          ? frameTable.nativeSymbol[frameIndex]
-          : null;
+          ? (frameTable.nativeSymbol[frameIndex] ?? -2)
+          : -2;
       const funcIndex = frameTable.func[frameIndex];
 
       // Check if the call node for this stack already exists.
@@ -321,7 +321,7 @@ function _createCallNodeTableFromUnorderedComponents(
   category: Array<IndexIntoCategoryList>,
   subcategory: Array<IndexIntoSubcategoryListForCategory>,
   innerWindowID: Array<InnerWindowID>,
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | -2>,
   length: number,
   stackIndexToCallNodeIndex: Int32Array
 ): CallNodeTableAndStackMap {
@@ -340,7 +340,7 @@ function _createCallNodeTableFromUnorderedComponents(
     const categorySorted = new Int32Array(length);
     const subcategorySorted = new Int32Array(length);
     const innerWindowIDSorted = new Float64Array(length);
-    const sourceFramesInlinedIntoSymbolSorted = new Array(length);
+    const sourceFramesInlinedIntoSymbolSorted = new Int32Array(length);
     const depthSorted = new Array(length);
     let maxDepth = 0;
 

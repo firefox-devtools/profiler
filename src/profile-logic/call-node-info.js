@@ -252,7 +252,7 @@ export class CallNodeInfoNonInvertedImpl implements CallNodeInfo {
 
   sourceFramesInlinedIntoSymbolForNode(
     callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoNativeSymbolTable | -1 | null {
+  ): IndexIntoNativeSymbolTable | -1 | -2 {
     return this._callNodeTable.sourceFramesInlinedIntoSymbol[callNodeIndex];
   }
 }
@@ -277,8 +277,8 @@ type InvertedRootCallNodeTable = {|
   innerWindowID: Float64Array, // IndexIntoFuncTable -> InnerWindowID
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: some, but not all, frames that collapsed into this call node were inlined, or they are from different symbols
-  // null: no inlining
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Int32Array, // IndexIntoFuncTable -> IndexIntoNativeSymbolTable | -1 | -2
   // The (exclusive) end of the suffix order index range for each root node.
   // The beginning of the range is given by suffixOrderIndexRangeEnd[i - 1], or by
   // zero. This is possible because both the inverted root order and the suffix order
@@ -298,8 +298,8 @@ type InvertedNonRootCallNodeTable = {|
   innerWindowID: InnerWindowID[], // IndexIntoInvertedNonRootCallNodeTable -> InnerWindowID
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: some, but not all, frames that collapsed into this call node were inlined, or they are from different symbols
-  // null: no inlining
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | -2>,
   suffixOrderIndexRangeStart: SuffixOrderIndex[], // IndexIntoInvertedNonRootCallNodeTable -> SuffixOrderIndex
   suffixOrderIndexRangeEnd: SuffixOrderIndex[], // IndexIntoInvertedNonRootCallNodeTable -> SuffixOrderIndex
 
@@ -367,7 +367,7 @@ function _createInvertedRootCallNodeTable(
   const category = new Int32Array(funcCount);
   const subcategory = new Int32Array(funcCount);
   const innerWindowID = new Float64Array(funcCount);
-  const sourceFramesInlinedIntoSymbol = new Array(funcCount);
+  const sourceFramesInlinedIntoSymbol = new Int32Array(funcCount);
   let previousRootSuffixOrderIndexRangeEnd = 0;
   for (let funcIndex = 0; funcIndex < funcCount; funcIndex++) {
     const callNodeSuffixOrderIndexRangeStart =
@@ -383,8 +383,8 @@ function _createInvertedRootCallNodeTable(
       // this func as its self func. This root only exists for simplicity, so
       // that there is one root per func.
 
-      // Set all columns to zero / null for this root.
-      sourceFramesInlinedIntoSymbol[funcIndex] = null;
+      // Set a dummy value for this unused root.
+      sourceFramesInlinedIntoSymbol[funcIndex] = -2; // "no symbol"
       // (the other columns are already initialized to zero because they're
       // typed arrays)
       continue;
@@ -1273,7 +1273,7 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
 
   sourceFramesInlinedIntoSymbolForNode(
     callNodeHandle: InvertedCallNodeHandle
-  ): IndexIntoNativeSymbolTable | -1 | null {
+  ): IndexIntoNativeSymbolTable | -1 | -2 {
     if (callNodeHandle < this._rootCount) {
       const rootFunc = callNodeHandle;
       return this._invertedRootCallNodeTable.sourceFramesInlinedIntoSymbol[
