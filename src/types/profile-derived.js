@@ -109,10 +109,10 @@ export type CallNodeTable = {
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
-  // null: no inlining
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Int32Array,
   // The depth of the call node. Roots have depth 0.
   depth: number[],
   // The maximum value in the depth column, or -1 if this table is empty.
@@ -189,7 +189,7 @@ export interface CallNodeInfo {
   depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
   sourceFramesInlinedIntoSymbolForNode(
     callNodeIndex: IndexIntoCallNodeTable
-  ): IndexIntoNativeSymbolTable | -1 | null;
+  ): IndexIntoNativeSymbolTable | -1 | -2;
 }
 
 // An index into SuffixOrderedCallNodes.
