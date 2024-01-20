@@ -987,17 +987,10 @@ describe('getSamplesSelectedStates', function () {
       stackIndexToCallNodeIndex,
       defaultCategory
     );
-    const stackIndexToInvertedCallNodeIndex =
-      callNodeInfoInverted.getStackIndexToCallNodeIndex();
-    const sampleInvertedCallNodes = getSampleIndexToCallNodeIndex(
-      thread.samples.stack,
-      stackIndexToInvertedCallNodeIndex
-    );
 
     return {
       callNodeInfo,
       callNodeInfoInverted,
-      sampleInvertedCallNodes,
       sampleCallNodes,
       funcNamesDict,
     };
@@ -1079,7 +1072,7 @@ describe('getSamplesSelectedStates', function () {
     });
 
     it('can sort the samples based on their selection status', function () {
-      const comparator = getTreeOrderComparator(sampleCallNodes);
+      const comparator = getTreeOrderComparator(sampleCallNodes, callNodeInfo);
       const samples = [4, 1, 3, 0, 2]; // some random order
       samples.sort(comparator);
       expect(samples).toEqual([0, 2, 4, 1, 3]);
@@ -1117,7 +1110,6 @@ describe('getSamplesSelectedStates', function () {
     const {
       callNodeInfoInverted,
       sampleCallNodes,
-      sampleInvertedCallNodes,
       funcNamesDict: { A, B, C },
     } = setup(`
       A  A  A  A  A  A  A
@@ -1181,7 +1173,10 @@ describe('getSamplesSelectedStates', function () {
     });
 
     it('can sort the samples based on their selection status', function () {
-      const comparator = getTreeOrderComparator(sampleInvertedCallNodes);
+      const comparator = getTreeOrderComparator(
+        sampleCallNodes,
+        callNodeInfoInverted
+      );
       const samples = [5, 6, 0, 1, 2, 3, 4]; // some random order of non-inverted call nodes
       samples.sort(comparator);
 
