@@ -114,7 +114,6 @@ export function getCallNodeInfo(
   return new CallNodeInfoImpl(
     callNodeTable,
     callNodeTable,
-    stackIndexToCallNodeIndex,
     stackIndexToCallNodeIndex
   );
 }
@@ -439,46 +438,19 @@ export function getInvertedCallNodeInfo(
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfoInverted {
   // We compute an inverted stack table, but we don't let it escape this function.
-  const {
-    invertedThread,
-    oldStackToNewStack: nonInvertedStackToInvertedStack,
-  } = _computeThreadWithInvertedStackTable(thread, defaultCategory);
+  const { invertedThread } = _computeThreadWithInvertedStackTable(
+    thread,
+    defaultCategory
+  );
 
   // Create an inverted call node table based on the inverted stack table.
-  const {
-    callNodeTable,
-    stackIndexToCallNodeIndex: invertedStackIndexToCallNodeIndex,
-  } = computeCallNodeTable(
+  const { callNodeTable } = computeCallNodeTable(
     invertedThread.stackTable,
     invertedThread.frameTable,
     invertedThread.funcTable,
     defaultCategory
   );
 
-  // Create a mapping that maps a stack index from the non-inverted thread to
-  // its corresponding call node in the inverted tree.
-  const nonInvertedStackIndexToCallNodeIndex = new Int32Array(
-    thread.stackTable.length
-  );
-  for (
-    let nonInvertedStackIndex = 0;
-    nonInvertedStackIndex < nonInvertedStackIndexToCallNodeIndex.length;
-    nonInvertedStackIndex++
-  ) {
-    const invertedStackIndex = nonInvertedStackToInvertedStack.get(
-      nonInvertedStackIndex
-    );
-    if (invertedStackIndex === undefined) {
-      // This stack is not used as a self stack, only as a prefix stack.
-      // There may or may not be an inverted call node that corresponds to it,
-      // but we haven't checked that and we don't need to know it.
-      // nonInvertedStackIndexToCallNodeIndex only needs useful values for self stacks.
-      nonInvertedStackIndexToCallNodeIndex[nonInvertedStackIndex] = -1;
-    } else {
-      nonInvertedStackIndexToCallNodeIndex[nonInvertedStackIndex] =
-        invertedStackIndexToCallNodeIndex[invertedStackIndex];
-    }
-  }
   const nonInvertedCallNodeCount = nonInvertedCallNodeTable.length;
   const invertedCallNodeCount = callNodeTable.length;
   const suffixOrderedCallNodes = new Uint32Array(nonInvertedCallNodeCount);
@@ -528,7 +500,6 @@ export function getInvertedCallNodeInfo(
   return new CallNodeInfoInvertedImpl(
     callNodeTable,
     nonInvertedCallNodeTable,
-    nonInvertedStackIndexToCallNodeIndex,
     stackIndexToNonInvertedCallNodeIndex,
     invertedRoots,
     suffixOrderedCallNodes,
