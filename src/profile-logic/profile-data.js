@@ -16,7 +16,10 @@ import {
   shallowCloneFrameTable,
   shallowCloneFuncTable,
 } from './data-structures';
-import { CallNodeInfoImpl, CallNodeInfoInvertedImpl } from './call-node-info';
+import {
+  CallNodeInfoNonInvertedImpl,
+  CallNodeInfoInvertedImpl,
+} from './call-node-info';
 import {
   INSTANT,
   INTERVAL,
@@ -110,8 +113,7 @@ export function getCallNodeInfo(
     funcTable,
     defaultCategory
   );
-  return new CallNodeInfoImpl(
-    callNodeTable,
+  return new CallNodeInfoNonInvertedImpl(
     callNodeTable,
     stackIndexToCallNodeIndex
   );
@@ -431,33 +433,20 @@ function _createCallNodeTableFromUnorderedComponents(
  * Generate the inverted CallNodeInfo for a thread.
  */
 export function getInvertedCallNodeInfo(
-  thread: Thread,
   nonInvertedCallNodeTable: CallNodeTable,
   stackIndexToNonInvertedCallNodeIndex: Int32Array,
-  defaultCategory: IndexIntoCategoryList
+  defaultCategory: IndexIntoCategoryList,
+  funcCount: number
 ): CallNodeInfoInverted {
-  // We compute an inverted stack table, but we don't let it escape this function.
-  const { invertedThread } = _computeThreadWithInvertedStackTable(
-    thread,
-    defaultCategory
-  );
-
-  // Create an inverted call node table based on the inverted stack table.
-  const { callNodeTable } = computeCallNodeTable(
-    invertedThread.stackTable,
-    invertedThread.frameTable,
-    invertedThread.funcTable,
-    defaultCategory
-  );
+  const callNodeCount = nonInvertedCallNodeTable.length;
+  const suffixOrderedCallNodes = new Uint32Array(callNodeCount);
+  const suffixOrderIndexes = new Uint32Array(callNodeCount);
 
   // TEMPORARY: Compute a suffix order for the entire non-inverted call node table.
   // See the CallNodeInfoInverted interface for more details about the suffix order.
   // By the end of this commit stack, the suffix order will be computed incrementally
   // as inverted nodes are created; we won't compute the entire order upfront.
-  const nonInvertedCallNodeCount = nonInvertedCallNodeTable.length;
-  const suffixOrderedCallNodes = new Uint32Array(nonInvertedCallNodeCount);
-  const suffixOrderIndexes = new Uint32Array(nonInvertedCallNodeCount);
-  for (let i = 0; i < nonInvertedCallNodeCount; i++) {
+  for (let i = 0; i < callNodeCount; i++) {
     suffixOrderedCallNodes[i] = i;
   }
   suffixOrderedCallNodes.sort((a, b) =>
@@ -468,11 +457,12 @@ export function getInvertedCallNodeInfo(
   }
 
   return new CallNodeInfoInvertedImpl(
-    callNodeTable,
     nonInvertedCallNodeTable,
     stackIndexToNonInvertedCallNodeIndex,
     suffixOrderedCallNodes,
-    suffixOrderIndexes
+    suffixOrderIndexes,
+    defaultCategory,
+    funcCount
   );
 }
 
@@ -514,31 +504,6 @@ function _compareNonInvertedCallNodesInSuffixOrder(
     }
   }
   return 0;
-}
-
-// Same as _compareNonInvertedCallNodesInSuffixOrder, but takes a call path for
-// callNodeB. This is used in the getSuffixOrderIndexRangeForCallNode implementation
-// of CallNodeInfoInvertedImpl, which doesn't have easy access to the non-inverted
-// call node index for callPathB.
-export function compareNonInvertedCallNodesInSuffixOrderWithPath(
-  callNodeA: IndexIntoCallNodeTable,
-  callPathB: CallNodePath,
-  nonInvertedCallNodeTable: CallNodeTable
-): number {
-  for (let i = 0; i < callPathB.length - 1; i++) {
-    const funcA = nonInvertedCallNodeTable.func[callNodeA];
-    const funcB = callPathB[i];
-    if (funcA !== funcB) {
-      return funcA - funcB;
-    }
-    callNodeA = nonInvertedCallNodeTable.prefix[callNodeA];
-    if (callNodeA === -1) {
-      return -1;
-    }
-  }
-  const funcA = nonInvertedCallNodeTable.func[callNodeA];
-  const funcB = callPathB[callPathB.length - 1];
-  return funcA - funcB;
 }
 
 // Given a stack index `needleStack` and a call node in the inverted tree
@@ -2183,98 +2148,6 @@ export function computeCallNodeMaxDepthPlusOne(
   }
 
   return maxDepth + 1;
-}
-
-function _computeThreadWithInvertedStackTable(
-  thread: Thread,
-  defaultCategory: IndexIntoCategoryList
-): {
-  invertedThread: Thread,
-  oldStackToNewStack: Map<IndexIntoStackTable, IndexIntoStackTable>,
-} {
-  return timeCode('_computeThreadWithInvertedStackTable', () => {
-    const { stackTable, frameTable } = thread;
-
-    const newStackTable = {
-      length: 0,
-      frame: [],
-      category: [],
-      subcategory: [],
-      prefix: [],
-    };
-    // Create a Map that keys off of two values, both the prefix and frame combination
-    // by using a bit of math: prefix * frameCount + frame => stackIndex
-    const prefixAndFrameToStack = new Map();
-    const frameCount = frameTable.length;
-
-    // Returns the stackIndex for a specific frame (that is, a function and its
-    // context), and a specific prefix. If it doesn't exist yet it will create
-    // a new stack entry and return its index.
-    function stackFor(prefix, frame, category, subcategory) {
-      const prefixAndFrameIndex =
-        (prefix === null ? -1 : prefix) * frameCount + frame;
-      let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
-      if (stackIndex === undefined) {
-        stackIndex = newStackTable.length++;
-        newStackTable.prefix[stackIndex] = prefix;
-        newStackTable.frame[stackIndex] = frame;
-        newStackTable.category[stackIndex] = category;
-        newStackTable.subcategory[stackIndex] = subcategory;
-        prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
-      } else if (newStackTable.category[stackIndex] !== category) {
-        // If two stack nodes from the non-inverted stack tree with different
-        // categories happen to collapse into the same stack node in the
-        // inverted tree, discard their category and set the category to the
-        // default category.
-        newStackTable.category[stackIndex] = defaultCategory;
-        newStackTable.subcategory[stackIndex] = 0;
-      } else if (newStackTable.subcategory[stackIndex] !== subcategory) {
-        // If two stack nodes from the non-inverted stack tree with the same
-        // category but different subcategories happen to collapse into the same
-        // stack node in the inverted tree, discard their subcategory and set it
-        // to the "Other" subcategory.
-        newStackTable.subcategory[stackIndex] = 0;
-      }
-      return stackIndex;
-    }
-
-    const oldStackToNewStack = new Map();
-
-    // For one specific stack, this will ensure that stacks are created for all
-    // of its ancestors, by walking its prefix chain up to the root.
-    function convertStack(stackIndex) {
-      if (stackIndex === null) {
-        return null;
-      }
-      let newStack = oldStackToNewStack.get(stackIndex);
-      if (newStack === undefined) {
-        newStack = null;
-        for (
-          let currentStack = stackIndex;
-          currentStack !== null;
-          currentStack = stackTable.prefix[currentStack]
-        ) {
-          // Notice how we reuse the previous stack as the prefix. This is what
-          // effectively inverts the call tree.
-          newStack = stackFor(
-            newStack,
-            stackTable.frame[currentStack],
-            stackTable.category[currentStack],
-            stackTable.subcategory[currentStack]
-          );
-        }
-        oldStackToNewStack.set(stackIndex, ensureExists(newStack));
-      }
-      return newStack;
-    }
-
-    const invertedThread = updateThreadStacks(
-      thread,
-      newStackTable,
-      convertStack
-    );
-    return { invertedThread, oldStackToNewStack };
-  });
 }
 
 /**

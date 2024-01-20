@@ -595,10 +595,10 @@ describe('getInvertedCallNodeInfo', function () {
     );
 
     const invertedCallNodeInfo = getInvertedCallNodeInfo(
-      thread,
       nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
       nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
-      defaultCategory
+      defaultCategory,
+      thread.funcTable.length
     );
 
     // This function is used to test `getSuffixOrderIndexRangeForCallNode` and
@@ -989,10 +989,10 @@ describe('getSamplesSelectedStates', function () {
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
     const callNodeInfoInverted = getInvertedCallNodeInfo(
-      thread,
       callNodeInfo.getNonInvertedCallNodeTable(),
       stackIndexToCallNodeIndex,
-      defaultCategory
+      defaultCategory,
+      thread.funcTable.length
     );
 
     return {
@@ -1537,10 +1537,10 @@ describe('getNativeSymbolsForCallNode', function () {
       defaultCategory
     );
     const callNodeInfo = getInvertedCallNodeInfo(
-      thread,
       nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
       nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
-      defaultCategory
+      defaultCategory,
+      thread.funcTable.length
     );
     const c = callNodeInfo.getCallNodeIndexFromPath([funC]);
     expect(c).not.toBeNull();
