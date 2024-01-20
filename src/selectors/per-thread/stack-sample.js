@@ -230,18 +230,6 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
-  const getSampleIndexToCallNodeIndexForFilteredThread: Selector<
-    Array<IndexIntoCallNodeTable | null>,
-  > = createSelector(
-    (state) => threadSelectors.getFilteredThread(state).samples.stack,
-    (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
-    (filteredThreadSampleStacks, stackIndexToCallNodeIndex) =>
-      ProfileData.getSampleIndexToCallNodeIndex(
-        filteredThreadSampleStacks,
-        stackIndexToCallNodeIndex
-      )
-  );
-
   const getSampleIndexToCallNodeIndexForPreviewFilteredThread: Selector<
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
@@ -410,7 +398,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
     createSelector(
       threadSelectors.getFilteredSamplesForCallTree,
-      getSampleIndexToCallNodeIndexForFilteredThread,
+      getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
       getCallNodeInfo,
       getFilteredCallNodeMaxDepthPlusOne,
       ProfileSelectors.getProfileInterval,
@@ -461,7 +449,6 @@ export function getStackAndSampleSelectorsPerThread(
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
-    getSampleIndexToCallNodeIndexForFilteredThread,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
