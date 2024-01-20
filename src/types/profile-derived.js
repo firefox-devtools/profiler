@@ -162,9 +162,6 @@ export interface CallNodeInfo {
     func: IndexIntoFuncTable
   ): IndexIntoCallNodeTable | null;
 
-  // Returns the list of root nodes.
-  getRoots(): IndexIntoCallNodeTable[];
-
   // Returns whether the given node is a root node.
   isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean;
 
@@ -334,6 +331,11 @@ export type SuffixOrderIndex = number;
  * part of X's range" will work correctly.
  */
 export interface CallNodeInfoInverted extends CallNodeInfo {
+  // Get the number of functions. There is one root per function.
+  // So this is also the number of roots at the same time.
+  // The inverted call node index for a root is the same as the function index.
+  getFuncCount(): number;
+
   // Get a mapping SuffixOrderIndex -> IndexIntoNonInvertedCallNodeTable.
   // This array contains all non-inverted call node indexes, ordered by
   // call path suffix. See "suffix order" in the documentation above.
