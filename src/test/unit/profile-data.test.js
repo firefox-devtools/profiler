@@ -895,14 +895,14 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
       thread.frameTable,
       thread.funcTable,
       defaultCategory
-    ).getCallNodeTable();
+    ).getNonInvertedCallNodeTable();
     const jsOnlyThread = filterThreadByImplementation(thread, 'js');
     const jsOnlyCallNodeTable = getCallNodeInfo(
       jsOnlyThread.stackTable,
       jsOnlyThread.frameTable,
       jsOnlyThread.funcTable,
       defaultCategory
-    ).getCallNodeTable();
+    ).getNonInvertedCallNodeTable();
     return { callNodeTable, jsOnlyCallNodeTable, funcNames };
   }
 
