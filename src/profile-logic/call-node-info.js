@@ -393,7 +393,6 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
   _invertedNonRootCallNodeTable: InvertedNonRootCallNodeTable;
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
   _rootCount: number;
-  _roots: InvertedCallNodeHandle[];
   _suffixOrderedCallNodes: Uint32Array; // IndexIntoCallNodeTable[],
   _suffixOrderIndexes: Uint32Array; // Map<IndexIntoCallNodeTable, SuffixOrderIndex>,
   _defaultCategory: IndexIntoCategoryList;
@@ -424,16 +423,7 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
     this._suffixOrderedCallNodes = suffixOrderedCallNodes;
     this._suffixOrderIndexes = suffixOrderIndexes;
     this._defaultCategory = defaultCategory;
-
-    const rootCount = rootSuffixOrderIndexRangeEndCol.length;
-    this._rootCount = rootCount;
-
-    const roots = new Array(rootCount);
-    for (let i = 0; i < rootCount; i++) {
-      roots[i] = i;
-    }
-    this._roots = roots;
-
+    this._rootCount = rootSuffixOrderIndexRangeEndCol.length;
     this._funcCountBuf = funcCountBuf;
     this._funcCountBuf.fill(0);
     const invertedRootCallNodeTable = _createInvertedRootCallNodeTable(
@@ -471,8 +461,8 @@ export class CallNodeInfoInvertedImpl implements CallNodeInfoInverted {
     return this._suffixOrderIndexes;
   }
 
-  getRoots(): Array<InvertedCallNodeHandle> {
-    return this._roots;
+  getFuncCount(): number {
+    return this._rootCount;
   }
 
   isRoot(nodeHandle: InvertedCallNodeHandle): boolean {
