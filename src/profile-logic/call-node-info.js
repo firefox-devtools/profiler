@@ -66,10 +66,6 @@ export class CallNodeInfoImpl implements CallNodeInfo {
     return null;
   }
 
-  getCallNodeTable(): CallNodeTable {
-    return this._callNodeTable;
-  }
-
   getNonInvertedCallNodeTable(): CallNodeTable {
     return this._nonInvertedCallNodeTable;
   }
