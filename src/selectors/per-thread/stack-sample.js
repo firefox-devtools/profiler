@@ -300,7 +300,8 @@ export function getStackAndSampleSelectorsPerThread(
   const getTreeOrderComparatorInFilteredThread: Selector<
     (IndexIntoSamplesTable, IndexIntoSamplesTable) => number,
   > = createSelector(
-    getSampleIndexToCallNodeIndexForFilteredThread,
+    getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
+    getCallNodeInfo,
     ProfileData.getTreeOrderComparator
   );
 
