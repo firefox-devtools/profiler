@@ -294,16 +294,16 @@ export type SuffixOrderIndex = number;
  * ```
  *                                                 Represents call paths ending in
  * - [in0] A  (so:0..3)        =  A             =            ... A (cn0, cn4, cn2)
- *   - [in1] A  (so:1..2)      =  A <- A        =       ... A -> A (cn4)
- *   - [in2] B  (so:2..3)      =  A <- B        =       ... B -> A (cn2)
- *     - [in3] A  (so:2..3)    =  A <- B <- A   =  ... A -> B -> A (cn2)
- * - [in4] B  (so:3..5)        =  B             =            ... B (cn1, cn5)
+ *   - [in3] A  (so:1..2)      =  A <- A        =       ... A -> A (cn4)
+ *   - [in4] B  (so:2..3)      =  A <- B        =       ... B -> A (cn2)
+ *     - [in6] A  (so:2..3)    =  A <- B <- A   =  ... A -> B -> A (cn2)
+ * - [in1] B  (so:3..5)        =  B             =            ... B (cn1, cn5)
  *   - [in5] A  (so:3..5)      =  B <- A        =       ... A -> B (cn1, cn5)
- *     - [in6] A  (so:4..5)    =  B <- A <- A   =  ... A -> A -> B (cn5)
- * - [in7] C  (so:5..7)        =  C             =            ... C (cn6, cn3)
- *   - [in8] A  (so:5..6)      =  C <- A        =       ... A -> C (cn6)
- *   - [in9] B  (so:6..7)      =  C <- B        =       ... B -> C (cn3)
- *     - [in10] A  (so:6..7)   =  C <- B <- A   =  ... A -> B -> C (cn3)
+ *     - [in10] A  (so:4..5)   =  B <- A <- A   =  ... A -> A -> B (cn5)
+ * - [in2] C  (so:5..7)        =  C             =            ... C (cn6, cn3)
+ *   - [in7] A  (so:5..6)      =  C <- A        =       ... A -> C (cn6)
+ *   - [in8] B  (so:6..7)      =  C <- B        =       ... B -> C (cn3)
+ *     - [in9] A  (so:6..7)    =  C <- B <- A   =  ... A -> B -> C (cn3)
  * ```
  *
  * In the suffix order, call paths become grouped in such a way that call paths
@@ -319,7 +319,6 @@ export type SuffixOrderIndex = number;
  *
  * Suffix ordered call nodes: [0, 4, 2, 1, 5, 6, 3] (soX -> cnY)
  * Suffix order indexes:      [0, 3, 2, 6, 1, 4, 5] (cnX -> soY)
- *
  */
 export interface CallNodeInfoInverted extends CallNodeInfo {
   // Get a mapping SuffixOrderIndex -> IndexIntoNonInvertedCallNodeTable.
