@@ -262,7 +262,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       categoryForUserTiming = 0;
     }
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
