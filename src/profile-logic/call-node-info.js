@@ -33,11 +33,6 @@ export class CallNodeInfoImpl implements CallNodeInfo {
   // The non-inverted call node table, regardless of isInverted().
   _nonInvertedCallNodeTable: CallNodeTable;
 
-  // The mapping of stack index to corresponding call node index. This maps to
-  // either the inverted or the non-inverted call node table, depending on
-  // isInverted().
-  _stackIndexToCallNodeIndex: Int32Array;
-
   // The mapping of stack index to corresponding non-inverted call node index.
   // This always maps to the non-inverted call node table, regardless of
   // isInverted().
@@ -51,12 +46,10 @@ export class CallNodeInfoImpl implements CallNodeInfo {
   constructor(
     callNodeTable: CallNodeTable,
     nonInvertedCallNodeTable: CallNodeTable,
-    stackIndexToCallNodeIndex: Int32Array,
     stackIndexToNonInvertedCallNodeIndex: Int32Array
   ) {
     this._callNodeTable = callNodeTable;
     this._nonInvertedCallNodeTable = nonInvertedCallNodeTable;
-    this._stackIndexToCallNodeIndex = stackIndexToCallNodeIndex;
     this._stackIndexToNonInvertedCallNodeIndex =
       stackIndexToNonInvertedCallNodeIndex;
   }
@@ -73,10 +66,6 @@ export class CallNodeInfoImpl implements CallNodeInfo {
 
   getCallNodeTable(): CallNodeTable {
     return this._callNodeTable;
-  }
-
-  getStackIndexToCallNodeIndex(): Int32Array {
-    return this._stackIndexToCallNodeIndex;
   }
 
   getNonInvertedCallNodeTable(): CallNodeTable {
@@ -240,7 +229,6 @@ export class CallNodeInfoInvertedImpl
   constructor(
     callNodeTable: CallNodeTable,
     nonInvertedCallNodeTable: CallNodeTable,
-    stackIndexToCallNodeIndex: Int32Array,
     stackIndexToNonInvertedCallNodeIndex: Int32Array,
     suffixOrderedCallNodes: Uint32Array,
     suffixOrderIndexes: Uint32Array
@@ -248,7 +236,6 @@ export class CallNodeInfoInvertedImpl
     super(
       callNodeTable,
       nonInvertedCallNodeTable,
-      stackIndexToCallNodeIndex,
       stackIndexToNonInvertedCallNodeIndex
     );
     this._suffixOrderedCallNodes = suffixOrderedCallNodes;

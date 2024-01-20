@@ -139,25 +139,11 @@ export interface CallNodeInfo {
   // This is always the non-inverted call node table, regardless of isInverted().
   getNonInvertedCallNodeTable(): CallNodeTable;
 
-  // Returns a mapping from the stack table to the call node table.
+  // Returns a mapping from the stack table to the non-inverted call node table.
   // The Int32Array should be used as if it were a
   // Map<IndexIntoStackTable, IndexIntoCallNodeTable | -1>.
   //
-  // If this CallNodeInfo is for the non-inverted tree, this maps the stack index
-  // to its corresponding call node index, and all entries are >= 0.
-  // If this CallNodeInfo is for the inverted tree, this maps the non-inverted
-  // stack index to the inverted call node index. For example, the stack
-  // A -> B -> C -> D is mapped to the inverted call node describing the
-  // call path D <- C <- B <- A, i.e. the node with function A under the D root
-  // of the inverted tree. Stacks which are only used as prefixes are not mapped
-  // to an inverted call node; for those, the entry will be -1. In the example
-  // above, if the stack node A -> B -> C only exists so that it can be the prefix
-  // of the A -> B -> C -> D stack and no sample / marker / allocation has
-  // A -> B -> C as its stack, then there is no need to have a call node
-  // C <- B <- A in the inverted call node table.
-  getStackIndexToCallNodeIndex(): Int32Array;
-
-  // Returns a mapping from the stack table to the non-inverted call node table.
+  // All entries are >= 0.
   // This always maps to the non-inverted call node table, regardless of isInverted().
   getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
 
