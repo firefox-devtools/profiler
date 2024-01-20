@@ -2826,6 +2826,19 @@ export function getFuncNamesAndOriginsForPath(
  * highlighted area for a selected subtree is contiguous in the graph.
  */
 export function getTreeOrderComparator(
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  callNodeInfo: CallNodeInfo
+): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  return callNodeInfoInverted !== null
+    ? _getTreeOrderComparatorInverted(
+        sampleNonInvertedCallNodes,
+        callNodeInfoInverted
+      )
+    : _getTreeOrderComparatorNonInverted(sampleNonInvertedCallNodes);
+}
+
+export function _getTreeOrderComparatorNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
 ): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
   /**
@@ -2856,6 +2869,38 @@ export function getTreeOrderComparator(
       return -1;
     }
     return callNodeA - callNodeB;
+  };
+}
+
+function _getTreeOrderComparatorInverted(
+  sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
+  callNodeInfo: CallNodeInfoInverted
+): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  return function treeOrderComparator(
+    sampleA: IndexIntoSamplesTable,
+    sampleB: IndexIntoSamplesTable
+  ): number {
+    const callNodeA = sampleNonInvertedCallNodes[sampleA];
+    const callNodeB = sampleNonInvertedCallNodes[sampleB];
+
+    if (callNodeA === callNodeB) {
+      // Both are filtered out or both are the same.
+      return 0;
+    }
+    if (callNodeA === null) {
+      // A filtered out, B not filtered out. A goes after B.
+      return 1;
+    }
+    if (callNodeB === null) {
+      // B filtered out, A not filtered out. B goes after A.
+      return -1;
+    }
+    return _compareNonInvertedCallNodesInSuffixOrder(
+      callNodeA,
+      callNodeB,
+      callNodeTable
+    );
   };
 }
 
