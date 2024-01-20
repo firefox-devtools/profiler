@@ -1160,51 +1160,78 @@ export function getTimingsForCallNodeIndex(
     return { forPath: pathTimings, rootTime };
   }
 
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+  const callNodeInfoInverted = callNodeInfo.asInverted();
+  if (callNodeInfoInverted !== null) {
+    // Inverted case
+    const needleNodeIsRootOfInvertedTree =
+      callNodeInfoInverted.isRoot(needleNodeIndex);
+    const suffixOrderIndexes = callNodeInfoInverted.getSuffixOrderIndexes();
+    const [rangeStart, rangeEnd] =
+      callNodeInfoInverted.getSuffixOrderIndexRangeForCallNode(needleNodeIndex);
 
-  const needleDescendantsEndIndex =
-    callNodeTable.subtreeRangeEnd[needleNodeIndex];
+    // Loop over each sample and accumulate the self time, running time, and
+    // the implementation breakdown.
+    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+      // Get the call node for this sample.
+      // TODO: Consider using sampleCallNodes for this, to save one indirection on
+      // a hot path.
+      const thisStackIndex = samples.stack[sampleIndex];
+      if (thisStackIndex === null) {
+        continue;
+      }
+      const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
+      const thisNodeSuffixOrderIndex = suffixOrderIndexes[thisNodeIndex];
+      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+      rootTime += Math.abs(weight);
 
-  const isInvertedTree = callNodeInfo.isInverted();
-  const needleNodeIsRootOfInvertedTree =
-    isInvertedTree && callNodeTable.prefix[needleNodeIndex] === -1;
+      if (
+        thisNodeSuffixOrderIndex >= rangeStart &&
+        thisNodeSuffixOrderIndex < rangeEnd
+      ) {
+        // One of the parents is the exact passed path.
+        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
 
-  // Loop over each sample and accumulate the self time, running time, and
-  // the implementation breakdown.
-  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-    // Get the call node for this sample.
-    // TODO: Consider using sampleCallNodes for this, to save one indirection on
-    // a hot path.
-    const thisStackIndex = samples.stack[sampleIndex];
-    if (thisStackIndex === null) {
-      continue;
+        if (needleNodeIsRootOfInvertedTree) {
+          // This root node matches the passed call node path.
+          // Just increment the selfTime value.
+          // We don't call accumulateDataToTimings(pathTimings.selfTime, ...)
+          // here, mainly because this would be the same as for the total time.
+          pathTimings.selfTime.value += weight;
+        }
+      }
     }
-    const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
+  } else {
+    // Non-inverted case
+    const needleSubtreeRangeEnd =
+      callNodeTable.subtreeRangeEnd[needleNodeIndex];
 
-    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    // Loop over each sample and accumulate the self time, running time, and
+    // the implementation breakdown.
+    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+      // Get the call node for this sample.
+      // TODO: Consider using sampleCallNodes for this, to save one indirection on
+      // a hot path.
+      const thisStackIndex = samples.stack[sampleIndex];
+      if (thisStackIndex === null) {
+        continue;
+      }
+      const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
+      const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+      rootTime += Math.abs(weight);
 
-    rootTime += Math.abs(weight);
-
-    if (!isInvertedTree) {
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
         accumulateDataToTimings(pathTimings.selfTime, sampleIndex, weight);
       }
-    }
-
-    if (
-      thisNodeIndex >= needleNodeIndex &&
-      thisNodeIndex < needleDescendantsEndIndex
-    ) {
-      // One of the parents is the exact passed path.
-      accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
-
-      if (needleNodeIsRootOfInvertedTree) {
-        // This root node matches the passed call node path.
-        // This is the only place where we don't accumulate timings, mainly
-        // because this would be the same as for the total time.
-        pathTimings.selfTime.value += weight;
+      if (
+        thisNodeIndex >= needleNodeIndex &&
+        thisNodeIndex < needleSubtreeRangeEnd
+      ) {
+        // One of the parents is the exact passed path.
+        accumulateDataToTimings(pathTimings.totalTime, sampleIndex, weight);
       }
     }
   }
