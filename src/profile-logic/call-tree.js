@@ -406,7 +406,7 @@ export class CallTree {
     const calledFunction = getFunctionName(funcName);
     const inlinedIntoNativeSymbol =
       this._callNodeInfo.sourceFramesInlinedIntoSymbolForNode(callNodeIndex);
-    if (inlinedIntoNativeSymbol === null) {
+    if (inlinedIntoNativeSymbol === -2) {
       return undefined;
     }
 
