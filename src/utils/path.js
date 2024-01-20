@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { CallNodePath } from 'firefox-profiler/types';
+import type { CallNodePath, IndexIntoFuncTable } from 'firefox-profiler/types';
 
 export function arePathsEqual(a: CallNodePath, b: CallNodePath): boolean {
   if (a === b) {
@@ -32,6 +32,17 @@ export function arePathsEqual(a: CallNodePath, b: CallNodePath): boolean {
 // implementations which is a lot faster.
 export function hashPath(a: CallNodePath): string {
   return a.join('-');
+}
+
+export function concatHash(
+  hash: string,
+  extraFunc: IndexIntoFuncTable
+): string {
+  return hash + '-' + extraFunc;
+}
+
+export function hashPathSingleFunc(func: IndexIntoFuncTable): string {
+  return '' + func;
 }
 
 // This class implements all of the methods of the native Set, but provides a
