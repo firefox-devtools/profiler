@@ -58,8 +58,8 @@ export type CallTreeTimingsInverted = {|
   callNodeSelf: Float32Array,
   rootTotalSummary: number,
   sortedRoots: IndexIntoFuncTable[],
-  totalPerRootNode: Map<IndexIntoCallNodeTable, number>,
-  rootNodesWithChildren: Set<IndexIntoCallNodeTable>,
+  totalPerRootFunc: Float32Array,
+  hasChildrenPerRootFunc: Uint8Array,
 |};
 
 export type CallTreeTimings =
@@ -185,8 +185,8 @@ class CallTreeInternalInverted implements CallTreeInternal {
   _callNodeSelf: Float32Array;
   _rootNodes: IndexIntoCallNodeTable[];
   _funcCount: number;
-  _totalPerRootNode: Map<IndexIntoCallNodeTable, number>;
-  _rootNodesWithChildren: Set<IndexIntoCallNodeTable>;
+  _totalPerRootFunc: Float32Array;
+  _hasChildrenPerRootFunc: Uint8Array;
   _totalAndHasChildrenPerNonRootNode: Map<
     IndexIntoCallNodeTable,
     TotalAndHasChildren,
@@ -199,10 +199,10 @@ class CallTreeInternalInverted implements CallTreeInternal {
     this._callNodeInfo = callNodeInfo;
     this._nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     this._callNodeSelf = callTreeTimingsInverted.callNodeSelf;
-    const { sortedRoots, totalPerRootNode, rootNodesWithChildren } =
+    const { sortedRoots, totalPerRootFunc, hasChildrenPerRootFunc } =
       callTreeTimingsInverted;
-    this._totalPerRootNode = totalPerRootNode;
-    this._rootNodesWithChildren = rootNodesWithChildren;
+    this._totalPerRootFunc = totalPerRootFunc;
+    this._hasChildrenPerRootFunc = hasChildrenPerRootFunc;
     this._rootNodes = sortedRoots;
   }
 
@@ -212,7 +212,7 @@ class CallTreeInternalInverted implements CallTreeInternal {
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      return this._rootNodesWithChildren.has(callNodeIndex);
+      return this._hasChildrenPerRootFunc[callNodeIndex] !== 0;
     }
     return this._getTotalAndHasChildren(callNodeIndex).hasChildren;
   }
@@ -238,7 +238,7 @@ class CallTreeInternalInverted implements CallTreeInternal {
 
   getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      const total = ensureExists(this._totalPerRootNode.get(callNodeIndex));
+      const total = this._totalPerRootFunc[callNodeIndex];
       return { self: total, total };
     }
     const { total } = this._getTotalAndHasChildren(callNodeIndex);
@@ -643,9 +643,9 @@ export function getSelfAndTotalForCallNode(
     case 'INVERTED': {
       const callNodeInfoInverted = ensureExists(callNodeInfo.asInverted());
       const { timings } = callTreeTimings;
-      const { callNodeSelf, totalPerRootNode } = timings;
+      const { callNodeSelf, totalPerRootFunc } = timings;
       if (callNodeInfoInverted.isRoot(callNodeIndex)) {
-        const total = totalPerRootNode.get(callNodeIndex) ?? 0;
+        const total = totalPerRootFunc[callNodeIndex];
         return { self: total, total };
       }
       const { total } = _getInvertedTreeNodeTotalAndHasChildren(
@@ -711,13 +711,14 @@ export function computeCallTreeTimingsInverted(
   callNodeInfo: CallNodeInfoInverted,
   { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary
 ): CallTreeTimingsInverted {
-  const roots = callNodeInfo.getRoots();
+  const funcCount = callNodeInfo.getFuncCount();
   const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
   const callNodeTableFuncCol = callNodeTable.func;
   const callNodeTableDepthCol = callNodeTable.depth;
-  const totalPerRootNode = new Map();
-  const rootNodesWithChildren = new Set();
-  const seenRoots = new Set();
+  const totalPerRootFunc = new Float32Array(funcCount);
+  const hasChildrenPerRootFunc = new Uint8Array(funcCount);
+  const seenPerRootFunc = new Uint8Array(funcCount);
+  const sortedRoots = [];
   for (let i = 0; i < callNodeSelf.length; i++) {
     const self = callNodeSelf[i];
     if (self === 0) {
@@ -728,36 +729,25 @@ export function computeCallTreeTimingsInverted(
     // call tree. This is done by finding the inverted root which corresponds to
     // the self function of the non-inverted call node.
     const func = callNodeTableFuncCol[i];
-    const rootNode = roots.find(
-      (invertedCallNode) => callNodeInfo.funcForNode(invertedCallNode) === func
-    );
-    if (rootNode === undefined) {
-      throw new Error(
-        "Couldn't find the inverted root for a function with non-zero self time."
-      );
-    }
 
-    totalPerRootNode.set(
-      rootNode,
-      (totalPerRootNode.get(rootNode) ?? 0) + self
-    );
-    seenRoots.add(rootNode);
+    totalPerRootFunc[func] += self;
+    if (seenPerRootFunc[func] === 0) {
+      seenPerRootFunc[func] = 1;
+      sortedRoots.push(func);
+    }
     if (callNodeTableDepthCol[i] !== 0) {
-      rootNodesWithChildren.add(rootNode);
+      hasChildrenPerRootFunc[func] = 1;
     }
   }
-  const sortedRoots = [...seenRoots];
   sortedRoots.sort(
-    (a, b) =>
-      Math.abs(totalPerRootNode.get(b) ?? 0) -
-      Math.abs(totalPerRootNode.get(a) ?? 0)
+    (a, b) => Math.abs(totalPerRootFunc[b]) - Math.abs(totalPerRootFunc[a])
   );
   return {
     callNodeSelf,
     rootTotalSummary,
     sortedRoots,
-    totalPerRootNode,
-    rootNodesWithChildren,
+    totalPerRootFunc,
+    hasChildrenPerRootFunc,
   };
 }
 
