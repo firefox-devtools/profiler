@@ -9,33 +9,32 @@ import { hashPath } from 'firefox-profiler/utils/path';
 import type {
   IndexIntoFuncTable,
   CallNodeInfo,
+  CallNodeInfoInverted,
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
+  SuffixOrderIndex,
 } from 'firefox-profiler/types';
 
 /**
  * The implementation of the CallNodeInfo interface.
  */
 export class CallNodeInfoImpl implements CallNodeInfo {
-  // If true, call node indexes describe nodes in the inverted call tree.
-  _isInverted: boolean;
-
   // The call node table. This is either the inverted or the non-inverted call
-  // node table, depending on _isInverted.
+  // node table, depending on isInverted().
   _callNodeTable: CallNodeTable;
 
-  // The non-inverted call node table, regardless of _isInverted.
+  // The non-inverted call node table, regardless of isInverted().
   _nonInvertedCallNodeTable: CallNodeTable;
 
   // The mapping of stack index to corresponding call node index. This maps to
   // either the inverted or the non-inverted call node table, depending on
-  // _isInverted.
+  // isInverted().
   _stackIndexToCallNodeIndex: Int32Array;
 
   // The mapping of stack index to corresponding non-inverted call node index.
   // This always maps to the non-inverted call node table, regardless of
-  // _isInverted.
+  // isInverted().
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
 
   // This is a Map<CallNodePathHash, IndexIntoCallNodeTable>. This map speeds up
@@ -47,19 +46,23 @@ export class CallNodeInfoImpl implements CallNodeInfo {
     callNodeTable: CallNodeTable,
     nonInvertedCallNodeTable: CallNodeTable,
     stackIndexToCallNodeIndex: Int32Array,
-    stackIndexToNonInvertedCallNodeIndex: Int32Array,
-    isInverted: boolean
+    stackIndexToNonInvertedCallNodeIndex: Int32Array
   ) {
     this._callNodeTable = callNodeTable;
     this._nonInvertedCallNodeTable = nonInvertedCallNodeTable;
     this._stackIndexToCallNodeIndex = stackIndexToCallNodeIndex;
     this._stackIndexToNonInvertedCallNodeIndex =
       stackIndexToNonInvertedCallNodeIndex;
-    this._isInverted = isInverted;
   }
 
   isInverted(): boolean {
-    return this._isInverted;
+    // Overridden in subclass
+    return false;
+  }
+
+  asInverted(): CallNodeInfoInverted | null {
+    // Overridden in subclass
+    return null;
   }
 
   getCallNodeTable(): CallNodeTable {
@@ -200,5 +203,92 @@ export class CallNodeInfoImpl implements CallNodeInfo {
     }
 
     return null;
+  }
+}
+
+export class CallNodeInfoInvertedImpl
+  extends CallNodeInfoImpl
+  implements CallNodeInfoInverted
+{
+  _roots: IndexIntoCallNodeTable[];
+  _suffixOrderedCallNodes: Uint32Array;
+  _suffixOrderIndexes: Uint32Array;
+  _suffixOrderIndexRangeStartCol: Uint32Array;
+  _suffixOrderIndexRangeEndCol: Uint32Array;
+
+  constructor(
+    callNodeTable: CallNodeTable,
+    nonInvertedCallNodeTable: CallNodeTable,
+    stackIndexToCallNodeIndex: Int32Array,
+    stackIndexToNonInvertedCallNodeIndex: Int32Array,
+    roots: IndexIntoCallNodeTable[],
+    suffixOrderedCallNodes: Uint32Array,
+    suffixOrderIndexes: Uint32Array,
+    suffixOrderIndexRangeStartCol: Uint32Array,
+    suffixOrderIndexRangeEndCol: Uint32Array
+  ) {
+    super(
+      callNodeTable,
+      nonInvertedCallNodeTable,
+      stackIndexToCallNodeIndex,
+      stackIndexToNonInvertedCallNodeIndex
+    );
+    this._roots = roots;
+    this._suffixOrderedCallNodes = suffixOrderedCallNodes;
+    this._suffixOrderIndexes = suffixOrderIndexes;
+    this._suffixOrderIndexRangeStartCol = suffixOrderIndexRangeStartCol;
+    this._suffixOrderIndexRangeEndCol = suffixOrderIndexRangeEndCol;
+  }
+
+  isInverted(): boolean {
+    return true;
+  }
+
+  asInverted(): CallNodeInfoInverted | null {
+    return this;
+  }
+
+  getRoots(): IndexIntoCallNodeTable[] {
+    return this._roots;
+  }
+
+  isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean {
+    return this._callNodeTable.prefix[callNodeIndex] === -1;
+  }
+
+  getChildren(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[] {
+    if (
+      this._callNodeTable.subtreeRangeEnd[callNodeIndex] ===
+      callNodeIndex + 1
+    ) {
+      return [];
+    }
+
+    const children = [];
+    const firstChild = callNodeIndex + 1;
+    for (
+      let childCallNodeIndex = firstChild;
+      childCallNodeIndex !== -1;
+      childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
+    ) {
+      children.push(childCallNodeIndex);
+    }
+    return children;
+  }
+
+  getSuffixOrderedCallNodes(): Uint32Array {
+    return this._suffixOrderedCallNodes;
+  }
+
+  getSuffixOrderIndexes(): Uint32Array {
+    return this._suffixOrderIndexes;
+  }
+
+  getSuffixOrderIndexRangeForCallNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): [SuffixOrderIndex, SuffixOrderIndex] {
+    const rangeStart = this._suffixOrderIndexRangeStartCol[callNodeIndex];
+    const rangeEnd = this._suffixOrderIndexRangeEndCol[callNodeIndex];
+    return [rangeStart, rangeEnd];
   }
 }

@@ -16,7 +16,7 @@ import {
   shallowCloneFrameTable,
   shallowCloneFuncTable,
 } from './data-structures';
-import { CallNodeInfoImpl } from './call-node-info';
+import { CallNodeInfoImpl, CallNodeInfoInvertedImpl } from './call-node-info';
 import {
   INSTANT,
   INTERVAL,
@@ -24,7 +24,11 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
+import {
+  bisectionRight,
+  bisectionLeft,
+  bisectEqualRange,
+} from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   assertExhaustiveCheck,
@@ -59,6 +63,7 @@ import type {
   IndexIntoFrameTable,
   PageList,
   CallNodeInfo,
+  CallNodeInfoInverted,
   CallNodeTable,
   CallNodePath,
   CallNodeAndCategoryPath,
@@ -109,8 +114,7 @@ export function getCallNodeInfo(
     callNodeTable,
     callNodeTable,
     stackIndexToCallNodeIndex,
-    stackIndexToCallNodeIndex,
-    false
+    stackIndexToCallNodeIndex
   );
 }
 
@@ -432,7 +436,7 @@ export function getInvertedCallNodeInfo(
   nonInvertedCallNodeTable: CallNodeTable,
   stackIndexToNonInvertedCallNodeIndex: Int32Array,
   defaultCategory: IndexIntoCategoryList
-): CallNodeInfo {
+): CallNodeInfoInverted {
   // We compute an inverted stack table, but we don't let it escape this function.
   const {
     invertedThread,
@@ -474,12 +478,133 @@ export function getInvertedCallNodeInfo(
         invertedStackIndexToCallNodeIndex[invertedStackIndex];
     }
   }
-  return new CallNodeInfoImpl(
+  const nonInvertedCallNodeCount = nonInvertedCallNodeTable.length;
+  const invertedCallNodeCount = callNodeTable.length;
+  const suffixOrderedCallNodes = new Uint32Array(nonInvertedCallNodeCount);
+  const suffixOrderIndexes = new Uint32Array(nonInvertedCallNodeCount);
+  const suffixOrderIndexRangeStartCol = new Uint32Array(invertedCallNodeCount);
+  const suffixOrderIndexRangeEndCol = new Uint32Array(invertedCallNodeCount);
+  for (let i = 0; i < nonInvertedCallNodeCount; i++) {
+    suffixOrderedCallNodes[i] = i;
+  }
+  suffixOrderedCallNodes.sort((a, b) =>
+    _compareNonInvertedCallNodesInSuffixOrder(a, b, nonInvertedCallNodeTable)
+  );
+  for (let i = 0; i < suffixOrderedCallNodes.length; i++) {
+    suffixOrderIndexes[suffixOrderedCallNodes[i]] = i;
+  }
+  for (
+    let invertedCallNodeIndex = 0;
+    invertedCallNodeIndex < invertedCallNodeCount;
+    invertedCallNodeIndex++
+  ) {
+    const suffixPath = [];
+    for (let i = invertedCallNodeIndex; i !== -1; i = callNodeTable.prefix[i]) {
+      suffixPath.push(callNodeTable.func[i]);
+    }
+    suffixPath.reverse();
+
+    const [rangeStart, rangeEnd] =
+      _getOrderingIndexRangeForDescendantsOfInvertedCallPath(
+        suffixPath,
+        suffixOrderedCallNodes,
+        nonInvertedCallNodeTable
+      );
+    suffixOrderIndexRangeStartCol[invertedCallNodeIndex] = rangeStart;
+    suffixOrderIndexRangeEndCol[invertedCallNodeIndex] = rangeEnd;
+  }
+  const invertedRoots = [];
+  if (nonInvertedCallNodeCount !== 0) {
+    for (
+      let invertedRoot = 0;
+      invertedRoot !== -1;
+      invertedRoot = callNodeTable.nextSibling[invertedRoot]
+    ) {
+      invertedRoots.push(invertedRoot);
+    }
+  }
+
+  return new CallNodeInfoInvertedImpl(
     callNodeTable,
     nonInvertedCallNodeTable,
     nonInvertedStackIndexToCallNodeIndex,
     stackIndexToNonInvertedCallNodeIndex,
-    true
+    invertedRoots,
+    suffixOrderedCallNodes,
+    suffixOrderIndexes,
+    suffixOrderIndexRangeStartCol,
+    suffixOrderIndexRangeEndCol
+  );
+}
+
+// Compare two non-inverted call nodes in "suffix order".
+// The suffix order is defined as the lexicographical order of the inverted call
+// path, or, in other words, the "backwards" lexicographical order of the
+// non-inverted call paths.
+//
+// Example of some suffix ordered non-inverted call paths:
+//       [0]
+//    [0, 0]
+//    [2, 0]
+// [4, 5, 1]
+//    [4, 5]
+function _compareNonInvertedCallNodesInSuffixOrder(
+  callNodeA: IndexIntoCallNodeTable,
+  callNodeB: IndexIntoCallNodeTable,
+  nonInvertedCallNodeTable: CallNodeTable
+): number {
+  // Walk up both and stop at the first non-matching function.
+  // Walking up the non-inverted tree is equivalent to walking down the
+  // inverted tree.
+  while (true) {
+    const funcA = nonInvertedCallNodeTable.func[callNodeA];
+    const funcB = nonInvertedCallNodeTable.func[callNodeB];
+    if (funcA !== funcB) {
+      return funcA - funcB;
+    }
+    callNodeA = nonInvertedCallNodeTable.prefix[callNodeA];
+    callNodeB = nonInvertedCallNodeTable.prefix[callNodeB];
+    if (callNodeA === callNodeB) {
+      break;
+    }
+    if (callNodeA === -1) {
+      return -1;
+    }
+    if (callNodeB === -1) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+function _getOrderingIndexRangeForDescendantsOfInvertedCallPath(
+  callPath: CallNodePath,
+  orderedSelfNodes: Uint32Array,
+  callNodeTable: CallNodeTable
+): [number, number] {
+  return bisectEqualRange(
+    orderedSelfNodes,
+    (callNodeIndex: IndexIntoCallNodeTable) => {
+      let currentCallNodeIndex = callNodeIndex;
+      for (let i = 0; i < callPath.length - 1; i++) {
+        const expectedFunc = callPath[i];
+        const currentFunc = callNodeTable.func[currentCallNodeIndex];
+        if (currentFunc < expectedFunc) {
+          return -1;
+        }
+        if (currentFunc > expectedFunc) {
+          return 1;
+        }
+        const prefix = callNodeTable.prefix[currentCallNodeIndex];
+        if (prefix === -1) {
+          return -1;
+        }
+        currentCallNodeIndex = prefix;
+      }
+      const expectedFunc = callPath[callPath.length - 1];
+      const currentFunc = callNodeTable.func[currentCallNodeIndex];
+      return currentFunc - expectedFunc;
+    }
   );
 }
 
