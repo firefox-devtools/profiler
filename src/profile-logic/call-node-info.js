@@ -9,6 +9,7 @@ import { hashPath } from 'firefox-profiler/utils/path';
 import type {
   IndexIntoFuncTable,
   CallNodeInfo,
+  CallNodeInfoInverted,
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
@@ -16,26 +17,27 @@ import type {
 
 /**
  * The implementation of the CallNodeInfo interface.
+ *
+ * CallNodeInfoInvertedImpl inherits from this class and shares this implementation.
+ * By the end of this commit stack, it will no longer inherit from this class and
+ * will have its own implementation.
  */
 export class CallNodeInfoImpl implements CallNodeInfo {
-  // If true, call node indexes describe nodes in the inverted call tree.
-  _isInverted: boolean;
-
   // The call node table. This is either the inverted or the non-inverted call
-  // node table, depending on _isInverted.
+  // node table, depending on isInverted().
   _callNodeTable: CallNodeTable;
 
-  // The non-inverted call node table, regardless of _isInverted.
+  // The non-inverted call node table, regardless of isInverted().
   _nonInvertedCallNodeTable: CallNodeTable;
 
   // The mapping of stack index to corresponding call node index. This maps to
   // either the inverted or the non-inverted call node table, depending on
-  // _isInverted.
+  // isInverted().
   _stackIndexToCallNodeIndex: Int32Array;
 
   // The mapping of stack index to corresponding non-inverted call node index.
   // This always maps to the non-inverted call node table, regardless of
-  // _isInverted.
+  // isInverted().
   _stackIndexToNonInvertedCallNodeIndex: Int32Array;
 
   // This is a Map<CallNodePathHash, IndexIntoCallNodeTable>. This map speeds up
@@ -47,19 +49,23 @@ export class CallNodeInfoImpl implements CallNodeInfo {
     callNodeTable: CallNodeTable,
     nonInvertedCallNodeTable: CallNodeTable,
     stackIndexToCallNodeIndex: Int32Array,
-    stackIndexToNonInvertedCallNodeIndex: Int32Array,
-    isInverted: boolean
+    stackIndexToNonInvertedCallNodeIndex: Int32Array
   ) {
     this._callNodeTable = callNodeTable;
     this._nonInvertedCallNodeTable = nonInvertedCallNodeTable;
     this._stackIndexToCallNodeIndex = stackIndexToCallNodeIndex;
     this._stackIndexToNonInvertedCallNodeIndex =
       stackIndexToNonInvertedCallNodeIndex;
-    this._isInverted = isInverted;
   }
 
   isInverted(): boolean {
-    return this._isInverted;
+    // Overridden in subclass
+    return false;
+  }
+
+  asInverted(): CallNodeInfoInverted | null {
+    // Overridden in subclass
+    return null;
   }
 
   getCallNodeTable(): CallNodeTable {
@@ -200,5 +206,27 @@ export class CallNodeInfoImpl implements CallNodeInfo {
     }
 
     return null;
+  }
+}
+
+/**
+ * A subclass of CallNodeInfoImpl for "invert call stack" mode.
+ *
+ * This currently shares its implementation with CallNodeInfoImpl;
+ * this._callNodeTable is the inverted call node table.
+ *
+ * By the end of this commit stack, we will no longer have an inverted call node
+ * table and this class will stop inheriting from CallNodeInfoImpl.
+ */
+export class CallNodeInfoInvertedImpl
+  extends CallNodeInfoImpl
+  implements CallNodeInfoInverted
+{
+  isInverted(): boolean {
+    return true;
+  }
+
+  asInverted(): CallNodeInfoInverted | null {
+    return this;
   }
 }
