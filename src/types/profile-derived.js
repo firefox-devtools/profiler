@@ -654,16 +654,24 @@ export type ProfileFilterPageData = {|
   favicon: string | null,
 |};
 
-/**
- * This struct contains the traced timing for each call node. The arrays are indexed
- * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
- * traced timing is computed by summing the distance between samples for a given call
- * node. See the `computeTracedTiming` for more details.
- */
-export type TracedTiming = {|
-  +self: Float32Array,
-  +running: Float32Array,
+export type CallNodeLeafAndSummary = {|
+  // This property stores the amount of unit (time, bytes, count, etc.) spent in the
+  // stacks' leaf nodes.
+  callNodeLeaf: Float32Array,
+  // The sum of absolute values in callNodeLeaf.
+  // This is used for computing the percentages displayed in the call tree.
+  rootTotalSummary: number,
 |};
+
+/**
+ * The self and total time, usually for a single call node.
+ * As with most places where the terms "self" and "total" are used, the meaning
+ * of the numbers depends on the context:
+ *  - When used for "traced" timing, the values are Milliseconds.
+ *  - Otherwise, the values are in the same unit as the sample weight type. For
+ *    example, they could be sample counts, weights, or bytes.
+ */
+export type SelfAndTotal = {| self: number, total: number |};
 
 /*
  * Event delay table that holds the pre-processed event delay values and other

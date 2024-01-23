@@ -42,7 +42,6 @@ import type {
   CallTreeSummaryStrategy,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  TracedTiming,
   ThreadsKey,
   InnerWindowID,
   Page,
@@ -50,7 +49,10 @@ import type {
 
 import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-graph';
 
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import type {
+  CallTree,
+  CallTreeTimings,
+} from 'firefox-profiler/profile-logic/call-tree';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -87,7 +89,7 @@ type StateProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: TracedTiming | null,
+  +tracedTiming: CallTreeTimings | null,
   +displayImplementation: boolean,
   +displayStackType: boolean,
 |};

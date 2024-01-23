@@ -42,8 +42,8 @@ import type {
   StartEndRange,
   Selector,
   $ReturnType,
-  TracedTiming,
   ThreadsKey,
+  SelfAndTotal,
 } from 'firefox-profiler/types';
 
 import type { ThreadSelectorsPerThread } from './thread';
@@ -234,6 +234,15 @@ export function getStackAndSampleSelectorsPerThread(
       )
   );
 
+  const getSampleIndexToCallNodeIndexForPreviewFilteredThread: Selector<
+    Array<IndexIntoCallNodeTable | null>,
+  > = createSelector(
+    (state) =>
+      threadSelectors.getPreviewFilteredSamplesForCallTree(state).stack,
+    (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
+    ProfileData.getSampleIndexToCallNodeIndex
+  );
+
   const getSampleIndexToCallNodeIndexForTabFilteredThread: Selector<
     Array<IndexIntoCallNodeTable | null>,
   > = createSelector(
@@ -302,20 +311,17 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getCallTreeTimings: Selector<CallTree.CallTreeTimings> = createSelector(
     threadSelectors.getPreviewFilteredSamplesForCallTree,
+    getSampleIndexToCallNodeIndexForPreviewFilteredThread,
     getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
-    UrlState.getInvertCallstack,
-    (samples, callNodeInfo, interval, invertCallStack) => {
-      const sampleIndexToCallNodeIndex =
-        ProfileData.getSampleIndexToCallNodeIndex(
-          samples.stack,
-          callNodeInfo.getStackIndexToCallNodeIndex()
-        );
-      return CallTree.computeCallTreeTimings(
+    (samples, sampleIndexToCallNodeIndex, callNodeInfo) => {
+      const callNodeLeafAndSummary = CallTree.computeCallNodeLeafAndSummary(
         samples,
         sampleIndexToCallNodeIndex,
+        callNodeInfo.getCallNodeTable().length
+      );
+      return CallTree.computeCallTreeTimings(
         callNodeInfo,
-        invertCallStack
+        callNodeLeafAndSummary
       );
     }
   );
@@ -342,13 +348,43 @@ export function getStackAndSampleSelectorsPerThread(
       getAddressTimings
     );
 
-  const getTracedTiming: Selector<TracedTiming | null> = createSelector(
-    threadSelectors.getPreviewFilteredSamplesForCallTree,
-    getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
-    UrlState.getInvertCallstack,
-    CallTree.computeTracedTiming
-  );
+  const getTracedTiming: Selector<CallTree.CallTreeTimings | null> =
+    createSelector(
+      threadSelectors.getPreviewFilteredSamplesForCallTree,
+      getSampleIndexToCallNodeIndexForPreviewFilteredThread,
+      getCallNodeInfo,
+      ProfileSelectors.getProfileInterval,
+      (samples, sampleIndexToCallNodeIndex, callNodeInfo, interval) => {
+        const callNodeLeafAndSummary =
+          CallTree.computeCallNodeTracedLeafAndSummary(
+            samples,
+            sampleIndexToCallNodeIndex,
+            callNodeInfo.getCallNodeTable().length,
+            interval
+          );
+        if (callNodeLeafAndSummary === null) {
+          return null;
+        }
+        return CallTree.computeCallTreeTimings(
+          callNodeInfo,
+          callNodeLeafAndSummary
+        );
+      }
+    );
+
+  const getTracedSelfAndTotalForSelectedCallNode: Selector<SelfAndTotal | null> =
+    createSelector(
+      getSelectedCallNodeIndex,
+      getTracedTiming,
+      (selectedCallNodeIndex, tracedTiming) => {
+        if (selectedCallNodeIndex === null || tracedTiming === null) {
+          return null;
+        }
+        const total = tracedTiming.total[selectedCallNodeIndex];
+        const self = tracedTiming.self[selectedCallNodeIndex];
+        return { total, self };
+      }
+    );
 
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
     createSelector(
@@ -412,6 +448,7 @@ export function getStackAndSampleSelectorsPerThread(
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,
+    getTracedSelfAndTotalForSelectedCallNode,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepthPlusOne,
     getPreviewFilteredCallNodeMaxDepthPlusOne,
