@@ -13,7 +13,6 @@ import {
 import {
   getCallNodeInfo,
   getInvertedCallNodeInfo,
-  getCallNodeIndexFromPath,
 } from '../../profile-logic/profile-data';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import type {
@@ -126,7 +125,7 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
       ? getInvertedCallNodeInfo(thread, defaultCat)
       : getCallNodeInfo(stackTable, frameTable, funcTable, defaultCat);
     const callNodeIndex = ensureExists(
-      getCallNodeIndexFromPath(callNodePath, callNodeInfo.callNodeTable),
+      callNodeInfo.getCallNodeIndexFromPath(callNodePath),
       'invalid call node path'
     );
     const stackLineInfo = getStackLineInfoForCallNode(

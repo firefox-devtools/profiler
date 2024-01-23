@@ -24,7 +24,6 @@ import {
   getInvertCallstack,
 } from '../../selectors/url-state';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
-import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
@@ -117,7 +116,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
   };
 
@@ -127,7 +126,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
     changeRightClickedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
   };
 
@@ -160,11 +159,9 @@ class FlameGraphImpl extends React.PureComponent<Props> {
    * Is the box for this call node wide enough to be selected?
    */
   _wideEnough = (callNodeIndex: IndexIntoCallNodeTable): boolean => {
-    const {
-      flameGraphTiming,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { flameGraphTiming, callNodeInfo } = this.props;
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[callNodeIndex];
     const row = flameGraphTiming[depth];
     const columnIndex = row.callNode.indexOf(callNodeIndex);
@@ -185,13 +182,11 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     startingCallNodeIndex: IndexIntoCallNodeTable,
     direction: 1 | -1
   ): IndexIntoCallNodeTable | void => {
-    const {
-      flameGraphTiming,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { flameGraphTiming, callNodeInfo } = this.props;
 
     let callNodeIndex = startingCallNodeIndex;
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[callNodeIndex];
     const row = flameGraphTiming[depth];
     let columnIndex = row.callNode.indexOf(callNodeIndex);
@@ -216,12 +211,13 @@ class FlameGraphImpl extends React.PureComponent<Props> {
     const {
       threadsKey,
       callTree,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       selectedCallNodeIndex,
       rightClickedCallNodeIndex,
       changeSelectedCallNode,
       handleCallNodeTransformShortcut,
     } = this.props;
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     if (
       // Please do not forget to update the switch/case below if changing the array to allow more keys.
@@ -231,7 +227,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
         // Just select the "root" node if we've got no prior selection.
         changeSelectedCallNode(
           threadsKey,
-          getCallNodePathFromIndex(0, callNodeTable)
+          callNodeInfo.getCallNodePathFromIndex(0)
         );
         return;
       }
@@ -242,7 +238,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
           if (prefix !== -1) {
             changeSelectedCallNode(
               threadsKey,
-              getCallNodePathFromIndex(prefix, callNodeTable)
+              callNodeInfo.getCallNodePathFromIndex(prefix)
             );
           }
           break;
@@ -257,7 +253,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
           if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
             changeSelectedCallNode(
               threadsKey,
-              getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+              callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
             );
           }
           break;
@@ -272,7 +268,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
           if (callNodeIndex !== undefined) {
             changeSelectedCallNode(
               threadsKey,
-              getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+              callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
             );
           }
           break;
@@ -306,11 +302,8 @@ class FlameGraphImpl extends React.PureComponent<Props> {
   _onCopy = (event: ClipboardEvent) => {
     if (document.activeElement === this._viewport) {
       event.preventDefault();
-      const {
-        callNodeInfo: { callNodeTable },
-        selectedCallNodeIndex,
-        thread,
-      } = this.props;
+      const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
+      const callNodeTable = callNodeInfo.getCallNodeTable();
       if (selectedCallNodeIndex !== null) {
         const funcIndex = callNodeTable.func[selectedCallNodeIndex];
         const funcName = thread.stringTable.getString(

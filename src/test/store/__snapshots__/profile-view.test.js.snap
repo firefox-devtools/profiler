@@ -2182,8 +2182,9 @@ Object {
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCallNodeInfo 1`] = `
-Object {
-  "callNodeTable": Object {
+CallNodeInfoImpl {
+  "_cache": Map {},
+  "_callNodeTable": Object {
     "category": Int32Array [
       0,
       0,
@@ -2286,8 +2287,8 @@ Object {
       9,
     ],
   },
-  "isInverted": false,
-  "stackIndexToCallNodeIndex": Int32Array [
+  "_isInverted": false,
+  "_stackIndexToCallNodeIndex": Int32Array [
     0,
     1,
     2,
@@ -2314,8 +2315,9 @@ CallTree {
     0,
     0,
   ],
-  "_callNodeInfo": Object {
-    "callNodeTable": Object {
+  "_callNodeInfo": CallNodeInfoImpl {
+    "_cache": Map {},
+    "_callNodeTable": Object {
       "category": Int32Array [
         0,
         0,
@@ -2418,8 +2420,8 @@ CallTree {
         9,
       ],
     },
-    "isInverted": false,
-    "stackIndexToCallNodeIndex": Int32Array [
+    "_isInverted": false,
+    "_stackIndexToCallNodeIndex": Int32Array [
       0,
       1,
       2,

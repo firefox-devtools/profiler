@@ -154,16 +154,14 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   }
 
   _scrollSelectionIntoView = () => {
-    const {
-      selectedCallNodeIndex,
-      maxStackDepthPlusOne,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { selectedCallNodeIndex, maxStackDepthPlusOne, callNodeInfo } =
+      this.props;
 
     if (selectedCallNodeIndex === null) {
       return;
     }
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
     const y = (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT;
 
@@ -185,7 +183,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     const {
       thread,
       flameGraphTiming,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       stackFrameHeight,
       maxStackDepthPlusOne,
       rightClickedCallNodeIndex,
@@ -236,6 +234,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
+
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     const startDepth = Math.floor(
       maxStackDepthPlusOne - viewportBottom / stackFrameHeight

@@ -131,7 +131,7 @@ export function callTreeFromProfile(
     thread.samples,
     getSampleIndexToCallNodeIndex(
       thread.samples.stack,
-      callNodeInfo.stackIndexToCallNodeIndex
+      callNodeInfo.getStackIndexToCallNodeIndex()
     ),
     callNodeInfo,
     false

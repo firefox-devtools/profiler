@@ -125,7 +125,7 @@ export function getStackLineInfoForCallNode(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): StackLineInfo {
-  return callNodeInfo.isInverted
+  return callNodeInfo.isInverted()
     ? getStackLineInfoForCallNodeInverted(
         stackTable,
         frameTable,
@@ -207,8 +207,10 @@ export function getStackLineInfoForCallNodeNonInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
   callNodeIndex: IndexIntoCallNodeTable,
-  { stackIndexToCallNodeIndex }: CallNodeInfo
+  callNodeInfo: CallNodeInfo
 ): StackLineInfo {
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+
   // "self line" == "the line which a stack's self time is contributed to"
   const callNodeSelfLineForAllStacks = [];
   // "total lines" == "the set of lines whose total time this stack contributes to"
@@ -281,12 +283,12 @@ export function getStackLineInfoForCallNodeInverted(
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
 ): StackLineInfo {
-  const invertedCallNodeTable = callNodeInfo.callNodeTable;
+  const invertedCallNodeTable = callNodeInfo.getCallNodeTable();
   const depth = invertedCallNodeTable.depth[callNodeIndex];
   const endIndex = invertedCallNodeTable.subtreeRangeEnd[callNodeIndex];
   const callNodeIsRootOfInvertedTree =
     invertedCallNodeTable.prefix[callNodeIndex] === -1;
-  const { stackIndexToCallNodeIndex } = callNodeInfo;
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
   const stackTablePrefixCol = stackTable.prefix;
 
   // "self line" == "the line which a stack's self time is contributed to"

@@ -10,7 +10,6 @@ import {
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
   getBottomBoxInfoForCallNode,
-  getCallNodePathFromIndex,
 } from './profile-data';
 import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -98,7 +97,7 @@ export class CallTree {
   ) {
     this._categories = categories;
     this._callNodeInfo = callNodeInfo;
-    this._callNodeTable = callNodeInfo.callNodeTable;
+    this._callNodeTable = callNodeInfo.getCallNodeTable();
     this._callNodeSummary = callNodeSummary;
     this._callNodeHasChildren = callNodeHasChildren;
     this._thread = thread;
@@ -415,7 +414,7 @@ export class CallTree {
       }
     }
 
-    return getCallNodePathFromIndex(maxNode, this._callNodeTable);
+    return this._callNodeInfo.getCallNodePathFromIndex(maxNode);
   }
 }
 
@@ -515,9 +514,11 @@ function _getStackSelf(
 export function computeCallTreeTimings(
   samples: SamplesLikeTable,
   sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
-  { callNodeTable }: CallNodeInfo,
+  callNodeInfo: CallNodeInfo,
   invertCallstack: boolean
 ): CallTreeTimings {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+
   // Inverted trees need a different method for computing the timing.
   const { callNodeSelf, callNodeLeaf } = invertCallstack
     ? _getInvertedStackSelf(samples, callNodeTable, sampleIndexToCallNodeIndex)
@@ -686,10 +687,13 @@ export function extractSamplesLikeTable(
  */
 export function computeTracedTiming(
   samples: SamplesLikeTable,
-  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
+  callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
   invertCallstack: boolean
 ): TracedTiming | null {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+
   if (samples.weightType !== 'samples' || samples.weight) {
     // Only compute for the samples weight types that have no weights. If a samples
     // table has weights then it's a diff profile. Currently, we aren't calculating

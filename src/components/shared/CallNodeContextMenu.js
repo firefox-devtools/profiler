@@ -18,7 +18,6 @@ import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 import {
   getBottomBoxInfoForCallNode,
   getOriginAnnotationForFunc,
-  getCallNodePathFromIndex,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getCategories } from 'firefox-profiler/selectors';
 
@@ -136,9 +135,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const funcIndex = callNodeTable.func[callNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
@@ -173,9 +173,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const funcIndex = callNodeTable.func[callNodeIndex];
     const stringIndex = funcTable.fileName[funcIndex];
     if (stringIndex === null) {
@@ -223,13 +224,12 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { funcTable, resourceTable, stringTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    const callPath = getCallNodePathFromIndex(
-      callNodeIndex,
-      callNodeTable
-    ).reverse();
+    const callPath = callNodeInfo
+      .getCallNodePathFromIndex(callNodeIndex)
+      .reverse();
 
     const stack = callPath
       .map((funcIndex) => {
@@ -300,14 +300,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const {
-      threadsKey,
-      callNodePath,
-      thread,
-      callNodeIndex,
-      callNodeInfo: { callNodeTable },
-    } = rightClickedCallNodeInfo;
+    const { threadsKey, callNodePath, thread, callNodeIndex, callNodeInfo } =
+      rightClickedCallNodeInfo;
     const selectedFunc = callNodePath[callNodePath.length - 1];
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const category = callNodeTable.category[callNodeIndex];
     switch (type) {
       case 'focus-subtree':
@@ -489,9 +485,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const categoryIndex = callNodeTable.category[callNodeIndex];
     const funcIndex = callNodeTable.func[callNodeIndex];
     const isJS = funcTable.isJS[funcIndex];

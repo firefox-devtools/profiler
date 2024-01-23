@@ -122,12 +122,20 @@ export type CallNodeTable = {
 };
 
 /**
- * Both the callNodeTable and a map that converts an IndexIntoStackTable
- * into an IndexIntoCallNodeTable.
+ * Wraps the call node table and provides associated functionality.
  */
-export type CallNodeInfo = {
-  callNodeTable: CallNodeTable,
-  // IndexIntoStackTable -> IndexIntoCallNodeTable | -1
+export interface CallNodeInfo {
+  // If true, call node indexes describe nodes in the inverted call tree.
+  isInverted(): boolean;
+
+  // Returns the call node table. If isInverted() is true, this is an inverted
+  // call node table, otherwise this is the non-inverted call node table.
+  getCallNodeTable(): CallNodeTable;
+
+  // Returns a mapping from the stack table to the call node table.
+  // The Int32Array should be used as if it were a
+  // Map<IndexIntoStackTable, IndexIntoCallNodeTable | -1>.
+  //
   // If this CallNodeInfo is for the non-inverted tree, this maps the stack index
   // to its corresponding call node index, and all entries are >= 0.
   // If this CallNodeInfo is for the inverted tree, this maps the non-inverted
@@ -140,11 +148,27 @@ export type CallNodeInfo = {
   // of the A -> B -> C -> D stack and no sample / marker / allocation has
   // A -> B -> C as its stack, then there is no need to have a call node
   // C <- B <- A in the inverted call node table.
-  stackIndexToCallNodeIndex: Int32Array,
-  // Whether the call node table in this call node info describes the inverted
-  // call tree.
-  isInverted: boolean,
-};
+  getStackIndexToCallNodeIndex(): Int32Array;
+
+  // Converts a call node index into a call node path.
+  getCallNodePathFromIndex(
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ): CallNodePath;
+
+  // Converts a call node path into a call node index.
+  getCallNodeIndexFromPath(
+    callNodePath: CallNodePath
+  ): IndexIntoCallNodeTable | null;
+
+  // Returns the call node index that matches the function `func` and whose
+  // parent's index  is `parent`. If `parent` is -1, this returns the index of
+  // the root node with function `func`.
+  // Returns null if the described call node doesn't exist.
+  getCallNodeIndexFromParentAndFunc(
+    parent: IndexIntoCallNodeTable | -1,
+    func: IndexIntoFuncTable
+  ): IndexIntoCallNodeTable | null;
+}
 
 export type LineNumber = number;
 
