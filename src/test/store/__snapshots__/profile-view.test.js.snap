@@ -2287,7 +2287,6 @@ CallNodeInfoImpl {
       9,
     ],
   },
-  "_isInverted": false,
   "_nonInvertedCallNodeTable": Object {
     "category": Int32Array [
       0,
@@ -2523,7 +2522,6 @@ CallTree {
         9,
       ],
     },
-    "_isInverted": false,
     "_nonInvertedCallNodeTable": Object {
       "category": Int32Array [
         0,
@@ -2813,7 +2811,7 @@ CallTree {
   ],
   "_children": Array [],
   "_displayDataByIndex": Map {},
-  "_internal": CallTreeInternalImpl {
+  "_internal": CallTreeInternalNonInverted {
     "_callNodeHasChildren": Uint8Array [
       1,
       1,

@@ -50,7 +50,7 @@ import type {
 
 import type {
   CallTree,
-  CallTreeTimings,
+  CallTreeTimingsNonInverted,
 } from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {|
@@ -77,7 +77,7 @@ export type OwnProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: CallTreeTimings | null,
+  +tracedTiming: CallTreeTimingsNonInverted | null,
   +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
