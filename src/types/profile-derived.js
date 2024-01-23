@@ -128,6 +128,9 @@ export interface CallNodeInfo {
   // If true, call node indexes describe nodes in the inverted call tree.
   isInverted(): boolean;
 
+  // Returns this object as CallNodeInfoInverted if isInverted(), otherwise null.
+  asInverted(): CallNodeInfoInverted | null;
+
   // Returns the call node table. If isInverted() is true, this is an inverted
   // call node table, otherwise this is the non-inverted call node table.
   getCallNodeTable(): CallNodeTable;
@@ -176,6 +179,16 @@ export interface CallNodeInfo {
     parent: IndexIntoCallNodeTable | -1,
     func: IndexIntoFuncTable
   ): IndexIntoCallNodeTable | null;
+}
+
+// An index into SuffixOrderedCallNodes.
+export type SuffixOrderIndex = number;
+
+/**
+ * A sub-interface of CallNodeInfo with additional functionality for the inverted
+ * call tree.
+ */
+export interface CallNodeInfoInverted extends CallNodeInfo {
 }
 
 export type LineNumber = number;
