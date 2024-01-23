@@ -14,7 +14,7 @@ import {
   shallowCloneFrameTable,
   shallowCloneFuncTable,
 } from './data-structures';
-import { CallNodeInfoImpl } from './call-node-info';
+import { CallNodeInfoImpl, CallNodeInfoInvertedImpl } from './call-node-info';
 import { computeThreadCPURatio } from './cpu';
 import {
   INSTANT,
@@ -71,6 +71,7 @@ import type {
   IndexIntoFrameTable,
   PageList,
   CallNodeInfo,
+  CallNodeInfoInverted,
   CallNodeTable,
   CallNodePath,
   CallNodeAndCategoryPath,
@@ -121,8 +122,7 @@ export function getCallNodeInfo(
     callNodeTable,
     callNodeTable,
     stackIndexToCallNodeIndex,
-    stackIndexToCallNodeIndex,
-    false
+    stackIndexToCallNodeIndex
   );
 }
 
@@ -444,7 +444,7 @@ export function getInvertedCallNodeInfo(
   nonInvertedCallNodeTable: CallNodeTable,
   stackIndexToNonInvertedCallNodeIndex: Int32Array,
   defaultCategory: IndexIntoCategoryList
-): CallNodeInfo {
+): CallNodeInfoInverted {
   // We compute an inverted stack table, but we don't let it escape this function.
   const {
     invertedThread,
@@ -486,12 +486,11 @@ export function getInvertedCallNodeInfo(
         invertedStackIndexToCallNodeIndex[invertedStackIndex];
     }
   }
-  return new CallNodeInfoImpl(
+  return new CallNodeInfoInvertedImpl(
     callNodeTable,
     nonInvertedCallNodeTable,
     nonInvertedStackIndexToCallNodeIndex,
-    stackIndexToNonInvertedCallNodeIndex,
-    true
+    stackIndexToNonInvertedCallNodeIndex
   );
 }
 
