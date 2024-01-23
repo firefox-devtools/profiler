@@ -2321,7 +2321,6 @@ CallNodeInfoImpl {
       9,
     ],
   },
-  "_isInverted": false,
   "_nonInvertedCallNodeTable": Object {
     "category": Int32Array [
       0,
@@ -2557,7 +2556,6 @@ CallTree {
         9,
       ],
     },
-    "_isInverted": false,
     "_nonInvertedCallNodeTable": Object {
       "category": Int32Array [
         0,
@@ -2964,7 +2962,6 @@ CallTree {
           9,
         ],
       },
-      "_isInverted": false,
       "_nonInvertedCallNodeTable": Object {
         "category": Int32Array [
           0,
