@@ -4400,10 +4400,10 @@ default-browser-id@^5.0.0:
   resolved "https://registry.yarnpkg.com/default-browser-id/-/default-browser-id-5.0.0.tgz#a1d98bf960c15082d8a3fa69e83150ccccc3af26"
   integrity sha512-A6p/pu/6fyBcA1TRz/GqWYPViplrftcW2gZC9q79ngNCKAeR/X3gcEdXQHl4KNXV+3wgIJ1CPkJQ3IHM6lcsyA==
 
-default-browser@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/default-browser/-/default-browser-5.2.0.tgz#31222b11e34165ccf7e5cb5cae872d0de173a7b6"
-  integrity sha512-EviRCeDkniKC30N3uKNHIaIsBZEo00ZOrxDZQmJwJeY2q6Uli5SwfmQ6wSf5aezcBS3PDHoQJl/XuAHEfMCJFg==
+default-browser@^5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/default-browser/-/default-browser-5.2.1.tgz#7b7ba61204ff3e425b556869ae6d3e9d9f1712cf"
+  integrity sha512-WY/3TUME0x3KPYdRRxEJJvXRHV4PyPoUsxtZa78lwItwRQRHhd2U9xOscaT/YTf8uCXIAjeJOFBVEh/7FtD8Xg==
   dependencies:
     bundle-name "^4.1.0"
     default-browser-id "^5.0.0"
@@ -9614,12 +9614,12 @@ only@~0.0.2:
   resolved "https://registry.yarnpkg.com/only/-/only-0.0.2.tgz#2afde84d03e50b9a8edc444e30610a70295edfb4"
   integrity sha1-Kv3oTQPlC5qO3EROMGEKcCle37Q=
 
-open@^10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/open/-/open-10.0.1.tgz#1883d6762935c75960284b66190f12f787e30622"
-  integrity sha512-+BCGXjtXs4qlmImA8X1AhSU2XyBqD8tJC/PNgWYbcEvNphnw2nyCvNEhAXYk9V+55h1B8M64oXind989YcWANw==
+open@^10.0.3:
+  version "10.0.3"
+  resolved "https://registry.yarnpkg.com/open/-/open-10.0.3.tgz#f60d8db49fa126c50aec751957fb5d7de3308d4f"
+  integrity sha512-dtbI5oW7987hwC9qjJTyABldTaa19SuyJse1QboWv3b0qCcrrLNVDqBx1XgELAjh9QTVQaP/C5b1nhQebd1H2A==
   dependencies:
-    default-browser "^5.2.0"
+    default-browser "^5.2.1"
     define-lazy-prop "^3.0.0"
     is-inside-container "^1.0.0"
     is-wsl "^3.1.0"
@@ -10327,10 +10327,10 @@ prettier@^2.0.5:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.8.tgz#e8c5d7e98a4305ffe3de2e1fc4aca1a71c28b1da"
   integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==
 
-prettier@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.1.1.tgz#6ba9f23165d690b6cbdaa88cb0807278f7019848"
-  integrity sha512-22UbSzg8luF4UuZtzgiUOfcGM8s4tjBv6dJRT7j275NXsy2jb4aJa4NNveul5x4eqlF1wuhuR2RElK71RvmVaw==
+prettier@^3.2.4:
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.2.4.tgz#4723cadeac2ce7c9227de758e5ff9b14e075f283"
+  integrity sha512-FWu1oLHKCrtpO1ypU6J0SbK2d9Ckwysq6bHj/uaCP26DxrPpppCLQRGVuqAxSTvhF00AcvDRyYrLNW7ocBhFFQ==
 
 pretty-bytes@^5.3.0, pretty-bytes@^5.4.1:
   version "5.6.0"
@@ -10611,10 +10611,10 @@ react-is@^18.0.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.1.0.tgz#61aaed3096d30eacf2a2127118b5b41387d32a67"
   integrity sha512-Fl7FuabXsJnV5Q1qIOQwx/sagGF18kogb4gpfcG4gjLBWO0WDiiz1ko/ExayuxE7InyQkBLkxRFG5oxY6Uu3Kg==
 
-react-redux@^9.0.4:
-  version "9.0.4"
-  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-9.0.4.tgz#6892d465f086507a517d4b53eb589876e6bc8344"
-  integrity sha512-9J1xh8sWO0vYq2sCxK2My/QO7MzUMRi3rpiILP/+tDr8krBHixC6JMM17fMK88+Oh3e4Ae6/sHIhNBgkUivwFA==
+react-redux@^9.1.0:
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-9.1.0.tgz#46a46d4cfed4e534ce5452bb39ba18e1d98a8197"
+  integrity sha512-6qoDzIO+gbrza8h3hjMA9aq4nwVFCKFtY2iLxCtVT38Swyy2C/dJCGBXHeHLtx6qlg/8qzc2MrhOeduf5K32wQ==
   dependencies:
     "@types/use-sync-external-store" "^0.0.3"
     use-sync-external-store "^1.0.0"
