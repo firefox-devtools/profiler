@@ -50,7 +50,7 @@ import type {
 
 import type {
   CallTree,
-  CallTreeTimings,
+  CallTreeTimingsNonInverted,
 } from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {|
@@ -77,7 +77,7 @@ export type OwnProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: CallTreeTimings | null,
+  +tracedTiming: CallTreeTimingsNonInverted | null,
   +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
@@ -163,7 +163,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       return;
     }
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
     const y = (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT;
 
@@ -237,7 +237,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     const startDepth = Math.floor(
       maxStackDepthPlusOne - viewportBottom / stackFrameHeight
@@ -367,7 +367,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       shouldDisplayTooltips,
       categories,
       interval,
-      isInverted,
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
       weightType,
@@ -426,7 +425,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 callNodeIndex,
                 callNodeInfo,
                 interval,
-                isInverted,
                 thread,
                 unfilteredThread,
                 sampleIndexOffset,

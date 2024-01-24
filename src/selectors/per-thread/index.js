@@ -263,7 +263,6 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
-    UrlState.getInvertCallstack,
     selectedThreadSelectors.getPreviewFilteredThread,
     selectedThreadSelectors.getThread,
     selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
@@ -289,8 +288,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
         if (sourceViewFile === null || selectedCallNodeIndex === null) {
           return null;
         }
-        const callNodeTable = callNodeInfo.getCallNodeTable();
-        const selectedFunc = callNodeTable.func[selectedCallNodeIndex];
+        const selectedFunc = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const selectedFuncFile = funcTable.fileName[selectedFunc];
         if (
           selectedFuncFile === null ||

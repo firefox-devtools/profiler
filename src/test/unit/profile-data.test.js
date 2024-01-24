@@ -450,7 +450,7 @@ describe('profile-data', function () {
       thread.funcTable,
       defaultCategory
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     it('should create one callNode per original stack', function () {
       // After nudgeReturnAddresses, the stack table now has 8 entries.
@@ -505,9 +505,9 @@ describe('profile-data', function () {
       thread.funcTable,
       defaultCategory
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const stackIndexToCallNodeIndex =
-      callNodeInfo.getStackIndexToCallNodeIndex();
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
     const stack0 = thread.samples.stack[0];
     const stack1 = thread.samples.stack[1];
     if (stack0 === null || stack1 === null) {
@@ -572,6 +572,104 @@ describe('profile-data', function () {
       expect(mergedFuncListB).toEqual([0, 1, 2, 3, 5]);
       expect(callNodeTable.length).toEqual(6);
     });
+  });
+});
+
+describe('getInvertedCallNodeInfo', function () {
+  function setup(plaintextSamples) {
+    const { profile, funcNamesDictPerThread } =
+      getProfileFromTextSamples(plaintextSamples);
+
+    const thread = profile.threads[0];
+    const funcNamesDict = funcNamesDictPerThread[0];
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+
+    const invertedCallNodeInfo = getInvertedCallNodeInfo(
+      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      defaultCategory,
+      thread.funcTable.length
+    );
+
+    function nodesWithSuffix(callPathSuffix) {
+      const invertedNodeForSuffix = ensureExists(
+        invertedCallNodeInfo.getCallNodeIndexFromPath(
+          [...callPathSuffix].reverse()
+        )
+      );
+      const [rangeStart, rangeEnd] =
+        invertedCallNodeInfo.getSuffixOrderIndexRangeForCallNode(
+          invertedNodeForSuffix
+        );
+      const suffixOrderedCallNodes =
+        invertedCallNodeInfo.getSuffixOrderedCallNodes();
+      const nonInvertedCallNodes = new Set();
+      for (let i = rangeStart; i < rangeEnd; i++) {
+        nonInvertedCallNodes.add(suffixOrderedCallNodes[i]);
+      }
+      return nonInvertedCallNodes;
+    }
+
+    return {
+      funcNamesDict,
+      nonInvertedCallNodeInfo,
+      invertedCallNodeInfo,
+      nodesWithSuffix,
+    };
+  }
+
+  it('creates a correct suffix order for this example profile', function () {
+    const {
+      funcNamesDict: { A, B, C },
+      nonInvertedCallNodeInfo,
+      nodesWithSuffix,
+    } = setup(`
+      A  A  A  A  A  A  A
+         B  B  B  A  A  C
+            A  C     B
+    `);
+
+    const cnA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A]);
+    const cnAB = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B]);
+    const cnABA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, A]);
+    const cnABC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, C]);
+    const cnAA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, A]);
+    const cnAAB = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, A, B]);
+    const cnAC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, C]);
+
+    expect(nodesWithSuffix([A])).toEqual(new Set([cnA, cnABA, cnAA]));
+    expect(nodesWithSuffix([B])).toEqual(new Set([cnAB, cnAAB]));
+    expect(nodesWithSuffix([A, B])).toEqual(new Set([cnAB, cnAAB]));
+    expect(nodesWithSuffix([A, A, B])).toEqual(new Set([cnAAB]));
+    expect(nodesWithSuffix([C])).toEqual(new Set([cnABC, cnAC]));
+  });
+
+  it('creates a correct suffix order for a different example profile', function () {
+    const {
+      funcNamesDict: { A, B, C },
+      nonInvertedCallNodeInfo,
+      nodesWithSuffix,
+    } = setup(`
+      A  A  A  C
+         B  B
+            C
+    `);
+
+    const cnABC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, C]);
+    const cnC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([C]);
+
+    expect(nodesWithSuffix([B, C])).toEqual(new Set([cnABC]));
+    expect(nodesWithSuffix([C])).toEqual(new Set([cnABC, cnC]));
   });
 });
 
@@ -790,14 +888,14 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
       thread.frameTable,
       thread.funcTable,
       defaultCategory
-    ).getCallNodeTable();
+    ).getNonInvertedCallNodeTable();
     const jsOnlyThread = filterThreadByImplementation(thread, 'js');
     const jsOnlyCallNodeTable = getCallNodeInfo(
       jsOnlyThread.stackTable,
       jsOnlyThread.frameTable,
       jsOnlyThread.funcTable,
       defaultCategory
-    ).getCallNodeTable();
+    ).getNonInvertedCallNodeTable();
     return { callNodeTable, jsOnlyCallNodeTable, funcNames };
   }
 
@@ -859,101 +957,253 @@ describe('convertStackToCallNodeAndCategoryPath', function () {
 });
 
 describe('getSamplesSelectedStates', function () {
-  const {
-    profile,
-    funcNamesDictPerThread: [{ A, B, D, E, F }],
-  } = getProfileFromTextSamples(`
-     A  A  A  A  A
-     B  D  B  D  D
-     C  E  F  G
-  `);
-  const thread = profile.threads[0];
-  const callNodeInfo = getCallNodeInfo(
-    thread.stackTable,
-    thread.frameTable,
-    thread.funcTable,
-    0
-  );
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
-  const sampleCallNodes = getSampleIndexToCallNodeIndex(
-    thread.samples.stack,
-    stackIndexToCallNodeIndex
-  );
+  function setup(textSamples) {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(textSamples);
+    const thread = profile.threads[0];
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      0
+    );
+    const stackIndexToCallNodeIndex =
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+    const sampleCallNodes = getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      stackIndexToCallNodeIndex
+    );
 
-  const A_B = callNodeInfo.getCallNodeIndexFromPath([A, B]);
-  const A_B_F = callNodeInfo.getCallNodeIndexFromPath([A, B, F]);
-  const A_D = callNodeInfo.getCallNodeIndexFromPath([A, D]);
-  const A_D_E = callNodeInfo.getCallNodeIndexFromPath([A, D, E]);
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+    const callNodeInfoInverted = getInvertedCallNodeInfo(
+      callNodeInfo.getNonInvertedCallNodeTable(),
+      stackIndexToCallNodeIndex,
+      defaultCategory,
+      thread.funcTable.length
+    );
 
-  it('determines the selection status of all the samples', function () {
-    expect(
-      getSamplesSelectedStates(
-        callNodeInfo,
-        sampleCallNodes,
-        sampleCallNodes,
-        A_B
-      )
-    ).toEqual([
-      'SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-    ]);
-    expect(
-      getSamplesSelectedStates(
-        callNodeInfo,
-        sampleCallNodes,
-        sampleCallNodes,
-        A_D
-      )
-    ).toEqual([
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'SELECTED',
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'SELECTED',
-      'SELECTED',
-    ]);
-    expect(
-      getSamplesSelectedStates(
-        callNodeInfo,
-        sampleCallNodes,
-        sampleCallNodes,
-        A_B_F
-      )
-    ).toEqual([
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-    ]);
-    expect(
-      getSamplesSelectedStates(
-        callNodeInfo,
-        sampleCallNodes,
-        sampleCallNodes,
-        A_D_E
-      )
-    ).toEqual([
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'SELECTED',
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-      'UNSELECTED_ORDERED_AFTER_SELECTED',
-      'UNSELECTED_ORDERED_BEFORE_SELECTED',
-    ]);
+    return {
+      callNodeInfo,
+      callNodeInfoInverted,
+      sampleCallNodes,
+      funcNamesDict,
+    };
+  }
+
+  describe('non-inverted', function () {
+    const {
+      callNodeInfo,
+      sampleCallNodes,
+      funcNamesDict: { A, B, D, E, F },
+    } = setup(`
+      A  A  A  A  A
+      B  D  B  D  D
+      C  E  F  G
+    `);
+
+    const A_B = callNodeInfo.getCallNodeIndexFromPath([A, B]);
+    const A_B_F = callNodeInfo.getCallNodeIndexFromPath([A, B, F]);
+    const A_D = callNodeInfo.getCallNodeIndexFromPath([A, D]);
+    const A_D_E = callNodeInfo.getCallNodeIndexFromPath([A, D, E]);
+
+    it('determines the selection status of all the samples', function () {
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfo,
+          sampleCallNodes,
+          sampleCallNodes,
+          A_B
+        )
+      ).toEqual([
+        'SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+      ]);
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfo,
+          sampleCallNodes,
+          sampleCallNodes,
+          A_D
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'SELECTED',
+      ]);
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfo,
+          sampleCallNodes,
+          sampleCallNodes,
+          A_B_F
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+      ]);
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfo,
+          sampleCallNodes,
+          sampleCallNodes,
+          A_D_E
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      ]);
+    });
+
+    it('can sort the samples based on their selection status', function () {
+      const comparator = getTreeOrderComparator(sampleCallNodes, callNodeInfo);
+      const samples = [4, 1, 3, 0, 2]; // some random order
+      samples.sort(comparator);
+      expect(samples).toEqual([0, 2, 4, 1, 3]);
+      expect(comparator(0, 0)).toBe(0);
+      expect(comparator(1, 1)).toBe(0);
+      expect(comparator(4, 4)).toBe(0);
+      expect(comparator(0, 2)).toBeLessThan(0);
+      expect(comparator(2, 0)).toBeGreaterThan(0);
+    });
   });
 
-  it('can sort the samples based on their selection status', function () {
-    const comparator = getTreeOrderComparator(sampleCallNodes);
-    const samples = [4, 1, 3, 0, 2]; // some random order
-    samples.sort(comparator);
-    expect(samples).toEqual([0, 2, 4, 1, 3]);
-    expect(comparator(0, 0)).toBe(0);
-    expect(comparator(1, 1)).toBe(0);
-    expect(comparator(4, 4)).toBe(0);
-    expect(comparator(0, 2)).toBeLessThan(0);
-    expect(comparator(2, 0)).toBeGreaterThan(0);
+  describe('inverted', function () {
+    /**
+     * - [cn0] A      =  A            =            A [so0]    [so0] [cn0] A
+     *   - [cn1] B    =  A -> B       =       A -> B [so3]    [so1] [cn4] A <- A
+     *     - [cn2] A  =  A -> B -> A  =  A -> B -> A [so2] ↘↗ [so2] [cn2] A <- B <- A
+     *     - [cn3] C  =  A -> B -> C  =  A -> B -> C [so6] ↗↘ [so3] [cn1] B <- A
+     *   - [cn4] A    =  A -> A       =       A -> A [so1]    [so4] [cn5] B <- A <- A
+     *     - [cn5] B  =  A -> A -> B  =  A -> A -> B [so4]    [so5] [cn6] C <- A
+     *   - [cn6] C    =  A -> C       =       A -> C [so5]    [so6] [cn3] C <- B <- A
+     *
+     *                                                 Represents call paths ending in
+     * - [in0] A  (so:0..3)        =  A             =            ... A (cn0, cn4, cn2)
+     *   - [in1] A  (so:1..2)      =  A <- A        =       ... A -> A (cn4)
+     *   - [in2] B  (so:2..3)      =  A <- B        =       ... B -> A (cn2)
+     *     - [in3] A  (so:2..3)    =  A <- B <- A   =  ... A -> B -> A (cn2)
+     *  - [in4] B  (so:3..5)       =  B             =            ... B (cn1, cn5)
+     *    - [in5] A  (so:3..5)     =  B <- A        =       ... A -> B (cn1, cn5)
+     *      - [in6] A  (so:4..5)   =  B <- A <- A   =  ... A -> A -> B (cn5)
+     *  - [in7] C  (so:5..7)       =  C             =            ... C (cn6, cn3)
+     *    - [in8] A  (so:5..6)     =  C <- A        =       ... A -> C (cn6)
+     *    - [in9] B  (so:6..7)     =  C <- B        =       ... B -> C (cn3)
+     *      - [in10] A  (so:6..7)  =  C <- B <- A   =  ... A -> B -> C (cn3)
+     *  */
+    const {
+      callNodeInfoInverted,
+      sampleCallNodes,
+      funcNamesDict: { A, B, C },
+    } = setup(`
+      A  A  A  A  A  A  A
+         A  B  B  C  B  A
+               A     C  B
+    `);
+
+    const inBA = callNodeInfoInverted.getCallNodeIndexFromPath([B, A]);
+    const inCBA = callNodeInfoInverted.getCallNodeIndexFromPath([C, B, A]);
+    const inB = callNodeInfoInverted.getCallNodeIndexFromPath([B]);
+
+    it('determines the selection status of all the samples', function () {
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfoInverted,
+          sampleCallNodes,
+          sampleCallNodes,
+          inBA
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'SELECTED',
+      ]);
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfoInverted,
+          sampleCallNodes,
+          sampleCallNodes,
+          inCBA
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      ]);
+      expect(
+        getSamplesSelectedStates(
+          callNodeInfoInverted,
+          sampleCallNodes,
+          sampleCallNodes,
+          inB
+        )
+      ).toEqual([
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'SELECTED',
+      ]);
+    });
+
+    it('can sort the samples based on their selection status', function () {
+      const comparator = getTreeOrderComparator(
+        sampleCallNodes,
+        callNodeInfoInverted
+      );
+      const samples = [5, 6, 0, 1, 2, 3, 4]; // some random order of non-inverted call nodes
+      samples.sort(comparator);
+
+      /**
+       * original order:
+       *   0  1  2  3  4  5  6
+       *   A  A  A  A  A  A  A
+       *      A  B  B  C  B  A
+       *            A     C  B
+       *
+       * sorted order:
+       *         A     A     A
+       *      A  B  A  A  A  B
+       *   A  A  A  B  B  C  C
+       *   0  1  3  2  6  4  5
+       */
+
+      // A <- A should come before A <- B <- A.
+      expect(comparator(1, 2)).toBeLessThan(0);
+
+      expect(samples).toEqual([0, 1, 3, 2, 6, 4, 5]);
+      expect(comparator(0, 0)).toBe(0);
+      expect(comparator(1, 1)).toBe(0);
+      expect(comparator(4, 4)).toBe(0);
+      expect(comparator(0, 2)).toBeLessThan(0);
+      expect(comparator(2, 0)).toBeGreaterThan(0);
+    });
   });
 });
 
@@ -1195,7 +1445,18 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const callNodeInfo = getInvertedCallNodeInfo(thread, defaultCategory);
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const callNodeInfo = getInvertedCallNodeInfo(
+      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      defaultCategory,
+      thread.funcTable.length
+    );
     const c = callNodeInfo.getCallNodeIndexFromPath([funC]);
     expect(c).not.toBeNull();
 

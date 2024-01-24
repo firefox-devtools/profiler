@@ -121,9 +121,20 @@ describe('getLineTimings for getStackLineInfoForCallNode', function () {
     isInverted: boolean
   ) {
     const { stackTable, frameTable, funcTable, samples } = thread;
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      stackTable,
+      frameTable,
+      funcTable,
+      defaultCat
+    );
     const callNodeInfo = isInverted
-      ? getInvertedCallNodeInfo(thread, defaultCat)
-      : getCallNodeInfo(stackTable, frameTable, funcTable, defaultCat);
+      ? getInvertedCallNodeInfo(
+          nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+          nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+          defaultCat,
+          funcTable.length
+        )
+      : nonInvertedCallNodeInfo;
     const callNodeIndex = ensureExists(
       callNodeInfo.getCallNodeIndexFromPath(callNodePath),
       'invalid call node path'

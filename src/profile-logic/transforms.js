@@ -598,8 +598,6 @@ function _removeOtherCategoryFunctionsInNodePathWithFunction(
   callNodePath: CallNodePath,
   callNodeInfo: CallNodeInfo
 ): CallNodePath {
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-
   const newCallNodePath = [];
 
   let prefix = -1;
@@ -614,7 +612,7 @@ function _removeOtherCategoryFunctionsInNodePathWithFunction(
       );
     }
 
-    if (callNodeTable.category[callNodeIndex] === category) {
+    if (callNodeInfo.categoryForNode(callNodeIndex) === category) {
       newCallNodePath.push(funcIndex);
     }
 

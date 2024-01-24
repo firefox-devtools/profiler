@@ -51,6 +51,7 @@ import {
   processCounter,
   type BreakdownByCategory,
 } from '../../profile-logic/profile-data';
+import { getSelfAndTotalForCallNode } from '../../profile-logic/call-tree';
 
 import type {
   TrackReference,
@@ -3287,7 +3288,7 @@ describe('traced timing', function () {
 
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
 
-    const { total, self } = ensureExists(
+    const tracedTiming = ensureExists(
       selectedThreadSelectors.getTracedTiming(getState()),
       'Expected to get a traced timing.'
     );
@@ -3298,7 +3299,11 @@ describe('traced timing', function () {
         const callNodeIndex = ensureExists(
           callNodeInfo.getCallNodeIndexFromPath(callNodePath)
         );
-        return { self: self[callNodeIndex], total: total[callNodeIndex] };
+        return getSelfAndTotalForCallNode(
+          callNodeIndex,
+          callNodeInfo,
+          tracedTiming
+        );
       },
       profile,
     };

@@ -109,10 +109,10 @@ export type CallNodeTable = {
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
-  // null: no inlining
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
-  sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // -2: no inlining
+  sourceFramesInlinedIntoSymbol: Int32Array,
   // The depth of the call node. Roots have depth 0.
   depth: number[],
   // The maximum value in the depth column, or -1 if this table is empty.
@@ -128,27 +128,20 @@ export interface CallNodeInfo {
   // If true, call node indexes describe nodes in the inverted call tree.
   isInverted(): boolean;
 
-  // Returns the call node table. If isInverted() is true, this is an inverted
-  // call node table, otherwise this is the non-inverted call node table.
-  getCallNodeTable(): CallNodeTable;
+  // Returns this object as CallNodeInfoInverted if isInverted(), otherwise null.
+  asInverted(): CallNodeInfoInverted | null;
 
-  // Returns a mapping from the stack table to the call node table.
+  // Returns the non-inverted call node table.
+  // This is always the non-inverted call node table, regardless of isInverted().
+  getNonInvertedCallNodeTable(): CallNodeTable;
+
+  // Returns a mapping from the stack table to the non-inverted call node table.
   // The Int32Array should be used as if it were a
   // Map<IndexIntoStackTable, IndexIntoCallNodeTable | -1>.
   //
-  // If this CallNodeInfo is for the non-inverted tree, this maps the stack index
-  // to its corresponding call node index, and all entries are >= 0.
-  // If this CallNodeInfo is for the inverted tree, this maps the non-inverted
-  // stack index to the inverted call node index. For example, the stack
-  // A -> B -> C -> D is mapped to the inverted call node describing the
-  // call path D <- C <- B <- A, i.e. the node with function A under the D root
-  // of the inverted tree. Stacks which are only used as prefixes are not mapped
-  // to an inverted call node; for those, the entry will be -1. In the example
-  // above, if the stack node A -> B -> C only exists so that it can be the prefix
-  // of the A -> B -> C -> D stack and no sample / marker / allocation has
-  // A -> B -> C as its stack, then there is no need to have a call node
-  // C <- B <- A in the inverted call node table.
-  getStackIndexToCallNodeIndex(): Int32Array;
+  // All entries are >= 0.
+  // This always maps to the non-inverted call node table, regardless of isInverted().
+  getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
 
   // Converts a call node index into a call node path.
   getCallNodePathFromIndex(
@@ -168,6 +161,137 @@ export interface CallNodeInfo {
     parent: IndexIntoCallNodeTable | -1,
     func: IndexIntoFuncTable
   ): IndexIntoCallNodeTable | null;
+
+  prefixForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable | -1;
+  funcForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoFuncTable;
+  categoryForNode(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCategoryList;
+  subcategoryForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  innerWindowIDForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCategoryList;
+  depthForNode(callNodeIndex: IndexIntoCallNodeTable): number;
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoNativeSymbolTable | -1 | -2;
+}
+
+// An index into SuffixOrderedCallNodes.
+export type SuffixOrderIndex = number;
+
+/**
+ * A sub-interface of CallNodeInfo with additional functionality for the inverted
+ * call tree.
+ *
+ * Every node in the non-inverted call tree represents a call path. It also
+ * represents all the call paths which "start with" this path, i.e. all call paths
+ * which have this node's path as their call path prefix. Any samples with that
+ * call path prefix contribute to the node's total time.
+ *
+ * Every node in the *inverted* call tree represents a call path *suffix*.
+ * In other words, a node in the inverted call tree represents all the call paths
+ * which "end with" its (reversed) path, i.e. which have this path as their call
+ * path suffix.
+ *
+ * Suffix order: You can order call paths lexicographically "from the end".
+ * When ordered by suffix, call path D -> A comes before C -> B because A comes
+ * before B. In this order, call paths become grouped in such a way that call
+ * paths which belong to the same *inverted* tree node (i.e. which share a suffix)
+ * end up ordered next to each other. This makes it so that a node in the inverted
+ * tree can refer to all its represented call paths with a single contiguous range.
+ *
+ * In the example below, inverted tree node `in5` represents all call paths which end
+ * in A -> B. Both `cn1` and `cn5` do so; `cn1` is A -> B and `cn5` is A -> A -> B.
+ * In the suffix order, `cn1` and `cn5` end up next to each other, at positions
+ * `so3` and `so4`. This means that the two paths can be referred to via the suffix
+ * order index range 3..5.
+ *
+ * # Example
+ *
+ * ## Non-inverted call tree:
+ *
+ * ```
+ *   Tree            Left aligned    Right aligned        Reordered by suffix
+ * - [cn0] A      =  A            =            A [so0]    [so0] [cn0] A
+ *   - [cn1] B    =  A -> B       =       A -> B [so3]    [so1] [cn4] A <- A
+ *     - [cn2] A  =  A -> B -> A  =  A -> B -> A [so2] ↘↗ [so2] [cn2] A <- B <- A
+ *     - [cn3] C  =  A -> B -> C  =  A -> B -> C [so6] ↗↘ [so3] [cn1] B <- A
+ *   - [cn4] A    =  A -> A       =       A -> A [so1]    [so4] [cn5] B <- A <- A
+ *     - [cn5] B  =  A -> A -> B  =  A -> A -> B [so4]    [so5] [cn6] C <- A
+ *   - [cn6] C    =  A -> C       =       A -> C [so5]    [so6] [cn3] C <- B <- A
+ * ```
+ *
+ * ## Inverted call tree:
+ *
+ * ```
+ *                                                 Represents call paths ending in
+ * - [in0] A  (so:0..3)       =  A             =            ... A (cn0, cn4, cn2)
+ *   - [in3] A  (so:1..2)     =  A <- A        =       ... A -> A (cn4)
+ *   - [in4] B  (so:2..3)     =  A <- B        =       ... B -> A (cn2)
+ *     - [in6] A  (so:2..3)   =  A <- B <- A   =  ... A -> B -> A (cn2)
+ * - [in1] B  (so:3..5)       =  B             =            ... B (cn1, cn5)
+ *   - [in5] A  (so:3..5)     =  B <- A        =       ... A -> B (cn1, cn5)
+ *     - [in7] A  (so:4..5)   =  B <- A <- A   =  ... A -> A -> B (cn5)
+ * - [in2] C  (so:5..7)       =  C             =            ... C (cn6, cn3)
+ *   - [in8] A  (so:5..6)     =  C <- A        =       ... A -> C (cn6)
+ *   - [in9] B  (so:6..7)     =  C <- B        =       ... B -> C (cn3)
+ *     - [in10] A  (so:6..7)  =  C <- B <- A   =  ... A -> B -> C (cn3)
+ * ```
+ *
+ * Suffix ordered call nodes: [0, 4, 2, 1, 5, 6, 3] (soX -> cnY)
+ * Suffix order indexes:      [0, 3, 2, 6, 1, 4, 5] (cnX -> soY)
+ *
+ * cnX:     Non-inverted call node index X
+ * soX:     Suffix order index X
+ * inX:     Inverted call node index X
+ * so:X..Y: Suffix order index range soX..soY (soY excluded)
+ */
+export interface CallNodeInfoInverted extends CallNodeInfo {
+  // Get the number of functions. There is one root per function.
+  // So this is also the number of roots at the same time.
+  // The inverted call node index for a root is the same as the function index.
+  getFuncCount(): number;
+
+  // Returns whether the given inverted tree node is a root.
+  // This is implemented as callNodeIndex < getFuncCount().
+  // If this returns true, then callNodeIndex is guaranteed to be a valid func index.
+  isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean;
+
+  // Get the children of a node in the inverted tree.
+  getChildren(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[];
+
+  // Get a mapping SuffixOrderIndex -> IndexIntoNonInvertedCallNodeTable.
+  // This array contains all non-inverted call node indexes, ordered by
+  // call path suffix. See "suffix ordering" in the documentation above.
+  getSuffixOrderedCallNodes(): Uint32Array;
+
+  // Returns the inverse of getSuffixOrderedCallNodes(), i.e. a mapping
+  // IndexIntoNonInvertedCallNodeTable -> SuffixOrderIndex.
+  getSuffixOrderIndexes(): Uint32Array;
+
+  // Get the [start, exclusiveEnd] range of suffix ordering indexes for this
+  // inverted tree node. This lets you list the non-inverted call nodes which
+  // "contribute to" the given inverted call node. Or put differently, it lets
+  // you iterate over the non-inverted call nodes whose call paths "end with"
+  // the call path suffix represented by the inverted node.
+  getSuffixOrderIndexRangeForCallNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): [SuffixOrderIndex, SuffixOrderIndex];
+}
+
+export type NodeIndex = number;
+
+export interface Tree<DisplayData> {
+  getDepth(NodeIndex): number;
+  getRoots(): NodeIndex[];
+  getDisplayData(NodeIndex): DisplayData;
+  getParent(NodeIndex): NodeIndex | -1;
+  getChildren(NodeIndex): NodeIndex[];
+  hasChildren(NodeIndex): boolean;
+  getAllDescendants(NodeIndex): Set<NodeIndex>;
 }
 
 export type LineNumber = number;
@@ -654,11 +778,11 @@ export type ProfileFilterPageData = {|
   favicon: string | null,
 |};
 
-export type CallNodeLeafAndSummary = {|
+export type CallNodeSelfAndSummary = {|
   // This property stores the amount of unit (time, bytes, count, etc.) spent in the
   // stacks' leaf nodes.
-  callNodeLeaf: Float32Array,
-  // The sum of absolute values in callNodeLeaf.
+  callNodeSelf: Float32Array,
+  // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number,
 |};
