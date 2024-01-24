@@ -38,10 +38,7 @@ import {
   changeMouseTimePosition,
 } from '../../actions/profile-view';
 
-import {
-  getCallNodePathFromIndex,
-  getBottomBoxInfoForCallNode,
-} from '../../profile-logic/profile-data';
+import { getBottomBoxInfoForCallNode } from '../../profile-logic/profile-data';
 
 import type {
   Thread,
@@ -122,7 +119,7 @@ class StackChartImpl extends React.PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
   };
 
@@ -131,7 +128,7 @@ class StackChartImpl extends React.PureComponent<Props> {
 
     changeRightClickedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
   };
 
@@ -182,12 +179,9 @@ class StackChartImpl extends React.PureComponent<Props> {
   _onCopy = (event: ClipboardEvent) => {
     if (document.activeElement === this._viewport) {
       event.preventDefault();
-      const {
-        callNodeInfo: { callNodeTable },
-        selectedCallNodeIndex,
-        thread,
-      } = this.props;
+      const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
       if (selectedCallNodeIndex !== null) {
+        const callNodeTable = callNodeInfo.getCallNodeTable();
         const funcIndex = callNodeTable.func[selectedCallNodeIndex];
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]

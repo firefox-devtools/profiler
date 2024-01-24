@@ -12,7 +12,6 @@ import {
   updateThreadStacks,
   updateThreadStacksByGeneratingNewStackColumns,
   getMapStackUpdater,
-  getCallNodeIndexFromParentAndFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
@@ -32,6 +31,7 @@ import type {
   CallNodePath,
   CallNodeAndCategoryPath,
   CallNodeTable,
+  CallNodeInfo,
   StackType,
   ImplementationFilter,
   Transform,
@@ -493,7 +493,7 @@ export function applyTransformToCallNodePath(
   callNodePath: CallNodePath,
   transform: Transform,
   transformedThread: Thread,
-  callNodeTable: CallNodeTable
+  callNodeInfo: CallNodeInfo
 ): CallNodePath {
   switch (transform.type) {
     case 'focus-subtree':
@@ -507,7 +507,7 @@ export function applyTransformToCallNodePath(
       return _removeOtherCategoryFunctionsInNodePathWithFunction(
         transform.category,
         callNodePath,
-        callNodeTable
+        callNodeInfo
       );
     case 'merge-call-node':
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
@@ -596,16 +596,17 @@ function _dropFunctionInCallNodePath(
 function _removeOtherCategoryFunctionsInNodePathWithFunction(
   category: IndexIntoCategoryList,
   callNodePath: CallNodePath,
-  callNodeTable: CallNodeTable
+  callNodeInfo: CallNodeInfo
 ): CallNodePath {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+
   const newCallNodePath = [];
 
   let prefix = -1;
   for (const funcIndex of callNodePath) {
-    const callNodeIndex = getCallNodeIndexFromParentAndFunc(
+    const callNodeIndex = callNodeInfo.getCallNodeIndexFromParentAndFunc(
       prefix,
-      funcIndex,
-      callNodeTable
+      funcIndex
     );
     if (callNodeIndex === null) {
       throw new Error(
@@ -794,7 +795,7 @@ export function mergeCallNode(
 }
 
 /**
- * Go through the StackTable and remove any stacks that are part of the given function.
+ * Go through the StackTable and "skip" any stacks with the given function.
  * This operation effectively merges the timing of the stacks into their callers.
  */
 export function mergeFunction(
@@ -802,45 +803,56 @@ export function mergeFunction(
   funcIndexToMerge: IndexIntoFuncTable
 ): Thread {
   const { stackTable, frameTable } = thread;
-  const oldStackToNewStack: Map<
-    IndexIntoStackTable | null,
-    IndexIntoStackTable | null,
-  > = new Map();
-  // A root stack's prefix will be null. Maintain that relationship from old to new
-  // stacks by mapping from null to null.
-  oldStackToNewStack.set(null, null);
-  const newStackTable = getEmptyStackTable();
+
+  // A map oldStack -> newStack+1, implemented as a Uint32Array for performance.
+  // If newStack+1 is zero it means "null", i.e. this stack was filtered out.
+  // Typed arrays are initialized to zero, which we interpret as null.
+  //
+  // For each old stack, the new stack is computed as follows:
+  //  - If the old stack's function is not funcIndexToMerge, then the new stack
+  //    is the same as the old stack.
+  //  - If the old stack's function is funcIndexToMerge, then the new stack is
+  //    the closest ancestor whose func is not funcIndexToMerge, or null if no
+  //    such ancestor exists.
+  //
+  // We only compute a new prefix column; the other columns are copied from the
+  // old stack table. The skipped stacks are "orphaned"; they'll still be present
+  // in the new stack table but not referenced by samples or other stacks.
+  const oldStackToNewStackPlusOne = new Uint32Array(stackTable.length);
+
+  const stackTableFrameCol = stackTable.frame;
+  const frameTableFuncCol = frameTable.func;
+  const oldPrefixCol = stackTable.prefix;
+  const newPrefixCol = new Array(stackTable.length);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const prefix = stackTable.prefix[stackIndex];
-    const frameIndex = stackTable.frame[stackIndex];
-    const category = stackTable.category[stackIndex];
-    const subcategory = stackTable.subcategory[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
+    const oldPrefix = oldPrefixCol[stackIndex];
+    const newPrefixPlusOne =
+      oldPrefix === null ? 0 : oldStackToNewStackPlusOne[oldPrefix];
 
+    const frameIndex = stackTableFrameCol[stackIndex];
+    const funcIndex = frameTableFuncCol[frameIndex];
     if (funcIndex === funcIndexToMerge) {
-      const newStackPrefix = oldStackToNewStack.get(prefix);
-      oldStackToNewStack.set(
-        stackIndex,
-        newStackPrefix === undefined ? null : newStackPrefix
-      );
+      oldStackToNewStackPlusOne[stackIndex] = newPrefixPlusOne;
     } else {
-      const newStackIndex = newStackTable.length++;
-      const newStackPrefix = oldStackToNewStack.get(prefix);
-      newStackTable.prefix[newStackIndex] =
-        newStackPrefix === undefined ? null : newStackPrefix;
-      newStackTable.frame[newStackIndex] = frameIndex;
-      newStackTable.category[newStackIndex] = category;
-      newStackTable.subcategory[newStackIndex] = subcategory;
-      oldStackToNewStack.set(stackIndex, newStackIndex);
+      oldStackToNewStackPlusOne[stackIndex] = stackIndex + 1;
     }
+    const newPrefix = newPrefixPlusOne === 0 ? null : newPrefixPlusOne - 1;
+    newPrefixCol[stackIndex] = newPrefix;
   }
 
-  return updateThreadStacks(
-    thread,
-    newStackTable,
-    getMapStackUpdater(oldStackToNewStack)
-  );
+  const newStackTable = {
+    ...stackTable,
+    prefix: newPrefixCol,
+  };
+
+  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const newStackPlusOne = oldStackToNewStackPlusOne[oldStack];
+    return newStackPlusOne === 0 ? null : newStackPlusOne - 1;
+  });
 }
 
 /**
