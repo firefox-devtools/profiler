@@ -450,7 +450,7 @@ describe('profile-data', function () {
       thread.funcTable,
       defaultCategory
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     it('should create one callNode per original stack', function () {
       // After nudgeReturnAddresses, the stack table now has 8 entries.
@@ -505,9 +505,9 @@ describe('profile-data', function () {
       thread.funcTable,
       defaultCategory
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const stackIndexToCallNodeIndex =
-      callNodeInfo.getStackIndexToCallNodeIndex();
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
     const stack0 = thread.samples.stack[0];
     const stack1 = thread.samples.stack[1];
     if (stack0 === null || stack1 === null) {
@@ -874,7 +874,8 @@ describe('getSamplesSelectedStates', function () {
     thread.funcTable,
     0
   );
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const sampleCallNodes = getSampleIndexToCallNodeIndex(
     thread.samples.stack,
     stackIndexToCallNodeIndex
@@ -1195,7 +1196,18 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const callNodeInfo = getInvertedCallNodeInfo(thread, defaultCategory);
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const callNodeInfo = getInvertedCallNodeInfo(
+      thread,
+      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      defaultCategory
+    );
     const c = callNodeInfo.getCallNodeIndexFromPath([funC]);
     expect(c).not.toBeNull();
 

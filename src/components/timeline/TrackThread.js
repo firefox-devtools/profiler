@@ -22,7 +22,6 @@ import {
   getCategories,
   getSelectedThreadIndexes,
   getTimelineType,
-  getInvertCallstack,
   getThreadSelectorsFromThreadsKey,
   getMaxThreadCPUDeltaPerMs,
   getIsExperimentalCPUGraphsEnabled,
@@ -38,8 +37,7 @@ import {
   updatePreviewSelection,
   changeSelectedCallNode,
   focusCallTree,
-  selectLeafCallNode,
-  selectRootCallNode,
+  selectSelfCallNode,
 } from 'firefox-profiler/actions/profile-view';
 import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
@@ -85,8 +83,7 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
-  +sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
-  +invertCallstack: boolean,
+  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -103,8 +100,7 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
-  +selectLeafCallNode: typeof selectLeafCallNode,
-  +selectRootCallNode: typeof selectRootCallNode,
+  +selectSelfCallNode: typeof selectSelfCallNode,
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
@@ -130,23 +126,15 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
 
     const {
       threadsKey,
-      selectLeafCallNode,
-      selectRootCallNode,
+      selectSelfCallNode,
       focusCallTree,
-      invertCallstack,
       selectedThreadIndexes,
       callTreeVisible,
     } = this.props;
 
     // Sample clicking only works for one thread. See issue #2709
     if (selectedThreadIndexes.size === 1) {
-      if (invertCallstack) {
-        // When we're displaying the inverted call stack, the "leaf" call node we're
-        // interested in is actually displayed as the "root" of the tree.
-        selectRootCallNode(threadsKey, sampleIndex);
-      } else {
-        selectLeafCallNode(threadsKey, sampleIndex);
-      }
+      selectSelfCallNode(threadsKey, sampleIndex);
 
       if (sampleIndex !== null && callTreeVisible) {
         // If the user clicked outside of the activity graph (sampleIndex === null),
@@ -198,7 +186,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       timelineType,
       hasFileIoMarkers,
       showMemoryMarkers,
-      sampleCallNodes,
+      sampleNonInvertedCallNodes,
       samplesSelectedStates,
       treeOrderSampleComparator,
       trackType,
@@ -317,7 +305,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
-            sampleCallNodes={sampleCallNodes}
+            sampleNonInvertedCallNodes={sampleNonInvertedCallNodes}
             samplesSelectedStates={samplesSelectedStates}
             categories={categories}
             onSampleClick={this._onSampleClick}
@@ -352,13 +340,14 @@ export const TimelineTrackThread = explicitConnect<
       fullThread.samples.threadCPUDelta !== undefined;
 
     return {
-      invertCallstack: getInvertCallstack(state),
       fullThread,
       filteredThread: selectors.getFilteredThread(state),
       rangeFilteredThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
-      sampleCallNodes:
-        selectors.getSampleIndexToCallNodeIndexForFilteredThread(state),
+      sampleNonInvertedCallNodes:
+        selectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
+          state
+        ),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
@@ -385,8 +374,7 @@ export const TimelineTrackThread = explicitConnect<
     updatePreviewSelection,
     changeSelectedCallNode,
     focusCallTree,
-    selectLeafCallNode,
-    selectRootCallNode,
+    selectSelfCallNode,
     reportTrackThreadHeight,
   },
   component: withSize<Props>(TimelineTrackThreadImpl),

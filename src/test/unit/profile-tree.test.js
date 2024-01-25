@@ -127,7 +127,7 @@ describe('unfiltered call tree', function () {
       const cnKN = callNodeInfo.getCallNodeIndexFromPath([K, N]);
 
       const rows = computeFlameGraphRows(
-        callNodeInfo.getCallNodeTable(),
+        callNodeInfo.getNonInvertedCallNodeTable(),
         thread.funcTable,
         thread.stringTable
       );
@@ -470,6 +470,8 @@ describe('inverted call tree', function () {
     // Now compute the inverted tree and check it.
     const invertedCallNodeInfo = getInvertedCallNodeInfo(
       thread,
+      callNodeInfo.getNonInvertedCallNodeTable(),
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
       defaultCategory
     );
     const invertedCallTreeTimings = computeCallTreeTimings(
