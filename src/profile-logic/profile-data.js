@@ -105,7 +105,13 @@ export function getCallNodeInfo(
     funcTable,
     defaultCategory
   );
-  return new CallNodeInfoImpl(callNodeTable, stackIndexToCallNodeIndex, false);
+  return new CallNodeInfoImpl(
+    callNodeTable,
+    callNodeTable,
+    stackIndexToCallNodeIndex,
+    stackIndexToCallNodeIndex,
+    false
+  );
 }
 
 type CallNodeTableAndStackMap = {
@@ -423,6 +429,8 @@ function _createCallNodeTableFromUnorderedComponents(
  */
 export function getInvertedCallNodeInfo(
   thread: Thread,
+  nonInvertedCallNodeTable: CallNodeTable,
+  stackIndexToNonInvertedCallNodeIndex: Int32Array,
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   // We compute an inverted stack table, but we don't let it escape this function.
@@ -468,7 +476,9 @@ export function getInvertedCallNodeInfo(
   }
   return new CallNodeInfoImpl(
     callNodeTable,
+    nonInvertedCallNodeTable,
     nonInvertedStackIndexToCallNodeIndex,
+    stackIndexToNonInvertedCallNodeIndex,
     true
   );
 }
@@ -776,7 +786,6 @@ export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  isInvertedTree: boolean,
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
@@ -789,7 +798,6 @@ export function getTimingsForPath(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
     interval,
-    isInvertedTree,
     thread,
     unfilteredThread,
     sampleIndexOffset,
@@ -812,7 +820,6 @@ export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  isInvertedTree: boolean,
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
@@ -1009,6 +1016,7 @@ export function getTimingsForCallNodeIndex(
   const needleDescendantsEndIndex =
     callNodeTable.subtreeRangeEnd[needleNodeIndex];
 
+  const isInvertedTree = callNodeInfo.isInverted();
   const needleNodeIsRootOfInvertedTree =
     isInvertedTree && callNodeTable.prefix[needleNodeIndex] === -1;
 
@@ -2011,8 +2019,10 @@ export function computeCallNodeMaxDepthPlusOne(
   // computed for the filtered thread, but a samples-like table can use the preview
   // filtered thread, which involves a subset of the total call nodes.
   let maxDepth = -1;
-  const callNodeTable = callNodeInfo.getCallNodeTable();
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  // TODO: Use sampleCallNodes instead
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
     if (stackIndex === null) {
@@ -3548,7 +3558,8 @@ export function getNativeSymbolsForCallNodeNonInverted(
   stackTable: StackTable,
   frameTable: FrameTable
 ): IndexIntoNativeSymbolTable[] {
-  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const set = new Set();
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {

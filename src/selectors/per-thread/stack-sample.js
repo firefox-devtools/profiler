@@ -116,8 +116,16 @@ export function getStackAndSampleSelectorsPerThread(
   const _getInvertedCallNodeInfo: Selector<CallNodeInfo> =
     createSelectorWithTwoCacheSlots(
       threadSelectors.getFilteredThread,
+      _getNonInvertedCallNodeInfo,
       ProfileSelectors.getDefaultCategory,
-      ProfileData.getInvertedCallNodeInfo
+      (thread, nonInvertedCallNodeInfo, defaultCategory) => {
+        return ProfileData.getInvertedCallNodeInfo(
+          thread,
+          nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+          nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+          defaultCategory
+        );
+      }
     );
 
   const getCallNodeInfo: Selector<CallNodeInfo> = (state) => {
@@ -241,6 +249,18 @@ export function getStackAndSampleSelectorsPerThread(
       threadSelectors.getPreviewFilteredSamplesForCallTree(state).stack,
     (state) => getCallNodeInfo(state).getStackIndexToCallNodeIndex(),
     ProfileData.getSampleIndexToCallNodeIndex
+  );
+
+  const getSampleIndexToNonInvertedCallNodeIndexForFilteredThread: Selector<
+    Array<IndexIntoCallNodeTable | null>,
+  > = createSelector(
+    (state) => threadSelectors.getFilteredThread(state).samples.stack,
+    (state) => getCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
+    (filteredThreadSampleStacks, stackIndexToNonInvertedCallNodeIndex) =>
+      ProfileData.getSampleIndexToCallNodeIndex(
+        filteredThreadSampleStacks,
+        stackIndexToNonInvertedCallNodeIndex
+      )
   );
 
   const getSampleIndexToCallNodeIndexForTabFilteredThread: Selector<
@@ -397,7 +417,7 @@ export function getStackAndSampleSelectorsPerThread(
     );
 
   const getFlameGraphRows: Selector<FlameGraph.FlameGraphRows> = createSelector(
-    (state) => getCallNodeInfo(state).getCallNodeTable(),
+    (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
     (state) => threadSelectors.getFilteredThread(state).funcTable,
     (state) => threadSelectors.getFilteredThread(state).stringTable,
     FlameGraph.computeFlameGraphRows
@@ -406,7 +426,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
     createSelector(
       getFlameGraphRows,
-      (state) => getCallNodeInfo(state).getCallNodeTable(),
+      (state) => getCallNodeInfo(state).getNonInvertedCallNodeTable(),
       getCallTreeTimings,
       FlameGraph.getFlameGraphTiming
     );
@@ -441,6 +461,7 @@ export function getStackAndSampleSelectorsPerThread(
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSampleIndexToCallNodeIndexForFilteredThread,
+    getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
     getSampleIndexToCallNodeIndexForTabFilteredThread,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
