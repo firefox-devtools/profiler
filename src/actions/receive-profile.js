@@ -1536,33 +1536,39 @@ export function retrieveProfilesToCompare(
         })
       );
 
-      const hasSupportedDatasources = profileStates.every(
-        (state) => state.dataSource === 'public'
-      );
-      if (!hasSupportedDatasources) {
-        throw new Error(
-          'Only public uploaded profiles are supported by the comparison function.'
-        );
-      }
-
       // Then we retrieve the profiles from the online store, and unserialize
       // and process them if needed.
-      const promises = profileStates.map(async ({ hash }) => {
-        const profileUrl = getProfileUrlForHash(hash);
-        const response: ProfileOrZip = await _fetchProfile({
-          url: profileUrl,
-          onTemporaryError: (e: TemporaryError) => {
-            dispatch(temporaryError(e));
-          },
-        });
-        if (response.responseType !== 'PROFILE') {
-          throw new Error('Expected to receive a profile from _fetchProfile');
-        }
-        const serializedProfile = response.profile;
+      const promises = profileStates.map(
+        async ({ dataSource, hash, profileUrl }) => {
+          switch (dataSource) {
+            case 'public':
+              // Use a URL from the public store.
+              profileUrl = getProfileUrlForHash(hash);
+              break;
+            case 'from-url':
+              // Use the profile URL in the decoded state, decoded from the input URL.
+              break;
+            default:
+              throw new Error(
+                'Only public uploaded profiles are supported by the comparison function.'
+              );
+          }
+          const response: ProfileOrZip = await _fetchProfile({
+            url: profileUrl,
+            onTemporaryError: (e: TemporaryError) => {
+              dispatch(temporaryError(e));
+            },
+          });
+          if (response.responseType !== 'PROFILE') {
+            throw new Error('Expected to receive a profile from _fetchProfile');
+          }
+          const serializedProfile = response.profile;
 
-        const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
-        return profile;
-      });
+          const profile =
+            unserializeProfileOfArbitraryFormat(serializedProfile);
+          return profile;
+        }
+      );
 
       // Once all profiles have been fetched and unserialized, we can start
       // pushing them to a brand new profile. This resulting profile will keep

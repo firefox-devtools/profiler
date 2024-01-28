@@ -122,15 +122,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   }
 
   _scrollSelectionIntoView = () => {
-    const {
-      selectedCallNodeIndex,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { selectedCallNodeIndex, callNodeInfo } = this.props;
 
     if (selectedCallNodeIndex === null) {
       return;
     }
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
     const y = depth * ROW_CSS_PIXELS_HEIGHT;
 
@@ -166,7 +164,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       stackFrameHeight,
       selectedCallNodeIndex,
       categories,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       getMarker,
       marginLeft,
       viewport: {
@@ -263,6 +261,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       // Default to the first item in the categories list.
       categoryForUserTiming = 0;
     }
+
+    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {

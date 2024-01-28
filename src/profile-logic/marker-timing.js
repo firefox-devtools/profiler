@@ -10,6 +10,10 @@ import type {
   MarkerTimingAndBuckets,
 } from 'firefox-profiler/types';
 
+// Arbitrarily set an upper limit for adding marker depths, avoiding very long
+// overlapping marker timings.
+const MAX_STACKING_DEPTH = 300;
+
 /**
  * This function computes the timing information for laying out the markers in the
  * MarkerChart component. Each marker is put into a single row based on its name. In
@@ -160,6 +164,12 @@ export function getMarkerTiming(
 
     if (foundMarkerTiming) {
       addCurrentMarkerToMarkerTiming(foundMarkerTiming);
+      continue;
+    }
+
+    if (markerTimingsForName.length >= MAX_STACKING_DEPTH) {
+      // There are too many markers stacked around the same time already, let's
+      // ignore this marker.
       continue;
     }
 

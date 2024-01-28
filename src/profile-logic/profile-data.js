@@ -16,6 +16,7 @@ import {
   shallowCloneFrameTable,
   shallowCloneFuncTable,
 } from './data-structures';
+import { CallNodeInfoImpl } from './call-node-info';
 import {
   INSTANT,
   INTERVAL,
@@ -23,7 +24,6 @@ import {
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import { hashPath } from 'firefox-profiler/utils/path';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
@@ -91,13 +91,7 @@ import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-arr
  */
 
 /**
- * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
- * an IndexIntoStackTable to a IndexIntoCallNodeTable. This function runs through
- * a stackTable, and de-duplicates stacks that have frames that point to the same
- * function.
- *
- * See `src/types/profile-derived.js` for the type definitions.
- * See `docs-developer/call-trees.md` for a detailed explanation of CallNodes.
+ * Generate the non-inverted CallNodeInfo for a thread.
  */
 export function getCallNodeInfo(
   stackTable: StackTable,
@@ -105,8 +99,43 @@ export function getCallNodeInfo(
   funcTable: FuncTable,
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
+  const { callNodeTable, stackIndexToCallNodeIndex } = computeCallNodeTable(
+    stackTable,
+    frameTable,
+    funcTable,
+    defaultCategory
+  );
+  return new CallNodeInfoImpl(
+    callNodeTable,
+    callNodeTable,
+    stackIndexToCallNodeIndex,
+    stackIndexToCallNodeIndex,
+    false
+  );
+}
+
+type CallNodeTableAndStackMap = {
+  callNodeTable: CallNodeTable,
+  // IndexIntoStackTable -> IndexIntoCallNodeTable
+  stackIndexToCallNodeIndex: Int32Array,
+};
+
+/**
+ * Generate the CallNodeTable, and a map to convert an IndexIntoStackTable to a
+ * IndexIntoCallNodeTable. This function runs through a stackTable, and
+ * de-duplicates stacks that have frames that point to the same function.
+ *
+ * See `src/types/profile-derived.js` for the type definitions.
+ * See `docs-developer/call-trees.md` for a detailed explanation of CallNodes.
+ */
+export function computeCallNodeTable(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  defaultCategory: IndexIntoCategoryList
+): CallNodeTableAndStackMap {
   return timeCode('getCallNodeInfo', () => {
-    const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
+    const stackIndexToCallNodeIndex = new Int32Array(stackTable.length);
 
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
@@ -254,7 +283,7 @@ export function getCallNodeInfo(
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
-    return _createCallNodeInfoFromUnorderedComponents(
+    return _createCallNodeTableFromUnorderedComponents(
       prefix,
       firstChild,
       nextSibling,
@@ -270,8 +299,8 @@ export function getCallNodeInfo(
 }
 
 /**
- * Create a CallNodeInfo with an ordered call node table based on the pieces of
- * an unordered call node table.
+ * Create a CallNodeTableAndStackMap with an ordered call node table based on
+ * the pieces of an unordered call node table.
  *
  * The order of siblings is maintained.
  * If a node A has children, its first child B directly follows A.
@@ -279,7 +308,7 @@ export function getCallNodeInfo(
  * next sibling of the closest ancestor which has a next sibling.
  * This means that any node and all its descendants are laid out contiguously.
  */
-function _createCallNodeInfoFromUnorderedComponents(
+function _createCallNodeTableFromUnorderedComponents(
   prefix: Array<IndexIntoCallNodeTable>,
   firstChild: Array<IndexIntoFuncTable>,
   nextSibling: Array<IndexIntoFuncTable>,
@@ -289,13 +318,13 @@ function _createCallNodeInfoFromUnorderedComponents(
   innerWindowID: Array<InnerWindowID>,
   sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
   length: number,
-  stackIndexToCallNodeIndex: Uint32Array
-): CallNodeInfo {
+  stackIndexToCallNodeIndex: Int32Array
+): CallNodeTableAndStackMap {
   return timeCode('createCallNodeInfoFromUnorderedComponents', () => {
     if (length === 0) {
       return {
         callNodeTable: getEmptyCallNodeTable(),
-        stackIndexToCallNodeIndex: new Uint32Array(0),
+        stackIndexToCallNodeIndex: new Int32Array(0),
       };
     }
 
@@ -393,6 +422,154 @@ function _createCallNodeInfoFromUnorderedComponents(
       ),
     };
   });
+}
+
+/**
+ * Generate the inverted CallNodeInfo for a thread.
+ */
+export function getInvertedCallNodeInfo(
+  thread: Thread,
+  nonInvertedCallNodeTable: CallNodeTable,
+  stackIndexToNonInvertedCallNodeIndex: Int32Array,
+  defaultCategory: IndexIntoCategoryList
+): CallNodeInfo {
+  // We compute an inverted stack table, but we don't let it escape this function.
+  const {
+    invertedThread,
+    oldStackToNewStack: nonInvertedStackToInvertedStack,
+  } = _computeThreadWithInvertedStackTable(thread, defaultCategory);
+
+  // Create an inverted call node table based on the inverted stack table.
+  const {
+    callNodeTable,
+    stackIndexToCallNodeIndex: invertedStackIndexToCallNodeIndex,
+  } = computeCallNodeTable(
+    invertedThread.stackTable,
+    invertedThread.frameTable,
+    invertedThread.funcTable,
+    defaultCategory
+  );
+
+  // Create a mapping that maps a stack index from the non-inverted thread to
+  // its corresponding call node in the inverted tree.
+  const nonInvertedStackIndexToCallNodeIndex = new Int32Array(
+    thread.stackTable.length
+  );
+  for (
+    let nonInvertedStackIndex = 0;
+    nonInvertedStackIndex < nonInvertedStackIndexToCallNodeIndex.length;
+    nonInvertedStackIndex++
+  ) {
+    const invertedStackIndex = nonInvertedStackToInvertedStack.get(
+      nonInvertedStackIndex
+    );
+    if (invertedStackIndex === undefined) {
+      // This stack is not used as a self stack, only as a prefix stack.
+      // There may or may not be an inverted call node that corresponds to it,
+      // but we haven't checked that and we don't need to know it.
+      // nonInvertedStackIndexToCallNodeIndex only needs useful values for self stacks.
+      nonInvertedStackIndexToCallNodeIndex[nonInvertedStackIndex] = -1;
+    } else {
+      nonInvertedStackIndexToCallNodeIndex[nonInvertedStackIndex] =
+        invertedStackIndexToCallNodeIndex[invertedStackIndex];
+    }
+  }
+  return new CallNodeInfoImpl(
+    callNodeTable,
+    nonInvertedCallNodeTable,
+    nonInvertedStackIndexToCallNodeIndex,
+    stackIndexToNonInvertedCallNodeIndex,
+    true
+  );
+}
+
+// Given a stack index `needleStack` and a call node in the inverted tree
+// `invertedCallTreeNode`, find an ancestor stack of `needleStack` which
+// corresponds to the given call node in the inverted call tree. Returns null if
+// there is no such ancestor stack.
+//
+// Also returns null for any stacks which aren't used as self stacks.
+//
+// Example:
+//
+//    Stack table (`<func>:<line>`):        Inverted call tree:
+//
+//     - A:10                                - A
+//        - B:20                             - B
+//          - C:30                             - A
+//          - C:31                           - C
+//        - B:21                               - B
+//                                               - A
+//
+// In this example, given the inverted tree call node C <- B and the needle
+// stack A:10 -> B:20 -> C:30, the function will return the stack A:10 -> B:20.
+//
+// For example, if you double click the call node C <- B in the inverted tree,
+// and if all samples spend their time in the stack A:10 -> B:20 -> C:30, then
+// the source view should be scrolled to line 20.
+//
+// Background: needleStack has some self time. This self time shows up in a
+// root node of the inverted tree. If you go to needleStack's prefix stack, i.e.
+// if you go "up" a level in the non-inverted stack table, you go "down" a level
+// in the inverted call tree. We want to go up/down enough so that we hit our
+// call node. This gives us a stack node whose frame's func is the same as the
+// func of `invertedCallTreeNode`. Then our caller can get some information from
+// that frame, for example the frame's address or line.
+export function getMatchingAncestorStackForInvertedCallNode(
+  needleStack: IndexIntoStackTable,
+  invertedTreeCallNode: IndexIntoCallNodeTable,
+  invertedTreeCallNodeSubtreeEnd: IndexIntoCallNodeTable,
+  invertedTreeCallNodeDepth: number,
+  stackIndexToInvertedCallNodeIndex: Int32Array,
+  stackTablePrefixCol: Array<IndexIntoStackTable | null>
+): IndexIntoStackTable | null {
+  // Get the inverted call tree node for the (non-inverted) stack.
+  // For example, if the stack has the call path A -> B -> C,
+  // this will give us the node C <- B <- A in the inverted tree.
+  const needleCallNode = stackIndexToInvertedCallNodeIndex[needleStack];
+
+  // Check if needleCallNode is a descendant of invertedTreeCallNode in the
+  // inverted tree.
+  if (
+    needleCallNode >= invertedTreeCallNode &&
+    needleCallNode < invertedTreeCallNodeSubtreeEnd
+  ) {
+    // needleCallNode is a descendant of invertedTreeCallNode in the inverted tree.
+    // That means that needleStack's self time contributes to the total time of
+    // invertedTreeCallNode. It also means that the non-inverted call path of
+    // needleStack "ends with" the suffix described by invertedTreeCallNode.
+    // For example, if invertedTreeCallNode is C <- B, and needleStack has the
+    // non-inverted call path A -> B -> C, then we now know that A -> B -> C ends
+    // with B -> C.
+    // Now we strip off this suffix. In the example, we strip off "-> C" at the
+    // end so that we end up with a stack for A -> B.
+    // Stripping off the suffix is equivalent to "walking down" in the inverted tree.
+    return getNthPrefixStack(
+      needleStack,
+      invertedTreeCallNodeDepth,
+      stackTablePrefixCol
+    );
+  }
+
+  // Not a descendant; return null.
+  return null;
+}
+
+/**
+ * Returns the n'th prefix of a stack, or null if it doesn't exist.
+ * (n = 0: the node itself, n = 1: the immediate parent node,
+ * n = 2: the grandparent, etc)
+ */
+export function getNthPrefixStack(
+  stackIndex: IndexIntoStackTable | null,
+  n: number,
+  stackTablePrefixCol: Array<IndexIntoStackTable | null>
+): IndexIntoStackTable | null {
+  let s = stackIndex;
+  for (let i = 0; i < n && s !== null; i++) {
+    s = stackTablePrefixCol[s];
+  }
+  return s;
 }
 
 /**
@@ -534,7 +711,7 @@ function mapCallNodeSelectedStatesToSamples(
  * from the same subtree (in the call tree) "clump together" in the graph.
  */
 export function getSamplesSelectedStates(
-  callNodeTable: CallNodeTable,
+  callNodeInfo: CallNodeInfo,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
@@ -546,6 +723,7 @@ export function getSamplesSelectedStates(
     );
   }
 
+  const callNodeTable = callNodeInfo.getCallNodeTable();
   return mapCallNodeSelectedStatesToSamples(
     sampleCallNodes,
     activeTabFilteredCallNodes,
@@ -608,7 +786,6 @@ export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  isInvertedTree: boolean,
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
@@ -618,10 +795,9 @@ export function getTimingsForPath(
   displayImplementation: boolean
 ) {
   return getTimingsForCallNodeIndex(
-    getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
+    callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
     interval,
-    isInvertedTree,
     thread,
     unfilteredThread,
     sampleIndexOffset,
@@ -642,9 +818,8 @@ export function getTimingsForPath(
  */
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
-  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
+  callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
-  isInvertedTree: boolean,
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
@@ -835,9 +1010,13 @@ export function getTimingsForCallNodeIndex(
     return { forPath: pathTimings, rootTime };
   }
 
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+
   const needleDescendantsEndIndex =
     callNodeTable.subtreeRangeEnd[needleNodeIndex];
 
+  const isInvertedTree = callNodeInfo.isInverted();
   const needleNodeIsRootOfInvertedTree =
     isInvertedTree && callNodeTable.prefix[needleNodeIndex] === -1;
 
@@ -1797,168 +1976,6 @@ export function processEventDelays(
   };
 }
 
-// --------------- CallNodePath and CallNodeIndex manipulations ---------------
-
-// Returns a list of CallNodeIndex from CallNodePaths. This function uses a map
-// to speed up the look-up process.
-export function getCallNodeIndicesFromPaths(
-  callNodePaths: CallNodePath[],
-  callNodeTable: CallNodeTable
-): Array<IndexIntoCallNodeTable | null> {
-  // This is a Map<CallNodePathHash, IndexIntoCallNodeTable>. This map speeds up
-  // the look-up process by caching every CallNodePath we handle which avoids
-  // looking up parents again and again.
-  const cache = new Map();
-  return callNodePaths.map((path) =>
-    _getCallNodeIndexFromPathWithCache(path, callNodeTable, cache)
-  );
-}
-
-// Returns a CallNodeIndex from a CallNodePath, using and contributing to the
-// cache parameter.
-function _getCallNodeIndexFromPathWithCache(
-  callNodePath: CallNodePath,
-  callNodeTable: CallNodeTable,
-  cache: Map<string, IndexIntoCallNodeTable>
-): IndexIntoCallNodeTable | null {
-  const hashFullPath = hashPath(callNodePath);
-  const result = cache.get(hashFullPath);
-  if (result !== undefined) {
-    // The cache already has the result for the full path.
-    return result;
-  }
-
-  // This array serves as a map and stores the hashes of callNodePath's
-  // parents to speed up the algorithm. First we'll follow the tree from the
-  // bottom towards the top, pushing hashes as we compute them, and then we'll
-  // move back towards the bottom popping hashes from this array.
-  const sliceHashes = [hashFullPath];
-
-  // Step 1: find whether we already computed the index for one of the path's
-  // parents, starting from the closest parent and looping towards the "top" of
-  // the tree.
-  // If we find it for one of the parents, we'll be able to start at this point
-  // in the following look up.
-  let i = callNodePath.length;
-  let index;
-  while (--i > 0) {
-    // Looking up each parent for this call node, starting from the deepest node.
-    // If we find a parent this makes it possible to start the look up from this location.
-    const subPath = callNodePath.slice(0, i);
-    const hash = hashPath(subPath);
-    index = cache.get(hash);
-    if (index !== undefined) {
-      // Yay, we already have the result for a parent!
-      break;
-    }
-    // Cache the hashed value because we'll need it later, after resolving this path.
-    // Note we don't add the hash if we found the parent in the cache, so the
-    // last added element here will accordingly be the first popped in the next
-    // algorithm.
-    sliceHashes.push(hash);
-  }
-
-  // Step 2: look for the requested path using the call node table, starting at
-  // the parent we already know if we found one, and looping down the tree.
-  // We're contributing to the cache at the same time.
-
-  // `index` is undefined if no parent was found in the cache. In that case we
-  // start from the start, and use `-1` which is the prefix we use to indicate
-  // the root node.
-  if (index === undefined) {
-    // assert(i === 0);
-    index = -1;
-  }
-
-  while (i < callNodePath.length) {
-    // Resolving the index for subpath `callNodePath.slice(0, i+1)` given we
-    // know the index for the subpath `callNodePath.slice(0, i)` (its parent).
-    const func = callNodePath[i];
-    const nextNodeIndex = getCallNodeIndexFromParentAndFunc(
-      index,
-      func,
-      callNodeTable
-    );
-
-    // We couldn't find this path into the call node table. This shouldn't
-    // normally happen.
-    if (nextNodeIndex === null) {
-      return null;
-    }
-
-    // Contributing to the shared cache
-    const hash = sliceHashes.pop();
-    cache.set(hash, nextNodeIndex);
-
-    index = nextNodeIndex;
-    i++;
-  }
-
-  return index < 0 ? null : index;
-}
-
-// Returns the CallNodeIndex that matches the function `func` and whose parent's
-// CallNodeIndex is `parent`.
-export function getCallNodeIndexFromParentAndFunc(
-  parent: IndexIntoCallNodeTable | -1,
-  func: IndexIntoFuncTable,
-  callNodeTable: CallNodeTable
-): IndexIntoCallNodeTable | null {
-  if (parent === -1) {
-    if (callNodeTable.length === 0) {
-      return null;
-    }
-  } else if (callNodeTable.subtreeRangeEnd[parent] === parent + 1) {
-    // parent has no children.
-    return null;
-  }
-  // Node children always come after their parents in the call node table,
-  // that's why we start looping at `parent + 1`.
-  // Note that because the root parent is `-1`, we correctly start at `0` when
-  // we look for a root.
-  const firstChild = parent + 1;
-  for (
-    let callNodeIndex = firstChild;
-    callNodeIndex !== -1;
-    callNodeIndex = callNodeTable.nextSibling[callNodeIndex]
-  ) {
-    if (callNodeTable.func[callNodeIndex] === func) {
-      return callNodeIndex;
-    }
-  }
-
-  return null;
-}
-
-// This function returns a CallNodeIndex from a CallNodePath, using the
-// specified `callNodeTable`.
-export function getCallNodeIndexFromPath(
-  callNodePath: CallNodePath,
-  callNodeTable: CallNodeTable
-): IndexIntoCallNodeTable | null {
-  const [result] = getCallNodeIndicesFromPaths([callNodePath], callNodeTable);
-  return result;
-}
-
-// This function returns a CallNodePath from a CallNodeIndex.
-export function getCallNodePathFromIndex(
-  callNodeIndex: IndexIntoCallNodeTable | null,
-  callNodeTable: CallNodeTable
-): CallNodePath {
-  if (callNodeIndex === null || callNodeIndex === -1) {
-    return [];
-  }
-
-  const callNodePath = [];
-  let fs = callNodeIndex;
-  while (fs !== -1) {
-    callNodePath.push(callNodeTable.func[fs]);
-    fs = callNodeTable.prefix[fs];
-  }
-  callNodePath.reverse();
-  return callNodePath;
-}
-
 /**
  * This function converts a stack information into a call node and
  * category path structure.
@@ -2002,7 +2019,10 @@ export function computeCallNodeMaxDepthPlusOne(
   // computed for the filtered thread, but a samples-like table can use the preview
   // filtered thread, which involves a subset of the total call nodes.
   let maxDepth = -1;
-  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+  const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+  // TODO: Use sampleCallNodes instead
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
     if (stackIndex === null) {
@@ -2018,11 +2038,14 @@ export function computeCallNodeMaxDepthPlusOne(
   return maxDepth + 1;
 }
 
-export function invertCallstack(
+function _computeThreadWithInvertedStackTable(
   thread: Thread,
   defaultCategory: IndexIntoCategoryList
-): Thread {
-  return timeCode('invertCallstack', () => {
+): {
+  invertedThread: Thread,
+  oldStackToNewStack: Map<IndexIntoStackTable, IndexIntoStackTable>,
+} {
+  return timeCode('_computeThreadWithInvertedStackTable', () => {
     const { stackTable, frameTable } = thread;
 
     const newStackTable = {
@@ -2093,12 +2116,17 @@ export function invertCallstack(
             stackTable.subcategory[currentStack]
           );
         }
-        oldStackToNewStack.set(stackIndex, newStack);
+        oldStackToNewStack.set(stackIndex, ensureExists(newStack));
       }
       return newStack;
     }
 
-    return updateThreadStacks(thread, newStackTable, convertStack);
+    const invertedThread = updateThreadStacks(
+      thread,
+      newStackTable,
+      convertStack
+    );
+    return { invertedThread, oldStackToNewStack };
   });
 }
 
@@ -3504,14 +3532,70 @@ export function calculateFunctionSizeLowerBound(
  */
 export function getNativeSymbolsForCallNode(
   callNodeIndex: IndexIntoCallNodeTable,
-  { stackIndexToCallNodeIndex }: CallNodeInfo,
+  callNodeInfo: CallNodeInfo,
   stackTable: StackTable,
   frameTable: FrameTable
 ): IndexIntoNativeSymbolTable[] {
+  if (callNodeInfo.isInverted()) {
+    return getNativeSymbolsForCallNodeInverted(
+      callNodeIndex,
+      callNodeInfo,
+      stackTable,
+      frameTable
+    );
+  }
+  return getNativeSymbolsForCallNodeNonInverted(
+    callNodeIndex,
+    callNodeInfo,
+    stackTable,
+    frameTable
+  );
+}
+
+export function getNativeSymbolsForCallNodeNonInverted(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  stackTable: StackTable,
+  frameTable: FrameTable
+): IndexIntoNativeSymbolTable[] {
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const set = new Set();
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
       const frame = stackTable.frame[stackIndex];
+      const nativeSymbol = frameTable.nativeSymbol[frame];
+      if (nativeSymbol !== null) {
+        set.add(nativeSymbol);
+      }
+    }
+  }
+  return [...set];
+}
+
+export function getNativeSymbolsForCallNodeInverted(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  stackTable: StackTable,
+  frameTable: FrameTable
+): IndexIntoNativeSymbolTable[] {
+  const invertedCallNodeTable = callNodeInfo.getCallNodeTable();
+  const depth = invertedCallNodeTable.depth[callNodeIndex];
+  const endIndex = invertedCallNodeTable.subtreeRangeEnd[callNodeIndex];
+  const stackTablePrefixCol = stackTable.prefix;
+  const stackIndexToCallNodeIndex = callNodeInfo.getStackIndexToCallNodeIndex();
+  const set = new Set();
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const stackForNode = getMatchingAncestorStackForInvertedCallNode(
+      stackIndex,
+      callNodeIndex,
+      endIndex,
+      depth,
+      stackIndexToCallNodeIndex,
+      stackTablePrefixCol
+    );
+    if (stackForNode !== null) {
+      const frame = stackTable.frame[stackForNode];
       const nativeSymbol = frameTable.nativeSymbol[frame];
       if (nativeSymbol !== null) {
         set.add(nativeSymbol);
@@ -3570,7 +3654,8 @@ export function getBottomBoxInfoForCallNode(
     nativeSymbols,
   } = thread;
 
-  const funcIndex = callNodeInfo.callNodeTable.func[callNodeIndex];
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const funcIndex = callNodeTable.func[callNodeIndex];
   const fileName = funcTable.fileName[funcIndex];
   const sourceFile = fileName !== null ? stringTable.getString(fileName) : null;
   const resource = funcTable.resource[funcIndex];
