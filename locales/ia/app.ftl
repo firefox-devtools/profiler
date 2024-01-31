@@ -833,6 +833,24 @@ TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µW
 
 # This is used in the tooltip of the bandwidth track.
 # Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } per secunda
+    .label = Velocitate de transferentia pro iste specimen
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = operationes de lectura/scriptura depost le specimen previe
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
+    .label = Datos transferite usque ora
+# This is used in the tooltip of the bandwidth track.
+# Variables:
 #   $value (String) - the total of transfered data during the visible time range.
 #                     Will contain the unit (eg. B, KB, MB)
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
