@@ -26,12 +26,21 @@ import {
   getTimelineType,
 } from '../../selectors/url-state';
 import { stateFromLocation } from '../../app-logic/url-handling';
+import { ensureExists } from '../../utils/flow';
 
 import type { Profile } from 'firefox-profiler/types';
 
 describe('ActiveTab', function () {
-  function setup(p = getProfileWithNiceTracks(), addInnerWindowID = true) {
-    const { profile, ...pageInfo } = addActiveTabInformationToProfile(p);
+  function setup(
+    p = getProfileWithNiceTracks(),
+    addInnerWindowID = true,
+    pageInfo = null
+  ) {
+    let profile = p;
+    if (!pageInfo) {
+      ({ profile, ...pageInfo } = addActiveTabInformationToProfile(profile));
+    }
+
     // Add the innerWindowIDs so we can compute the first thread as main track.
     if (addInnerWindowID) {
       profile.threads[0].frameTable.innerWindowID[0] =
@@ -166,6 +175,61 @@ describe('ActiveTab', function () {
       expect(getHumanReadableActiveTabTracks(getState())).toEqual([
         'main track [tab] SELECTED',
         '  - iframe: Page #2',
+      ]);
+    });
+
+    it('do not show the thread when it fails to find the iframe resource name', function () {
+      const {
+        profile: p,
+        funcNamesDictPerThread: [firstThread],
+      } = getProfileFromTextSamples(
+        // First thread is the main thread of the first tab (which is the
+        // active tab)
+        `A`,
+        // The second thread is an iframe of the first thread.
+        `B`
+      );
+
+      p.threads[0].name = 'GeckoMain';
+      p.threads[0].isMainThread = true;
+      p.threads[1].name = 'GeckoMain';
+      p.threads[1].isMainThread = true;
+
+      const { profile, ...pageInfo } = addActiveTabInformationToProfile(p);
+      addInnerWindowIdToStacks(
+        profile.threads[0],
+        /* listOfOperations */
+        [
+          // first tab is the active tab.
+          {
+            innerWindowID: pageInfo.firstTabInnerWindowIDs[0],
+            callNodes: [[firstThread.A]],
+          },
+        ]
+      );
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+        // All about:blank or about:newtab markers are ignored during the
+        // track name computation because they don't provide the correct innerWindowID.
+        // This thread SHOULD NOT be shown in the tracks.
+        [
+          'This marker will be filtered',
+          1,
+          2,
+          {
+            type: 'tracing',
+            category: 'Navigation',
+            innerWindowID: pageInfo.iframeInnerWindowIDsWithChild,
+          },
+        ],
+      ]);
+
+      // Lastly, we need to put the iframe innerWindowID url to about:blank to test this case.
+      ensureExists(profile.pages)[1].url = 'about:blank';
+
+      const { getState } = setup(profile, false, pageInfo);
+
+      expect(getHumanReadableActiveTabTracks(getState())).toEqual([
+        'main track [tab] SELECTED',
       ]);
     });
   });
