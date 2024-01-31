@@ -618,6 +618,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         textMeasurement.getFittedText(
           name,
           TIMELINE_MARGIN_LEFT -
+            LABEL_PADDING -
             (countString ? textMeasurement.getTextWidth(countString) : 0)
         ) + countString;
 

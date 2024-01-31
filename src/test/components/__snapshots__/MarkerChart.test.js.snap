@@ -1010,6 +1010,10 @@ Array [
     "Non-interval marker F without data",
   ],
   Array [
+    "measureText",
+    "Non-interval marker F withou",
+  ],
+  Array [
     "fillText",
     "Non-interval marker F withou…",
     5,
@@ -1028,6 +1032,10 @@ Array [
   Array [
     "measureText",
     "Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D",
+  ],
+  Array [
+    "measureText",
+    "Very very very very very ver",
   ],
   Array [
     "fillText",
