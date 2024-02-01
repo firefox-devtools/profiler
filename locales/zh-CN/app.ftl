@@ -780,6 +780,13 @@ TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value }（{ $carbonV
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
 TrackBandwidthGraph--total-bandwidth-in-graph = { $value }（{ $carbonValue } g CO₂e）
     .label = 可见范围内传输的数据
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value }（{ $carbonValue } g CO₂e）
+    .label = 当前选中部分传输的数据
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
