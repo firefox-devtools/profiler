@@ -264,6 +264,7 @@ export const getActiveTabID: Selector<TabID | null> = (state) => {
   }
 
   if (
+    timelineTrackOrganization.type === 'active-tab' &&
     configuration &&
     configuration.activeTabID &&
     configuration.activeTabID !== 0
