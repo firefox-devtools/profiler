@@ -25,7 +25,7 @@
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>{ -firefox-brand-name } 性能分析网页应用程序</subheader>
 AppHeader--github-icon =
-    .title = 前往我们的 Git 仓库（将打开新窗口）
+    .title = 前往我们的 Git 仓库（新建窗口打开）
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
@@ -198,8 +198,8 @@ Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--menu-button-instructions = 启用分析器菜单按钮，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
 Home--profile-firefox-android-instructions =
-    您还可以分析 { -firefox-android-brand-name }。
-    有关更多信息，请查阅此文档：
+    您还可以分析 { -firefox-android-brand-name }，
+    详见此文档：
     <a>直接在设备上分析 { -firefox-android-brand-name }</a>。
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
