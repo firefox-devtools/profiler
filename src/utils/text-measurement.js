@@ -65,7 +65,7 @@ class TextMeasurement {
    * Massage a text to fit inside a given width. This clamps the string
    * at the end to avoid overflowing.
    *
-   * @param {string} text -The text to fit inside the given width.
+   * @param {string} text - The text to fit inside the given width.
    * @param {number} maxWidth - The available width for the given text.
    * @return {string} The fitted text.
    */
@@ -74,16 +74,40 @@ class TextMeasurement {
       return text;
     }
 
+    // Returns the actual width of a string composed of the n first characters
+    // of the text variable.
+    const getWidth = (n) => this.getTextWidth(text.substring(0, n));
+    // Estimate how many characters can still be added after taking into account
+    // the space used by the n first characters. The result can be negative.
+    const getRemainingCharacterCount = (n) =>
+      Math.round((availableWidth - getWidth(n)) / this._averageCharWidth);
+
     // Approximate the number of characters to truncate to,
     // using avg character width as reference.
-    const f = (maxWidth - this.minWidth) / this._averageCharWidth;
+    const availableWidth = maxWidth - this.minWidth;
+    const f = availableWidth / this._averageCharWidth;
     let n = Math.floor(f);
-    if (n === f) {
-      // The approximate width of `n` characters is exactly max width,
-      // so take one character less just in case.
-      n -= 1;
+    if (n < 1) {
+      return '';
     }
-    return n > 0 ? text.substring(0, n) + this.overflowChar : '';
+
+    // Do a second finer grained approximation to add or remove a few characters.
+    n += getRemainingCharacterCount(n);
+
+    // And a third one that can only add characters. This will be useful when
+    // the characters added at the previous step were narrow (eg. '::').
+    const offset = getRemainingCharacterCount(n);
+    if (offset >= 1) {
+      n += offset;
+    }
+
+    // If we overflow a little bit, remove characters one at a time until we no
+    // longer do.
+    while (getWidth(n) > availableWidth) {
+      --n;
+    }
+
+    return text.substring(0, n) + this.overflowChar;
   }
 }
 

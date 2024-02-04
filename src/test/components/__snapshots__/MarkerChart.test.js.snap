@@ -262,8 +262,12 @@ Array [
     "#000000",
   ],
   Array [
+    "measureText",
+    " (1)",
+  ],
+  Array [
     "fillText",
-    "UserTiming",
+    "UserTiming (1)",
     5,
     139,
   ],
@@ -1006,6 +1010,10 @@ Array [
     "Non-interval marker F without data",
   ],
   Array [
+    "measureText",
+    "Non-interval marker F withou",
+  ],
+  Array [
     "fillText",
     "Non-interval marker F withou…",
     5,
@@ -1024,6 +1032,10 @@ Array [
   Array [
     "measureText",
     "Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D",
+  ],
+  Array [
+    "measureText",
+    "Very very very very very ver",
   ],
   Array [
     "fillText",
@@ -1263,14 +1275,22 @@ Array [
     "#000000",
   ],
   Array [
+    "measureText",
+    " (1)",
+  ],
+  Array [
     "set fillStyle",
     "#ffffffbf",
+  ],
+  Array [
+    "measureText",
+    "Marker DomEvent (1)",
   ],
   Array [
     "fillRect",
     0,
     16,
-    85,
+    105,
     16,
   ],
   Array [
@@ -1279,7 +1299,7 @@ Array [
   ],
   Array [
     "fillText",
-    "Marker DomEvent",
+    "Marker DomEvent (1)",
     5,
     27,
   ],

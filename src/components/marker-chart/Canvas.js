@@ -207,7 +207,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         this.highlightRow(ctx, newRow);
         this.drawMarkers(ctx, hoveredMarker, newRow, newRow + 1);
         if (hoveredLabel === null) {
-          this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1);
+          this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1, true);
         }
       }
       if (oldRow !== undefined && oldRow !== newRow) {
@@ -542,10 +542,32 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     return this._textMeasurement;
   }
 
+  countMarkersInBucketStartingAtRow(rowIndex: number): number {
+    const { markerTimingAndBuckets } = this.props;
+    const markerTiming = markerTimingAndBuckets[rowIndex];
+    if (typeof markerTiming === 'string') {
+      return 0;
+    }
+
+    const { name } = markerTiming;
+    let count = markerTiming.length;
+    for (let row = rowIndex + 1; row < markerTimingAndBuckets.length; ++row) {
+      if (
+        typeof markerTimingAndBuckets[row] === 'string' ||
+        markerTimingAndBuckets[row].name !== name
+      ) {
+        break;
+      }
+      count += markerTimingAndBuckets[row].length;
+    }
+    return count;
+  }
+
   drawSeparatorsAndLabels(
     ctx: CanvasRenderingContext2D,
     startRow: number,
-    endRow: number
+    endRow: number,
+    drawMarkerCount: boolean = false
   ) {
     const {
       markerTimingAndBuckets,
@@ -587,11 +609,18 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       }
 
       const y = rowIndex * rowHeight - viewportTop;
-      // Even though it's on active tab view, have a hard cap on the text length.
-      const fittedText = textMeasurement.getFittedText(
-        name,
-        TIMELINE_MARGIN_LEFT
-      );
+
+      const countString = drawMarkerCount
+        ? ` (${this.countMarkersInBucketStartingAtRow(rowIndex)})`
+        : '';
+      // Even when it's on active tab view, have a hard cap on the text length.
+      const fittedText =
+        textMeasurement.getFittedText(
+          name,
+          TIMELINE_MARGIN_LEFT -
+            LABEL_PADDING -
+            (countString ? textMeasurement.getTextWidth(countString) : 0)
+        ) + countString;
 
       if (timelineTrackOrganization.type === 'active-tab') {
         // Draw the text backgound for active tab.
