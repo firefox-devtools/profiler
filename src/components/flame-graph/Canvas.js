@@ -33,7 +33,6 @@ import type {
   CallTreeSummaryStrategy,
   WeightType,
   SamplesLikeTable,
-  TracedTiming,
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
@@ -49,7 +48,10 @@ import type {
   ChartCanvasHoverInfo,
 } from '../shared/chart/Canvas';
 
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import type {
+  CallTree,
+  CallTreeTimings,
+} from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -75,7 +77,7 @@ export type OwnProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: TracedTiming | null,
+  +tracedTiming: CallTreeTimings | null,
   +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
@@ -154,16 +156,14 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   }
 
   _scrollSelectionIntoView = () => {
-    const {
-      selectedCallNodeIndex,
-      maxStackDepthPlusOne,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { selectedCallNodeIndex, maxStackDepthPlusOne, callNodeInfo } =
+      this.props;
 
     if (selectedCallNodeIndex === null) {
       return;
     }
 
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
     const y = (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT;
 
@@ -185,7 +185,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     const {
       thread,
       flameGraphTiming,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       stackFrameHeight,
       maxStackDepthPlusOne,
       rightClickedCallNodeIndex,
@@ -236,6 +236,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
+
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     const startDepth = Math.floor(
       maxStackDepthPlusOne - viewportBottom / stackFrameHeight
@@ -365,7 +367,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       shouldDisplayTooltips,
       categories,
       interval,
-      isInverted,
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
       weightType,
@@ -391,7 +392,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       const time = formatCallNodeNumberWithUnit(
         'tracing-ms',
         false,
-        tracedTiming.running[callNodeIndex]
+        tracedTiming.total[callNodeIndex]
       );
       percentage = `${time} (${percentage})`;
     }
@@ -424,7 +425,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 callNodeIndex,
                 callNodeInfo,
                 interval,
-                isInverted,
                 thread,
                 unfilteredThread,
                 sampleIndexOffset,

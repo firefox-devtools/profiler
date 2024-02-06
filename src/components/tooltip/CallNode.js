@@ -430,9 +430,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       timings,
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       displayStackType,
     } = this.props;
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const categoryIndex = callNodeTable.category[callNodeIndex];
     const categoryColor = categories[categoryIndex].color;
     const subcategoryIndex = callNodeTable.subcategory[callNodeIndex];
