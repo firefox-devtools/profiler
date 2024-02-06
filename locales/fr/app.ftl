@@ -759,6 +759,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mW
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg eqCO₂)
     .label = Énergie consommée dans la sélection courante
 
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } par seconde
+    .label = Vitesse de transfert pour cet échantillon
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = opérations de lecture/écriture depuis le précédent échantillon
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g eqCO₂)
+    .label = Données transférées jusqu’à présent
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } g eqCO₂)
+    .label = Données transférées dans l’intervalle visible
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g eqCO₂)
+    .label = Données transférées dans la sélection courante
+
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 

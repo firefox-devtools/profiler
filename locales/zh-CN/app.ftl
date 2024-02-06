@@ -25,7 +25,7 @@
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>{ -firefox-brand-name } 性能分析网页应用程序</subheader>
 AppHeader--github-icon =
-    .title = 前往我们的 Git 仓库（将打开新窗口）
+    .title = 前往我们的 Git 仓库（新建窗口打开）
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
@@ -198,8 +198,8 @@ Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--menu-button-instructions = 启用分析器菜单按钮，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
 Home--profile-firefox-android-instructions =
-    您还可以分析 { -firefox-android-brand-name }。
-    有关更多信息，请查阅此文档：
+    您还可以分析 { -firefox-android-brand-name }，
+    详见此文档：
     <a>直接在设备上分析 { -firefox-android-brand-name }</a>。
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
@@ -748,6 +748,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO2e)
     .label = 当前选择范围内的能耗
 
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } 每秒
+    .label = 此样本的传输速度
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = 上次采样结束后发生的读写操作数
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value }（{ $carbonValue } g CO₂e）
+    .label = 目前为止传输的数据
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value }（{ $carbonValue } g CO₂e）
+    .label = 可见范围内传输的数据
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value }（{ $carbonValue } g CO₂e）
+    .label = 当前选中部分传输的数据
+
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
@@ -769,7 +809,7 @@ TrackSearchField--search-input =
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
-TransformNavigator--complete = 完成“{ $item }”
+TransformNavigator--complete = 完整“{ $item }”
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
