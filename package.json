@@ -132,7 +132,7 @@
     "eslint-plugin-jest-formatting": "^3.1.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-testing-library": "^6.2.0",
-    "espree": "^9.6.1",
+    "espree": "^10.0.0",
     "fake-indexeddb": "^4.0.2",
     "fetch-mock-jest": "^1.5.1",
     "file-loader": "^6.2.0",
