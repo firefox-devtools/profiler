@@ -84,11 +84,17 @@ export function computeActiveTabTracks(
         mainTrackIndexes.push(threadIndex);
       } else {
         if (!isTabFilteredThreadEmpty(threadIndex, state)) {
-          resources.push({
-            type: 'sub-frame',
-            threadIndex,
-            name: _getActiveTabResourceName(thread, innerWindowIDToPageMap),
-          });
+          const resourceName = _getActiveTabResourceName(
+            thread,
+            innerWindowIDToPageMap
+          );
+          if (resourceName !== null) {
+            resources.push({
+              type: 'sub-frame',
+              threadIndex,
+              name: resourceName,
+            });
+          }
         }
       }
     } else {
@@ -96,11 +102,17 @@ export function computeActiveTabTracks(
       // track. Find out if that thread contains the active tab data, and add it
       // as a resource track if it does.
       if (!isTabFilteredThreadEmpty(threadIndex, state)) {
-        resources.push({
-          type: 'thread',
-          threadIndex,
-          name: _getActiveTabResourceName(thread, innerWindowIDToPageMap),
-        });
+        const resourceName = _getActiveTabResourceName(
+          thread,
+          innerWindowIDToPageMap
+        );
+        if (resourceName !== null) {
+          resources.push({
+            type: 'thread',
+            threadIndex,
+            name: resourceName,
+          });
+        }
       }
     }
 
@@ -189,11 +201,12 @@ function isTopmostThread(
 /**
  * Returns the name of active tab resource track.
  * It can be either a sub-frame or a regular thread.
+ * If it fails to find a name, returns null.
  */
 function _getActiveTabResourceName(
   thread: Thread,
   innerWindowIDToPageMap: Map<InnerWindowID, Page>
-): string {
+): string | null {
   if (thread.isMainThread) {
     // This is a sub-frame.
     // Get the first innerWindowID inside the thread that's also present of innerWindowIDToPageMap.
@@ -216,6 +229,16 @@ function _getActiveTabResourceName(
           // find them, so we can get the real resource name.
           const page = innerWindowIDToPageMap.get(data.innerWindowID);
           return (
+            // During a page load, iframes usually start with an about:blank page
+            // and then they navigate to the url. While it's in about:blank, we
+            // might catch some markers. We would like to exclude them because
+            // `about:blank` name doesn't bring any value as a resource name and
+            // we would prefer to display the _real_ url instead which is
+            // captured after the about:blank.
+            // FIXME: I think we initially added `about:newtab` here to exclude
+            // the "new tab page -> website" navigation from showing the
+            // `about:newtab` all the time. But I don't think we have to worry
+            // about this for iframes. So maybe remove this?
             page && page.url !== 'about:blank' && page.url !== 'about:newtab'
           );
         }
@@ -225,9 +248,15 @@ function _getActiveTabResourceName(
         firstInnerWindowID = markerData.innerWindowID;
       }
     }
+
     if (firstInnerWindowID === undefined || firstInnerWindowID === null) {
-      throw new Error('There must be an innerWindowID in the thread');
+      // Since we excluded the about:blank and about:newtab pages, we might fail
+      // to find a valid innerWindowID. This might happen when an ad blocker
+      // blocks an iframe and therefore it fails to load. In that case, we
+      // should return null.
+      return null;
     }
+
     const page = ensureExists(innerWindowIDToPageMap.get(firstInnerWindowID));
     return page.url;
   }
