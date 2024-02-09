@@ -34,6 +34,7 @@ describe('sanitizePII', function () {
   ) {
     const defaultsPii = {
       shouldRemoveThreads: new Set(),
+      shouldRemoveCounters: new Set(),
       shouldRemoveThreadsWithScreenshots: new Set(),
       shouldRemoveUrls: false,
       shouldFilterToCommittedRange: null,
@@ -130,6 +131,24 @@ describe('sanitizePII', function () {
     expect(originalProfile.threads.length).toEqual(3);
     // First and last threads are removed and now there are only 1 thread.
     expect(sanitizedProfile.threads.length).toEqual(1);
+  });
+
+  it('should sanitize counters if they are provided', function () {
+    const { originalProfile, sanitizedProfile } = setup({
+      shouldRemoveCounters: new Set([0]),
+    });
+
+    expect(ensureExists(originalProfile.counters).length).toEqual(1);
+    // The counter should be deleted now.
+    expect(ensureExists(sanitizedProfile.counters).length).toEqual(0);
+  });
+
+  it('should not sanitize counters if shouldRemoveCounters is not provided', function () {
+    const { originalProfile, sanitizedProfile } = setup({});
+
+    expect(ensureExists(originalProfile.counters).length).toEqual(1);
+    // The counter should still be there.
+    expect(ensureExists(sanitizedProfile.counters).length).toEqual(1);
   });
 
   it('should sanitize counters if its thread is deleted', function () {

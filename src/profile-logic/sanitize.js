@@ -124,6 +124,7 @@ export function sanitizePII(
     }
   }
 
+  let removingCounters = false;
   const newProfile = {
     ...profile,
     meta: {
@@ -156,7 +157,12 @@ export function sanitizePII(
     // Remove counters which belong to the removed counters.
     // Also adjust other counters to point to the right thread.
     counters: profile.counters
-      ? profile.counters.reduce((acc, counter) => {
+      ? profile.counters.reduce((acc, counter, counterIndex) => {
+          if (PIIToBeRemoved.shouldRemoveCounters.has(counterIndex)) {
+            removingCounters = true;
+            return acc;
+          }
+
           const newCounter: Counter | null = sanitizeCounterPII(
             counter,
             PIIToBeRemoved,
@@ -203,10 +209,10 @@ export function sanitizePII(
     isSanitized: true,
     // Provide a new empty committed range if needed.
     committedRanges: PIIToBeRemoved.shouldFilterToCommittedRange ? [] : null,
-    // Only return the oldThreadIndexToNew if some threads are being removed. This
+    // Only return the oldThreadIndexToNew if some tracks are being removed. This
     // allows the UrlState to be dynamically updated.
     oldThreadIndexToNew:
-      oldThreadIndexToNew.size === profile.threads.length
+      oldThreadIndexToNew.size === profile.threads.length && !removingCounters
         ? null
         : oldThreadIndexToNew,
   };

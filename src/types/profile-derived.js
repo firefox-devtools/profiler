@@ -611,6 +611,8 @@ export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
 export type RemoveProfileInformation = {|
   // Remove the given hidden threads if they are provided.
   +shouldRemoveThreads: Set<ThreadIndex>,
+  // Remove the given counters if they are provided.
+  +shouldRemoveCounters: Set<CounterIndex>,
   // Remove the screenshots if they are provided.
   +shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
   // Remove the full time range if StartEndRange is provided.
