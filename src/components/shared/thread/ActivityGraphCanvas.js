@@ -41,7 +41,6 @@ type CanvasProps = {|
   +categories: CategoryList,
   +passFillsQuerier: (ActivityFillGraphQuerier) => void,
   +onClick: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
-  +enableCPUUsage: boolean,
   +maxThreadCPUDeltaPerMs: number,
   ...SizeProps,
 |};
@@ -127,7 +126,6 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       samplesSelectedStates,
       treeOrderSampleComparator,
       categories,
-      enableCPUUsage,
       maxThreadCPUDeltaPerMs,
       width,
       height,
@@ -149,7 +147,6 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeEnd,
       sampleIndexOffset,
       samplesSelectedStates,
-      enableCPUUsage,
       maxThreadCPUDeltaPerMs,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
