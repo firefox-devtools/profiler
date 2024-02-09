@@ -421,6 +421,12 @@ function sanitizeThreadPII(
     // to range.
     if (PIIToBeRemoved.shouldFilterToCommittedRange !== null) {
       const { start, end } = PIIToBeRemoved.shouldFilterToCommittedRange;
+      if (
+        thread.registerTime > end ||
+        (thread.unregisterTime && thread.unregisterTime < start)
+      ) {
+        return null;
+      }
       newThread = filterThreadSamplesToRange(thread, start, end);
     } else {
       // Copying the thread even if we don't filter samples because we are gonna
@@ -660,7 +666,7 @@ function sanitizeThreadPII(
   newThread.markers = markerTable;
 
   // Have we removed everything from this thread?
-  if (isThreadNonEmpty(newThread)) {
+  if (isThreadNonEmpty(newThread) || !isThreadNonEmpty(thread)) {
     return newThread;
   }
 
