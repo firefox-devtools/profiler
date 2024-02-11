@@ -846,6 +846,12 @@ TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } м�
 
 # This is used in the tooltip of the bandwidth track.
 # Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } у секунду
+    .label = Хуткасць перадачы для гэтай выбаркі
+# This is used in the tooltip of the bandwidth track.
+# Variables:
 #   $value (String) - how many read or write operations were performed since the previous sample
 TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
     .label = аперацый уводу/вываду з часу папярэдняй выбаркі
