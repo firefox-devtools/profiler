@@ -189,6 +189,24 @@ CallTree--inlining-badge = (inlined)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Select a node to display information about it.
+CallTreeSidebar--call-node-details = Call node details
+
+CallTreeSidebar--traced-running-time =
+    .label = Traced running time
+CallTreeSidebar--traced-self-time =
+    .label = Traced self time
+CallTreeSidebar--running-time =
+    .label = Running time
+CallTreeSidebar--self-time =
+    .label = Self time
+CallTreeSidebar--running-samples =
+    .label = Running samples
+CallTreeSidebar--self-samples =
+    .label = Self samples
+CallTreeSidebar--running-size =
+    .label = Running size
+CallTreeSidebar--self-size =
+    .label = Self size
 
 ## CompareHome
 ## This is used in the page to compare two profiles.

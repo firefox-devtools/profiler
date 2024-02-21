@@ -297,8 +297,8 @@ type StateProps = {|
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 type WeightDetails = {|
-  +running: string,
-  +self: string,
+  +runningL10nId: string,
+  +selfL10nId: string,
   +number: (n: number) => string,
 |};
 
@@ -321,20 +321,20 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
       switch (weightType) {
         case 'tracing-ms':
           return {
-            running: 'Running time',
-            self: 'Self time',
+            runningL10nId: 'CallTreeSidebar--running-time',
+            selfL10nId: 'CallTreeSidebar--self-time',
             number: (n) => formatMilliseconds(n, 3, 1),
           };
         case 'samples':
           return {
-            running: 'Running samples',
-            self: 'Self samples',
+            runningL10nId: 'CallTreeSidebar--running-samples',
+            selfL10nId: 'CallTreeSidebar--self-samples',
             number: (n) => formatNumber(n, 0),
           };
         case 'bytes':
           return {
-            running: 'Running size',
-            self: 'Self size',
+            runningL10nId: 'CallTreeSidebar--running-size',
+            selfL10nId: 'CallTreeSidebar--self-size',
             number: (n) => formatBytes(n),
           };
         default:
@@ -371,7 +371,8 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
       );
     }
 
-    const { number, running, self } = this._getWeightTypeDetails(weightType);
+    const { number, runningL10nId, selfL10nId } =
+      this._getWeightTypeDetails(weightType);
 
     const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
     const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
@@ -400,42 +401,60 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
             ) : null}
           </header>
           <h4 className="sidebar-title3">
-            <div>Call node details</div>
+            <Localized id="CallTreeSidebar--call-node-details">
+              <div>Call node details</div>
+            </Localized>
           </h4>
           {selectedNodeTracedSelfAndTotal ? (
-            <SidebarDetail
-              label="Traced running time"
-              value={formatMilliseconds(
-                selectedNodeTracedSelfAndTotal.total,
-                3,
-                1
-              )}
-            ></SidebarDetail>
+            <Localized
+              id="CallTreeSidebar--traced-running-time"
+              attrs={{ label: true }}
+            >
+              <SidebarDetail
+                label="Traced running time"
+                value={formatMilliseconds(
+                  selectedNodeTracedSelfAndTotal.total,
+                  3,
+                  1
+                )}
+              ></SidebarDetail>
+            </Localized>
           ) : null}
           {selectedNodeTracedSelfAndTotal ? (
-            <SidebarDetail
-              label="Traced self time"
-              value={
-                selectedNodeTracedSelfAndTotal.self === 0
-                  ? '—'
-                  : formatMilliseconds(
-                      selectedNodeTracedSelfAndTotal.self,
-                      3,
-                      1
-                    )
-              }
-            />
+            <Localized
+              id="CallTreeSidebar--traced-self-time"
+              attrs={{ label: true }}
+            >
+              <SidebarDetail
+                label="Traced self time"
+                value={
+                  selectedNodeTracedSelfAndTotal.self === 0
+                    ? '—'
+                    : formatMilliseconds(
+                        selectedNodeTracedSelfAndTotal.self,
+                        3,
+                        1
+                      )
+                }
+              />
+            </Localized>
           ) : null}
-          <SidebarDetail
-            label={running}
-            value={totalTime.value ? `${number(totalTime.value)}` : '—'}
-            percentage={totalTimePercent ? totalTimePercent + '%' : '—'}
-          />
-          <SidebarDetail
-            label={self}
-            value={selfTime.value ? `${number(selfTime.value)}` : '—'}
-            percentage={selfTimePercent ? selfTimePercent + '%' : '—'}
-          />
+          <Localized id={runningL10nId} attrs={{ label: true }}>
+            <SidebarDetail
+              // The value for the label following will be replaced
+              label=""
+              value={totalTime.value ? `${number(totalTime.value)}` : '—'}
+              percentage={totalTimePercent ? totalTimePercent + '%' : '—'}
+            />
+          </Localized>
+          <Localized id={selfL10nId} attrs={{ label: true }}>
+            <SidebarDetail
+              // The value for the label following will be replaced
+              label=""
+              value={selfTime.value ? `${number(selfTime.value)}` : '—'}
+              percentage={selfTimePercent ? selfTimePercent + '%' : '—'}
+            />
+          </Localized>
           {totalTimeBreakdownByCategory ? (
             <>
               <h4 className="sidebar-title3 sidebar-title-label">
