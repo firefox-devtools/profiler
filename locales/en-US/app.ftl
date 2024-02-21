@@ -208,6 +208,17 @@ CallTreeSidebar--running-size =
 CallTreeSidebar--self-size =
     .label = Self size
 
+CallTreeSidebar--categories = Categories
+CallTreeSidebar--implementation = Implementation
+
+CallTreeSidebar--running-milliseconds = Running milliseconds
+CallTreeSidebar--running-sample-count = Running sample count
+CallTreeSidebar--running-bytes = Running bytes
+
+CallTreeSidebar--self-milliseconds = Self milliseconds
+CallTreeSidebar--self-sample-count = Self sample count
+CallTreeSidebar--self-bytes = Self bytes
+
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/

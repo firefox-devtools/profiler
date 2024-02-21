@@ -302,14 +302,27 @@ type WeightDetails = {|
   +number: (n: number) => string,
 |};
 
-function getWeightTypeLabel(weightType: WeightType): string {
+function getRunningWeightTypeLabelL10nId(weightType: WeightType): string {
   switch (weightType) {
     case 'tracing-ms':
-      return `milliseconds`;
+      return 'CallTreeSidebar--running-milliseconds';
     case 'samples':
-      return 'sample count';
+      return 'CallTreeSidebar--running-sample-count';
     case 'bytes':
-      return 'bytes';
+      return 'CallTreeSidebar--running-bytes';
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}
+
+function getSelfWeightTypeLabelL10nId(weightType: WeightType): string {
+  switch (weightType) {
+    case 'tracing-ms':
+      return 'CallTreeSidebar--self-milliseconds';
+    case 'samples':
+      return 'CallTreeSidebar--self-sample-count';
+    case 'bytes':
+      return 'CallTreeSidebar--self-bytes';
     default:
       throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
   }
@@ -458,10 +471,12 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           {totalTimeBreakdownByCategory ? (
             <>
               <h4 className="sidebar-title3 sidebar-title-label">
-                <div className="sidebar-title-label-left">Categories</div>
-                <div className="sidebar-title-label-right">
-                  Running {getWeightTypeLabel(weightType)}
-                </div>
+                <Localized id="CallTreeSidebar--categories">
+                  <div className="sidebar-title-label-left">Categories</div>
+                </Localized>
+                <Localized id={getRunningWeightTypeLabelL10nId(weightType)}>
+                  <div className="sidebar-title-label-right"></div>
+                </Localized>
               </h4>
               <CategoryBreakdown
                 kind="total"
@@ -474,10 +489,12 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           {selfTimeBreakdownByCategory ? (
             <>
               <h4 className="sidebar-title3 sidebar-title-label">
-                <div className="sidebar-title-label-left">Categories</div>
-                <div className="sidebar-title-label-right">
-                  Self {getWeightTypeLabel(weightType)}
-                </div>
+                <Localized id="CallTreeSidebar--categories">
+                  <div className="sidebar-title-label-left">Categories</div>
+                </Localized>
+                <Localized id={getSelfWeightTypeLabelL10nId(weightType)}>
+                  <div className="sidebar-title-label-right"></div>
+                </Localized>
               </h4>
               <CategoryBreakdown
                 kind="self"
@@ -490,8 +507,12 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           {totalTimeBreakdownByImplementation && totalTime.value ? (
             <React.Fragment>
               <h4 className="sidebar-title3 sidebar-title-label">
-                <div>Implementation</div>
-                <div>Running {getWeightTypeLabel(weightType)}</div>
+                <Localized id="CallTreeSidebar--implementation">
+                  <div>Implementation</div>
+                </Localized>
+                <Localized id={getRunningWeightTypeLabelL10nId(weightType)}>
+                  <div></div>
+                </Localized>
               </h4>
               <ImplementationBreakdown
                 breakdown={totalTimeBreakdownByImplementation}
@@ -502,8 +523,12 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           {selfTimeBreakdownByImplementation && selfTime.value ? (
             <React.Fragment>
               <h4 className="sidebar-title3 sidebar-title-label">
-                <div>Implementation</div>
-                <div>Self {getWeightTypeLabel(weightType)}</div>
+                <Localized id="CallTreeSidebar--implementation">
+                  <div>Implementation</div>
+                </Localized>
+                <Localized id={getSelfWeightTypeLabelL10nId(weightType)}>
+                  <div></div>
+                </Localized>
               </h4>
               <ImplementationBreakdown
                 breakdown={selfTimeBreakdownByImplementation}
