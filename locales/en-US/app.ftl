@@ -191,6 +191,20 @@ CallTree--inlining-badge = (inlined)
 CallTreeSidebar--select-a-node = Select a node to display information about it.
 CallTreeSidebar--call-node-details = Call node details
 
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
 CallTreeSidebar--traced-running-time =
     .label = Traced running time
 CallTreeSidebar--traced-self-time =
