@@ -96,8 +96,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -140,8 +139,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
       <div
         class="sidebar-title-label-right"
       >
-        Self 
-        sample count
+        Self sample count
       </div>
     </h4>
     <div
@@ -180,8 +178,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -214,8 +211,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
         Implementation
       </div>
       <div>
-        Self 
-        sample count
+        Self sample count
       </div>
     </h4>
     <div
@@ -341,8 +337,7 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -415,8 +410,7 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
       <div
         class="sidebar-title-label-right"
       >
-        Self 
-        sample count
+        Self sample count
       </div>
     </h4>
     <div
@@ -455,8 +449,7 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -489,8 +482,7 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
         Implementation
       </div>
       <div>
-        Self 
-        sample count
+        Self sample count
       </div>
     </h4>
     <div
@@ -507,6 +499,151 @@ exports[`CallTreeSidebar can expand subcategories 2`] = `
       class="sidebar-value"
     >
       2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
+    </div>
+  </div>
+</aside>
+`;
+
+exports[`CallTreeSidebar matches the snapshots when displaying bytes data 1`] = `
+<div
+  class="sidebar sidebar-calltree"
+>
+  <div
+    class="sidebar-contents-wrapper"
+  >
+    Select a node to display information about it.
+  </div>
+</div>
+`;
+
+exports[`CallTreeSidebar matches the snapshots when displaying bytes data 2`] = `
+<aside
+  class="sidebar sidebar-calltree"
+>
+  <div
+    class="sidebar-contents-wrapper"
+  >
+    <header
+      class="sidebar-titlegroup"
+    >
+      <h2
+        class="sidebar-title can-select-content"
+        title="Cjs
+(click to select)"
+      >
+        <input
+          class="can-select-content-input"
+          readonly=""
+          value="Cjs"
+        />
+      </h2>
+    </header>
+    <h4
+      class="sidebar-title3"
+    >
+      <div>
+        Call node details
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Running size
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      17%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1B
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Self size
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      —
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      —
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Running bytes
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      JavaScript
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1B
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-yellow"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running bytes
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      JS interpreter
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1B
     </div>
     <div
       class="sidebar-histogram-bar"
@@ -628,8 +765,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -662,8 +798,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -789,8 +924,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -823,8 +957,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -950,8 +1083,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1011,8 +1143,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Self 
-        sample count
+        Self sample count
       </div>
     </h4>
     <div
@@ -1045,8 +1176,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1079,8 +1209,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Self 
-        sample count
+        Self sample count
       </div>
     </h4>
     <div
@@ -1206,8 +1335,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1244,8 +1372,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Self 
-        sample count
+        Self sample count
       </div>
     </h4>
     <div
@@ -1278,8 +1405,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1312,8 +1438,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Self 
-        sample count
+        Self sample count
       </div>
     </h4>
     <div
@@ -1451,8 +1576,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1485,8 +1609,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1612,8 +1735,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1646,8 +1768,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1773,8 +1894,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1807,8 +1927,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1934,8 +2053,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-title-label-right"
       >
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
@@ -1968,8 +2086,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Implementation
       </div>
       <div>
-        Running 
-        sample count
+        Running sample count
       </div>
     </h4>
     <div
