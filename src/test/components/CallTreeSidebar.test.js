@@ -130,6 +130,25 @@ describe('CallTreeSidebar', function () {
     expect(container.firstChild).toMatchSnapshot();
   });
 
+  it('matches the snapshots when displaying bytes data', () => {
+    const profileWithDicts = getProfileWithCategories();
+    // Create a weighted samples table with bytes.
+    const [{ samples }] = profileWithDicts.profile.threads;
+    samples.weightType = 'bytes';
+    samples.weight = samples.time.map((i) => i);
+
+    const {
+      selectNode,
+      funcNamesDict: { A, B, Cjs },
+      container,
+    } = setup(profileWithDicts);
+
+    expect(container.firstChild).toMatchSnapshot();
+
+    selectNode([A, B, Cjs]);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
   it('matches the snapshots when displaying data about the currently selected node in an inverted tree', () => {
     const {
       selectNode,
