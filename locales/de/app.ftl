@@ -169,6 +169,46 @@ CallTree--inlining-badge = (inlined)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Wählen Sie einen Knoten aus, um Informationen darüber anzuzeigen.
+CallTreeSidebar--call-node-details = Details zum Aufrufknoten
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Nachverfolgte Laufzeit
+CallTreeSidebar--traced-self-time =
+    .label = Nachverfolgte Eigenzeit
+CallTreeSidebar--running-time =
+    .label = Laufzeit
+CallTreeSidebar--self-time =
+    .label = Eigenzeit
+CallTreeSidebar--running-samples =
+    .label = Laufende Stichproben
+CallTreeSidebar--self-samples =
+    .label = Eigenstichproben
+CallTreeSidebar--running-size =
+    .label = Laufgröße
+CallTreeSidebar--self-size =
+    .label = Eigengröße
+CallTreeSidebar--categories = Kategorien
+CallTreeSidebar--implementation = Implementierung
+CallTreeSidebar--running-milliseconds = Laufende Millisekunden
+CallTreeSidebar--running-sample-count = Anzahl laufende Stichproben
+CallTreeSidebar--running-bytes = Laufende Bytes
+CallTreeSidebar--self-milliseconds = Eigene Millisekunden
+CallTreeSidebar--self-sample-count = Anzahl Eigenstichproben
+CallTreeSidebar--self-bytes = Eigene Bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
