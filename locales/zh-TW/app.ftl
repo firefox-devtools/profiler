@@ -126,6 +126,46 @@ CallTree--inlining-badge = （內聯）
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = 選擇節點來顯示該節點的相關資訊。
+CallTreeSidebar--call-node-details = 呼叫節點詳細資訊
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = 追蹤執行時間
+CallTreeSidebar--traced-self-time =
+    .label = 追蹤 Self 時間
+CallTreeSidebar--running-time =
+    .label = 執行時間
+CallTreeSidebar--self-time =
+    .label = Self 時間
+CallTreeSidebar--running-samples =
+    .label = 執行取樣
+CallTreeSidebar--self-samples =
+    .label = Self 取樣
+CallTreeSidebar--running-size =
+    .label = 執行大小
+CallTreeSidebar--self-size =
+    .label = Self 大小
+CallTreeSidebar--categories = 分類
+CallTreeSidebar--implementation = 實作
+CallTreeSidebar--running-milliseconds = 執行時間（ms）
+CallTreeSidebar--running-sample-count = 執行取樣數
+CallTreeSidebar--running-bytes = 執行位元組
+CallTreeSidebar--self-milliseconds = Self 時間（ms）
+CallTreeSidebar--self-sample-count = Self 取樣數
+CallTreeSidebar--self-bytes = Self 位元組
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
