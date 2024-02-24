@@ -156,11 +156,16 @@ CallTreeSidebar--self-samples =
     .label = Campioni nella funzione
 CallTreeSidebar--running-size =
     .label = Dimensioni esecuzione
+CallTreeSidebar--self-size =
+    .label = Dimensioni nella funzione
 CallTreeSidebar--categories = Categorie
 CallTreeSidebar--implementation = Implementazione
-CallTreeSidebar--running-milliseconds = Millisecondi (esecuzione)
-CallTreeSidebar--running-sample-count = Numero campioni (esecuzione)
-CallTreeSidebar--running-bytes = Byte (esecuzione)
+CallTreeSidebar--running-milliseconds = Esecuzione — Millisecondi
+CallTreeSidebar--running-sample-count = Esecuzione — Numero campioni
+CallTreeSidebar--running-bytes = Esecuzione — Byte
+CallTreeSidebar--self-milliseconds = Nella funzione —  Millisecondi
+CallTreeSidebar--self-sample-count = Nella funzione —  Numero campioni
+CallTreeSidebar--self-bytes = Nella funzione —  Byte
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
