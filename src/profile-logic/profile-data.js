@@ -2143,6 +2143,10 @@ export function updateThreadStacksByGeneratingNewStackColumns(
     Array<IndexIntoStackTable | null>,
     Array<Milliseconds>
   ) => Array<IndexIntoStackTable | null>,
+  computeMappedSyncBacktraceStackColumn: (
+    Array<IndexIntoStackTable | null>,
+    Array<Milliseconds>
+  ) => Array<IndexIntoStackTable | null>,
   computeMappedMarkerDataColumn: (
     Array<MarkerPayload | null>
   ) => Array<MarkerPayload | null>
@@ -2170,14 +2174,17 @@ export function updateThreadStacksByGeneratingNewStackColumns(
     // Map the JS allocations stacks if there are any.
     newThread.jsAllocations = {
       ...jsAllocations,
-      stack: computeMappedStackColumn(jsAllocations.stack, jsAllocations.time),
+      stack: computeMappedSyncBacktraceStackColumn(
+        jsAllocations.stack,
+        jsAllocations.time
+      ),
     };
   }
   if (nativeAllocations) {
     // Map the native allocations stacks if there are any.
     newThread.nativeAllocations = {
       ...nativeAllocations,
-      stack: computeMappedStackColumn(
+      stack: computeMappedSyncBacktraceStackColumn(
         nativeAllocations.stack,
         nativeAllocations.time
       ),
@@ -2197,6 +2204,30 @@ export function updateThreadStacks(
   newStackTable: StackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
 ): Thread {
+  return updateThreadStacksSeparate(
+    thread,
+    newStackTable,
+    convertStack,
+    convertStack
+  );
+}
+
+/**
+ * Like updateThreadStacks, but accepts separate functions for converting sample
+ * stacks and sync backtrace stacks. There is only one reason to treat the two
+ * differently: Sample stacks start with a frame address which was sampled from
+ * the instruction pointer, and sync backtrace stacks start with a frame address
+ * that was originally derived from a return address (because there were other
+ * frames on the native stack which have been stripped).
+ */
+export function updateThreadStacksSeparate(
+  thread: Thread,
+  newStackTable: StackTable,
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null,
+  convertSyncBacktraceStack: (
+    IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null
+): Thread {
   function convertMarkerData(
     oldData: MarkerPayload | null
   ): MarkerPayload | null {
@@ -2207,7 +2238,7 @@ export function updateThreadStacks(
         ...oldData,
         cause: {
           ...oldData.cause,
-          stack: convertStack(oldData.cause.stack),
+          stack: convertSyncBacktraceStack(oldData.cause.stack),
         },
       };
     }
@@ -2219,6 +2250,8 @@ export function updateThreadStacks(
     newStackTable,
     (stackColumn, _timeColumn) =>
       stackColumn.map((oldStack) => convertStack(oldStack)),
+    (stackColumn, _timeColumn) =>
+      stackColumn.map((oldStack) => convertSyncBacktraceStack(oldStack)),
     (markerDataColumn) => markerDataColumn.map(convertMarkerData)
   );
 }
@@ -3117,107 +3150,6 @@ export function gatherStackReferences(thread: Thread): StackReferences {
 }
 
 /**
- * Create a new thread with all stack references translated via the given
- * maps. The maps map IndexIntoOldStackTable -> IndexIntoNewStackTable.
- * Only a subset of entries are read from the map: The same stacks that
- * gatherStackReferences found in the thread. All other entries are ignored
- * and do not need to be present.
- * With the exception of the caller which does the initial return address
- * nudging, most callers will want to pass the same map to both map arguments.
- */
-export function replaceStackReferences(
-  thread: Thread,
-  mapForSamplingSelfStacks: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  >,
-  mapForBacktraceSelfStacks: Map<
-    IndexIntoStackTable,
-    IndexIntoStackTable | null,
-  >
-): Thread {
-  const {
-    samples: oldSamples,
-    markers: oldMarkers,
-    jsAllocations: oldJsAllocations,
-    nativeAllocations: oldNativeAllocations,
-  } = thread;
-
-  // Samples
-  const samples = {
-    ...oldSamples,
-    stack: oldSamples.stack.map((oldStackIndex) => {
-      if (oldStackIndex === null) {
-        return null;
-      }
-      const newStack = mapForSamplingSelfStacks.get(oldStackIndex);
-      if (newStack === undefined) {
-        throw new Error(
-          `Missing mapForSamplingSelfStacks entry for stack ${oldStackIndex}`
-        );
-      }
-      return newStack;
-    }),
-  };
-
-  function mapBacktraceSelfStack(oldStackIndex) {
-    if (oldStackIndex === null) {
-      return null;
-    }
-    const newStack = mapForBacktraceSelfStacks.get(oldStackIndex);
-    if (newStack === undefined) {
-      throw new Error(
-        `Missing mapForBacktraceSelfStacks entry for stack ${oldStackIndex}`
-      );
-    }
-    return newStack;
-  }
-
-  // Markers
-  function replaceStackReferenceInMarkerPayload(
-    oldData: MarkerPayload | null
-  ): MarkerPayload | null {
-    if (oldData && 'cause' in oldData && oldData.cause) {
-      // Replace the cause with the right stack index.
-      // Use (...: any) because our current version of Flow has trouble with
-      // the object spread operator.
-      return ({
-        ...oldData,
-        cause: {
-          ...oldData.cause,
-          stack: mapBacktraceSelfStack(oldData.cause.stack),
-        },
-      }: any);
-    }
-    return oldData;
-  }
-  const markers = {
-    ...oldMarkers,
-    data: oldMarkers.data.map(replaceStackReferenceInMarkerPayload),
-  };
-
-  // JS allocations
-  let jsAllocations;
-  if (oldJsAllocations !== undefined) {
-    jsAllocations = {
-      ...oldJsAllocations,
-      stack: oldJsAllocations.stack.map(mapBacktraceSelfStack),
-    };
-  }
-
-  // Native allocations
-  let nativeAllocations;
-  if (oldNativeAllocations !== undefined) {
-    nativeAllocations = {
-      ...oldNativeAllocations,
-      stack: oldNativeAllocations.stack.map(mapBacktraceSelfStack),
-    };
-  }
-
-  return { ...thread, samples, markers, jsAllocations, nativeAllocations };
-}
-
-/**
  * Creates a new thread with modified frame and stack tables for "nudged" return addresses:
  * All return addresses are moved backwards by one byte, to point into the "call"
  * instruction. This allows symbolication to obtain accurate line numbers and inline frames
@@ -3477,13 +3409,13 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
   const newThread = {
     ...thread,
     frameTable: newFrameTable,
-    stackTable: newStackTable,
   };
 
-  return replaceStackReferences(
+  return updateThreadStacksSeparate(
     newThread,
-    mapForSamplingSelfStacks,
-    mapForBacktraceSelfStacks
+    newStackTable,
+    getMapStackUpdater(mapForSamplingSelfStacks),
+    getMapStackUpdater(mapForBacktraceSelfStacks)
   );
 }
 

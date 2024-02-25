@@ -1731,6 +1731,7 @@ export function filterSamples(
       thread,
       thread.stackTable,
       computeFilteredStackColumn,
+      computeFilteredStackColumn,
       (markerData) => markerData
     );
   });
