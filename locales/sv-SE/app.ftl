@@ -177,6 +177,7 @@ CallTree--inlining-badge = (infogad)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Välj en nod för att visa information om den.
+CallTreeSidebar--call-node-details = Detaljer anropsnod
 
 ## CallTreeSidebar timing information
 ##
