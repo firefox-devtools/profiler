@@ -197,6 +197,7 @@ CallTreeSidebar--call-node-details = Λεπτομέρειες κόμβου κλ�
 CallTreeSidebar--running-time =
     .label = Χρόνος εκτέλεσης
 CallTreeSidebar--categories = Κατηγορίες
+CallTreeSidebar--implementation = Υλοποίηση
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
