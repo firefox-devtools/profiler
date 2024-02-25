@@ -2437,7 +2437,9 @@ export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  stringTable: UniqueStringArray
+  stringTable: UniqueStringArray,
+  frameLineNumber: number | null = null,
+  frameColumnNumber: number | null = null
 ): string {
   let resourceType = null;
   let origin = null;
@@ -2459,12 +2461,19 @@ export function getOriginAnnotationForFunc(
     // strip it down to just the actual path.
     fileName = parseFileNameFromSymbolication(fileName).path;
 
-    const lineNumber = funcTable.lineNumber[funcIndex];
-    if (lineNumber !== null) {
-      fileName += ':' + lineNumber;
-      const columnNumber = funcTable.columnNumber[funcIndex];
-      if (columnNumber !== null) {
-        fileName += ':' + columnNumber;
+    if (frameLineNumber !== null) {
+      fileName += ':' + frameLineNumber;
+      if (frameColumnNumber !== null) {
+        fileName += ':' + frameColumnNumber;
+      }
+    } else {
+      const lineNumber = funcTable.lineNumber[funcIndex];
+      if (lineNumber !== null) {
+        fileName += ':' + lineNumber;
+        const columnNumber = funcTable.columnNumber[funcIndex];
+        if (columnNumber !== null) {
+          fileName += ':' + columnNumber;
+        }
       }
     }
   }

@@ -18,10 +18,12 @@ import {
   changeSelectedCallNode,
   changeExpandedCallNodes,
 } from '../../actions/profile-view';
-import { formatTree } from '../fixtures/utils';
+import { formatTree, formatStack } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
+import { stripIndent } from 'common-tags';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 /**
@@ -221,6 +223,17 @@ describe('doSymbolicateProfile', function () {
         'third symbol',
         'last symbol',
       ]);
+
+      // Check that the first sample's stack (0x000a -> 0x2000) has been symbolicated
+      // correctly. The 0x000a frame expands to two frames: there is an "inlined call"
+      // from "first symbol" to "second symbol" at this address. 0x2000 symbolicates to
+      // just one frame ("last symbol"). We also check that the frame line numbers
+      // are correct.
+      expect(formatStack(thread, ensureExists(thread.samples.stack[0])))
+        .toBe(stripIndent`
+          first symbol (first_and_last.cpp:14)
+          second symbol (second_and_third.rs:37)
+          last symbol (first_and_last.cpp)`);
 
       // The first and last symbol function should have the filename first_and_last.cpp.
       expect(funcTable.fileName[firstSymbolFuncIndex]).toBe(
