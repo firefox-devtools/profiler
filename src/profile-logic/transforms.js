@@ -1730,7 +1730,8 @@ export function filterSamples(
     return updateThreadStacksByGeneratingNewStackColumns(
       thread,
       thread.stackTable,
-      computeFilteredStackColumn
+      computeFilteredStackColumn,
+      (markerData) => markerData
     );
   });
 }

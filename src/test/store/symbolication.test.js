@@ -9,10 +9,15 @@ import {
   partialSymbolTable,
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
+import type { MarkerPayload } from 'firefox-profiler/types';
 import { SymbolStore } from '../../profile-logic/symbol-store.js';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { resourceTypes } from '../../profile-logic/data-structures';
+import { INTERVAL } from 'firefox-profiler/app-logic/constants';
+import {
+  resourceTypes,
+  getEmptyRawMarkerTable,
+} from '../../profile-logic/data-structures';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
   changeSelectedCallNode,
@@ -234,6 +239,19 @@ describe('doSymbolicateProfile', function () {
           first symbol (first_and_last.cpp:14)
           second symbol (second_and_third.rs:37)
           last symbol (first_and_last.cpp)`);
+
+      // Do the same check for the marker stack. We only have one marker, and its stack
+      // is the same as the stack of the first sample (see _createUnsymbolicatedProfile).
+      // We're doing this check in a test which adds inlined frames during symbolication,
+      // because with inlining we know that symbolication has to create a new stack
+      // table, and so stack indexes have to be updated.
+      const firstMarkerData = ensureExists(thread.markers.data[0]);
+      expect(firstMarkerData.type).toBe('Text');
+      const firstMarkerCause = ensureExists((firstMarkerData: any).cause);
+      expect(formatStack(thread, firstMarkerCause.stack)).toBe(stripIndent`
+        first symbol (first_and_last.cpp:14)
+        second symbol (second_and_third.rs:37)
+        last symbol (first_and_last.cpp)`);
 
       // The first and last symbol function should have the filename first_and_last.cpp.
       expect(funcTable.fileName[firstSymbolFuncIndex]).toBe(
@@ -552,6 +570,32 @@ function _createUnsymbolicatedProfile() {
   for (let i = 0; i < thread.funcTable.length; i++) {
     thread.funcTable.resource[i] = 0;
   }
+
+  // Add a marker with a cause stack. We use the stack of the first sample.
+  // This sample has 0x000a in its stack, which has an inlined function call,
+  // so we can test that the inlined function call is symbolicated in the marker
+  // stack.
+  const markerStack = ensureExists(thread.samples.stack[0]);
+  const markerData: MarkerPayload = {
+    type: 'Text',
+    name: 'MarkerWithStack',
+    cause: {
+      stack: markerStack,
+    },
+  };
+
+  const markers = getEmptyRawMarkerTable();
+  const markerIndex = markers.length++;
+  markers.data[markerIndex] = markerData;
+  markers.name[markerIndex] =
+    thread.stringTable.indexForString('MarkerWithStack');
+  markers.startTime[markerIndex] = thread.samples.time[0];
+  markers.endTime[markerIndex] = thread.samples.time[1];
+  markers.phase[markerIndex] = INTERVAL;
+  markers.category[markerIndex] = 0;
+
+  thread.markers = markers;
+
   return profile;
 }
 

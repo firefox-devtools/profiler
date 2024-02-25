@@ -2139,39 +2139,45 @@ function _computeThreadWithInvertedStackTable(
 export function updateThreadStacksByGeneratingNewStackColumns(
   thread: Thread,
   newStackTable: StackTable,
-  computeFilteredStackColumn: (
+  computeMappedStackColumn: (
     Array<IndexIntoStackTable | null>,
     Array<Milliseconds>
-  ) => Array<IndexIntoStackTable | null>
+  ) => Array<IndexIntoStackTable | null>,
+  computeMappedMarkerDataColumn: (
+    Array<MarkerPayload | null>
+  ) => Array<MarkerPayload | null>
 ): Thread {
-  const { jsAllocations, nativeAllocations, samples } = thread;
+  const { jsAllocations, nativeAllocations, samples, markers } = thread;
 
   const newSamples = {
     ...samples,
-    stack: computeFilteredStackColumn(samples.stack, samples.time),
+    stack: computeMappedStackColumn(samples.stack, samples.time),
+  };
+
+  const newMarkers = {
+    ...markers,
+    data: computeMappedMarkerDataColumn(markers.data),
   };
 
   const newThread = {
     ...thread,
     samples: newSamples,
+    markers: newMarkers,
     stackTable: newStackTable,
   };
 
   if (jsAllocations) {
-    // Filter the JS allocations if there are any.
+    // Map the JS allocations stacks if there are any.
     newThread.jsAllocations = {
       ...jsAllocations,
-      stack: computeFilteredStackColumn(
-        jsAllocations.stack,
-        jsAllocations.time
-      ),
+      stack: computeMappedStackColumn(jsAllocations.stack, jsAllocations.time),
     };
   }
   if (nativeAllocations) {
-    // Filter the native allocations if there are any.
+    // Map the native allocations stacks if there are any.
     newThread.nativeAllocations = {
       ...nativeAllocations,
-      stack: computeFilteredStackColumn(
+      stack: computeMappedStackColumn(
         nativeAllocations.stack,
         nativeAllocations.time
       ),
@@ -2191,11 +2197,29 @@ export function updateThreadStacks(
   newStackTable: StackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
 ): Thread {
+  function convertMarkerData(
+    oldData: MarkerPayload | null
+  ): MarkerPayload | null {
+    if (oldData && 'cause' in oldData && oldData.cause) {
+      // Replace the cause with the right stack index.
+      // $FlowExpectError Flow is failing to refine oldData.type based on the `cause` field check
+      return {
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: convertStack(oldData.cause.stack),
+        },
+      };
+    }
+    return oldData;
+  }
+
   return updateThreadStacksByGeneratingNewStackColumns(
     thread,
     newStackTable,
     (stackColumn, _timeColumn) =>
-      stackColumn.map((oldStack) => convertStack(oldStack))
+      stackColumn.map((oldStack) => convertStack(oldStack)),
+    (markerDataColumn) => markerDataColumn.map(convertMarkerData)
   );
 }
 
