@@ -194,10 +194,30 @@ CallTreeSidebar--call-node-details = Λεπτομέρειες κόμβου κλ�
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = Ιχνηλατημένος χρόνος εκτέλεσης
+CallTreeSidebar--traced-self-time =
+    .label = Ιχνηλατημένος ιδιοχρόνος
 CallTreeSidebar--running-time =
     .label = Χρόνος εκτέλεσης
+CallTreeSidebar--self-time =
+    .label = Iδιοχρόνος
+CallTreeSidebar--running-samples =
+    .label = Εκτελούμενα δείγματα
+CallTreeSidebar--self-samples =
+    .label = Ιδιοδείγματα
+CallTreeSidebar--running-size =
+    .label = Μέγεθος εκτέλεσης
+CallTreeSidebar--self-size =
+    .label = Ιδιομέγεθος
 CallTreeSidebar--categories = Κατηγορίες
 CallTreeSidebar--implementation = Υλοποίηση
+CallTreeSidebar--running-milliseconds = Χιλιοστά δευτερολέπτου εκτέλεσης
+CallTreeSidebar--running-sample-count = Εκτελούμενος αριθμός δειγμάτων
+CallTreeSidebar--running-bytes = Bytes εκτέλεσης
+CallTreeSidebar--self-milliseconds = Χιλιοστά δευτερολέπτου συνάρτησης
+CallTreeSidebar--self-sample-count = Αριθμός ιδιοδειγμάτων
+CallTreeSidebar--self-bytes = Ιδιο-bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
