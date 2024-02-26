@@ -6,6 +6,9 @@
 import { SymbolStore } from '../../profile-logic/symbol-store';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
+// fake-indexeddb no longer includes a structuredClone polyfill, so we need to
+// import it explicitly.
+import 'core-js/stable/structured-clone';
 import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { ensureExists } from '../../utils/flow';

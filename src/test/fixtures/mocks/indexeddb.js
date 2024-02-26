@@ -18,6 +18,10 @@ function resetIndexedDb() {
 }
 
 export function autoMockIndexedDB() {
+  // fake-indexeddb no longer includes a structuredClone polyfill, so we need to
+  // import it explicitly.
+  require('core-js/stable/structured-clone');
+
   // This require has a side-effect that's not possible to have with a function
   // call, and that we want to happen only when calling autoMockIndexedDB.
   // That's why we require it instead of importing.

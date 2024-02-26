@@ -21,6 +21,9 @@ import {
 import { formatTree } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
+// fake-indexeddb no longer includes a structuredClone polyfill, so we need to
+// import it explicitly.
+import 'core-js/stable/structured-clone';
 import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
