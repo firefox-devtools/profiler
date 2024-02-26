@@ -34,6 +34,7 @@ describe('sanitizePII', function () {
   ) {
     const defaultsPii = {
       shouldRemoveThreads: new Set(),
+      shouldRemoveCounters: new Set(),
       shouldRemoveThreadsWithScreenshots: new Set(),
       shouldRemoveUrls: false,
       shouldFilterToCommittedRange: null,
@@ -132,6 +133,24 @@ describe('sanitizePII', function () {
     expect(sanitizedProfile.threads.length).toEqual(1);
   });
 
+  it('should sanitize counters if they are provided', function () {
+    const { originalProfile, sanitizedProfile } = setup({
+      shouldRemoveCounters: new Set([0]),
+    });
+
+    expect(ensureExists(originalProfile.counters).length).toEqual(1);
+    // The counter should be deleted now.
+    expect(ensureExists(sanitizedProfile.counters).length).toEqual(0);
+  });
+
+  it('should not sanitize counters if shouldRemoveCounters is not provided', function () {
+    const { originalProfile, sanitizedProfile } = setup({});
+
+    expect(ensureExists(originalProfile.counters).length).toEqual(1);
+    // The counter should still be there.
+    expect(ensureExists(sanitizedProfile.counters).length).toEqual(1);
+  });
+
   it('should sanitize counters if its thread is deleted', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveThreads: new Set([0]),
@@ -217,6 +236,99 @@ describe('sanitizePII', function () {
         sanitizedRange.end + 1
       );
     }
+  });
+
+  it('should remove threads starting after the range if range is filtered', function () {
+    const originalProfile = processGeckoProfile(createGeckoProfile());
+    const timeRangeForFirstThread = getTimeRangeForThread(
+      originalProfile.threads[0],
+      originalProfile.meta.interval
+    );
+
+    // Make sure that the original time range is 0-7.
+    expect(timeRangeForFirstThread).toEqual({ start: 0, end: 7 });
+
+    const { sanitizedProfile } = setup(
+      {
+        shouldFilterToCommittedRange: timeRangeForFirstThread,
+      },
+      originalProfile
+    );
+
+    function isInTimeRange(thread) {
+      return (
+        thread.registerTime < timeRangeForFirstThread.end &&
+        (!thread.unregisterTime ||
+          thread.unregisterTime > timeRangeForFirstThread.start)
+      );
+    }
+    const expectedThreadCount =
+      originalProfile.threads.filter(isInTimeRange).length;
+    expect(expectedThreadCount).toEqual(2);
+    expect(sanitizedProfile.threads.length).toEqual(expectedThreadCount);
+    expect(sanitizedProfile.threads.every(isInTimeRange)).toBeTruthy();
+  });
+
+  it('should remove threads ending before the range if range is filtered', function () {
+    const originalProfile = processGeckoProfile(createGeckoProfile());
+    const timeRangeForLastThread = getTimeRangeForThread(
+      originalProfile.threads[2],
+      originalProfile.meta.interval
+    );
+
+    // Make sure that the original time range is 0-7.
+    expect(timeRangeForLastThread).toEqual({ start: 1000, end: 1007 });
+
+    const { sanitizedProfile } = setup(
+      {
+        shouldFilterToCommittedRange: timeRangeForLastThread,
+      },
+      originalProfile
+    );
+
+    function isInTimeRange(thread) {
+      return (
+        thread.registerTime < timeRangeForLastThread.end &&
+        (!thread.unregisterTime ||
+          thread.unregisterTime > timeRangeForLastThread.start)
+      );
+    }
+    const expectedThreadCount =
+      originalProfile.threads.filter(isInTimeRange).length;
+    expect(expectedThreadCount).toEqual(1);
+    expect(sanitizedProfile.threads.length).toEqual(expectedThreadCount);
+    expect(sanitizedProfile.threads.every(isInTimeRange)).toBeTruthy();
+  });
+
+  it('should keep empty threads that were already empty', function () {
+    const originalProfile = processGeckoProfile(createGeckoProfile());
+
+    // Remove all the markers and samples from one thread of the original profile.
+    const { markers, samples } = originalProfile.threads[1];
+    markers.data = [];
+    markers.name = [];
+    markers.startTime = [];
+    markers.endTime = [];
+    markers.phase = [];
+    markers.category = [];
+    markers.length = 0;
+    samples.stack = [];
+    samples.time = [];
+    samples.threadCPUDelta = [];
+    samples.eventDelay = [];
+    samples.length = 0;
+
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveUrls: true,
+      },
+      originalProfile
+    );
+
+    // Verify that the empty thread has not been sanitized out.
+    expect(sanitizedProfile.threads.length).toEqual(
+      originalProfile.threads.length
+    );
   });
 
   it('should sanitize profiler overhead if its thread is deleted', function () {
