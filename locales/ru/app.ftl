@@ -182,6 +182,32 @@ CallTree--inlining-badge = (встроенный)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Выберите узел, чтобы отобразить информацию о нем.
+CallTreeSidebar--call-node-details = Подробности вызова узла
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Отслеживаемое время работы
+CallTreeSidebar--traced-self-time =
+    .label = Отслеживаемое собственное время
+CallTreeSidebar--running-time =
+    .label = Время работы
+CallTreeSidebar--self-time =
+    .label = Собственное время
+CallTreeSidebar--running-samples =
+    .label = Запущенные семплы
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
