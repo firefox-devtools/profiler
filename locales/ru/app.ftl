@@ -208,6 +208,20 @@ CallTreeSidebar--self-time =
     .label = Собственное время
 CallTreeSidebar--running-samples =
     .label = Запущенные семплы
+CallTreeSidebar--self-samples =
+    .label = Собственные семплы
+CallTreeSidebar--running-size =
+    .label = Запущенный размер
+CallTreeSidebar--self-size =
+    .label = Собственный размер
+CallTreeSidebar--categories = Категории
+CallTreeSidebar--implementation = Реализация
+CallTreeSidebar--running-milliseconds = Запущенные миллисекунды
+CallTreeSidebar--running-sample-count = Число запущенных семплов
+CallTreeSidebar--running-bytes = Запущенные байты
+CallTreeSidebar--self-milliseconds = Собственные миллисекунды
+CallTreeSidebar--self-sample-count = Число собственных семплов
+CallTreeSidebar--self-bytes = Собственные байты
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
