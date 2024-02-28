@@ -40,15 +40,38 @@ the [section related to this step](#how-to-merge-l10n-into-main) for more detail
 After merging the `l10n` branch, we can continue with the deployment.
 The easiest by far is to
 [create a pull request on GitHub](https://github.com/firefox-devtools/profiler/compare/production...main?expand=1).
-It would be nice to write down the main changes in the PR description.
+It would be nice to write down the main changes in the PR description ([see below](#user-content-helpful-git-commands-to-write-the-main-changes)).
 
 After the PR is created all checks should run. When it's ready the PR can be
 merged. Be careful to always use the **create a merge commit** functionality,
-not _squash_ or _rebase_, to keep a better history.
+not _squash_ or _rebase_, to keep a better history. Also you can copy the PR
+description as the commit log body, so that the changelog is also present in the
+git repository.
 
 Once it's done the new version should be deployed automatically. You can follow the
 process on [Netlify's dashboard](https://app.netlify.com/sites/perf-html/deploys)
 if you have access.
+
+### Helpful git commands to write the main changes
+
+Here is how you can gather the changes since the last deploy:
+
+1. Gather all the code changes:
+
+```
+git fetch upstream && git log upstream/production..upstream/main --first-parent --oneline --no-decorate --format="format:[%an] %s" --reverse
+```
+
+2. You'll probably need to adjust it manually: remove some useless commits (such
+   as the dependency updates), fix some authors (as merge commits aren't always
+   using the same author as the Pull Request author).
+3. Gather the locales author changes:
+
+```
+for i in ./locales/* ; do git log upstream/production..upstream/main --grep Pontoon: --oneline --no-decorate --format="format:$(basename $i): %an" $i ; done
+```
+
+4. You'll also need to adjust the result, by merging the lines for the same locale.
 
 ## How to revert to a previous version
 
