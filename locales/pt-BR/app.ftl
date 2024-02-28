@@ -146,6 +146,10 @@ CallTreeSidebar--call-node-details = Detalhes do node de chamadas
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = Tempo de execução registrado
+CallTreeSidebar--traced-self-time =
+    .label = Tempo próprio registrado
 CallTreeSidebar--running-time =
     .label = Tempo de execução
 CallTreeSidebar--self-time =
