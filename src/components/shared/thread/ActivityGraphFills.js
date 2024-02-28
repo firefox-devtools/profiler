@@ -473,11 +473,14 @@ export class ActivityFillGraphQuerier {
         continue;
       }
       const sampleCategory = stackTable.category[stackIndex];
+      if (sampleCategory !== category) {
+        // The sample contribution is already filtered by the category at this
+        // point. So we should skip the samples that have different categories.
+        continue;
+      }
+
       const upperEdgeOfThisSample = upperEdgeOfPreviousSample + contribution;
-      // Checking the sample category here because there are samples with different
-      // categories that has y percentage is lower than the upperEdgeOfThisSample.
-      // It's possible to pick the wrong value otherwise.
-      if (sampleCategory === category && yPercentage <= upperEdgeOfThisSample) {
+      if (yPercentage <= upperEdgeOfThisSample) {
         // We use <= rather than < here so that we don't return null if
         // yPercentage is equal to the upper edge of the last sample.
         return { sample, cpuRatioInTimeRange };

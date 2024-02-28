@@ -130,6 +130,46 @@ CallTree--inlining-badge = (inlined)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Selecione um node para exibir informações sobre ele.
+CallTreeSidebar--call-node-details = Detalhes do node de chamadas
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Tempo de execução registrado
+CallTreeSidebar--traced-self-time =
+    .label = Tempo próprio registrado
+CallTreeSidebar--running-time =
+    .label = Tempo de execução
+CallTreeSidebar--self-time =
+    .label = Tempo próprio
+CallTreeSidebar--running-samples =
+    .label = Amostras de execução
+CallTreeSidebar--self-samples =
+    .label = Amostras próprias
+CallTreeSidebar--running-size =
+    .label = Tamanho de execução
+CallTreeSidebar--self-size =
+    .label = Tamanho próprio
+CallTreeSidebar--categories = Categorias
+CallTreeSidebar--implementation = Implementação
+CallTreeSidebar--running-milliseconds = Milissegundos de execução
+CallTreeSidebar--running-sample-count = Contagem de amostras de execução
+CallTreeSidebar--running-bytes = Bytes de execução
+CallTreeSidebar--self-milliseconds = Milissegundos próprio
+CallTreeSidebar--self-sample-count = Contagem de amostras próprio
+CallTreeSidebar--self-bytes = Bytes próprio
 
 ## CompareHome
 ## This is used in the page to compare two profiles.

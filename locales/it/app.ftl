@@ -126,6 +126,46 @@ CallTree--inlining-badge = (incorporata)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Seleziona un nodo per visualizzare informazioni su di esso.
+CallTreeSidebar--call-node-details = Dettagli nodo di chiamata
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Tempo di esecuzione tracciato
+CallTreeSidebar--traced-self-time =
+    .label = Tempo nella funzione tracciato
+CallTreeSidebar--running-time =
+    .label = Tempo di esecuzione
+CallTreeSidebar--self-time =
+    .label = Tempo nella funzione
+CallTreeSidebar--running-samples =
+    .label = Campioni esecuzione
+CallTreeSidebar--self-samples =
+    .label = Campioni nella funzione
+CallTreeSidebar--running-size =
+    .label = Dimensioni esecuzione
+CallTreeSidebar--self-size =
+    .label = Dimensioni nella funzione
+CallTreeSidebar--categories = Categorie
+CallTreeSidebar--implementation = Implementazione
+CallTreeSidebar--running-milliseconds = Esecuzione — Millisecondi
+CallTreeSidebar--running-sample-count = Esecuzione — Numero campioni
+CallTreeSidebar--running-bytes = Esecuzione — Byte
+CallTreeSidebar--self-milliseconds = Nella funzione —  Millisecondi
+CallTreeSidebar--self-sample-count = Nella funzione —  Numero campioni
+CallTreeSidebar--self-bytes = Nella funzione —  Byte
 
 ## CompareHome
 ## This is used in the page to compare two profiles.

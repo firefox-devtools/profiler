@@ -228,7 +228,7 @@ ErrorBoundary--report-error-on-github = Повідомити про помилк
 
 FooterLinks--legal = Правові положення
 FooterLinks--Privacy = Приватність
-FooterLinks--Cookies = Куки
+FooterLinks--Cookies = Файли cookie
 FooterLinks--languageSwitcher--select =
     .title = Змінити мову
 FooterLinks--hide-button =

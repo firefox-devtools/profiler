@@ -14,6 +14,10 @@
 }
 
 .menuButtonsPermalinkTextField {
-  width: 16em;
+  width: 20em;
   height: 19px;
+
+  /* Use a monospace font so that I and l can be differentiated */
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
 }

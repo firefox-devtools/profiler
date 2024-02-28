@@ -132,6 +132,46 @@ CallTree--inlining-badge = (incorporada)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Selecciona un nodo para mostrar información sobre él.
+CallTreeSidebar--call-node-details = Detalles del nodo de llamada
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Tiempo de ejecución trazado
+CallTreeSidebar--traced-self-time =
+    .label = Tiempo propio trazado
+CallTreeSidebar--running-time =
+    .label = Tiempo en ejecución
+CallTreeSidebar--self-time =
+    .label = Tiempo propio
+CallTreeSidebar--running-samples =
+    .label = Bytes durante ejecución
+CallTreeSidebar--self-samples =
+    .label = Muestras propias
+CallTreeSidebar--running-size =
+    .label = Tamaño durante ejecución
+CallTreeSidebar--self-size =
+    .label = Tamaño propio
+CallTreeSidebar--categories = Categorías
+CallTreeSidebar--implementation = Implementación
+CallTreeSidebar--running-milliseconds = Milisegundos en ejecución
+CallTreeSidebar--running-sample-count = Conteo de muestras durante ejecución
+CallTreeSidebar--running-bytes = Bytes durante ejecución
+CallTreeSidebar--self-milliseconds = Milisegundos propios
+CallTreeSidebar--self-sample-count = Conteo de muestras propio
+CallTreeSidebar--self-bytes = Bytes propios
 
 ## CompareHome
 ## This is used in the page to compare two profiles.

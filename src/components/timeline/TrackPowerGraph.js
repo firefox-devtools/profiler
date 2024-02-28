@@ -138,6 +138,11 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
         return samples.count[i] / sampleTimeDeltaInMs;
       };
       const getY = (rawY) => {
+        if (!rawY) {
+          // Make the 0 values invisible so that 'almost 0' is noticeable.
+          return deviceHeight + deviceLineHalfWidth;
+        }
+
         const unitGraphCount = rawY / countRangePerMs;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
