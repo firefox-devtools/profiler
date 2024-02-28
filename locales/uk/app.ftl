@@ -179,6 +179,46 @@ CallTree--inlining-badge = (вбудовані)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Виберіть вузол для показу інформації про нього.
+CallTreeSidebar--call-node-details = Подробиці вузла виклику
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Відстежувана тривалість роботи
+CallTreeSidebar--traced-self-time =
+    .label = Відстежувана самостійно тривалість
+CallTreeSidebar--running-time =
+    .label = Тривалість роботи
+CallTreeSidebar--self-time =
+    .label = Власний час
+CallTreeSidebar--running-samples =
+    .label = Виконувані зразки
+CallTreeSidebar--self-samples =
+    .label = Власні зразки
+CallTreeSidebar--running-size =
+    .label = Виконуваний розмір
+CallTreeSidebar--self-size =
+    .label = Власний розмір
+CallTreeSidebar--categories = Категорії
+CallTreeSidebar--implementation = Імплементація
+CallTreeSidebar--running-milliseconds = Виконання - мілісекунд
+CallTreeSidebar--running-sample-count = Кількість виконуваних зразків
+CallTreeSidebar--running-bytes = Виконувані байти
+CallTreeSidebar--self-milliseconds = Власні - мілісекунд
+CallTreeSidebar--self-sample-count = Кількість власних зразків
+CallTreeSidebar--self-bytes = Власні - байтів
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
