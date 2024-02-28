@@ -149,15 +149,15 @@ class TrackBandwidthCanvas extends React.PureComponent<CanvasProps> {
       const getX = (i) =>
         Math.round((samples.time[i] - rangeStart) * millisecondWidth);
       const getY = (i) => {
-        const sampleTimeDeltaInMs =
-          i === 0 ? interval : samples.time[i] - samples.time[i - 1];
-        const unitGraphCount =
-          samples.count[i] / sampleTimeDeltaInMs / countRangePerMs;
-        if (!unitGraphCount) {
+        const rawY = samples.count[i];
+        if (!rawY) {
           // Make the 0 values invisible so that 'almost 0' is noticeable.
           return deviceHeight + deviceLineHalfWidth;
         }
 
+        const sampleTimeDeltaInMs =
+          i === 0 ? interval : samples.time[i] - samples.time[i - 1];
+        const unitGraphCount = rawY / sampleTimeDeltaInMs / countRangePerMs;
         return (
           innerDeviceHeight -
           innerDeviceHeight * unitGraphCount +

@@ -12,6 +12,7 @@ import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 import {
   getCallNodeInfo,
   getSampleIndexToCallNodeIndex,
+  getOriginAnnotationForFunc,
 } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
@@ -19,6 +20,8 @@ import type {
   Profile,
   Store,
   State,
+  Thread,
+  IndexIntoStackTable,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -211,6 +214,38 @@ export function formatTree(
  */
 export function formatTreeIncludeCategories(callTree: CallTree): string[] {
   return formatTree(callTree, true);
+}
+
+export function formatStack(
+  thread: Thread,
+  stack: IndexIntoStackTable
+): string {
+  const lines = [];
+  const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
+    thread;
+  for (
+    let stackIndex = stack;
+    stackIndex !== null;
+    stackIndex = stackTable.prefix[stackIndex]
+  ) {
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const frameLine = frameTable.line[frameIndex];
+    const frameColumn = frameTable.column[frameIndex];
+    const funcName = stringTable.getString(funcTable.name[funcIndex]);
+    const origin = getOriginAnnotationForFunc(
+      funcIndex,
+      funcTable,
+      resourceTable,
+      stringTable,
+      frameLine,
+      frameColumn
+    );
+    lines.push(`${funcName} (${origin})`);
+  }
+  lines.reverse();
+
+  return lines.join('\n');
 }
 
 /**
