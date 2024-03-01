@@ -193,7 +193,30 @@ CallTreeSidebar--call-node-details = Detaljer anropsnod
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = Spårad körtid
+CallTreeSidebar--traced-self-time =
+    .label = Spårad självtid
+CallTreeSidebar--running-time =
+    .label = Körtid
+CallTreeSidebar--self-time =
+    .label = Självtid
+CallTreeSidebar--running-samples =
+    .label = Körande prover
+CallTreeSidebar--self-samples =
+    .label = Självprover
+CallTreeSidebar--running-size =
+    .label = Körstorlek
+CallTreeSidebar--self-size =
+    .label = Självstorlek
 CallTreeSidebar--categories = Kategorier
+CallTreeSidebar--implementation = Implementation
+CallTreeSidebar--running-milliseconds = Körande millisekunder
+CallTreeSidebar--running-sample-count = Körande antal prover
+CallTreeSidebar--running-bytes = Körande bytes
+CallTreeSidebar--self-milliseconds = Själv millisekunder
+CallTreeSidebar--self-sample-count = Antal självprov
+CallTreeSidebar--self-bytes = Självbytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
