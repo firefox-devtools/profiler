@@ -7,13 +7,14 @@ import { oneLine } from 'common-tags';
 import queryString from 'query-string';
 import JSZip from 'jszip';
 import {
+  insertExternalPowerCountersIntoProfile,
   processGeckoProfile,
   unserializeProfileOfArbitraryFormat,
 } from 'firefox-profiler/profile-logic/process-profile';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
-  applySymbolicationStep,
+  applySymbolicationSteps,
 } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
 import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
@@ -38,12 +39,14 @@ import {
   getActiveTabID,
   getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
+import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
 import {
   withHistoryReplaceStateAsync,
   withHistoryReplaceStateSync,
   stateFromLocation,
   ensureIsValidDataSource,
 } from 'firefox-profiler/app-logic/url-handling';
+import { tabsShowingSampleData } from 'firefox-profiler/app-logic/tabs-handling';
 import {
   initializeLocalTrackOrderByPid,
   computeLocalTracksByPid,
@@ -59,7 +62,10 @@ import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-ta
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
-import { determineTimelineType } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  determineTimelineType,
+  hasUsefulSamples,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   RequestedLib,
@@ -345,10 +351,32 @@ export function finalizeFullProfileView(
       timelineType = determineTimelineType(profile);
     }
 
+    // If the currently selected tab is only visible when the selected track
+    // has samples, verify that the selected track has samples, and if not
+    // select the marker chart.
+    let selectedTab = getSelectedTab(getState());
+    if (tabsShowingSampleData.includes(selectedTab)) {
+      let hasSamples = false;
+      for (const threadIndex of selectedThreadIndexes) {
+        const thread = profile.threads[threadIndex];
+        const { samples, jsAllocations, nativeAllocations } = thread;
+        hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
+          hasUsefulSamples(table, thread)
+        );
+        if (hasSamples) {
+          break;
+        }
+      }
+      if (!hasSamples) {
+        selectedTab = 'marker-chart';
+      }
+    }
+
     withHistoryReplaceStateSync(() => {
       dispatch({
         type: 'VIEW_FULL_PROFILE',
         selectedThreadIndexes,
+        selectedTab,
         globalTracks,
         globalTrackOrder,
         localTracksByPid,
@@ -736,15 +764,10 @@ export function bulkProcessSymbolicationSteps(
       if (symbolicationSteps === undefined) {
         return oldThread;
       }
-      const oldFuncToNewFuncsMap = new Map();
-      let thread = oldThread;
-      for (const symbolicationStep of symbolicationSteps) {
-        thread = applySymbolicationStep(
-          thread,
-          symbolicationStep,
-          oldFuncToNewFuncsMap
-        );
-      }
+      const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
+        oldThread,
+        symbolicationSteps
+      );
       oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
       return thread;
     });
@@ -1024,6 +1047,14 @@ export function retrieveProfileFromBrowser(
       });
       const unpackedProfile =
         await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
+      const meta = unpackedProfile.meta;
+      if (meta.configuration && meta.configuration.features.includes('power')) {
+        const tracks = await browserConnection.getExternalPowerTracks(
+          meta.startTime + meta.profilingStartTime,
+          meta.startTime + meta.profilingEndTime
+        );
+        insertExternalPowerCountersIntoProfile(tracks, unpackedProfile);
+      }
       const profile = processGeckoProfile(unpackedProfile);
       await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
     } catch (error) {
@@ -1267,9 +1298,11 @@ async function _extractJsonFromResponse(
   reportError: (...data: Array<any>) => void,
   fileType: 'application/json' | null
 ): Promise<MixedObject> {
+  let arrayBuffer: ArrayBuffer | null = null;
   try {
     // await before returning so that we can catch JSON parse errors.
-    return await _extractJsonFromArrayBuffer(await response.arrayBuffer());
+    arrayBuffer = await response.arrayBuffer();
+    return await _extractJsonFromArrayBuffer(arrayBuffer);
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
@@ -1277,6 +1310,10 @@ async function _extractJsonFromResponse(
       message = 'The network request to load the profile was aborted.';
     } else if (fileType === 'application/json') {
       message = 'The profile’s JSON could not be decoded.';
+    } else if (fileType === null && arrayBuffer !== null) {
+      // If the content type is not specified, use a raw array buffer
+      // to fallback to other supported profile formats.
+      return arrayBuffer;
     } else {
       message = oneLine`
         The profile could not be downloaded and decoded. This does not look like a supported file
@@ -1443,6 +1480,31 @@ export function retrieveProfileFromFile(
 }
 
 /**
+ * View a profile that was injected via a "postMessage". A website can
+ * inject a profile to the profiler.
+ */
+export function viewProfileFromPostMessage(
+  rawProfile: any
+): ThunkAction<Promise<void>> {
+  return async (dispatch) => {
+    try {
+      const profile = await unserializeProfileOfArbitraryFormat(rawProfile);
+      /* istanbul ignore if */
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      await withHistoryReplaceStateAsync(async () => {
+        await dispatch(viewProfile(profile));
+      });
+    } catch (error) {
+      /* istanbul ignore next */
+      dispatch(fatalError(error));
+    }
+  };
+}
+
+/**
  * This action retrieves several profiles and push them into 1 profile using the
  * information contained in the query.
  */
@@ -1469,33 +1531,39 @@ export function retrieveProfilesToCompare(
         })
       );
 
-      const hasSupportedDatasources = profileStates.every(
-        (state) => state.dataSource === 'public'
-      );
-      if (!hasSupportedDatasources) {
-        throw new Error(
-          'Only public uploaded profiles are supported by the comparison function.'
-        );
-      }
-
       // Then we retrieve the profiles from the online store, and unserialize
       // and process them if needed.
-      const promises = profileStates.map(async ({ hash }) => {
-        const profileUrl = getProfileUrlForHash(hash);
-        const response: ProfileOrZip = await _fetchProfile({
-          url: profileUrl,
-          onTemporaryError: (e: TemporaryError) => {
-            dispatch(temporaryError(e));
-          },
-        });
-        if (response.responseType !== 'PROFILE') {
-          throw new Error('Expected to receive a profile from _fetchProfile');
-        }
-        const serializedProfile = response.profile;
+      const promises = profileStates.map(
+        async ({ dataSource, hash, profileUrl }) => {
+          switch (dataSource) {
+            case 'public':
+              // Use a URL from the public store.
+              profileUrl = getProfileUrlForHash(hash);
+              break;
+            case 'from-url':
+              // Use the profile URL in the decoded state, decoded from the input URL.
+              break;
+            default:
+              throw new Error(
+                'Only public uploaded profiles are supported by the comparison function.'
+              );
+          }
+          const response: ProfileOrZip = await _fetchProfile({
+            url: profileUrl,
+            onTemporaryError: (e: TemporaryError) => {
+              dispatch(temporaryError(e));
+            },
+          });
+          if (response.responseType !== 'PROFILE') {
+            throw new Error('Expected to receive a profile from _fetchProfile');
+          }
+          const serializedProfile = response.profile;
 
-        const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
-        return profile;
-      });
+          const profile =
+            unserializeProfileOfArbitraryFormat(serializedProfile);
+          return profile;
+        }
+      );
 
       // Once all profiles have been fetched and unserialized, we can start
       // pushing them to a brand new profile. This resulting profile will keep
@@ -1581,6 +1649,38 @@ export function retrieveProfileForRawUrl(
         if (Array.isArray(query.profiles)) {
           await dispatch(retrieveProfilesToCompare(query.profiles, true));
         }
+        break;
+      }
+      case 'from-post-message': {
+        window.addEventListener('message', (event) => {
+          const { data } = event;
+          console.log(`Received postMessage`, data);
+          /* istanbul ignore if */
+          if (!data || typeof data !== 'object') {
+            return;
+          }
+          switch (data.name) {
+            case 'inject-profile':
+              dispatch(viewProfileFromPostMessage(data.profile));
+              break;
+            case 'is-ready': {
+              // The "inject-profile" event could be coming from a variety of locations.
+              // It could come from a `window.open` call on another page. It could come
+              // from an addon. It could come from being embedded in an iframe. In order
+              // to generically support these cases allow the opener to poll for the
+              // "is-ready" message.
+              console.log(
+                'Responding via postMessage that the profiler is ready.'
+              );
+              const otherWindow = event.source ?? window;
+              otherWindow.postMessage({ name: 'is-ready' }, '*');
+              break;
+            }
+            default:
+              /* istanbul ignore next */
+              console.log('Unknown post message', data);
+          }
+        });
         break;
       }
       case 'uploaded-recordings':

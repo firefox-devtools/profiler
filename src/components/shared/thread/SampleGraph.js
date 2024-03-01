@@ -6,13 +6,8 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { InView } from 'react-intersection-observer';
-import { ensureExists } from 'firefox-profiler/utils/flow';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import {
-  getSampleIndexToCallNodeIndex,
-  getSamplesSelectedStates,
-  getSampleIndexClosestToCenteredTime,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getSampleIndexClosestToCenteredTime } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
@@ -24,20 +19,17 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
-  CallNodeInfo,
-  IndexIntoCallNodeTable,
+  SelectedState,
 } from 'firefox-profiler/types';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 type Props = {|
   +className: string,
   +thread: Thread,
-  +tabFilteredThread: Thread,
+  +samplesSelectedStates: null | SelectedState[],
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
@@ -96,12 +88,10 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       thread,
-      tabFilteredThread,
       interval,
       rangeStart,
       rangeEnd,
-      callNodeInfo,
-      selectedCallNodeIndex,
+      samplesSelectedStates,
       categories,
       width,
       height,
@@ -113,30 +103,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     canvas.width = Math.round(width * devicePixelRatio);
     canvas.height = Math.round(height * devicePixelRatio);
     const ctx = canvas.getContext('2d');
-    let maxDepth = 0;
-    const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-    const sampleCallNodes = getSampleIndexToCallNodeIndex(
-      thread.samples.stack,
-      stackIndexToCallNodeIndex
-    );
-    const tabFilteredSampleCallNodes = getSampleIndexToCallNodeIndex(
-      tabFilteredThread.samples.stack,
-      stackIndexToCallNodeIndex
-    );
-    // This is currently too slow to compute for the JS Tracer threads.
-    const samplesSelectedStates = thread.isJsTracer
-      ? null
-      : getSamplesSelectedStates(
-          callNodeTable,
-          sampleCallNodes,
-          tabFilteredSampleCallNodes,
-          selectedCallNodeIndex
-        );
-    for (let i = 0; i < callNodeTable.depth.length; i++) {
-      if (callNodeTable.depth[i] > maxDepth) {
-        maxDepth = callNodeTable.depth[i];
-      }
-    }
     const range = [rangeStart, rangeEnd];
     const rangeLength = range[1] - range[0];
     const xPixelsPerMs = canvas.width / rangeLength;
@@ -174,8 +140,8 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
       if (sampleTime < nextMinTime) {
         continue;
       }
-      const callNodeIndex = sampleCallNodes[i];
-      if (callNodeIndex === null) {
+      const stackIndex = thread.samples.stack[i];
+      if (stackIndex === null) {
         continue;
       }
       const xPos =
@@ -187,10 +153,6 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
       ) {
         samplesBucket = highlightedSamples;
       } else {
-        const stackIndex = ensureExists(
-          thread.samples.stack[i],
-          'A stack must exist for this sample, since a callNodeIndex exists.'
-        );
         const categoryIndex = thread.stackTable.category[stackIndex];
         const category = categories[categoryIndex];
         if (category.name === 'Idle') {
@@ -204,8 +166,11 @@ export class ThreadSampleGraphImpl extends PureComponent<Props> {
     }
 
     function drawSamples(samplePositions: number[], color: string) {
+      if (samplePositions.length === 0) {
+        return;
+      }
+      ctx.fillStyle = color;
       for (let i = 0; i < samplePositions.length; i++) {
-        ctx.fillStyle = color;
         const startY = 0;
         const xPos = samplePositions[i];
         ctx.fillRect(xPos, startY, drawnSampleWidth, canvas.height);

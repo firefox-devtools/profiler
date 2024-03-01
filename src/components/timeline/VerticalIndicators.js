@@ -70,16 +70,21 @@ export class VerticalIndicators extends React.PureComponent<Props> {
         case 'DOMContentLoaded':
           color = 'var(--blue-50)';
           break;
+        case 'FirstContentfulPaint':
+        case 'FirstContentfulComposite':
+        case 'LargestContentfulPaint':
+          color = 'var(--magenta-60)';
+          break;
         default:
-          if (marker.name.startsWith('Contentful paint ')) {
-            color = 'var(--green-60)';
-          }
+          color = '#000';
+          break;
       }
 
       // Compute the positioning
       const rangeLength = rangeEnd - rangeStart;
       const xPixelsPerMs = width / rangeLength;
-      const left = (marker.start - rangeStart) * xPixelsPerMs;
+      const markerPos = marker.end !== null ? marker.end : marker.start;
+      const left = (markerPos - rangeStart) * xPixelsPerMs;
 
       // Optionally compute a url.
       let url = null;
@@ -123,7 +128,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
                     {' at '}
                   </span>
                   <span className="timelineVerticalIndicatorsTime">
-                    {formatSeconds(marker.start - zeroAt)}
+                    {formatSeconds(markerPos - zeroAt)}
                   </span>{' '}
                 </div>
                 {url}

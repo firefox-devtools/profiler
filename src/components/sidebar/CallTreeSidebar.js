@@ -29,9 +29,8 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type {
   ThreadsKey,
   CategoryList,
-  CallNodeTable,
   IndexIntoCallNodeTable,
-  TracedTiming,
+  SelfAndTotal,
   Milliseconds,
   WeightType,
   IndexIntoCategoryList,
@@ -286,32 +285,44 @@ export const CategoryBreakdown = explicitConnect<
 
 type StateProps = {|
   +selectedNodeIndex: IndexIntoCallNodeTable | null,
-  +callNodeTable: CallNodeTable,
   +selectedThreadsKey: ThreadsKey,
   +name: string,
   +lib: string,
   +timings: TimingsForPath,
   +categoryList: CategoryList,
   +weightType: WeightType,
-  +tracedTiming: TracedTiming | null,
+  +selectedNodeTracedSelfAndTotal: SelfAndTotal | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 type WeightDetails = {|
-  +running: string,
-  +self: string,
+  +runningL10nId: string,
+  +selfL10nId: string,
   +number: (n: number) => string,
 |};
 
-function getWeightTypeLabel(weightType: WeightType): string {
+function getRunningWeightTypeLabelL10nId(weightType: WeightType): string {
   switch (weightType) {
     case 'tracing-ms':
-      return `milliseconds`;
+      return 'CallTreeSidebar--running-milliseconds';
     case 'samples':
-      return 'sample count';
+      return 'CallTreeSidebar--running-sample-count';
     case 'bytes':
-      return 'bytes';
+      return 'CallTreeSidebar--running-bytes';
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}
+
+function getSelfWeightTypeLabelL10nId(weightType: WeightType): string {
+  switch (weightType) {
+    case 'tracing-ms':
+      return 'CallTreeSidebar--self-milliseconds';
+    case 'samples':
+      return 'CallTreeSidebar--self-sample-count';
+    case 'bytes':
+      return 'CallTreeSidebar--self-bytes';
     default:
       throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
   }
@@ -323,20 +334,20 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
       switch (weightType) {
         case 'tracing-ms':
           return {
-            running: 'Running time',
-            self: 'Self time',
+            runningL10nId: 'CallTreeSidebar--running-time',
+            selfL10nId: 'CallTreeSidebar--self-time',
             number: (n) => formatMilliseconds(n, 3, 1),
           };
         case 'samples':
           return {
-            running: 'Running samples',
-            self: 'Self samples',
+            runningL10nId: 'CallTreeSidebar--running-samples',
+            selfL10nId: 'CallTreeSidebar--self-samples',
             number: (n) => formatNumber(n, 0),
           };
         case 'bytes':
           return {
-            running: 'Running size',
-            self: 'Self size',
+            runningL10nId: 'CallTreeSidebar--running-size',
+            selfL10nId: 'CallTreeSidebar--self-size',
             number: (n) => formatBytes(n),
           };
         default:
@@ -354,7 +365,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
       timings,
       categoryList,
       weightType,
-      tracedTiming,
+      selectedNodeTracedSelfAndTotal,
     } = this.props;
     const {
       forPath: { selfTime, totalTime },
@@ -373,7 +384,8 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
       );
     }
 
-    const { number, running, self } = this._getWeightTypeDetails(weightType);
+    const { number, runningL10nId, selfL10nId } =
+      this._getWeightTypeDetails(weightType);
 
     const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
     const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
@@ -402,49 +414,69 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
             ) : null}
           </header>
           <h4 className="sidebar-title3">
-            <div>Call node details</div>
+            <Localized id="CallTreeSidebar--call-node-details">
+              <div>Call node details</div>
+            </Localized>
           </h4>
-          {tracedTiming ? (
-            <SidebarDetail
-              label="Traced running time"
-              value={formatMilliseconds(
-                tracedTiming.running[selectedNodeIndex],
-                3,
-                1
-              )}
-            ></SidebarDetail>
+          {selectedNodeTracedSelfAndTotal ? (
+            <Localized
+              id="CallTreeSidebar--traced-running-time"
+              attrs={{ label: true }}
+            >
+              <SidebarDetail
+                label="Traced running time"
+                value={formatMilliseconds(
+                  selectedNodeTracedSelfAndTotal.total,
+                  3,
+                  1
+                )}
+              ></SidebarDetail>
+            </Localized>
           ) : null}
-          {tracedTiming ? (
+          {selectedNodeTracedSelfAndTotal ? (
+            <Localized
+              id="CallTreeSidebar--traced-self-time"
+              attrs={{ label: true }}
+            >
+              <SidebarDetail
+                label="Traced self time"
+                value={
+                  selectedNodeTracedSelfAndTotal.self === 0
+                    ? '—'
+                    : formatMilliseconds(
+                        selectedNodeTracedSelfAndTotal.self,
+                        3,
+                        1
+                      )
+                }
+              />
+            </Localized>
+          ) : null}
+          <Localized id={runningL10nId} attrs={{ label: true }}>
             <SidebarDetail
-              label="Traced self time"
-              value={
-                tracedTiming.self[selectedNodeIndex] === 0
-                  ? '—'
-                  : formatMilliseconds(
-                      tracedTiming.self[selectedNodeIndex],
-                      3,
-                      1
-                    )
-              }
+              // The value for the label following will be replaced
+              label=""
+              value={totalTime.value ? `${number(totalTime.value)}` : '—'}
+              percentage={totalTimePercent ? totalTimePercent + '%' : '—'}
             />
-          ) : null}
-          <SidebarDetail
-            label={running}
-            value={totalTime.value ? `${number(totalTime.value)}` : '—'}
-            percentage={totalTimePercent ? totalTimePercent + '%' : '—'}
-          />
-          <SidebarDetail
-            label={self}
-            value={selfTime.value ? `${number(selfTime.value)}` : '—'}
-            percentage={selfTimePercent ? selfTimePercent + '%' : '—'}
-          />
+          </Localized>
+          <Localized id={selfL10nId} attrs={{ label: true }}>
+            <SidebarDetail
+              // The value for the label following will be replaced
+              label=""
+              value={selfTime.value ? `${number(selfTime.value)}` : '—'}
+              percentage={selfTimePercent ? selfTimePercent + '%' : '—'}
+            />
+          </Localized>
           {totalTimeBreakdownByCategory ? (
             <>
               <h4 className="sidebar-title3 sidebar-title-label">
-                <div className="sidebar-title-label-left">Categories</div>
-                <div className="sidebar-title-label-right">
-                  Running {getWeightTypeLabel(weightType)}
-                </div>
+                <Localized id="CallTreeSidebar--categories">
+                  <div className="sidebar-title-label-left">Categories</div>
+                </Localized>
+                <Localized id={getRunningWeightTypeLabelL10nId(weightType)}>
+                  <div className="sidebar-title-label-right"></div>
+                </Localized>
               </h4>
               <CategoryBreakdown
                 kind="total"
@@ -457,10 +489,12 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           {selfTimeBreakdownByCategory ? (
             <>
               <h4 className="sidebar-title3 sidebar-title-label">
-                <div className="sidebar-title-label-left">Categories</div>
-                <div className="sidebar-title-label-right">
-                  Self {getWeightTypeLabel(weightType)}
-                </div>
+                <Localized id="CallTreeSidebar--categories">
+                  <div className="sidebar-title-label-left">Categories</div>
+                </Localized>
+                <Localized id={getSelfWeightTypeLabelL10nId(weightType)}>
+                  <div className="sidebar-title-label-right"></div>
+                </Localized>
               </h4>
               <CategoryBreakdown
                 kind="self"
@@ -473,8 +507,12 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           {totalTimeBreakdownByImplementation && totalTime.value ? (
             <React.Fragment>
               <h4 className="sidebar-title3 sidebar-title-label">
-                <div>Implementation</div>
-                <div>Running {getWeightTypeLabel(weightType)}</div>
+                <Localized id="CallTreeSidebar--implementation">
+                  <div>Implementation</div>
+                </Localized>
+                <Localized id={getRunningWeightTypeLabelL10nId(weightType)}>
+                  <div></div>
+                </Localized>
               </h4>
               <ImplementationBreakdown
                 breakdown={totalTimeBreakdownByImplementation}
@@ -485,8 +523,12 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           {selfTimeBreakdownByImplementation && selfTime.value ? (
             <React.Fragment>
               <h4 className="sidebar-title3 sidebar-title-label">
-                <div>Implementation</div>
-                <div>Self {getWeightTypeLabel(weightType)}</div>
+                <Localized id="CallTreeSidebar--implementation">
+                  <div>Implementation</div>
+                </Localized>
+                <Localized id={getSelfWeightTypeLabelL10nId(weightType)}>
+                  <div></div>
+                </Localized>
               </h4>
               <ImplementationBreakdown
                 breakdown={selfTimeBreakdownByImplementation}
@@ -503,14 +545,14 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
 export const CallTreeSidebar = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state) => ({
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
-    callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
     selectedThreadsKey: getSelectedThreadsKey(state),
     name: getFunctionName(selectedNodeSelectors.getName(state)),
     lib: selectedNodeSelectors.getLib(state),
     timings: selectedNodeSelectors.getTimingsForSidebar(state),
     categoryList: getCategories(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
-    tracedTiming: selectedThreadSelectors.getTracedTiming(state),
+    selectedNodeTracedSelfAndTotal:
+      selectedThreadSelectors.getTracedSelfAndTotalForSelectedCallNode(state),
   }),
   component: CallTreeSidebarImpl,
 });

@@ -33,7 +33,6 @@ import type {
   CallTreeSummaryStrategy,
   WeightType,
   SamplesLikeTable,
-  TracedTiming,
   InnerWindowID,
   Page,
 } from 'firefox-profiler/types';
@@ -49,7 +48,10 @@ import type {
   ChartCanvasHoverInfo,
 } from '../shared/chart/Canvas';
 
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import type {
+  CallTree,
+  CallTreeTimings,
+} from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -57,7 +59,7 @@ export type OwnProps = {|
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
-  +maxStackDepth: number,
+  +maxStackDepthPlusOne: number,
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
   +callTree: CallTree,
@@ -75,7 +77,7 @@ export type OwnProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
-  +tracedTiming: TracedTiming | null,
+  +tracedTiming: CallTreeTimings | null,
   +displayImplementation: boolean,
   +displayStackType: boolean,
 |};
@@ -128,10 +130,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     // selection or applying a transform), move the viewport
     // vertically so that its offset from the base of the flame graph
     // is maintained.
-    if (prevProps.maxStackDepth !== this.props.maxStackDepth) {
+    if (prevProps.maxStackDepthPlusOne !== this.props.maxStackDepthPlusOne) {
       this.props.viewport.moveViewport(
         0,
-        (prevProps.maxStackDepth - this.props.maxStackDepth) * ROW_HEIGHT
+        (prevProps.maxStackDepthPlusOne - this.props.maxStackDepthPlusOne) *
+          ROW_HEIGHT
       );
     }
 
@@ -153,18 +156,16 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   }
 
   _scrollSelectionIntoView = () => {
-    const {
-      selectedCallNodeIndex,
-      maxStackDepth,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { selectedCallNodeIndex, maxStackDepthPlusOne, callNodeInfo } =
+      this.props;
 
     if (selectedCallNodeIndex === null) {
       return;
     }
 
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
-    const y = (maxStackDepth - depth - 1) * ROW_HEIGHT;
+    const y = (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT;
 
     if (y < this.props.viewport.viewportTop) {
       this.props.viewport.moveViewport(0, this.props.viewport.viewportTop - y);
@@ -184,9 +185,9 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     const {
       thread,
       flameGraphTiming,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       stackFrameHeight,
-      maxStackDepth,
+      maxStackDepthPlusOne,
       rightClickedCallNodeIndex,
       selectedCallNodeIndex,
       categories,
@@ -236,10 +237,14 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
 
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+
     const startDepth = Math.floor(
-      maxStackDepth - viewportBottom / stackFrameHeight
+      maxStackDepthPlusOne - viewportBottom / stackFrameHeight
     );
-    const endDepth = Math.ceil(maxStackDepth - viewportTop / stackFrameHeight);
+    const endDepth = Math.ceil(
+      maxStackDepthPlusOne - viewportTop / stackFrameHeight
+    );
 
     // Only draw the stack frames that are vertically within view.
     // The graph is drawn from bottom to top, in order of increasing depth.
@@ -252,9 +257,9 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       }
 
       const cssRowTop: CssPixels =
-        (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
+        (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT - viewportTop;
       const cssRowBottom: CssPixels =
-        (maxStackDepth - depth) * ROW_HEIGHT - viewportTop;
+        (maxStackDepthPlusOne - depth) * ROW_HEIGHT - viewportTop;
       const deviceRowTop: DevicePixels = snap(cssRowTop * cssToDeviceScale);
       const deviceRowBottom: DevicePixels =
         snap(cssRowBottom * cssToDeviceScale) - 1;
@@ -362,7 +367,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       shouldDisplayTooltips,
       categories,
       interval,
-      isInverted,
       callTreeSummaryStrategy,
       innerWindowIDToPageMap,
       weightType,
@@ -388,7 +392,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       const time = formatCallNodeNumberWithUnit(
         'tracing-ms',
         false,
-        tracedTiming.running[callNodeIndex]
+        tracedTiming.total[callNodeIndex]
       );
       percentage = `${time} (${percentage})`;
     }
@@ -413,7 +417,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         callNodeInfo={callNodeInfo}
         categories={categories}
         durationText={percentage}
-        callTree={callTree}
+        displayData={callTree.getDisplayData(callNodeIndex)}
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={
           shouldComputeTimings
@@ -421,7 +425,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
                 callNodeIndex,
                 callNodeInfo,
                 interval,
-                isInverted,
                 thread,
                 unfilteredThread,
                 sampleIndexOffset,
@@ -473,11 +476,13 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
     const {
       flameGraphTiming,
-      maxStackDepth,
+      maxStackDepthPlusOne,
       viewport: { viewportTop, containerWidth },
     } = this.props;
     const pos = x / containerWidth;
-    const depth = Math.floor(maxStackDepth - (y + viewportTop) / ROW_HEIGHT);
+    const depth = Math.floor(
+      maxStackDepthPlusOne - (y + viewportTop) / ROW_HEIGHT
+    );
     const stackTiming = flameGraphTiming[depth];
 
     if (!stackTiming) {

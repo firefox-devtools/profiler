@@ -9,16 +9,13 @@ import {
 } from '../utils/uintarray-encoding';
 import {
   toValidImplementationFilter,
-  getCallNodeIndexFromPath,
   updateThreadStacks,
   updateThreadStacksByGeneratingNewStackColumns,
   getMapStackUpdater,
-  getCallNodeIndexFromParentAndFunc,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { canonicalizeRangeSet } from '../utils/range-set';
-import { CallTree } from '../profile-logic/call-tree';
 import { getSearchFilteredMarkerIndexes } from '../profile-logic/marker-data';
 import { shallowCloneFrameTable, getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -34,6 +31,7 @@ import type {
   CallNodePath,
   CallNodeAndCategoryPath,
   CallNodeTable,
+  CallNodeInfo,
   StackType,
   ImplementationFilter,
   Transform,
@@ -495,7 +493,7 @@ export function applyTransformToCallNodePath(
   callNodePath: CallNodePath,
   transform: Transform,
   transformedThread: Thread,
-  callNodeTable: CallNodeTable
+  callNodeInfo: CallNodeInfo
 ): CallNodePath {
   switch (transform.type) {
     case 'focus-subtree':
@@ -507,10 +505,9 @@ export function applyTransformToCallNodePath(
       return _startCallNodePathWithFunction(transform.funcIndex, callNodePath);
     case 'focus-category':
       return _removeOtherCategoryFunctionsInNodePathWithFunction(
-        transformedThread,
         transform.category,
         callNodePath,
-        callNodeTable
+        callNodeInfo
       );
     case 'merge-call-node':
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
@@ -597,19 +594,19 @@ function _dropFunctionInCallNodePath(
 
 // removes all functions that are not in the category from the callNodePath
 function _removeOtherCategoryFunctionsInNodePathWithFunction(
-  thread: Thread,
   category: IndexIntoCategoryList,
   callNodePath: CallNodePath,
-  callNodeTable: CallNodeTable
+  callNodeInfo: CallNodeInfo
 ): CallNodePath {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+
   const newCallNodePath = [];
 
   let prefix = -1;
   for (const funcIndex of callNodePath) {
-    const callNodeIndex = getCallNodeIndexFromParentAndFunc(
+    const callNodeIndex = callNodeInfo.getCallNodeIndexFromParentAndFunc(
       prefix,
-      funcIndex,
-      callNodeTable
+      funcIndex
     );
     if (callNodeIndex === null) {
       throw new Error(
@@ -698,53 +695,6 @@ function _callNodePathHasPrefixPath(
   return (
     prefixPath.length <= callNodePath.length &&
     prefixPath.every((prefixFunc, i) => prefixFunc === callNodePath[i])
-  );
-}
-
-/**
- * Take a CallNodePath, and invert it given a CallTree. Note that if the CallTree
- * is itself inverted, you will get back the uninverted CallNodePath to the regular
- * CallTree.
- *
- * e.g:
- *   (invertedPath, invertedCallTree) => path
- *   (path, callTree) => invertedPath
- *
- * Call trees are sorted with the CallNodes with the heaviest total time as the first
- * entry. This function walks to the tip of the heaviest branches to find the leaf node,
- * then construct an inverted CallNodePath with the result. This gives a pretty decent
- * result, but it doesn't guarantee that it will select the heaviest CallNodePath for the
- * INVERTED call tree. This would require doing a round trip through the reducers or
- * some other mechanism in order to first calculate the next inverted call tree. This is
- * probably not worth it, so go ahead and use the uninverted call tree, as it's probably
- * good enough.
- */
-export function invertCallNodePath(
-  path: CallNodePath,
-  callTree: CallTree,
-  callNodeTable: CallNodeTable
-): CallNodePath {
-  let callNodeIndex = getCallNodeIndexFromPath(path, callNodeTable);
-  if (callNodeIndex === null) {
-    // No path was found, return an empty CallNodePath.
-    return [];
-  }
-  let children = [callNodeIndex];
-  const pathToLeaf = [];
-  do {
-    // Walk down the tree's depth to construct a path to the leaf node, this should
-    // be the heaviest branch of the tree.
-    callNodeIndex = children[0];
-    pathToLeaf.push(callNodeIndex);
-    children = callTree.getChildren(callNodeIndex);
-  } while (children && children.length > 0);
-
-  return (
-    pathToLeaf
-      // Map the CallNodeIndex to FuncIndex.
-      .map((index) => callNodeTable.func[index])
-      // Reverse it so that it's in the proper inverted order.
-      .reverse()
   );
 }
 
@@ -845,7 +795,7 @@ export function mergeCallNode(
 }
 
 /**
- * Go through the StackTable and remove any stacks that are part of the given function.
+ * Go through the StackTable and "skip" any stacks with the given function.
  * This operation effectively merges the timing of the stacks into their callers.
  */
 export function mergeFunction(
@@ -853,45 +803,56 @@ export function mergeFunction(
   funcIndexToMerge: IndexIntoFuncTable
 ): Thread {
   const { stackTable, frameTable } = thread;
-  const oldStackToNewStack: Map<
-    IndexIntoStackTable | null,
-    IndexIntoStackTable | null,
-  > = new Map();
-  // A root stack's prefix will be null. Maintain that relationship from old to new
-  // stacks by mapping from null to null.
-  oldStackToNewStack.set(null, null);
-  const newStackTable = getEmptyStackTable();
+
+  // A map oldStack -> newStack+1, implemented as a Uint32Array for performance.
+  // If newStack+1 is zero it means "null", i.e. this stack was filtered out.
+  // Typed arrays are initialized to zero, which we interpret as null.
+  //
+  // For each old stack, the new stack is computed as follows:
+  //  - If the old stack's function is not funcIndexToMerge, then the new stack
+  //    is the same as the old stack.
+  //  - If the old stack's function is funcIndexToMerge, then the new stack is
+  //    the closest ancestor whose func is not funcIndexToMerge, or null if no
+  //    such ancestor exists.
+  //
+  // We only compute a new prefix column; the other columns are copied from the
+  // old stack table. The skipped stacks are "orphaned"; they'll still be present
+  // in the new stack table but not referenced by samples or other stacks.
+  const oldStackToNewStackPlusOne = new Uint32Array(stackTable.length);
+
+  const stackTableFrameCol = stackTable.frame;
+  const frameTableFuncCol = frameTable.func;
+  const oldPrefixCol = stackTable.prefix;
+  const newPrefixCol = new Array(stackTable.length);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const prefix = stackTable.prefix[stackIndex];
-    const frameIndex = stackTable.frame[stackIndex];
-    const category = stackTable.category[stackIndex];
-    const subcategory = stackTable.subcategory[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
+    const oldPrefix = oldPrefixCol[stackIndex];
+    const newPrefixPlusOne =
+      oldPrefix === null ? 0 : oldStackToNewStackPlusOne[oldPrefix];
 
+    const frameIndex = stackTableFrameCol[stackIndex];
+    const funcIndex = frameTableFuncCol[frameIndex];
     if (funcIndex === funcIndexToMerge) {
-      const newStackPrefix = oldStackToNewStack.get(prefix);
-      oldStackToNewStack.set(
-        stackIndex,
-        newStackPrefix === undefined ? null : newStackPrefix
-      );
+      oldStackToNewStackPlusOne[stackIndex] = newPrefixPlusOne;
     } else {
-      const newStackIndex = newStackTable.length++;
-      const newStackPrefix = oldStackToNewStack.get(prefix);
-      newStackTable.prefix[newStackIndex] =
-        newStackPrefix === undefined ? null : newStackPrefix;
-      newStackTable.frame[newStackIndex] = frameIndex;
-      newStackTable.category[newStackIndex] = category;
-      newStackTable.subcategory[newStackIndex] = subcategory;
-      oldStackToNewStack.set(stackIndex, newStackIndex);
+      oldStackToNewStackPlusOne[stackIndex] = stackIndex + 1;
     }
+    const newPrefix = newPrefixPlusOne === 0 ? null : newPrefixPlusOne - 1;
+    newPrefixCol[stackIndex] = newPrefix;
   }
 
-  return updateThreadStacks(
-    thread,
-    newStackTable,
-    getMapStackUpdater(oldStackToNewStack)
-  );
+  const newStackTable = {
+    ...stackTable,
+    prefix: newPrefixCol,
+  };
+
+  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const newStackPlusOne = oldStackToNewStackPlusOne[oldStack];
+    return newStackPlusOne === 0 ? null : newStackPlusOne - 1;
+  });
 }
 
 /**
@@ -1286,85 +1247,33 @@ const FUNC_MATCHES = {
 
 export function collapseFunctionSubtree(
   thread: Thread,
-  funcToCollapse: IndexIntoFuncTable,
-  defaultCategory: IndexIntoCategoryList
+  funcToCollapse: IndexIntoFuncTable
 ): Thread {
   const { stackTable, frameTable } = thread;
-  const oldStackToNewStack: Map<
-    IndexIntoStackTable | null,
-    IndexIntoStackTable | null,
-  > = new Map();
-  // A root stack's prefix will be null. Maintain that relationship from old to new
-  // stacks by mapping from null to null.
-  oldStackToNewStack.set(null, null);
-  const collapsedStacks = new Set();
-  const newStackTable = getEmptyStackTable();
+  const oldStackToNewStack = new Int32Array(stackTable.length);
+  const isInCollapsedSubtree = new Uint8Array(stackTable.length);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
-    if (
-      // The previous stack was collapsed, this one is collapsed too.
-      collapsedStacks.has(prefix)
-    ) {
-      // Only remember that this stack is collapsed.
-      const newPrefixStackIndex = oldStackToNewStack.get(prefix);
-      if (newPrefixStackIndex === undefined) {
-        throw new Error('newPrefixStackIndex cannot be undefined');
-      }
-      // Many collapsed stacks will potentially all point to the first stack that used the
-      // funcToCollapse, so newPrefixStackIndex will potentially be assigned to many
-      // stacks. This is what actually "collapses" a stack.
-      oldStackToNewStack.set(stackIndex, newPrefixStackIndex);
-      collapsedStacks.add(stackIndex);
-
-      // Fall back to the default category when stack categories conflict.
-      if (newPrefixStackIndex !== null) {
-        if (
-          newStackTable.category[newPrefixStackIndex] !==
-          stackTable.category[stackIndex]
-        ) {
-          newStackTable.category[newPrefixStackIndex] = defaultCategory;
-          newStackTable.subcategory[newPrefixStackIndex] = 0;
-        } else if (
-          newStackTable.subcategory[newPrefixStackIndex] !==
-          stackTable.subcategory[stackIndex]
-        ) {
-          newStackTable.subcategory[newPrefixStackIndex] = 0;
-        }
-      }
+    if (prefix !== null && isInCollapsedSubtree[prefix] !== 0) {
+      oldStackToNewStack[stackIndex] = oldStackToNewStack[prefix];
+      isInCollapsedSubtree[stackIndex] = 1;
     } else {
-      // Add this stack.
-      const newStackIndex = newStackTable.length++;
-      const newStackPrefix = oldStackToNewStack.get(prefix);
-      if (newStackPrefix === undefined) {
-        throw new Error(
-          'The newStackPrefix must exist because prefix < stackIndex as the StackTable is ordered.'
-        );
-      }
-
+      oldStackToNewStack[stackIndex] = stackIndex;
       const frameIndex = stackTable.frame[stackIndex];
-      const category = stackTable.category[stackIndex];
-      const subcategory = stackTable.subcategory[stackIndex];
-      newStackTable.prefix[newStackIndex] = newStackPrefix;
-      newStackTable.frame[newStackIndex] = frameIndex;
-      newStackTable.category[newStackIndex] = category;
-      newStackTable.subcategory[newStackIndex] = subcategory;
-      oldStackToNewStack.set(stackIndex, newStackIndex);
-
-      // If this is the function to collapse, keep the stack, but note that its children
-      // should be discarded.
       const funcIndex = frameTable.func[frameIndex];
       if (funcToCollapse === funcIndex) {
-        collapsedStacks.add(stackIndex);
+        isInCollapsedSubtree[stackIndex] = 1;
       }
     }
   }
 
-  return updateThreadStacks(
-    thread,
-    newStackTable,
-    getMapStackUpdater(oldStackToNewStack)
-  );
+  return updateThreadStacks(thread, thread.stackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    return oldStackToNewStack[oldStack];
+  });
 }
 
 /**
@@ -1667,34 +1576,18 @@ export function filterCallNodeAndCategoryPathByImplementation(
 }
 
 /**
- * Search through the entire call stack and see if there are any examples of
- * direct recursion.
+ * Search through the entire call node table and see if there are any examples of
+ * direct recursion of funcToCheck.
  */
 export function funcHasDirectRecursiveCall(
-  thread: Thread,
-  implementation: ImplementationFilter,
+  callNodeTable: CallNodeTable,
   funcToCheck: IndexIntoFuncTable
 ) {
-  const { stackTable, frameTable } = thread;
-  // Set of stack indices that are funcToCheck or have a funcToCheck parent, ignoring other implementations.
-  const recursiveStacks = new Set<IndexIntoStackTable>();
-  const funcMatchesImplementation = FUNC_MATCHES[implementation];
-
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const frameIndex = stackTable.frame[stackIndex];
-    const prefix = stackTable.prefix[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
-    const recursivePrefix = prefix !== null && recursiveStacks.has(prefix);
-
-    if (funcToCheck === funcIndex) {
-      if (recursivePrefix) {
-        // This function matches and so did its prefix of the same implementation.
+  for (let i = 0; i < callNodeTable.length; i++) {
+    if (callNodeTable.func[i] === funcToCheck) {
+      const prefix = callNodeTable.prefix[i];
+      if (prefix !== null && callNodeTable.func[prefix] === funcToCheck) {
         return true;
-      }
-      recursiveStacks.add(stackIndex);
-    } else {
-      if (recursivePrefix && !funcMatchesImplementation(thread, funcIndex)) {
-        recursiveStacks.add(stackIndex);
       }
     }
   }
@@ -1702,31 +1595,32 @@ export function funcHasDirectRecursiveCall(
 }
 
 /**
- * Search through the entire call stack and see if there are any examples of
- * recursion (direct or indirect).
+ * Search through the entire call node table and see if there are any examples of
+ * recursion of funcToCheck (direct or indirect).
  */
 export function funcHasRecursiveCall(
-  thread: Thread,
+  callNodeTable: CallNodeTable,
   funcToCheck: IndexIntoFuncTable
 ) {
-  const { stackTable, frameTable } = thread;
   // Set of stack indices that are funcToCheck or have a funcToCheck ancestor.
-  const recursiveStacks = new Set<IndexIntoStackTable>();
+  const ancestorOfCallNodeContainsFuncToCheck = new Uint8Array(
+    callNodeTable.length
+  );
 
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const frameIndex = stackTable.frame[stackIndex];
-    const prefix = stackTable.prefix[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
-    const recursivePrefix = prefix !== null && recursiveStacks.has(prefix);
+  for (let i = 0; i < callNodeTable.length; i++) {
+    const prefix = callNodeTable.prefix[i];
+    const funcIndex = callNodeTable.func[i];
+    const recursivePrefix =
+      prefix !== -1 && ancestorOfCallNodeContainsFuncToCheck[prefix] !== 0;
 
     if (funcToCheck === funcIndex) {
       if (recursivePrefix) {
         // This function matches and so did one of its ancestors.
         return true;
       }
-      recursiveStacks.add(stackIndex);
+      ancestorOfCallNodeContainsFuncToCheck[i] = 1;
     } else if (recursivePrefix) {
-      recursiveStacks.add(stackIndex);
+      ancestorOfCallNodeContainsFuncToCheck[i] = 1;
     }
   }
   return false;
@@ -1836,7 +1730,9 @@ export function filterSamples(
     return updateThreadStacksByGeneratingNewStackColumns(
       thread,
       thread.stackTable,
-      computeFilteredStackColumn
+      computeFilteredStackColumn,
+      computeFilteredStackColumn,
+      (markerData) => markerData
     );
   });
 }
@@ -1894,11 +1790,7 @@ export function applyTransform(
     case 'collapse-recursion':
       return collapseRecursion(thread, transform.funcIndex);
     case 'collapse-function-subtree':
-      return collapseFunctionSubtree(
-        thread,
-        transform.funcIndex,
-        defaultCategory
-      );
+      return collapseFunctionSubtree(thread, transform.funcIndex);
     case 'filter-samples':
       return filterSamples(
         thread,

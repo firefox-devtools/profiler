@@ -4,7 +4,7 @@
 // @flow
 
 import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
-import type { MixedObject } from 'firefox-profiler/types';
+import type { Milliseconds, MixedObject } from 'firefox-profiler/types';
 
 /**
  * This file is in charge of handling the message managing between profiler.firefox.com
@@ -20,12 +20,18 @@ export type Request =
   | StatusQueryRequest
   | EnableMenuButtonRequest
   | GetProfileRequest
+  | GetExternalPowerTracksRequest
   | GetSymbolTableRequest
   | QuerySymbolicationApiRequest;
 
 type StatusQueryRequest = {| type: 'STATUS_QUERY' |};
 type EnableMenuButtonRequest = {| type: 'ENABLE_MENU_BUTTON' |};
 type GetProfileRequest = {| type: 'GET_PROFILE' |};
+type GetExternalPowerTracksRequest = {|
+  type: 'GET_EXTERNAL_POWER_TRACKS',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+|};
 type GetSymbolTableRequest = {|
   type: 'GET_SYMBOL_TABLE',
   debugName: string,
@@ -63,6 +69,7 @@ export type ResponseFromBrowser =
   | StatusQueryResponse
   | EnableMenuButtonResponse
   | GetProfileResponse
+  | GetExternalPowerTracksResponse
   | GetSymbolTableResponse
   | QuerySymbolicationApiResponse;
 
@@ -80,10 +87,15 @@ type StatusQueryResponse = {|
   //    - GET_PROFILE
   //    - GET_SYMBOL_TABLE
   //    - QUERY_SYMBOLICATION_API
+  // Version 2:
+  //   Shipped in Firefox 121.
+  //   Adds support for the following message types:
+  //    - GET_EXTERNAL_POWER_TRACKS
   version?: number,
 |};
 type EnableMenuButtonResponse = void;
 type GetProfileResponse = ArrayBuffer | MixedObject;
+type GetExternalPowerTracksResponse = MixedObject[];
 type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
 
@@ -98,6 +110,9 @@ declare function _sendMessageWithResponse(
 declare function _sendMessageWithResponse(
   GetProfileRequest
 ): Promise<GetProfileResponse>;
+declare function _sendMessageWithResponse(
+  GetExternalPowerTracksRequest
+): Promise<GetExternalPowerTracksResponse>;
 declare function _sendMessageWithResponse(
   GetSymbolTableRequest
 ): Promise<GetSymbolTableResponse>;
@@ -130,14 +145,14 @@ export async function enableMenuButton(): Promise<void> {
 }
 
 /**
- * Ask the browser if the web channel supports getting the profile and symbolication.
+ * Ask the browser for the web channel version.
  */
-export async function querySupportsGetProfileAndSymbolicationViaWebChannel(): Promise<boolean> {
+export async function queryWebChannelVersionViaWebChannel(): Promise<number> {
   const response = await _sendMessageWithResponse({
     type: 'STATUS_QUERY',
   });
 
-  return response.version ? response.version >= 1 : false;
+  return response.version || 0;
 }
 
 export async function getSymbolTableViaWebChannel(
@@ -156,6 +171,17 @@ export async function getProfileViaWebChannel(): Promise<
 > {
   return _sendMessageWithResponse({
     type: 'GET_PROFILE',
+  });
+}
+
+export async function getExternalPowerTracksViaWebChannel(
+  startTime: Milliseconds,
+  endTime: Milliseconds
+): Promise<MixedObject[]> {
+  return _sendMessageWithResponse({
+    type: 'GET_EXTERNAL_POWER_TRACKS',
+    startTime,
+    endTime,
   });
 }
 

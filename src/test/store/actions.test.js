@@ -146,9 +146,10 @@ describe('selectors/getFlameGraphTiming', function () {
    * "FunctionName1 (StartTime:EndTime) | FunctionName2 (StartTime:EndTime)"
    */
   function getHumanReadableFlameGraphRanges(store, funcNames) {
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
@@ -176,9 +177,10 @@ describe('selectors/getFlameGraphTiming', function () {
    * "FunctionName1 (SelfTimeRelative) | ..."
    */
   function getHumanReadableFlameGraphTimings(store, funcNames) {
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
@@ -279,7 +281,7 @@ describe('selectors/getFlameGraphTiming', function () {
   });
 });
 
-describe('selectors/getCallNodeMaxDepthForFlameGraph', function () {
+describe('selectors/getCallNodeMaxDepthPlusOneForFlameGraph', function () {
   it('calculates the max call node depth', function () {
     const { profile } = getProfileFromTextSamples(`
       A  A  A
@@ -290,7 +292,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function () {
 
     const store = storeWithProfile(profile);
     const allSamplesMaxDepth =
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
         store.getState()
       );
     expect(allSamplesMaxDepth).toEqual(4);
@@ -300,7 +302,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function () {
     const { profile } = getProfileFromTextSamples(` `);
     const store = storeWithProfile(profile);
     const allSamplesMaxDepth =
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
         store.getState()
       );
     expect(allSamplesMaxDepth).toEqual(0);
@@ -361,11 +363,11 @@ describe('actions/changeInvertCallstack', function () {
     profile,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
-      A  A  A  A  A
-      B  E  B  B  B
-      C  F  I  I  I
-      D  G  J  J  J
-         H
+      A  A  A  A  A  A
+      B  E  B  B  B  B
+      C  F  I  I  I  I
+      D  G  J  J  J  J
+         H           K
     `);
   const toFuncIndex = (funcName) => funcNames.indexOf(funcName);
   const threadIndex = 0;
@@ -396,9 +398,8 @@ describe('actions/changeInvertCallstack', function () {
 
     it('starts with a selectedCallNodePath', function () {
       const { getState } = storeWithNormalCallTree();
-      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
-        getState()
-      );
+      const { selectedCallNodePath, expandedCallNodePaths } =
+        getPaths(getState());
       expect(selectedCallNodePath).toEqual(['A', 'B']);
       expect(expandedCallNodePaths).toEqual([['A']]);
     });
@@ -407,14 +408,13 @@ describe('actions/changeInvertCallstack', function () {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(changeSelectedCallNode(threadIndex, callNodePath));
       dispatch(changeInvertCallstack(true));
-      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
-        getState()
-      );
+      const { selectedCallNodePath, expandedCallNodePaths } =
+        getPaths(getState());
 
       // Do not select the first alphabetical path:
       expect(selectedCallNodePath).not.toEqual(['D', 'C', 'B']);
 
-      // Pick the heaviest path:
+      // Pick the heaviest path, and stops short of K:
       expect(selectedCallNodePath).toEqual(['J', 'I', 'B']);
       expect(expandedCallNodePaths).toEqual([['J'], ['J', 'I']]);
     });
@@ -431,9 +431,8 @@ describe('actions/changeInvertCallstack', function () {
 
     it('starts with a selectedCallNodePath', function () {
       const { getState } = storeWithInvertedCallTree();
-      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
-        getState()
-      );
+      const { selectedCallNodePath, expandedCallNodePaths } =
+        getPaths(getState());
       expect(selectedCallNodePath).toEqual(['J', 'I', 'B']);
       expect(expandedCallNodePaths).toEqual([['J'], ['J', 'I']]);
     });
@@ -441,9 +440,8 @@ describe('actions/changeInvertCallstack', function () {
     it('uninverts the selectedCallNodePath', function () {
       const { dispatch, getState } = storeWithInvertedCallTree();
       dispatch(changeInvertCallstack(false));
-      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
-        getState()
-      );
+      const { selectedCallNodePath, expandedCallNodePaths } =
+        getPaths(getState());
 
       expect(selectedCallNodePath).toEqual(['A', 'B']);
       expect(expandedCallNodePaths).toEqual([['A']]);

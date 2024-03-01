@@ -9,12 +9,12 @@ import type { MarkerPhase } from 'firefox-profiler/types';
 // The current version of the Gecko profile format.
 // Please don't forget to update the gecko profile format changelog in
 // `docs-developer/CHANGELOG-formats.md`.
-export const GECKO_PROFILE_VERSION = 28;
+export const GECKO_PROFILE_VERSION = 29;
 
 // The current version of the "processed" profile format.
 // Please don't forget to update the processed profile format changelog in
 // `docs-developer/CHANGELOG-formats.md`.
-export const PROCESSED_PROFILE_VERSION = 47;
+export const PROCESSED_PROFILE_VERSION = 48;
 
 // The following are the margin sizes for the left and right of the timeline. Independent
 // components need to share these values.
@@ -39,6 +39,12 @@ export const TRACK_MEMORY_MARKERS_HEIGHT = 15;
 export const TRACK_MEMORY_HEIGHT =
   TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT;
 export const TRACK_MEMORY_LINE_WIDTH = 2;
+export const TRACK_MEMORY_COLOR = 'orange';
+
+// The following values are for the bandwidth track.
+export const TRACK_BANDWIDTH_HEIGHT = 25;
+export const TRACK_BANDWIDTH_LINE_WIDTH = 2;
+export const TRACK_BANDWIDTH_COLOR = 'blue';
 
 // The following values are for experimental event delay track.
 export const TRACK_EVENT_DELAY_HEIGHT = 40;
@@ -62,6 +68,7 @@ export const TIMELINE_RULER_HEIGHT = 20;
 // Height of the power track.
 export const TRACK_POWER_HEIGHT = 25;
 export const TRACK_POWER_LINE_WIDTH = 2;
+export const TRACK_POWER_DEFAULT_COLOR = 'grey';
 
 // Height of the process cpu track.
 export const TRACK_PROCESS_CPU_HEIGHT = 25;

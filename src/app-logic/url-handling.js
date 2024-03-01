@@ -129,6 +129,7 @@ function getPathParts(urlState: UrlState): string[] {
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-browser':
+    case 'from-post-message':
     case 'unpublished':
     case 'from-file':
       return [dataSource, urlState.selectedTab];
@@ -274,6 +275,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     case 'public':
     case 'local':
     case 'from-browser':
+    case 'from-post-message':
     case 'unpublished':
     case 'from-file':
     case 'from-url':
@@ -494,6 +496,7 @@ export function ensureIsValidDataSource(
   switch (coercedDataSource) {
     case 'none':
     case 'from-browser':
+    case 'from-post-message':
     case 'unpublished':
     case 'from-file':
     case 'local':

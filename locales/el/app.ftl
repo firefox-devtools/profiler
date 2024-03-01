@@ -178,6 +178,46 @@ CallTree--inlining-badge = (ενσωματωμένη)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Επιλέξτε κόμβο για προβολή πληροφοριών σχετικά με αυτόν.
+CallTreeSidebar--call-node-details = Λεπτομέρειες κόμβου κλήσης
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Ιχνηλατημένος χρόνος εκτέλεσης
+CallTreeSidebar--traced-self-time =
+    .label = Ιχνηλατημένος ιδιοχρόνος
+CallTreeSidebar--running-time =
+    .label = Χρόνος εκτέλεσης
+CallTreeSidebar--self-time =
+    .label = Iδιοχρόνος
+CallTreeSidebar--running-samples =
+    .label = Εκτελούμενα δείγματα
+CallTreeSidebar--self-samples =
+    .label = Ιδιοδείγματα
+CallTreeSidebar--running-size =
+    .label = Μέγεθος εκτέλεσης
+CallTreeSidebar--self-size =
+    .label = Ιδιομέγεθος
+CallTreeSidebar--categories = Κατηγορίες
+CallTreeSidebar--implementation = Υλοποίηση
+CallTreeSidebar--running-milliseconds = Χιλιοστά δευτερολέπτου εκτέλεσης
+CallTreeSidebar--running-sample-count = Εκτελούμενος αριθμός δειγμάτων
+CallTreeSidebar--running-bytes = Bytes εκτέλεσης
+CallTreeSidebar--self-milliseconds = Χιλιοστά δευτερολέπτου συνάρτησης
+CallTreeSidebar--self-sample-count = Αριθμός ιδιοδειγμάτων
+CallTreeSidebar--self-bytes = Ιδιο-bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -228,7 +268,7 @@ ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο
 
 FooterLinks--legal = Νομικά
 FooterLinks--Privacy = Απόρρητο
-FooterLinks--Cookies = Cookies
+FooterLinks--Cookies = Cookie
 FooterLinks--languageSwitcher--select =
     .title = Αλλαγή γλώσσας
 FooterLinks--hide-button =
@@ -390,8 +430,8 @@ MarkerSidebar--select-a-marker = Επιλέξτε σημάδι για προβο
 
 MarkerTable--start = Έναρξη
 MarkerTable--duration = Διάρκεια
-MarkerTable--type = Τύπος
-MarkerTable--description = Περιγραφή
+MarkerTable--name = Όνομα
+MarkerTable--details = Λεπτομέρειες
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -746,7 +786,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = σχετική μνήμη αυτήν τη στιγμή
 TrackMemoryGraph--memory-range-in-graph = εύρος μνήμης στο γράφημα
-TrackMemoryGraph--operations-since-the-previous-sample = λειτουργίες από το προηγούμενο δείγμα
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = κατανομές και αποδεσμεύσεις από το προηγούμενο δείγμα
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -829,6 +869,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Η ενέργεια που χρησιμοποιείται στην τρέχουσα επιλογή
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } ανά δευτερόλεπτο
+    .label = Ταχύτητα μεταφοράς για αυτό το δείγμα
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = λειτουργίες ανάγνωσης/εγγραφής από το προηγούμενο δείγμα
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
+    .label = Δεδομένα που μεταφέρθηκαν μέχρι αυτήν τη στιγμή
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } g CO₂e)
+    .label = Δεδομένα που μεταφέρθηκαν στο ορατό εύρος
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g CO₂e)
+    .label = Δεδομένα που μεταφέρθηκαν στην τρέχουσα επιλογή
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

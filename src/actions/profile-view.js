@@ -36,7 +36,6 @@ import {
   getInvertCallstack,
   getHash,
 } from 'firefox-profiler/selectors/url-state';
-import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   assertExhaustiveCheck,
   getFirstItemFromSet,
@@ -105,26 +104,30 @@ export function changeSelectedCallNode(
   selectedCallNodePath: CallNodePath,
   context: SelectionContext = { source: 'auto' },
   optionalExpandedToCallNodePath?: CallNodePath
-): Action {
-  if (optionalExpandedToCallNodePath) {
-    for (let i = 0; i < selectedCallNodePath.length; i++) {
-      if (selectedCallNodePath[i] !== optionalExpandedToCallNodePath[i]) {
-        // This assertion ensures that the selectedCallNode will be correctly expanded.
-        throw new Error(
-          oneLine`
-            The optional expanded call node path provided to the changeSelectedCallNode
-            must contain the selected call node path.
-          `
-        );
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (optionalExpandedToCallNodePath) {
+      for (let i = 0; i < selectedCallNodePath.length; i++) {
+        if (selectedCallNodePath[i] !== optionalExpandedToCallNodePath[i]) {
+          // This assertion ensures that the selectedCallNode will be correctly expanded.
+          throw new Error(
+            oneLine`
+              The optional expanded call node path provided to the changeSelectedCallNode
+              must contain the selected call node path.
+            `
+          );
+        }
       }
     }
-  }
-  return {
-    type: 'CHANGE_SELECTED_CALL_NODE',
-    selectedCallNodePath,
-    optionalExpandedToCallNodePath,
-    threadsKey,
-    context,
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_SELECTED_CALL_NODE',
+      isInverted,
+      selectedCallNodePath,
+      optionalExpandedToCallNodePath,
+      threadsKey,
+      context,
+    });
   };
 }
 
@@ -145,80 +148,64 @@ export function changeRightClickedCallNode(
 }
 
 /**
- * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
- * of that sample's stack.
+ * Given a threadIndex and a sampleIndex, select the call node which carries the
+ * sample's self time. In the inverted tree, this will be a root node.
  */
-export function selectLeafCallNode(
+export function selectSelfCallNode(
   threadsKey: ThreadsKey,
   sampleIndex: IndexIntoSamplesTable | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const filteredThread = threadSelectors.getFilteredThread(getState());
-    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const sampleCallNodes =
+      threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
+        getState()
+      );
 
-    let newSelectedCallNode = -1;
-    if (sampleIndex !== null) {
-      // The newSelectedStack could be undefined if there are 0 samples.
-      const newSelectedStack = filteredThread.samples.stack[sampleIndex];
-
-      if (newSelectedStack !== null && newSelectedStack !== undefined) {
-        newSelectedCallNode =
-          callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
-      }
+    if (
+      sampleIndex === null ||
+      sampleIndex < 0 ||
+      sampleIndex >= sampleCallNodes.length
+    ) {
+      dispatch(changeSelectedCallNode(threadsKey, []));
+      return;
     }
 
-    dispatch(
-      changeSelectedCallNode(
-        threadsKey,
-        getCallNodePathFromIndex(
-          newSelectedCallNode,
-          callNodeInfo.callNodeTable
+    const nonInvertedSelfCallNode = sampleCallNodes[sampleIndex];
+    if (nonInvertedSelfCallNode === null) {
+      dispatch(changeSelectedCallNode(threadsKey, []));
+      return;
+    }
+
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+
+    // Compute the call path based on the non-inverted call node table.
+    // We're not calling callNodeInfo.getCallNodePathFromIndex here because we
+    // only have a non-inverted call node index, which wouldn't be accepted by
+    // the inverted call node info.
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const callNodePath = [];
+    let cni = nonInvertedSelfCallNode;
+    while (cni !== -1) {
+      callNodePath.push(callNodeTable.func[cni]);
+      cni = callNodeTable.prefix[cni];
+    }
+
+    if (callNodeInfo.isInverted()) {
+      // In the inverted tree, we want to select the inverted tree root node
+      // with the "self" function, and also expand the path to the non-inverted root.
+      dispatch(
+        changeSelectedCallNode(
+          threadsKey,
+          callNodePath.slice(0, 1), // Select a root node
+          { source: 'auto' },
+          callNodePath // Expand the full path
         )
-      )
-    );
-  };
-}
-
-/**
- * Given a threadIndex and a sampleIndex, select the call node at the bottom ("root")
- * of that sample's stack.
- */
-export function selectRootCallNode(
-  threadsKey: ThreadsKey,
-  sampleIndex: IndexIntoSamplesTable | null
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const filteredThread = threadSelectors.getFilteredThread(getState());
-    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
-
-    if (sampleIndex === null) {
-      dispatch(changeSelectedCallNode(threadsKey, []));
-      return;
+      );
+    } else {
+      // In the non-inverted tree, we want to select the self node.
+      dispatch(changeSelectedCallNode(threadsKey, callNodePath.reverse()));
     }
-    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
-    if (newSelectedStack === null || newSelectedStack === undefined) {
-      dispatch(changeSelectedCallNode(threadsKey, []));
-      return;
-    }
-    const newSelectedCallNode =
-      callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
-
-    const selectedCallNodePath = getCallNodePathFromIndex(
-      newSelectedCallNode,
-      callNodeInfo.callNodeTable
-    );
-    const rootCallNodePath = [selectedCallNodePath[0]];
-
-    dispatch(
-      changeSelectedCallNode(
-        threadsKey,
-        rootCallNodePath,
-        { source: 'auto' },
-        selectedCallNodePath
-      )
-    );
   };
 }
 
@@ -363,6 +350,7 @@ function getInformationFromTrackReference(
             relatedTab: null,
           };
         case 'memory':
+        case 'bandwidth':
         case 'process-cpu':
         case 'power': {
           const counterSelectors = getCounterSelectors(localTrack.counterIndex);
@@ -1628,7 +1616,7 @@ export function expandAllCallNodeDescendants(
     });
 
     const expandedCallNodePaths = [...descendants].map((callNodeIndex) =>
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
     dispatch(changeExpandedCallNodes(threadsKey, expandedCallNodePaths));
   };
@@ -1637,14 +1625,17 @@ export function expandAllCallNodeDescendants(
 export function changeExpandedCallNodes(
   threadsKey: ThreadsKey,
   expandedCallNodePaths: Array<CallNodePath>
-): Action {
-  return {
-    type: 'CHANGE_EXPANDED_CALL_NODES',
-    threadsKey,
-    expandedCallNodePaths,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_EXPANDED_CALL_NODES',
+      isInverted,
+      threadsKey,
+      expandedCallNodePaths,
+    });
   };
 }
-
 export function changeSelectedMarker(
   threadsKey: ThreadsKey,
   selectedMarker: MarkerIndex | null,
@@ -1772,13 +1763,16 @@ export function changeInvertCallstack(
       eventCategory: 'profile',
       eventAction: 'change invert callstack',
     });
+    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const selectedCallNode =
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState());
+    const newSelectedCallNodePath =
+      callTree.findHeavyPathToSameFunctionAfterInversion(selectedCallNode);
     dispatch({
       type: 'CHANGE_INVERT_CALLSTACK',
       invertCallstack,
       selectedThreadIndexes: getSelectedThreadIndexes(getState()),
-      callTree: selectedThreadSelectors.getCallTree(getState()),
-      callNodeTable: selectedThreadSelectors.getCallNodeInfo(getState())
-        .callNodeTable,
+      newSelectedCallNodePath,
     });
   };
 }
@@ -1866,13 +1860,13 @@ export function addTransformToStack(
     const transformedThread =
       threadSelectors.getRangeAndTransformFilteredThread(getState());
 
-    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
     dispatch({
       type: 'ADD_TRANSFORM_TO_STACK',
       threadsKey,
       transform,
       transformedThread,
-      callNodeTable,
+      callNodeInfo,
     });
     sendAnalytics({
       hitType: 'event',
@@ -2029,10 +2023,11 @@ export function handleCallNodeTransformShortcut(
     }
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const unfilteredThread = threadSelectors.getThread(getState());
-    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const implementation = getImplementationFilter(getState());
     const inverted = getInvertCallstack(getState());
-    const callNodePath = getCallNodePathFromIndex(callNodeIndex, callNodeTable);
+    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const funcIndex = callNodeTable.func[callNodeIndex];
     const category = callNodeTable.category[callNodeIndex];
 
@@ -2093,7 +2088,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'r': {
-        if (funcHasRecursiveCall(unfilteredThread, funcIndex)) {
+        if (funcHasRecursiveCall(callNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-recursion',
@@ -2104,13 +2099,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'R': {
-        if (
-          funcHasDirectRecursiveCall(
-            unfilteredThread,
-            implementation,
-            funcIndex
-          )
-        ) {
+        if (funcHasDirectRecursiveCall(callNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-direct-recursion',

@@ -4,7 +4,7 @@
 // @flow
 import {
   symbolicateProfile,
-  applySymbolicationStep,
+  applySymbolicationSteps,
 } from '../../profile-logic/symbolication';
 import { AddressLocator } from '../../profile-logic/address-locator';
 import {
@@ -13,13 +13,11 @@ import {
 } from '../../profile-logic/process-profile';
 import {
   getCallNodeInfo,
-  invertCallstack,
+  getInvertedCallNodeInfo,
   filterThreadByImplementation,
-  getCallNodePathFromIndex,
   getSampleIndexClosestToStartTime,
   convertStackToCallNodeAndCategoryPath,
   getSampleIndexToCallNodeIndex,
-  getCallNodeIndexFromPath,
   getTreeOrderComparator,
   getSamplesSelectedStates,
   extractProfileFilterPageData,
@@ -446,12 +444,13 @@ describe('profile-data', function () {
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
     const thread = profile.threads[0];
-    const { callNodeTable } = getCallNodeInfo(
+    const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable,
       defaultCategory
     );
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     it('should create one callNode per original stack', function () {
       // After nudgeReturnAddresses, the stack table now has 8 entries.
@@ -500,12 +499,15 @@ describe('profile-data', function () {
       meta.categories,
       'Expected to find categories'
     ).findIndex((c) => c.name === 'Other');
-    const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
+    const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable,
       defaultCategory
     );
+    const callNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
+    const stackIndexToCallNodeIndex =
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
     const stack0 = thread.samples.stack[0];
     const stack1 = thread.samples.stack[1];
     if (stack0 === null || stack1 === null) {
@@ -513,13 +515,11 @@ describe('profile-data', function () {
     }
     const originalStackListA = _getStackList(thread, stack0);
     const originalStackListB = _getStackList(thread, stack1);
-    const mergedFuncListA = getCallNodePathFromIndex(
-      stackIndexToCallNodeIndex[stack0],
-      callNodeTable
+    const mergedFuncListA = callNodeInfo.getCallNodePathFromIndex(
+      stackIndexToCallNodeIndex[stack0]
     );
-    const mergedFuncListB = getCallNodePathFromIndex(
-      stackIndexToCallNodeIndex[stack1],
-      callNodeTable
+    const mergedFuncListB = callNodeInfo.getCallNodePathFromIndex(
+      stackIndexToCallNodeIndex[stack1]
     );
 
     it('starts with a fully unduplicated set stack frames', function () {
@@ -673,11 +673,11 @@ describe('symbolication', function () {
           if (!symbolicatedProfile) {
             throw new Error('symbolicatedProfile cannot be null');
           }
-          symbolicatedProfile.threads[threadIndex] = applySymbolicationStep(
+          const { thread } = applySymbolicationSteps(
             symbolicatedProfile.threads[threadIndex],
-            symbolicationStepInfo,
-            new Map()
+            [symbolicationStepInfo]
           );
+          symbolicatedProfile.threads[threadIndex] = thread;
         }
       );
       return symbolicationPromise;
@@ -714,10 +714,6 @@ describe('symbolication', function () {
 
 describe('filter-by-implementation', function () {
   const profile = processGeckoProfile(createGeckoProfileWithJsTimings());
-  const defaultCategory = ensureExists(
-    profile.meta.categories,
-    'Expected to find categories'
-  ).findIndex((c) => c.name === 'Other');
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
@@ -730,17 +726,11 @@ describe('filter-by-implementation', function () {
   }
 
   it('will return the same thread if filtering to "all"', function () {
-    expect(
-      filterThreadByImplementation(thread, 'combined', defaultCategory)
-    ).toEqual(thread);
+    expect(filterThreadByImplementation(thread, 'combined')).toEqual(thread);
   });
 
   it('will return only JS samples if filtering to "js"', function () {
-    const jsOnlyThread = filterThreadByImplementation(
-      thread,
-      'js',
-      defaultCategory
-    );
+    const jsOnlyThread = filterThreadByImplementation(thread, 'js');
     const nonNullSampleStacks = jsOnlyThread.samples.stack.filter(
       (stack) => stack !== null
     );
@@ -753,11 +743,7 @@ describe('filter-by-implementation', function () {
   });
 
   it('will return only C++ samples if filtering to "cpp"', function () {
-    const cppOnlyThread = filterThreadByImplementation(
-      thread,
-      'cpp',
-      defaultCategory
-    );
+    const cppOnlyThread = filterThreadByImplementation(thread, 'cpp');
     const nonNullSampleStacks = cppOnlyThread.samples.stack.filter(
       (stack) => stack !== null
     );
@@ -775,16 +761,8 @@ describe('get-sample-index-closest-to-time', function () {
     const { profile } = getProfileFromTextSamples(
       Array(10).fill('A').join('  ')
     );
-    const defaultCategory = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    ).findIndex((c) => c.name === 'Other');
     const thread = profile.threads[0];
-    const { samples } = filterThreadByImplementation(
-      thread,
-      'js',
-      defaultCategory
-    );
+    const { samples } = filterThreadByImplementation(thread, 'js');
 
     const interval = profile.meta.interval;
     expect(getSampleIndexClosestToStartTime(samples, 0, interval)).toBe(0);
@@ -796,68 +774,69 @@ describe('get-sample-index-closest-to-time', function () {
   });
 });
 
-describe('funcHasDirectRecursiveCall', function () {
-  const {
-    profile,
-    funcNamesPerThread: [funcNames],
-  } = getProfileFromTextSamples(`
-    A.js
-    B.js
-    C.cpp
-    B.js
-    D.js
-  `);
-  const [thread] = profile.threads;
-
-  it('correctly identifies directly recursive functions based taking into account implementation', function () {
-    expect([
-      funcHasDirectRecursiveCall(thread, 'combined', funcNames.indexOf('A.js')),
-      funcHasDirectRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
-      funcHasDirectRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
-    ]).toEqual([false, false, true]);
-  });
-});
-
-describe('funcHasRecursiveCall', function () {
-  it('correctly identifies directly recursive functions', function () {
-    // Same test case as funcHasDirectRecursiveCall
+describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
+  function setup(textSamples) {
     const {
       profile,
       funcNamesPerThread: [funcNames],
-    } = getProfileFromTextSamples(`
+    } = getProfileFromTextSamples(textSamples);
+    const [thread] = profile.threads;
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex((c) => c.name === 'Other');
+    const callNodeTable = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    ).getCallNodeTable();
+    const jsOnlyThread = filterThreadByImplementation(thread, 'js');
+    const jsOnlyCallNodeTable = getCallNodeInfo(
+      jsOnlyThread.stackTable,
+      jsOnlyThread.frameTable,
+      jsOnlyThread.funcTable,
+      defaultCategory
+    ).getCallNodeTable();
+    return { callNodeTable, jsOnlyCallNodeTable, funcNames };
+  }
+
+  it('correctly identifies directly recursive functions based on the filtered call node table, which takes into account implementation', function () {
+    const { callNodeTable, jsOnlyCallNodeTable, funcNames } = setup(`
       A.js
       B.js
       C.cpp
       B.js
       D.js
     `);
-    const [thread] = profile.threads;
-
-    expect([
-      funcHasRecursiveCall(thread, funcNames.indexOf('A.js')),
-      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
-      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
-    ]).toEqual([false, true, true]);
+    expect(
+      funcHasDirectRecursiveCall(callNodeTable, funcNames.indexOf('A.js'))
+    ).toBeFalse();
+    expect(
+      funcHasDirectRecursiveCall(callNodeTable, funcNames.indexOf('B.js'))
+    ).toBeFalse();
+    expect(
+      funcHasDirectRecursiveCall(jsOnlyCallNodeTable, funcNames.indexOf('B.js'))
+    ).toBeTrue();
   });
 
-  it('correctly identifies indirectly recursive functions', function () {
-    const {
-      profile,
-      funcNamesPerThread: [funcNames],
-    } = getProfileFromTextSamples(`
+  it('funcHasRecursiveCall correctly identifies directly recursive functions', function () {
+    const { callNodeTable, funcNames } = setup(`
       A.js
       B.js
       C.cpp
       B.js
       D.js
-      B.js
     `);
-    const [thread] = profile.threads;
-
-    expect([
-      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
-      funcHasRecursiveCall(thread, funcNames.indexOf('B.js')),
-    ]).toEqual([true, true]);
+    expect(
+      funcHasRecursiveCall(callNodeTable, funcNames.indexOf('A.js'))
+    ).toBeFalse();
+    expect(
+      funcHasRecursiveCall(callNodeTable, funcNames.indexOf('B.js'))
+    ).toBeTrue();
+    expect(
+      funcHasRecursiveCall(callNodeTable, funcNames.indexOf('C.cpp'))
+    ).toBeFalse();
   });
 });
 
@@ -889,26 +868,28 @@ describe('getSamplesSelectedStates', function () {
      C  E  F  G
   `);
   const thread = profile.threads[0];
-  const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
+  const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
     thread.frameTable,
     thread.funcTable,
     0
   );
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
   const sampleCallNodes = getSampleIndexToCallNodeIndex(
     thread.samples.stack,
     stackIndexToCallNodeIndex
   );
 
-  const A_B = getCallNodeIndexFromPath([A, B], callNodeTable);
-  const A_B_F = getCallNodeIndexFromPath([A, B, F], callNodeTable);
-  const A_D = getCallNodeIndexFromPath([A, D], callNodeTable);
-  const A_D_E = getCallNodeIndexFromPath([A, D, E], callNodeTable);
+  const A_B = callNodeInfo.getCallNodeIndexFromPath([A, B]);
+  const A_B_F = callNodeInfo.getCallNodeIndexFromPath([A, B, F]);
+  const A_D = callNodeInfo.getCallNodeIndexFromPath([A, D]);
+  const A_D_E = callNodeInfo.getCallNodeIndexFromPath([A, D, E]);
 
   it('determines the selection status of all the samples', function () {
     expect(
       getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
         A_B
@@ -922,7 +903,7 @@ describe('getSamplesSelectedStates', function () {
     ]);
     expect(
       getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
         A_D
@@ -936,7 +917,7 @@ describe('getSamplesSelectedStates', function () {
     ]);
     expect(
       getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
         A_B_F
@@ -950,7 +931,7 @@ describe('getSamplesSelectedStates', function () {
     ]);
     expect(
       getSamplesSelectedStates(
-        callNodeTable,
+        callNodeInfo,
         sampleCallNodes,
         sampleCallNodes,
         A_D_E
@@ -965,7 +946,7 @@ describe('getSamplesSelectedStates', function () {
   });
 
   it('can sort the samples based on their selection status', function () {
-    const comparator = getTreeOrderComparator(callNodeTable, sampleCallNodes);
+    const comparator = getTreeOrderComparator(sampleCallNodes);
     const samples = [4, 1, 3, 0, 2]; // some random order
     samples.sort(comparator);
     expect(samples).toEqual([0, 2, 4, 1, 3]);
@@ -1174,15 +1155,9 @@ describe('getNativeSymbolsForCallNode', function () {
       thread.funcTable,
       defaultCategory
     );
-    const ab = getCallNodeIndexFromPath(
-      [funA, funB],
-      callNodeInfo.callNodeTable
-    );
+    const ab = callNodeInfo.getCallNodeIndexFromPath([funA, funB]);
     expect(ab).not.toBeNull();
-    const abc = getCallNodeIndexFromPath(
-      [funA, funB, funC],
-      callNodeInfo.callNodeTable
-    );
+    const abc = callNodeInfo.getCallNodeIndexFromPath([funA, funB, funC]);
     expect(abc).not.toBeNull();
 
     // Both the call path [funA, funB] and the call path [funA, funB, funC] end
@@ -1221,14 +1196,19 @@ describe('getNativeSymbolsForCallNode', function () {
       'Expected to find categories'
     );
     const defaultCategory = categories.findIndex((c) => c.name === 'Other');
-    const invertedThread = invertCallstack(thread, defaultCategory);
-    const callNodeInfo = getCallNodeInfo(
-      invertedThread.stackTable,
-      invertedThread.frameTable,
-      invertedThread.funcTable,
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
       defaultCategory
     );
-    const c = getCallNodeIndexFromPath([funC], callNodeInfo.callNodeTable);
+    const callNodeInfo = getInvertedCallNodeInfo(
+      thread,
+      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      defaultCategory
+    );
+    const c = callNodeInfo.getCallNodeIndexFromPath([funC]);
     expect(c).not.toBeNull();
 
     // The call node for funC in the inverted thread has one sample where funC
@@ -1240,8 +1220,8 @@ describe('getNativeSymbolsForCallNode', function () {
         getNativeSymbolsForCallNode(
           ensureExists(c),
           callNodeInfo,
-          invertedThread.stackTable,
-          invertedThread.frameTable
+          thread.stackTable,
+          thread.frameTable
         )
       )
     ).toEqual(new Set([symB, symD]));

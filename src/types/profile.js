@@ -514,16 +514,26 @@ export type CounterSamplesTable = {|
   length: number,
 |};
 
+export type GraphColor =
+  | 'blue'
+  | 'green'
+  | 'grey'
+  | 'ink'
+  | 'magenta'
+  | 'orange'
+  | 'purple'
+  | 'red'
+  | 'teal'
+  | 'yellow';
+
 export type Counter = {|
   name: string,
   category: string,
   description: string,
+  color?: GraphColor,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
-  sampleGroups: $ReadOnlyArray<{|
-    id: number,
-    samples: CounterSamplesTable,
-  |}>,
+  samples: CounterSamplesTable,
 |};
 
 /**
@@ -627,6 +637,7 @@ export type Thread = {|
   registerTime: Milliseconds,
   unregisterTime: Milliseconds | null,
   pausedRanges: PausedRange[],
+  showMarkersInTimeline?: boolean,
   name: string,
   isMainThread: boolean,
   // The eTLD+1 of the isolated content process if provided by the back-end.

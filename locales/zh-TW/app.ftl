@@ -126,6 +126,46 @@ CallTree--inlining-badge = （內聯）
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = 選擇節點來顯示該節點的相關資訊。
+CallTreeSidebar--call-node-details = 呼叫節點詳細資訊
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = 追蹤執行時間
+CallTreeSidebar--traced-self-time =
+    .label = 追蹤 Self 時間
+CallTreeSidebar--running-time =
+    .label = 執行時間
+CallTreeSidebar--self-time =
+    .label = Self 時間
+CallTreeSidebar--running-samples =
+    .label = 執行取樣
+CallTreeSidebar--self-samples =
+    .label = Self 取樣
+CallTreeSidebar--running-size =
+    .label = 執行大小
+CallTreeSidebar--self-size =
+    .label = Self 大小
+CallTreeSidebar--categories = 分類
+CallTreeSidebar--implementation = 實作
+CallTreeSidebar--running-milliseconds = 執行時間（ms）
+CallTreeSidebar--running-sample-count = 執行取樣數
+CallTreeSidebar--running-bytes = 執行位元組
+CallTreeSidebar--self-milliseconds = Self 時間（ms）
+CallTreeSidebar--self-sample-count = Self 取樣數
+CallTreeSidebar--self-bytes = Self 位元組
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -313,8 +353,8 @@ MarkerSidebar--select-a-marker = 選擇標記來顯示該標記的相關資訊�
 
 MarkerTable--start = 開始
 MarkerTable--duration = 持續時間
-MarkerTable--type = 類型
-MarkerTable--description = 描述
+MarkerTable--name = 名稱
+MarkerTable--details = 詳細資訊
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -663,7 +703,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
 TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
-TrackMemoryGraph--operations-since-the-previous-sample = 自前一次取樣以來的操作次數
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = 上次取樣以來的分配予取消分配
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -746,6 +786,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh（{ $carbonValue } mg CO₂e）
     .label = 目前選擇範圍中消耗的能源
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = 每秒 { $value }
+    .label = 此樣本的傳輸速度
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = 自從上次取樣後的讀寫操作數量
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value }（{ $carbonValue } g CO₂e）
+    .label = 至此刻為止傳輸的資料量
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value }（{ $carbonValue } g CO₂e）
+    .label = 可見範圍中傳輸的資料量
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value }（{ $carbonValue } g CO₂e）
+    .label = 目前選擇範圍傳輸的資料量
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

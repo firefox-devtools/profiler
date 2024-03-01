@@ -18,6 +18,8 @@ import memoize from 'memoize-immutable';
 import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
+  typeof changeMouseTimePosition as ChangeMouseTimePosition,
+  typeof changeSelectedMarker as ChangeSelectedMarker,
 } from 'firefox-profiler/actions/profile-view';
 import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
@@ -79,9 +81,12 @@ type OwnProps = {|
   +getMarker: (MarkerIndex) => Marker,
   +threadsKey: ThreadsKey,
   +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
+  +changeMouseTimePosition: ChangeMouseTimePosition,
+  +changeSelectedMarker: ChangeSelectedMarker,
   +changeRightClickedMarker: ChangeRightClickedMarker,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
+  +selectedMarkerIndex: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +shouldDisplayTooltips: () => boolean,
   +timelineTrackOrganization: TimelineTrackOrganization,
@@ -202,7 +207,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         this.highlightRow(ctx, newRow);
         this.drawMarkers(ctx, hoveredMarker, newRow, newRow + 1);
         if (hoveredLabel === null) {
-          this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1);
+          this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1, true);
         }
       }
       if (oldRow !== undefined && oldRow !== newRow) {
@@ -392,6 +397,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       marginLeft,
       marginRight,
       rightClickedMarkerIndex,
+      selectedMarkerIndex,
       viewport: {
         containerWidth,
         containerHeight,
@@ -472,7 +478,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
 
           const isHighlighted =
             rightClickedMarkerIndex === markerIndex ||
-            hoveredItem === markerIndex;
+            hoveredItem === markerIndex ||
+            selectedMarkerIndex === markerIndex;
 
           if (isHighlighted) {
             highlightedMarkers.push({ x, y, w, h, isInstantMarker, text });
@@ -535,10 +542,32 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     return this._textMeasurement;
   }
 
+  countMarkersInBucketStartingAtRow(rowIndex: number): number {
+    const { markerTimingAndBuckets } = this.props;
+    const markerTiming = markerTimingAndBuckets[rowIndex];
+    if (typeof markerTiming === 'string') {
+      return 0;
+    }
+
+    const { name } = markerTiming;
+    let count = markerTiming.length;
+    for (let row = rowIndex + 1; row < markerTimingAndBuckets.length; ++row) {
+      if (
+        typeof markerTimingAndBuckets[row] === 'string' ||
+        markerTimingAndBuckets[row].name !== name
+      ) {
+        break;
+      }
+      count += markerTimingAndBuckets[row].length;
+    }
+    return count;
+  }
+
   drawSeparatorsAndLabels(
     ctx: CanvasRenderingContext2D,
     startRow: number,
-    endRow: number
+    endRow: number,
+    drawMarkerCount: boolean = false
   ) {
     const {
       markerTimingAndBuckets,
@@ -580,11 +609,18 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       }
 
       const y = rowIndex * rowHeight - viewportTop;
-      // Even though it's on active tab view, have a hard cap on the text length.
-      const fittedText = textMeasurement.getFittedText(
-        name,
-        TIMELINE_MARGIN_LEFT
-      );
+
+      const countString = drawMarkerCount
+        ? ` (${this.countMarkersInBucketStartingAtRow(rowIndex)})`
+        : '';
+      // Even when it's on active tab view, have a hard cap on the text length.
+      const fittedText =
+        textMeasurement.getFittedText(
+          name,
+          TIMELINE_MARGIN_LEFT -
+            LABEL_PADDING -
+            (countString ? textMeasurement.getTextWidth(countString) : 0)
+        ) + countString;
 
       if (timelineTrackOrganization.type === 'active-tab') {
         // Draw the text backgound for active tab.
@@ -757,6 +793,37 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     return { markerIndex, rowIndexOfLabel };
   };
 
+  onMouseMove = (event: { nativeEvent: MouseEvent }) => {
+    const {
+      changeMouseTimePosition,
+      rangeStart,
+      rangeEnd,
+      marginLeft,
+      marginRight,
+      viewport: { viewportLeft, viewportRight, containerWidth },
+    } = this.props;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const markerContainerWidth = containerWidth - marginLeft - marginRight;
+    // This is the x position in terms of unit interval (so, between 0 and 1).
+    const xInUnitInterval: UnitIntervalOfProfileRange =
+      viewportLeft +
+      viewportLength *
+        ((event.nativeEvent.offsetX - marginLeft) / markerContainerWidth);
+
+    if (xInUnitInterval < 0 || xInUnitInterval > 1) {
+      changeMouseTimePosition(null);
+    } else {
+      const rangeLength: Milliseconds = rangeEnd - rangeStart;
+      const xInTime: Milliseconds = rangeStart + xInUnitInterval * rangeLength;
+      changeMouseTimePosition(xInTime);
+    }
+  };
+
+  onMouseLeave = () => {
+    this.props.changeMouseTimePosition(null);
+  };
+
   onDoubleClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
     const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
     if (markerIndex === null) {
@@ -777,6 +844,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       selectionStart: start,
       selectionEnd: end,
     });
+  };
+
+  onSelectItem = (hoveredItems: HoveredMarkerChartItems | null) => {
+    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
+    const { changeSelectedMarker, threadsKey } = this.props;
+    changeSelectedMarker(threadsKey, markerIndex, { source: 'pointer' });
   };
 
   onRightClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
@@ -813,11 +886,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         containerHeight={containerHeight}
         isDragging={isDragging}
         scaleCtxToCssPixels={true}
+        onSelectItem={this.onSelectItem}
         onDoubleClickItem={this.onDoubleClickMarker}
         onRightClick={this.onRightClickMarker}
         getHoveredItemInfo={this.getHoveredMarkerInfo}
         drawCanvas={this.drawCanvas}
         hitTest={this.hitTest}
+        onMouseMove={this.onMouseMove}
+        onMouseLeave={this.onMouseLeave}
       />
     );
   }

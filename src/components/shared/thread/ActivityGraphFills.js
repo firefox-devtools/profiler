@@ -416,10 +416,23 @@ export class ActivityFillGraphQuerier {
   ): HoveredPixelState | null {
     const {
       rangeFilteredThread: { samples, stackTable },
+      canvasPixelWidth,
+      canvasPixelHeight,
     } = this.renderedComponentSettings;
+
     const { devicePixelRatio } = window;
-    const deviceX = Math.round(cssX * devicePixelRatio);
-    const deviceY = Math.round(cssY * devicePixelRatio);
+    const deviceX = Math.floor(cssX * devicePixelRatio);
+    const deviceY = Math.floor(cssY * devicePixelRatio);
+
+    if (
+      deviceX < 0 ||
+      deviceX >= canvasPixelWidth ||
+      deviceY < 0 ||
+      deviceY >= canvasPixelHeight
+    ) {
+      return null;
+    }
+
     const categoryUnderMouse = this._categoryAtDevicePixel(deviceX, deviceY);
 
     const candidateSamples = this._getSamplesAtTime(time);
@@ -460,11 +473,14 @@ export class ActivityFillGraphQuerier {
         continue;
       }
       const sampleCategory = stackTable.category[stackIndex];
+      if (sampleCategory !== category) {
+        // The sample contribution is already filtered by the category at this
+        // point. So we should skip the samples that have different categories.
+        continue;
+      }
+
       const upperEdgeOfThisSample = upperEdgeOfPreviousSample + contribution;
-      // Checking the sample category here because there are samples with different
-      // categories that has y percentage is lower than the upperEdgeOfThisSample.
-      // It's possible to pick the wrong value otherwise.
-      if (sampleCategory === category && yPercentage <= upperEdgeOfThisSample) {
+      if (yPercentage <= upperEdgeOfThisSample) {
         // We use <= rather than < here so that we don't return null if
         // yPercentage is equal to the upper edge of the last sample.
         return { sample, cpuRatioInTimeRange };
@@ -533,17 +549,7 @@ export class ActivityFillGraphQuerier {
     categoryLowerEdge: number,
     yPercentage: number,
   } {
-    const { canvasPixelWidth, canvasPixelHeight } =
-      this.renderedComponentSettings;
-
-    if (
-      deviceX < 0 ||
-      deviceX >= canvasPixelWidth ||
-      deviceY < 0 ||
-      deviceY >= canvasPixelHeight
-    ) {
-      return null;
-    }
+    const { canvasPixelHeight } = this.renderedComponentSettings;
 
     // Convert the device pixel position into the range [0, 1], with 0 being
     // the *lower* edge of the canvas.
@@ -857,15 +863,16 @@ function _accumulateInBuffer(
     (sampleCategoryStartTime - bufferTimeRangeStart) * xPixelsPerMs;
   let sampleCategoryEndPixel =
     (sampleCategoryEndTime - bufferTimeRangeStart) * xPixelsPerMs;
-  sampleCategoryStartPixel = Math.max(0, sampleCategoryStartPixel);
-  sampleCategoryEndPixel = Math.min(
-    percentageBuffer.length - 1,
-    sampleCategoryEndPixel
-  );
+  if (sampleCategoryStartPixel < 0) {
+    sampleCategoryStartPixel = 0;
+  }
+  if (sampleCategoryEndPixel > percentageBuffer.length - 1) {
+    sampleCategoryEndPixel = percentageBuffer.length - 1;
+  }
   const samplePixel = (sampleTime - bufferTimeRangeStart) * xPixelsPerMs;
-  const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
-  const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
-  const intSamplePixel = Math.floor(samplePixel);
+  const intCategoryStartPixel = sampleCategoryStartPixel | 0;
+  const intCategoryEndPixel = sampleCategoryEndPixel | 0;
+  const intSamplePixel = samplePixel | 0;
   const sampleTimeDeltaBefore = sampleTime - prevSampleTime;
   const sampleTimeDeltaAfter = nextSampleTime - sampleTime;
 
@@ -896,11 +903,11 @@ function _accumulateInBuffer(
   // A number between 0 and 1 for sample ratio. It changes depending on
   // the CPU usage per ms if it's given. If not, it uses 1 directly.
   const beforeSampleCpuRatio =
-    cpuDeltaBeforeSample === null
+    cpuDeltaBeforeSample === null || sampleTimeDeltaBefore === 0
       ? 1
       : cpuDeltaBeforeSample / sampleTimeDeltaBefore / maxThreadCPUDeltaPerMs;
   const afterSampleCpuRatio =
-    cpuDeltaAfterSample === null
+    cpuDeltaAfterSample === null || sampleTimeDeltaAfter === 0
       ? 1
       : cpuDeltaAfterSample / sampleTimeDeltaAfter / maxThreadCPUDeltaPerMs;
 

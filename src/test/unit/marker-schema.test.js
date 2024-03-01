@@ -220,13 +220,16 @@ describe('marker schema formatting', function () {
       ['duration', 50000000],
       ['duration', 123456789],
       ['duration', 0.000123456],
-      ['duration', 1000 * 60 - 0.01], // slightly less than 1min, should not be shown as '60s'
+      ['duration', 1000 * 60 - 501], // slightly less than 1min, should not be shown as '60s'
+      ['duration', 1000 * 60 - 500], // slightly less than 1min, should not be shown as '60s'
       ['duration', 1000 * 60 + 1], // slightly more than 1min, should not be shown as '1min0s'
       ['duration', 779873.639], // '13min60s' should be rounded to '14min'
-      ['duration', 1000 * 3600 - 0.01], // slightly less than 1h, should not be shown as '0h60min'
+      ['duration', 1000 * 3600 - 501], // 1h - 501ms slightly less than 1h, should be shown as '59min59s'
+      ['duration', 1000 * 3600 - 500], // 1h - 500s slightly less than 1h, should be shown as '1h', not '0h60min'
       ['duration', 1000 * 3600 + 1], // slightly more than 1h, should not be shown as '1h0min'
-      ['duration', 1000 * 3600 * 24 - 0.01], // slightly less than 1 day, should not be shown as '0d24h'
-      ['duration', 1000 * 3600 * 24 + 1], // slightly more than 1 day, should not be shown as '1min0s'
+      ['duration', 1000 * 3600 * 24 - 31 * 1000], // 1d - 31s, should be shown as '23h59min'
+      ['duration', 1000 * 3600 * 24 - 30 * 1000], // 1d - 30s, should be shown as '1d', not '0d24h'
+      ['duration', 1000 * 3600 * 24 + 1], // slightly more than 1 day, should not be shown as '1d0h'
       ['time', 12.3456789],
       ['seconds', 0],
       ['seconds', 10],
@@ -296,18 +299,21 @@ describe('marker schema formatting', function () {
         "duration - 0s",
         "duration - 10ms",
         "duration - 12.346ms",
-        "duration - 2min3s",
-        "duration - 6h31min",
+        "duration - 2m3s",
+        "duration - 6h31m",
         "duration - 50s",
-        "duration - 33min20s",
-        "duration - 13h53min",
+        "duration - 33m20s",
+        "duration - 13h53m",
         "duration - 1d10h",
         "duration - 123.46ns",
-        "duration - 1min",
-        "duration - 1min",
-        "duration - 13min",
+        "duration - 59.499s",
+        "duration - 1m",
+        "duration - 1m",
+        "duration - 13m",
+        "duration - 59m59s",
         "duration - 1h",
         "duration - 1h",
+        "duration - 23h59m",
         "duration - 1d",
         "duration - 1d",
         "time - 12.346ms",

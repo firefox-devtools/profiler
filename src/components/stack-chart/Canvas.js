@@ -15,7 +15,10 @@ import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  updatePreviewSelection,
+  typeof changeMouseTimePosition as ChangeMouseTimePosition,
+} from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
@@ -63,6 +66,7 @@ type OwnProps = {|
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection,
   >,
+  +changeMouseTimePosition: ChangeMouseTimePosition,
   +getMarker: (MarkerIndex) => Marker,
   +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
@@ -118,15 +122,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   }
 
   _scrollSelectionIntoView = () => {
-    const {
-      selectedCallNodeIndex,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { selectedCallNodeIndex, callNodeInfo } = this.props;
 
     if (selectedCallNodeIndex === null) {
       return;
     }
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[selectedCallNodeIndex];
     const y = depth * ROW_CSS_PIXELS_HEIGHT;
 
@@ -162,7 +164,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       stackFrameHeight,
       selectedCallNodeIndex,
       categories,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       getMarker,
       marginLeft,
       viewport: {
@@ -209,18 +211,32 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
 
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange =
-      viewportRight - viewportLeft;
     const viewportDevicePixelsTop = viewportTop * cssToDeviceScale;
 
     // Convert CssPixels to Stack Depth
     const startDepth = Math.floor(viewportTop / stackFrameHeight);
     const endDepth = Math.ceil(viewportBottom / stackFrameHeight);
 
+    // Convert between horizontal units: viewport units, milliseconds, CSS pixels, device pixels
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportRangeLength: Milliseconds = rangeLength * viewportLength;
+
     const innerContainerWidth =
       containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
     const innerDevicePixelsWidth = innerContainerWidth * cssToDeviceScale;
+
+    const timePerCssPixel = viewportRangeLength / innerContainerWidth;
+
+    // Compute the time range that's displayed on the canvas, including in the
+    // margins around the viewport.
+    const timeAtStart: Milliseconds =
+      rangeStart + rangeLength * viewportLeft - timePerCssPixel * marginLeft;
+    const timeAtEnd: Milliseconds =
+      rangeStart +
+      rangeLength * viewportRight +
+      timePerCssPixel * TIMELINE_MARGIN_RIGHT;
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
@@ -246,6 +262,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       categoryForUserTiming = 0;
     }
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
       // Get the timing information for a row of stack frames.
@@ -254,25 +272,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       if (!stackTiming) {
         continue;
       }
-      /*
-       * TODO - Do an O(log n) binary search to find the only samples in range rather than
-       * linear O(n) search for loops. Profile the results to see if this helps at all.
-       *
-       * const startSampleIndex = binarySearch(stackTiming.start, rangeStart + rangeLength * viewportLeft);
-       * const endSampleIndex = binarySearch(stackTiming.end, rangeStart + rangeLength * viewportRight);
-       */
-
-      const pixelsInViewport = viewportLength * innerDevicePixelsWidth;
-      const timePerPixel = rangeLength / pixelsInViewport;
-
-      // Decide which samples to actually draw
-      const timeAtStart: Milliseconds =
-        rangeStart + rangeLength * viewportLeft - timePerPixel * marginLeft;
-      const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
-
       let lastDrawnPixelX = 0;
       for (let i = 0; i < stackTiming.length; i++) {
-        // Only draw samples that are in bounds.
+        // Only draw boxes that overlap with the canvas.
         if (
           stackTiming.end[i] > timeAtStart &&
           stackTiming.start[i] < timeAtEnd
@@ -579,6 +581,36 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     return null;
   };
 
+  onMouseMove = (event: { nativeEvent: MouseEvent }) => {
+    const {
+      changeMouseTimePosition,
+      rangeStart,
+      rangeEnd,
+      marginLeft,
+      viewport: { viewportLeft, viewportRight, containerWidth },
+    } = this.props;
+
+    const innerDevicePixelsWidth =
+      containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const unitIntervalTime: UnitIntervalOfProfileRange =
+      viewportLeft +
+      viewportLength *
+        ((event.nativeEvent.offsetX - marginLeft) / innerDevicePixelsWidth);
+    if (unitIntervalTime < 0 || unitIntervalTime > 1) {
+      changeMouseTimePosition(null);
+    } else {
+      const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
+      changeMouseTimePosition(time);
+    }
+  };
+
+  onMouseLeave = () => {
+    this.props.changeMouseTimePosition(null);
+  };
+
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
@@ -593,6 +625,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
+        onMouseMove={this.onMouseMove}
+        onMouseLeave={this.onMouseLeave}
         onSelectItem={this._onSelectItem}
         onRightClick={this._onRightClick}
       />

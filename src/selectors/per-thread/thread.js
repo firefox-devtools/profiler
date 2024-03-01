@@ -454,28 +454,13 @@ export function getThreadSelectorsWithMarkersPerThread(
   const _getImplementationFilteredThread: Selector<Thread> = createSelector(
     getRangeAndTransformFilteredThread,
     UrlState.getImplementationFilter,
-    ProfileSelectors.getDefaultCategory,
     ProfileData.filterThreadByImplementation
   );
 
-  const _getImplementationAndSearchFilteredThread: Selector<Thread> =
-    createSelector(
-      _getImplementationFilteredThread,
-      UrlState.getSearchStrings,
-      (thread, searchStrings) => {
-        return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
-      }
-    );
-
   const getFilteredThread: Selector<Thread> = createSelector(
-    _getImplementationAndSearchFilteredThread,
-    UrlState.getInvertCallstack,
-    ProfileSelectors.getDefaultCategory,
-    (thread, shouldInvertCallstack, defaultCategory) => {
-      return shouldInvertCallstack
-        ? ProfileData.invertCallstack(thread, defaultCategory)
-        : thread;
-    }
+    _getImplementationFilteredThread,
+    UrlState.getSearchStrings,
+    ProfileData.filterThreadToSearchStrings
   );
 
   const getPreviewFilteredThread: Selector<Thread> = createSelector(

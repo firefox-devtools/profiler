@@ -23,6 +23,8 @@ import { getTimelineMarginLeft } from 'firefox-profiler/selectors/app';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
+  changeMouseTimePosition,
+  changeSelectedMarker,
 } from 'firefox-profiler/actions/profile-view';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
@@ -47,6 +49,8 @@ const ROW_HEIGHT = 16;
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
+  +changeMouseTimePosition: typeof changeMouseTimePosition,
+  +changeSelectedMarker: typeof changeSelectedMarker,
 |};
 
 type StateProps = {|
@@ -57,6 +61,7 @@ type StateProps = {|
   +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
   +rightClickedMarkerIndex: MarkerIndex | null,
+  +selectedMarkerIndex: MarkerIndex | null,
   +timelineMarginLeft: CssPixels,
   +timelineTrackOrganization: TimelineTrackOrganization,
 |};
@@ -106,8 +111,11 @@ class MarkerChartImpl extends React.PureComponent<Props> {
       getMarker,
       previewSelection,
       updatePreviewSelection,
+      changeMouseTimePosition,
       changeRightClickedMarker,
       rightClickedMarkerIndex,
+      selectedMarkerIndex,
+      changeSelectedMarker,
       timelineMarginLeft,
       timelineTrackOrganization,
     } = this.props;
@@ -150,6 +158,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 getMarker,
                 // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 updatePreviewSelection,
+                changeMouseTimePosition,
                 changeRightClickedMarker,
                 rangeStart: timeRange.start,
                 rangeEnd: timeRange.end,
@@ -157,6 +166,8 @@ class MarkerChartImpl extends React.PureComponent<Props> {
                 threadsKey,
                 marginLeft: timelineMarginLeft,
                 marginRight: TIMELINE_MARGIN_RIGHT,
+                changeSelectedMarker,
+                selectedMarkerIndex,
                 rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
                 timelineTrackOrganization,
@@ -190,10 +201,17 @@ export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
       previewSelection: getPreviewSelection(state),
       rightClickedMarkerIndex:
         selectedThreadSelectors.getRightClickedMarkerIndex(state),
+      selectedMarkerIndex:
+        selectedThreadSelectors.getSelectedMarkerIndex(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
       timelineTrackOrganization: getTimelineTrackOrganization(state),
     };
   },
-  mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },
+  mapDispatchToProps: {
+    updatePreviewSelection,
+    changeMouseTimePosition,
+    changeRightClickedMarker,
+    changeSelectedMarker,
+  },
   component: MarkerChartImpl,
 });

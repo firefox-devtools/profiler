@@ -64,6 +64,7 @@ import type {
   Milliseconds,
   Microseconds,
   Address,
+  GeckoCounter,
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoThread,
@@ -1027,20 +1028,12 @@ function _processCounters(
   }
 
   return geckoCounters.reduce(
-    (result, { name, category, description, sample_groups }) => {
-      if (sample_groups.length === 0) {
+    (result, { name, category, description, samples }) => {
+      if (samples.data.length === 0) {
         // It's possible that no sample has been collected during our capture
         // session, ignore this counter if that's the case.
         return result;
       }
-
-      const sampleGroups = sample_groups.map((sampleGroup) => ({
-        id: sampleGroup.id,
-        samples: adjustTableTimestamps(
-          _toStructOfArrays(sampleGroup.samples),
-          delta
-        ),
-      }));
 
       result.push({
         name,
@@ -1048,7 +1041,7 @@ function _processCounters(
         description,
         pid: mainThreadPid,
         mainThreadIndex,
-        sampleGroups,
+        samples: adjustTableTimestamps(_toStructOfArrays(samples), delta),
       });
       return result;
     },
@@ -1384,6 +1377,28 @@ function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
   }
 
   return combinedSchemas;
+}
+
+export function insertExternalPowerCountersIntoProfile(
+  counters: GeckoCounter[],
+  geckoProfile: GeckoProfile
+): void {
+  for (const counter of counters) {
+    const { samples } = counter;
+    const timeColumnIndex = samples.schema.time;
+    for (const sample of samples.data) {
+      // Adjust the sample times to be relative to meta.startTime,
+      // and limit the precision to nanoseconds
+      sample[timeColumnIndex] =
+        Math.round(
+          (sample[timeColumnIndex] + geckoProfile.meta.profilingStartTime) * 1e6
+        ) / 1e6;
+    }
+    if (!geckoProfile.counters) {
+      geckoProfile.counters = [];
+    }
+    geckoProfile.counters.push(counter);
+  }
 }
 
 /**

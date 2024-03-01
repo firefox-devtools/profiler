@@ -373,8 +373,8 @@ MarkerSidebar--select-a-marker = Выберыце маркер, каб пагл�
 
 MarkerTable--start = Пачатак
 MarkerTable--duration = Працягласць
-MarkerTable--type = Тып
-MarkerTable--description = Апісанне
+MarkerTable--name = Назва
+MarkerTable--details = Падрабязнасці
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -754,7 +754,6 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = адносная памяць на гэты момант
 TrackMemoryGraph--memory-range-in-graph = дыяпазон памяці ў графіку
-TrackMemoryGraph--operations-since-the-previous-sample = аперацый, пачынаючы з папярэдняга ўзору
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -837,6 +836,25 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } м�
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } мкВт·гад ({ $carbonValue } мг CO₂e)
     .label = Энергія, якая спажываецца ў бягучай выбарцы
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } у секунду
+    .label = Хуткасць перадачы для гэтай выбаркі
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = аперацый уводу/вываду з часу папярэдняй выбаркі
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

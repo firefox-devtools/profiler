@@ -49,7 +49,6 @@ import type {
   TransformType,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  IndexIntoFuncTable,
   CallNodeInfo,
   CallNodePath,
   Thread,
@@ -136,9 +135,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const funcIndex = callNodeTable.func[callNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
@@ -173,9 +173,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const funcIndex = callNodeTable.func[callNodeIndex];
     const stringIndex = funcTable.fileName[funcIndex];
     if (stringIndex === null) {
@@ -223,28 +224,30 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { funcTable, resourceTable, stringTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    let stack = '';
-    let curCallNodeIndex = callNodeIndex;
+    const callPath = callNodeInfo
+      .getCallNodePathFromIndex(callNodeIndex)
+      .reverse();
 
-    do {
-      // Match the style of MarkerContextMenu.js#convertStackToString which uses
-      // square brackets around [file:line:column] info. This isn't provided by
-      // getOriginAnnotationForFunc, so build the string in two parts:
-      const funcIndex = callNodeTable.func[curCallNodeIndex];
-      const funcNameIndex = funcTable.name[funcIndex];
-      const funcName = stringTable.getString(funcNameIndex);
-      const fileNameURL = getOriginAnnotationForFunc(
-        funcIndex,
-        funcTable,
-        resourceTable,
-        stringTable
-      );
-      stack += funcName + (fileNameURL ? ` [${fileNameURL}]\n` : '\n');
-      curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
-    } while (curCallNodeIndex !== -1);
+    const stack = callPath
+      .map((funcIndex) => {
+        // Match the style of MarkerContextMenu.js#convertStackToString which uses
+        // square brackets around [file:line:column] info.
+        // The square brackets aren't included in the string that's returned from
+        // getOriginAnnotationForFunc, so build the string in two parts:
+        const funcNameIndex = funcTable.name[funcIndex];
+        const funcName = stringTable.getString(funcNameIndex);
+        const originAnnotation = getOriginAnnotationForFunc(
+          funcIndex,
+          funcTable,
+          resourceTable,
+          stringTable
+        );
+        return funcName + (originAnnotation ? ` [${originAnnotation}]` : '');
+      })
+      .join('\n');
 
     copy(stack);
   }
@@ -297,14 +300,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
       );
     }
 
-    const {
-      threadsKey,
-      callNodePath,
-      thread,
-      callNodeIndex,
-      callNodeInfo: { callNodeTable },
-    } = rightClickedCallNodeInfo;
+    const { threadsKey, callNodePath, thread, callNodeIndex, callNodeInfo } =
+      rightClickedCallNodeInfo;
     const selectedFunc = callNodePath[callNodePath.length - 1];
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const category = callNodeTable.category[callNodeIndex];
     switch (type) {
       case 'focus-subtree':
@@ -438,37 +437,6 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     return stringTable.getString(resNameStringIndex);
   }
 
-  /**
-   * Determine if this CallNode represent a recursive function call.
-   */
-  isRecursiveCall(
-    funcHasRecursiveCall: (Thread, IndexIntoFuncTable) => boolean
-  ): boolean {
-    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
-
-    if (rightClickedCallNodeInfo === null) {
-      console.error(
-        "The context menu assumes there is a selected call node and there wasn't one."
-      );
-      return false;
-    }
-
-    const { callNodePath, thread } = rightClickedCallNodeInfo;
-    const funcIndex = callNodePath[callNodePath.length - 1];
-
-    if (funcIndex === undefined) {
-      return false;
-    }
-
-    // Do the easy thing first, see if this function was called by itself.
-    if (callNodePath[callNodePath.length - 2] === funcIndex) {
-      return true;
-    }
-
-    // Do a full check of the stackTable for recursion.
-    return funcHasRecursiveCall(thread, funcIndex);
-  }
-
   getRightClickedCallNodeInfo(): null | {|
     +thread: Thread,
     +threadsKey: ThreadsKey,
@@ -517,9 +485,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       callNodeIndex,
       thread: { funcTable },
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
     } = rightClickedCallNodeInfo;
 
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     const categoryIndex = callNodeTable.category[callNodeIndex];
     const funcIndex = callNodeTable.func[callNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
@@ -642,7 +611,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             })
           : null}
 
-        {this.isRecursiveCall(funcHasRecursiveCall)
+        {funcHasRecursiveCall(callNodeTable, funcIndex)
           ? this.renderTransformMenuItem({
               l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
               shortcut: 'r',
@@ -654,13 +623,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             })
           : null}
 
-        {this.isRecursiveCall((thread, funcIndex) =>
-          funcHasDirectRecursiveCall(
-            thread,
-            this.props.implementation,
-            funcIndex
-          )
-        )
+        {funcHasDirectRecursiveCall(callNodeTable, funcIndex)
           ? this.renderTransformMenuItem({
               l10nId:
                 'CallNodeContextMenu--transform-collapse-direct-recursion-only',

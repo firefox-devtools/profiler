@@ -7,6 +7,11 @@
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import {
+  getStrokeColor,
+  getFillColor,
+  getDotColor,
+} from 'firefox-profiler/profile-logic/graph-color';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
@@ -15,10 +20,10 @@ import {
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { GREY_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { TooltipTrackPower } from 'firefox-profiler/components/tooltip/TrackPower';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
+import { TRACK_POWER_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants';
 
 import type {
   CounterIndex,
@@ -44,8 +49,8 @@ type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +counter: Counter,
-  +counterSampleRanges: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>,
-  +maxCounterSampleCountsPerMs: number[],
+  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
   +width: CssPixels,
   +height: CssPixels,
@@ -73,8 +78,8 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
       width,
       lineWidth,
       interval,
-      maxCounterSampleCountsPerMs,
-      counterSampleRanges,
+      maxCounterSampleCountPerMs,
+      counterSampleRange,
     } = this.props;
     if (width === 0) {
       // This is attempting to draw before the canvas was laid out.
@@ -97,21 +102,14 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
     canvas.height = Math.round(deviceHeight);
     ctx.clearRect(0, 0, deviceWidth, deviceHeight);
 
-    const sampleGroups = counter.sampleGroups;
-    if (sampleGroups.length === 0 || counterSampleRanges.length === 0) {
-      // Gecko failed to capture samples for some reason and it shouldn't happen for
-      // malloc counter. Print an error and do not draw anything.
-      throw new Error('No sample group found for power counter');
-    }
-
-    const samples = counter.sampleGroups[0].samples;
+    const samples = counter.samples;
     if (samples.length === 0) {
       // There's no reason to draw the samples, there are none.
       return;
     }
 
-    const [sampleStart, sampleEnd] = counterSampleRanges[0];
-    const countRangePerMs = maxCounterSampleCountsPerMs[0];
+    const [sampleStart, sampleEnd] = counterSampleRange;
+    const countRangePerMs = maxCounterSampleCountPerMs;
 
     {
       // Draw the chart.
@@ -126,8 +124,10 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = GREY_50;
-      ctx.fillStyle = '#73737388'; // Grey 50 with transparency.
+      ctx.strokeStyle = getStrokeColor(
+        counter.color || TRACK_POWER_DEFAULT_COLOR
+      );
+      ctx.fillStyle = getFillColor(counter.color || TRACK_POWER_DEFAULT_COLOR);
       ctx.beginPath();
 
       const getX = (i) =>
@@ -138,6 +138,11 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
         return samples.count[i] / sampleTimeDeltaInMs;
       };
       const getY = (rawY) => {
+        if (!rawY) {
+          // Make the 0 values invisible so that 'almost 0' is noticeable.
+          return deviceHeight + deviceLineHalfWidth;
+        }
+
         const unitGraphCount = rawY / countRangePerMs;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
@@ -279,8 +284,8 @@ type StateProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +counter: Counter,
-  +counterSampleRanges: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>,
-  +maxCounterSampleCountsPerMs: number[],
+  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
@@ -324,17 +329,12 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       rangeEnd,
       counter,
       interval,
-      counterSampleRanges,
+      counterSampleRange,
     } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
 
-    if (counter.sampleGroups.length === 0) {
-      // Gecko failed to capture samples for some reason and it shouldn't happen for
-      // malloc counter. Print an error and bail out early.
-      throw new Error('No sample group found for power counter');
-    }
-    const { samples } = counter.sampleGroups[0];
+    const { samples } = counter;
 
     if (
       timeAtMouse < samples.time[0] ||
@@ -345,7 +345,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
     } else {
       // When the mouse pointer hovers between two points, select the point that's closer.
       let hoveredCounter;
-      const [sampleStart, sampleEnd] = counterSampleRanges[0];
+      const [sampleStart, sampleEnd] = counterSampleRange;
       const bisectionCounter = bisectionRight(
         samples.time,
         timeAtMouse,
@@ -411,7 +411,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
     const { counter, rangeStart, rangeEnd } = this.props;
     const { mouseX, mouseY } = this.state;
 
-    const samples = counter.sampleGroups[0].samples;
+    const { samples } = counter;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
@@ -449,16 +449,11 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      maxCounterSampleCountsPerMs,
+      maxCounterSampleCountPerMs,
       interval,
     } = this.props;
 
-    if (counter.sampleGroups.length === 0) {
-      // Gecko failed to capture samples for some reason and it shouldn't happen for
-      // malloc counter. Print an error and bail out early.
-      throw new Error('No sample group found for power counter');
-    }
-    const { samples } = counter.sampleGroups[0];
+    const { samples } = counter;
     const rangeLength = rangeEnd - rangeStart;
     const sampleTime = samples.time[counterIndex];
 
@@ -477,7 +472,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       // power counter. Print an error and bail out early.
       throw new Error('No sample found for power counter');
     }
-    const countRangePerMs = maxCounterSampleCountsPerMs[0];
+    const countRangePerMs = maxCounterSampleCountPerMs;
     const sampleTimeDeltaInMs =
       counterIndex === 0
         ? interval
@@ -488,7 +483,18 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
 
-    return <div style={{ left, top }} className="timelineTrackPowerGraphDot" />;
+    return (
+      <div
+        style={{
+          left,
+          top,
+          backgroundColor: getDotColor(
+            counter.color || TRACK_POWER_DEFAULT_COLOR
+          ),
+        }}
+        className="timelineTrackPowerGraphDot"
+      />
+    );
   }
 
   render() {
@@ -500,11 +506,11 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
       rangeEnd,
       unfilteredSamplesRange,
       counter,
-      counterSampleRanges,
+      counterSampleRange,
       graphHeight,
       width,
       lineWidth,
-      maxCounterSampleCountsPerMs,
+      maxCounterSampleCountPerMs,
     } = this.props;
 
     return (
@@ -517,12 +523,12 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           counter={counter}
-          counterSampleRanges={counterSampleRanges}
+          counterSampleRange={counterSampleRange}
           height={graphHeight}
           width={width}
           lineWidth={lineWidth}
           interval={interval}
-          maxCounterSampleCountsPerMs={maxCounterSampleCountsPerMs}
+          maxCounterSampleCountPerMs={maxCounterSampleCountPerMs}
         />
         {hoveredCounter === null ? null : (
           <>
@@ -552,18 +558,18 @@ export const TrackPowerGraph = explicitConnect<
     const counterSelectors = getCounterSelectors(counterIndex);
     const counter = counterSelectors.getCounter(state);
     const { start, end } = getCommittedRange(state);
-    const counterSampleRanges =
-      counterSelectors.getCommittedRangeCounterSampleRanges(state);
+    const counterSampleRange =
+      counterSelectors.getCommittedRangeCounterSampleRange(state);
 
     const selectors = getThreadSelectors(counter.mainThreadIndex);
     return {
       counter,
       threadIndex: counter.mainThreadIndex,
-      maxCounterSampleCountsPerMs:
-        counterSelectors.getMaxRangeCounterSampleCountsPerMs(state),
+      maxCounterSampleCountPerMs:
+        counterSelectors.getMaxRangeCounterSampleCountPerMs(state),
       rangeStart: start,
       rangeEnd: end,
-      counterSampleRanges,
+      counterSampleRange,
       interval: getProfileInterval(state),
       filteredThread: selectors.getFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),

@@ -3,7 +3,7 @@
 exports[`TrackPower draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackPowerGraphDot"
-  style="left: 15px; top: 24.872px;"
+  style="left: 15px; top: 24.872px; background-color: rgb(74, 74, 79);"
 />
 `;
 
@@ -63,7 +63,7 @@ Array [
   Array [
     "moveTo",
     0,
-    24,
+    26,
   ],
   Array [
     "lineTo",

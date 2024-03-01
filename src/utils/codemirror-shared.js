@@ -67,7 +67,7 @@ function getSortedStartPositionsOfNonZeroLines(state: EditorState): number[] {
   }
   const lineCount = state.doc.lines;
   const positions = [...nonZeroLines]
-    .filter((l) => l <= lineCount)
+    .filter((l) => l >= 1 && l <= lineCount)
     .map((lineNumber) => state.doc.line(lineNumber).from);
   positions.sort((a, b) => a - b);
   return positions;

@@ -4,17 +4,24 @@
 // @flow
 import {
   getCallTree,
-  computeCallTreeCountsAndSummary,
+  computeCallNodeLeafAndSummary,
+  computeCallTreeTimings,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
-import { getCallNodeInfo } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getCallNodeInfo,
+  getSampleIndexToCallNodeIndex,
+  getOriginAnnotationForFunc,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   IndexIntoCallNodeTable,
   Profile,
   Store,
   State,
+  Thread,
+  IndexIntoStackTable,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
@@ -113,7 +120,6 @@ export function callTreeFromProfile(
   threadIndex: number = 0
 ): CallTree {
   const thread = profile.threads[threadIndex] ?? getEmptyThread();
-  const { interval } = profile.meta;
   const categories = ensureExists(
     profile.meta.categories,
     'Expected to find categories'
@@ -125,19 +131,22 @@ export function callTreeFromProfile(
     thread.funcTable,
     defaultCategory
   );
-  const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
-    thread.samples,
+  const callTreeTimings = computeCallTreeTimings(
     callNodeInfo,
-    interval,
-    false
+    computeCallNodeLeafAndSummary(
+      thread.samples,
+      getSampleIndexToCallNodeIndex(
+        thread.samples.stack,
+        callNodeInfo.getStackIndexToCallNodeIndex()
+      ),
+      callNodeInfo.getCallNodeTable().length
+    )
   );
   return getCallTree(
     thread,
-    interval,
     callNodeInfo,
     categories,
-    'combined',
-    callTreeCountsAndSummary,
+    callTreeTimings,
     'samples'
   );
 }
@@ -205,6 +214,38 @@ export function formatTree(
  */
 export function formatTreeIncludeCategories(callTree: CallTree): string[] {
   return formatTree(callTree, true);
+}
+
+export function formatStack(
+  thread: Thread,
+  stack: IndexIntoStackTable
+): string {
+  const lines = [];
+  const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
+    thread;
+  for (
+    let stackIndex = stack;
+    stackIndex !== null;
+    stackIndex = stackTable.prefix[stackIndex]
+  ) {
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const frameLine = frameTable.line[frameIndex];
+    const frameColumn = frameTable.column[frameIndex];
+    const funcName = stringTable.getString(funcTable.name[funcIndex]);
+    const origin = getOriginAnnotationForFunc(
+      funcIndex,
+      funcTable,
+      resourceTable,
+      stringTable,
+      frameLine,
+      frameColumn
+    );
+    lines.push(`${funcName} (${origin})`);
+  }
+  lines.reverse();
+
+  return lines.join('\n');
 }
 
 /**

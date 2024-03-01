@@ -13,6 +13,7 @@ import {
   screen,
   waitFor,
   fireEvent,
+  act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { ensureExists } from '../../utils/flow';
 import {
@@ -599,9 +600,13 @@ describe('timeline/TrackContextMenu', function () {
       if (threadIndex !== null) {
         // Explicitly select the global thread. Tests can pass in a custom profile,
         // so don't fail if this doesn't exist.
-        dispatch(changeSelectedThreads(new Set([threadIndex])));
+        act(() => {
+          dispatch(changeSelectedThreads(new Set([threadIndex])));
+        });
       }
-      dispatch(changeRightClickedTrack(trackReference));
+      act(() => {
+        dispatch(changeRightClickedTrack(trackReference));
+      });
 
       const isolateProcessItem = () =>
         screen.getByText(/Only show this process/);
@@ -770,8 +775,12 @@ describe('timeline/TrackContextMenu', function () {
       const threadIndex = localTrack.threadIndex;
 
       // Explicitly select the global thread.
-      dispatch(changeSelectedThreads(new Set([threadIndex])));
-      dispatch(changeRightClickedTrack(trackReference));
+      act(() => {
+        dispatch(changeSelectedThreads(new Set([threadIndex])));
+      });
+      act(() => {
+        dispatch(changeRightClickedTrack(trackReference));
+      });
 
       // Fluent adds isolation characters \u2068 and \u2069 around DOM Worker.
       const isolateLocalTrackItem = () =>
@@ -892,7 +901,9 @@ describe('timeline/TrackContextMenu', function () {
         const { getState, dispatch, clickAllThreadPoolTracks } =
           setupMoreTracks();
 
-        dispatch(changeRightClickedTrack(rightClickedTrackReference));
+        act(() => {
+          dispatch(changeRightClickedTrack(rightClickedTrackReference));
+        });
         clickAllThreadPoolTracks();
 
         // First, check that the initial state is what we expect.
@@ -1001,8 +1012,12 @@ describe('timeline/TrackContextMenu', function () {
         `Couldn't get the mainThreadIndex of global track`
       );
 
-      dispatch(changeSelectedThreads(new Set([threadIndex])));
-      dispatch(changeRightClickedTrack(trackReference));
+      act(() => {
+        dispatch(changeSelectedThreads(new Set([threadIndex])));
+      });
+      act(() => {
+        dispatch(changeRightClickedTrack(trackReference));
+      });
 
       return setupResult;
     }

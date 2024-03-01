@@ -228,7 +228,7 @@ ErrorBoundary--report-error-on-github = Повідомити про помилк
 
 FooterLinks--legal = Правові положення
 FooterLinks--Privacy = Приватність
-FooterLinks--Cookies = Куки
+FooterLinks--Cookies = Файли cookie
 FooterLinks--languageSwitcher--select =
     .title = Змінити мову
 FooterLinks--hide-button =
@@ -391,8 +391,8 @@ MarkerSidebar--select-a-marker = Виберіть маркер для показ
 
 MarkerTable--start = Почати
 MarkerTable--duration = Тривалість
-MarkerTable--type = Тип
-MarkerTable--description = Опис
+MarkerTable--name = Назва
+MarkerTable--details = Подробиці
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -752,7 +752,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = відносна пам'ять на цю мить
 TrackMemoryGraph--memory-range-in-graph = діапазон пам'яті в графіку
-TrackMemoryGraph--operations-since-the-previous-sample = операції, починаючи з попереднього зразка
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = розподіл і вивільнення після попереднього зразка
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -835,6 +835,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } м�
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } мкВт·год ({ $carbonValue } мг CO₂e)
     .label = Спожита у поточній вибірці енергія
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } за секунду
+    .label = Швидкість передавання для цього зразка
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = операцій читання/запису від попереднього зразка
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } г CO₂e)
+    .label = Дані, передані до цього часу
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } г CO₂e)
+    .label = Дані, передані у видимому діапазоні
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } г CO₂e)
+    .label = Дані, передані в поточному виборі
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

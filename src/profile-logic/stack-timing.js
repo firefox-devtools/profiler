@@ -7,7 +7,6 @@ import type {
   SamplesLikeTable,
   Milliseconds,
   CallNodeInfo,
-  CallNodeTable,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
 /**
@@ -57,135 +56,123 @@ export type StackTiming = {|
 
 export type StackTimingByDepth = Array<StackTiming>;
 
-type LastSeen = {
-  startTimeByDepth: number[],
-  callNodeIndexByDepth: IndexIntoCallNodeTable[],
-};
-
 /**
  * Build a StackTimingByDepth table from a given thread.
  */
 export function getStackTimingByDepth(
   samples: SamplesLikeTable,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   callNodeInfo: CallNodeInfo,
-  maxDepth: number,
+  maxDepthPlusOne: number,
   interval: Milliseconds
 ): StackTimingByDepth {
-  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-  const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const {
+    prefix: callNodeTablePrefixColumn,
+    subtreeRangeEnd: callNodeTableSubtreeRangeEndColumn,
+    depth: callNodeTableDepthColumn,
+  } = callNodeTable;
+  const stackTimingByDepth = Array.from({ length: maxDepthPlusOne }, () => ({
     start: [],
     end: [],
     callNode: [],
     length: 0,
   }));
 
-  const lastSeen: LastSeen = {
-    startTimeByDepth: [],
-    callNodeIndexByDepth: [],
-  };
-
-  // Go through each sample, and push/pop it on the stack to build up
-  // the stackTimingByDepth.
-  let previousDepth = -1;
-  for (let i = 0; i < samples.length; i++) {
-    const stackIndex = samples.stack[i];
-    const sampleTime = samples.time[i];
-
-    // If this stack index is null (for instance if it was filtered out) then pop back
-    // down to the base stack.
-    if (stackIndex === null) {
-      _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, sampleTime);
-      previousDepth = -1;
-    } else {
-      const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
-      const depth = callNodeTable.depth[callNodeIndex];
-
-      // Find the depth of the nearest shared stack.
-      const depthToPop = _findNearestSharedCallNodeDepth(
-        callNodeTable,
-        callNodeIndex,
-        lastSeen,
-        depth
-      );
-      _popStacks(
-        stackTimingByDepth,
-        lastSeen,
-        depthToPop,
-        previousDepth,
-        sampleTime
-      );
-      _pushStacks(callNodeTable, lastSeen, depth, callNodeIndex, sampleTime);
-      previousDepth = depth;
-    }
+  if (samples.length === 0) {
+    return stackTimingByDepth;
   }
 
-  // Pop the remaining stacks
-  const lastIndex = samples.length - 1;
-  const endingTime = samples.time[lastIndex] + interval;
-  _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
+  // Overview of the algorithm:
+  // We go sample by sample.
+  // At the end of each iteration, we have a stack of "open boxes" which are
+  // available for sharing with the next sample; each open box has a call node
+  // and a start time. The number of open boxes matches the length of the call
+  // path.
+  // At the beginning of each iteration, we pick which of the open boxes from
+  // the previous sample we want to share (these boxes remain "open") and which
+  // ones we can't share.
+  // The ones we can't share need to be "committed", i.e. added to stackTimingByDepth.
+  // We share the boxes whose call nodes are ancestors of the current sample's
+  // call node, and commit the rest. Then we open new boxes for the unshared part
+  // of the current sample's call node path.
+
+  // We remember the stack of open boxes by remembering only the deepest call
+  // node; and the start time for each box in the stack.
+  // The call nodes of the remaining "open boxes" are implicit; i.e. the call
+  // node of the open box at depth d is the ancestor at depth d of
+  // deepestOpenBoxCallNodeIndex.
+  let deepestOpenBoxCallNodeIndex = -1;
+  let deepestOpenBoxDepth = -1;
+  const openBoxStartTimeByDepth = new Float64Array(maxDepthPlusOne);
+
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const sampleTime = samples.time[sampleIndex];
+    const thisCallNodeIndex = sampleCallNodes[sampleIndex] ?? -1;
+    if (thisCallNodeIndex === deepestOpenBoxCallNodeIndex) {
+      continue;
+    }
+
+    // Phase 1: Commit open boxes which are not shared by the current call node,
+    // i.e. any boxes whose call nodes are not ancestors of the current call node.
+    // These unshared boxes will be committed and added to stackTimingForThisDepth.
+    //
+    // We walk up from the previous sample's depth until we find the lowest
+    // common ancestor with the current sample's call node, commiting all boxes
+    // along the way.
+    //
+    // Here we use the call node table ordering for a cheap "is in subtree of" check.
+    // Any boxes which can stay open are the ones whose call nodes contain
+    // thisCallNodeIndex in their subtree, i.e. the ones which are ancestors af
+    // thisCallNodeIndex.
+    while (
+      deepestOpenBoxDepth !== -1 &&
+      (thisCallNodeIndex < deepestOpenBoxCallNodeIndex ||
+        thisCallNodeIndex >=
+          callNodeTableSubtreeRangeEndColumn[deepestOpenBoxCallNodeIndex])
+    ) {
+      // deepestOpenBoxCallNodeIndex is *not* an ancestors of thisCallNodeIndex.
+      // Commit this box.
+      const start = openBoxStartTimeByDepth[deepestOpenBoxDepth];
+      const stackTimingForThisDepth = stackTimingByDepth[deepestOpenBoxDepth];
+      const index = stackTimingForThisDepth.length++;
+      stackTimingForThisDepth.start[index] = start;
+      stackTimingForThisDepth.end[index] = sampleTime;
+      stackTimingForThisDepth.callNode[index] = deepestOpenBoxCallNodeIndex;
+      deepestOpenBoxCallNodeIndex =
+        callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
+      deepestOpenBoxDepth--;
+    }
+
+    // Phase 2: Enter new boxes for the current call node.
+    // New boxes start from depth `deepestOpenBoxDepth`, which is the depth of
+    // the lowest common ancestor of thisCallNodeIndex and the previous sample's
+    // call node. We "open" boxes going down all the way to thisCallNodeIndex.
+    if (thisCallNodeIndex !== -1) {
+      const thisCallNodeDepth = callNodeTableDepthColumn[thisCallNodeIndex];
+      while (deepestOpenBoxDepth < thisCallNodeDepth) {
+        deepestOpenBoxDepth++;
+        openBoxStartTimeByDepth[deepestOpenBoxDepth] = sampleTime;
+      }
+    }
+
+    deepestOpenBoxCallNodeIndex = thisCallNodeIndex;
+  }
+
+  // We've processed all samples.
+  // Commit the boxes that were left open by the last sample.
+  const endTime = samples.time[samples.length - 1] + interval;
+  while (deepestOpenBoxDepth !== -1) {
+    const stackTimingForThisDepth = stackTimingByDepth[deepestOpenBoxDepth];
+    const index = stackTimingForThisDepth.length++;
+    const start = openBoxStartTimeByDepth[deepestOpenBoxDepth];
+    stackTimingForThisDepth.start[index] = start;
+    stackTimingForThisDepth.end[index] = endTime;
+    stackTimingForThisDepth.callNode[index] = deepestOpenBoxCallNodeIndex;
+    deepestOpenBoxCallNodeIndex =
+      callNodeTablePrefixColumn[deepestOpenBoxCallNodeIndex];
+    deepestOpenBoxDepth--;
+  }
 
   return stackTimingByDepth;
-}
-
-function _findNearestSharedCallNodeDepth(
-  callNodeTable: CallNodeTable,
-  callNodeIndex: IndexIntoCallNodeTable,
-  lastSeen: LastSeen,
-  depthStart: number
-): number {
-  let nextCallNodeIndex = callNodeIndex;
-  for (let depth = depthStart; depth >= 0; depth--) {
-    if (lastSeen.callNodeIndexByDepth[depth] === nextCallNodeIndex) {
-      return depth;
-    }
-    nextCallNodeIndex = callNodeTable.prefix[nextCallNodeIndex];
-  }
-  return -1;
-}
-
-function _popStacks(
-  stackTimingByDepth: StackTimingByDepth,
-  lastSeen: LastSeen,
-  depth: number,
-  previousDepth: number,
-  sampleTime: number
-) {
-  // "Pop" off the stack, and commit the timing of the frames
-  for (let stackDepth = depth + 1; stackDepth <= previousDepth; stackDepth++) {
-    // Push on the new information.
-    stackTimingByDepth[stackDepth].start.push(
-      lastSeen.startTimeByDepth[stackDepth]
-    );
-    stackTimingByDepth[stackDepth].end.push(sampleTime);
-    stackTimingByDepth[stackDepth].callNode.push(
-      lastSeen.callNodeIndexByDepth[stackDepth]
-    );
-    stackTimingByDepth[stackDepth].length++;
-
-    // Delete that this stack frame has been seen.
-    delete lastSeen.callNodeIndexByDepth[stackDepth];
-    delete lastSeen.startTimeByDepth[stackDepth];
-  }
-}
-
-function _pushStacks(
-  callNodeTable: CallNodeTable,
-  lastSeen: LastSeen,
-  depth: number,
-  startingCallNodeIndex: IndexIntoCallNodeTable,
-  sampleTime: number
-) {
-  let callNodeIndex = startingCallNodeIndex;
-  // "Push" onto the stack with new frames
-  for (let parentDepth = depth; parentDepth >= 0; parentDepth--) {
-    if (
-      callNodeIndex === -1 ||
-      lastSeen.callNodeIndexByDepth[parentDepth] !== undefined
-    ) {
-      break;
-    }
-    lastSeen.callNodeIndexByDepth[parentDepth] = callNodeIndex;
-    lastSeen.startTimeByDepth[parentDepth] = sampleTime;
-    callNodeIndex = callNodeTable.prefix[callNodeIndex];
-  }
 }

@@ -48,7 +48,6 @@ import {
 } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 import {
-  getCallNodeIndexFromPath,
   processCounter,
   type BreakdownByCategory,
 } from '../../profile-logic/profile-data';
@@ -58,6 +57,7 @@ import type {
   Milliseconds,
   TabID,
   Thread,
+  StartEndRange,
 } from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function () {
@@ -416,14 +416,16 @@ describe('actions/ProfileView', function () {
         pid: '0',
       };
 
-      it('starts out with the thread track and call tree selected', function () {
+      it('starts out with the thread track and marker chart selected', function () {
         const profile = getNetworkTrackProfile();
         const { getState } = storeWithProfile(profile);
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
         );
+        // The profile contains only markers, so the default tab is the
+        // marker-chart rather than the calltree.
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
+          'marker-chart'
         );
       });
 
@@ -935,27 +937,24 @@ describe('actions/ProfileView', function () {
       // Tests the filename, but with a substring
       dispatch(ProfileView.changeMarkersSearchString('foo'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
 
       // Tests the operation
       dispatch(ProfileView.changeMarkersSearchString('open'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
 
       // Tests the source
       dispatch(ProfileView.changeMarkersSearchString('Interposer'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
     });
@@ -1030,17 +1029,15 @@ describe('actions/ProfileView', function () {
       // Tests otherPid
       dispatch(ProfileView.changeMarkersSearchString('3333'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
 
       dispatch(ProfileView.changeMarkersSearchString('9'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('IPCOut')).toBeTruthy();
     });
@@ -1157,18 +1154,16 @@ describe('actions/ProfileView', function () {
       // Tests searching for the DOMEVent type
       dispatch(ProfileView.changeMarkersSearchString('mouse'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
 
       // This tests searching in the category.
       dispatch(ProfileView.changeMarkersSearchString('dom'));
 
-      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
-        getState()
-      );
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
     });
@@ -1820,17 +1815,19 @@ describe('snapshots of selectors/profile', function () {
     ).toMatchSnapshot();
   });
 
-  it('matches the last stored run of selectedThreadSelector.getFilteredCallNodeMaxDepth', function () {
+  it('matches the last stored run of selectedThreadSelector.getFilteredCallNodeMaxDepthPlusOne', function () {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getFilteredCallNodeMaxDepth(getState())
+      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(getState())
     ).toEqual(4);
   });
 
-  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepth', function () {
+  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepthPlusOne', function () {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(getState())
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepthPlusOne(
+        getState()
+      )
     ).toEqual(4);
   });
 
@@ -1931,6 +1928,69 @@ describe('snapshots of selectors/profile', function () {
   });
 });
 
+describe('changeSelectedCallNode', function () {
+  it('switching between the call tree and the flame graph always selects a reasonable node', function () {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(`
+      A  A  A  A
+      B  B  B  B
+      C  C  C  H
+      D  D  F  I
+      E  E  G
+    `);
+
+    const { A, B, C, D, E, F } = funcNamesDict;
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    dispatch(App.changeSelectedTab('calltree'));
+    dispatch(ProfileView.changeSelectedCallNode(0, [A, B, C]));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C]
+    );
+    dispatch(ProfileView.changeInvertCallstack(true));
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+
+    // Inverting the call stack should have picked the heaviest inverted stack
+    // as the new selected call node path.
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [E, D, C]
+    );
+
+    dispatch(App.changeSelectedTab('flame-graph'));
+    // In the flame graph, everything should still be non-inverted.
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+    // The original non-inverted selected call node should be selected.
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C]
+    );
+
+    // Now we select a different call node in the flame graph.
+    dispatch(ProfileView.changeSelectedCallNode(0, [A, B, C, F]));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C, F]
+    );
+
+    // Switch back to the call tree tab. In the call tree tab, we should still
+    // be looking at the inverted tree, with the unchanged inverted selection.
+    dispatch(App.changeSelectedTab('calltree'));
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [E, D, C]
+    );
+
+    // Switching back to non-inverted mode should pick a new non-inverted
+    // selected call node based on the selection in the inverted tree.
+    dispatch(ProfileView.changeInvertCallstack(false));
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C]
+    );
+  });
+});
+
 describe('getTimingsForSidebar', () => {
   function getGenericProfileString() {
     // Note that the first column won't be counted because a range is used,
@@ -1994,9 +2054,6 @@ describe('getTimingsForSidebar', () => {
       } = setup();
 
       // This is a root node: it should have no self time but all the total time.
-      // Also, because the function is only present once in the tree, forPath
-      // and forFunc timings are the same, so we're extracting them in one
-      // object for a better readability.
       const timings = getTimingsForPath([A]);
 
       const expectedTiming = {
@@ -2018,7 +2075,6 @@ describe('getTimingsForSidebar', () => {
       };
       expect(timings).toEqual({
         forPath: expectedTiming,
-        forFunc: expectedTiming,
         rootTime: 5,
       });
     });
@@ -2034,9 +2090,6 @@ describe('getTimingsForSidebar', () => {
       //
       // This is also a JS node so it should have some js engine implementation
       // implementations.
-      //
-      // The same func is also present in 2 different stacks so it should have
-      // different timings for the `forFunc` property.
       const timings = getTimingsForPath([A, B, Cjs, D, Ejs]);
       expect(timings).toEqual({
         forPath: {
@@ -2069,36 +2122,6 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
-        forFunc: {
-          selfTime: {
-            value: 3,
-            breakdownByImplementation: { ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              0,
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 3,
-            breakdownByImplementation: { ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              0,
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
         rootTime: 5,
       });
     });
@@ -2113,9 +2136,6 @@ describe('getTimingsForSidebar', () => {
       // have some running time that's different than the self time.
       const timings = getTimingsForPath([A, B, H]);
 
-      // This node is present only once in the tree, so its forPath and forFunc
-      // timing values are identical. Extracting them provides a better
-      // readability.
       const expectedTiming = {
         selfTime: {
           value: 1,
@@ -2150,7 +2170,6 @@ describe('getTimingsForSidebar', () => {
 
       expect(timings).toEqual({
         forPath: expectedTiming,
-        forFunc: expectedTiming,
         rootTime: 5,
       });
     });
@@ -2213,9 +2232,6 @@ describe('getTimingsForSidebar', () => {
         // This is a root node: it should have no self time but all the total time.
         const timings = getTimingsForPath([A]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. So we extract the
-        // expectation to make this a bit more readable.
         const expectedTiming = {
           selfTime: EMPTY_TIMING,
           totalTime: {
@@ -2240,7 +2256,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
-          forFunc: expectedTiming,
           rootTime: 4,
         });
       });
@@ -2253,9 +2268,6 @@ describe('getTimingsForSidebar', () => {
 
         const timings = getTimingsForPath([A, Bjs]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. So we extract the
-        // expectation to make this a bit more readable.
         const expectedTiming = {
           selfTime: {
             value: 1,
@@ -2293,7 +2305,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
-          forFunc: expectedTiming,
           rootTime: 4,
         });
       });
@@ -2307,8 +2318,7 @@ describe('getTimingsForSidebar', () => {
         // This node is a native stack inhering the ion jit information.
         const timings = getTimingsForPath([A, Bjs, E]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. Also it only has a self
+        // This function has a self
         // time occurrence, so selfTime and totalTime show the same timing.
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
@@ -2327,7 +2337,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
-          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
           rootTime: 4,
         });
       });
@@ -2340,9 +2349,6 @@ describe('getTimingsForSidebar', () => {
 
         const timings = getTimingsForPath([A, Bjs, C]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. So we extract the
-        // expectation to make this a bit more readable.
         const expectedTiming = {
           selfTime: {
             value: 1,
@@ -2378,7 +2384,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
-          forFunc: expectedTiming,
           rootTime: 4,
         });
       });
@@ -2392,8 +2397,7 @@ describe('getTimingsForSidebar', () => {
         // This node is a native stack inhering the ion jit information.
         const timings = getTimingsForPath([A, Bjs, C, D]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. Also it only has a self
+        // This function only has a self
         // time occurrence, so selfTime and totalTime show the same timing.
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
@@ -2412,7 +2416,6 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
-          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
           rootTime: 4,
         });
       });
@@ -2443,9 +2446,7 @@ describe('getTimingsForSidebar', () => {
       } = setupForInvertedTree();
       const timings = getTimingsForPath([Ejs]);
 
-      // A root node will have the same values for total and selftime. Also this
-      // function is present once so forPath and forFunc will have the same
-      // values.
+      // A root node will have the same values for total and selftime.
       const expectedTiming = {
         value: 3,
         breakdownByImplementation: { ion: 2, baseline: 1 },
@@ -2471,7 +2472,6 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: expectedTiming,
         },
-        forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
         rootTime: 5,
       });
     });
@@ -2493,27 +2493,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
               2, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
-        forFunc: {
-          selfTime: EMPTY_TIMING,
-          totalTime: {
-            value: 5,
-            breakdownByImplementation: {
-              ion: 2,
-              baseline: 1,
-              native: 2,
-            },
-            breakdownByCategory: withSingleSubcategory([
-              0, // Other
-              1, // Idle
-              1, // Layout
-              3, // JavaScript
               0,
               0,
               0,
@@ -2554,36 +2533,6 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
-        forFunc: {
-          selfTime: {
-            value: 1,
-            breakdownByImplementation: { native: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 2,
-            breakdownByImplementation: { native: 2 },
-            breakdownByCategory: withSingleSubcategory([
-              0, // Other
-              1, // Idle
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
         rootTime: 5,
       });
 
@@ -2599,36 +2548,6 @@ describe('getTimingsForSidebar', () => {
               0,
               1, // Idle
               0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
-        forFunc: {
-          selfTime: {
-            value: 1,
-            breakdownByImplementation: { native: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 2,
-            breakdownByImplementation: { native: 2 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              1, // Idle
-              1, // Layout
               0,
               0,
               0,
@@ -2663,23 +2582,6 @@ describe('getTimingsForSidebar', () => {
               0,
               0,
             ]),
-          },
-        },
-        forFunc: {
-          selfTime: EMPTY_TIMING,
-          totalTime: {
-            value: 5,
-            breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0, // Other
-              1, // Idle
-              1, // Layout
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]), // [Idle, Other, Layout, JavaScript]
           },
         },
         rootTime: 5,
@@ -2751,8 +2653,7 @@ describe('getTimingsForSidebar', () => {
         // This is a root node: it should have all self time.
         const timings = getTimingsForPath([D]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. Also it's a root node in
+        // This function is a root node in
         // an inverted tree, so selfTime and totalTime show the same timing.
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
@@ -2780,7 +2681,6 @@ describe('getTimingsForSidebar', () => {
             },
             totalTime: expectedTiming,
           },
-          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
           rootTime: 4,
         });
       });
@@ -2794,8 +2694,7 @@ describe('getTimingsForSidebar', () => {
         // This is a root node: it should have all self time.
         const timings = getTimingsForPath([E]);
 
-        // This function is present only once in the call tree, so we'll get the
-        // same timing results for forPath and forFunc. Also it's a root node in
+        // This function is a root node in
         // an inverted tree, so selfTime and totalTime show the same timing.
         // We extract the expectations to make this a bit more readable.
         const expectedTiming = {
@@ -2823,7 +2722,6 @@ describe('getTimingsForSidebar', () => {
             },
             totalTime: expectedTiming,
           },
-          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
           rootTime: 4,
         });
       });
@@ -2849,41 +2747,6 @@ describe('getTimingsForSidebar', () => {
                 0,
                 1, // Layout
                 0,
-                0,
-                0,
-                0,
-                0,
-              ]),
-            },
-          },
-          forFunc: {
-            selfTime: {
-              value: 1,
-              breakdownByImplementation: { blinterp: 1 },
-              breakdownByCategory: withSingleSubcategory([
-                0,
-                0,
-                0,
-                1, // JavaScript
-                0,
-                0,
-                0,
-                0,
-              ]),
-            },
-            totalTime: {
-              value: 4,
-              breakdownByImplementation: {
-                ion: 1,
-                blinterp: 1,
-                interpreter: 1,
-                native: 1,
-              },
-              breakdownByCategory: withSingleSubcategory([
-                0,
-                0,
-                1, // Layout
-                3, // JavaScript
                 0,
                 0,
                 0,
@@ -3151,7 +3014,7 @@ describe('counter selectors', function () {
 
   it('can accumulate samples', function () {
     const { getState, counterA } = setup();
-    counterA.sampleGroups[0].samples.count = [
+    counterA.samples.count = [
       // The first value gets zeroed out due to a work-around for Bug 1520587. It
       // can be much larger than all the rest of the values, as it doesn't ever
       // get reset.
@@ -3159,7 +3022,7 @@ describe('counter selectors', function () {
       -2, 3, -5, 7, -11, 13, -17, 19, 23,
     ];
     expect(
-      getCounterSelectors(0).getAccumulateCounterSamples(getState())[0]
+      getCounterSelectors(0).getAccumulateCounterSamples(getState())
     ).toEqual({
       accumulatedCounts: [0, -2, 1, -4, 3, -8, 5, -12, 7, 30],
       countRange: 42,
@@ -3395,7 +3258,13 @@ describe('pages and active tab selectors', function () {
 });
 
 describe('traced timing', function () {
-  function setup({ inverted }: {| inverted: boolean |}, textSamples: string) {
+  function setup(
+    {
+      inverted,
+      previewSelection,
+    }: {| inverted: boolean, previewSelection?: StartEndRange |},
+    textSamples: string
+  ) {
     const { profile, funcNamesDictPerThread } =
       getProfileFromTextSamples(textSamples);
 
@@ -3403,21 +3272,34 @@ describe('traced timing', function () {
 
     const { getState, dispatch } = storeWithProfile(profile);
     dispatch(ProfileView.changeInvertCallstack(inverted));
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
-      getState()
-    );
 
-    const { running, self } = ensureExists(
+    if (previewSelection) {
+      const { start, end } = previewSelection;
+      dispatch(
+        ProfileView.updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: start,
+          selectionEnd: end,
+        })
+      );
+    }
+
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+
+    const { total, self } = ensureExists(
       selectedThreadSelectors.getTracedTiming(getState()),
       'Expected to get a traced timing.'
     );
 
     return {
       funcNames: funcNamesDictPerThread[0],
-      getCallNode: (...callNodePath) =>
-        ensureExists(getCallNodeIndexFromPath(callNodePath, callNodeTable)),
-      running,
-      self,
+      getSelfAndTotal: (...callNodePath) => {
+        const callNodeIndex = ensureExists(
+          callNodeInfo.getCallNodeIndexFromPath(callNodePath)
+        );
+        return { self: self[callNodeIndex], total: total[callNodeIndex] };
+      },
       profile,
     };
   }
@@ -3425,9 +3307,7 @@ describe('traced timing', function () {
   it('computes traced timing', function () {
     const {
       funcNames: { A, B, C },
-      getCallNode,
-      running,
-      self,
+      getSelfAndTotal,
       profile,
     } = setup(
       { inverted: false },
@@ -3438,24 +3318,18 @@ describe('traced timing', function () {
       `
     );
 
-    expect(running[getCallNode(A)]).toBe(6);
-    expect(self[getCallNode(A)]).toBe(2);
-
-    expect(running[getCallNode(A, B)]).toBe(4);
-    expect(self[getCallNode(A, B)]).toBe(4);
+    expect(getSelfAndTotal(A)).toEqual({ self: 2, total: 6 });
+    expect(getSelfAndTotal(A, B)).toEqual({ self: 4, total: 4 });
 
     // This is the last sample, which is deduced to be the interval length.
-    expect(running[getCallNode(C)]).toBe(profile.meta.interval);
-    expect(self[getCallNode(C)]).toBe(profile.meta.interval);
+    const interval = profile.meta.interval;
+    expect(getSelfAndTotal(C)).toEqual({ self: interval, total: interval });
   });
 
   it('computes traced timing for an inverted tree', function () {
     const {
       funcNames: { A, B, C },
-      getCallNode,
-      running,
-      // Rename self to make the assertions more readable.
-      self: self___,
+      getSelfAndTotal,
     } = setup(
       { inverted: true },
       `
@@ -3473,26 +3347,15 @@ describe('traced timing', function () {
     );
 
     // This test is a bit hard to assert in a really readable fasshion.
-    // Running: [ 1, 4, 4, 1.5, 1, 1 ]
-    // Self:    [ 1, 4, 0, 1.5, 0, 0 ]
+    // total: [ 1, 4, 4, 1.5, 1, 1 ]
+    // Self:  [ 1, 4, 0, 1.5, 0, 0 ]
 
-    expect(running[getCallNode(A)]).toBe(1);
-    expect(self___[getCallNode(A)]).toBe(1);
-
-    expect(running[getCallNode(B)]).toBe(4);
-    expect(self___[getCallNode(B)]).toBe(4);
-
-    expect(running[getCallNode(B, A)]).toBe(4);
-    expect(self___[getCallNode(B, A)]).toBe(0);
-
-    expect(running[getCallNode(C)]).toBe(1.5);
-    expect(self___[getCallNode(C)]).toBe(1.5);
-
-    expect(running[getCallNode(C, B)]).toBe(1);
-    expect(self___[getCallNode(C, B)]).toBe(0);
-
-    expect(running[getCallNode(C, B, A)]).toBe(1);
-    expect(self___[getCallNode(C, B, A)]).toBe(0);
+    expect(getSelfAndTotal(A)).toEqual({ self: 1, total: 1 });
+    expect(getSelfAndTotal(B)).toEqual({ self: 4, total: 4 });
+    expect(getSelfAndTotal(B, A)).toEqual({ self: 0, total: 4 });
+    expect(getSelfAndTotal(C)).toEqual({ self: 1.5, total: 1.5 });
+    expect(getSelfAndTotal(C, B)).toEqual({ self: 0, total: 1 });
+    expect(getSelfAndTotal(C, B, A)).toEqual({ self: 0, total: 1 });
   });
 
   it('does not compute traced timing for other types', function () {
@@ -3508,6 +3371,36 @@ describe('traced timing', function () {
 
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
+  });
+
+  it('computes traced timing based on the preview selection', function () {
+    const {
+      funcNames: { A, B, C },
+      getSelfAndTotal,
+      profile,
+    } = setup(
+      { inverted: false, previewSelection: { start: 1, end: 5.5 } },
+      `
+        0  1  5  6
+        A  A  A  C
+           B
+      `
+    );
+
+    // The preview range only contains the sample at 1 and the sample at 5.
+    // The first sample will have a "traced duration" of 4ms (5ms - 1ms), and
+    // the second sample will have a "traced duration" of the interval, because
+    // it's the last sample in the range.
+
+    expect(getSelfAndTotal(A)).toEqual({
+      self: profile.meta.interval,
+      total: 4 + profile.meta.interval,
+    });
+    expect(getSelfAndTotal(A, B)).toEqual({ self: 4, total: 4 });
+
+    // Call node [C] is fully outside the preview range, so we should have no
+    // traced duration for it.
+    expect(getSelfAndTotal(C)).toEqual({ self: 0, total: 0 });
   });
 });
 

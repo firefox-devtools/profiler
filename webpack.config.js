@@ -99,6 +99,7 @@ const config = {
         'res/_redirects',
         'res/zee-worker.js',
         'res/contribute.json',
+        'res/robots.txt',
         'res/service-worker-compat.js',
         { from: 'docs-user', to: 'docs' },
         { from: 'locales', to: 'locales' },

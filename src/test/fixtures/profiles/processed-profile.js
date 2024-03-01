@@ -71,14 +71,14 @@ export type TestDefinedMarkers = Array<
   | [
       MarkerName,
       MarkerTime, // start time
-      MarkerTime | null // end time
+      MarkerTime | null, // end time
     ]
   | [
       MarkerName,
       MarkerTime, // start time
       MarkerTime | null, // end time
-      MarkerPayload | MockPayload | null
-    ]
+      MarkerPayload | MockPayload | null,
+    ],
 >;
 
 // This type is used when needing to create a specific RawMarkerTable.
@@ -97,7 +97,7 @@ export type TestDefinedJsTracerEvent = [
   // Start time:
   Milliseconds,
   // End time:
-  Milliseconds
+  Milliseconds,
 ];
 
 export function addRawMarkersToThread(
@@ -438,6 +438,13 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
   return profile;
 }
 
+export type ProfileWithDicts = {
+  profile: Profile,
+  funcNamesPerThread: Array<string[]>,
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
+  nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
+};
+
 /**
  * Create a profile from text representation of samples. Each column in the text provided
  * represents a sample. Each sample is made up of a list of functions.
@@ -562,12 +569,9 @@ function getStack(thread, stackIndex) {
 getStack(filteredThread, filteredThread.samples.stack[0])
 ```
 */
-export function getProfileFromTextSamples(...allTextSamples: string[]): {
-  profile: Profile,
-  funcNamesPerThread: Array<string[]>,
-  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
-  nativeSymbolsDictPerThread: Array<{ [nativeSymbolName: string]: number }>,
-} {
+export function getProfileFromTextSamples(
+  ...allTextSamples: string[]
+): ProfileWithDicts {
   let profile = getEmptyProfile();
   // Provide a useful marker schema, rather than an empty one.
   profile.meta.markerSchema = markerSchemaForTests;
@@ -575,10 +579,6 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
     profile.meta.categories,
     'Expected to find categories.'
   );
-
-  const funcNamesPerThread = [];
-  const funcNamesDictPerThread = [];
-  const nativeSymbolsDictPerThread = [];
 
   const globalDataCollector = new GlobalDataCollector();
 
@@ -613,11 +613,6 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
     }
     const funcNames = [...funcNamesSet];
 
-    const funcNamesDict = funcNames.reduce((result, item, index) => {
-      result[item] = index;
-      return result;
-    }, {});
-
     // Turn this into a real thread.
     const thread = _buildThreadFromTextOnlyStacks(
       textOnlyStacks,
@@ -627,30 +622,15 @@ export function getProfileFromTextSamples(...allTextSamples: string[]): {
       sampleTimes
     );
 
-    const nativeSymbolsDict = {};
-    for (let i = 0; i < thread.nativeSymbols.length; i++) {
-      const name = thread.stringTable.getString(thread.nativeSymbols.name[i]);
-      nativeSymbolsDict[name] = i;
-    }
-
     // Make sure all threads have a unique tid
     thread.tid = i;
-
-    funcNamesPerThread.push(funcNames);
-    funcNamesDictPerThread.push(funcNamesDict);
-    nativeSymbolsDictPerThread.push(nativeSymbolsDict);
 
     return thread;
   });
 
   profile = { ...profile, ...globalDataCollector.finish() };
 
-  return {
-    profile,
-    funcNamesPerThread,
-    funcNamesDictPerThread,
-    nativeSymbolsDictPerThread,
-  };
+  return getProfileWithDicts(profile);
 }
 
 function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
@@ -1059,6 +1039,51 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
+export function getFuncNamesDictForThread(thread: Thread): {
+  funcNames: string[],
+  funcNamesDict: { [funcName: string]: number },
+} {
+  const { funcTable, stringTable } = thread;
+  const funcNames = [];
+  const funcNamesDict = {};
+  for (let i = 0; i < funcTable.length; i++) {
+    const funcName = stringTable.getString(funcTable.name[i]);
+    funcNames[i] = funcName;
+    funcNamesDict[funcName] = i;
+  }
+  return { funcNames, funcNamesDict };
+}
+
+export function getNativeSymbolsDictForThread(thread: Thread): {
+  [nativeSymbolName: string]: number,
+} {
+  const { nativeSymbols, stringTable } = thread;
+  const nativeSymbolsDict = {};
+  for (let i = 0; i < nativeSymbols.length; i++) {
+    const name = stringTable.getString(nativeSymbols.name[i]);
+    nativeSymbolsDict[name] = i;
+  }
+  return nativeSymbolsDict;
+}
+
+export function getProfileWithDicts(profile: Profile): ProfileWithDicts {
+  const funcNameDicts = profile.threads.map(getFuncNamesDictForThread);
+  const funcNamesPerThread = funcNameDicts.map(({ funcNames }) => funcNames);
+  const funcNamesDictPerThread = funcNameDicts.map(
+    ({ funcNamesDict }) => funcNamesDict
+  );
+  const nativeSymbolsDictPerThread = profile.threads.map(
+    getNativeSymbolsDictForThread
+  );
+
+  return {
+    profile,
+    funcNamesPerThread,
+    funcNamesDictPerThread,
+    nativeSymbolsDictPerThread,
+  };
+}
+
 /**
  * This returns a merged profile from a number of profile strings.
  */
@@ -1068,11 +1093,7 @@ export function getMergedProfileFromTextSamples(
     threadCPUDelta: Array<number | null>,
     threadCPUDeltaUnit: ThreadCPUDeltaUnit,
   |} | null> = []
-): {
-  profile: Profile,
-  funcNamesPerThread: Array<string[]>,
-  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
-} {
+): ProfileWithDicts {
   const profilesAndFuncNames = profileStrings.map((str) =>
     getProfileFromTextSamples(str)
   );
@@ -1096,15 +1117,7 @@ export function getMergedProfileFromTextSamples(
     profiles,
     profiles.map(() => profileState)
   );
-  return {
-    profile,
-    funcNamesPerThread: profilesAndFuncNames.map(
-      ({ funcNamesPerThread }) => funcNamesPerThread[0]
-    ),
-    funcNamesDictPerThread: profilesAndFuncNames.map(
-      ({ funcNamesDictPerThread }) => funcNamesDictPerThread[0]
-    ),
-  };
+  return getProfileWithDicts(profile);
 }
 
 type NetworkMarkersOptions = {|
@@ -1210,14 +1223,14 @@ export function getNetworkTrackProfile() {
     [
       'Load',
       4,
-      5,
+      6,
       ({
         ...loadPayloadBase,
       }: NavigationMarkerPayload),
     ],
     ['TTI', 6],
     ['Navigation::Start', 7],
-    ['Contentful paint at something', 8],
+    ['FirstContentfulPaint', 7, 8],
     [
       'DOMContentLoaded',
       6,
@@ -1454,23 +1467,16 @@ export function getCounterForThread(
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
-    sampleGroups: [
-      {
-        id: 0,
-        samples: {
-          time: thread.samples.time.slice(),
-          // Create some arbitrary (positive integer) values for the number.
-          number: config.hasCountNumber
-            ? thread.samples.time.map((_, i) =>
-                Math.floor(50 * Math.sin(i) + 50)
-              )
-            : undefined,
-          // Create some arbitrary values for the count.
-          count: thread.samples.time.map((_, i) => Math.sin(i)),
-          length: thread.samples.length,
-        },
-      },
-    ],
+    samples: {
+      time: thread.samples.time.slice(),
+      // Create some arbitrary (positive integer) values for the number.
+      number: config.hasCountNumber
+        ? thread.samples.time.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
+        : undefined,
+      // Create some arbitrary values for the count.
+      count: thread.samples.time.map((_, i) => Math.sin(i)),
+      length: thread.samples.length,
+    },
   };
   return counter;
 }
@@ -1507,12 +1513,7 @@ export function getCounterForThreadWithSamples(
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
-    sampleGroups: [
-      {
-        id: 0,
-        samples: newSamples,
-      },
-    ],
+    samples: newSamples,
   };
   return counter;
 }

@@ -42,8 +42,8 @@ type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +counter: Counter,
-  +counterSampleRanges: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>,
-  +maxCounterSampleCountsPerMs: number[],
+  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
   +width: CssPixels,
   +height: CssPixels,
@@ -68,8 +68,8 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
       width,
       lineWidth,
       interval,
-      maxCounterSampleCountsPerMs,
-      counterSampleRanges,
+      maxCounterSampleCountPerMs,
+      counterSampleRange,
     } = this.props;
     if (width === 0) {
       // This is attempting to draw before the canvas was laid out.
@@ -92,21 +92,14 @@ class TrackProcessCPUCanvas extends React.PureComponent<CanvasProps> {
     canvas.height = Math.round(deviceHeight);
     ctx.clearRect(0, 0, deviceWidth, deviceHeight);
 
-    const sampleGroups = counter.sampleGroups;
-    if (sampleGroups.length === 0 || counterSampleRanges.length === 0) {
-      // Gecko failed to capture samples for some reason and it shouldn't happen for
-      // malloc counter. Print an error and do not draw anything.
-      throw new Error('No sample group found for process CPU counter');
-    }
-
-    const samples = counter.sampleGroups[0].samples;
+    const samples = counter.samples;
     if (samples.length === 0) {
       // There's no reason to draw the samples, there are none.
       return;
     }
 
-    const [sampleStart, sampleEnd] = counterSampleRanges[0];
-    const countRangePerMs = maxCounterSampleCountsPerMs[0];
+    const [sampleStart, sampleEnd] = counterSampleRange;
+    const countRangePerMs = maxCounterSampleCountPerMs;
 
     {
       // Draw the chart.
@@ -215,8 +208,8 @@ type StateProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +counter: Counter,
-  +counterSampleRanges: Array<[IndexIntoSamplesTable, IndexIntoSamplesTable]>,
-  +maxCounterSampleCountsPerMs: number[],
+  +counterSampleRange: [IndexIntoSamplesTable, IndexIntoSamplesTable],
+  +maxCounterSampleCountPerMs: number,
   +interval: Milliseconds,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
@@ -260,17 +253,12 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       rangeEnd,
       counter,
       interval,
-      counterSampleRanges,
+      counterSampleRange,
     } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
 
-    if (counter.sampleGroups.length === 0) {
-      // Gecko failed to capture samples for some reason and it shouldn't happen for
-      // malloc counter. Print an error and bail out early.
-      throw new Error('No sample group found for process CPU counter');
-    }
-    const { samples } = counter.sampleGroups[0];
+    const { samples } = counter;
 
     if (
       timeAtMouse < samples.time[0] ||
@@ -281,7 +269,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
     } else {
       // When the mouse pointer hovers between two points, select the point that's closer.
       let hoveredCounter;
-      const [sampleStart, sampleEnd] = counterSampleRanges[0];
+      const [sampleStart, sampleEnd] = counterSampleRange;
       const bisectionCounter = bisectionRight(
         samples.time,
         timeAtMouse,
@@ -320,13 +308,13 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
   _renderTooltip(counterIndex: number): React.Node {
     const {
       counter,
-      maxCounterSampleCountsPerMs,
+      maxCounterSampleCountPerMs,
       interval,
       rangeStart,
       rangeEnd,
     } = this.props;
     const { mouseX, mouseY } = this.state;
-    const samples = counter.sampleGroups[0].samples;
+    const { samples } = counter;
     if (samples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
@@ -341,7 +329,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const maxCPUPerMs = maxCounterSampleCountsPerMs[0];
+    const maxCPUPerMs = maxCounterSampleCountPerMs;
     const cpuUsage = samples.count[counterIndex];
     const sampleTimeDeltaInMs =
       counterIndex === 0
@@ -374,16 +362,10 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      maxCounterSampleCountsPerMs,
+      maxCounterSampleCountPerMs,
       interval,
     } = this.props;
-
-    if (counter.sampleGroups.length === 0) {
-      // Gecko failed to capture samples for some reason and it shouldn't happen for
-      // malloc counter. Print an error and bail out early.
-      throw new Error('No sample group found for process CPU counter');
-    }
-    const { samples } = counter.sampleGroups[0];
+    const { samples } = counter;
     const rangeLength = rangeEnd - rangeStart;
     const sampleTime = samples.time[counterIndex];
 
@@ -403,7 +385,7 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       // process CPU counter. Print an error and bail out early.
       throw new Error('No sample found for process CPU counter');
     }
-    const countRangePerMs = maxCounterSampleCountsPerMs[0];
+    const countRangePerMs = maxCounterSampleCountPerMs;
     const sampleTimeDeltaInMs =
       counterIndex === 0
         ? interval
@@ -428,11 +410,11 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
       rangeEnd,
       unfilteredSamplesRange,
       counter,
-      counterSampleRanges,
+      counterSampleRange,
       graphHeight,
       width,
       lineWidth,
-      maxCounterSampleCountsPerMs,
+      maxCounterSampleCountPerMs,
     } = this.props;
 
     return (
@@ -445,12 +427,12 @@ class TrackProcessCPUGraphImpl extends React.PureComponent<Props, State> {
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           counter={counter}
-          counterSampleRanges={counterSampleRanges}
+          counterSampleRange={counterSampleRange}
           height={graphHeight}
           width={width}
           lineWidth={lineWidth}
           interval={interval}
-          maxCounterSampleCountsPerMs={maxCounterSampleCountsPerMs}
+          maxCounterSampleCountPerMs={maxCounterSampleCountPerMs}
         />
         {hoveredCounter === null ? null : (
           <>
@@ -480,17 +462,17 @@ export const TrackProcessCPUGraph = explicitConnect<
     const counterSelectors = getCounterSelectors(counterIndex);
     const counter = counterSelectors.getCounter(state);
     const { start, end } = getCommittedRange(state);
-    const counterSampleRanges =
-      counterSelectors.getCommittedRangeCounterSampleRanges(state);
+    const counterSampleRange =
+      counterSelectors.getCommittedRangeCounterSampleRange(state);
     const selectors = getThreadSelectors(counter.mainThreadIndex);
     return {
       counter,
       threadIndex: counter.mainThreadIndex,
-      maxCounterSampleCountsPerMs:
-        counterSelectors.getMaxCounterSampleCountsPerMs(state),
+      maxCounterSampleCountPerMs:
+        counterSelectors.getMaxCounterSampleCountPerMs(state),
       rangeStart: start,
       rangeEnd: end,
-      counterSampleRanges,
+      counterSampleRange,
       interval: getProfileInterval(state),
       filteredThread: selectors.getFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),

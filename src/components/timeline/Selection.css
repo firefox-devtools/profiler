@@ -24,14 +24,19 @@
   z-index: 1;
   top: 0;
   bottom: 0;
-  display: none;
   width: 1px;
   background: rgb(0 0 0 / 0.4);
   pointer-events: none;
 }
 
-.timelineSelection:hover > .timelineSelectionHoverLine {
-  display: block;
+.timelineSelectionOverlayTime {
+  position: absolute;
+  z-index: 1;
+  padding: 3.25px 8px;
+  border-radius: 0 4px 4px 0;
+  margin-left: 1px;
+  background-color: rgb(153 153 153);
+  color: #fff;
 }
 
 .timelineSelectionOverlay {

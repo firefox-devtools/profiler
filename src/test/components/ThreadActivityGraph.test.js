@@ -13,7 +13,7 @@ import type {
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineType, getSelectedTab } from '../../selectors/url-state';
 import { getLastVisibleThreadTabSlug } from '../../selectors/app';
@@ -238,7 +238,9 @@ describe('ThreadActivityGraph', function () {
     const { getState, dispatch } = setup(profile);
 
     // Commit a range that contains only the second sample.
-    dispatch(commitRange(0.1, 2.0));
+    act(() => {
+      dispatch(commitRange(0.1, 2.0));
+    });
 
     // If there are CPU values, it should be automatically defaulted to this view.
     expect(getTimelineType(getState())).toBe('cpu-category');
@@ -266,6 +268,7 @@ describe('ThreadActivityGraph', function () {
   it('when clicking a stack, this selects the call tree panel', function () {
     const { dispatch, getState, clickActivityGraph } = setup();
 
+    expect(getSelectedTab(getState())).toBe('calltree');
     dispatch(changeSelectedTab('marker-chart'));
 
     // The full call node at this sample is:
@@ -278,6 +281,7 @@ describe('ThreadActivityGraph', function () {
   it(`when clicking outside of the graph, this doesn't select the call tree panel`, function () {
     const { dispatch, getState, clickActivityGraph } = setup();
 
+    expect(getSelectedTab(getState())).toBe('calltree');
     dispatch(changeSelectedTab('marker-chart'));
 
     // There's no sample at this location.
@@ -286,12 +290,24 @@ describe('ThreadActivityGraph', function () {
     expect(getLastVisibleThreadTabSlug(getState())).toBe('marker-chart');
   });
 
+  it("when clicking a sample in a track with only '(root)' samples, this doesn't select the hidden call tree panel", function () {
+    const { profile } = getProfileFromTextSamples('(root)');
+    const { getState, clickActivityGraph } = setup(profile);
+
+    expect(getSelectedTab(getState())).toBe('marker-chart');
+
+    clickActivityGraph(1, 0.2);
+    expect(getSelectedTab(getState())).toBe('marker-chart');
+  });
+
   it('will redraw even when there are no samples in range', function () {
     const { dispatch } = setup();
     flushDrawLog();
 
     // Commit a thin range which contains no samples
-    dispatch(commitRange(0.5, 0.6));
+    act(() => {
+      dispatch(commitRange(0.5, 0.6));
+    });
     const drawCalls = flushDrawLog();
     // We use the presence of 'globalCompositeOperation' to know
     // whether the canvas was redrawn or not.
@@ -300,7 +316,7 @@ describe('ThreadActivityGraph', function () {
     );
   });
 
-  it('will compute the percentage properly even though it is in a commited range with missing samples', function () {
+  it('will compute the percentage properly even though it is in a committed range with missing samples', function () {
     const MS_TO_NS_MULTIPLIER = 1000000;
     const profile = getSamplesProfile();
     profile.meta.interval = 1;
@@ -337,7 +353,9 @@ describe('ThreadActivityGraph', function () {
     flushDrawLog();
 
     // Commit a range that starts right after the missing sample.
-    dispatch(commitRange(9, 14));
+    act(() => {
+      dispatch(commitRange(9, 14));
+    });
 
     const drawCalls = flushDrawLog();
     // Activity graph uses lineTo to draw the lines for the samples.
@@ -360,6 +378,47 @@ describe('ThreadActivityGraph', function () {
           isNaN(y)
       )
     ).toEqual([]);
+  });
+
+  it('selects the correct call node path when clicked on an area where multiple stacks overlap with various categories', function () {
+    const { profile } = getProfileFromTextSamples(`
+    A[cat:DOM]   A[cat:DOM]       A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]
+    B            B                B              B              B              B              B              B
+    C            C                H              H              H              H              H              C
+    D            F                I              I              K[cat:Layout]  L              J              F[cat:Graphics]
+    E[cat:Idle]  G                                                                                           G
+  `);
+    const { clickActivityGraph, getCallNodePath } = setup(profile);
+
+    // Previously every sample was taking 10 pixel and the graph width was
+    // sample count * 10. Reducing the size of the graph to make sure that we
+    // have multiple overlapping samples.
+    setMockedElementSize({ width: GRAPH_WIDTH / 4, height: GRAPH_HEIGHT });
+    triggerResizeObservers();
+
+    // The full call node at this sample is:
+    //  A -> B -> H -> J
+    clickActivityGraph(2 / 4, 0.1);
+    expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'J']);
+
+    // The full call node at this sample is:
+    //  A -> B -> H -> L
+    clickActivityGraph(2 / 4, 0.2);
+    expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'L']);
+
+    // The full call node at this sample is:
+    //  A -> B -> H -> I
+    clickActivityGraph(2 / 4, 0.5);
+    expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
+
+    // The full call node at this sample is:
+    //  A -> B -> H -> K
+    clickActivityGraph(2 / 4, 0.8);
+    expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'K']);
+
+    // // There's no sample at this location.
+    clickActivityGraph(0, 1);
+    expect(getCallNodePath()).toEqual([]);
   });
 });
 

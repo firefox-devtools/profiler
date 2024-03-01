@@ -395,8 +395,8 @@ MarkerSidebar--select-a-marker = Selektearje in markearringen om ynformaasje oer
 
 MarkerTable--start = Start
 MarkerTable--duration = Doer
-MarkerTable--type = Type
-MarkerTable--description = Beskriuwing
+MarkerTable--name = Namme
+MarkerTable--details = Details
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -751,7 +751,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = relatyf ûnthâld op dit stuit
 TrackMemoryGraph--memory-range-in-graph = ûnthâldberik yn grafyk
-TrackMemoryGraph--operations-since-the-previous-sample = bewurkingen sûnt de foarige werjefte
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = tawizingen en fuortsmiten tawizingen sûnt de foarige stekproef
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -834,6 +834,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Enerzjy brûkt yn de aktuele seleksje
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } per sekonde
+    .label = Oersetsnelheid foar dizze opname
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = lês/skriuw-útfieringen sûnt de lêste opname
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
+    .label = Oersette gegevens oant no ta
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } g CO₂e)
+    .label = Oersette gegevens yn it sichtbere berik
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g CO₂e)
+    .label = Oersette gegevens yn de aktuele seleksje
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

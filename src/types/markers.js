@@ -10,6 +10,7 @@ import type {
   IndexIntoStringTable,
   Tid,
   Pid,
+  GraphColor,
 } from './profile';
 import type { ObjectMap } from './utils';
 
@@ -74,9 +75,15 @@ type TableColumnFormat = {|
 // A list of all the valid locations to surface this marker.
 // We can be free to add more UI areas.
 export type MarkerDisplayLocation =
+  // Display the marker in the Marker Chart tab.
   | 'marker-chart'
+  // Display the marker in the Marker Table tab.
   | 'marker-table'
-  // This adds markers to the main marker timeline in the header.
+  // This adds markers to the main marker timeline in the header. Note that for
+  // synthesized or imported profiles using the marker schema, the threads can register
+  // themselves for by setting the flag `thread.showMarkersInTimeline = true`. Otherwise
+  // for Gecko threads, the timeline overview is only shown for specifically named
+  // threads. See src/components/timeline/TrackThread.js for the current list.
   | 'timeline-overview'
   // In the timeline, this is a section that breaks out markers that are related
   // to memory. When memory counters are enabled, this is its own track, otherwise
@@ -89,23 +96,11 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
-export type MarkerGraphColor =
-  | 'blue'
-  | 'green'
-  | 'grey'
-  | 'ink'
-  | 'magenta'
-  | 'orange'
-  | 'purple'
-  | 'red'
-  | 'teal'
-  | 'yellow';
-
 export type MarkerGraphType = 'bar' | 'line' | 'line-filled';
 export type MarkerGraph = {|
   key: string,
   type: MarkerGraphType,
-  color?: MarkerGraphColor,
+  color?: GraphColor,
 |};
 
 export type MarkerSchema = {|

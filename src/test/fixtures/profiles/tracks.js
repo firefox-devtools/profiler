@@ -107,6 +107,10 @@ export function getHumanReadableTracks(state: State): string[] {
           trackName = profileViewSelectors
             .getCounterSelectors(track.counterIndex)
             .getPid(state);
+        } else if (track.type === 'bandwidth') {
+          trackName = profileViewSelectors
+            .getCounterSelectors(track.counterIndex)
+            .getPid(state);
         } else if (track.type === 'process-cpu') {
           trackName = profileViewSelectors
             .getCounterSelectors(track.counterIndex)
@@ -333,6 +337,7 @@ export function getStoreWithMemoryTrack(pid: Pid = '222') {
  */
 export function getHumanReadableActiveTabTracks(state: State): string[] {
   const globalTracks = profileViewSelectors.getActiveTabGlobalTracks(state);
+  const resourceTracks = profileViewSelectors.getActiveTabResourceTracks(state);
   const selectedThreadIndexes =
     urlStateSelectors.getSelectedThreadIndexes(state);
   const text: string[] = [];
@@ -361,6 +366,22 @@ export function getHumanReadableActiveTabTracks(state: State): string[] {
         throw assertExhaustiveCheck(
           globalTrack,
           'Unhandled ActiveTabGlobalTrack.'
+        );
+    }
+  }
+
+  for (const resourceTrack of resourceTracks) {
+    switch (resourceTrack.type) {
+      case 'sub-frame':
+        text.push(`  - iframe: ${resourceTrack.name}`);
+        break;
+      case 'thread':
+        text.push(`  - ${resourceTrack.name}`);
+        break;
+      default:
+        throw assertExhaustiveCheck(
+          resourceTrack,
+          'Unhandled ActiveTabResourceTrack.'
         );
     }
   }

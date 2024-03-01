@@ -70,19 +70,6 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-          <span
-            title="Sort by the time spent in a call node, ignoring its children."
-          >
-            Invert call stack
-          </span>
-        </label>
-        <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
           Show user timing
         </label>
       </li>
@@ -264,6 +251,31 @@ Array [
     "componentB",
     286.3333333333333,
     43,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90070",
+  ],
+  Array [
+    "fillRect",
+    350,
+    48,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "componentC",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "componentC",
+    353,
+    59,
   ],
   Array [
     "set fillStyle",
@@ -545,19 +557,6 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-          <span
-            title="Sort by the time spent in a call node, ignoring its children."
-          >
-            Invert call stack
-          </span>
-        </label>
-        <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
           Show user timing
         </label>
       </li>
@@ -754,6 +753,14 @@ Array [
   Array [
     "measureText",
     "componentD",
+  ],
+  Array [
+    "measureText",
+    "c",
+  ],
+  Array [
+    "measureText",
+    "co",
   ],
   Array [
     "set fillStyle",
@@ -1003,19 +1010,6 @@ exports[`StackChart matches the snapshot 1`] = `
       <li
         class="panelSettingsListItem"
       >
-        <label
-          class="photon-label photon-label-micro photon-label-horiz-padding"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-          <span
-            title="Sort by the time spent in a call node, ignoring its children."
-          >
-            Invert call stack
-          </span>
-        </label>
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >

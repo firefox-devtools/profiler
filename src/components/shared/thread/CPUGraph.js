@@ -14,19 +14,17 @@ import type {
   IndexIntoSamplesTable,
   Milliseconds,
   CallNodeInfo,
-  IndexIntoCallNodeTable,
+  SelectedState,
 } from 'firefox-profiler/types';
-import type { HeightFunctionParams } from './HeightGraph';
 
 type Props = {|
   +className: string,
   +thread: Thread,
-  +tabFilteredThread: Thread,
+  +samplesSelectedStates: null | SelectedState[],
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
@@ -39,10 +37,7 @@ type Props = {|
 |};
 
 export class ThreadCPUGraph extends PureComponent<Props> {
-  _heightFunction = ({
-    sampleIndex,
-    yPixelsPerHeight,
-  }: HeightFunctionParams): number => {
+  _heightFunction = (sampleIndex: IndexIntoSamplesTable): number | null => {
     const { thread } = this.props;
     const { samples } = thread;
 
@@ -55,19 +50,17 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     const cpuDelta = ensureExists(samples.threadCPUDelta)[sampleIndex + 1] || 0;
     const interval = samples.time[sampleIndex + 1] - samples.time[sampleIndex];
     const currentCPUPerMs = cpuDelta / interval;
-    return currentCPUPerMs * yPixelsPerHeight;
+    return currentCPUPerMs;
   };
 
   render() {
     const {
       className,
       thread,
-      tabFilteredThread,
+      samplesSelectedStates,
       interval,
       rangeStart,
       rangeEnd,
-      callNodeInfo,
-      selectedCallNodeIndex,
       categories,
       trackName,
       maxThreadCPUDeltaPerMs,
@@ -85,11 +78,9 @@ export class ThreadCPUGraph extends PureComponent<Props> {
         trackName={trackName}
         interval={interval}
         thread={thread}
-        tabFilteredThread={tabFilteredThread}
+        samplesSelectedStates={samplesSelectedStates}
         rangeStart={rangeStart}
         rangeEnd={rangeEnd}
-        callNodeInfo={callNodeInfo}
-        selectedCallNodeIndex={selectedCallNodeIndex}
         categories={categories}
         onSampleClick={onSampleClick}
       />

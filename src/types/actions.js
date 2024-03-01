@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { CallTree } from '../profile-logic/call-tree';
 import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
 import type {
@@ -17,7 +16,7 @@ import type {
 } from './profile';
 import type {
   CallNodePath,
-  CallNodeTable,
+  CallNodeInfo,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
@@ -55,6 +54,9 @@ export type DataSource =
   // This datasource is used to fetch a profile from Firefox via a frame script.
   // This is the first entry-point when a profile is captured in the browser.
   | 'from-browser'
+  // Websites can inject profiles via a postMessage call:
+  // postMessage({ name: "inject-profile", profile: Profile })
+  | 'from-post-message'
   // This is used for profiles that have been shared / uploaded to the Profiler
   // Server.
   | 'public'
@@ -196,6 +198,7 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_SELECTED_CALL_NODE',
+      +isInverted: boolean,
       +threadsKey: ThreadsKey,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
@@ -217,6 +220,7 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_EXPANDED_CALL_NODES',
       +threadsKey: ThreadsKey,
+      +isInverted: boolean,
       +expandedCallNodePaths: Array<CallNodePath>,
     |}
   | {|
@@ -407,6 +411,7 @@ type ReceiveProfileAction =
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +timelineType: TimelineType | null,
+      +selectedTab: TabSlug,
     |}
   | {|
       +type: 'VIEW_ORIGINS_PROFILE',
@@ -473,7 +478,7 @@ type UrlStateAction =
       +threadsKey: ThreadsKey,
       +transform: Transform,
       +transformedThread: Thread,
-      +callNodeTable: CallNodeTable,
+      +callNodeInfo: CallNodeInfo,
     |}
   | {|
       +type: 'POP_TRANSFORMS_FROM_STACK',
@@ -499,8 +504,7 @@ type UrlStateAction =
   | {|
       +type: 'CHANGE_INVERT_CALLSTACK',
       +invertCallstack: boolean,
-      +callTree: CallTree,
-      +callNodeTable: CallNodeTable,
+      +newSelectedCallNodePath: CallNodePath,
       +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|

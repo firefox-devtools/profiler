@@ -20,14 +20,11 @@
   text-align: right;
 }
 
-.treeViewHeaderColumn.name {
-  padding: 0 20px;
-}
-
-.treeViewFixedColumn.type {
+.treeViewFixedColumn.name {
   width: 100px;
+  text-align: right;
 }
 
-.treeViewRowColumn.type {
-  text-align: left;
+.markerTable .treeRowToggleButton {
+  display: none;
 }

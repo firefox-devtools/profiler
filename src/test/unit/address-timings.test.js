@@ -11,9 +11,8 @@ import {
   getAddressTimings,
 } from 'firefox-profiler/profile-logic/address-timings';
 import {
-  invertCallstack,
   getCallNodeInfo,
-  getCallNodeIndexFromPath,
+  getInvertedCallNodeInfo,
 } from '../../profile-logic/profile-data';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import type {
@@ -39,8 +38,7 @@ describe('getStackAddressInfo', function () {
       stackTable,
       frameTable,
       funcTable,
-      Asym,
-      false
+      Asym
     );
 
     // Expect the returned arrays to have the same length as the stackTable.
@@ -51,18 +49,13 @@ describe('getStackAddressInfo', function () {
 });
 
 describe('getAddressTimings for getStackAddressInfo', function () {
-  function getTimings(
-    thread: Thread,
-    sym: IndexIntoNativeSymbolTable,
-    isInverted: boolean
-  ) {
+  function getTimings(thread: Thread, sym: IndexIntoNativeSymbolTable) {
     const { stackTable, frameTable, funcTable, samples } = thread;
     const stackLineInfo = getStackAddressInfo(
       stackTable,
       frameTable,
       funcTable,
-      sym,
-      isInverted
+      sym
     );
     return getAddressTimings(stackLineInfo, samples);
   }
@@ -76,7 +69,7 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     `);
     const [thread] = profile.threads;
     const [{ Asym }] = nativeSymbolsDictPerThread;
-    const addressTimings = getTimings(thread, Asym, false);
+    const addressTimings = getTimings(thread, Asym);
     expect(addressTimings.totalAddressHits.get(0x20)).toBe(1);
     expect(addressTimings.totalAddressHits.get(0x30)).toBe(1);
     expect(addressTimings.totalAddressHits.size).toBe(2); // no other hits
@@ -96,7 +89,7 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     `);
     const [thread] = profile.threads;
     const [{ Asym }] = nativeSymbolsDictPerThread;
-    const addressTimings = getTimings(thread, Asym, false);
+    const addressTimings = getTimings(thread, Asym);
     expect(addressTimings.totalAddressHits.get(0x20)).toBe(1);
     expect(addressTimings.totalAddressHits.get(0x30)).toBe(1);
     expect(addressTimings.totalAddressHits.size).toBe(2); // no other hits
@@ -115,7 +108,7 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     const [thread] = profile.threads;
     const [{ Asym, Bsym, Csym, Dsym }] = nativeSymbolsDictPerThread;
 
-    const addressTimingsA = getTimings(thread, Asym, false);
+    const addressTimingsA = getTimings(thread, Asym);
     expect(addressTimingsA.totalAddressHits.get(0x20)).toBe(2);
     expect(addressTimingsA.totalAddressHits.get(0x21)).toBe(1);
     // 0x30 is in the righ lib (one) but in the wrong native symbol (B instead
@@ -128,7 +121,7 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     expect(addressTimingsA.selfAddressHits.get(0x30)).toBe(undefined);
     expect(addressTimingsA.selfAddressHits.size).toBe(0); // no other hits
 
-    const addressTimingsB = getTimings(thread, Bsym, false);
+    const addressTimingsB = getTimings(thread, Bsym);
     // Address 0x30 was hit in every sample, twice in the first sample
     // (due to recursion) but that still only counts as one sample
     expect(addressTimingsB.totalAddressHits.get(0x30)).toBe(3);
@@ -139,7 +132,7 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     expect(addressTimingsB.selfAddressHits.get(0x30)).toBe(1);
     expect(addressTimingsB.selfAddressHits.size).toBe(1); // no other hits
 
-    const addressTimingsC = getTimings(thread, Csym, false);
+    const addressTimingsC = getTimings(thread, Csym);
     expect(addressTimingsC.totalAddressHits.get(0x10)).toBe(1);
     expect(addressTimingsC.totalAddressHits.get(0x11)).toBe(1);
     expect(addressTimingsC.totalAddressHits.size).toBe(2); // no other hits
@@ -147,46 +140,12 @@ describe('getAddressTimings for getStackAddressInfo', function () {
     expect(addressTimingsC.selfAddressHits.get(0x11)).toBe(1);
     expect(addressTimingsC.selfAddressHits.size).toBe(1); // no other hits
 
-    const addressTimingsD = getTimings(thread, Dsym, false);
+    const addressTimingsD = getTimings(thread, Dsym);
     expect(addressTimingsD.totalAddressHits.get(0x40)).toBe(1);
     expect(addressTimingsD.totalAddressHits.size).toBe(1); // no other hits
     // Dsym's address 0x40 recursed but should only be counted as 1 sample
     expect(addressTimingsD.selfAddressHits.get(0x40)).toBe(1);
     expect(addressTimingsD.selfAddressHits.size).toBe(1); // no other hits
-  });
-
-  it('computes the same values on an inverted thread', function () {
-    const { profile, nativeSymbolsDictPerThread } = getProfileFromTextSamples(`
-      A[lib:one][address:20][sym:Asym:20:]  A[lib:one][address:21][sym:Asym:20:]  A[lib:one][address:20][sym:Asym:20:]
-      B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]  B[lib:one][address:30][sym:Bsym:30:]
-      C[lib:two][address:10][sym:Csym:10:]  C[lib:two][address:11][sym:Csym:10:]  D[lib:two][address:40][sym:Dsym:40:]
-      B[lib:one][address:30][sym:Bsym:30:]                                        D[lib:two][address:40][sym:Dsym:40:]
-    `);
-    const categories = ensureExists(
-      profile.meta.categories,
-      'Expected to find categories'
-    );
-
-    const [thread] = profile.threads;
-    const [{ Asym, Bsym, Csym, Dsym }] = nativeSymbolsDictPerThread;
-    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
-    const invertedThread = invertCallstack(thread, defaultCategory);
-
-    const addressTimingsA = getTimings(thread, Asym, false);
-    const addressTimingsInvertedA = getTimings(invertedThread, Asym, true);
-    expect(addressTimingsInvertedA).toEqual(addressTimingsA);
-
-    const addressTimingsB = getTimings(thread, Bsym, false);
-    const addressTimingsInvertedB = getTimings(invertedThread, Bsym, true);
-    expect(addressTimingsInvertedB).toEqual(addressTimingsB);
-
-    const addressTimingsC = getTimings(thread, Csym, false);
-    const addressTimingsInvertedC = getTimings(invertedThread, Csym, true);
-    expect(addressTimingsInvertedC).toEqual(addressTimingsC);
-
-    const addressTimingsD = getTimings(thread, Dsym, false);
-    const addressTimingsInvertedD = getTimings(invertedThread, Dsym, true);
-    expect(addressTimingsInvertedD).toEqual(addressTimingsD);
   });
 });
 
@@ -199,14 +158,22 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     isInverted: boolean
   ) {
     const { stackTable, frameTable, funcTable, samples } = thread;
-    const callNodeInfo = getCallNodeInfo(
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
       stackTable,
       frameTable,
       funcTable,
       defaultCat
     );
+    const callNodeInfo = isInverted
+      ? getInvertedCallNodeInfo(
+          thread,
+          nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+          nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+          defaultCat
+        )
+      : nonInvertedCallNodeInfo;
     const callNodeIndex = ensureExists(
-      getCallNodeIndexFromPath(callNodePath, callNodeInfo.callNodeTable),
+      callNodeInfo.getCallNodeIndexFromPath(callNodePath),
       'invalid call node path'
     );
     const stackLineInfo = getStackAddressInfoForCallNode(
@@ -214,8 +181,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
       frameTable,
       callNodeIndex,
       callNodeInfo,
-      nativeSymbol,
-      isInverted
+      nativeSymbol
     );
     return getAddressTimings(stackLineInfo, samples);
   }
@@ -348,16 +314,8 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
     const [{ C, D }] = funcNamesDictPerThread;
     const [{ Csym, Dsym }] = nativeSymbolsDictPerThread;
     const [thread] = profile.threads;
-    const invertedThread = invertCallstack(thread, defaultCat);
-
     // For the root D of the inverted tree, we have 3 self address hits.
-    const addressTimingsD = getTimings(
-      invertedThread,
-      [D],
-      defaultCat,
-      Dsym,
-      true
-    );
+    const addressTimingsD = getTimings(thread, [D], defaultCat, Dsym, true);
     expect(addressTimingsD.totalAddressHits.get(0x51)).toBe(2);
     expect(addressTimingsD.totalAddressHits.get(0x52)).toBe(1);
     expect(addressTimingsD.totalAddressHits.size).toBe(2); // no other hits
@@ -367,13 +325,7 @@ describe('getAddressTimings for getStackAddressInfoForCallNode', function () {
 
     // For the C call node which is a child (direct caller) of D, we have
     // no self address hit and one hit at address 0x12.
-    const addressTimingsDC = getTimings(
-      invertedThread,
-      [D, C],
-      defaultCat,
-      Csym,
-      true
-    );
+    const addressTimingsDC = getTimings(thread, [D, C], defaultCat, Csym, true);
     expect(addressTimingsDC.totalAddressHits.get(0x12)).toBe(1);
     expect(addressTimingsDC.totalAddressHits.size).toBe(1); // no other hits
     expect(addressTimingsDC.selfAddressHits.size).toBe(0); // no self address hits

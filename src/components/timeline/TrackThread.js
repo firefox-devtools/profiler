@@ -6,7 +6,6 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import memoize from 'memoize-immutable';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   withSize,
@@ -23,7 +22,6 @@ import {
   getCategories,
   getSelectedThreadIndexes,
   getTimelineType,
-  getInvertCallstack,
   getThreadSelectorsFromThreadsKey,
   getMaxThreadCPUDeltaPerMs,
   getIsExperimentalCPUGraphsEnabled,
@@ -39,11 +37,9 @@ import {
   updatePreviewSelection,
   changeSelectedCallNode,
   focusCallTree,
-  selectLeafCallNode,
-  selectRootCallNode,
+  selectSelfCallNode,
 } from 'firefox-profiler/actions/profile-view';
 import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
-import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import './TrackThread.css';
@@ -77,9 +73,7 @@ type StateProps = {|
   +fullThread: Thread,
   +rangeFilteredThread: Thread,
   +filteredThread: Thread,
-  +tabFilteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +unfilteredSamplesRange: StartEndRange | null,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
@@ -89,7 +83,7 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
-  +invertCallstack: boolean,
+  +sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -99,14 +93,14 @@ type StateProps = {|
   +isExperimentalCPUGraphsEnabled: boolean,
   +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
+  +callTreeVisible: boolean,
 |};
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
-  +selectLeafCallNode: typeof selectLeafCallNode,
-  +selectRootCallNode: typeof selectRootCallNode,
+  +selectSelfCallNode: typeof selectSelfCallNode,
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
@@ -132,24 +126,17 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
 
     const {
       threadsKey,
-      selectLeafCallNode,
-      selectRootCallNode,
+      selectSelfCallNode,
       focusCallTree,
-      invertCallstack,
       selectedThreadIndexes,
+      callTreeVisible,
     } = this.props;
 
     // Sample clicking only works for one thread. See issue #2709
     if (selectedThreadIndexes.size === 1) {
-      if (invertCallstack) {
-        // When we're displaying the inverted call stack, the "leaf" call node we're
-        // interested in is actually displayed as the "root" of the tree.
-        selectRootCallNode(threadsKey, sampleIndex);
-      } else {
-        selectLeafCallNode(threadsKey, sampleIndex);
-      }
+      selectSelfCallNode(threadsKey, sampleIndex);
 
-      if (sampleIndex !== null) {
+      if (sampleIndex !== null && callTreeVisible) {
         // If the user clicked outside of the activity graph (sampleIndex === null),
         // then we don't need to focus the call tree. This action also selects
         // the call tree panel, which we don't want either in this case.
@@ -188,19 +175,18 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       fullThread,
       filteredThread,
       rangeFilteredThread,
-      tabFilteredThread,
       threadsKey,
       interval,
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
       callNodeInfo,
-      selectedCallNodeIndex,
       unfilteredSamplesRange,
       categories,
       timelineType,
       hasFileIoMarkers,
       showMemoryMarkers,
+      sampleNonInvertedCallNodes,
       samplesSelectedStates,
       treeOrderSampleComparator,
       trackType,
@@ -214,7 +200,8 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
     const processType = filteredThread.processType;
     const displayJank = processType !== 'plugin';
     const displayMarkers =
-      (filteredThread.name === 'GeckoMain' ||
+      (filteredThread.showMarkersInTimeline ||
+        filteredThread.name === 'GeckoMain' ||
         filteredThread.name === 'Compositor' ||
         filteredThread.name === 'Renderer' ||
         filteredThread.name === 'AndroidUI (JVM)' ||
@@ -285,11 +272,9 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 trackName={trackName}
                 interval={interval}
                 thread={filteredThread}
-                tabFilteredThread={tabFilteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                callNodeInfo={callNodeInfo}
-                selectedCallNodeIndex={selectedCallNodeIndex}
+                samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
               />
@@ -301,11 +286,10 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 trackName={trackName}
                 interval={interval}
                 thread={filteredThread}
-                tabFilteredThread={tabFilteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
                 callNodeInfo={callNodeInfo}
-                selectedCallNodeIndex={selectedCallNodeIndex}
+                samplesSelectedStates={samplesSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
                 maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
@@ -318,11 +302,11 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
             trackName={trackName}
             interval={interval}
             thread={filteredThread}
-            tabFilteredThread={tabFilteredThread}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
-            selectedCallNodeIndex={selectedCallNodeIndex}
+            sampleNonInvertedCallNodes={sampleNonInvertedCallNodes}
+            samplesSelectedStates={samplesSelectedStates}
             categories={categories}
             onSampleClick={this._onSampleClick}
           />
@@ -339,14 +323,6 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
   }
 }
 
-/**
- * Memoize the hasThreadKeys to not compute it all the time.
- */
-const _getTimelineIsSelected = memoize(
-  (selectedThreads, threadsKey) => hasThreadKeys(selectedThreads, threadsKey),
-  { limit: 1 }
-);
-
 export const TimelineTrackThread = explicitConnect<
   OwnProps,
   StateProps,
@@ -357,12 +333,6 @@ export const TimelineTrackThread = explicitConnect<
     const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const selectedCallNodeIndex = _getTimelineIsSelected(
-      selectedThreadIndexes,
-      threadsKey
-    )
-      ? selectors.getSelectedCallNodeIndex(state)
-      : null;
     const fullThread = selectors.getCPUProcessedThread(state);
     const timelineType = getTimelineType(state);
     const enableCPUUsage =
@@ -370,13 +340,14 @@ export const TimelineTrackThread = explicitConnect<
       fullThread.samples.threadCPUDelta !== undefined;
 
     return {
-      invertCallstack: getInvertCallstack(state),
       fullThread,
       filteredThread: selectors.getFilteredThread(state),
       rangeFilteredThread: selectors.getRangeFilteredThread(state),
-      tabFilteredThread: selectors.getTabFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
-      selectedCallNodeIndex,
+      sampleNonInvertedCallNodes:
+        selectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
+          state
+        ),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
@@ -396,14 +367,14 @@ export const TimelineTrackThread = explicitConnect<
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
       maxThreadCPUDeltaPerMs: getMaxThreadCPUDeltaPerMs(state),
       implementationFilter: getImplementationFilter(state),
+      callTreeVisible: selectors.getUsefulTabs(state).includes('calltree'),
     };
   },
   mapDispatchToProps: {
     updatePreviewSelection,
     changeSelectedCallNode,
     focusCallTree,
-    selectLeafCallNode,
-    selectRootCallNode,
+    selectSelfCallNode,
     reportTrackThreadHeight,
   },
   component: withSize<Props>(TimelineTrackThreadImpl),

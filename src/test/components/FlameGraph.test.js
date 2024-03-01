@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { FlameGraph } from '../../components/flame-graph';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import {
@@ -29,6 +29,7 @@ import {
   updatePreviewSelection,
   changeImplementationFilter,
 } from '../../actions/profile-view';
+import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 import {
@@ -67,17 +68,16 @@ describe('FlameGraph', function () {
     expect(drawCalls).toMatchSnapshot();
   });
 
-  it('renders a message instead of the graph when call stack is inverted', () => {
-    const { getByText, dispatch } = setupFlameGraph();
-    dispatch(changeInvertCallstack(true));
-    expect(getByText(/The Flame Graph is not available/)).toBeInTheDocument();
-  });
-
-  it('switches back to uninverted mode when clicking the button', () => {
-    const { getByText, dispatch, getState } = setupFlameGraph();
-    dispatch(changeInvertCallstack(true));
-    expect(getInvertCallstack(getState())).toBe(true);
-    fireFullClick(getByText(/Switch to the normal call stack/));
+  it('ignores invertCallstack and always displays non-inverted', () => {
+    const { getState, dispatch } = setupFlameGraph();
+    expect(getInvertCallstack(getState())).toBe(false);
+    act(() => {
+      dispatch(changeInvertCallstack(true));
+    });
+    expect(getInvertCallstack(getState())).toBe(false);
+    act(() => {
+      dispatch(changeInvertCallstack(false));
+    });
     expect(getInvertCallstack(getState())).toBe(false);
   });
 
@@ -141,14 +141,15 @@ describe('FlameGraph', function () {
     const div = getContentDiv();
 
     function selectedNode() {
-      const callNodeIndex = selectedThreadSelectors.getSelectedCallNodeIndex(
-        getState()
-      );
+      const callNodeIndex =
+        selectedThreadSelectors.getSelectedCallNodeIndex(getState());
       return callNodeIndex && funcNames[callNodeIndex];
     }
 
     // Start out with callnode B selected
-    dispatch(changeSelectedCallNode(0, [0, 1] /* B */));
+    act(() => {
+      dispatch(changeSelectedCallNode(0, [0, 1] /* B */));
+    });
     expect(selectedNode()).toBe('B');
 
     // Move one callnode up
@@ -192,7 +193,7 @@ describe('FlameGraph', function () {
     // afterwards the flame graph will redraw again (as a result of closing the
     // menu and resetting the rightClickedCallNodeIndex).
     flushDrawLog();
-    jest.runAllTimers();
+    act(() => jest.runAllTimers());
 
     // Try another node to make sure the menu can handle other nodes than the first.
     rightClick(findFillTextPosition('B'));
@@ -222,7 +223,9 @@ describe('FlameGraph', function () {
 
     it('shows reasons when samples are not in the committed range', () => {
       const { dispatch } = setupFlameGraph();
-      dispatch(commitRange(5, 10));
+      act(() => {
+        dispatch(commitRange(5, 10));
+      });
       expect(
         screen.getByText('Broaden the selected range to view samples.')
       ).toBeInTheDocument();
@@ -230,14 +233,16 @@ describe('FlameGraph', function () {
 
     it('shows reasons when samples are not in the preview range', () => {
       const { dispatch } = setupFlameGraph();
-      dispatch(
-        updatePreviewSelection({
-          hasSelection: true,
-          isModifying: false,
-          selectionStart: 5,
-          selectionEnd: 10,
-        })
-      );
+      act(() => {
+        dispatch(
+          updatePreviewSelection({
+            hasSelection: true,
+            isModifying: false,
+            selectionStart: 5,
+            selectionEnd: 10,
+          })
+        );
+      });
 
       expect(
         screen.getByText(
@@ -248,7 +253,9 @@ describe('FlameGraph', function () {
 
     it('shows reasons when samples have been completely filtered out', function () {
       const { dispatch } = setupFlameGraph();
-      dispatch(changeImplementationFilter('js'));
+      act(() => {
+        dispatch(changeImplementationFilter('js'));
+      });
       expect(
         screen.getByText(
           'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
@@ -298,6 +305,7 @@ function setupFlameGraph(addImplementationData: boolean = true) {
   }
 
   const store = storeWithProfile(profile);
+  store.dispatch(changeSelectedTab('flame-graph'));
 
   const renderResult = render(
     <Provider store={store}>

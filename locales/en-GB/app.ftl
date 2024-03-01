@@ -182,6 +182,46 @@ CallTree--inlining-badge = (inlined)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Select a node to display information about it.
+CallTreeSidebar--call-node-details = Call node details
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Traced running time
+CallTreeSidebar--traced-self-time =
+    .label = Traced self time
+CallTreeSidebar--running-time =
+    .label = Running time
+CallTreeSidebar--self-time =
+    .label = Self time
+CallTreeSidebar--running-samples =
+    .label = Running samples
+CallTreeSidebar--self-samples =
+    .label = Self samples
+CallTreeSidebar--running-size =
+    .label = Running size
+CallTreeSidebar--self-size =
+    .label = Self size
+CallTreeSidebar--categories = Categories
+CallTreeSidebar--implementation = Implementation
+CallTreeSidebar--running-milliseconds = Running milliseconds
+CallTreeSidebar--running-sample-count = Running sample count
+CallTreeSidebar--running-bytes = Running bytes
+CallTreeSidebar--self-milliseconds = Self milliseconds
+CallTreeSidebar--self-sample-count = Self sample count
+CallTreeSidebar--self-bytes = Self bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -395,8 +435,8 @@ MarkerSidebar--select-a-marker = Select a marker to display information about it
 
 MarkerTable--start = Start
 MarkerTable--duration = Duration
-MarkerTable--type = Type
-MarkerTable--description = Description
+MarkerTable--name = Name
+MarkerTable--details = Details
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -751,7 +791,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = relative memory at this time
 TrackMemoryGraph--memory-range-in-graph = memory range in graph
-TrackMemoryGraph--operations-since-the-previous-sample = operations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allocations and deallocations since the previous sample
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -834,6 +874,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
     .label = Energy used in the current selection
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } per second
+    .label = Transfer speed for this sample
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = read/write operations since the previous sample
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
+    .label = Data transferred up to this time
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } g CO₂e)
+    .label = Data transferred in the visible range
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g CO₂e)
+    .label = Data transferred in the current selection
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.

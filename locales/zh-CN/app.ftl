@@ -126,6 +126,22 @@ CallTree--inlining-badge = （内联）
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = 选择节点即可显示它的相关信息。
+CallTreeSidebar--call-node-details = 调用节点详情
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -198,8 +214,8 @@ Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--menu-button-instructions = 启用分析器菜单按钮，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
 Home--profile-firefox-android-instructions =
-    您还可以分析 { -firefox-android-brand-name }。
-    有关更多信息，请查阅此文档：
+    您还可以分析 { -firefox-android-brand-name }，
+    详见此文档：
     <a>直接在设备上分析 { -firefox-android-brand-name }</a>。
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
@@ -314,8 +330,8 @@ MarkerSidebar--select-a-marker = 选择标记即可显示其相关信息。
 
 MarkerTable--start = 开始
 MarkerTable--duration = 持续时间
-MarkerTable--type = 类型
-MarkerTable--description = 描述
+MarkerTable--name = 名称
+MarkerTable--details = 详情
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -664,7 +680,7 @@ TrackNameButton--hide-process =
 
 TrackMemoryGraph--relative-memory-at-this-time = 此时的相对内存用量
 TrackMemoryGraph--memory-range-in-graph = 图表里的内存范围
-TrackMemoryGraph--operations-since-the-previous-sample = 自前一次采样以来的操作次数
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = 自上次采样以来的分配和释放情况
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -748,6 +764,46 @@ TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh
 TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO2e)
     .label = 当前选择范围内的能耗
 
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } 每秒
+    .label = 此样本的传输速度
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = 上次采样结束后发生的读写操作数
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value }（{ $carbonValue } g CO₂e）
+    .label = 目前为止传输的数据
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value }（{ $carbonValue } g CO₂e）
+    .label = 可见范围内传输的数据
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value }（{ $carbonValue } g CO₂e）
+    .label = 当前选中部分传输的数据
+
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
@@ -769,7 +825,7 @@ TrackSearchField--search-input =
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
-TransformNavigator--complete = 完成“{ $item }”
+TransformNavigator--complete = 完整“{ $item }”
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:

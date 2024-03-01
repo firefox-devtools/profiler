@@ -267,17 +267,14 @@ export type GeckoCounter = {|
   name: string,
   category: string,
   description: string,
-  sample_groups: $ReadOnlyArray<{|
-    id: number,
-    samples: {|
-      schema: {|
-        time: 0,
-        number: 1,
-        count: 2,
-      |},
-      data: $ReadOnlyArray<[number, number, number]>,
+  samples: {|
+    schema: {|
+      time: 0,
+      count: 1,
+      number: 2,
     |},
-  |}>,
+    data: $ReadOnlyArray<[number, number, number]>,
+  |},
 |};
 
 export type GeckoProfilerOverhead = {|

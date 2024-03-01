@@ -51,9 +51,60 @@ export type IndexIntoCallNodeTable = number;
  *
  * For a detailed explanation of callNodes see `docs-developer/call-tree.md` and
  * `docs-developer/call-nodes-in-cpp.md`.
+ *
+ * # Call node ordering
+ *
+ * Call nodes are ordered in depth-first traversal order. This makes it super fast
+ * to check whether node A is a descendant of node B, because all subtrees are
+ * a contiguous range of call node indexes.
+ *
+ * More details about the ordering:
+ *
+ *  - The node at index 0 is the first root node.
+ *  - If a node A has children, then A + 1 is its first child.
+ *  - If a node A has no children, then A + 1 is its next sibling, or the closest
+ *    next sibling of an ancestor node if A doesn't have a next sibling.
+ *  - For every node A, there's a single "index range" which contains this node
+ *    and all its descendants: [A, callNodeTable.subtreeRangeEnd[A]).
+ *  - This "tree of ranges" is well-nested.
+ *  - The ordering of siblings doesn't have any meaning, i.e. it doesn't matter
+ *    if a node is the first or the third child of its parent (they're not
+ *    ordered by func or anything).
+ *
+ * Example:
+ *
+ * ```
+ *  - 0 funcG
+ *    - 1 funcH
+ *      - 2 funcI
+ *      - 3 funcG
+ *    - 4 funcJ
+ *    - 5 funcI
+ *  - 6 funcK
+ *    - 7 funcG
+ *      - 8 funcL
+ *  - 9 funcH
+ * ```
+ *
+ * In this example, the index range of the subtree of node 0 is [0, 6).
+ * The index range of the subtree of node 3 is [3, 4), i.e. the half-open range
+ * which only contains node 3.
  */
 export type CallNodeTable = {
+  // The index of the parent call node, or -1 for root nodes.
   prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+
+  // The index of this node's next sibling, or -1 if this node is the last child / last root.
+  nextSibling: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+
+  // The index after this node's last descendant. If this node has a next sibling,
+  // subtreeRangeEnd is equal to nextSibling. Otherwise, this is the index
+  // of the next sibling of the closest ancestor node which has a next sibling.
+  // The last node has subtreeRangeEnd set to callNodeTable.length.
+  //
+  // The nodes in the range range [A, subtreeRangeEnd[A]) form A's subtree.
+  subtreeRangeEnd: Uint32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable
+
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
@@ -62,36 +113,102 @@ export type CallNodeTable = {
   // IndexIntoNativeSymbolTable: all frames that collapsed into this call node inlined into the same native symbol
   // -1: divergent: not all frames that collapsed into this call node were inlined, or they are from different symbols
   sourceFramesInlinedIntoSymbol: Array<IndexIntoNativeSymbolTable | -1 | null>,
+  // The depth of the call node. Roots have depth 0.
   depth: number[],
+  // The maximum value in the depth column, or -1 if this table is empty.
+  maxDepth: number,
+  // The number of call nodes. All columns in this table have this length.
   length: number,
 };
 
 /**
- * Both the callNodeTable and a map that converts an IndexIntoStackTable
- * into an IndexIntoCallNodeTable.
+ * Wraps the call node table and provides associated functionality.
  */
-export type CallNodeInfo = {
-  callNodeTable: CallNodeTable,
-  // IndexIntoStackTable -> IndexIntoCallNodeTable
-  stackIndexToCallNodeIndex: Uint32Array,
-};
+export interface CallNodeInfo {
+  // If true, call node indexes describe nodes in the inverted call tree.
+  isInverted(): boolean;
+
+  // Returns the call node table. If isInverted() is true, this is an inverted
+  // call node table, otherwise this is the non-inverted call node table.
+  getCallNodeTable(): CallNodeTable;
+
+  // Returns the non-inverted call node table.
+  // This is always the non-inverted call node table, regardless of isInverted().
+  getNonInvertedCallNodeTable(): CallNodeTable;
+
+  // Returns a mapping from the stack table to the call node table.
+  // The Int32Array should be used as if it were a
+  // Map<IndexIntoStackTable, IndexIntoCallNodeTable | -1>.
+  //
+  // If this CallNodeInfo is for the non-inverted tree, this maps the stack index
+  // to its corresponding call node index, and all entries are >= 0.
+  // If this CallNodeInfo is for the inverted tree, this maps the non-inverted
+  // stack index to the inverted call node index. For example, the stack
+  // A -> B -> C -> D is mapped to the inverted call node describing the
+  // call path D <- C <- B <- A, i.e. the node with function A under the D root
+  // of the inverted tree. Stacks which are only used as prefixes are not mapped
+  // to an inverted call node; for those, the entry will be -1. In the example
+  // above, if the stack node A -> B -> C only exists so that it can be the prefix
+  // of the A -> B -> C -> D stack and no sample / marker / allocation has
+  // A -> B -> C as its stack, then there is no need to have a call node
+  // C <- B <- A in the inverted call node table.
+  getStackIndexToCallNodeIndex(): Int32Array;
+
+  // Returns a mapping from the stack table to the non-inverted call node table.
+  // This always maps to the non-inverted call node table, regardless of isInverted().
+  getStackIndexToNonInvertedCallNodeIndex(): Int32Array;
+
+  // Converts a call node index into a call node path.
+  getCallNodePathFromIndex(
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ): CallNodePath;
+
+  // Converts a call node path into a call node index.
+  getCallNodeIndexFromPath(
+    callNodePath: CallNodePath
+  ): IndexIntoCallNodeTable | null;
+
+  // Returns the call node index that matches the function `func` and whose
+  // parent's index  is `parent`. If `parent` is -1, this returns the index of
+  // the root node with function `func`.
+  // Returns null if the described call node doesn't exist.
+  getCallNodeIndexFromParentAndFunc(
+    parent: IndexIntoCallNodeTable | -1,
+    func: IndexIntoFuncTable
+  ): IndexIntoCallNodeTable | null;
+}
 
 export type LineNumber = number;
 
-// Stores, for all stacks of a thread and for one specific file, the line
-// numbers in that file that are hit by each stack.
-// This can be computed once for a filtered thread, and then queried cheaply
-// as the preview selection changes.
+// Stores the line numbers which are hit by each stack, for one specific source
+// file.
+// Used to compute LineTimings in combination with a SamplesLikeTable.
+//
+// StackLineInfo can be computed once for a filtered thread. Then it is reused
+// for the computation of different LineTimings as the preview selection changes.
+//
 // The order of these arrays is the same as the order of thread.stackTable;
-// the array index is a stackIndex.
+// the array index is a stackIndex. Not all stacks are guaranteed to have a useful
+// value; only stacks which are used as "self" stacks, i.e. stacks which are used
+// in thread.samples.stack or in marker stacks / allocation stacks, are required
+// to have their values computed - only these values will be accessed during the
+// LineTimings computation.
+//
+// For stacks which are only used as prefix stack nodes, selfLine and
+// stackLine may be null. This is fine because their values are not accessed
+// during the LineTimings computation.
 export type StackLineInfo = {|
-  // An array that contains, for each stack, the line number that this stack
+  // An array that contains, for each "self" stack, the line number that this stack
   // spends its self time in, in this file, or null if the self time of the
   // stack is in a different file or if the line number is not known.
+  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
+  // never referred to from a SamplesLikeTable, the value may be null.
   selfLine: Array<LineNumber | null>,
-  // An array that contains, for each stack, all the lines that the frames in
+  // An array that contains, for each "self" stack, all the lines that the frames in
   // this stack hit in this file, or null if this stack does not hit any line
   // in the given file.
+  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
+  // never referred to from a SamplesLikeTable, the value may be null.
   stackLines: Array<Set<LineNumber> | null>,
 |};
 
@@ -103,20 +220,35 @@ export type LineTimings = {|
   selfLineHits: Map<LineNumber, number>,
 |};
 
-// Stores, for all stacks of a thread and for one specific file, the addresses
-// in that file that are hit by each stack.
-// This can be computed once for a filtered thread, and then queried cheaply
-// as the preview selection changes.
+// Stores the addresses which are hit by each stack, for addresses belonging to
+// one specific native symbol.
+// Used to compute AddressTimings in combination with a SamplesLikeTable.
+//
+// StackAddressInfo can be computed once for a filtered thread. Then it is reused
+// for the computation of different AddressTimings as the preview selection changes.
+//
 // The order of these arrays is the same as the order of thread.stackTable;
-// the array index is a stackIndex.
+// the array index is a stackIndex. Not all stacks are guaranteed to have a useful
+// value; only stacks which are used as "self" stacks, i.e. stacks which are used
+// in thread.samples.stack or in marker stacks / allocation stacks, are required
+// to have their values computed - only these values will be accessed during the
+// AddressTimings computation.
+//
+// For stacks which are only used as prefix stack nodes, selfAddress and
+// stackAddress may be null. This is fine because their values are not accessed
+// during the AddressTimings computation.
 export type StackAddressInfo = {|
-  // An array that contains, for each stack, the address that this stack
-  // spends its self time in, in this library, or null if the self time of the
-  // stack is in a different library or if the address is not known.
+  // An array that contains, for each "self" stack, the address that this stack
+  // spends its self time in, in this native symbol, or null if the self time of
+  // the stack is in a different native symbol or if the address is not known.
+  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
+  // never referred to from a SamplesLikeTable, the value may be null.
   selfAddress: Array<Address | null>,
-  // An array that contains, for each stack, all the addresses that the frames
-  // in this stack hit in this library, or null if this stack does not hit any
-  // address in the given library.
+  // An array that contains, for each "self" stack, all the addresses that the
+  // frames in this stack hit in this native symbol, or null if this stack does
+  // not hit any address in the given native symbol.
+  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
+  // never referred to from a SamplesLikeTable, the value may be null.
   stackAddresses: Array<Set<Address> | null>,
 |};
 
@@ -351,6 +483,7 @@ export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}
   | {| +type: 'network', +threadIndex: ThreadIndex |}
   | {| +type: 'memory', +counterIndex: CounterIndex |}
+  | {| +type: 'bandwidth', +counterIndex: CounterIndex |}
   | {| +type: 'ipc', +threadIndex: ThreadIndex |}
   | {| +type: 'event-delay', +threadIndex: ThreadIndex |}
   | {| +type: 'process-cpu', +counterIndex: CounterIndex |}
@@ -478,6 +611,8 @@ export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
 export type RemoveProfileInformation = {|
   // Remove the given hidden threads if they are provided.
   +shouldRemoveThreads: Set<ThreadIndex>,
+  // Remove the given counters if they are provided.
+  +shouldRemoveCounters: Set<CounterIndex>,
   // Remove the screenshots if they are provided.
   +shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
   // Remove the full time range if StartEndRange is provided.
@@ -529,16 +664,24 @@ export type ProfileFilterPageData = {|
   favicon: string | null,
 |};
 
-/**
- * This struct contains the traced timing for each call node. The arrays are indexed
- * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
- * traced timing is computed by summing the distance between samples for a given call
- * node. See the `computeTracedTiming` for more details.
- */
-export type TracedTiming = {|
-  +self: Float32Array,
-  +running: Float32Array,
+export type CallNodeLeafAndSummary = {|
+  // This property stores the amount of unit (time, bytes, count, etc.) spent in the
+  // stacks' leaf nodes.
+  callNodeLeaf: Float32Array,
+  // The sum of absolute values in callNodeLeaf.
+  // This is used for computing the percentages displayed in the call tree.
+  rootTotalSummary: number,
 |};
+
+/**
+ * The self and total time, usually for a single call node.
+ * As with most places where the terms "self" and "total" are used, the meaning
+ * of the numbers depends on the context:
+ *  - When used for "traced" timing, the values are Milliseconds.
+ *  - Otherwise, the values are in the same unit as the sample weight type. For
+ *    example, they could be sample counts, weights, or bytes.
+ */
+export type SelfAndTotal = {| self: number, total: number |};
 
 /*
  * Event delay table that holds the pre-processed event delay values and other

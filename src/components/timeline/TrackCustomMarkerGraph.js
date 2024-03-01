@@ -7,6 +7,11 @@
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import {
+  getStrokeColor,
+  getFillColor,
+  getDotColor,
+} from 'firefox-profiler/profile-logic/graph-color';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { getCommittedRange } from 'firefox-profiler/selectors/profile';
@@ -17,28 +22,6 @@ import {
   TRACK_MARKER_DEFAULT_COLOR,
   TRACK_MARKER_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
-import {
-  BLUE_50,
-  BLUE_60,
-  GREEN_50,
-  GREEN_60,
-  GREY_50,
-  GREY_60,
-  INK_50,
-  INK_60,
-  MAGENTA_50,
-  MAGENTA_60,
-  ORANGE_50,
-  ORANGE_60,
-  PURPLE_50,
-  PURPLE_60,
-  RED_50,
-  RED_60,
-  TEAL_50,
-  TEAL_60,
-  YELLOW_50,
-  YELLOW_60,
-} from 'photon-colors';
 
 import type {
   ThreadIndex,
@@ -48,7 +31,6 @@ import type {
   IndexIntoStringTable,
   MarkerSchema,
   CollectedCustomMarkerSamples,
-  MarkerGraphColor,
   MarkerGraphType,
   MarkerIndex,
   Marker,
@@ -101,65 +83,6 @@ function _calculateUnitValue(
   return scaled * 0.85;
 }
 
-function _getStrokeColor(color: MarkerGraphColor) {
-  switch (color) {
-    case 'magenta':
-      return MAGENTA_50;
-    case 'purple':
-      return PURPLE_50;
-    case 'blue':
-      return BLUE_50;
-    case 'teal':
-      return TEAL_50;
-    case 'green':
-      return GREEN_50;
-    case 'yellow':
-      return YELLOW_50;
-    case 'red':
-      return RED_50;
-    case 'orange':
-      return ORANGE_50;
-    case 'grey':
-      return GREY_50;
-    case 'ink':
-      return INK_50;
-    default:
-      throw new Error('Unexpected marker track stroke color: ' + color);
-  }
-}
-
-function _getFillColor(color: MarkerGraphColor) {
-  // Same as stroke color with transparency.
-  return _getStrokeColor(color) + '88';
-}
-
-function _getDotColor(color: MarkerGraphColor) {
-  switch (color) {
-    case 'magenta':
-      return MAGENTA_60;
-    case 'purple':
-      return PURPLE_60;
-    case 'blue':
-      return BLUE_60;
-    case 'teal':
-      return TEAL_60;
-    case 'green':
-      return GREEN_60;
-    case 'yellow':
-      return YELLOW_60;
-    case 'red':
-      return RED_60;
-    case 'orange':
-      return ORANGE_60;
-    case 'grey':
-      return GREY_60;
-    case 'ink':
-      return INK_60;
-    default:
-      throw new Error('Unexpected marker track stroke color: ' + color);
-  }
-}
-
 /**
  * This component controls the rendering of the canvas. Every render call through
  * React triggers a new canvas render. Because of this, it's important to only pass
@@ -207,7 +130,6 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
     ctx.clearRect(0, 0, deviceWidth, deviceHeight);
 
     const deviceLineWidth = TRACK_MARKER_LINE_WIDTH * devicePixelRatio;
-    const deviceLineHalfWidth = deviceLineWidth * 0.5;
     ctx.lineWidth = deviceLineWidth;
     ctx.lineJoin = 'bevel';
 
@@ -225,10 +147,13 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
         const samples = collectedSamples.numbersPerLine[graphIndex];
         // Draw the chart.
         //
-        ctx.strokeStyle = _getStrokeColor(color || TRACK_MARKER_DEFAULT_COLOR);
+        ctx.strokeStyle = getStrokeColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
-        const getX = (marker) =>
-          Math.round((marker.start - rangeStart) * millisecondWidth);
+        const getX = (time) =>
+          Math.round((time - rangeStart) * millisecondWidth);
+        // For line graphs, ensure y is at least half the stroke's line width
+        // so that it won't be cut off the bottom edge of the graph.
+        const minY = type === 'bar' ? 0 : deviceLineWidth * 0.5;
         const getY = (i) => {
           const unitValue = _calculateUnitValue(
             type,
@@ -236,11 +161,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
             maxNumber,
             samples[i]
           );
-          // Add on half the stroke's line width so that it won't be cut
-          // off the edge of the graph.
-          return Math.round(
-            deviceHeight - deviceHeight * unitValue - deviceLineHalfWidth
-          );
+          return Math.floor(deviceHeight - deviceHeight * unitValue - minY);
         };
 
         switch (type) {
@@ -264,7 +185,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               const marker = getMarker(collectedSamples.markerIndexes[i]);
               // Create a path for the top of the chart. This is the line that
               // will have a stroke applied to it.
-              x = getX(marker);
+              x = getX(marker.start);
               y = getY(i);
               if (i === sampleStart) {
                 // This is the first iteration, only move the line, do not draw it.
@@ -276,7 +197,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
                 ctx.lineTo(x, y);
               }
               if (marker.end) {
-                x = (marker.end - rangeStart) * millisecondWidth;
+                x = getX(marker.end);
                 ctx.lineTo(x, y);
               }
             }
@@ -297,9 +218,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
               ctx.lineTo(firstX, deviceHeight);
 
               // The line from 4 to 1 will be implicitly filled in.
-              ctx.fillStyle = _getFillColor(
-                color || TRACK_MARKER_DEFAULT_COLOR
-              );
+              ctx.fillStyle = getFillColor(color || TRACK_MARKER_DEFAULT_COLOR);
               ctx.fill();
               ctx.closePath();
             }
@@ -311,7 +230,7 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
 
             for (let i = sampleStart; i < sampleEnd; i++) {
               let marker = getMarker(collectedSamples.markerIndexes[i]);
-              const x = getX(marker);
+              const x = getX(marker.start);
               let y = getY(i);
 
               // If we have multiple markers to draw on the same horizontal pixel,
@@ -320,22 +239,25 @@ class TrackCustomMarkerCanvas extends React.PureComponent<CanvasProps> {
                 const nextMarker = getMarker(
                   collectedSamples.markerIndexes[i + 1]
                 );
-                if (getX(nextMarker) !== x) {
+
+                if (
+                  getX(nextMarker.start) !== x ||
+                  getX(nextMarker.end || nextMarker.start) !==
+                    getX(marker.end || marker.start)
+                ) {
                   break;
                 }
-
                 marker = nextMarker;
                 y = Math.min(y, getY(++i));
               }
 
-              const x2 = marker.end
-                ? Math.max(
-                    x + 1,
-                    Math.round((marker.end - rangeStart) * millisecondWidth)
-                  )
-                : x + 1;
-
-              ctx.fillRect(x, y, x2 - x, deviceHeight - y);
+              // Only draw if the height is more than 0
+              if (y !== deviceHeight) {
+                const x2 = marker.end
+                  ? Math.max(x + 1, getX(marker.end))
+                  : x + 1;
+                ctx.fillRect(x, y, x2 - x, deviceHeight - y);
+              }
             }
             break;
           default:
@@ -608,7 +530,7 @@ class TrackCustomMarkerGraphImpl extends React.PureComponent<Props, State> {
         innerTrackHeight - unitValue * innerTrackHeight - halfLineWidth;
       // eslint-disable-next-line flowtype/no-weak-types
       const style: Object = { left, top };
-      style.backgroundColor = _getDotColor(color || TRACK_MARKER_DEFAULT_COLOR);
+      style.backgroundColor = getDotColor(color || TRACK_MARKER_DEFAULT_COLOR);
 
       if (marker.end) {
         let screenWidth = (width * (marker.end - marker.start)) / rangeLength;

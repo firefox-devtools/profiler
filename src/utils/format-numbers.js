@@ -237,27 +237,43 @@ export function formatMilliseconds(
 export function formatSeconds(
   time: Milliseconds,
   significantDigits: number = 5,
-  maxFractionalDigits: number = 3
+  maxFractionalDigits: number = 3,
+  precision: Milliseconds = Infinity
 ) {
-  return (
-    formatNumber(time / 1000, significantDigits, maxFractionalDigits) + 's'
-  );
+  const msPerSecond = 1000;
+  const timeInSeconds = time / msPerSecond;
+  let result = '';
+  if (precision < msPerSecond) {
+    const exponent = Math.floor(Math.log10(precision / msPerSecond));
+    const digits = Math.max(0, -exponent);
+    result = timeInSeconds.toFixed(digits);
+  } else {
+    result = formatNumber(
+      timeInSeconds,
+      significantDigits,
+      maxFractionalDigits
+    );
+  }
+  return result + 's';
 }
 
 export function formatMinutes(
   time: Milliseconds,
   significantDigits: number = 5,
-  maxFractionalDigits: number = 2
+  maxFractionalDigits: number = 2,
+  precision: Milliseconds = Infinity
 ) {
   const msPerSecond = 1000;
-  time = Math.round(time / msPerSecond) * msPerSecond;
   const msPerMinute = 60 * msPerSecond;
+  if (precision >= msPerSecond) {
+    time = Math.round(time / msPerSecond) * msPerSecond;
+  }
   const seconds = time % msPerMinute;
   return (
     formatNumber((time - seconds) / msPerMinute, significantDigits, 0) +
-    'min' +
-    (maxFractionalDigits > 0 && seconds > 0
-      ? formatSeconds(seconds, significantDigits, 0)
+    'm' +
+    ((seconds > 0 && maxFractionalDigits > 0) || precision < msPerMinute
+      ? formatSeconds(seconds, significantDigits, 0, precision)
       : '')
   );
 }
@@ -265,17 +281,20 @@ export function formatMinutes(
 export function formatHours(
   time: Milliseconds,
   significantDigits: number = 5,
-  maxFractionalDigits: number = 1
+  maxFractionalDigits: number = 1,
+  precision: Milliseconds = Infinity
 ) {
   const msPerMinute = 60 * 1000;
-  time = Math.round(time / msPerMinute) * msPerMinute;
+  if (precision >= msPerMinute) {
+    time = Math.round(time / msPerMinute) * msPerMinute;
+  }
   const msPerHour = 60 * msPerMinute;
   const minutes = time % msPerHour;
   return (
     formatNumber((time - minutes) / msPerHour, significantDigits, 0) +
     'h' +
-    (maxFractionalDigits > 0 && minutes > 0
-      ? formatMinutes(minutes, significantDigits, 0)
+    ((minutes > 0 && maxFractionalDigits > 0) || precision < msPerHour
+      ? formatMinutes(minutes, significantDigits, 0, precision)
       : '')
   );
 }
@@ -283,17 +302,20 @@ export function formatHours(
 export function formatDays(
   time: Milliseconds,
   significantDigits: number = 5,
-  maxFractionalDigits: number = 1
+  maxFractionalDigits: number = 1,
+  precision: Milliseconds = Infinity
 ) {
   const msPerHour = 60 * 60 * 1000;
-  time = Math.round(time / msPerHour) * msPerHour;
+  if (precision >= msPerHour) {
+    time = Math.round(time / msPerHour) * msPerHour;
+  }
   const msPerDay = 24 * msPerHour;
   const hours = time % msPerDay;
   return (
     formatNumber((time - hours) / msPerDay, significantDigits, 0) +
     'd' +
-    (maxFractionalDigits > 0 && hours > 0
-      ? formatHours(hours, significantDigits, 0)
+    ((hours > 0 && maxFractionalDigits > 0) || precision < msPerDay
+      ? formatHours(hours, significantDigits, 0, precision)
       : '')
   );
 }
@@ -301,28 +323,63 @@ export function formatDays(
 export function formatTimestamp(
   time: Milliseconds,
   significantDigits: number = 5,
-  maxFractionalDigits: number = 3
+  maxFractionalDigits: number = 3,
+  // precision is the minimum required precision.
+  precision: Milliseconds = Infinity
 ) {
+  if (precision !== Infinity) {
+    // Round the values to display nicer numbers when the extra precision
+    // isn't useful. (eg. show 3h52min10s instead of 3h52min14s)
+    // Only do this for values < 10s as after that we use time units that are
+    // not decimal.
+    if (precision < 10000) {
+      precision = 10 ** Math.floor(Math.log10(precision));
+    }
+    if (time > precision) {
+      time = Math.round(time / precision) * precision;
+    }
+  }
   // Format in the closest base (days, hours, minutes, seconds, milliseconds,
   // microseconds, or nanoseconds), to avoid cases where times are displayed
   // with too many leading zeroes to be useful.
-  // The Math.round call is needed to avoid showing values like '0min60s'.
-  if (Math.round(time / 1000) / 60 >= 1) {
-    // The if blocks are nested to avoid calling Math.round repeatedly for
-    // the most common case where the value will be less than 1 minute.
-    if (Math.round(time / (60 * 1000)) / 60 >= 1) {
-      if (Math.round(time / (60 * 60 * 1000)) / 24 >= 1) {
-        return formatDays(time, significantDigits, maxFractionalDigits);
+  // 59.5s is the smallest value rounded to 1min.
+  if (time >= 60 * 1000 - (precision === Infinity ? 500 : 0)) {
+    // The if blocks are nested to avoid repeated tests for the most
+    // common case where the value will be less than 1 minute.
+    // 59min59.5s is the smallest value rounded to 1h
+    if (time >= 60 * 60 * 1000 - (precision === Infinity ? 500 : 0)) {
+      // 23h59min30s is the smallest value rounded to 1d.
+      if (
+        time >=
+        24 * 60 * 60 * 1000 - (precision === Infinity ? 30 * 1000 : 0)
+      ) {
+        return formatDays(
+          time,
+          significantDigits,
+          maxFractionalDigits,
+          precision
+        );
       }
-      return formatHours(time, significantDigits, maxFractionalDigits);
+      return formatHours(
+        time,
+        significantDigits,
+        maxFractionalDigits,
+        precision
+      );
     }
-    return formatMinutes(time, significantDigits, maxFractionalDigits);
+    return formatMinutes(
+      time,
+      significantDigits,
+      maxFractionalDigits,
+      precision
+    );
   }
   if (time >= 1000) {
     return formatSeconds(
       time,
       significantDigits,
-      Number.isInteger(time / 1000) ? 0 : maxFractionalDigits
+      Number.isInteger(time / 1000) ? 0 : maxFractionalDigits,
+      precision
     );
   }
   if (time >= 1) {

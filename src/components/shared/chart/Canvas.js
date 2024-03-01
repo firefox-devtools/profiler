@@ -30,6 +30,9 @@ type Props<HoveredItem> = {|
   // Default to true. Set to false if the chart should be redrawn right away after
   // rerender.
   +drawCanvasAfterRaf?: boolean,
+
+  +onMouseMove?: (e: { nativeEvent: MouseEvent }) => mixed,
+  +onMouseLeave?: (e: { nativeEvent: MouseEvent }) => mixed,
 |};
 
 // The naming of the X and Y coordinates here correspond to the ones
@@ -223,11 +226,23 @@ export class ChartCanvas<HoveredItem> extends React.Component<
     }
   };
 
+  _onMouseLeave = (
+    event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>
+  ) => {
+    if (this.props.onMouseLeave) {
+      this.props.onMouseLeave(event);
+    }
+  };
+
   _onMouseMove = (
     event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>
   ) => {
     if (!this._canvas) {
       return;
+    }
+
+    if (this.props.onMouseMove) {
+      this.props.onMouseMove(event);
     }
 
     this._offsetX = event.nativeEvent.offsetX;
@@ -347,6 +362,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
           ref={this._takeCanvasRef}
           onMouseDown={this._onMouseDown}
           onClick={this._onClick}
+          onMouseLeave={this._onMouseLeave}
           onMouseMove={this._onMouseMove}
           onMouseOut={this._onMouseOut}
           onDoubleClick={this._onDoubleClick}

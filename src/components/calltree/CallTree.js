@@ -9,7 +9,6 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
-import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
@@ -71,7 +70,7 @@ type StateProps = {|
   +disableOverscan: boolean,
   +invertCallstack: boolean,
   +implementationFilter: ImplementationFilter,
-  +callNodeMaxDepth: number,
+  +callNodeMaxDepthPlusOne: number,
   +weightType: WeightType,
   +tableViewOptions: TableViewOptions,
 |};
@@ -246,7 +245,7 @@ class CallTreeImpl extends PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable),
+      callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode),
       context
     );
   };
@@ -255,7 +254,7 @@ class CallTreeImpl extends PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
     changeRightClickedCallNode(
       threadsKey,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
+      callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode)
     );
   };
 
@@ -266,7 +265,7 @@ class CallTreeImpl extends PureComponent<Props> {
     changeExpandedCallNodes(
       threadsKey,
       newExpandedCallNodeIndexes.map((callNodeIndex) =>
-        getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+        callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
       )
     );
   };
@@ -301,7 +300,7 @@ class CallTreeImpl extends PureComponent<Props> {
       tree,
       expandedCallNodeIndexes,
       selectedCallNodeIndex,
-      callNodeInfo: { callNodeTable },
+      callNodeInfo,
       categories,
     } = this.props;
 
@@ -321,6 +320,7 @@ class CallTreeImpl extends PureComponent<Props> {
       // This tree is empty.
       return;
     }
+    const callNodeTable = callNodeInfo.getCallNodeTable();
     newExpandedCallNodeIndexes.push(currentCallNodeIndex);
     for (let i = 0; i < maxInterestingDepth; i++) {
       const children = tree.getChildren(currentCallNodeIndex);
@@ -359,7 +359,7 @@ class CallTreeImpl extends PureComponent<Props> {
       expandedCallNodeIndexes,
       searchStringsRegExp,
       disableOverscan,
-      callNodeMaxDepth,
+      callNodeMaxDepthPlusOne,
       weightType,
       tableViewOptions,
       onTableViewOptionsChange,
@@ -383,7 +383,7 @@ class CallTreeImpl extends PureComponent<Props> {
         disableOverscan={disableOverscan}
         ref={this._takeTreeViewRef}
         contextMenuId="CallNodeContextMenu"
-        maxNodeDepth={callNodeMaxDepth}
+        maxNodeDepth={callNodeMaxDepthPlusOne}
         rowHeight={16}
         indentWidth={10}
         onKeyDown={this._onKeyDown}
@@ -417,8 +417,8 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     // Use the filtered call node max depth, rather than the preview filtered call node
     // max depth so that the width of the TreeView component is stable across preview
     // selections.
-    callNodeMaxDepth:
-      selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
+    callNodeMaxDepthPlusOne:
+      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     tableViewOptions: getCurrentTableViewOptions(state),
   }),
