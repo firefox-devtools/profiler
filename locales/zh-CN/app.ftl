@@ -142,6 +142,8 @@ CallTreeSidebar--call-node-details = 调用节点详情
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--running-time =
+    .label = 运行耗时
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
