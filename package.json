@@ -81,7 +81,7 @@
     "mixedtuplemap": "^1.0.0",
     "namedtuplemap": "^1.0.0",
     "photon-colors": "^3.3.2",
-    "query-string": "^8.2.0",
+    "query-string": "^9.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-intersection-observer": "^9.7.0",
