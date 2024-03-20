@@ -29,8 +29,8 @@ import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getMouseEvent,
-  addRootOverlayElement,
-  removeRootOverlayElement,
+  addScreenshotHoverlement,
+  removeScreenshotHoverElement,
   fireFullClick,
 } from '../fixtures/utils';
 import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
@@ -61,8 +61,8 @@ describe('timeline/TrackScreenshots', function () {
   autoMockElementSize(INITIAL_ELEMENT_SIZE);
   autoMockIntersectionObserver();
 
-  beforeEach(addRootOverlayElement);
-  afterEach(removeRootOverlayElement);
+  beforeEach(addScreenshotHoverlement);
+  afterEach(removeScreenshotHoverElement);
 
   it('matches the component snapshot', () => {
     const { container, unmount } = setup();
