@@ -426,6 +426,10 @@ type ReceiveProfileAction =
       +timelineType: TimelineType | null,
     |}
   | {|
+      +type: 'CHANGE_ACTIVE_TAB',
+      +tabID: TabID | null,
+    |}
+  | {|
       +type: 'DATA_RELOAD',
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}

@@ -328,7 +328,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function () {
   const tabID = 123123;
   const innerWindowID = 2;
 
-  function setup(ctxId, markers: ?Array<any>) {
+  function setup(withTabID, markers: ?Array<any>) {
     const profile = getProfileWithMarkers(
       markers || [
         [
@@ -381,7 +381,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function () {
     };
     const { getState, dispatch } = storeWithProfile(profile);
 
-    if (ctxId) {
+    if (withTabID) {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
