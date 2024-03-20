@@ -105,7 +105,7 @@ exports[`timeline/TrackNetwork draws differently a request and displays a toolti
       <div
         class="tooltipLabel"
       >
-        Thread
+        Track
         :
       </div>
       Empty

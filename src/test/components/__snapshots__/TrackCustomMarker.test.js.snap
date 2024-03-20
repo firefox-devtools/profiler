@@ -49,7 +49,7 @@ exports[`TrackCustomMarker has a tooltip that matches the snapshot 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
+      Track
       :
     </div>
     Empty

@@ -887,7 +887,7 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
       <div
         class="tooltipLabel"
       >
-        Thread
+        Track
         :
       </div>
       Empty

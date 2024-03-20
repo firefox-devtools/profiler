@@ -90,7 +90,7 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
         <div
           class="tooltipLabel"
         >
-          Thread
+          Track
           :
         </div>
         Empty

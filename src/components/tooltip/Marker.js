@@ -216,7 +216,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     // This is the common case.
 
     return [
-      <TooltipDetail label="Thread" key="thread">
+      <TooltipDetail label="Track" key="thread">
         {threadName}
       </TooltipDetail>,
     ];
