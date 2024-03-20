@@ -58,7 +58,7 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
           Other Pid
           :
         </div>
-        2222
+        PID: 2222
         <div
           class="tooltipLabel"
         >

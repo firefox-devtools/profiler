@@ -3329,7 +3329,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       Other Pid
       :
     </div>
-    2222
+    PID: 2222
     <div
       class="tooltipLabel"
     >
