@@ -20,6 +20,7 @@ export type Request =
   | StatusQueryRequest
   | EnableMenuButtonRequest
   | GetProfileRequest
+  | GetExternalMarkersRequest
   | GetExternalPowerTracksRequest
   | GetSymbolTableRequest
   | QuerySymbolicationApiRequest;
@@ -27,6 +28,11 @@ export type Request =
 type StatusQueryRequest = {| type: 'STATUS_QUERY' |};
 type EnableMenuButtonRequest = {| type: 'ENABLE_MENU_BUTTON' |};
 type GetProfileRequest = {| type: 'GET_PROFILE' |};
+type GetExternalMarkersRequest = {|
+  type: 'GET_EXTERNAL_MARKERS',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+|};
 type GetExternalPowerTracksRequest = {|
   type: 'GET_EXTERNAL_POWER_TRACKS',
   startTime: Milliseconds,
@@ -69,6 +75,7 @@ export type ResponseFromBrowser =
   | StatusQueryResponse
   | EnableMenuButtonResponse
   | GetProfileResponse
+  | GetExternalMarkersResponse
   | GetExternalPowerTracksResponse
   | GetSymbolTableResponse
   | QuerySymbolicationApiResponse;
@@ -91,10 +98,15 @@ type StatusQueryResponse = {|
   //   Shipped in Firefox 121.
   //   Adds support for the following message types:
   //    - GET_EXTERNAL_POWER_TRACKS
+  // Version 3:
+  //   Shipped in Firefox 125.
+  //   Adds support for the following message types:
+  //    - GET_EXTERNAL_MARKERS
   version?: number,
 |};
 type EnableMenuButtonResponse = void;
 type GetProfileResponse = ArrayBuffer | MixedObject;
+type GetExternalMarkersResponse = MixedObject[];
 type GetExternalPowerTracksResponse = MixedObject[];
 type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
@@ -110,6 +122,9 @@ declare function _sendMessageWithResponse(
 declare function _sendMessageWithResponse(
   GetProfileRequest
 ): Promise<GetProfileResponse>;
+declare function _sendMessageWithResponse(
+  GetExternalMarkersRequest
+): Promise<GetExternalMarkersResponse>;
 declare function _sendMessageWithResponse(
   GetExternalPowerTracksRequest
 ): Promise<GetExternalPowerTracksResponse>;
@@ -171,6 +186,17 @@ export async function getProfileViaWebChannel(): Promise<
 > {
   return _sendMessageWithResponse({
     type: 'GET_PROFILE',
+  });
+}
+
+export async function getExternalMarkersViaWebChannel(
+  startTime: Milliseconds,
+  endTime: Milliseconds
+): Promise<MixedObject[]> {
+  return _sendMessageWithResponse({
+    type: 'GET_EXTERNAL_MARKERS',
+    startTime,
+    endTime,
   });
 }
 

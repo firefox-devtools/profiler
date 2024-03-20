@@ -6,6 +6,7 @@
 import { oneLine } from 'common-tags';
 import {
   getProfileViaWebChannel,
+  getExternalMarkersViaWebChannel,
   getExternalPowerTracksViaWebChannel,
   getSymbolTableViaWebChannel,
   queryWebChannelVersionViaWebChannel,
@@ -48,6 +49,11 @@ export interface BrowserConnection {
     onThirtySecondTimeout: () => void,
   |}): Promise<ArrayBuffer | MixedObject>;
 
+  getExternalMarkers(
+    startTime: Milliseconds,
+    endTime: Milliseconds
+  ): Promise<MixedObject>;
+
   getExternalPowerTracks(
     startTime: Milliseconds,
     endTime: Milliseconds
@@ -74,11 +80,13 @@ export interface BrowserConnection {
 class BrowserConnectionImpl implements BrowserConnection {
   _webChannelSupportsGetProfileAndSymbolication: boolean;
   _webChannelSupportsGetExternalPowerTracks: boolean;
+  _webChannelSupportsGetExternalMarkers: boolean;
   _geckoProfiler: $GeckoProfiler | void;
 
   constructor(webChannelVersion: number) {
     this._webChannelSupportsGetProfileAndSymbolication = webChannelVersion >= 1;
     this._webChannelSupportsGetExternalPowerTracks = webChannelVersion >= 2;
+    this._webChannelSupportsGetExternalMarkers = webChannelVersion >= 3;
   }
 
   // Only called when we must obtain the profile from the browser, i.e. if we
@@ -110,6 +118,18 @@ class BrowserConnectionImpl implements BrowserConnection {
     const profile = await geckoProfiler.getProfile();
     clearTimeout(timeoutId);
     return profile;
+  }
+
+  async getExternalMarkers(
+    startTime: Milliseconds,
+    endTime: Milliseconds
+  ): Promise<MixedObject> {
+    // On Firefox 125 and above, we can get additional global markers recorded outside the browser.
+    if (this._webChannelSupportsGetExternalMarkers) {
+      return getExternalMarkersViaWebChannel(startTime, endTime);
+    }
+
+    return [];
   }
 
   async getExternalPowerTracks(

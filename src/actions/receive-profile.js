@@ -7,6 +7,7 @@ import { oneLine } from 'common-tags';
 import queryString from 'query-string';
 import JSZip from 'jszip';
 import {
+  insertExternalMarkersIntoProfile,
   insertExternalPowerCountersIntoProfile,
   processGeckoProfile,
   unserializeProfileOfArbitraryFormat,
@@ -1049,11 +1050,29 @@ export function retrieveProfileFromBrowser(
         await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
       const meta = unpackedProfile.meta;
       if (meta.configuration && meta.configuration.features.includes('power')) {
-        const tracks = await browserConnection.getExternalPowerTracks(
-          meta.startTime + meta.profilingStartTime,
-          meta.startTime + meta.profilingEndTime
-        );
-        insertExternalPowerCountersIntoProfile(tracks, unpackedProfile);
+        try {
+          await Promise.all([
+            browserConnection
+              .getExternalPowerTracks(
+                meta.startTime + meta.profilingStartTime,
+                meta.startTime + meta.profilingEndTime
+              )
+              .then((tracks) =>
+                insertExternalPowerCountersIntoProfile(tracks, unpackedProfile)
+              ),
+            browserConnection
+              .getExternalMarkers(
+                meta.startTime + meta.profilingStartTime,
+                meta.startTime + meta.profilingEndTime
+              )
+              .then((markers) =>
+                insertExternalMarkersIntoProfile(markers, unpackedProfile)
+              ),
+          ]);
+        } catch (error) {
+          // Make failures in adding external data non-fatal.
+          console.error(error);
+        }
       }
       const profile = processGeckoProfile(unpackedProfile);
       await dispatch(loadProfile(profile, { browserConnection }, initialLoad));
