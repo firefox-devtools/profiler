@@ -2124,6 +2124,7 @@ export function handleCallNodeTransformShortcut(
           addTransformToStack(threadsKey, {
             type: 'focus-category',
             category,
+            implementation,
           })
         );
         break;
