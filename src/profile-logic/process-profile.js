@@ -70,6 +70,7 @@ import type {
   GeckoThread,
   GeckoMarkers,
   GeckoMarkerStruct,
+  GeckoMarkerTuple,
   GeckoFrameStruct,
   GeckoSampleStruct,
   GeckoStackStruct,
@@ -84,6 +85,7 @@ import type {
   GCMajorAborted,
   PhaseTimes,
   SerializableProfile,
+  ExternalMarkersData,
   MarkerSchema,
   ProfileMeta,
   PageList,
@@ -1377,6 +1379,83 @@ function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
   }
 
   return combinedSchemas;
+}
+
+export function insertExternalMarkersIntoProfile(
+  externalMarkers: ExternalMarkersData,
+  geckoProfile: GeckoProfile
+): void {
+  for (const schema of externalMarkers.markerSchema) {
+    const existingSchema = geckoProfile.meta.markerSchema.find(
+      (s) => s.name === schema.name
+    );
+    if (existingSchema) {
+      if (JSON.stringify(schema) !== JSON.stringify(existingSchema)) {
+        console.error(
+          `Existing marker schema for ${schema.name} doesn't match`,
+          schema,
+          existingSchema
+        );
+      }
+    } else {
+      geckoProfile.meta.markerSchema.push(schema);
+    }
+  }
+
+  const categoryMap = new Map();
+  for (let i = 0; i < externalMarkers.categories.length; ++i) {
+    const cat = externalMarkers.categories[i];
+    let index = geckoProfile.meta.categories.findIndex(
+      (c) => c.name === cat.name
+    );
+    if (index === -1) {
+      index = geckoProfile.meta.categories.push(cat) - 1;
+    }
+    categoryMap.set(i, index);
+  }
+
+  const mainThread = geckoProfile.threads.find(
+    (thread) => thread.name === 'GeckoMain' && thread.processType === 'default'
+  );
+  if (!mainThread) {
+    throw new Error('Could not find the main thread in the gecko profile');
+  }
+
+  const { data, schema } = externalMarkers.markers;
+
+  for (const prop of Object.keys(mainThread.markers.schema)) {
+    if (!(prop in schema) || mainThread.markers.schema[prop] !== schema[prop]) {
+      throw new Error(
+        'Marker table schema in the gecko profile and the external marker data do not match'
+      );
+    }
+  }
+
+  for (const marker of data) {
+    const name = marker[schema.name];
+    let stringId = mainThread.stringTable.indexOf(name);
+    if (stringId === -1) {
+      stringId = mainThread.stringTable.length;
+      mainThread.stringTable.push(name);
+    }
+    // The ExternalMarkerTuple and GeckoMarkerTuple types are the same except
+    // for the marker name that is represented as a string in the former and a
+    // string table index in the latter.
+    const geckoMarker = ((marker: any): GeckoMarkerTuple);
+    geckoMarker[schema.name] = stringId;
+    if (geckoMarker[schema.startTime]) {
+      geckoMarker[schema.startTime] =
+        geckoMarker[schema.startTime] + geckoProfile.meta.profilingStartTime;
+    }
+    if (geckoMarker[schema.endTime]) {
+      geckoMarker[schema.endTime] =
+        geckoMarker[schema.endTime] + geckoProfile.meta.profilingStartTime;
+    }
+    geckoMarker[schema.category] =
+      categoryMap.get(geckoMarker[schema.category]) || 0;
+
+    mainThread.markers.data.push(geckoMarker);
+  }
 }
 
 export function insertExternalPowerCountersIntoProfile(
