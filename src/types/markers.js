@@ -62,6 +62,8 @@ export type MarkerFormatType =
   // use it for time information.
   // "Label: 52.23, 0.0054, 123,456.78"
   | 'decimal'
+  | 'pid'
+  | 'tid'
   | 'list'
   | {| type: 'table', columns: TableColumnFormat[] |};
 

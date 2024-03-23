@@ -1097,8 +1097,8 @@ describe('TooltipMarker', function () {
         />
       </Provider>
     );
-    const threadTitle = screen.getByText('Thread:');
-    const threadInfo = threadTitle.nextSibling;
-    expect(threadInfo).toHaveTextContent(tab2Domain);
+    const trackTitle = screen.getByText('Track:');
+    const trackInfo = trackTitle.nextSibling;
+    expect(trackInfo).toHaveTextContent(tab2Domain);
   });
 });

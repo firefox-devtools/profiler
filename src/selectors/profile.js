@@ -864,6 +864,23 @@ export const getThreadIdToNameMap: Selector<Map<Tid, string>> = createSelector(
   }
 );
 
+export const getProcessIdToNameMap: Selector<Map<Pid, string>> = createSelector(
+  getThreads,
+  (threads) => {
+    const processIdToNameMap = new Map();
+    for (const thread of threads) {
+      if (!thread.isMainThread || !thread.pid) {
+        continue;
+      }
+      processIdToNameMap.set(
+        thread.pid,
+        getFriendlyThreadName(threads, thread)
+      );
+    }
+    return processIdToNameMap;
+  }
+);
+
 // Gets whether this profile contains private information.
 export const getContainsPrivateBrowsingInformation: Selector<boolean> =
   createSelector(getProfile, (profile) => {

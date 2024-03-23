@@ -343,7 +343,7 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
       <div
         class="tooltipLabel"
       >
-        Thread
+        Track
         :
       </div>
       Empty
@@ -1353,7 +1353,7 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
       <div
         class="tooltipLabel"
       >
-        Thread
+        Track
         :
       </div>
       Empty
