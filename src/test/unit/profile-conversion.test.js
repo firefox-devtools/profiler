@@ -221,6 +221,23 @@ describe('converting Google Chrome profile', function () {
     expect(profile).toMatchSnapshot();
   });
 
+  it('successfully imports a profile with DevTools timestamp in filename', async function () {
+    const fs = require('fs');
+    const profileFilename =
+      'src/test/fixtures/upgrades/hello.cjs-20231120T211435.cpuprofile';
+    const json = fs.readFileSync(profileFilename, 'utf8');
+    const profile = await unserializeProfileOfArbitraryFormat(
+      json,
+      profileFilename
+    );
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
+    checkProfileContainsUniqueTid(profile);
+    expect(profile).toMatchSnapshot();
+  });
+
   it('successfully imports a profile using the chrome tracing format', async function () {
     const fs = require('fs');
     const zlib = require('zlib');

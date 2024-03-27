@@ -1813,7 +1813,8 @@ function attemptToFixProcessedProfileThroughMutation(
  *  - ART trace: input must be ArrayBuffer
  */
 export async function unserializeProfileOfArbitraryFormat(
-  arbitraryFormat: mixed
+  arbitraryFormat: mixed,
+  profileUrl?: string
 ): Promise<Profile> {
   try {
     // We used to use `instanceof ArrayBuffer`, but this doesn't work when the
@@ -1859,7 +1860,10 @@ export async function unserializeProfileOfArbitraryFormat(
       return _unserializeProfile(processedProfile);
     }
 
-    const processedChromeProfile = attemptToConvertChromeProfile(json);
+    const processedChromeProfile = attemptToConvertChromeProfile(
+      json,
+      profileUrl
+    );
     if (processedChromeProfile) {
       return processedChromeProfile;
     }
