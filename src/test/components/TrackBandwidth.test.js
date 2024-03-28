@@ -209,6 +209,6 @@ describe('TrackBandwidth', function () {
     );
     expect(
       screen.getByText(/current selection:/).nextSibling
-    ).toHaveTextContent('4.77MB\u2069 (\u20680.96\u2069 g CO₂e)');
+    ).toHaveTextContent('4.77MB\u2069 (\u20680.95\u2069 g CO₂e)');
   });
 });
