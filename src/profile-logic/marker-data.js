@@ -128,32 +128,41 @@ export function getSearchFilteredMarkerIndexes(
   // Need to assign it to a constant variable so Flow doesn't complain about
   // passing it inside a function below.
   const regExp = searchRegExp;
+  function test(value, key) {
+    // Reset regexp for each iteration. Otherwise state from previous
+    // iterations can cause matches to fail if the search is global or
+    // sticky.
+    regExp.lastIndex = 0;
+
+    return (
+      regExp.test(value) ||
+      (!regExp.test(key + ':') && // avoid matching the key
+        // (eg. searching for 'me' should not match all markers,
+        //  even though they all have a 'name:' field).
+        regExp.test(key + ':' + value))
+    );
+  }
+
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
     const marker = getMarker(markerIndex);
     const { data, name, category } = marker;
 
-    // Reset regexp for each iteration. Otherwise state from previous
-    // iterations can cause matches to fail if the search is global or
-    // sticky.
-
-    regExp.lastIndex = 0;
-
     if (categoryList[category] !== undefined) {
       const markerCategory = categoryList[category].name;
-      if (regExp.test(markerCategory)) {
+      if (test(markerCategory, 'cat')) {
         newMarkers.push(markerIndex);
         continue;
       }
     }
 
-    if (regExp.test(name)) {
+    if (test(name, 'name')) {
       newMarkers.push(markerIndex);
       continue;
     }
 
     if (data && typeof data === 'object') {
-      if (regExp.test(data.type)) {
+      if (test(data.type, 'type')) {
         // Check the type of the marker payload first.
         newMarkers.push(markerIndex);
         continue;
@@ -167,7 +176,7 @@ export function getSearchFilteredMarkerIndexes(
       );
       if (
         markerSchema &&
-        markerPayloadMatchesSearch(markerSchema, marker, regExp)
+        markerPayloadMatchesSearch(markerSchema, marker, test)
       ) {
         newMarkers.push(markerIndex);
         continue;
