@@ -46,6 +46,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { MarkerRegExps } from '../utils/string';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
@@ -119,28 +120,33 @@ export function getSearchFilteredMarkerIndexes(
   getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
-  searchRegExp: RegExp | null,
+  searchRegExps: MarkerRegExps | null,
   categoryList: CategoryList
 ): MarkerIndex[] {
-  if (!searchRegExp) {
+  if (!searchRegExps) {
     return markerIndexes;
   }
   // Need to assign it to a constant variable so Flow doesn't complain about
   // passing it inside a function below.
-  const regExp = searchRegExp;
+  const regExps = searchRegExps;
   function test(value, key) {
+    key = key.toLowerCase();
+    const fieldRegexp = regExps.fieldMap.get(key);
+    const found =
+      (regExps.generic ? regExps.generic.test(value) : false) ||
+      (fieldRegexp ? fieldRegexp.test(value) : false);
+
     // Reset regexp for each iteration. Otherwise state from previous
     // iterations can cause matches to fail if the search is global or
     // sticky.
-    regExp.lastIndex = 0;
+    if (regExps.generic) {
+      regExps.generic.lastIndex = 0;
+    }
+    if (fieldRegexp) {
+      fieldRegexp.lastIndex = 0;
+    }
 
-    return (
-      regExp.test(value) ||
-      (!regExp.test(key + ':') && // avoid matching the key
-        // (eg. searching for 'me' should not match all markers,
-        //  even though they all have a 'name:' field).
-        regExp.test(key + ':' + value))
-    );
+    return found;
   }
 
   const newMarkers: MarkerIndex[] = [];
