@@ -106,14 +106,53 @@ export const stringsToRegExp = (strings: string[] | null): RegExp | null => {
     return null;
   }
 
-  const regexpStr = strings
-    .map((string) => {
-      const prefixMatch = string.match(/^([a-z0-1]+):(.+)/i);
-      if (prefixMatch) {
-        return prefixMatch[1] + ':.*' + escapeStringRegexp(prefixMatch[2]);
-      }
-      return escapeStringRegexp(string);
-    })
-    .join('|');
+  const regexpStr = strings.map(escapeStringRegexp).join('|');
   return new RegExp(regexpStr, 'gi');
+};
+
+export type MarkerRegExps = {
+  generic: RegExp | null,
+  fieldMap: Map<string, RegExp>,
+};
+
+/**
+ * Concatenate an array of strings into a RegExp that matches on all
+ * the strings.
+ */
+export const stringsToMarkerRegExps = (
+  strings: string[] | null
+): MarkerRegExps | null => {
+  if (!strings || !strings.length) {
+    return null;
+  }
+
+  const fieldStrings = new Map();
+  const genericStrings = [];
+  for (const string of strings) {
+    const prefixMatch = string.match(/^([a-z0-1]+):(.+)/i);
+    if (prefixMatch) {
+      // This is a key-value pair that will only be matched for a specific field.
+      let fieldStrs = fieldStrings.get(prefixMatch[1]);
+      if (!fieldStrs) {
+        fieldStrs = [];
+        fieldStrings.set(prefixMatch[1], fieldStrs);
+      }
+      fieldStrs.push(prefixMatch[2]);
+    } else {
+      genericStrings.push(string);
+    }
+  }
+
+  const fieldMap = new Map();
+  for (const [field, strings] of fieldStrings) {
+    fieldMap.set(field, new RegExp(strings.join('|'), 'gi'));
+  }
+
+  return {
+    generic:
+      genericStrings.length > 0
+        ? new RegExp(genericStrings.join('|'), 'gi')
+        : null,
+    fieldMap,
+  };
 };

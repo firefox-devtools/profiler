@@ -10,7 +10,11 @@ import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
-import { splitSearchString, stringsToRegExp } from '../utils/string';
+import {
+  splitSearchString,
+  stringsToRegExp,
+  stringsToMarkerRegExps,
+} from '../utils/string';
 import { isLocalURL } from '../utils/url';
 
 import type {
@@ -36,6 +40,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
+import type { MarkerRegExps } from '../utils/string';
 
 import urlStateReducer from '../reducers/url-state';
 import { formatMetaInfoString } from '../profile-logic/profile-metainfo';
@@ -202,11 +207,11 @@ export const getSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
   stringsToRegExp
 );
 
-export const getMarkersSearchStringsAsRegExp: Selector<RegExp | null> =
-  createSelector(getMarkersSearchStrings, stringsToRegExp);
+export const getMarkersSearchStringsAsRegExp: Selector<MarkerRegExps | null> =
+  createSelector(getMarkersSearchStrings, stringsToMarkerRegExps);
 
-export const getNetworkSearchStringsAsRegExp: Selector<RegExp | null> =
-  createSelector(getNetworkSearchStrings, stringsToRegExp);
+export const getNetworkSearchStringsAsRegExp: Selector<MarkerRegExps | null> =
+  createSelector(getNetworkSearchStrings, stringsToMarkerRegExps);
 
 // Pre-allocate an array to help with strict equality tests in the selectors.
 const EMPTY_TRANSFORM_STACK = [];
