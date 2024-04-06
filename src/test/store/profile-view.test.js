@@ -1167,6 +1167,105 @@ describe('actions/ProfileView', function () {
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
     });
+
+    it('filters the markers by specified fields', function () {
+      const profile = getProfileWithMarkers([
+        [
+          'a',
+          0,
+          null,
+          {
+            type: 'DOMEvent',
+            latency: 1001,
+            eventType: 'mousedown',
+          },
+        ],
+        [
+          'b',
+          1002,
+          1022,
+          {
+            type: 'UserTiming',
+            name: 'mark-1',
+            entryType: 'mark',
+          },
+        ],
+        ['c', 2, null],
+        [
+          'd',
+          1050,
+          1100,
+          {
+            type: 'UserTiming',
+            name: 'clic',
+            entryType: 'measure',
+          },
+        ],
+      ]);
+      // Set the category to DOM for the marker 'a'.
+      profile.threads[0].markers.category[0] = ensureExists(
+        profile.meta.categories
+      ).findIndex((c) => c.name === 'DOM');
+
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(4);
+
+      // Tests searching for the marker name or the name of usertiming markers.
+      dispatch(ProfileView.changeMarkersSearchString('name:a'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      let markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
+
+      // Tests searching for the DOMEvent type
+      dispatch(ProfileView.changeMarkersSearchString('type:dom'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+
+      // Tests searching for the UserTiming type, with a string that isn't a prefix
+      dispatch(ProfileView.changeMarkersSearchString('type:timing'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('d')).toBeTruthy();
+
+      // Tests searching in the category.
+      dispatch(ProfileView.changeMarkersSearchString('cat:dom'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+
+      // This tests searching in all searchable field.
+      // The 'c' in 'cat:' should not be matched.
+      dispatch(ProfileView.changeMarkersSearchString('c'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('c')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('d')).toBeTruthy();
+
+      // Search for a specific field or the data payload.
+      dispatch(ProfileView.changeMarkersSearchString('eventtype:down'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+    });
   });
 
   describe('changeNetworkSearchString', function () {
