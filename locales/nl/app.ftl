@@ -182,6 +182,46 @@ CallTree--inlining-badge = (inline geplaatst)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Selecteer een node om informatie erover te tonen.
+CallTreeSidebar--call-node-details = Details aanroepnode
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Gevolgde looptijd
+CallTreeSidebar--traced-self-time =
+    .label = Gevolgde eigen tijd
+CallTreeSidebar--running-time =
+    .label = Looptijd
+CallTreeSidebar--self-time =
+    .label = Eigen tijd
+CallTreeSidebar--running-samples =
+    .label = Lopende samples
+CallTreeSidebar--self-samples =
+    .label = Eigen samples
+CallTreeSidebar--running-size =
+    .label = Omvang lopend
+CallTreeSidebar--self-size =
+    .label = Eigen omvang
+CallTreeSidebar--categories = Categorieën
+CallTreeSidebar--implementation = Implementatie
+CallTreeSidebar--running-milliseconds = Lopend in milliseconden
+CallTreeSidebar--running-sample-count = Aantal samples lopend
+CallTreeSidebar--running-bytes = Lopend in bytes
+CallTreeSidebar--self-milliseconds = Eigen in milliseconden
+CallTreeSidebar--self-sample-count = Aantal samples eigen
+CallTreeSidebar--self-bytes = Eigen in bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
