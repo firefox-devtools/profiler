@@ -105,6 +105,15 @@ export const stringsToRegExp = (strings: string[] | null): RegExp | null => {
   if (!strings || !strings.length) {
     return null;
   }
-  const regexpStr = strings.map(escapeStringRegexp).join('|');
+
+  const regexpStr = strings
+    .map((string) => {
+      const prefixMatch = string.match(/^([a-z0-1]+):(.+)/i);
+      if (prefixMatch) {
+        return prefixMatch[1] + ':.*' + escapeStringRegexp(prefixMatch[2]);
+      }
+      return escapeStringRegexp(string);
+    })
+    .join('|');
   return new RegExp(regexpStr, 'gi');
 };

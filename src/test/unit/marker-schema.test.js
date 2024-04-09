@@ -271,6 +271,8 @@ describe('marker schema formatting', function () {
       ['percentage', 0.123456789],
       ['percentage', 1234.56789],
       ['percentage', 0.000123456],
+      ['pid', '2322'],
+      ['tid', '2427'],
       ['unique-string', 0], // Should be "IPC Message", see "stringTable" in "applyLabel" fn
       ['unique-string', 1], // Should be "MouseDown Event", see "stringTable" in "applyLabel" fn
       ['unique-string', null], // Should be "(empty)"
@@ -357,6 +359,8 @@ describe('marker schema formatting', function () {
         "percentage - 12%",
         "percentage - 123,457%",
         "percentage - 0.0%",
+        "pid - PID: 2322",
+        "tid - TID: 2427",
         "unique-string - IPC Message",
         "unique-string - MouseDown Event",
         "unique-string - (empty)",

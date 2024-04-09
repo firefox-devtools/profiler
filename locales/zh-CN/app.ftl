@@ -142,6 +142,30 @@ CallTreeSidebar--call-node-details = 调用节点详情
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = 跟踪所得运行耗时
+CallTreeSidebar--traced-self-time =
+    .label = 跟踪所得自身耗时
+CallTreeSidebar--running-time =
+    .label = 运行耗时
+CallTreeSidebar--self-time =
+    .label = 自身耗时
+CallTreeSidebar--running-samples =
+    .label = 运行样本
+CallTreeSidebar--self-samples =
+    .label = 自身样本
+CallTreeSidebar--running-size =
+    .label = 运行大小
+CallTreeSidebar--self-size =
+    .label = 自身大小
+CallTreeSidebar--categories = 类别
+CallTreeSidebar--implementation = 实现
+CallTreeSidebar--running-milliseconds = 运行毫秒数
+CallTreeSidebar--running-sample-count = 运行样本数
+CallTreeSidebar--running-bytes = 运行字节数
+CallTreeSidebar--self-milliseconds = 自身毫秒数
+CallTreeSidebar--self-sample-count = 自身样本数
+CallTreeSidebar--self-bytes = 自身字节数
 
 ## CompareHome
 ## This is used in the page to compare two profiles.

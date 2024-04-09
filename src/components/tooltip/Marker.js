@@ -19,6 +19,7 @@ import {
   getInnerWindowIDToPageMap,
   getZeroAt,
   getThreadIdToNameMap,
+  getProcessIdToNameMap,
   getThreadSelectorsFromThreadsKey,
 } from 'firefox-profiler/selectors';
 
@@ -52,6 +53,7 @@ import type {
   MarkerIndex,
   InnerWindowID,
   Page,
+  Pid,
   Tid,
 } from 'firefox-profiler/types';
 
@@ -93,6 +95,7 @@ type StateProps = {|
   +innerWindowIDToPageMap: Map<InnerWindowID, Page> | null,
   +zeroAt: Milliseconds,
   +threadIdToNameMap: Map<Tid, string>,
+  +processIdToNameMap: Map<Pid, string>,
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: (MarkerIndex) => string,
   +categories: CategoryList,
@@ -213,7 +216,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     // This is the common case.
 
     return [
-      <TooltipDetail label="Thread" key="thread">
+      <TooltipDetail label="Track" key="thread">
         {threadName}
       </TooltipDetail>,
     ];
@@ -224,7 +227,13 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * properties that are difficult to represent with the Schema.
    */
   _renderMarkerDetails(): TooltipDetailComponent[] {
-    const { marker, markerSchemaByName, thread } = this.props;
+    const {
+      marker,
+      markerSchemaByName,
+      thread,
+      threadIdToNameMap,
+      processIdToNameMap,
+    } = this.props;
     const data = marker.data;
     const details: TooltipDetailComponent[] = [];
 
@@ -255,7 +264,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                       schema.name,
                       format,
                       value,
-                      thread.stringTable
+                      thread.stringTable,
+                      threadIdToNameMap,
+                      processIdToNameMap
                     )}
                   </TooltipDetail>
                 );
@@ -524,6 +535,7 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
       innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
       zeroAt: getZeroAt(state),
       threadIdToNameMap: getThreadIdToNameMap(state),
+      processIdToNameMap: getProcessIdToNameMap(state),
       markerSchemaByName: getMarkerSchemaByName(state),
       getMarkerLabel: selectors.getMarkerTooltipLabelGetter(state),
       categories: getCategories(state),

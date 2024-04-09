@@ -46,17 +46,39 @@ export type GeckoMarkerTuple = [
   MarkerPayload_Gecko | null,
 ];
 
+type GeckoMarkerSchema = {
+  name: 0,
+  startTime: 1,
+  endTime: 2,
+  phase: 3,
+  category: 4,
+  data: 5,
+};
+
 export type GeckoMarkers = {
-  schema: {
-    name: 0,
-    startTime: 1,
-    endTime: 2,
-    phase: 3,
-    category: 4,
-    data: 5,
-  },
+  schema: GeckoMarkerSchema,
   data: Array<GeckoMarkerTuple>,
 };
+
+export type ExternalMarkerTuple = [
+  string,
+  Milliseconds | null,
+  Milliseconds | null,
+  MarkerPhase,
+  IndexIntoCategoryList,
+  MarkerPayload_Gecko | null,
+];
+
+export type ExternalMarkers = {
+  schema: GeckoMarkerSchema,
+  data: Array<ExternalMarkerTuple>,
+};
+
+export type ExternalMarkersData = {|
+  markerSchema: MarkerSchema[],
+  categories: CategoryList,
+  markers: ExternalMarkers,
+|};
 
 /**
  * These structs aren't very DRY, but it is a simple and complete approach.

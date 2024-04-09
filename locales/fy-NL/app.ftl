@@ -182,6 +182,46 @@ CallTree--inlining-badge = (inline pleatst)
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Selektearje in node om ynformaasje oer te toanen.
+CallTreeSidebar--call-node-details = Details oanropnode
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Folge rintiid
+CallTreeSidebar--traced-self-time =
+    .label = Folge eigen tiid
+CallTreeSidebar--running-time =
+    .label = Rintiid
+CallTreeSidebar--self-time =
+    .label = Eigen tiid
+CallTreeSidebar--running-samples =
+    .label = Rinnende samples
+CallTreeSidebar--self-samples =
+    .label = Eigen samples
+CallTreeSidebar--running-size =
+    .label = Omfang rinnend
+CallTreeSidebar--self-size =
+    .label = Eigen omfang
+CallTreeSidebar--categories = Kategoryen
+CallTreeSidebar--implementation = Ymplemintaasje
+CallTreeSidebar--running-milliseconds = Rinnend yn millisekonden
+CallTreeSidebar--running-sample-count = Tal samples rinnend
+CallTreeSidebar--running-bytes = Rinnend yn bytes
+CallTreeSidebar--self-milliseconds = Eigen yn milisekonden
+CallTreeSidebar--self-sample-count = Tal samples eigen
+CallTreeSidebar--self-bytes = Eigen yn bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.

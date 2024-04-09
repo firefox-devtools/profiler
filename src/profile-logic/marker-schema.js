@@ -23,6 +23,8 @@ import type {
   Marker,
   MarkerIndex,
   MarkerPayload,
+  Tid,
+  Pid,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
@@ -64,7 +66,7 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
       {
         key: 'otherPid',
         label: 'Other Pid',
-        format: 'string',
+        format: 'pid',
         searchable: true,
       },
     ],
@@ -413,7 +415,9 @@ export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
   value: any,
-  stringTable: UniqueStringArray
+  stringTable: UniqueStringArray,
+  threadIdToNameMap?: Map<Tid, string>,
+  processIdToNameMap?: Map<Pid, string>
 ): string {
   if (value === undefined || value === null) {
     console.warn(
@@ -450,7 +454,9 @@ export function formatFromMarkerSchema(
               markerType,
               format || 'string',
               cell,
-              stringTable
+              stringTable,
+              threadIdToNameMap,
+              processIdToNameMap
             );
           });
         });
@@ -490,6 +496,14 @@ export function formatFromMarkerSchema(
       return formatNumber(value);
     case 'percentage':
       return formatPercent(value);
+    case 'pid':
+      return processIdToNameMap && processIdToNameMap.has(value)
+        ? `${ensureExists(processIdToNameMap.get(value))} (${value})`
+        : `PID: ${value}`;
+    case 'tid':
+      return threadIdToNameMap && threadIdToNameMap.has(value)
+        ? `${ensureExists(threadIdToNameMap.get(value))} (${value})`
+        : `TID: ${value}`;
     case 'list':
       if (!(value instanceof Array)) {
         throw new Error('Expected an array for list format');
@@ -521,14 +535,23 @@ export function formatMarkupFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
   value: any,
-  stringTable: UniqueStringArray
+  stringTable: UniqueStringArray,
+  threadIdToNameMap?: Map<Tid, string>,
+  processIdToNameMap?: Map<Pid, string>
 ): React.Element<any> | string {
   if (value === undefined || value === null) {
     console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
     return '(empty)';
   }
   if (format !== 'url' && typeof format !== 'object' && format !== 'list') {
-    return formatFromMarkerSchema(markerType, format, value, stringTable);
+    return formatFromMarkerSchema(
+      markerType,
+      format,
+      value,
+      stringTable,
+      threadIdToNameMap,
+      processIdToNameMap
+    );
   }
   if (typeof format === 'object') {
     switch (format.type) {
@@ -569,7 +592,9 @@ export function formatMarkupFromMarkerSchema(
                             markerType,
                             columns[i].type || 'string',
                             cell,
-                            stringTable
+                            stringTable,
+                            threadIdToNameMap,
+                            processIdToNameMap
                           )}
                         </td>
                       );
@@ -633,17 +658,12 @@ export function formatMarkupFromMarkerSchema(
 export function markerPayloadMatchesSearch(
   markerSchema: MarkerSchema,
   marker: Marker,
-  searchRegExp: RegExp
+  testFun: (string, string) => boolean
 ): boolean {
   const { data } = marker;
   if (!data) {
     return false;
   }
-
-  // Reset regexp for each marker. Otherwise state from previous
-  // usages can cause matches to fail if the search is global or
-  // sticky.
-  searchRegExp.lastIndex = 0;
 
   // Check if searchable fields match the search regular expression.
   for (const payloadField of markerSchema.data) {
@@ -653,7 +673,7 @@ export function markerPayloadMatchesSearch(
         continue;
       }
 
-      if (searchRegExp.test(value)) {
+      if (testFun(value, payloadField.key)) {
         return true;
       }
     }

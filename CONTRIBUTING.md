@@ -158,12 +158,11 @@ and all individual commits. This is the best default choice, and the recommended
 choice if the PR is composed of more than 1 commit and they're all well split up
 in logical chunks.
 
-When creating a merge commit, it's important that you change the merge commit's
-title. It should read something like:
+When creating a merge commit, github will automatically use the pull request
+title as the commit title, but please edit it where needed. It should look like
+this:
 
-> <Short description of what changes in this PR, can often be the PR title> (Merge PR #XXX)
-
-Note the words `Merge PR` before the pull request number.
+> <Short description of what changes in this PR, can often be the PR title> (#XXX)
 
 You can change the title if necessary. You can also add more information to
 the commit message, and possibly add `Fixes #XXX`.
@@ -176,15 +175,13 @@ information but one. This is recommended if the PR is composed of only one
 commit, or several commits that aren't independent (which can be the case when
 the contributor is new to the git system).
 
-When creating a squashed commit, github will automatically use the pull request
-title as the commit title, but please edit it where needed. It should look like
-this:
+Similarly, when creating a squashed commit, github will automatically use the
+pull request title as the commit title, but please edit it where needed. It
+should look like this:
 
-> <Short description of what changes in this PR, can often be the PR title> (PR #XXX)
+> <Short description of what changes in this PR, can often be the PR title> (#XXX)
 
-Note the word `PR` before the pull request's number.
-
-Again you can edit the commit log if necessary, and possibly add `Fixes #XXX`.
+Again you can edit the commit message if necessary, and possibly add `Fixes #XXX`.
 
 ## Learning more
 

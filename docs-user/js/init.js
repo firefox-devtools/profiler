@@ -7,5 +7,5 @@ window.$docsify = {
   subMaxLevel: 2,
   // Photon blue-50
   themeColor: '#0a84ff',
-  noCompileLinks: ['.*\\.svg'],
+  noCompileLinks: ['.*\\.svg', '.*\\.png'],
 };
