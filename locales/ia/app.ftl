@@ -194,6 +194,8 @@ CallTreeSidebar--call-node-details = Detalios de nodo de appello
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--categories = Categorias
+CallTreeSidebar--implementation = Implementation
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
