@@ -194,6 +194,30 @@ CallTreeSidebar--call-node-details = Detalios de nodo de appello
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = Tempore de execution traciate
+CallTreeSidebar--traced-self-time =
+    .label = Tempore proprie traciate
+CallTreeSidebar--running-time =
+    .label = Tempore de execution
+CallTreeSidebar--self-time =
+    .label = Tempore proprie
+CallTreeSidebar--running-samples =
+    .label = Specimens de execution
+CallTreeSidebar--self-samples =
+    .label = Specimens proprie
+CallTreeSidebar--running-size =
+    .label = Dimension de execution
+CallTreeSidebar--self-size =
+    .label = Dimension proprie
+CallTreeSidebar--categories = Categorias
+CallTreeSidebar--implementation = Implementation
+CallTreeSidebar--running-milliseconds = Millisecundas de execution
+CallTreeSidebar--running-sample-count = Numero de specimen de execution
+CallTreeSidebar--running-bytes = Bytes de execution
+CallTreeSidebar--self-milliseconds = Millisecundas proprie
+CallTreeSidebar--self-sample-count = Numero de specimen proprie
+CallTreeSidebar--self-bytes = Bytes proprie
 
 ## CompareHome
 ## This is used in the page to compare two profiles.

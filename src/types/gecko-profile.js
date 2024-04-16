@@ -74,11 +74,13 @@ export type ExternalMarkers = {
   data: Array<ExternalMarkerTuple>,
 };
 
-export type ExternalMarkersData = {|
-  markerSchema: MarkerSchema[],
-  categories: CategoryList,
-  markers: ExternalMarkers,
-|};
+export type ExternalMarkersData =
+  | {|
+      markerSchema: MarkerSchema[],
+      categories: CategoryList,
+      markers: ExternalMarkers,
+    |}
+  | {||};
 
 /**
  * These structs aren't very DRY, but it is a simple and complete approach.
