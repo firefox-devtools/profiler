@@ -4,7 +4,11 @@
 // @flow
 
 import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
-import type { Milliseconds, MixedObject } from 'firefox-profiler/types';
+import type {
+  Milliseconds,
+  MixedObject,
+  ExternalMarkersData,
+} from 'firefox-profiler/types';
 
 /**
  * This file is in charge of handling the message managing between profiler.firefox.com
@@ -106,7 +110,7 @@ type StatusQueryResponse = {|
 |};
 type EnableMenuButtonResponse = void;
 type GetProfileResponse = ArrayBuffer | MixedObject;
-type GetExternalMarkersResponse = MixedObject[];
+type GetExternalMarkersResponse = ExternalMarkersData;
 type GetExternalPowerTracksResponse = MixedObject[];
 type GetSymbolTableResponse = SymbolTableAsTuple;
 type QuerySymbolicationApiResponse = string;
@@ -192,7 +196,7 @@ export async function getProfileViaWebChannel(): Promise<
 export async function getExternalMarkersViaWebChannel(
   startTime: Milliseconds,
   endTime: Milliseconds
-): Promise<MixedObject[]> {
+): Promise<ExternalMarkersData> {
   return _sendMessageWithResponse({
     type: 'GET_EXTERNAL_MARKERS',
     startTime,
