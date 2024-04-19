@@ -105,7 +105,7 @@
     "@babel/preset-env": "^7.24.3",
     "@babel/preset-flow": "^7.24.1",
     "@babel/preset-react": "^7.24.1",
-    "@testing-library/dom": "^9.3.4",
+    "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.3.0",
     "alex": "^11.0.1",
