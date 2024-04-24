@@ -25,7 +25,6 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
 >
   <div
     class="tooltipCallNode"
-    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"
@@ -79,13 +78,21 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 0%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
@@ -106,13 +113,21 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 50px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 33.33333333333333%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 0%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
@@ -133,13 +148,21 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 100px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 66.66666666666666%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 0%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
@@ -198,7 +221,6 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
 >
   <div
     class="tooltipCallNode"
-    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"
@@ -252,13 +274,21 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 0%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
@@ -279,13 +309,21 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 50px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 33.33333333333333%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 0%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
@@ -306,13 +344,21 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 100px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 66.66666666666666%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 0px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 0%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
@@ -796,7 +842,6 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
 >
   <div
     class="tooltipCallNode"
-    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"
@@ -850,13 +895,21 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
@@ -877,13 +930,21 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
@@ -948,7 +1009,6 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
 >
   <div
     class="tooltipCallNode"
-    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"
@@ -1002,13 +1062,21 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
@@ -1029,13 +1097,21 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
-            class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
           <div
-            class="tooltipCallNodeGraphSelf"
-            style="width: 150px;"
-          />
+            class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+          >
+            <div
+              class="tooltipCallNodeGraphMeterBar"
+              style="width: 100%;"
+            />
+          </div>
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"

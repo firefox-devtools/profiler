@@ -35,28 +35,32 @@ import type {
 import './CallNode.css';
 import classNames from 'classnames';
 
-const GRAPH_WIDTH = 150;
-const GRAPH_HEIGHT = 10;
-
+/**
+ * This implements a meter bar, used to display in a visual way the values for
+ * the total and self sample counts.
+ * This component could be implemented using a HTML <meter>, but these ones are
+ * impossible to style in a cross-browser way, notably Chrome and Safari.
+ */
 function TooltipCallNodeMeter({
-  className,
+  additionalClassName,
   max,
   value,
   color,
 }: {|
-  className: string,
+  additionalClassName: string,
   max: number,
   value: number,
   color?: string,
 |}) {
+  const widthPercent = (value / max) * 100 + '%';
+  const barColor = color ? `var(--category-color-${color})` : 'var(--blue-40)';
   return (
-    <div
-      className={className}
-      style={{
-        width: (GRAPH_WIDTH * value) / max,
-        backgroundColor: color ? `var(--category-color-${color})` : null,
-      }}
-    />
+    <div className={`tooltipCallNodeGraphMeter ${additionalClassName}`}>
+      <div
+        className="tooltipCallNodeGraphMeterBar"
+        style={{ width: widthPercent, background: barColor }}
+      ></div>
+    </div>
   );
 }
 
@@ -80,13 +84,13 @@ function TooltipCallNodeTotalSelfMeters({
       })}
     >
       <TooltipCallNodeMeter
-        className="tooltipCallNodeGraphRunning"
+        additionalClassName="tooltipCallNodeGraphMeterTotal"
         max={max}
         value={total}
         color={color}
       />
       <TooltipCallNodeMeter
-        className="tooltipCallNodeGraphSelf"
+        additionalClassName="tooltipCallNodeGraphMeterSelf"
         max={max}
         value={self}
         color={color}
@@ -469,13 +473,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     }
 
     return (
-      <div
-        className="tooltipCallNode"
-        style={{
-          '--graph-width': GRAPH_WIDTH + 'px',
-          '--graph-height': GRAPH_HEIGHT + 'px',
-        }}
-      >
+      <div className="tooltipCallNode">
         <div className="tooltipOneLine tooltipHeader">
           <div className="tooltipTiming">{durationText}</div>
           <div className="tooltipTitle">{funcName}</div>
