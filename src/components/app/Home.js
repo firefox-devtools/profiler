@@ -671,7 +671,6 @@ function _isFirefox(): boolean {
 function isMobile(): boolean {
   const userAgent = navigator.userAgent;
   return /Mobi|Android/i.test(userAgent);
-
 }
 
 export const Home = explicitConnect<
