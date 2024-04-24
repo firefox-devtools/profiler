@@ -107,7 +107,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
         >
           <div
             class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
+            style="width: 50px;"
           />
           <div
             class="tooltipCallNodeGraphSelf"
@@ -134,7 +134,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
         >
           <div
             class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
+            style="width: 100px;"
           />
           <div
             class="tooltipCallNodeGraphSelf"
@@ -280,7 +280,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
         >
           <div
             class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
+            style="width: 50px;"
           />
           <div
             class="tooltipCallNodeGraphSelf"
@@ -307,7 +307,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
         >
           <div
             class="tooltipCallNodeGraphRunning"
-            style="width: 150px;"
+            style="width: 100px;"
           />
           <div
             class="tooltipCallNodeGraphSelf"

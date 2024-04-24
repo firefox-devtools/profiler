@@ -202,7 +202,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           subCategory,
           selfTimeValue,
           entireCategoryValue,
-          entireCategoryValue,
+          totalTime.value,
           isHighPrecision,
           true
         )
@@ -221,7 +221,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         -1 /* Any number different from a subcategory index */,
         selfTimeValue,
         entireCategoryValue,
-        entireCategoryValue,
+        totalTime.value,
         isHighPrecision,
         true /* isCategoryHeader */
       )
