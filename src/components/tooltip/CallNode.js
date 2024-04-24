@@ -38,6 +38,63 @@ import classNames from 'classnames';
 const GRAPH_WIDTH = 150;
 const GRAPH_HEIGHT = 10;
 
+function TooltipCallNodeMeter({
+  className,
+  max,
+  value,
+  color,
+}: {|
+  className: string,
+  max: number,
+  value: number,
+  color?: string,
+|}) {
+  return (
+    <div
+      className={className}
+      style={{
+        width: (GRAPH_WIDTH * value) / max,
+        backgroundColor: color ? `var(--category-color-${color})` : null,
+      }}
+    />
+  );
+}
+
+function TooltipCallNodeTotalSelfMeters({
+  isHeader,
+  max,
+  self,
+  total,
+  color,
+}: {|
+  isHeader: boolean,
+  max: number,
+  self: number,
+  total: number,
+  color?: string,
+|}) {
+  return (
+    <div
+      className={classNames('tooltipCallNodeGraph', {
+        tooltipCategoryRowHeader: isHeader,
+      })}
+    >
+      <TooltipCallNodeMeter
+        className="tooltipCallNodeGraphRunning"
+        max={max}
+        value={total}
+        color={color}
+      />
+      <TooltipCallNodeMeter
+        className="tooltipCallNodeGraphSelf"
+        max={max}
+        value={self}
+        color={color}
+      />
+    </div>
+  );
+}
+
 type Props = {|
   +thread: Thread,
   +weightType: WeightType,
@@ -83,26 +140,13 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         >
           {label}
         </div>
-        <div
-          className={classNames('tooltipCallNodeGraph ', {
-            tooltipCategoryRowHeader: isCategoryHeader,
-          })}
-        >
-          <div
-            className="tooltipCallNodeGraphRunning"
-            style={{
-              width: (GRAPH_WIDTH * totalTime) / overallTotalTime,
-              backgroundColor: `var(--category-color-${color})`,
-            }}
-          />
-          <div
-            className="tooltipCallNodeGraphSelf"
-            style={{
-              width: (GRAPH_WIDTH * selfTime) / overallTotalTime,
-              backgroundColor: `var(--category-color-${color})`,
-            }}
-          />
-        </div>
+        <TooltipCallNodeTotalSelfMeters
+          self={selfTime}
+          total={totalTime}
+          max={overallTotalTime}
+          color={color}
+          isHeader={isCategoryHeader}
+        />
         <div
           className={classNames({
             tooltipCallNodeTiming: true,
@@ -254,20 +298,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         <div className="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader">
           Overall
         </div>
-        <div className="tooltipCallNodeGraph tooltipCategoryRow tooltipCategoryRowHeader">
-          <div
-            className="tooltipCallNodeGraphRunning"
-            style={{
-              width: GRAPH_WIDTH,
-            }}
-          />
-          <div
-            className="tooltipCallNodeGraphSelf"
-            style={{
-              width: (GRAPH_WIDTH * selfTime.value) / totalTime.value,
-            }}
-          />
-        </div>
+        <TooltipCallNodeTotalSelfMeters
+          self={selfTime.value}
+          total={totalTime.value}
+          max={totalTime.value}
+          isHeader={true}
+        />
         <div className="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader">
           {formatCallNodeNumberWithUnit(
             weightType,

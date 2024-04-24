@@ -76,7 +76,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           Overall
         </div>
         <div
-          class="tooltipCallNodeGraph tooltipCategoryRow tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -103,7 +103,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           Network
         </div>
         <div
-          class="tooltipCallNodeGraph  tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -130,7 +130,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           Graphics
         </div>
         <div
-          class="tooltipCallNodeGraph  tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -249,7 +249,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           Overall
         </div>
         <div
-          class="tooltipCallNodeGraph tooltipCategoryRow tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -276,7 +276,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           Network
         </div>
         <div
-          class="tooltipCallNodeGraph  tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -303,7 +303,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           Graphics
         </div>
         <div
-          class="tooltipCallNodeGraph  tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -847,7 +847,7 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           Overall
         </div>
         <div
-          class="tooltipCallNodeGraph tooltipCategoryRow tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -874,7 +874,7 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           Graphics
         </div>
         <div
-          class="tooltipCallNodeGraph  tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -999,7 +999,7 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
           Overall
         </div>
         <div
-          class="tooltipCallNodeGraph tooltipCategoryRow tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
@@ -1026,7 +1026,7 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
           Graphics
         </div>
         <div
-          class="tooltipCallNodeGraph  tooltipCategoryRowHeader"
+          class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
             class="tooltipCallNodeGraphRunning"
