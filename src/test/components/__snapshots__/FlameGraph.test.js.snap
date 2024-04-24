@@ -78,7 +78,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="3"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -86,7 +91,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
             />
           </div>
           <div
+            aria-label="Self samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -113,7 +123,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -121,7 +136,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
             />
           </div>
           <div
+            aria-label="Self samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -148,7 +168,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="2"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -156,7 +181,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
             />
           </div>
           <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -274,7 +304,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="3"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -282,7 +317,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
             />
           </div>
           <div
+            aria-label="Self samples overall"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -309,7 +349,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -317,7 +362,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
             />
           </div>
           <div
+            aria-label="Self samples for Network"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -344,7 +394,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="2"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -352,7 +407,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
             />
           </div>
           <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="3"
+            aria-valuemin="0"
+            aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -895,7 +955,12 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -903,7 +968,12 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
             />
           </div>
           <div
+            aria-label="Self samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -930,7 +1000,12 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -938,7 +1013,12 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
             />
           </div>
           <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -1062,7 +1142,12 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -1070,7 +1155,12 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
             />
           </div>
           <div
+            aria-label="Self samples overall"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -1097,7 +1187,12 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
           class="tooltipCallNodeGraph tooltipCategoryRowHeader"
         >
           <div
+            aria-label="Total samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterTotal"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"
@@ -1105,7 +1200,12 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
             />
           </div>
           <div
+            aria-label="Self samples for Graphics"
+            aria-valuemax="1"
+            aria-valuemin="0"
+            aria-valuenow="1"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
+            role="meter"
           >
             <div
               class="tooltipCallNodeGraphMeterBar"

@@ -46,16 +46,25 @@ function TooltipCallNodeMeter({
   max,
   value,
   color,
+  ariaLabel,
 }: {|
   additionalClassName: string,
   max: number,
   value: number,
   color?: string,
+  ariaLabel: string,
 |}) {
   const widthPercent = (value / max) * 100 + '%';
   const barColor = color ? `var(--category-color-${color})` : 'var(--blue-40)';
   return (
-    <div className={`tooltipCallNodeGraphMeter ${additionalClassName}`}>
+    <div
+      className={`tooltipCallNodeGraphMeter ${additionalClassName}`}
+      role="meter"
+      aria-label={ariaLabel}
+      aria-valuemax={max}
+      aria-valuemin={0}
+      aria-valuenow={value}
+    >
       <div
         className="tooltipCallNodeGraphMeterBar"
         style={{ width: widthPercent, background: barColor }}
@@ -70,12 +79,14 @@ function TooltipCallNodeTotalSelfMeters({
   self,
   total,
   color,
+  labelQualifier,
 }: {|
   isHeader: boolean,
   max: number,
   self: number,
   total: number,
   color?: string,
+  labelQualifier: string,
 |}) {
   return (
     <div
@@ -88,12 +99,14 @@ function TooltipCallNodeTotalSelfMeters({
         max={max}
         value={total}
         color={color}
+        ariaLabel={`Total samples ${labelQualifier}`}
       />
       <TooltipCallNodeMeter
         additionalClassName="tooltipCallNodeGraphMeterSelf"
         max={max}
         value={self}
         color={color}
+        ariaLabel={`Self samples ${labelQualifier}`}
       />
     </div>
   );
@@ -148,6 +161,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           self={selfTime}
           total={totalTime}
           max={overallTotalTime}
+          labelQualifier={`for ${label}`}
           color={color}
           isHeader={isCategoryHeader}
         />
@@ -306,6 +320,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           self={selfTime.value}
           total={totalTime.value}
           max={totalTime.value}
+          labelQualifier="overall"
           isHeader={true}
         />
         <div className="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader">
