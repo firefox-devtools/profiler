@@ -92,6 +92,11 @@ CallNodeContextMenu--transform-collapse-function-subtree = Strenç funzion
         La copression di une funzion e gjavarà dut ce che le clame e e assegnarà
         dut il so timp ae funzion. Chest al pues judâ a semplificâ un profîl che
         al clame codiç che nol covente analizâ.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Strenç <strong>{ $nameForResource }</strong>
+    .title = La compression di une risorse e placarà dutis lis clamadis a chê risorse intun singul grop di clamade strenzût.
 
 ## CallTree
 ## This is the component for Call Tree panel.
