@@ -120,6 +120,12 @@ CallNodeContextMenu--copy-stack = Copie stack
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Timp di esecuzion (ms)
+    .title =
+        Il timp di esecuzion “totâl” al inclût une sintesi di dut il timp là che e je stade
+        osservade la presince di cheste funzion sul stack. Chest al inclût il timp là
+        che la funzion e je stade in efiets in esecuzion e il timp spindût tai clamadôrs di
+        cheste funzion.
 
 ## Call tree "badges" (icons) with tooltips
 ##
