@@ -64,6 +64,34 @@ CallNodeContextMenu--transform-merge-call-node = Unìs dome il grop
         La union di un grop lu gjave dal profîl e e assegne il so timp al
         grop de funzion che lu clame. E gjave ancje la funzion di chê part specifiche dal arbul. Ducj i altris puescj là che la funzion e ven clamade
         a restaran tal profîl.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    La concentrazion su une funzion e gjavarà ducj i campions che no includin chê
+    funzion. Al vignarà riorganizât ancje l'arbul des clamadis, in mût che la funzion
+    e sedi l'unic grop lidrîs. Chest al permet di cumbinâ plui sîts di clamade di une funzion midiant il profîl intun unic grop di clamade.
+CallNodeContextMenu--transform-focus-function = Concentrazion su funzion
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Concentrazion su funzion (invertide)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Concentrazion dome su sot-arbul
+    .title =
+        La concentrazion suntun sot-arbul e gjavara ducj i campions che no includin chê
+        specifiche part dal arbul des clamadis. Al tire fûr un ram dal arbul des clamadis,
+        dut câs lu fâs dome par chel singul grop di clamadis. Dutis lis altris clamadis
+        de funzion a vegnin ignoradis.
+# This is used as the context menu item to apply the "Focus on category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to focus on.
+CallNodeContextMenu--transform-focus-category = Concentrazion su categorie <strong>{ $categoryName }</strong>
+    .title =
+        La concentrazion sui grops che a apartegnin ae stesse categorie dal grop selezionât,
+        unint cussì ducj i grop che a apartegnin a une altre categorie.
+CallNodeContextMenu--transform-collapse-function-subtree = Strenç funzion
+    .title =
+        La copression di une funzion e gjavarà dut ce che le clame e e assegnarà
+        dut il so timp ae funzion. Chest al pues judâ a semplificâ un profîl che
+        al clame codiç che nol covente analizâ.
 
 ## CallTree
 ## This is the component for Call Tree panel.
