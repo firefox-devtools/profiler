@@ -18,14 +18,32 @@
 -firefox-android-brand-name = Firefox par Android
 -profiler-brand-name = Firefox Profiler
 -profiler-brand-short-name = Profiladôr
+-firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Aplicazion web pe analisi des prestazions di { -firefox-brand-name }</subheader>
+AppHeader--github-icon =
+    .title = Va tal nestri dipuesit Git (il colegament al vignarà viert intun gnûf barcon)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-unpublished = Impussibil recuperâ il profîl di { -firefox-brand-name }.
+AppViewRouter--error-from-file = Impussibil lei il file o analizâ il profîl che al à dentri.
+AppViewRouter--error-local = No ancjemò implementât.
+AppViewRouter--error-public = Impussibil discjariâ il profîl.
+AppViewRouter--error-from-url = Impussibil discjariâ il profîl.
+AppViewRouter--error-compare = Impussibil recuperâ i profîi.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    Par vie di une <a>limitazion specifiche di Safari</a>, { -profiler-brand-name } nol rive
+    a impuartâ in chest navigadôr i profîi de machine locâl. Par plasê vierç
+    cheste pagjine in { -firefox-brand-name } o in Chrome.
+    .title = Safari nol rive a impuartâ i profîi locâi
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
