@@ -44,11 +44,26 @@ AppViewRouter--error-from-localhost-url-safari =
     a impuartâ in chest navigadôr i profîi de machine locâl. Par plasê vierç
     cheste pagjine in { -firefox-brand-name } o in Chrome.
     .title = Safari nol rive a impuartâ i profîi locâi
+AppViewRouter--route-not-found--home =
+    .specialMessage = L’URL che tu âs cirût di contatâ nol è stât ricognossût.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = Mostre <strong>{ $fileName }</strong>
+CallNodeContextMenu--transform-merge-function = Unìs funzion
+    .title =
+        La union di une funzion le gjave dal profîl e e assegne il so timp ae
+        funzion che le clame. Chest al sucêt dapardut là che la funzion e je stade clamade
+        tal arbul.
+CallNodeContextMenu--transform-merge-call-node = Unìs dome il grop
+    .title =
+        La union di un grop lu gjave dal profîl e e assegne il so timp al
+        grop de funzion che lu clame. E gjave ancje la funzion di chê part specifiche dal arbul. Ducj i altris puescj là che la funzion e ven clamade
+        a restaran tal profîl.
 
 ## CallTree
 ## This is the component for Call Tree panel.
