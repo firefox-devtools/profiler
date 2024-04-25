@@ -97,6 +97,25 @@ CallNodeContextMenu--transform-collapse-function-subtree = Strenç funzion
 #   $nameForResource (String) - Name of the resource to collapse.
 CallNodeContextMenu--transform-collapse-resource = Strenç <strong>{ $nameForResource }</strong>
     .title = La compression di une risorse e placarà dutis lis clamadis a chê risorse intun singul grop di clamade strenzût.
+CallNodeContextMenu--transform-collapse-recursion = Strenç ricorsion
+    .title =
+        La compression de ricorsion e gjave lis clamadis che si ripetin in mût ricorsîf
+        te stesse funzion, ancje cun funzions intermedis sul stack.
+CallNodeContextMenu--transform-collapse-direct-recursion-only = Strenç dome ricorsion direte
+    .title =
+        La compression de ricorsion direte e gjave lis clamadis che si ripetin in mût ricorsîf
+        te stesse funzion cence funzions intermedis sul stack.
+CallNodeContextMenu--transform-drop-function = Mole i campions cun cheste funzion
+    .title =
+        Il scart dai campions al gjave il lôr timp dal profîl. Chest al è util par
+        eliminâ lis informazions temporâls che no son impuartantis pe analisi.
+CallNodeContextMenu--expand-all = Slargje dut
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Cîr il non de funzion in Searchfox
+CallNodeContextMenu--copy-function-name = Copie non de funzion
+CallNodeContextMenu--copy-script-url = Copie URL dal script
+CallNodeContextMenu--copy-stack = Copie stack
 
 ## CallTree
 ## This is the component for Call Tree panel.
