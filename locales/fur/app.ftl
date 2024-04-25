@@ -126,6 +126,18 @@ CallTree--tracing-ms-total = Timp di esecuzion (ms)
         osservade la presince di cheste funzion sul stack. Chest al inclût il timp là
         che la funzion e je stade in efiets in esecuzion e il timp spindût tai clamadôrs di
         cheste funzion.
+CallTree--tracing-ms-self = Self (ms)
+    .title =
+        Il timp “self” al inclût dome il timp là che la funzion e stave
+        te fin dal stack. Se cheste funzion e à clamât altris funzions,
+        il timp “altri” di cheste funzion nol è includût. Il timp “self” al è util
+        par capî là che il timp al è stât spindût intun program.
+CallTree--samples-total = Totâl (campions)
+    .title =
+        Il cont “totâl” dai campions al inclût une sintesi di ducj i campions là che cheste
+        funzion e je stade osservade stâ sul stack. Chest al inclûd il timp là che la
+        funzion e jere in efiets in esecuzion e il timp pierdût tai clamadôrs di cheste
+        funzion.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -133,10 +145,16 @@ CallTree--tracing-ms-total = Timp di esecuzion (ms)
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Cualchi clamade a { $calledFunction } e je stade incorporade dal compiladôr.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Selezione un grop par visualizâ informazions in merit.
+CallTreeSidebar--call-node-details = Detais grop di clamade
 
 ## CallTreeSidebar timing information
 ##
@@ -152,6 +170,20 @@ CallTree--tracing-ms-total = Timp di esecuzion (ms)
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = Timp di esecuzion tignût segnât
+CallTreeSidebar--traced-self-time =
+    .label = Timp te funzion tignût segnât
+CallTreeSidebar--running-time =
+    .label = Timp di esecuzion
+CallTreeSidebar--self-time =
+    .label = Timp te funzion
+CallTreeSidebar--running-samples =
+    .label = Campions esecuzion
+CallTreeSidebar--self-samples =
+    .label = Campions te funzion
+CallTreeSidebar--running-size =
+    .label = Dimensions esecuzion
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -183,6 +215,9 @@ CallTree--tracing-ms-total = Timp di esecuzion (ms)
 
 ## Home page
 
+Home--record-instructions-start-stop = Interomp e invie la profiladure
+Home--record-instructions-capture-load = Cature e cjame profîl
+Home--additional-content-title = Cjame profîi esistents
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
