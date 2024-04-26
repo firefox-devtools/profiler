@@ -266,7 +266,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           subCategory,
           selfTimeValue,
           subCategoryValue,
-          entireCategoryValue,
+          totalTime.value,
           isHighPrecision,
           false /* isCategoryHeader */
         )
