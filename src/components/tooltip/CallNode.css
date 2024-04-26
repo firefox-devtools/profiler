@@ -46,16 +46,10 @@
 .tooltipCallNodeGraphMeterBar {
   height: 100%;
   box-sizing: border-box;
-}
 
-/* Some colors don't have enough contrast (yellow for JavaScript, white for
- * Idle), therefore adding a border improves accessibility. */
-.tooltipCallNodeGraphMeterTotal > .tooltipCallNodeGraphMeterBar {
-  border-top: 1px solid var(--grey-50);
-}
-
-.tooltipCallNodeGraphMeterSelf > .tooltipCallNodeGraphMeterBar {
-  border-bottom: 1px solid var(--grey-50);
+  /* Some colors don't have enough contrast (yellow for JavaScript, white for
+   * Idle), therefore adding a border improves accessibility. */
+  border-inline-end: 1px solid var(--grey-50);
 }
 
 .tooltipCallNodeCategory .tooltipCategoryRowHeader {

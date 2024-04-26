@@ -65,10 +65,12 @@ function TooltipCallNodeMeter({
       aria-valuemin={0}
       aria-valuenow={value}
     >
-      <div
-        className="tooltipCallNodeGraphMeterBar"
-        style={{ width: widthPercent, background: barColor }}
-      ></div>
+      {value > 0 ? (
+        <div
+          className="tooltipCallNodeGraphMeterBar"
+          style={{ width: widthPercent, background: barColor }}
+        ></div>
+      ) : null}
     </div>
   );
 }

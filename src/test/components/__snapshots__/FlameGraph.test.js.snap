@@ -97,12 +97,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
             aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
             role="meter"
-          >
-            <div
-              class="tooltipCallNodeGraphMeterBar"
-              style="width: 0%;"
-            />
-          </div>
+          />
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
@@ -142,12 +137,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
             aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
             role="meter"
-          >
-            <div
-              class="tooltipCallNodeGraphMeterBar"
-              style="width: 0%;"
-            />
-          </div>
+          />
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
@@ -187,12 +177,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
             aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
             role="meter"
-          >
-            <div
-              class="tooltipCallNodeGraphMeterBar"
-              style="width: 0%;"
-            />
-          </div>
+          />
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
@@ -323,12 +308,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
             aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
             role="meter"
-          >
-            <div
-              class="tooltipCallNodeGraphMeterBar"
-              style="width: 0%;"
-            />
-          </div>
+          />
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader"
@@ -368,12 +348,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
             aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
             role="meter"
-          >
-            <div
-              class="tooltipCallNodeGraphMeterBar"
-              style="width: 0%;"
-            />
-          </div>
+          />
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
@@ -413,12 +388,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
             aria-valuenow="0"
             class="tooltipCallNodeGraphMeter tooltipCallNodeGraphMeterSelf"
             role="meter"
-          >
-            <div
-              class="tooltipCallNodeGraphMeterBar"
-              style="width: 0%;"
-            />
-          </div>
+          />
         </div>
         <div
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
