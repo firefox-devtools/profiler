@@ -25,6 +25,8 @@ const FIREFOX =
 const SAFARI =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8';
 let userAgent;
+const ANDROID =
+  'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.74 Mobile Safari/537.36';
 
 // Flow doesn't understand Object.defineProperty. Use the "any" type to use it anyway.
 (Object.defineProperty: any)(window.navigator, 'userAgent', {
@@ -50,6 +52,11 @@ describe('app/Home', function () {
 
   it('renders the information screen for other browsers', () => {
     const { container } = setup(SAFARI);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders the information screen for android', () => {
+    const { container } = setup(ANDROID);
     expect(container.firstChild).toMatchSnapshot();
   });
 
