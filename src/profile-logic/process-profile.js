@@ -1385,6 +1385,15 @@ export function insertExternalMarkersIntoProfile(
   externalMarkers: ExternalMarkersData,
   geckoProfile: GeckoProfile
 ): void {
+  if (
+    !externalMarkers.markerSchema ||
+    !externalMarkers.categories ||
+    !externalMarkers.markers
+  ) {
+    // No data provided by Firefox.
+    return;
+  }
+
   for (const schema of externalMarkers.markerSchema) {
     const existingSchema = geckoProfile.meta.markerSchema.find(
       (s) => s.name === schema.name
