@@ -148,6 +148,51 @@ export function addDataToWindowObject(
     `);
   };
 
+  target.extractGeckoLog = function () {
+    function pad(p, c) {
+      return ('' + p).padStart(c, '0');
+    }
+    function d2s(ts) {
+      const d = new Date(ts);
+      // new Date rounds down the timestamp (in milliseconds) to the lower integer,
+      // let's get the microseconds and nanoseconds differently.
+      // This will be imperfect because of float rounding errors but still better
+      // than not having them.
+      const ns = Math.trunc((ts - Math.trunc(ts)) * 10 ** 6);
+      return `${d.getFullYear()}-${pad(d.getUTCMonth() + 1, 2)}-${pad(d.getUTCDate(), 2)} ${pad(d.getUTCHours(), 2)}:${pad(d.getUTCMinutes(), 2)}:${pad(d.getUTCSeconds(), 2)}.${pad(d.getUTCMilliseconds(), 3)}${pad(ns, 6)} UTC`;
+    }
+
+    const all = [];
+
+    const profile = selectorsForConsole.profile.getProfile(getState());
+
+    for (const thread of profile.threads) {
+      for (let i = 0; i < thread.markers.length; i++) {
+        if (thread.markers.data[i] && thread.markers.data[i].type === 'Log') {
+          const data = thread.markers.data[i];
+          const strTimestamp = d2s(
+            profile.meta.startTime + thread.markers.startTime[i]
+          );
+          const processName = thread.processName ?? 'Unknown Process';
+          // lying about the log level as it's not available yet in the markers
+          const statement = `${strTimestamp} - [${processName} ${thread.pid} ${thread.name}] D/${data.module} ${data.name.trim()}\n`;
+          all.push(statement);
+        }
+      }
+    }
+    const blob = new Blob(all.sort(), { type: 'text/plain' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Trigger the download programmatically
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobUrl;
+    downloadLink.download = `gecko-log.txt`;
+    downloadLink.click();
+
+    // Clean up the URL object
+    URL.revokeObjectURL(blobUrl);
+  };
+
   target.shortenUrl = shortenUrl;
   target.getState = getState;
   target.selectors = selectorsForConsole;
