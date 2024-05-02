@@ -1498,7 +1498,7 @@ describe('actions/ProfileView', function () {
       ]);
     });
 
-    it('pops a committed range and unsets the selection', function () {
+    it('pops a committed range and sets the selection', function () {
       const { getState, dispatch } = setupStore();
       dispatch(
         ProfileView.updatePreviewSelection({
@@ -1526,6 +1526,36 @@ describe('actions/ProfileView', function () {
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 3,
+        selectionEnd: 7,
+      });
+    });
+
+    it('unsets the selection when popping the current committed range', function () {
+      const { getState, dispatch } = setupStore();
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 0, end: 10 },
+        { start: 1, end: 9 },
+        { start: 2, end: 8 },
+        { start: 3, end: 7 },
+      ]);
+
+      dispatch(ProfileView.popCommittedRanges(2));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 0, end: 10 },
+        { start: 1, end: 9 },
+      ]);
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 3,
+        selectionEnd: 7,
+      });
+
+      dispatch(ProfileView.popCommittedRanges(2));
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
