@@ -545,8 +545,17 @@ const previewSelection: Reducer<PreviewSelection> = (
     case 'UPDATE_PREVIEW_SELECTION':
       return action.previewSelection;
     case 'COMMIT_RANGE':
-    case 'POP_COMMITTED_RANGES':
       return { hasSelection: false, isModifying: false };
+    case 'POP_COMMITTED_RANGES':
+      if (!action.committedRange) {
+        return { hasSelection: false, isModifying: false };
+      }
+      return {
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: action.committedRange.start,
+        selectionEnd: action.committedRange.end,
+      };
     default:
       return state;
   }
