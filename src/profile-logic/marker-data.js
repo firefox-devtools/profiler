@@ -126,15 +126,70 @@ export function getSearchFilteredMarkerIndexes(
   if (!searchRegExps) {
     return markerIndexes;
   }
+
+  let hasPositiveRegexps = Boolean(searchRegExps.generic);
+  let hasNegativeRegexps = false;
+
+  for (const val of searchRegExps.fieldMap.values()) {
+    hasPositiveRegexps = hasPositiveRegexps || val.positive !== null;
+    hasNegativeRegexps = hasNegativeRegexps || val.negative !== null;
+  }
+
+  const newMarkers: MarkerIndex[] = [];
+  for (const markerIndex of markerIndexes) {
+    const marker = getMarker(markerIndex);
+    // Starting includeMarker with true in case `hasPositiveRegexps` is false.
+    // Otherwise it will be overwritten inside the next if branch.
+    let includeMarker = true;
+    // If there are positive RegExps, then check if the marker will be included.
+    if (hasPositiveRegexps) {
+      includeMarker = positiveFilterMarker(
+        marker,
+        markerSchemaByName,
+        searchRegExps,
+        categoryList
+      );
+    }
+
+    // If the marker marked as `included` so far by the positive regexps, check
+    // for negative RegExps and filter if there are any. If `includeMarker` is
+    // false here it means that it's already excluded so there is no point of
+    // checking it for negative filtering.
+    if (includeMarker && hasNegativeRegexps) {
+      includeMarker = negativeFilterMarker(
+        marker,
+        markerSchemaByName,
+        searchRegExps,
+        categoryList
+      );
+    }
+
+    if (includeMarker) {
+      newMarkers.push(markerIndex);
+    }
+  }
+
+  return newMarkers;
+}
+
+function positiveFilterMarker(
+  marker: Marker,
+  markerSchemaByName: MarkerSchemaByName,
+  searchRegExps: MarkerRegExps,
+  categoryList: CategoryList
+): boolean {
   // Need to assign it to a constant variable so Flow doesn't complain about
   // passing it inside a function below.
   const regExps = searchRegExps;
+
   function test(value, key) {
     key = key.toLowerCase();
     const fieldRegexp = regExps.fieldMap.get(key);
     const found =
       (regExps.generic ? regExps.generic.test(value) : false) ||
-      (fieldRegexp ? fieldRegexp.test(value) : false);
+      (fieldRegexp && fieldRegexp.positive
+        ? fieldRegexp.positive.test(value)
+        : false);
 
     // Reset regexp for each iteration. Otherwise state from previous
     // iterations can cause matches to fail if the search is global or
@@ -142,54 +197,113 @@ export function getSearchFilteredMarkerIndexes(
     if (regExps.generic) {
       regExps.generic.lastIndex = 0;
     }
-    if (fieldRegexp) {
-      fieldRegexp.lastIndex = 0;
+    if (fieldRegexp && fieldRegexp.positive) {
+      fieldRegexp.positive.lastIndex = 0;
     }
-
     return found;
   }
 
-  const newMarkers: MarkerIndex[] = [];
-  for (const markerIndex of markerIndexes) {
-    const marker = getMarker(markerIndex);
-    const { data, name, category } = marker;
+  const { data, name, category } = marker;
 
-    if (categoryList[category] !== undefined) {
-      const markerCategory = categoryList[category].name;
-      if (test(markerCategory, 'cat')) {
-        newMarkers.push(markerIndex);
-        continue;
-      }
-    }
-
-    if (test(name, 'name')) {
-      newMarkers.push(markerIndex);
-      continue;
-    }
-
-    if (data && typeof data === 'object') {
-      if (test(data.type, 'type')) {
-        // Check the type of the marker payload first.
-        newMarkers.push(markerIndex);
-        continue;
-      }
-
-      // Now check the schema for the marker payload for searchable
-      const markerSchema = getSchemaFromMarker(
-        markerSchemaByName,
-        marker.name,
-        marker.data
-      );
-      if (
-        markerSchema &&
-        markerPayloadMatchesSearch(markerSchema, marker, test)
-      ) {
-        newMarkers.push(markerIndex);
-        continue;
-      }
+  if (categoryList[category] !== undefined) {
+    const markerCategory = categoryList[category].name;
+    if (test(markerCategory, 'cat')) {
+      return true;
     }
   }
-  return newMarkers;
+
+  if (test(name, 'name')) {
+    return true;
+  }
+
+  if (data && typeof data === 'object') {
+    if (test(data.type, 'type')) {
+      // Check the type of the marker payload first.
+      return true;
+    }
+
+    // Now check the schema for the marker payload for searchable
+    const markerSchema = getSchemaFromMarker(
+      markerSchemaByName,
+      marker.name,
+      marker.data
+    );
+    if (
+      markerSchema &&
+      markerPayloadMatchesSearch(markerSchema, marker, test)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function negativeFilterMarker(
+  marker: Marker,
+  markerSchemaByName: MarkerSchemaByName,
+  searchRegExps: MarkerRegExps,
+  categoryList: CategoryList
+): boolean {
+  // Need to assign it to a constant variable so Flow doesn't complain about
+  // passing it inside a function below.
+  const regExps = searchRegExps;
+
+  function test(value, key) {
+    key = key.toLowerCase();
+    const fieldRegexp = regExps.fieldMap.get(key);
+    const negativeRegexp = fieldRegexp?.negative;
+    if (!negativeRegexp) {
+      return false;
+    }
+
+    const found = negativeRegexp.test(value);
+
+    // Reset regexp for each iteration. Otherwise state from previous
+    // iterations can cause matches to fail if the search is global or
+    // sticky.
+    negativeRegexp.lastIndex = 0;
+    return found;
+  }
+
+  const { data, name, category } = marker;
+
+  if (categoryList[category] !== undefined) {
+    const markerCategory = categoryList[category].name;
+    if (test(markerCategory, 'cat')) {
+      // Found the category in the negative filters, do not include it.
+      return false;
+    }
+  }
+
+  if (test(name, 'name')) {
+    // Found the name in the negative filters, do not include it.
+    return false;
+  }
+
+  if (data && typeof data === 'object') {
+    if (test(data.type, 'type')) {
+      // Found the type of the payload in the negative filters, do not include it.
+      return false;
+    }
+
+    // Now check the schema for the marker payload for searchable
+    const markerSchema = getSchemaFromMarker(
+      markerSchemaByName,
+      marker.name,
+      marker.data
+    );
+
+    if (
+      markerSchema &&
+      markerPayloadMatchesSearch(markerSchema, marker, test)
+    ) {
+      // Found the field in the negative filters, do not include it.
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**

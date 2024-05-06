@@ -110,14 +110,19 @@ export const stringsToRegExp = (strings: string[] | null): RegExp | null => {
   return new RegExp(regexpStr, 'gi');
 };
 
+export type MarkerSearchFieldMap = Map<
+  string,
+  {| positive: RegExp | null, negative: RegExp | null |},
+>;
+
 export type MarkerRegExps = $ReadOnly<{|
   generic: RegExp | null,
-  fieldMap: Map<string, RegExp>,
+  fieldMap: MarkerSearchFieldMap,
 |}>;
 
 /**
  * Concatenate an array of strings into multiple RegExps that match on all
- * the marker strings which can include field specific search.
+ * the marker strings which can include positive and negative field specific search.
  */
 export const stringsToMarkerRegExps = (
   strings: string[] | null
@@ -126,35 +131,56 @@ export const stringsToMarkerRegExps = (
     return null;
   }
 
-  const fieldStrings = new Map();
-  const genericStrings = [];
+  // We create this map to group all the field specific search strings and then
+  // we aggregate them to create a single regexp for each field later.
+  const fieldStrings: Map<
+    string,
+    {| positive: string[], negative: string[] |},
+  > = new Map();
+  // These are the non-field specific search strings. They have to be positive
+  // as we don't support negative generic filtering.
+  const genericPositiveStrings = [];
   for (const string of strings) {
-    const prefixMatch = string.match(/^(?<key>\w+):(?<value>.+)/i);
+    // First capture group is used to determine if it has a "-" in front of the
+    // field to understand if it's a negative filter.
+    // Second capture group is used to get the field name.
+    // Third capture group is to get the filter value.
+    const prefixMatch = string.match(
+      /^(?<maybeNegative>-?)(?<key>\w+):(?<value>.+)/i
+    );
     if (prefixMatch && prefixMatch.groups) {
       // This is a key-value pair that will only be matched for a specific field.
-      const { value } = prefixMatch.groups;
+      const { maybeNegative, value } = prefixMatch.groups;
       const key = prefixMatch.groups.key.toLowerCase();
       let fieldStrs = fieldStrings.get(key);
       if (!fieldStrs) {
-        fieldStrs = [];
+        fieldStrs = { positive: [], negative: [] };
         fieldStrings.set(key, fieldStrs);
       }
-      fieldStrs.push(value);
+
+      // First capture group checks if we have "-" in front of the string to see
+      // if it's a negative filtering.
+      if (maybeNegative.length === 0) {
+        fieldStrs.positive.push(value);
+      } else {
+        fieldStrs.negative.push(value);
+      }
     } else {
-      genericStrings.push(string);
+      genericPositiveStrings.push(string);
     }
   }
 
-  const fieldMap = new Map();
+  // Now we constructed the grouped arrays. Let's convert them into a map of RegExps.
+  const fieldMap: MarkerSearchFieldMap = new Map();
   for (const [field, strings] of fieldStrings) {
-    fieldMap.set(
-      field,
-      new RegExp(strings.map(escapeStringRegexp).join('|'), 'gi')
-    );
+    fieldMap.set(field, {
+      positive: stringsToRegExp(strings.positive),
+      negative: stringsToRegExp(strings.negative),
+    });
   }
 
   return {
-    generic: stringsToRegExp(genericStrings),
+    generic: stringsToRegExp(genericPositiveStrings),
     fieldMap,
   };
 };
