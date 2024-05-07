@@ -80,6 +80,22 @@ CallNodeContextMenu--copy-stack = Nqel tanebdant
 
 CallTreeSidebar--select-a-node = Fren takerrist i uskan n talɣut fell-as.
 
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--categories = Taggayin
+
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
@@ -462,6 +478,14 @@ TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Power
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
