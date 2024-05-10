@@ -1959,10 +1959,10 @@
     "@testing-library/dom" "^9.0.0"
     "@types/react-dom" "^18.0.0"
 
-"@tgwf/co2@^0.14.4":
-  version "0.14.4"
-  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.14.4.tgz#b5be156c691fb4ff20dfc6bc6172104e13098b87"
-  integrity sha512-837dH4n6cGt2s3ssR3Yt904WHy/MDmYZmnHCla6e73YjxIWmvLgYLXUYWzXJ2C5096jTR7yT5tNe1+Dq5bjnNw==
+"@tgwf/co2@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@tgwf/co2/-/co2-0.15.0.tgz#a1603bfcad2e21757a222fc59e77455cae835658"
+  integrity sha512-H3Y+gw+GqRqzLj3rFZNfxHMSi2WpL3eCnnJqs9vOZHUM7/t+aaIG8WheV9PlILMat2bXXCk0hkJJTEW/NFDmTw==
 
 "@tootallnate/once@1":
   version "1.1.2"
