@@ -47,6 +47,39 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
       class="tooltipCallNodeDetails"
     >
       <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-blue"
+          />
+          DOM
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          path/to/file:10:100
+        </div>
+      </div>
+      <div
         class="tooltipCallNodeCategory"
       >
         <div />
@@ -188,39 +221,6 @@ exports[`FlameGraph has a tooltip that matches the snapshot with categories 1`] 
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
         >
           —
-        </div>
-      </div>
-      <div
-        class="tooltipDetails tooltipCallNodeDetailsLeft"
-      >
-        <div
-          class="tooltipLabel"
-        >
-          Stack Type:
-        </div>
-        <div>
-          Native
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Category:
-        </div>
-        <div>
-          <span
-            class="colored-square category-color-blue"
-          />
-          DOM
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          File:
-        </div>
-        <div
-          class="tooltipDetailsUrl"
-        >
-          path/to/file:10:100
         </div>
       </div>
     </div>
@@ -258,6 +258,39 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
       class="tooltipCallNodeDetails"
     >
       <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-blue"
+          />
+          DOM
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          path/to/file:10:100
+        </div>
+      </div>
+      <div
         class="tooltipCallNodeCategory"
       >
         <div />
@@ -399,39 +432,6 @@ exports[`FlameGraph has a tooltip that matches the snapshot with implementation 
           class="tooltipCallNodeTiming tooltipCategoryRowHeader"
         >
           —
-        </div>
-      </div>
-      <div
-        class="tooltipDetails tooltipCallNodeDetailsLeft"
-      >
-        <div
-          class="tooltipLabel"
-        >
-          Stack Type:
-        </div>
-        <div>
-          Native
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Category:
-        </div>
-        <div>
-          <span
-            class="colored-square category-color-blue"
-          />
-          DOM
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          File:
-        </div>
-        <div
-          class="tooltipDetailsUrl"
-        >
-          path/to/file:10:100
         </div>
       </div>
     </div>
@@ -894,6 +894,45 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
       class="tooltipCallNodeDetails"
     >
       <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-green"
+          />
+          Graphics
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          widget/cocoa/nsAppShell.mm:17:107
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Resource:
+        </div>
+        libxul.so
+      </div>
+      <div
         class="tooltipCallNodeCategory"
       >
         <div />
@@ -1006,45 +1045,6 @@ exports[`FlameGraph shows a tooltip with the resource information with categorie
         >
           1 sample
         </div>
-      </div>
-      <div
-        class="tooltipDetails tooltipCallNodeDetailsLeft"
-      >
-        <div
-          class="tooltipLabel"
-        >
-          Stack Type:
-        </div>
-        <div>
-          Native
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Category:
-        </div>
-        <div>
-          <span
-            class="colored-square category-color-green"
-          />
-          Graphics
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          File:
-        </div>
-        <div
-          class="tooltipDetailsUrl"
-        >
-          widget/cocoa/nsAppShell.mm:17:107
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Resource:
-        </div>
-        libxul.so
       </div>
     </div>
   </div>
@@ -1081,6 +1081,45 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
       class="tooltipCallNodeDetails"
     >
       <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-green"
+          />
+          Graphics
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        <div
+          class="tooltipDetailsUrl"
+        >
+          widget/cocoa/nsAppShell.mm:17:107
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Resource:
+        </div>
+        libxul.so
+      </div>
+      <div
         class="tooltipCallNodeCategory"
       >
         <div />
@@ -1193,45 +1232,6 @@ exports[`FlameGraph shows a tooltip with the resource information with implement
         >
           1 sample
         </div>
-      </div>
-      <div
-        class="tooltipDetails tooltipCallNodeDetailsLeft"
-      >
-        <div
-          class="tooltipLabel"
-        >
-          Stack Type:
-        </div>
-        <div>
-          Native
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Category:
-        </div>
-        <div>
-          <span
-            class="colored-square category-color-green"
-          />
-          Graphics
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          File:
-        </div>
-        <div
-          class="tooltipDetailsUrl"
-        >
-          widget/cocoa/nsAppShell.mm:17:107
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Resource:
-        </div>
-        libxul.so
       </div>
     </div>
   </div>

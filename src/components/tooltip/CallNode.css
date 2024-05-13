@@ -6,7 +6,7 @@
   display: grid;
   align-items: center;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--grey-30);
+  border-top: 1px solid var(--grey-40);
   grid-gap: 4px;
   grid-template-columns: repeat(4, min-content);
 }

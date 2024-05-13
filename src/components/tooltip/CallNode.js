@@ -501,7 +501,6 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           </div>
         </div>
         <div className="tooltipCallNodeDetails">
-          {this._renderCategoryTimings(timings)}
           {callTreeSummaryStrategy !== 'timing' && displayData ? (
             <div className="tooltipDetails tooltipCallNodeDetailsLeft">
               {/* Everything in this div needs to come in pairs of two in order to
@@ -540,6 +539,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {fileName}
             {resource}
           </div>
+          {this._renderCategoryTimings(timings)}
         </div>
       </div>
     );
