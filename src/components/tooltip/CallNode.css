@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.tooltipCallNodeImplementation,
 .tooltipCallNodeCategory {
   display: grid;
+  align-items: center;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--grey-30);
-  grid-gap: 2px;
+  border-top: 1px solid var(--grey-40);
+  grid-gap: 4px;
   grid-template-columns: repeat(4, min-content);
 }
 
@@ -23,33 +23,37 @@
   white-space: nowrap;
 }
 
+/* This contains the 2 meters (self and total sample count values). */
 .tooltipCallNodeGraph {
-  position: relative;
-  width: var(--graph-width);
-  height: var(--graph-height);
-  border-radius: 2px;
-  margin-top: 3px;
-  background-color: var(--grey-30);
+  display: flex;
+  width: 150px;
+  height: 10px;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.tooltipCallNodeGraphRunning {
-  height: calc(var(--graph-height) / 2 - 1px);
-  border-radius: 2px;
-  background-color: var(--blue-40);
+/* This is just one meter (either self or total sample count values). */
+.tooltipCallNodeGraphMeter {
+  /* It's not fully clear why height: 0 is needed here, but otherwise the meter
+   * has a height of 11px despite the parent's 10px height... */
+  height: 0;
+  flex: 1;
+  appearance: none;
+  background: var(--grey-90-a10);
 }
 
-.tooltipCallNodeGraphSelf {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: calc(var(--graph-height) / 2 - 1px);
-  border-radius: 2px;
-  margin-top: calc(var(--graph-height) / 2);
-  background-color: var(--blue-60);
+/* This is the bar inside the meter. */
+.tooltipCallNodeGraphMeterBar {
+  height: 100%;
+  box-sizing: border-box;
+
+  /* Some colors don't have enough contrast (yellow for JavaScript, white for
+   * Idle), therefore adding a border improves accessibility. */
+  border-inline-end: 1px solid var(--grey-50);
 }
 
 .tooltipCallNodeCategory .tooltipCategoryRowHeader {
-  margin-top: 8px;
+  margin-top: 12px;
   font-weight: bold;
 }
 
@@ -86,13 +90,4 @@
   min-width: 150px;
   padding: 10px;
   padding-bottom: 5px;
-}
-
-.tooltipCategoryRowHeader.tooltipCallNodeGraph {
-  /* we have to add 3px to the 8px of category row to realign the callnode graph propertly */
-  margin-top: 11px;
-}
-
-.tooltipCategoryRowHeader.tooltipCategoryName {
-  padding-right: 4px;
 }

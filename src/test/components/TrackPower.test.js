@@ -212,7 +212,7 @@ describe('TrackPower', function () {
     );
     // Over the preview selection, we get 5 µWh which shows up as 5.0 µWh.
     expect(
-      screen.getByText(/current selection:/).nextSibling
+      screen.getByText(/Energy used in the current selection:/).nextSibling
     ).toHaveTextContent('5.0\u2069 µWh');
   });
 });

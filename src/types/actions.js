@@ -457,7 +457,11 @@ type UrlStateAction =
     |}
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
   | {| +type: 'COMMIT_RANGE', +start: number, +end: number |}
-  | {| +type: 'POP_COMMITTED_RANGES', +firstPoppedFilterIndex: number |}
+  | {|
+      +type: 'POP_COMMITTED_RANGES',
+      +firstPoppedFilterIndex: number,
+      +committedRange: StartEndRange | false,
+    |}
   | {|
       +type: 'CHANGE_SELECTED_THREAD',
       +selectedThreadIndexes: Set<ThreadIndex>,

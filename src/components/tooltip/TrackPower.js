@@ -175,6 +175,18 @@ class TooltipTrackPowerImpl extends React.PureComponent<Props> {
                 'TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour'
               )
             : null}
+          {previewSelection.hasSelection
+            ? this._formatPowerValue(
+                (1000 /* ms -> s */ *
+                  3600 /* s -> h */ *
+                  this._computePowerSumForPreviewRange(previewSelection)) /
+                  (previewSelection.selectionEnd -
+                    previewSelection.selectionStart),
+                'TrackPower--tooltip-average-power-kilowatt',
+                'TrackPower--tooltip-average-power-watt',
+                'TrackPower--tooltip-average-power-milliwatt'
+              )
+            : null}
           {this._formatPowerValue(
             this._computePowerSumForCommittedRange(committedRange),
             'TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour',
