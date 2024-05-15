@@ -57,6 +57,8 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile confirming the delet
       class="profileDeleteButtonSuccess"
     >
       The uploaded data was successfully deleted.
+Note that due to caching mechanisms it may take up to one hour for the data
+to be fully deleted from our storage servers.
     </p>
   </div>
 </div>

@@ -234,9 +234,11 @@ export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
 
 export function ProfileDeleteSuccess(_props: {||}) {
   return (
-    <Localized id="ProfileDeletePanel--message-success">
+    <Localized id="ProfileDeletePanel--message-success2">
       <p className="profileDeleteButtonSuccess">
-        The uploaded data was successfully deleted.
+        The uploaded data was successfully deleted. Note that due to caching
+        mechanisms it may take up to one hour for the data to be fully deleted
+        from our storage servers.
       </p>
     </Localized>
   );
