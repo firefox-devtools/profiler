@@ -24,6 +24,7 @@ export const AVAILABLE_LOCALES_TO_LOCALIZED_NAMES = {
   de: 'Deutsch',
   el: 'Ελληνικά',
   'en-GB': 'English (GB)',
+  'en-CA': 'English (CA)',
   'en-US': 'English (US)',
   'es-CL': 'Español', // Use "Español (CL)" once we have more spanish versions
   fr: 'Français',
@@ -32,6 +33,7 @@ export const AVAILABLE_LOCALES_TO_LOCALIZED_NAMES = {
   it: 'Italiano',
   nl: 'Nederlands',
   'pt-BR': 'Português (BR)',
+  ru: 'Русский',
   'sv-SE': 'Svenska',
   uk: 'Українська',
   'zh-CN': '简体中文',
