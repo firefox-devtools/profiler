@@ -8,13 +8,10 @@ import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
+import { stringsToMarkerRegExps } from '../profile-logic/marker-data';
 import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
-import {
-  splitSearchString,
-  stringsToRegExp,
-  stringsToMarkerRegExps,
-} from '../utils/string';
+import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { isLocalURL } from '../utils/url';
 
 import type {
@@ -40,7 +37,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { MarkerRegExps } from '../utils/string';
+import type { MarkerRegExps } from '../profile-logic/marker-data';
 
 import urlStateReducer from '../reducers/url-state';
 import { formatMetaInfoString } from '../profile-logic/profile-metainfo';

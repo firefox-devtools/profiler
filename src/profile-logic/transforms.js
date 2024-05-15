@@ -16,10 +16,13 @@ import {
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { canonicalizeRangeSet } from '../utils/range-set';
-import { getSearchFilteredMarkerIndexes } from '../profile-logic/marker-data';
+import {
+  getSearchFilteredMarkerIndexes,
+  stringsToMarkerRegExps,
+} from '../profile-logic/marker-data';
 import { shallowCloneFrameTable, getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
-import { splitSearchString, stringsToMarkerRegExps } from '../utils/string';
+import { splitSearchString } from '../utils/string';
 
 import type {
   Thread,
