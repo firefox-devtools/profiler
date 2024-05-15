@@ -107,7 +107,7 @@
     "@babel/preset-react": "^7.24.1",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.3.0",
+    "@testing-library/react": "^15.0.7",
     "alex": "^11.0.1",
     "autoprefixer": "^10.4.19",
     "babel-jest": "^29.7.0",
