@@ -6,13 +6,9 @@ import * as React from 'react';
 
 import { getStackType } from 'firefox-profiler/profile-logic/transforms';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
-import { objectEntries } from 'firefox-profiler/utils/flow';
 import { formatCallNodeNumberWithUnit } from 'firefox-profiler/utils/format-numbers';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
-import {
-  getFriendlyStackTypeName,
-  getCategoryPairLabel,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getCategoryPairLabel } from 'firefox-profiler/profile-logic/profile-data';
 import { countPositiveValues } from 'firefox-profiler/utils';
 
 import type {
@@ -39,8 +35,84 @@ import type {
 import './CallNode.css';
 import classNames from 'classnames';
 
-const GRAPH_WIDTH = 150;
-const GRAPH_HEIGHT = 10;
+/**
+ * This implements a meter bar, used to display in a visual way the values for
+ * the total and self sample counts.
+ * This component could be implemented using a HTML <meter>, but these ones are
+ * impossible to style in a cross-browser way, notably Chrome and Safari.
+ */
+function TooltipCallNodeMeter({
+  additionalClassName,
+  max,
+  value,
+  color,
+  ariaLabel,
+}: {|
+  additionalClassName: string,
+  max: number,
+  value: number,
+  color?: string,
+  ariaLabel: string,
+|}) {
+  const widthPercent = (value / max) * 100 + '%';
+  const barColor = color ? `var(--category-color-${color})` : 'var(--blue-40)';
+  return (
+    <div
+      className={`tooltipCallNodeGraphMeter ${additionalClassName}`}
+      role="meter"
+      aria-label={ariaLabel}
+      aria-valuemax={max}
+      aria-valuemin={0}
+      aria-valuenow={value}
+    >
+      {value > 0 ? (
+        <div
+          className="tooltipCallNodeGraphMeterBar"
+          style={{ width: widthPercent, background: barColor }}
+        ></div>
+      ) : null}
+    </div>
+  );
+}
+
+function TooltipCallNodeTotalSelfMeters({
+  isHeader,
+  max,
+  self,
+  total,
+  color,
+  labelQualifier,
+}: {|
+  isHeader: boolean,
+  max: number,
+  self: number,
+  total: number,
+  color?: string,
+  labelQualifier: string,
+|}) {
+  return (
+    <div
+      className={classNames('tooltipCallNodeGraph', {
+        tooltipCategoryRowHeader: isHeader,
+      })}
+    >
+      <TooltipCallNodeMeter
+        additionalClassName="tooltipCallNodeGraphMeterTotal"
+        max={max}
+        value={total}
+        color={color}
+        ariaLabel={`Total samples ${labelQualifier}`}
+      />
+      <TooltipCallNodeMeter
+        additionalClassName="tooltipCallNodeGraphMeterSelf"
+        max={max}
+        value={self}
+        color={color}
+        ariaLabel={`Self samples ${labelQualifier}`}
+      />
+    </div>
+  );
+}
 
 type Props = {|
   +thread: Thread,
@@ -87,26 +159,14 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         >
           {label}
         </div>
-        <div
-          className={classNames('tooltipCallNodeGraph ', {
-            tooltipCategoryRowHeader: isCategoryHeader,
-          })}
-        >
-          <div
-            className="tooltipCallNodeGraphRunning"
-            style={{
-              width: (GRAPH_WIDTH * totalTime) / overallTotalTime,
-              backgroundColor: `var(--category-color-${color})`,
-            }}
-          />
-          <div
-            className="tooltipCallNodeGraphSelf"
-            style={{
-              width: (GRAPH_WIDTH * selfTime) / overallTotalTime,
-              backgroundColor: `var(--category-color-${color})`,
-            }}
-          />
-        </div>
+        <TooltipCallNodeTotalSelfMeters
+          self={selfTime}
+          total={totalTime}
+          max={overallTotalTime}
+          labelQualifier={`for ${label}`}
+          color={color}
+          isHeader={isCategoryHeader}
+        />
         <div
           className={classNames({
             tooltipCallNodeTiming: true,
@@ -162,7 +222,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           subCategory,
           selfTimeValue,
           entireCategoryValue,
-          entireCategoryValue,
+          totalTime.value,
           isHighPrecision,
           true
         )
@@ -181,7 +241,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         -1 /* Any number different from a subcategory index */,
         selfTimeValue,
         entireCategoryValue,
-        entireCategoryValue,
+        totalTime.value,
         isHighPrecision,
         true /* isCategoryHeader */
       )
@@ -206,7 +266,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           subCategory,
           selfTimeValue,
           subCategoryValue,
-          entireCategoryValue,
+          totalTime.value,
           isHighPrecision,
           false /* isCategoryHeader */
         )
@@ -258,20 +318,13 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         <div className="tooltipLabel tooltipCategoryLabel tooltipCategoryRowHeader">
           Overall
         </div>
-        <div className="tooltipCallNodeGraph tooltipCategoryRow tooltipCategoryRowHeader">
-          <div
-            className="tooltipCallNodeGraphRunning"
-            style={{
-              width: GRAPH_WIDTH,
-            }}
-          />
-          <div
-            className="tooltipCallNodeGraphSelf"
-            style={{
-              width: (GRAPH_WIDTH * selfTime.value) / totalTime.value,
-            }}
-          />
-        </div>
+        <TooltipCallNodeTotalSelfMeters
+          self={selfTime.value}
+          total={totalTime.value}
+          max={totalTime.value}
+          labelQualifier="overall"
+          isHeader={true}
+        />
         <div className="tooltipCallNodeTiming tooltipCategoryRow tooltipCategoryRowHeader">
           {formatCallNodeNumberWithUnit(
             weightType,
@@ -294,127 +347,6 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             categoryIndex,
             isHighPrecision
           )
-        )}
-      </div>
-    );
-  }
-
-  _canRenderImplementationTimings(maybeTimings: ?TimingsForPath) {
-    if (!maybeTimings) {
-      return false;
-    }
-    return maybeTimings.forPath.totalTime.breakdownByImplementation !== null;
-  }
-
-  _renderImplementationTimings(maybeTimings: ?TimingsForPath) {
-    if (!maybeTimings) {
-      return null;
-    }
-    const { totalTime, selfTime } = maybeTimings.forPath;
-    if (!totalTime.breakdownByImplementation) {
-      return null;
-    }
-
-    const sortedTotalBreakdownByImplementation = objectEntries(
-      totalTime.breakdownByImplementation
-    ).sort((a, b) => b[1] - a[1]);
-    const { thread, weightType } = this.props;
-
-    // JS Tracer threads have data relevant to the microsecond level.
-    const isHighPrecision = Boolean(thread.isJsTracer);
-
-    return (
-      <div className="tooltipCallNodeImplementation">
-        {/* grid row -------------------------------------------------- */}
-        <div />
-        <div className="tooltipCallNodeHeader" />
-        <div className="tooltipCallNodeHeader">
-          <span className="tooltipCallNodeHeaderSwatchRunning" />
-          Running
-        </div>
-        <div className="tooltipCallNodeHeader">
-          <span className="tooltipCallNodeHeaderSwatchSelf" />
-          Self
-        </div>
-        {/* grid row -------------------------------------------------- */}
-        <div className="tooltipLabel">Overall</div>
-        <div className="tooltipCallNodeGraph">
-          <div
-            className="tooltipCallNodeGraphRunning"
-            style={{
-              width: GRAPH_WIDTH,
-            }}
-          />
-          <div
-            className="tooltipCallNodeGraphSelf"
-            style={{
-              width: (GRAPH_WIDTH * selfTime.value) / totalTime.value,
-            }}
-          />
-        </div>
-        <div className="tooltipCallNodeTiming">
-          {formatCallNodeNumberWithUnit(
-            weightType,
-            isHighPrecision,
-            totalTime.value
-          )}
-        </div>
-        <div className="tooltipCallNodeTiming">
-          {selfTime.value === 0
-            ? '—'
-            : formatCallNodeNumberWithUnit(
-                weightType,
-                isHighPrecision,
-                selfTime.value
-              )}
-        </div>
-        {/* grid row -------------------------------------------------- */}
-        {sortedTotalBreakdownByImplementation.map(
-          ([implementation, time], index) => {
-            let selfTimeValue = 0;
-            if (selfTime.breakdownByImplementation) {
-              selfTimeValue =
-                selfTime.breakdownByImplementation[implementation] || 0;
-            }
-
-            return (
-              <React.Fragment key={index}>
-                <div className="tooltipCallNodeName tooltipLabel">
-                  {getFriendlyStackTypeName(implementation)}
-                </div>
-                <div className="tooltipCallNodeGraph">
-                  <div
-                    className="tooltipCallNodeGraphRunning"
-                    style={{
-                      width: (GRAPH_WIDTH * time) / totalTime.value,
-                    }}
-                  />
-                  <div
-                    className="tooltipCallNodeGraphSelf"
-                    style={{
-                      width: (GRAPH_WIDTH * selfTimeValue) / totalTime.value,
-                    }}
-                  />
-                </div>
-                <div className="tooltipCallNodeTiming">
-                  {formatCallNodeNumberWithUnit(
-                    weightType,
-                    isHighPrecision,
-                    time
-                  )}
-                </div>
-                <div className="tooltipCallNodeTiming">
-                  {selfTimeValue === 0
-                    ? '—'
-                    : formatCallNodeNumberWithUnit(
-                        weightType,
-                        isHighPrecision,
-                        selfTimeValue
-                      )}
-                </div>
-              </React.Fragment>
-            );
-          }
         )}
       </div>
     );
@@ -558,13 +490,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     }
 
     return (
-      <div
-        className="tooltipCallNode"
-        style={{
-          '--graph-width': GRAPH_WIDTH + 'px',
-          '--graph-height': GRAPH_HEIGHT + 'px',
-        }}
-      >
+      <div className="tooltipCallNode">
         <div className="tooltipOneLine tooltipHeader">
           <div className="tooltipTiming">{durationText}</div>
           <div className="tooltipTitle">{funcName}</div>
@@ -575,9 +501,6 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           </div>
         </div>
         <div className="tooltipCallNodeDetails">
-          {this._canRenderImplementationTimings(timings)
-            ? this._renderImplementationTimings(timings)
-            : this._renderCategoryTimings(timings)}
           {callTreeSummaryStrategy !== 'timing' && displayData ? (
             <div className="tooltipDetails tooltipCallNodeDetailsLeft">
               {/* Everything in this div needs to come in pairs of two in order to
@@ -616,6 +539,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             {fileName}
             {resource}
           </div>
+          {this._renderCategoryTimings(timings)}
         </div>
       </div>
     );

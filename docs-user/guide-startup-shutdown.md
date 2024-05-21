@@ -40,7 +40,7 @@ If you have compiled GeckoView-example locally, you can launch it with `./mach r
 ```bash
 ./mach run --setenv MOZ_PROFILER_STARTUP=1 \
            --setenv MOZ_PROFILER_STARTUP_INTERVAL=5 \
-           --setenv MOZ_PROFILER_STARTUP_FEATURES=threads,js,stackwalk,leaf,screenshots,ipcmessages,java \
+           --setenv MOZ_PROFILER_STARTUP_FEATURES=js,stackwalk,screenshots,ipcmessages,java,processcpu,cpu \
            --setenv MOZ_PROFILER_STARTUP_FILTERS="GeckoMain,Compositor,Renderer,IPDL Background"
 ```
 
@@ -50,7 +50,7 @@ Alternatively, if you have installed GeckoView-example from another source, you 
 adb shell am start -n org.mozilla.geckoview_example/.App \
     --es env0 MOZ_PROFILER_STARTUP=1 \
     --es env1 MOZ_PROFILER_STARTUP_INTERVAL=5 \
-    --es env2 MOZ_PROFILER_STARTUP_FEATURES=threads,js,stackwalk,leaf,screenshots,ipcmessages,java \
+    --es env2 MOZ_PROFILER_STARTUP_FEATURES=js,stackwalk,screenshots,ipcmessages,java,processcpu,cpu \
     --es env3 MOZ_PROFILER_STARTUP_FILTERS="GeckoMain,Compositor,Renderer,IPDL Background"
 ```
 
@@ -78,7 +78,7 @@ The filename of the YAML file mentioned above depends on the bundle ID of your F
     env:
       MOZ_PROFILER_STARTUP: 1
       MOZ_PROFILER_STARTUP_INTERVAL: 5
-      MOZ_PROFILER_STARTUP_FEATURES: threads,js,stackwalk,leaf,screenshots,ipcmessages,java
+      MOZ_PROFILER_STARTUP_FEATURES: js,stackwalk,screenshots,ipcmessages,java,processcpu,cpu
       MOZ_PROFILER_STARTUP_FILTERS: GeckoMain,Compositor,Renderer,IPDL Background
     ```
  2. Push this file to the device with `adb push org.mozilla.fenix-geckoview-config.yaml /data/local/tmp/`.

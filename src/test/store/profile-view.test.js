@@ -1265,6 +1265,70 @@ describe('actions/ProfileView', function () {
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+
+      // Testing the negative filtering
+
+      // Tests the basic negative filtering with "-timing".
+      dispatch(ProfileView.changeMarkersSearchString('-name:mark'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(3);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
+      expect(getMarker(markerIndexes[2]).name.includes('d')).toBeTruthy();
+
+      // Tests multiple negative filtering with "-mark,-clic".
+      dispatch(ProfileView.changeMarkersSearchString('-name:mark,-name:clic'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
+
+      // Tests the negative filtering on a field with "-timing".
+      dispatch(ProfileView.changeMarkersSearchString('-type:timing'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
+
+      // Tests searching for the UserTiming type and negative search field.
+      dispatch(ProfileView.changeMarkersSearchString('type:timing,-name:b'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      // Tests searching for the mark-1 string making sure that it successfully gets it.
+      dispatch(ProfileView.changeMarkersSearchString('-1'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
+
+      // Tests searching for the mark-1 as a field string making sure that it successfully gets it.
+      dispatch(ProfileView.changeMarkersSearchString('name:-1'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
+
+      // Tests searching for the mark-1 as a negative filter to make sure we exclude it.
+      dispatch(ProfileView.changeMarkersSearchString('-name:-1'));
+
+      markerIndexes =
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState());
+      expect(markerIndexes).toHaveLength(3);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
+      expect(getMarker(markerIndexes[2]).name.includes('d')).toBeTruthy();
     });
   });
 
@@ -1498,7 +1562,7 @@ describe('actions/ProfileView', function () {
       ]);
     });
 
-    it('pops a committed range and unsets the selection', function () {
+    it('pops a committed range and sets the selection', function () {
       const { getState, dispatch } = setupStore();
       dispatch(
         ProfileView.updatePreviewSelection({
@@ -1526,6 +1590,36 @@ describe('actions/ProfileView', function () {
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 3,
+        selectionEnd: 7,
+      });
+    });
+
+    it('unsets the selection when popping the current committed range', function () {
+      const { getState, dispatch } = setupStore();
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 0, end: 10 },
+        { start: 1, end: 9 },
+        { start: 2, end: 8 },
+        { start: 3, end: 7 },
+      ]);
+
+      dispatch(ProfileView.popCommittedRanges(2));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 0, end: 10 },
+        { start: 1, end: 9 },
+      ]);
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 3,
+        selectionEnd: 7,
+      });
+
+      dispatch(ProfileView.popCommittedRanges(2));
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
