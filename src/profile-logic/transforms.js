@@ -16,10 +16,13 @@ import {
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { canonicalizeRangeSet } from '../utils/range-set';
-import { getSearchFilteredMarkerIndexes } from '../profile-logic/marker-data';
+import {
+  getSearchFilteredMarkerIndexes,
+  stringsToMarkerRegExps,
+} from '../profile-logic/marker-data';
 import { shallowCloneFrameTable, getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
-import { splitSearchString, stringsToRegExp } from '../utils/string';
+import { splitSearchString } from '../utils/string';
 
 import type {
   Thread,
@@ -1635,12 +1638,12 @@ function _findRangesByMarkerFilter(
 ): StartEndRange[] {
   const ranges = [];
 
-  const searchRegExp = stringsToRegExp(splitSearchString(filter));
+  const searchRegExps = stringsToMarkerRegExps(splitSearchString(filter));
   const searchFilteredMarkerIndexes = getSearchFilteredMarkerIndexes(
     getMarker,
     markerIndexes,
     markerSchemaByName,
-    searchRegExp,
+    searchRegExps,
     categoryList
   );
 
