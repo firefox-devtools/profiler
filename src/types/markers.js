@@ -763,6 +763,13 @@ export type UrlMarkerPayload = {|
   url: string,
 |};
 
+export type HostResolverPayload = {|
+  type: 'HostResolver',
+  host: string,
+  originSuffix: string,
+  flags: string,
+|}
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -793,7 +800,8 @@ export type MarkerPayload =
   | JankPayload
   | BrowsertimeMarkerPayload
   | NoPayloadUserData
-  | UrlMarkerPayload;
+  | UrlMarkerPayload
+  | HostResolverPayload;
 
 export type MarkerPayload_Gecko =
   | GPUMarkerPayload

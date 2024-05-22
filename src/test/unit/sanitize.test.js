@@ -821,8 +821,8 @@ describe('sanitizePII', function () {
       getProfileWithMarkers([
         [
           'nsHostResolver::ResolveHost',
+          0,
           1,
-          2,
           {
             type: 'HostResolver',
             host: 'domain.name',
