@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 49
+
+A new `sanitized-string` marker schema format type has been added, allowing markers to carry arbitrary strings containing PII that will be sanitized along with URLs and FilePaths.
+
 ### Version 48
 
 Removed the 'sampleGroups' object from the Counter structure.
