@@ -1467,7 +1467,7 @@ export function sanitizeFromMarkerSchema(
       } else if (format === 'sanitized-string') {
         markerPayload = ({
           ...markerPayload,
-          [key]: "<sanitized>",
+          [key]: '<sanitized>',
         }: any);
       }
     }
