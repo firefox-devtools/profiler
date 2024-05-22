@@ -768,7 +768,7 @@ export type HostResolverPayload = {|
   host: string,
   originSuffix: string,
   flags: string,
-|}
+|};
 
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
