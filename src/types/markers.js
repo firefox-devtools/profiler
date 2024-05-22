@@ -24,6 +24,8 @@ export type MarkerFormatType =
   | 'url'
   // Show the file path, and handle PII sanitization.
   | 'file-path'
+  // Show regular string, and handle PII sanitization.
+  | 'sanitized-string'
   // Important, do not put URL or file path information here, as it will not be
   // sanitized. Please be careful with including other types of PII here as well.
   // e.g. "Label: Some String"
