@@ -106,14 +106,6 @@ export const stringsToRegExp = (strings: string[] | null): RegExp | null => {
     return null;
   }
 
-  const regexpStr = strings
-    .map((string) => {
-      const prefixMatch = string.match(/^([a-z0-1]+):(.+)/i);
-      if (prefixMatch) {
-        return prefixMatch[1] + ':.*' + escapeStringRegexp(prefixMatch[2]);
-      }
-      return escapeStringRegexp(string);
-    })
-    .join('|');
+  const regexpStr = strings.map(escapeStringRegexp).join('|');
   return new RegExp(regexpStr, 'gi');
 };
