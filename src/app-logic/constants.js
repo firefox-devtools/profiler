@@ -9,7 +9,7 @@ import type { MarkerPhase } from 'firefox-profiler/types';
 // The current version of the Gecko profile format.
 // Please don't forget to update the gecko profile format changelog in
 // `docs-developer/CHANGELOG-formats.md`.
-export const GECKO_PROFILE_VERSION = 29;
+export const GECKO_PROFILE_VERSION = 30;
 
 // The current version of the "processed" profile format.
 // Please don't forget to update the processed profile format changelog in

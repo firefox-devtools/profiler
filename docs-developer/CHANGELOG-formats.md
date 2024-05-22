@@ -70,6 +70,10 @@ Older versions are not documented in this changelog but can be found in [process
 
 ## Gecko profile format
 
+### Version 30
+
+A new `sanitized-string` marker schema format type has been added, allowing markers to carry arbitrary strings containing PII that will be sanitized along with URLs and FilePaths.
+
 ### Version 29
 
 Removed the 'sample_groups' object from the GeckoCounter structure.
