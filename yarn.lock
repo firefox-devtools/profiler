@@ -1573,6 +1573,18 @@
   dependencies:
     vary "^1.1.2"
 
+"@kwsites/file-exists@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@kwsites/file-exists/-/file-exists-1.1.1.tgz#ad1efcac13e1987d8dbaf235ef3be5b0d96faa99"
+  integrity sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==
+  dependencies:
+    debug "^4.1.1"
+
+"@kwsites/promise-deferred@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
+  integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
+
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
@@ -5834,10 +5846,10 @@ flow-coverage-report@^0.8.0:
     terminal-table "^0.0.12"
     yargs "^16.0.3"
 
-flow-typed@^3.9.0:
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/flow-typed/-/flow-typed-3.9.0.tgz#fdf2df3fc8fa7bb60ff84722e886ef0a53316a82"
-  integrity sha512-VrvyaXh9UA6SIYQrzQvR+3AbMFsrNitUnWOxJqDCm/oPoTtUZXUaW9TpWAAU7Rz2icJ1yId43kTo4Z4lwWDlSg==
+flow-typed@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/flow-typed/-/flow-typed-4.0.0.tgz#cc97f7b2ab7fde027eadeaa23437feeecadf7aa3"
+  integrity sha512-GEgO6/YZH/nP1f3bNv2kAd3hx8JkIaf9B+rH4y87kcoeUKy5ktk5LzO0brv5uT2O+wBDTZn2/omj6V6wOXpKuA==
   dependencies:
     "@octokit/rest" "^18.12.0"
     colors "1.4.0"
@@ -5845,12 +5857,14 @@ flow-typed@^3.9.0:
     fs-extra "^8.1.0"
     glob "^7.1.6"
     got "^11.8.5"
+    js-yaml "^4.1.0"
     md5 "^2.2.1"
     mkdirp "^1.0.3"
     node-stream-zip "^1.15.0"
     prettier "^1.19.1"
     rimraf "^3.0.2"
     semver "^7.5.4"
+    simple-git "^3.10.0"
     table "^6.7.3"
     which "^2.0.2"
     yargs "^15.1.0"
@@ -11713,6 +11727,15 @@ signal-exit@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-4.0.1.tgz#96a61033896120ec9335d96851d902cc98f0ba2a"
   integrity sha512-uUWsN4aOxJAS8KOuf3QMyFtgm1pkb6I+KRZbRF/ghdf5T7sM+B1lLLzPDxswUjkmHyxQAVzEgG35E3NzDM9GVw==
+
+simple-git@^3.10.0:
+  version "3.24.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.24.0.tgz#33a8c88dc6fa74e53eaf3d6bfc27d0182a49ec00"
+  integrity sha512-QqAKee9Twv+3k8IFOFfPB2hnk6as6Y6ACUpwCtQvRYBAes23Wv3SZlHVobAzqcE8gfsisCvPw3HGW3HYM+VYYw==
+  dependencies:
+    "@kwsites/file-exists" "^1.1.1"
+    "@kwsites/promise-deferred" "^1.1.1"
+    debug "^4.3.4"
 
 sisteransi@^1.0.4:
   version "1.0.5"
