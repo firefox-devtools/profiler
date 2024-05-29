@@ -1368,7 +1368,7 @@ export function filterThreadToSearchString(
     }
 
     const fileNameIndex = funcTable.fileName[func];
-    if (fileNameIndex !== null) {
+    if (fileNameIndex !== null && fileNameIndex !== undefined) {
       const fileNameString = stringTable.getString(fileNameIndex);
       if (fileNameString.toLowerCase().includes(lowercaseSearchString)) {
         return true;
@@ -2502,14 +2502,14 @@ export function getOriginAnnotationForFunc(
   let origin = null;
   const resourceIndex = funcTable.resource[funcIndex];
   if (resourceIndex !== -1) {
-    resourceType = resourceTable.type[resourceIndex];
+    resourceType = compressedArrayElement(resourceTable.type, resourceIndex);
     const resourceNameIndex = resourceTable.name[resourceIndex];
     origin = stringTable.getString(resourceNameIndex);
   }
 
   const fileNameIndex = funcTable.fileName[funcIndex];
   let fileName;
-  if (fileNameIndex !== null) {
+  if (fileNameIndex !== null && fileNameIndex !== undefined) {
     fileName = stringTable.getString(fileNameIndex);
 
     // Strip off any filename decorations from symbolication. It could be a path
@@ -2518,17 +2518,17 @@ export function getOriginAnnotationForFunc(
     // strip it down to just the actual path.
     fileName = parseFileNameFromSymbolication(fileName).path;
 
-    if (frameLineNumber !== null) {
+    if (frameLineNumber !== null && frameLineNumber !== undefined) {
       fileName += ':' + frameLineNumber;
-      if (frameColumnNumber !== null) {
+      if (frameColumnNumber !== null && frameColumnNumber !== undefined) {
         fileName += ':' + frameColumnNumber;
       }
     } else {
       const lineNumber = funcTable.lineNumber[funcIndex];
-      if (lineNumber !== null) {
+      if (lineNumber !== null && lineNumber !== undefined) {
         fileName += ':' + lineNumber;
         const columnNumber = funcTable.columnNumber[funcIndex];
-        if (columnNumber !== null) {
+        if (columnNumber !== null && columnNumber !== undefined) {
           fileName += ':' + columnNumber;
         }
       }
@@ -2578,7 +2578,7 @@ export function reserveFunctionsInThread(
     resourceIndex < resourceTable.length;
     resourceIndex++
   ) {
-    const resourceType = resourceTable.type[resourceIndex];
+    const resourceType = compressedArrayElement(resourceTable.type, resourceIndex);
     const name = resourceTable.name[resourceIndex];
     const isJS = jsResourceTypes.includes(resourceType);
     const fileName = resourceType === resourceTypes.url ? name : null;
@@ -3443,11 +3443,12 @@ export function findAddressProofForFile(
     if (address === null) {
       continue;
     }
-    const resource = funcTable.resource[func];
-    if (resourceTable.type[resource] !== resourceTypes.library) {
+    const resourceIndex = funcTable.resource[func];
+    const resourceType = compressedArrayElement(resourceTable.type, resourceIndex);
+    if (resourceType !== resourceTypes.library) {
       continue;
     }
-    const libIndex = resourceTable.lib[resource];
+    const libIndex = resourceTable.lib[resourceIndex];
     if (libIndex === null) {
       continue;
     }
@@ -3621,12 +3622,13 @@ export function getBottomBoxInfoForCallNode(
 
   const callNodeTable = callNodeInfo.getCallNodeTable();
   const funcIndex = callNodeTable.func[callNodeIndex];
-  const fileName = funcTable.fileName[funcIndex];
+  const fileName = compressedTableelement(funcTable.fileName, funcIndex);
   const sourceFile = fileName !== null ? stringTable.getString(fileName) : null;
-  const resource = funcTable.resource[funcIndex];
+  const resourceIndex = funcTable.resource[funcIndex];
+  const resourceType = compressedArrayElement(resourceTable.type, resourceIndex);
   const libIndex =
-    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
-      ? resourceTable.lib[resource]
+    resource !== -1 && resourceType === resourceTypes.library
+      ? compressedArrayElement(resourceTable.lib, resourceIndex)
       : null;
   const nativeSymbolsForCallNode = getNativeSymbolsForCallNode(
     callNodeIndex,
@@ -3678,4 +3680,17 @@ export function determineTimelineType(profile: Profile): TimelineType {
 
   // Have both category and CPU usage information. Use 'cpu-category'.
   return 'cpu-category';
+}
+
+/**
+ * Helper function allow specifying arrays that contain the same element as
+ * just that element itself, to save space in profile JSON and memory.
+ *
+ * e.g.:
+ *  `lineNumber: [0, 0, 0, 0]`
+ * becomes:
+ *  `lineNumber: 0`
+ */
+export function compressedArrayElement(array: any, index: number): any {
+  return Array.isArray(array) ? array[index] : array;
 }
