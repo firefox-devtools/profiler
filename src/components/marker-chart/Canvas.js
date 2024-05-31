@@ -28,6 +28,7 @@ import type {
   UnitIntervalOfProfileRange,
   ThreadsKey,
   Marker,
+  MarkerTiming,
   MarkerTimingAndBuckets,
   MarkerIndex,
   TimelineTrackOrganization,
@@ -543,22 +544,53 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   }
 
   countMarkersInBucketStartingAtRow(rowIndex: number): number {
-    const { markerTimingAndBuckets } = this.props;
+    const {
+      rangeStart,
+      rangeEnd,
+      markerTimingAndBuckets,
+      marginLeft,
+      marginRight,
+      viewport: { containerWidth, viewportLeft, viewportRight },
+    } = this.props;
+    // Decide the time range for which markers should be counted.
+    const markerContainerWidth = containerWidth - marginLeft - marginRight;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const timeAtViewportLeft: Milliseconds =
+      rangeStart + rangeLength * viewportLeft;
+    const timeAtViewportRightPlusMargin: Milliseconds =
+      rangeStart +
+      rangeLength * viewportRight +
+      // This represents the amount of seconds in the right margin:
+      marginRight * ((viewportLength * rangeLength) / markerContainerWidth);
+
     const markerTiming = markerTimingAndBuckets[rowIndex];
     if (typeof markerTiming === 'string') {
       return 0;
     }
 
     const { name } = markerTiming;
-    let count = markerTiming.length;
+    function countMarkersInRange(markerTiming: MarkerTiming): number {
+      let count: number = 0;
+      for (let i = 0; i < markerTiming.length; i++) {
+        if (
+          markerTiming.end[i] >= timeAtViewportLeft &&
+          markerTiming.start[i] < timeAtViewportRightPlusMargin
+        ) {
+          ++count;
+        }
+      }
+
+      return count;
+    }
+    let count = countMarkersInRange(markerTiming);
     for (let row = rowIndex + 1; row < markerTimingAndBuckets.length; ++row) {
-      if (
-        typeof markerTimingAndBuckets[row] === 'string' ||
-        markerTimingAndBuckets[row].name !== name
-      ) {
+      const markerTiming = markerTimingAndBuckets[row];
+      if (typeof markerTiming === 'string' || markerTiming.name !== name) {
         break;
       }
-      count += markerTimingAndBuckets[row].length;
+      count += countMarkersInRange(markerTiming);
     }
     return count;
   }
