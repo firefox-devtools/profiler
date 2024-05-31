@@ -1,5 +1,5 @@
 
-# Async POSIX Signal Control
+# Controlling the profiler using POSIX signals
 
 The Firefox profiler supports the use of asynchronous POSIX signals for a
 limited number of operations, specifically starting and stopping the profiler.
@@ -22,7 +22,7 @@ on MacOS:
     ls ~/Downloads/ | grep "profile.*json"
 
 From there, the user can open the written profile using the standard profiler
-UI, by navigating to [profiler.firefox.com](profiler.firefox.com), and selecting
+UI, by navigating to [profiler.firefox.com](https://profiler.firefox.com), and selecting
 "Load a profile from file".
 
 Typically, sending a signal to a program is done using the `kill`
@@ -39,13 +39,13 @@ are written without the `SIG` prefix when used as an argument to `kill` i.e.:
     kill -USR1 <firefox pid>
     kill --signal USR1 <firefox pid>
 
-Only the process ID of the "main" process should be used. Child processes are
+!> Only the process ID of the "main" process should be used. Child processes are
 controlled by the parent process via IPC, and are unable to write their
 processes to disk (due to sandboxing restrictions), so are not useful to profile
 using signals.
 
 The process ID of a running instance of Firefox can be found in a number of
-ways, for instance::
+ways, for instance:
 
     pgrep -f Firefox.app      // On MacOS
     pidof Firefox             // on Linux
