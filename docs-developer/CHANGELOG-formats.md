@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 49
+
+A new `sanitized-string` marker schema format type has been added, allowing markers to carry arbitrary strings containing PII that will be sanitized along with URLs and FilePaths.
+
 ### Version 48
 
 Removed the 'sampleGroups' object from the Counter structure.
@@ -69,6 +73,10 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js).
 
 ## Gecko profile format
+
+### Version 30
+
+A new `sanitized-string` marker schema format type has been added, allowing markers to carry arbitrary strings containing PII that will be sanitized along with URLs and FilePaths.
 
 ### Version 29
 

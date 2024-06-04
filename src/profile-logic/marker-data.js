@@ -1464,6 +1464,11 @@ export function sanitizeFromMarkerSchema(
           ...markerPayload,
           [key]: removeFilePath(markerPayload[key]),
         }: any);
+      } else if (format === 'sanitized-string') {
+        markerPayload = ({
+          ...markerPayload,
+          [key]: '<sanitized>',
+        }: any);
       }
     }
   }
