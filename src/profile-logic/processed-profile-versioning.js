@@ -2264,6 +2264,9 @@ const _upgraders = {
       }
     }
   },
+  [49]: (_) => {
+    // The 'sanitized-string' marker schema format type has been added.
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

@@ -108,6 +108,27 @@ describe('sanitizePII', function () {
           },
         ],
       },
+      HostResolver: {
+        name: 'HostResolver',
+        tableLabel: '{marker.name} - {marker.data.host}',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          {
+            key: 'host',
+            format: 'sanitized-string',
+            searchable: true,
+          },
+          {
+            key: 'originSuffix',
+            format: 'sanitized-string',
+            searchable: true,
+          },
+          {
+            key: 'flags',
+            format: 'string',
+          },
+        ],
+      },
     };
 
     const sanitizedProfile = sanitizePII(
@@ -790,6 +811,42 @@ describe('sanitizePII', function () {
 
     // Now check the url fields and make sure they are sanitized.
     expect(marker.url).toBe('https://<URL>');
+  });
+
+  it('should sanitize the sanitized-string markers', function () {
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveUrls: true,
+      },
+      getProfileWithMarkers([
+        [
+          'nsHostResolver::ResolveHost',
+          0,
+          1,
+          {
+            type: 'HostResolver',
+            host: 'domain.name',
+            originSuffix: '^other.domain',
+            flags: '0xf00ba4',
+          },
+        ],
+      ])
+    );
+    expect(sanitizedProfile.threads.length).toEqual(1);
+    const thread = sanitizedProfile.threads[0];
+    expect(thread.markers.length).toEqual(1);
+
+    const marker = thread.markers.data[0];
+
+    // The host fields should still be there
+    if (!marker || !marker.host) {
+      throw new Error('Failed to find host property in the payload');
+    }
+
+    // Now check the host fields and make sure they are sanitized.
+    expect(marker.host).toBe('<sanitized>');
+    expect(marker.originSuffix).toBe('<sanitized>');
+    expect(marker.flags).toBe('0xf00ba4');
   });
 
   it('should sanitize the eTLD+1 field if urls are supposed to be sanitized', function () {
