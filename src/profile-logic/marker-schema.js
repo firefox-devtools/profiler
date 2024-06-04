@@ -472,6 +472,7 @@ export function formatFromMarkerSchema(
   switch (format) {
     case 'url':
     case 'file-path':
+    case 'sanitized-string':
     case 'string':
       // Make sure a non-empty string is returned here.
       return String(value) || '(empty)';
