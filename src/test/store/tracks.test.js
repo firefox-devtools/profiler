@@ -407,7 +407,6 @@ describe('ordering and hiding', function () {
         'show [process]',
         '  - show [thread Empty] SELECTED',
         '  - show [marker Marker] SELECTED',
-        '  - show [marker NoGraphMarker] SELECTED',
       ]);
     });
 
