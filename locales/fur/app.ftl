@@ -138,6 +138,12 @@ CallTree--samples-total = Totâl (campions)
         funzion e je stade osservade stâ sul stack. Chest al inclûd il timp là che la
         funzion e jere in efiets in esecuzion e il timp pierdût tai clamadôrs di cheste
         funzion.
+CallTree--samples-self = Self
+    .title = Il cont dai campions “self” al inclût ducj i campions là che la funzion si cjatave ae fin dal stack. Se cheste funzion e à clamât altris funzions, il cont "altri" di chestis funzions nol è includût. Il cont “self” al è util par capî là che di fat il timp al ven doprât dentri di un program.
+CallTree--bytes-total = Dimension totâl (bytes)
+    .title = La “dimension totâl“ e inclût une sintesi di ducj i bytes assegnâts o gjavâts de assegnazion cuant che cheste funzion e je stade tignude di voli sul stack. Chest al inclût i bytes consumâts cuant che la funzion e jere di fat in esecuzion, ma ancje il timp passât tes funzions clamadis di cheste funzion.
+CallTree--bytes-self = Self (bytes)
+    .title = “Self“ al inclût i bytes assegnâts o gjavâts de assegnazion cuant che cheste funzion si cjatave ae fin dal stack. Se cheste funzione e à clamât altris funzions, il cont dai bytes "altri" di chestis funzions nol è includût. Il cont “self” al è util par capî cemût che la memorie e ven di fat assegnade e gjavade de assegnazion dentri di un program.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -149,6 +155,11 @@ CallTree--samples-total = Totâl (campions)
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
     .title = Cualchi clamade a { $calledFunction } e je stade incorporade dal compiladôr.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (incorporade)
+    .title = Lis clamadis a { $calledFunction } a son stadis incorporadis in { $outerFunction } dal compiladôr.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -184,6 +195,16 @@ CallTreeSidebar--self-samples =
     .label = Campions te funzion
 CallTreeSidebar--running-size =
     .label = Dimensions esecuzion
+CallTreeSidebar--self-size =
+    .label = Dimensions te funzion
+CallTreeSidebar--categories = Categoriis
+CallTreeSidebar--implementation = Implementazion
+CallTreeSidebar--running-milliseconds = Esecuzion — Miliseconts
+CallTreeSidebar--running-sample-count = Esecuzion — Numar campions
+CallTreeSidebar--running-bytes = Esecuzion — Bytes
+CallTreeSidebar--self-milliseconds = Te funzion —  Miliseconts
+CallTreeSidebar--self-sample-count = Te funzion —  Numar campions
+CallTreeSidebar--self-bytes = Te funzion —  Bytes
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
