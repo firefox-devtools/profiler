@@ -211,32 +211,76 @@ CallTreeSidebar--self-bytes = Te funzion —  Bytes
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Inserî i URLs dai profîi che tu vuelis confrontâ
+CompareHome--instruction-content =
+    Chest imprest al tirarà fûr i dâts dal segn e de dade di timp selezionâts par
+    ogni profîl, e ju metarà te stesse viodude par rindi il confront plui sempliç.
+CompareHome--form-label-profile1 = Profîl 1:
+CompareHome--form-label-profile2 = Profîl 2:
+CompareHome--submit-button =
+    .value = Recupere profîi
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Chest profîl al è stât regjistrât cuntune version (compilazion) che no veve lis otimizazions dopradis te version di publicazion.
+        Al è pussibil che lis osservazions des prestazions no vegnin aplicadis ai utents te version di publicazion.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = Vierç la sbare laterâl
+Details--close-sidebar-button =
+    .title = Siere la sbare laterâl
+Details--error-boundary-message =
+    .message = Orpo, al è capitât un erôr no cognossût in chest panel.
 
 ## ErrorBoundary
 ## This component is shown when an unexpected error is encountered in the application.
 ## Note that the localization won't be always applied in this component.
 
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Segnale chest probleme ai svilupadôrs, includint l’erôr
+    complet come visualizât te Console web dai struments di svilup.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Segnale l’erôr su GitHub
 
 ## Footer Links
 
+FooterLinks--legal = Notis legâls
+FooterLinks--Privacy = Riservatece
+FooterLinks--Cookies = Cookies
+FooterLinks--languageSwitcher--select =
+    .title = Cambie lenghe
+FooterLinks--hide-button =
+    .title = Plate colegaments da pît de pagjine
+    .aria-label = Plate colegaments da pît de pagjine
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> segns
 
 ## Home page
 
+Home--upload-from-file-input-button = Cjame un profîl di file
+Home--upload-from-url-button = Cjame un profîl di un URL
+Home--load-from-url-submit-button =
+    .value = Cjame
+Home--documentation-button = Documentazion
+Home--menu-button = Ative il boton { -profiler-brand-name } tal menù
 Home--record-instructions-start-stop = Interomp e invie la profiladure
 Home--record-instructions-capture-load = Cature e cjame profîl
 Home--additional-content-title = Cjame profîi esistents
