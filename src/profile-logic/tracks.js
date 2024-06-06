@@ -261,7 +261,7 @@ export function computeLocalTracksByPid(
 
   // find markers that might have their own track.
   const markerSchemasWithGraphs = (profile.meta.markerSchema || []).filter(
-    (schema) => schema.graphs !== undefined
+    (schema) => Array.isArray(schema.graphs) && schema.graphs.length > 0
   );
 
   for (
