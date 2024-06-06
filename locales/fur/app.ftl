@@ -210,6 +210,7 @@ CallTreeSidebar--self-bytes = Te funzion —  Bytes
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Inserî i URLs dai profîi che tu vuelis confrontâ
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
