@@ -1,5 +1,5 @@
 
-# Controlling the profiler using POSIX signals
+# Profiler control using POSIX signals
 
 The Firefox profiler supports the use of asynchronous POSIX signals for a
 limited number of operations, specifically starting and stopping the profiler.
