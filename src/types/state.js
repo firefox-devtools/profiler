@@ -355,6 +355,7 @@ export type FullProfileSpecificUrlState = {|
   localTrackOrderByPid: Map<Pid, TrackIndex[]>,
   localTrackOrderChangedPids: Set<Pid>,
   showJsTracerSummary: boolean,
+  tabFilter: TabID | null,
   legacyThreadOrder: ThreadIndex[] | null,
   legacyHiddenThreads: ThreadIndex[] | null,
 |};

@@ -153,6 +153,7 @@ type FullProfileSpecificBaseQuery = {|
   hiddenGlobalTracks: string, // "01"
   hiddenLocalTracksByPid: string, // "1549-0w8~1593-23~1598-01~1602-02~1607-1"
   localTrackOrderByPid: string, // "1549-780w6~1560-01"
+  tabID: TabID,
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
@@ -328,6 +329,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.full.localTrackOrderByPid,
         urlState.profileSpecific.full.localTrackOrderChangedPids
       );
+      baseQuery.tabID = urlState.profileSpecific.full.tabFilter ?? undefined;
 
       break;
     }
@@ -581,9 +583,17 @@ export function stateFromLocation(
     transforms[selectedThreadsKey] = parseTransforms(query.transforms);
   }
 
-  let tabID = null;
+  // oldTabID is used for the old active tab view that we had. We will remove
+  // it in the end, but have to keep this while we have the view.
+  let oldTabID = null;
   if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
-    tabID = Number(query.ctxId);
+    oldTabID = Number(query.ctxId);
+  }
+
+  // tabID is used for the tab selector that we have in our full view.
+  let tabID = null;
+  if (query.tabID && Number.isInteger(Number(query.tabID))) {
+    tabID = Number(query.tabID);
   }
 
   const selectedTab =
@@ -631,7 +641,7 @@ export function stateFromLocation(
     symbolServerUrl: query.symbolServer || null,
     timelineTrackOrganization: validateTimelineTrackOrganization(
       query.view,
-      tabID
+      oldTabID
     ),
     profileSpecific: {
       implementation,
@@ -663,6 +673,7 @@ export function stateFromLocation(
         ),
         localTrackOrderByPid,
         localTrackOrderChangedPids,
+        tabFilter: tabID,
         legacyThreadOrder: query.threadOrder
           ? query.threadOrder.split('-').map((index) => Number(index))
           : null,
