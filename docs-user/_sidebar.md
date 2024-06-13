@@ -15,6 +15,7 @@
   * [Perf profiling on Linux](./guide-perf-profiling.md)
   * [Perf profiling on Android](./guide-android-profiling.md)
   * [IPC Messages](./ipc-messages.md)
+  * [Profiler control using POSIX signals](./async-posix-signal-control.md)
 * [Video Tutorials](./videos.md)
   * [Firefox Profiler intro](./videos-intro.md)
   * [Samples and markers](./videos-samples-markers.md)

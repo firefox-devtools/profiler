@@ -7,3 +7,4 @@ developers of the Firefox browser.
 * [Perf profiling on Linux](./guide-perf-profiling.md)
 * [Perf profiling on Android](./guide-android-profiling.md)
 * [IPC Messages](./ipc-messages.md)
+* [Profiler control using POSIX signals](./async-posix-signal-control.md)
