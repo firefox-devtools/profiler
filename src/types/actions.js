@@ -557,6 +557,10 @@ type UrlStateAction =
       +type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
       +kind: string,
       +category: IndexIntoCategoryList,
+    |}
+  | {|
+      +type: 'CHANGE_TAB_FILTER',
+      +tabID: TabID | null,
     |};
 
 type IconsAction =

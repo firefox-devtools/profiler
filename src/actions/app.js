@@ -50,6 +50,7 @@ import type {
   UrlState,
   UploadedProfileInformation,
   IndexIntoCategoryList,
+  TabID,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -426,5 +427,12 @@ export function toggleOpenCategoryInSidebar(
     type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
     kind,
     category,
+  };
+}
+
+export function changeTabFilter(tabID: TabID | null): Action {
+  return {
+    type: 'CHANGE_TAB_FILTER',
+    tabID,
   };
 }
