@@ -696,35 +696,33 @@ export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
 
     // Construction of TabID to Page array map.
     const pageMap: Map<TabID, Page[]> = new Map();
-    const appendPageMap = (tabID, page) => {
+
+    for (const page of pageList) {
+      // If this is an iframe, we recursively visit its parent.
+      const getTopMostParent = (item) => {
+        if (item.embedderInnerWindowID === 0) {
+          return item;
+        }
+
+        // We are using a Map to make this more performant.
+        // It should be 1-2 loop iteration in 99% of the cases.
+        const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
+        if (parent !== undefined) {
+          return getTopMostParent(parent);
+        }
+        // This is very unlikely to happen.
+        return item;
+      };
+
+      const topMostParent = getTopMostParent(page);
+
+      // Now we have the top most parent. We can append the pageMap.
+      const { tabID } = topMostParent;
       const tabEntry = pageMap.get(tabID);
       if (tabEntry === undefined) {
         pageMap.set(tabID, [page]);
       } else {
         tabEntry.push(page);
-      }
-    };
-
-    for (const page of pageList) {
-      if (page.embedderInnerWindowID === undefined) {
-        // This is the top most page, which means the web page itself.
-        appendPageMap(page.tabID, page);
-      } else {
-        // This is an iframe, we should find its parent to see find top most
-        // TabID, which is the tab ID for our case.
-        const getTopMostParent = (item) => {
-          // We are using a Map to make this more performant.
-          // It should be 1-2 loop iteration in 99% of the cases.
-          const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
-          if (parent !== undefined) {
-            return getTopMostParent(parent);
-          }
-          return item;
-        };
-
-        const parent = getTopMostParent(page);
-        // Now we have the top most parent. We can append the pageMap.
-        appendPageMap(parent.tabID, page);
       }
     }
 
