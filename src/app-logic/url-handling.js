@@ -1355,8 +1355,8 @@ function validateTimelineTrackOrganization(
  * provided or something else is provided for some reason.
  */
 function validateTimelineType(type: ?string): TimelineType {
-  // Pretend this is a TimelineTrackOrganization so that we can exhaustively
-  // go through each option.
+  // Pretend this is a TimelineType so that we can exhaustively go through
+  // each option.
   const timelineType: TimelineType = (type: any);
   switch (timelineType) {
     case 'stack':
