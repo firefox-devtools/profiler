@@ -82,6 +82,7 @@ import type {
   BottomBoxInfo,
   Bytes,
   ThreadWithReservedFunctions,
+  TabID,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -2924,74 +2925,79 @@ export function filterToRetainedAllocations(
 }
 
 /**
- * Extract the hostname and favicon from the last page given the relative pages
- * to a tab. We assume that the user wants to know about the last loaded page
- * in this tab.
+ * Extract the hostname and favicon from the last page for all tab ids. we
+ * assume that the user wants to know about the last loaded page in this tab.
+ * returns null if we don't have information about pages (in older profiles).
  */
 export function extractProfileFilterPageData(
-  pages: PageList | null,
-  relevantPages: Set<InnerWindowID>
-): ProfileFilterPageData | null {
-  if (pages === null) {
-    // We don't have pages array (which is the case for older profiles).
-    // Return early.
-    return null;
+  pagesMapByTabID: Map<TabID, PageList> | null
+): Map<TabID, ProfileFilterPageData> {
+  if (pagesMapByTabID === null) {
+    // We don't have pages array (which is the case for older profiles). Return early.
+    return new Map();
   }
 
-  // Getting the pages that are relevant and a top-most frame.
-  let filteredPages = pages.filter(
-    (page) =>
-      // It's the top-most frame if `embedderInnerWindowID` is zero.
-      page.embedderInnerWindowID === 0 && relevantPages.has(page.innerWindowID)
-  );
-
-  if (filteredPages.length > 1) {
-    // If there are more than one top-most page, it's also good to filter out the
-    // `about:` pages so user can see their url they are actually profiling.
-    filteredPages = filteredPages.filter(
-      (page) => !page.url.startsWith('about:')
+  const pageDataByTabID = new Map();
+  for (const [tabID, pages] of pagesMapByTabID) {
+    let topMostPages = pages.filter(
+      (page) =>
+        // It's the top-most frame if `embedderInnerWindowID` is zero.
+        page.embedderInnerWindowID === 0
     );
-  }
 
-  if (filteredPages.length === 0) {
-    // There should be at least one relevant page.
-    console.error(`Expected a relevant page but couldn't find it.`);
-    return null;
-  }
-
-  const pageUrl = filteredPages[filteredPages.length - 1].url;
-
-  if (pageUrl.startsWith('about:')) {
-    // If we only have an `about:*` page, we should return early with a friendly
-    // origin and hostname. Otherwise the try block will fail.
-    return {
-      origin: pageUrl,
-      hostname: pageUrl,
-      favicon: null,
-    };
-  }
-
-  try {
-    const page = new URL(pageUrl);
-    // FIXME(Bug 1620546): This is not ideal and we should get the favicon
-    // either during profile capture or profile pre-process.
-    const favicon = new URL('/favicon.ico', page.origin);
-    if (favicon.protocol === 'http:') {
-      // Upgrade http requests.
-      favicon.protocol = 'https:';
+    if (topMostPages.length > 1) {
+      // If there are more than one top-most page, it's also good to filter out the
+      // `about:` pages so user can see their url they are actually profiling.
+      topMostPages = topMostPages.filter(
+        (page) => !page.url.startsWith('about:')
+      );
     }
-    return {
-      origin: page.origin,
-      hostname: page.hostname,
-      favicon: favicon.href,
-    };
-  } catch (e) {
-    console.error(
-      'Error while extracing the hostname and favicon from the page url',
-      pageUrl
-    );
-    return null;
+
+    if (topMostPages.length === 0) {
+      // There should be at least one relevant page.
+      console.error(
+        `Expected a relevant page for tabID ${tabID} but couldn't find it.`
+      );
+      continue;
+    }
+
+    // The last page is the one we care about.
+    const pageUrl = topMostPages[topMostPages.length - 1].url;
+    if (pageUrl.startsWith('about:')) {
+      // If we only have an `about:*` page, we should return early with a friendly
+      // origin and hostname. Otherwise the try block will always fail.
+      pageDataByTabID.set(tabID, {
+        origin: pageUrl,
+        hostname: pageUrl,
+        favicon: null,
+      });
+      continue;
+    }
+
+    try {
+      const page = new URL(pageUrl);
+      // FIXME(Bug 1620546): This is not ideal and we should get the favicon
+      // either during profile capture or profile pre-process.
+      const favicon = new URL('/favicon.ico', page.origin);
+      if (favicon.protocol === 'http:') {
+        // Upgrade http requests.
+        favicon.protocol = 'https:';
+      }
+      pageDataByTabID.set(tabID, {
+        origin: page.origin,
+        hostname: page.hostname,
+        favicon: favicon.href,
+      });
+    } catch (e) {
+      console.error(
+        'Error while extracing the hostname and favicon from the page url',
+        pageUrl
+      );
+      continue;
+    }
   }
+
+  return pageDataByTabID;
 }
 
 // Returns the resource index for a "url" or "webhost" resource which is created
