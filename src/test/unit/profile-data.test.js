@@ -959,113 +959,138 @@ describe('getSamplesSelectedStates', function () {
 });
 
 describe('extractProfileFilterPageData', function () {
-  const innerWindowIds = {
-    mozilla: 1,
-    aboutBlank: 2,
-    profiler: 3,
-    exampleSubFrame: 4,
-    unknown: 5,
-  };
-  // This is the `profile.pages` array.
-  const pages = [
-    {
+  const pages = {
+    mozilla: {
       tabID: 1111,
-      innerWindowID: innerWindowIds.mozilla,
+      innerWindowID: 1,
       url: 'https://www.mozilla.org',
       embedderInnerWindowID: 0,
     },
-    {
+    aboutBlank: {
       tabID: 2222,
-      innerWindowID: innerWindowIds.aboutBlank,
+      innerWindowID: 2,
       url: 'about:blank',
       embedderInnerWindowID: 0,
     },
-    {
+    profiler: {
       tabID: 2222,
-      innerWindowID: innerWindowIds.profiler,
+      innerWindowID: 3,
       url: 'https://profiler.firefox.com/public/xyz',
       embedderInnerWindowID: 0,
     },
-    {
+    exampleSubFrame: {
       tabID: 2222,
-      innerWindowID: innerWindowIds.exampleSubFrame,
+      innerWindowID: 4,
       url: 'https://example.com/subframe',
       // This is a subframe of the page above.
-      embedderInnerWindowID: innerWindowIds.profiler,
+      embedderInnerWindowID: 3,
     },
-  ];
+  };
 
   it('extracts the page data when there is only one relevant page', function () {
     // Adding only the https://www.mozilla.org page.
-    const relevantPages = new Set([innerWindowIds.mozilla]);
-
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-    expect(pageData).toEqual({
-      origin: 'https://www.mozilla.org',
-      hostname: 'www.mozilla.org',
-      favicon: 'https://www.mozilla.org/favicon.ico',
-    });
+    const pagesMap = new Map([[pages.mozilla.tabID, [pages.mozilla]]]);
+    const pageData = extractProfileFilterPageData(pagesMap);
+    expect([...pageData]).toEqual([
+      [
+        pages.mozilla.tabID,
+        {
+          origin: 'https://www.mozilla.org',
+          hostname: 'www.mozilla.org',
+          favicon: 'https://www.mozilla.org/favicon.ico',
+        },
+      ],
+    ]);
   });
 
   it('extracts the page data when there are multiple relevant page', function () {
-    const relevantPages = new Set([
-      innerWindowIds.profiler,
-      innerWindowIds.exampleSubFrame,
+    const pagesMap = new Map([
+      [pages.profiler.tabID, [pages.profiler, pages.exampleSubFrame]],
     ]);
 
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-    expect(pageData).toEqual({
-      origin: 'https://profiler.firefox.com',
-      hostname: 'profiler.firefox.com',
-      favicon: 'https://profiler.firefox.com/favicon.ico',
-    });
+    const pageData = extractProfileFilterPageData(pagesMap);
+    expect([...pageData]).toEqual([
+      [
+        pages.profiler.tabID,
+        {
+          origin: 'https://profiler.firefox.com',
+          hostname: 'profiler.firefox.com',
+          favicon: 'https://profiler.firefox.com/favicon.ico',
+        },
+      ],
+    ]);
   });
 
   it('extracts the page data when there are multiple relevant page with about:blank', function () {
-    const relevantPages = new Set([
-      innerWindowIds.aboutBlank,
-      innerWindowIds.profiler,
+    const pagesMap = new Map([
+      [pages.profiler.tabID, [pages.aboutBlank, pages.profiler]],
     ]);
 
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-    expect(pageData).toEqual({
-      origin: 'https://profiler.firefox.com',
-      hostname: 'profiler.firefox.com',
-      favicon: 'https://profiler.firefox.com/favicon.ico',
-    });
+    const pageData = extractProfileFilterPageData(pagesMap);
+    expect([...pageData]).toEqual([
+      [
+        pages.profiler.tabID,
+        {
+          origin: 'https://profiler.firefox.com',
+          hostname: 'profiler.firefox.com',
+          favicon: 'https://profiler.firefox.com/favicon.ico',
+        },
+      ],
+    ]);
   });
 
   it('extracts the page data when there is only about:blank as relevant page', function () {
-    const relevantPages = new Set([innerWindowIds.aboutBlank]);
+    const pagesMap = new Map([[pages.aboutBlank.tabID, [pages.aboutBlank]]]);
 
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-    expect(pageData).toEqual({
-      origin: 'about:blank',
-      hostname: 'about:blank',
-      favicon: null,
-    });
-  });
-
-  it('fails to extract the page data when there is no profile data in common', function () {
-    // Ignore the error we output when it fails.
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    const relevantPages = new Set([innerWindowIds.unknown]);
-
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-
-    expect(pageData).toEqual(null);
-    expect(console.error).toHaveBeenCalled();
+    const pageData = extractProfileFilterPageData(pagesMap);
+    expect([...pageData]).toEqual([
+      [
+        pages.aboutBlank.tabID,
+        {
+          origin: 'about:blank',
+          hostname: 'about:blank',
+          favicon: null,
+        },
+      ],
+    ]);
   });
 
   it('fails to extract the page data when there is only a sub frame', function () {
     // Ignore the error we output when it fails.
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    const relevantPages = new Set([innerWindowIds.exampleSubFrame]);
+    const pagesMap = new Map([
+      [pages.exampleSubFrame.tabID, [pages.exampleSubFrame]],
+    ]);
 
-    const pageData = extractProfileFilterPageData(pages, relevantPages);
-
-    expect(pageData).toEqual(null);
+    const pageData = extractProfileFilterPageData(pagesMap);
+    expect([...pageData]).toEqual([]);
     expect(console.error).toHaveBeenCalled();
+  });
+
+  it('can extract the data of several tabs', function () {
+    const pagesMap = new Map([
+      [pages.mozilla.tabID, [pages.mozilla]],
+      [pages.profiler.tabID, [pages.profiler, pages.exampleSubFrame]],
+    ]);
+    const pageData = extractProfileFilterPageData(pagesMap);
+    expect([...pageData]).toEqual([
+      [
+        pages.mozilla.tabID,
+        {
+          origin: 'https://www.mozilla.org',
+          hostname: 'www.mozilla.org',
+          favicon: 'https://www.mozilla.org/favicon.ico',
+        },
+      ],
+      [
+        pages.profiler.tabID,
+        {
+          origin: 'https://profiler.firefox.com',
+          hostname: 'profiler.firefox.com',
+          favicon: 'https://profiler.firefox.com/favicon.ico',
+        },
+      ],
+    ]);
   });
 });
 
