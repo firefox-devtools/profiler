@@ -942,8 +942,31 @@ export type Profile = {|
 |};
 
 type SerializableThread = {|
-  ...$Diff<Thread, { stringTable: UniqueStringArray }>,
+  ...$Diff<Thread, { stringTable: UniqueStringArray, samples: SamplesTable }>,
   stringArray: string[],
+  samples: SerializableSamplesTable,
+|};
+
+/**
+ * Starting with version 50 of the processed format, the time column may
+ * optionally be serialized as a timeDeltas column instead.
+ * Both formats are supported for unserialization.
+ */
+export type SerializableSamplesTable = {|
+  ...$Diff<SamplesTable, { time: Milliseconds[] }>,
+  time?: Milliseconds[],
+  timeDeltas?: Milliseconds[],
+|};
+
+export type SerializableCounterSamplesTable = {|
+  ...$Diff<CounterSamplesTable, { time: Milliseconds[] }>,
+  time?: Milliseconds[],
+  timeDeltas?: Milliseconds[],
+|};
+
+export type SerializableCounter = {|
+  ...$Diff<Counter, { samples: CounterSamplesTable }>,
+  samples: SerializableCounterSamplesTable,
 |};
 
 /**
@@ -951,6 +974,7 @@ type SerializableThread = {|
  * variant is able to be based into JSON.stringify.
  */
 export type SerializableProfile = {|
-  ...Profile,
+  ...$Diff<Profile, { threads: Thread[], counters?: Counter[] }>,
   threads: SerializableThread[],
+  counters?: SerializableCounter[],
 |};
