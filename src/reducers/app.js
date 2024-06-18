@@ -52,6 +52,7 @@ const view: Reducer<AppViewState> = (
     case 'VIEW_FULL_PROFILE':
     case 'VIEW_ORIGINS_PROFILE':
     case 'VIEW_ACTIVE_TAB_PROFILE':
+    case 'CHANGE_TAB_FILTER':
       return { phase: 'DATA_LOADED' };
     default:
       return state;
@@ -146,6 +147,7 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     // Bottom box: (fallthrough)
     case 'UPDATE_BOTTOM_BOX':
     case 'CLOSE_BOTTOM_BOX_FOR_TAB':
+      // case 'CHANGE_TAB_FILTER':
       return state + 1;
     default:
       return state;

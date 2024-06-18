@@ -14,7 +14,7 @@ import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 import { popCommittedRanges } from 'firefox-profiler/actions/profile-view';
-import { changeTabFilter } from 'firefox-profiler/actions/app';
+import { changeTabFilter } from 'firefox-profiler/actions/receive-profile';
 import {
   getPreviewSelection,
   getProfileFilterPageDataByTabID,

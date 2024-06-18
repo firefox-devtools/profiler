@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { changeTabFilter } from 'firefox-profiler/actions/app';
+import { changeTabFilter } from 'firefox-profiler/actions/receive-profile';
 import { getTabFilter } from '../../selectors/url-state';
 import { getProfileFilterPageDataByTabID } from 'firefox-profiler/selectors/profile';
 
