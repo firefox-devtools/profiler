@@ -127,9 +127,7 @@ describe('ordering and hiding', function () {
 
   function getProfileWithCustomMarkerTracks() {
     const profile = getProfileWithMarkers([
-      // $FlowExpectError Our flow type system doesn't know about this non-existant marker type.
       ['Marker', 1, 2, { type: 'Marker', first: 5 }],
-      // $FlowExpectError Our flow type system doesn't know about this non-existant marker type.
       ['NoGraphMarker', 3, 4, { type: 'NoGraphMarker', first: 6 }],
     ]);
 

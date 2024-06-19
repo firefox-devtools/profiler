@@ -92,30 +92,30 @@ export function getMarkerSchemaName(
   markerName: string,
   markerData: MarkerPayload | null
 ): string {
-  if (markerData) {
-    const { type } = markerData;
-    if (type === 'tracing' && markerData.category) {
-      // TODO - Tracing markers have a duplicate "category" field.
-      // See issue #2749
-
-      // Does a marker schema for the "category" exist?
-      return markerSchemaByName[markerData.category] === undefined
-        ? // If not, default back to tracing
-          'tracing'
-        : // If so, use the category as the schema name.
-          markerData.category;
-    }
-    if (type === 'Text') {
-      // Text markers are a cheap and easy way to create markers with
-      // a category. Check for schema if it exists, if not, fallback to
-      // a Text type marker.
-      return markerSchemaByName[markerName] === undefined ? 'Text' : markerName;
-    }
-    return markerData.type;
+  if (!markerData) {
+    // Fall back to using the name if no payload exists.
+    return markerName;
   }
 
-  // Fall back to using the name if no payload exists.
-  return markerName;
+  const { type } = markerData;
+  if (type === 'tracing' && markerData.category) {
+    // TODO - Tracing markers have a duplicate "category" field.
+    // See issue #2749
+
+    // Does a marker schema for the "category" exist?
+    return markerSchemaByName[markerData.category] === undefined
+      ? // If not, default back to tracing
+        'tracing'
+      : // If so, use the category as the schema name.
+        markerData.category;
+  }
+  if (type === 'Text') {
+    // Text markers are a cheap and easy way to create markers with
+    // a category. Check for schema if it exists, if not, fallback to
+    // a Text type marker.
+    return markerSchemaByName[markerName] === undefined ? 'Text' : markerName;
+  }
+  return type;
 }
 
 /**
