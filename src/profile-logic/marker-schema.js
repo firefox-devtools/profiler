@@ -659,6 +659,7 @@ export function formatMarkupFromMarkerSchema(
 export function markerPayloadMatchesSearch(
   markerSchema: MarkerSchema,
   marker: Marker,
+  stringTable: UniqueStringArray,
   testFun: (string, string) => boolean
 ): boolean {
   const { data } = marker;
@@ -669,7 +670,10 @@ export function markerPayloadMatchesSearch(
   // Check if searchable fields match the search regular expression.
   for (const payloadField of markerSchema.data) {
     if (payloadField.searchable) {
-      const value = data[payloadField.key];
+      let value = data[payloadField.key];
+      if (payloadField.format === 'unique-string') {
+        value = stringTable.getString(value);
+      }
       if (value === undefined || value === null || value === '') {
         continue;
       }
