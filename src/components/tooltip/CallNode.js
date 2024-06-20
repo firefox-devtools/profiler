@@ -8,7 +8,7 @@ import { getStackType } from 'firefox-profiler/profile-logic/transforms';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { formatCallNodeNumberWithUnit } from 'firefox-profiler/utils/format-numbers';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
-import { getCategoryPairLabel } from 'firefox-profiler/profile-logic/profile-data';
+import { getCategoryPairLabel, compressedArrayElement } from 'firefox-profiler/profile-logic/profile-data';
 import { countPositiveValues } from 'firefox-profiler/utils';
 
 import type {
@@ -366,17 +366,17 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       displayStackType,
     } = this.props;
     const callNodeTable = callNodeInfo.getCallNodeTable();
-    const categoryIndex = callNodeTable.category[callNodeIndex];
+    const categoryIndex = compressedArrayElement(callNodeTable.category, callNodeIndex);
     const categoryColor = categories[categoryIndex].color;
-    const subcategoryIndex = callNodeTable.subcategory[callNodeIndex];
+    const subcategoryIndex = compressedArrayElement(callNodeTable.subcategory,callNodeIndex);
     const funcIndex = callNodeTable.func[callNodeIndex];
-    const innerWindowID = callNodeTable.innerWindowID[callNodeIndex];
+    const innerWindowID = compressedArrayElement(callNodeTable.innerWindowID, callNodeIndex);
     const funcStringIndex = thread.funcTable.name[funcIndex];
     const funcName = thread.stringTable.getString(funcStringIndex);
 
     let fileName = null;
 
-    const fileNameIndex = thread.funcTable.fileName[funcIndex];
+    const fileNameIndex = compressedArrayElement(thread.funcTable.fileName, funcIndex);
     if (fileNameIndex !== null) {
       let fileNameURL = thread.stringTable.getString(fileNameIndex);
       // fileNameURL could be a path from symbolication (potentially using "special path"
@@ -386,10 +386,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
       // JS functions have information about where the function starts.
       // Add :<line>:<col> to the URL, if known.
-      const lineNumber = thread.funcTable.lineNumber[funcIndex];
+      const lineNumber = compressedArrayElement(thread.funcTable.lineNumber, funcIndex);
       if (lineNumber !== null) {
         fileNameURL += ':' + lineNumber;
-        const columnNumber = thread.funcTable.columnNumber[funcIndex];
+        const columnNumber = compressedArrayElement(thread.funcTable.columnNumber, funcIndex);
         if (columnNumber !== null) {
           fileNameURL += ':' + columnNumber;
         }
