@@ -89,7 +89,7 @@ type StateProps = {|
     IndexIntoSamplesTable
   ) => number,
   +selectedThreadIndexes: Set<ThreadIndex>,
-  +enableCPUUsage: boolean,
+  +hasCPUUsageInformation: boolean,
   +isExperimentalCPUGraphsEnabled: boolean,
   +maxThreadCPUDeltaPerMs: number,
   +implementationFilter: ImplementationFilter,
@@ -191,7 +191,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       treeOrderSampleComparator,
       trackType,
       trackName,
-      enableCPUUsage,
+      hasCPUUsageInformation,
       maxThreadCPUDeltaPerMs,
       isExperimentalCPUGraphsEnabled,
       implementationFilter,
@@ -261,10 +261,9 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               categories={categories}
               samplesSelectedStates={samplesSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
-              enableCPUUsage={enableCPUUsage}
+              hasCPUUsageInformation={hasCPUUsageInformation}
               maxThreadCPUDeltaPerMs={maxThreadCPUDeltaPerMs}
               implementationFilter={implementationFilter}
-              timelineType={timelineType}
             />
             {trackType === 'expanded' ? (
               <ThreadSampleGraph
@@ -335,8 +334,7 @@ export const TimelineTrackThread = explicitConnect<
     const committedRange = getCommittedRange(state);
     const fullThread = selectors.getCPUProcessedThread(state);
     const timelineType = getTimelineType(state);
-    const enableCPUUsage =
-      timelineType === 'cpu-category' &&
+    const hasCPUUsageInformation =
       fullThread.samples.threadCPUDelta !== undefined;
 
     return {
@@ -363,7 +361,7 @@ export const TimelineTrackThread = explicitConnect<
       treeOrderSampleComparator:
         selectors.getTreeOrderComparatorInFilteredThread(state),
       selectedThreadIndexes,
-      enableCPUUsage,
+      hasCPUUsageInformation,
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
       maxThreadCPUDeltaPerMs: getMaxThreadCPUDeltaPerMs(state),
       implementationFilter: getImplementationFilter(state),
