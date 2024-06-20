@@ -14,6 +14,11 @@
   transition: opacity 250ms;
 }
 
+.tooltip.clickable {
+  /* Make sure that the pointer events are properly triggered if it's clickable */
+  pointer-events: auto;
+}
+
 .tooltipTiming {
   padding-right: 0.5em;
   color: #666;

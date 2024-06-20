@@ -389,7 +389,13 @@ export class ChartCanvas<Item> extends React.Component<
           onDoubleClick={this._onDoubleClick}
         />
         {!isDragging && tooltipContents ? (
-          <Tooltip mouseX={pageX} mouseY={pageY}>
+          <Tooltip
+            mouseX={pageX}
+            mouseY={pageY}
+            className={classNames({
+              clickable: this.state.selectedItem !== null,
+            })}
+          >
             {tooltipContents}
           </Tooltip>
         ) : null}

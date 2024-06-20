@@ -5,6 +5,7 @@
 // @flow
 import * as React from 'react';
 import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import type { CssPixels } from 'firefox-profiler/types';
 
 import {
@@ -21,6 +22,7 @@ type Props = {|
   +mouseX: CssPixels,
   +mouseY: CssPixels,
   +children: React.Node,
+  +className?: string,
 |};
 
 // These types represent the tooltip's position. They will be used when storing
@@ -159,10 +161,17 @@ export class Tooltip extends React.PureComponent<Props> {
     this.setPositioningStyle();
   }
 
+  _mouseDownListener = (event: SyntheticMouseEvent<>) => {
+    // Prevent the canvas element to handle the mouse down event. Otherwise
+    // drag and drop events closes the tooltip.
+    event.stopPropagation();
+  };
+
   render() {
     return ReactDOM.createPortal(
       <div
-        className="tooltip"
+        className={classNames('tooltip', this.props.className)}
+        onMouseDown={this._mouseDownListener}
         data-testid="tooltip"
         // This will be overridden in setPositioningStyle, but they are
         // necessary so that the measurements are correct.
