@@ -39,6 +39,7 @@ type Props<HoveredItem> = {|
 // found on the MouseEvent interface.
 type State<HoveredItem> = {
   hoveredItem: HoveredItem | null,
+  selectedItem: HoveredItem | null,
   pageX: CssPixels,
   pageY: CssPixels,
 };
@@ -94,6 +95,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
 
   state: State<HoveredItem> = {
     hoveredItem: null,
+    selectedItem: null,
     pageX: 0,
     pageY: 0,
   };
@@ -219,10 +221,16 @@ export class ChartCanvas<HoveredItem> extends React.Component<
     if (this._mouseMovedWhileClicked) {
       return;
     }
-
-    if (e.button === 0 && this.props.onSelectItem) {
+    const { onSelectItem } = this.props;
+    if (e.button === 0 && onSelectItem) {
       // Left button is a selection action
-      this.props.onSelectItem(this.state.hoveredItem);
+      this.setState((state) => ({
+        selectedItem: state.hoveredItem,
+        pageX: e.pageX,
+        pageY: e.pageY,
+      }));
+
+      onSelectItem(this.state.hoveredItem);
     }
   };
 
@@ -269,11 +277,20 @@ export class ChartCanvas<HoveredItem> extends React.Component<
 
     const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
     if (maybeHoveredItem !== null) {
-      this.setState({
-        hoveredItem: maybeHoveredItem,
-        pageX: event.pageX,
-        pageY: event.pageY,
-      });
+      if (this.state.selectedItem === null) {
+        // Update both the hovered item and the position of the tooltip.
+        this.setState({
+          hoveredItem: maybeHoveredItem,
+          pageX: event.pageX,
+          pageY: event.pageY,
+        });
+      } else {
+        // If there is a selected item, only update the hoveredItem and not the
+        // pageX and pageY values which is used for the position of the tooltip.
+        this.setState({
+          hoveredItem: maybeHoveredItem,
+        });
+      }
     } else if (
       this.state.hoveredItem !== null &&
       // This persistTooltips property is part of the web console API. It helps
@@ -302,7 +319,14 @@ export class ChartCanvas<HoveredItem> extends React.Component<
   };
 
   _getHoveredItemInfo = (): React.Node => {
-    const { hoveredItem } = this.state;
+    const { hoveredItem, selectedItem } = this.state;
+    if (selectedItem !== null) {
+      // If we have a selected item, persist that one instead of returning
+      // the hovered items.
+      return this.props.getHoveredItemInfo(selectedItem);
+    }
+
+    // Return the hovered item if we don't have a selected item.
     if (hoveredItem === null) {
       return null;
     }
