@@ -548,6 +548,11 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
         type: 'active-tab',
         tabID: action.tabID,
       };
+    case 'CHANGE_ACTIVE_TAB':
+      return {
+        type: 'active-tab',
+        tabID: action.tabID,
+      };
     case 'VIEW_ORIGINS_PROFILE':
       return { type: 'origins' };
     default:
