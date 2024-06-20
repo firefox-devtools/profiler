@@ -10,23 +10,23 @@ import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 
 import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
 
-type Props<HoveredItem> = {|
+type Props<Item> = {|
   +containerWidth: CssPixels,
   +containerHeight: CssPixels,
   +className: string,
-  +onSelectItem?: (HoveredItem | null) => void,
-  +onRightClick?: (HoveredItem | null) => void,
-  +onDoubleClickItem: (HoveredItem | null) => void,
-  +getHoveredItemInfo: (HoveredItem) => React.Node,
+  +onSelectItem?: (Item | null) => void,
+  +onRightClick?: (Item | null) => void,
+  +onDoubleClickItem: (Item | null) => void,
+  +getHoveredItemInfo: (Item) => React.Node,
   +drawCanvas: (
     CanvasRenderingContext2D,
     ChartCanvasScale: ChartCanvasScale,
-    ChartCanvasHoverInfo: ChartCanvasHoverInfo<HoveredItem>
+    ChartCanvasHoverInfo: ChartCanvasHoverInfo<Item>
   ) => void,
   +isDragging: boolean,
   // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
   +scaleCtxToCssPixels: boolean,
-  +hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
+  +hitTest: (x: CssPixels, y: CssPixels) => Item | null,
   // Default to true. Set to false if the chart should be redrawn right away after
   // rerender.
   +drawCanvasAfterRaf?: boolean,
@@ -37,9 +37,9 @@ type Props<HoveredItem> = {|
 
 // The naming of the X and Y coordinates here correspond to the ones
 // found on the MouseEvent interface.
-type State<HoveredItem> = {
-  hoveredItem: HoveredItem | null,
-  selectedItem: HoveredItem | null,
+type State<Item> = {
+  hoveredItem: Item | null,
+  selectedItem: Item | null,
   pageX: CssPixels,
   pageY: CssPixels,
 };
@@ -51,9 +51,9 @@ export type ChartCanvasScale = {
   cssToUserScale: number,
 };
 
-export type ChartCanvasHoverInfo<HoveredItem> = {
-  hoveredItem: HoveredItem | null,
-  prevHoveredItem: HoveredItem | null,
+export type ChartCanvasHoverInfo<Item> = {
+  hoveredItem: Item | null,
+  prevHoveredItem: Item | null,
   isHoveredOnlyDifferent: boolean,
 };
 
@@ -72,9 +72,9 @@ const MOUSE_CLICK_MAX_MOVEMENT_DELTA: CssPixels = 5;
 
 // This isn't a PureComponent on purpose: we always want to update if the parent updates
 // But we still conditionally update the canvas itself, see componentDidUpdate.
-export class ChartCanvas<HoveredItem> extends React.Component<
-  Props<HoveredItem>,
-  State<HoveredItem>,
+export class ChartCanvas<Item> extends React.Component<
+  Props<Item>,
+  State<Item>,
 > {
   _devicePixelRatio: number = 1;
   // The current mouse position. Needs to be stored for tooltip
@@ -93,7 +93,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
   _canvas: HTMLCanvasElement | null = null;
   _isDrawScheduled: boolean = false;
 
-  state: State<HoveredItem> = {
+  state: State<Item> = {
     hoveredItem: null,
     selectedItem: null,
     pageX: 0,
@@ -102,7 +102,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
 
   _scheduleDraw(
     isHoveredOnlyDifferent: boolean = false,
-    prevHoveredItem: HoveredItem | null = null
+    prevHoveredItem: Item | null = null
   ) {
     const { drawCanvasAfterRaf } = this.props;
     if (drawCanvasAfterRaf === false) {
@@ -175,7 +175,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
 
   _doDrawCanvas(
     isHoveredOnlyDifferent: boolean = false,
-    prevHoveredItem: HoveredItem | null = null
+    prevHoveredItem: Item | null = null
   ) {
     const { className, drawCanvas, scaleCtxToCssPixels } = this.props;
     const { hoveredItem } = this.state;
@@ -353,10 +353,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  componentDidUpdate(
-    prevProps: Props<HoveredItem>,
-    prevState: State<HoveredItem>
-  ) {
+  componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
     if (prevProps !== this.props) {
       this._scheduleDraw();
     } else if (
