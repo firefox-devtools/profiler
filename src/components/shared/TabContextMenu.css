@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .tabContextMenuItem.checkable {
-  padding-right: 0;
+  padding-right: 10px;
   padding-left: 21px;
 }
 
