@@ -429,13 +429,11 @@ describe('Marker schema filtering', function () {
     // prettier-ignore
     const profile = getProfileWithMarkers([
       ['no payload',        0, null, null],
-      // $FlowExpectError - Invalid payload by our type system.
       ['payload no schema', 0, null, { type: 'no schema marker' }],
       ['RefreshDriverTick', 0, null, { type: 'Text', name: 'RefreshDriverTick' }],
       ['UserTiming',        5, 6,    { type: 'UserTiming', name: 'name', entryType: 'mark' }],
       // The following is a tracing marker without a schema attached, this was a
       // regression reported in Bug 1678698.
-      // $FlowExpectError - Invalid payload by our type system.
       ['RandomTracingMarker', 7, 8,  { type: 'tracing', category: 'RandomTracingMarker' }],
       ...getNetworkMarkers(),
     ]);

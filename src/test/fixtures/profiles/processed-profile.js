@@ -46,6 +46,7 @@ import type {
   Bytes,
   CallNodePath,
   Pid,
+  MarkerSchema,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -59,7 +60,6 @@ import { getVisualMetrics } from './gecko-profile';
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
 type MarkerTime = Milliseconds;
-type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
 
 // These markers can create an Instant or a complete Interval marker, depending
 // on if an end time is passed in. The definition uses a union, becaus as far
@@ -77,7 +77,7 @@ export type TestDefinedMarkers = Array<
       MarkerName,
       MarkerTime, // start time
       MarkerTime | null, // end time
-      MarkerPayload | MockPayload | null,
+      MixedObject | null, // data payload
     ],
 >;
 
@@ -120,6 +120,34 @@ export function addRawMarkersToThread(
   }
 }
 
+function _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
+  payload: MixedObject | null,
+  markerSchemas: MarkerSchema[],
+  stringTable: UniqueStringArray
+) {
+  if (payload === null) {
+    return;
+  }
+  const markerType = payload.type;
+  if (markerType === undefined) {
+    return;
+  }
+  const schema = markerSchemas.find((schema) => schema.name === markerType);
+  if (schema === undefined) {
+    return;
+  }
+  for (const fieldSchema of schema.data) {
+    if (!fieldSchema.format || fieldSchema.format !== 'unique-string') {
+      continue;
+    }
+    const { key } = fieldSchema;
+    if (typeof payload[key] === 'string') {
+      // Replace string with string index
+      payload[key] = stringTable.indexForString(payload[key]);
+    }
+  }
+}
+
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
   markers: TestDefinedMarkers
@@ -147,6 +175,11 @@ export function addMarkersToThreadWithCorrespondingSamples(
       allTimes.add(maybeEndTime);
     }
     allTimes.add(startTime);
+    _replaceUniqueStringFieldValuesWithStringIndexesInMarkerPayload(
+      payload,
+      markerSchemaForTests,
+      stringTable
+    );
     markersTable.data.push(payload);
     markersTable.category.push(0);
     markersTable.length++;

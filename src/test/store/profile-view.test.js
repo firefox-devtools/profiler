@@ -902,6 +902,52 @@ describe('actions/ProfileView', function () {
       expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
     });
 
+    it('filters the markers by searchable unique-string fields', function () {
+      const profile = getProfileWithMarkers([
+        [
+          'a',
+          5,
+          10,
+          {
+            type: 'StringTesting',
+            searchableString: 'searchable cucumber',
+            searchableUniqueString: 'searchable mango',
+            nonSearchableString: 'non-searchable papaya',
+            nonSearchableUniqueString: 'non-searchable onion',
+          },
+        ],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(1);
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerPayload: MixedObject = (getMarker(0).data: any);
+      expect(typeof markerPayload.searchableString).toBe('string');
+      expect(typeof markerPayload.searchableUniqueString).toBe('number');
+      expect(typeof markerPayload.nonSearchableString).toBe('string');
+      expect(typeof markerPayload.nonSearchableUniqueString).toBe('number');
+
+      function getMarkerIndexesForSearch(searchString) {
+        dispatch(ProfileView.changeMarkersSearchString(searchString));
+        return selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+          getState()
+        );
+      }
+
+      // cucumber and mango should match the marker, because those strings
+      // are contained in searchable fields.
+      expect(getMarkerIndexesForSearch('cucumber')).toHaveLength(1);
+      expect(getMarkerIndexesForSearch('mango')).toHaveLength(1);
+
+      // papaya and onion should not match the marker, because those strings
+      // are only contained in non-searchable fields.
+      expect(getMarkerIndexesForSearch('papaya')).toHaveLength(0);
+      expect(getMarkerIndexesForSearch('onion')).toHaveLength(0);
+    });
+
     it('filters the markers by a potential data payload of type FileIO', function () {
       const profile = getProfileWithMarkers([
         ['a', 0, null],
