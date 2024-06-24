@@ -92,30 +92,30 @@ export function getMarkerSchemaName(
   markerName: string,
   markerData: MarkerPayload | null
 ): string {
-  if (markerData) {
-    const { type } = markerData;
-    if (type === 'tracing' && markerData.category) {
-      // TODO - Tracing markers have a duplicate "category" field.
-      // See issue #2749
-
-      // Does a marker schema for the "category" exist?
-      return markerSchemaByName[markerData.category] === undefined
-        ? // If not, default back to tracing
-          'tracing'
-        : // If so, use the category as the schema name.
-          markerData.category;
-    }
-    if (type === 'Text') {
-      // Text markers are a cheap and easy way to create markers with
-      // a category. Check for schema if it exists, if not, fallback to
-      // a Text type marker.
-      return markerSchemaByName[markerName] === undefined ? 'Text' : markerName;
-    }
-    return markerData.type;
+  if (!markerData) {
+    // Fall back to using the name if no payload exists.
+    return markerName;
   }
 
-  // Fall back to using the name if no payload exists.
-  return markerName;
+  const { type } = markerData;
+  if (type === 'tracing' && markerData.category) {
+    // TODO - Tracing markers have a duplicate "category" field.
+    // See issue #2749
+
+    // Does a marker schema for the "category" exist?
+    return markerSchemaByName[markerData.category] === undefined
+      ? // If not, default back to tracing
+        'tracing'
+      : // If so, use the category as the schema name.
+        markerData.category;
+  }
+  if (type === 'Text') {
+    // Text markers are a cheap and easy way to create markers with
+    // a category. Check for schema if it exists, if not, fallback to
+    // a Text type marker.
+    return markerSchemaByName[markerName] === undefined ? 'Text' : markerName;
+  }
+  return type;
 }
 
 /**
@@ -659,6 +659,7 @@ export function formatMarkupFromMarkerSchema(
 export function markerPayloadMatchesSearch(
   markerSchema: MarkerSchema,
   marker: Marker,
+  stringTable: UniqueStringArray,
   testFun: (string, string) => boolean
 ): boolean {
   const { data } = marker;
@@ -669,7 +670,10 @@ export function markerPayloadMatchesSearch(
   // Check if searchable fields match the search regular expression.
   for (const payloadField of markerSchema.data) {
     if (payloadField.searchable) {
-      const value = data[payloadField.key];
+      let value = data[payloadField.key];
+      if (payloadField.format === 'unique-string') {
+        value = stringTable.getString(value);
+      }
       if (value === undefined || value === null || value === '') {
         continue;
       }

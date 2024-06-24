@@ -120,6 +120,7 @@ export function getSearchFilteredMarkerIndexes(
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps | null,
+  stringTable: UniqueStringArray,
   categoryList: CategoryList
 ): MarkerIndex[] {
   if (!searchRegExps) {
@@ -146,6 +147,7 @@ export function getSearchFilteredMarkerIndexes(
         marker,
         markerSchemaByName,
         searchRegExps,
+        stringTable,
         categoryList
       );
     }
@@ -159,6 +161,7 @@ export function getSearchFilteredMarkerIndexes(
         marker,
         markerSchemaByName,
         searchRegExps,
+        stringTable,
         categoryList
       );
     }
@@ -175,6 +178,7 @@ function positiveFilterMarker(
   marker: Marker,
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps,
+  stringTable: UniqueStringArray,
   categoryList: CategoryList
 ): boolean {
   // Need to assign it to a constant variable so Flow doesn't complain about
@@ -229,7 +233,7 @@ function positiveFilterMarker(
     );
     if (
       markerSchema &&
-      markerPayloadMatchesSearch(markerSchema, marker, test)
+      markerPayloadMatchesSearch(markerSchema, marker, stringTable, test)
     ) {
       return true;
     }
@@ -242,6 +246,7 @@ function negativeFilterMarker(
   marker: Marker,
   markerSchemaByName: MarkerSchemaByName,
   searchRegExps: MarkerRegExps,
+  stringTable: UniqueStringArray,
   categoryList: CategoryList
 ): boolean {
   // Need to assign it to a constant variable so Flow doesn't complain about
@@ -295,7 +300,7 @@ function negativeFilterMarker(
 
     if (
       markerSchema &&
-      markerPayloadMatchesSearch(markerSchema, marker, test)
+      markerPayloadMatchesSearch(markerSchema, marker, stringTable, test)
     ) {
       // Found the field in the negative filters, do not include it.
       return false;
