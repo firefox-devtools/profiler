@@ -49,6 +49,7 @@ import type {
   CategoryList,
   Milliseconds,
 } from 'firefox-profiler/types';
+import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 /**
  * This file contains the functions and logic for working with and applying transforms
@@ -1633,6 +1634,7 @@ function _findRangesByMarkerFilter(
   getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   markerSchemaByName: MarkerSchemaByName,
+  stringTable: UniqueStringArray,
   categoryList: CategoryList,
   filter: string
 ): StartEndRange[] {
@@ -1644,6 +1646,7 @@ function _findRangesByMarkerFilter(
     markerIndexes,
     markerSchemaByName,
     searchRegExps,
+    stringTable,
     categoryList
   );
 
@@ -1682,6 +1685,7 @@ export function filterSamples(
             getMarker,
             markerIndexes,
             markerSchemaByName,
+            thread.stringTable,
             categoryList,
             filter
           );
