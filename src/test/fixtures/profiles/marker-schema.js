@@ -196,4 +196,34 @@ export const markerSchemaForTests: MarkerSchema[] = [
       },
     ],
   },
+  {
+    name: 'StringTesting',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
+    data: [
+      {
+        key: 'searchableString',
+        label: 'Searchable string field',
+        format: 'string',
+        searchable: true,
+      },
+      {
+        key: 'searchableUniqueString',
+        label: 'Searchable unique string field',
+        format: 'unique-string',
+        searchable: true,
+      },
+      {
+        key: 'nonSearchableString',
+        label: 'Non-searchable string field',
+        format: 'string',
+        searchable: false,
+      },
+      {
+        key: 'nonSearchableUniqueString',
+        label: 'Non-searchable unique string field',
+        format: 'unique-string',
+        searchable: false,
+      },
+    ],
+  },
 ];
