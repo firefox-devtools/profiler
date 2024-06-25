@@ -86,10 +86,19 @@
   cursor: ew-resize;
 }
 
+/* The :not() selectors are to handle the edge case where the mouse is pressed
+ * on a grippy, then the pointer is moved down (above the first track) but not
+ * moved horizontally.
+ * In that case, because selectionDeltas are 0, the draggingStart/draggingEnd
+ * classes are not set, and the grippy is not hovered, so it would be light
+ * grey until the mouse is moved horizontally. */
 .timelineSelectionGrippyRangeStart:hover,
-.timelineSelectionGrippyRangeStart.dragging,
+.draggingStart > .timelineSelectionGrippyRangeStart,
+:not(.draggingStart, .draggingEnd)
+  > .timelineSelectionGrippyRangeStart.dragging,
 .timelineSelectionGrippyRangeEnd:hover,
-.timelineSelectionGrippyRangeEnd.dragging {
+.draggingEnd > .timelineSelectionGrippyRangeEnd,
+:not(.draggingStart, .draggingEnd) > .timelineSelectionGrippyRangeEnd.dragging {
   background: #888;
 }
 

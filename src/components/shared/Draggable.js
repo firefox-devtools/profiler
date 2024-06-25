@@ -15,7 +15,10 @@ export type OnMove = (
 ) => void;
 
 type Props = {
-  value: { +selectionStart: Milliseconds, +selectionEnd: Milliseconds },
+  value: {
+    +selectionStart: Milliseconds,
+    +selectionEnd: Milliseconds,
+  },
   onMove: OnMove,
   className: string,
   children?: React.Node,

@@ -93,6 +93,8 @@ export type PreviewSelection =
       +isModifying: boolean,
       +selectionStart: number,
       +selectionEnd: number,
+      +draggingStart?: boolean,
+      +draggingEnd?: boolean,
     |};
 
 /**

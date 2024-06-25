@@ -281,20 +281,29 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
       const { committedRange, width, updatePreviewSelection } = this.props;
       const delta = (dx / width) * (committedRange.end - committedRange.start);
       const selectionDeltas = fun(delta);
-      const selectionStart = Math.max(
+      let selectionStart = clamp(
+        originalSelection.selectionStart + selectionDeltas.startDelta,
         committedRange.start,
-        originalSelection.selectionStart + selectionDeltas.startDelta
-      );
-      const selectionEnd = clamp(
-        originalSelection.selectionEnd + selectionDeltas.endDelta,
-        selectionStart,
         committedRange.end
       );
+      let selectionEnd = clamp(
+        originalSelection.selectionEnd + selectionDeltas.endDelta,
+        committedRange.start,
+        committedRange.end
+      );
+      let draggingStart = isModifying && !!selectionDeltas.startDelta;
+      let draggingEnd = isModifying && !!selectionDeltas.endDelta;
+      if (selectionStart > selectionEnd) {
+        [selectionStart, selectionEnd] = [selectionEnd, selectionStart];
+        [draggingStart, draggingEnd] = [draggingEnd, draggingStart];
+      }
       updatePreviewSelection({
         hasSelection: true,
         isModifying,
         selectionStart,
         selectionEnd,
+        draggingStart,
+        draggingEnd,
       });
     };
 
@@ -332,6 +341,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     +selectionStart: number,
     +selectionEnd: number,
     +isModifying: boolean,
+    +draggingStart?: boolean,
+    +draggingEnd?: boolean,
   }) {
     const { committedRange, width } = this.props;
     const { selectionStart, selectionEnd } = previewSelection;
@@ -353,7 +364,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
         />
         <div className="timelineSelectionOverlayWrapper">
           <div
-            className="timelineSelectionGrippy"
+            className={classNames('timelineSelectionGrippy', {
+              draggingStart: previewSelection.draggingStart,
+              draggingEnd: previewSelection.draggingEnd,
+            })}
             style={{ width: `${selectionWidth}px` }}
           >
             <Draggable
