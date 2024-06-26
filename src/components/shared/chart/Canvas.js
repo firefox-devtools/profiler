@@ -278,7 +278,10 @@ export class ChartCanvas<Item> extends React.Component<
     const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
     if (maybeHoveredItem !== null) {
       if (this.state.selectedItem === null) {
-        // Update both the hovered item and the position of the tooltip.
+        // Update both the hovered item and the pageX and pageY values. The
+        // pageX and pageY values are used to change the position of the tooltip
+        // and if there is no selected item, it means that we can update this
+        // position freely.
         this.setState({
           hoveredItem: maybeHoveredItem,
           pageX: event.pageX,
@@ -287,6 +290,8 @@ export class ChartCanvas<Item> extends React.Component<
       } else {
         // If there is a selected item, only update the hoveredItem and not the
         // pageX and pageY values which is used for the position of the tooltip.
+        // By keeping the x and y values the same, we make sure that the tooltip
+        // stays in its initial position where it's clicked.
         this.setState({
           hoveredItem: maybeHoveredItem,
         });
