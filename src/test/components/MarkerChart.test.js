@@ -298,6 +298,67 @@ describe('MarkerChart', function () {
     ).toMatchSnapshot();
   });
 
+  it('persists the selected marker tooltips properly', () => {
+    window.devicePixelRatio = 1;
+
+    const profile = getProfileWithMarkers(MARKERS);
+    const { flushRafCalls, dispatch, fireMouseEvent, container } =
+      setupWithProfile(profile);
+
+    dispatch(changeSelectedTab('marker-chart'));
+    flushRafCalls();
+
+    // No tooltip displayed yet
+    expect(document.querySelector('.tooltip')).toBeFalsy();
+
+    function leftClick(pos: { x: CssPixels, y: CssPixels }) {
+      const positioningOptions = {
+        offsetX: pos.x,
+        offsetY: pos.y,
+        pageX: pos.x,
+        pageY: pos.y,
+      };
+      const canvas = ensureExists(
+        container.querySelector('canvas'),
+        `Couldn't find the canvas element`
+      );
+      // Because different components listen to different events, we trigger
+      // all the right events, to be as close as possible to the real stuff.
+      fireMouseEvent('mousemove', positioningOptions);
+      fireFullClick(canvas, positioningOptions);
+      flushRafCalls();
+    }
+
+    const drawLog = flushDrawLog();
+    const position = findFillTextPositionFromDrawLog(drawLog, 'Marker B');
+    leftClick(position);
+
+    // The tooltip should be displayed
+    expect(
+      ensureExists(
+        document.querySelector('.tooltip'),
+        'A tooltip component must exist for this test.'
+      )
+    ).toMatchSnapshot();
+
+    // Move the mouse outside of the marker.
+    fireMouseEvent('mousemove', {
+      offsetX: 0,
+      offsetY: 0,
+      pageX: 0,
+      pageY: 0,
+    });
+
+    // Make sure that we have the tooltip persisted.
+    expect(document.querySelector('.tooltip')).toBeTruthy();
+
+    // Click outside of the marker.
+    leftClick({ x: 0, y: 0 });
+
+    // Now the tooltip should not be displayed.
+    expect(document.querySelector('.tooltip')).toBeFalsy();
+  });
+
   it('only renders a single row when hovering', () => {
     window.devicePixelRatio = 1;
 
