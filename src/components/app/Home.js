@@ -225,6 +225,7 @@ type PopupInstallPhase =
   | 'popup-enabled'
   | 'suggest-enable-popup'
   // Other browsers:
+  | 'firefox-android'
   | 'other-browser';
 
 class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
@@ -249,6 +250,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           this.setState({ popupInstallPhase: 'webchannel-unavailable' });
         }
       );
+    } else if (isMobile()) {
+      popupInstallPhase = 'firefox-android';
     }
 
     this.state = {
@@ -268,6 +271,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
         return this._renderRecordInstructions(FirefoxPopupScreenshot);
       case 'other-browser':
         return this._renderOtherBrowserInstructions();
+      case 'firefox-android':
+        return this._renderFirefoxAndroidInstructions();
       default:
         throw assertExhaustiveCheck(
           popupInstallPhase,
@@ -288,6 +293,43 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
       }
     );
   };
+  _renderFirefoxAndroidInstructions() {
+    return (
+      <InstructionTransition key={2}>
+        <div
+          className="homeInstructions"
+          data-testid="home-firefox-android-instructions"
+        >
+          <img
+            className="homeSectionScreenshot"
+            alt="Screenshot of Firefox for Android."
+          />
+          {/* Right column: instructions */}
+          <div>
+            <DocsButton />
+            <Localized
+              id="Home--firefox-android-instructions"
+              elems={{
+                a: (
+                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+                ),
+              }}
+            >
+              <p>
+                Recording performance profiles currently requires{' '}
+                <a href="https://www.mozilla.org/en-US/firefox/new/">
+                  Firefox for Desktop
+                </a>
+                . However, existing profiles can be viewed in any modern desktop
+                browser.
+              </p>
+            </Localized>
+          </div>
+          {/* end of grid container */}
+        </div>
+      </InstructionTransition>
+    );
+  }
 
   _renderEnablePopupInstructions(webChannelAvailable: boolean) {
     return (
@@ -625,6 +667,10 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
 
 function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
+}
+function isMobile(): boolean {
+  const userAgent = navigator.userAgent;
+  return /Mobi|Android/i.test(userAgent);
 }
 
 export const Home = explicitConnect<
