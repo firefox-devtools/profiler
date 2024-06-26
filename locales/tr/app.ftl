@@ -15,6 +15,8 @@
 ## The following feature names must be treated as a brand. They cannot be translated.
 
 -firefox-brand-name = Firefox
+-firefox-android-brand-name = Android için Firefox
+-profiler-brand-name = Firefox Profiler
 
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
