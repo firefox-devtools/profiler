@@ -78,6 +78,7 @@ function mockCanvasContext() {
       moveTo: spyLog('moveTo'),
       lineTo: spyLog('lineTo'),
       stroke: spyLog('stroke'),
+      strokeRect: spyLog('strokeRect'),
       rect: spyLog('rect'),
       arc: spyLog('arc'),
       measureText: spyLog('measureText', (text) => ({

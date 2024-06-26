@@ -34,7 +34,7 @@ import {
 } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../../utils/flow';
 
 import {
   autoMockCanvasContext,
@@ -59,8 +59,6 @@ import {
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { Profile, CssPixels } from 'firefox-profiler/types';
-
-jest.useFakeTimers();
 
 const GRAPH_BASE_WIDTH = 200;
 const GRAPH_WIDTH =
@@ -129,8 +127,6 @@ describe('StackChart', function () {
 
   it('can display a context menu when right clicking the chart', function () {
     // Fake timers are indicated when dealing with the context menus.
-    jest.useFakeTimers();
-
     const { rightClick, getContextMenu, clickMenuItem, findFillTextPosition } =
       setupSamples();
 
@@ -196,6 +192,42 @@ describe('StackChart', function () {
     drawnFrames = getDrawnFrames();
     expect(drawnFrames).toContain('A');
     expect(drawnFrames).not.toContain('Z');
+  });
+
+  it('can search into the stack chart', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      Init     Init     Init     Init     Init
+      RunTask  RunTask  RunTask  RunTask  Poll
+      Task1    Task2    Task1    Task1
+    `);
+    const { changeSearchString } = setup(profile, funcNames);
+
+    // Flush the draw logs before searching so that we'll have only the new draw
+    // instructions later.
+    flushDrawLog();
+
+    changeSearchString('Task2');
+    // Let's check whether only the selected task is drawn.
+    const drawLogs = flushDrawLog();
+    const drawnFunctions = drawLogs
+      .filter(([action]) => action === 'fillText')
+      .map(([_, value]) => value);
+    expect(drawnFunctions).toEqual(['Init', 'RunTask', 'Task2']);
+
+    expect(findHighlightedFunctions(drawLogs)).toEqual(['Task2']);
+
+    changeSearchString('Task');
+    expect(findHighlightedFunctions(flushDrawLog())).toEqual([
+      'RunTask',
+      'Task1',
+      'Task2',
+      'Task1',
+    ]);
+
+    // Let's search for a more common function
   });
 
   describe('EmptyReasons', () => {
@@ -368,6 +400,7 @@ function setupSamples(
  * Setup the stack chart component with a profile.
  */
 function setup(profile: Profile, funcNames: string[] = []) {
+  jest.useFakeTimers();
   const flushRafCalls = mockRaf();
 
   const store = storeWithProfile(profile);
@@ -447,6 +480,13 @@ function setup(profile: Profile, funcNames: string[] = []) {
     fireMouseEvent('mousemove', getPositioningOptions(where));
   }
 
+  function changeSearchString(searchString) {
+    const input = screen.getByRole('searchbox', { name: /Filter stacks/ });
+    fireEvent.change(input, { target: { value: searchString } });
+    jest.runAllTimers();
+    flushRafCalls();
+  }
+
   // Context menu tools
   const getContextMenu = () =>
     ensureExists(
@@ -475,6 +515,7 @@ function setup(profile: Profile, funcNames: string[] = []) {
     getContextMenu,
     getTooltip,
     findFillTextPosition,
+    changeSearchString,
   };
 }
 
@@ -483,4 +524,29 @@ function setup(profile: Profile, funcNames: string[] = []) {
  */
 function getCheckedState(element: HTMLElement): mixed {
   return (element: any).checked;
+}
+
+// This function loops over drawLogs and finds the function names whose box is stroke.
+function findHighlightedFunctions(drawLogs): string[] {
+  const result = [];
+
+  let phase: 'finding-stroke' | 'finding-text' = 'finding-stroke';
+  for (const [operation, arg] of drawLogs) {
+    switch (phase) {
+      case 'finding-stroke':
+        if (operation === 'strokeRect') {
+          phase = 'finding-text';
+        }
+        continue;
+      case 'finding-text':
+        if (operation === 'fillText') {
+          phase = 'finding-stroke';
+          result.push(arg);
+        }
+        continue;
+      default:
+        throw assertExhaustiveCheck(phase);
+    }
+  }
+  return result;
 }
