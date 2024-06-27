@@ -360,7 +360,18 @@ export class ChartCanvas<Item> extends React.Component<
 
   componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
     if (prevProps !== this.props) {
-      this._scheduleDraw();
+      if (
+        this.state.selectedItem !== null &&
+        prevState.selectedItem === this.state.selectedItem
+      ) {
+        // The props have changed but not the selectedItem. This mean that the
+        // selected item can get out of sync. Invalidate it to make sure that
+        // it's always fresh. This setState will cause a rerender, but we have
+        // to do it to prevent any crashes or incorrect tooltip positions.
+        this.setState({ selectedItem: null });
+      } else {
+        this._scheduleDraw();
+      }
     } else if (
       !hoveredItemsAreEqual(prevState.hoveredItem, this.state.hoveredItem)
     ) {
