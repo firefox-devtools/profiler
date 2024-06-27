@@ -17,19 +17,33 @@
 -firefox-brand-name = Firefox
 -firefox-android-brand-name = Android için Firefox
 -profiler-brand-name = Firefox Profiler
+-firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--github-icon =
+    .title = Git depomuza gidin (yeni pencerede açılır)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-unpublished = { -firefox-brand-name } tarayıcısından profil alınamadı.
+AppViewRouter--error-from-file = Dosya okunamadı veya içindeki profil ayrıştırılamadı.
+AppViewRouter--error-public = Profil indirilemedi.
+AppViewRouter--error-from-url = Profil indirilemedi.
+AppViewRouter--error-compare = Profiller getirilemedi.
+AppViewRouter--route-not-found--home =
+    .specialMessage = Ulaşmaya çalıştığınız URL tanınamadı.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+# Variables:
+#   $fileName (String) - Name of the file to open.
+CallNodeContextMenu--show-file = <strong>{ $fileName }</strong> dosyasını göster
+CallNodeContextMenu--expand-all = Tümünü genişlet
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -60,11 +74,19 @@
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--running-time =
+    .label = Çalışma süresi
+CallTreeSidebar--categories = Kategoriler
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Karşılaştırmak istediğiniz profil URL’lerini girin
+CompareHome--form-label-profile1 = Profil 1:
+CompareHome--form-label-profile2 = Profil 2:
+CompareHome--submit-button =
+    .value = Profilleri getir
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -75,6 +97,12 @@
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = Kenar çubuğunu aç
+Details--close-sidebar-button =
+    .title = Kenar çubuğunu kapat
+Details--error-boundary-message =
+    .message = Bu panelde bilinmeyen bir hata oluştu.
 
 ## ErrorBoundary
 ## This component is shown when an unexpected error is encountered in the application.
@@ -83,6 +111,11 @@
 
 ## Footer Links
 
+FooterLinks--legal = Hukuki bilgiler
+FooterLinks--Privacy = Gizlilik
+FooterLinks--Cookies = Çerezler
+FooterLinks--languageSwitcher--select =
+    .title = Dili değiştir
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
