@@ -182,6 +182,10 @@ FooterLinks--languageSwitcher--select =
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-mean = Ortalama
+MenuButtons--metaOverheadStatistics-max = Maksimum
+MenuButtons--metaOverheadStatistics-min = Minimum
+MenuButtons--metaOverheadStatistics-overhead-duration = Ek yük süreleri:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -226,6 +230,8 @@ ProfileDeletePanel--dialog-delete-button =
 # progress indicator.
 ProfileDeletePanel--dialog-deleting-button =
     .value = Siliniyor…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Yüklenen veriler başarıyla silindi.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
