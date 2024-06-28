@@ -503,6 +503,24 @@ TrackPower--tooltip-average-power-milliwatt = { $value } mW
 ## The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = Saniyede { $value }
+    .label = Bu örnek için aktarım hızı
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = önceki örnekten bu yana okuma/yazma işlemleri
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
+    .label = Bu zamana kadar aktarılan veriler
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -524,6 +542,23 @@ TrackPower--tooltip-average-power-milliwatt = { $value } mW
 ## Some of these string IDs still start with SourceView, even though the strings
 ## are used for both the source view and the assembly view.
 
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = { $host } bekleniyor…
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
+SourceView--loading-browser-connection = { -firefox-brand-name } bekleniyor…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+BottomBox--source-code-not-available-title = Kaynak kodu mevcut değil
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Assembly kodu mevcut değil
+SourceView--close-button =
+    .title = Kaynak görünümünü kapat
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
@@ -532,8 +567,17 @@ TrackPower--tooltip-average-power-milliwatt = { $value } mW
 
 ## Toggle buttons in the top right corner of the bottom box
 
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Assembly görünümünü göster
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Assembly görünümünü gizle
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Yüklenen Kayıtlar
