@@ -121,6 +121,10 @@ Details--error-boundary-message =
 ## This component is shown when an unexpected error is encountered in the application.
 ## Note that the localization won't be always applied in this component.
 
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Lütfen bu sorunu Geliştirici Araçları Web Konsolu’nda görüntülenen
+    hatanın tamamıyla birlikte geliştiricilere bildirin.
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Hatayı GitHub’da rapor et
 
@@ -164,10 +168,15 @@ Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
 Home--profiler-motto = Performans profili yakalayın. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
 Home--additional-content-title = Mevcut profilleri yükleyin
+Home--additional-content-content = Bir profil dosyasını yüklemek için buraya <strong>sürükleyip bırakabilirsiniz</strong> ya da:
+Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
+Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Filtre terimlerini girin
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -177,6 +186,13 @@ Home--additional-content-title = Mevcut profilleri yükleyin
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = { $smallProfileName } profilini yüklemek için buraya tıklayın
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Sil
+    .title = Yetkilendirme bilgileri eksik olduğu için bu profil silinemez.
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
