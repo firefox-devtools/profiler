@@ -185,6 +185,14 @@ Home--menu-button = { -profiler-brand-name } menü düğmesini etkinleştir
 MenuButtons--index--metaInfo-button =
     .label = Profil Bilgileri
 MenuButtons--index--full-view = Tam Görünüm
+MenuButtons--index--cancel-upload = Yüklemeyi İptal Et
+MenuButtons--index--share-upload =
+    .label = Yerel Profili Yükle
+MenuButtons--index--share-re-upload =
+    .label = Yeniden Yükle
+MenuButtons--index--share-error-uploading =
+    .label = Yükleme başarısız
+MenuButtons--index--revert = Orijinal profile geri dön
 MenuButtons--index--docs = Dokümanlar
 MenuButtons--permalink--button =
     .label = Kalıcı bağlantı
@@ -198,12 +206,32 @@ MenuButtons--index--profile-info-uploaded-actions = Sil
 MenuButtons--metaInfo--profiling-started = Kayıt başlama tarihi:
 MenuButtons--metaInfo--profiling-session = Kayıt uzunluğu:
 MenuButtons--metaInfo--main-process-started = Ana işlemin başlama tarihi:
+MenuButtons--metaInfo--main-process-ended = Ana işlemin bitiş tarihi:
+MenuButtons--metaInfo--interval = Aralık:
+MenuButtons--metaInfo--buffer-capacity = Tampon kapasitesi:
+MenuButtons--metaInfo--buffer-duration = Tampon süresi:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } saniye
+       *[other] { $configurationDuration } saniye
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Sınırsız
+MenuButtons--metaInfo--application = Uygulama
+MenuButtons--metaInfo--name-and-version = Ad ve sürüm:
+MenuButtons--metaInfo--application-uptime = Çalışma süresi:
+MenuButtons--metaInfo--update-channel = Güncelleme kanalı:
+MenuButtons--metaInfo--build-id = Yapı kimliği:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
 
 ##
 
+MenuButtons--metaInfo--platform = Platform
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
