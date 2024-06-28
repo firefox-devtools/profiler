@@ -71,6 +71,7 @@ CallTree--divergent-inlining-badge =
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Hakkındaki bilgileri görüntülemek için bir düğüm seçin.
 
 ## CallTreeSidebar timing information
 ##
@@ -138,6 +139,13 @@ FooterLinks--hide-button =
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> yol
 
 ## Home page
 
@@ -147,6 +155,15 @@ Home--load-from-url-submit-button =
     .value = Yükle
 Home--documentation-button = Dokümantasyon
 Home--menu-button = { -profiler-brand-name } menü düğmesini etkinleştir
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Bu profilleyici örneği WebChannel’a bağlanamadığı için profilleyici menü düğmesini etkinleştiremez.
+Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
+Home--record-instructions-capture-load = Profili yakala ve yükle
+Home--profiler-motto = Performans profili yakalayın. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
+Home--additional-content-title = Mevcut profilleri yükleyin
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
