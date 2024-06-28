@@ -14,7 +14,7 @@ separate domain, whose link will be added automatically to the PR:
 
 ## How to merge l10n into main
 
-Our localization process happens inside [Pontoon](https://pontoon.mozilla.org/de/firefox-profiler/).
+Our localization process happens inside [Pontoon](https://pontoon.mozilla.org/projects/firefox-profiler/).
 Changes in Pontoon are being pushed into the `l10n` branch. They should be merged
 into `main` before the deployment.
 

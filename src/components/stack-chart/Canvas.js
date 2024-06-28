@@ -450,6 +450,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     const timing = combinedTimingRows[depth];
+    if (!timing) {
+      return null;
+    }
 
     if (timing.index) {
       const markerIndex = timing.index[stackTimingIndex];
@@ -465,6 +468,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     }
 
     const callNodeIndex = timing.callNode[stackTimingIndex];
+    if (callNodeIndex === undefined) {
+      return null;
+    }
     const duration =
       timing.end[stackTimingIndex] - timing.start[stackTimingIndex];
 
