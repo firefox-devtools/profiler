@@ -193,11 +193,25 @@ ListOfPublishedProfiles--published-profiles-link =
     .title = { $smallProfileName } profilini yüklemek için buraya tıklayın
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Sil
     .title = Yetkilendirme bilgileri eksik olduğu için bu profil silinemez.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Henüz hiç profil yüklenmedi!
+# This string is used below the 'Your recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Tüm kayıtlarınızı görün ve yönetin ({ $profilesRestCount } kayıt daha)
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Bu kaydı yönet
+       *[other] Bu kayıtları yönet
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Seçimi buradan başlat
 
 ## MarkerFiltersContextMenu
 ## This is the menu when filter icon is clicked in Marker Chart and Marker Table
