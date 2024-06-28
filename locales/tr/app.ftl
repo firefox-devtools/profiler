@@ -186,6 +186,13 @@ FooterLinks--languageSwitcher--select =
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--button-upload = Yükle
+MenuButtons--publish--upload-title = Profil yükleniyor…
+MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
+MenuButtons--publish--message-something-went-wrong = Profil yüklenirken bir hata oluştu.
+MenuButtons--publish--message-try-again = Yeniden dene
+MenuButtons--publish--download = İndir
+MenuButtons--publish--compressing = Sıkıştırılıyor…
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -200,11 +207,25 @@ FooterLinks--languageSwitcher--select =
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Sil
+    .title = { $smallProfileName } profilini silmek için buraya tıkla
 
 ## Profile Delete Panel
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Vazgeç
+ProfileDeletePanel--dialog-delete-button =
+    .value = Sil
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Siliniyor…
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -228,6 +249,7 @@ FooterLinks--languageSwitcher--select =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--use-data-source-label = Veri kaynağı:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -253,6 +275,36 @@ FooterLinks--languageSwitcher--select =
 ## consumption. The carbon dioxide equivalent represents the equivalent amount
 ## of CO₂ to achieve the same level of global warming potential.
 
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Güç
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-watt = { $value } W
+    .label = Güç
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Güç
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-kilowatt = { $value } kW
+    .label = Geçerli seçimdeki ortalama güç
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-watt = { $value } W
+    .label = Geçerli seçimdeki ortalama güç
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Geçerli seçimdeki ortalama güç
 
 ## TrackBandwidth
 ## This is used to show how much data was transfered over time.
