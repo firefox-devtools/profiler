@@ -110,6 +110,8 @@ Details--error-boundary-message =
 ## This component is shown when an unexpected error is encountered in the application.
 ## Note that the localization won't be always applied in this component.
 
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Hatayı GitHub’da rapor et
 
 ## Footer Links
 
