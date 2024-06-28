@@ -186,10 +186,12 @@ MenuButtons--metaOverheadStatistics-mean = Ortalama
 MenuButtons--metaOverheadStatistics-max = Maksimum
 MenuButtons--metaOverheadStatistics-min = Minimum
 MenuButtons--metaOverheadStatistics-overhead-duration = Ek yük süreleri:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Ek yük yüzdesi:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Gizli iş parçaçıklarını dahil et
 MenuButtons--publish--button-upload = Yükle
 MenuButtons--publish--upload-title = Profil yükleniyor…
 MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
