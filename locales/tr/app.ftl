@@ -50,6 +50,8 @@ CallNodeContextMenu--expand-all = Tümünü genişlet
 # See: https://searchfox.org/
 CallNodeContextMenu--searchfox = Fonksiyon adını Searchfox’ta ara
 CallNodeContextMenu--copy-function-name = Fonksiyon adını kopyala
+CallNodeContextMenu--copy-script-url = Betik URL'sini kopyala
+CallNodeContextMenu--copy-stack = Yığını kopyala
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -124,6 +126,9 @@ FooterLinks--Privacy = Gizlilik
 FooterLinks--Cookies = Çerezler
 FooterLinks--languageSwitcher--select =
     .title = Dili değiştir
+FooterLinks--hide-button =
+    .title = Alt bilgi bağlantılarını gizle
+    .aria-label = Alt bilgi bağlantılarını gizle
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -132,6 +137,12 @@ FooterLinks--languageSwitcher--select =
 
 ## Home page
 
+Home--upload-from-file-input-button = Dosyadan profil yükle
+Home--upload-from-url-button = URL’den profil yükle
+Home--load-from-url-submit-button =
+    .value = Yükle
+Home--documentation-button = Dokümantasyon
+Home--menu-button = { -profiler-brand-name } menü düğmesini etkinleştir
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -171,11 +182,22 @@ FooterLinks--languageSwitcher--select =
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Profil Bilgileri
+MenuButtons--index--full-view = Tam Görünüm
+MenuButtons--index--docs = Dokümanlar
+MenuButtons--permalink--button =
+    .label = Kalıcı bağlantı
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Yüklenme tarihi:
+MenuButtons--index--profile-info-uploaded-actions = Sil
+MenuButtons--metaInfo--profiling-started = Kayıt başlama tarihi:
+MenuButtons--metaInfo--profiling-session = Kayıt uzunluğu:
+MenuButtons--metaInfo--main-process-started = Ana işlemin başlama tarihi:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
