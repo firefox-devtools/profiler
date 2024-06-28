@@ -225,17 +225,30 @@ MenuButtons--metaInfo--name-and-version = Ad ve sürüm:
 MenuButtons--metaInfo--application-uptime = Çalışma süresi:
 MenuButtons--metaInfo--update-channel = Güncelleme kanalı:
 MenuButtons--metaInfo--build-id = Yapı kimliği:
+MenuButtons--metaInfo--build-type = Yapı tipi:
+MenuButtons--metaInfo--arguments = Argümanlar:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Hata ayıklama
 
 ##
 
 MenuButtons--metaInfo--platform = Platform
+MenuButtons--metaInfo--device = Cihaz:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = İşletim sistemi:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Görsel metrikler
+MenuButtons--metaInfo-renderRowOfList-label-features = Özellikler:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = İş parçacıkları filtresi:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Uzantılar:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } yükü
 MenuButtons--metaOverheadStatistics-mean = Ortalama
 MenuButtons--metaOverheadStatistics-max = Maksimum
 MenuButtons--metaOverheadStatistics-min = Minimum
