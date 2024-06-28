@@ -17,6 +17,7 @@
 -firefox-brand-name = Firefox
 -firefox-android-brand-name = Android için Firefox
 -profiler-brand-name = Firefox Profiler
+-profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
@@ -30,6 +31,7 @@ AppHeader--github-icon =
 
 AppViewRouter--error-unpublished = { -firefox-brand-name } tarayıcısından profil alınamadı.
 AppViewRouter--error-from-file = Dosya okunamadı veya içindeki profil ayrıştırılamadı.
+AppViewRouter--error-local = Henüz hazır değil.
 AppViewRouter--error-public = Profil indirilemedi.
 AppViewRouter--error-from-url = Profil indirilemedi.
 AppViewRouter--error-compare = Profiller getirilemedi.
