@@ -46,6 +46,10 @@ AppViewRouter--route-not-found--home =
 #   $fileName (String) - Name of the file to open.
 CallNodeContextMenu--show-file = <strong>{ $fileName }</strong> dosyasını göster
 CallNodeContextMenu--expand-all = Tümünü genişlet
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Fonksiyon adını Searchfox’ta ara
+CallNodeContextMenu--copy-function-name = Fonksiyon adını kopyala
 
 ## CallTree
 ## This is the component for Call Tree panel.
