@@ -203,6 +203,48 @@ MenuButtons--permalink--button =
 
 MenuButtons--index--profile-info-uploaded-label = Yüklenme tarihi:
 MenuButtons--index--profile-info-uploaded-actions = Sil
+MenuButtons--index--metaInfo-subtitle = Profil Bilgileri
+MenuButtons--metaInfo--symbols = Semboller:
+MenuButtons--metaInfo--cpu-model = İşlemci modeli:
+MenuButtons--metaInfo--cpu-cores = İşlemci çekirdekleri:
+MenuButtons--metaInfo--main-memory = Ana bellek:
+MenuButtons--index--show-moreInfo-button = Daha fazla göster
+MenuButtons--index--hide-moreInfo-button = Daha az göster
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } fiziksel çekirdek, { $logicalCPUs } mantıksal çekirdek
+               *[other] { $physicalCPUs } fiziksel çekirdek, { $logicalCPUs } mantıksal çekirdek
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } fiziksel çekirdek, { $logicalCPUs } mantıksal çekirdek
+               *[other] { $physicalCPUs } fiziksel çekirdek, { $logicalCPUs } mantıksal çekirdek
+            }
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } fiziksel çekirdek
+       *[other] { $physicalCPUs } fiziksel çekirdek
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } mantıksal çekirdek
+       *[other] { $logicalCPUs } mantıksal çekirdek
+    }
 MenuButtons--metaInfo--profiling-started = Kayıt başlama tarihi:
 MenuButtons--metaInfo--profiling-session = Kayıt uzunluğu:
 MenuButtons--metaInfo--main-process-started = Ana işlemin başlama tarihi:
@@ -259,6 +301,17 @@ MenuButtons--metaOverheadStatistics-overhead-percentage = Ek yük yüzdesi:
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Gizli iş parçaçıklarını dahil et
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Diğer sekmelerdeki verileri dahil et
+MenuButtons--publish--renderCheckbox-label-hidden-time = Gizli zaman aralığını dahil et
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Ekran görüntülerini dahil et
+MenuButtons--publish--renderCheckbox-label-resource = Kaynak URL’lerini ve yollarını dahil et
+MenuButtons--publish--renderCheckbox-label-extension = Uzantı bilgilerini dahil et
+MenuButtons--publish--renderCheckbox-label-preference = Tercih değerlerini dahil et
+MenuButtons--publish--renderCheckbox-label-private-browsing = Gizli gezinti pencerelerindeki verileri dahil et
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Bu profil gizli gezinti verileri içeriyor
+MenuButtons--publish--reupload-performance-profile = Performans Profilini Yeniden Yükle
+MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
 MenuButtons--publish--button-upload = Yükle
 MenuButtons--publish--upload-title = Profil yükleniyor…
 MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
