@@ -63,6 +63,10 @@ CallNodeContextMenu--copy-stack = Yığını kopyala
 ## functions for native code (C / C++ / Rust). They're a small "inl" icon with
 ## a tooltip.
 
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Bazı { $calledFunction } çağrıları derleyici tarafından satır içine dönüştürüldü.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -331,6 +335,7 @@ MenuButtons--publish--compressing = Sıkıştırılıyor…
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Birden fazla terim kullanarak arama yapmak için virgül (,) kullanabileceğinizi biliyor muydunuz?
 
 ## Profile Delete Button
 
@@ -345,6 +350,16 @@ ProfileDeleteButton--delete-button =
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Bu profil silinirken bir hata oluştu. <a>Daha fazla bilgi için üstüne gelin.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = { $profileName } profilini sil
+ProfileDeletePanel--dialog-confirmation-question =
+    Bu profil için yüklenen verileri silmek istediğinizden emin misiniz?
+    Daha önce paylaşılan bağlantılar artık çalışmayacaktır.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Vazgeç
 ProfileDeletePanel--dialog-delete-button =
@@ -383,6 +398,8 @@ ProfileRootMessage--additional = Ana sayfaya dön
 
 ## Root
 
+Root--error-boundary-message =
+    .message = profiler.firefox.com adresinde bilinmeyen bir hata oluştu.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
@@ -405,9 +422,11 @@ StackSettings--implementation-all-frames = Tüm çerçeveler
 StackSettings--implementation-javascript2 = JavaScript
     .title = Yalnızca JavaScript yürütmesiyle ilgili yığın çerçevelerini göster
 StackSettings--use-data-source-label = Veri kaynağı:
+StackSettings--show-user-timing = Kullanıcı zamanlamasını göster
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Çağrı Ağacı
 TabBar--flame-graph-tab = Alev Grafiği
 TabBar--stack-chart-tab = Yığın Grafiği
 TabBar--marker-chart-tab = İşaret Grafiği
