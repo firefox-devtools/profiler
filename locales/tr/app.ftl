@@ -312,6 +312,7 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Bu profil gizli gezinti verileri içeriyor
 MenuButtons--publish--reupload-performance-profile = Performans Profilini Yeniden Yükle
 MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
+MenuButtons--publish--info-description = Profilinizi yükleyerek bağlantıya sahip herkesin erişmesini sağlayın.
 MenuButtons--publish--button-upload = Yükle
 MenuButtons--publish--upload-title = Profil yükleniyor…
 MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
@@ -407,11 +408,46 @@ StackSettings--use-data-source-label = Veri kaynağı:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--flame-graph-tab = Alev Grafiği
+TabBar--stack-chart-tab = Yığın Grafiği
+TabBar--marker-chart-tab = İşaret Grafiği
+TabBar--marker-table-tab = İşaret Tablosu
+TabBar--network-tab = Ağ
+TabBar--js-tracer-tab = JS İzleyici
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Yalnızca bu işlemi göster
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Yalnızca “{ $trackName }” yolunu göster
+TrackContextMenu--hide-other-screenshots-tracks = Diğer ekran görüntüsü yollarını gizle
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = “{ $trackName }” yolunu gizle
+TrackContextMenu--show-all-tracks = Tüm yolları göster
+TrackContextMenu--show-local-tracks-in-process = Bu işlemdeki tüm yolları göster
+# This is used in the tracks context menu as a button to show all the tracks
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Eşleşen tüm yolları göster
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Eşleşen tüm yolları gizle
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = “<span>{ $searchFilter }</span>” için sonuç bulunamadı
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Yolu gizle
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = İşlemi gizle
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
