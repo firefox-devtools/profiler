@@ -258,6 +258,7 @@ ProfileLoaderAnimation--loading-view-not-found = Görünüm bulunamadı
 ## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Ana sayfaya dön
 
 ## Root
 
@@ -266,11 +267,22 @@ ProfileRootMessage--title = { -profiler-brand-name }
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--applying-button = Uygulanıyor…
+ServiceWorkerManager--pending-button = Uygula ve yeniden yükle
+ServiceWorkerManager--installed-button = Uygulamayı yeniden yükle
+ServiceWorkerManager--new-version-is-ready = Uygulamanın yeni sürümü indirildi ve kullanıma hazır.
+ServiceWorkerManager--hide-notice-button =
+    .title = Yeniden yükleme bildirimini gizle
+    .aria-label = Yeniden yükleme bildirimini gizle
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-frames = Tüm çerçeveler
+    .title = Yığın çerçevelerini filtreleme
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Yalnızca JavaScript yürütmesiyle ilgili yığın çerçevelerini göster
 StackSettings--use-data-source-label = Veri kaynağı:
 
 ## Tab Bar for the bottom half of the analysis UI.
