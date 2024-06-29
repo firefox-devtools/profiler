@@ -212,6 +212,12 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## panels.
 
 MarkerContextMenu--start-selection-here = Seçimi buradan başlat
+MarkerContextMenu--end-selection-here = Seçimi burada sonlandır
+MarkerContextMenu--copy-description = Açıklamayı kopyala
+MarkerContextMenu--copy-call-stack = Çağrı yığınını kopyala
+MarkerContextMenu--copy-url = URL’yi kopyala
+MarkerContextMenu--copy-page-url = Sayfa URL’sini kopyala
+MarkerContextMenu--copy-as-json = JSON olarak kopyala
 
 ## MarkerFiltersContextMenu
 ## This is the menu when filter icon is clicked in Marker Chart and Marker Table
@@ -229,6 +235,10 @@ MarkerContextMenu--start-selection-here = Seçimi buradan başlat
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Başlangıç
+MarkerTable--duration = Süre
+MarkerTable--name = Ad
+MarkerTable--details = Ayrıntılar
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -364,6 +374,8 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
 MenuButtons--publish--reupload-performance-profile = Performans Profilini Yeniden Yükle
 MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
 MenuButtons--publish--info-description = Profilinizi yükleyerek bağlantıya sahip herkesin erişmesini sağlayın.
+MenuButtons--publish--info-description-default = Varsayılan olarak kişisel verileriniz kaldırılır.
+MenuButtons--publish--include-additional-data = Tanımlanabilir olabilecek ek verileri dahil et
 MenuButtons--publish--button-upload = Yükle
 MenuButtons--publish--upload-title = Profil yükleniyor…
 MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
@@ -371,6 +383,7 @@ MenuButtons--publish--message-something-went-wrong = Profil yüklenirken bir hat
 MenuButtons--publish--message-try-again = Yeniden dene
 MenuButtons--publish--download = İndir
 MenuButtons--publish--compressing = Sıkıştırılıyor…
+MenuButtons--publish--error-while-compressing = Sıkıştırma sırasında hata oluştu. Profil boyutunu küçültmek için bazı onay kutularının işaretini kaldırmayı deneyin.
 
 ## NetworkSettings
 ## This is used in the network chart.
