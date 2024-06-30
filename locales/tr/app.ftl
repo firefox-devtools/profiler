@@ -50,7 +50,7 @@ CallNodeContextMenu--expand-all = Tümünü genişlet
 # See: https://searchfox.org/
 CallNodeContextMenu--searchfox = Fonksiyon adını Searchfox’ta ara
 CallNodeContextMenu--copy-function-name = Fonksiyon adını kopyala
-CallNodeContextMenu--copy-script-url = Betik URL'sini kopyala
+CallNodeContextMenu--copy-script-url = Betik URL’sini kopyala
 CallNodeContextMenu--copy-stack = Yığını kopyala
 
 ## CallTree
