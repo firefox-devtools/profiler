@@ -284,6 +284,9 @@ Home--menu-button = Ative il boton { -profiler-brand-name } tal menù
 Home--record-instructions-start-stop = Interomp e invie la profiladure
 Home--record-instructions-capture-load = Cature e cjame profîl
 Home--additional-content-title = Cjame profîi esistents
+Home--additional-content-content = Tu puedis <strong>strissinâ e molâ</strong> achì un profîl par cjariâlu, opûr:
+Home--compare-recordings-info = Tu puedis ancje paragonâ diviersis regjistrazions. <a>Vierç la interface pal confront</a>.
+Home--your-recent-uploaded-recordings-title = Lis tôs regjistrazions cjariadis in rêt di resint
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
