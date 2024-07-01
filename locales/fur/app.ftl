@@ -287,19 +287,40 @@ Home--additional-content-title = Cjame profîi esistents
 Home--additional-content-content = Tu puedis <strong>strissinâ e molâ</strong> achì un profîl par cjariâlu, opûr:
 Home--compare-recordings-info = Tu puedis ancje paragonâ diviersis regjistrazions. <a>Vierç la interface pal confront</a>.
 Home--your-recent-uploaded-recordings-title = Lis tôs regjistrazions cjariadis in rêt di resint
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 =
+    { -profiler-brand-name } al pues ancje impuartâ profîi di altris profiladôrs, come <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>, il
+    panel prestazions di Chrome, <androidstudio>Android Studio</androidstudio> o qualsisei file che al dopri il <dhat>formât dhat</dhat> o <traceevent>Trace Event di Google</traceevent>. <write>Scuvierç cemût creâ un strument di importazion</write>.
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Inserìs i tiermins di cirî
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Mostre dome “self time’”
+    .title = Mostre nome il timp doprât intun grop di clamade, ignorant i siei fîs.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Fâs clic achì par cjariâ il profîl { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Elimine
+    .title = Nol è pussibil eliminâ chest profîl parcè che nus mancjin lis informazions di autorizazion.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nol è stât cjariât ancjemò nissun profîl!
+# This string is used below the 'Your recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Viôt e gjestìs dutis lis tôs regjistrazions (altris { $profilesRestCount })
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
