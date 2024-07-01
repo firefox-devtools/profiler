@@ -334,6 +334,23 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Scomence la selezion achì
+MarkerContextMenu--end-selection-here = Finìs la selezion achì
+MarkerContextMenu--copy-description = Copie descrizion
+MarkerContextMenu--copy-call-stack = Copie stack de clamade
+MarkerContextMenu--copy-url = Copie URL
+MarkerContextMenu--copy-page-url = Copie URL de pagjine
+MarkerContextMenu--copy-as-json = Copie come JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Selezione il thread dal ricevidôr “<strong>{ $threadName }</strong>”
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Selezione il thread dal mitent “<strong>{ $threadName }</strong>”
 
 ## MarkerFiltersContextMenu
 ## This is the menu when filter icon is clicked in Marker Chart and Marker Table
@@ -351,18 +368,111 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Inizi
+MarkerTable--duration = Durade
+MarkerTable--name = Non
+MarkerTable--details = Detais
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Informazions profîl
+MenuButtons--index--full-view = Viodude complete
+MenuButtons--index--cancel-upload = Anule cjariament in rêt
+MenuButtons--index--share-upload =
+    .label = Cjame in rêt il profîl locâl
+MenuButtons--index--share-re-upload =
+    .label = Torne cjame in rêt
+MenuButtons--index--share-error-uploading =
+    .label = Erôr tal cjariâ in rêt
+MenuButtons--index--revert = Ripristine al profîl origjinâl
+MenuButtons--index--docs = Documentazion
+MenuButtons--permalink--button =
+    .label = Colegament permanent
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Cjariât in rêt:
+MenuButtons--index--profile-info-uploaded-actions = Elimine
+MenuButtons--index--metaInfo-subtitle = Informazions profîl
+MenuButtons--metaInfo--symbols = Simbui:
+MenuButtons--metaInfo--profile-symbolicated = Il profîl al è simbolizât
+MenuButtons--metaInfo--profile-not-symbolicated = Il profîl nol è simbolizât
+MenuButtons--metaInfo--resymbolicate-profile = Torne simbolize il profîl
+MenuButtons--metaInfo--symbolicate-profile = Simbolize il profîl
+MenuButtons--metaInfo--attempting-resymbolicate = Tentatîf di tornâ a simbolizâ il profîl
+MenuButtons--metaInfo--currently-symbolicating = In chest moment, daûr a simbolizâ il profîl
+MenuButtons--metaInfo--cpu-model = Model CPU:
+MenuButtons--metaInfo--cpu-cores = Cores de CPU:
+MenuButtons--metaInfo--main-memory = Memorie principâl:
+MenuButtons--index--show-moreInfo-button = Mostre di plui
+MenuButtons--index--hide-moreInfo-button = Mostre di mancul
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } core fisic, { $logicalCPUs } core logjic
+               *[other] { $physicalCPUs } core fisic, { $logicalCPUs } cores logjics
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } cores fisics, { $logicalCPUs } core logjic
+               *[other] { $physicalCPUs } cores fisics, { $logicalCPUs } cores logjics
+            }
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } core fisic
+       *[other] { $physicalCPUs } cores fisics
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } core logjic
+       *[other] { $logicalCPUs } cores logjics
+    }
+MenuButtons--metaInfo--profiling-started = Regjistrazion scomençade:
+MenuButtons--metaInfo--profiling-session = Lungjece regjistrazion:
+MenuButtons--metaInfo--main-process-started = Procès principâl inviât:
+MenuButtons--metaInfo--main-process-ended = Procès principâl completât:
+MenuButtons--metaInfo--interval = Interval:
+MenuButtons--metaInfo--buffer-capacity = Capacitât buffer:
+MenuButtons--metaInfo--buffer-duration = Durade buffer:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } secont
+       *[other] { $configurationDuration } seconts
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitade
+MenuButtons--metaInfo--application = Aplicazion
+MenuButtons--metaInfo--name-and-version = Non e version:
+MenuButtons--metaInfo--application-uptime = Timp di ativitât:
+MenuButtons--metaInfo--update-channel = Canâl di inzornament:
+MenuButtons--metaInfo--build-id = ID compilazion:
+MenuButtons--metaInfo--build-type = Gjenar di compilazion:
+MenuButtons--metaInfo--arguments = Argoments:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Debug
 
 ##
 
