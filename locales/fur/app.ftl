@@ -484,10 +484,32 @@ MenuButtons--metaInfo--os = SO:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Metrichis visivis
+MenuButtons--metaInfo--speed-index = Indiç di velocitât:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Indiç di velocitât percetive:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Indiç di velocitât dal contignût:
+MenuButtons--metaInfo-renderRowOfList-label-features = Funzionalitâts:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtri threads:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Estensions:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Risorsis adizionâls (overhead) { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-mean = Medie
+MenuButtons--metaOverheadStatistics-max = Max
+MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
+    .title = Timp par campionâ ducj i threads.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Netisie
+    .title = Timp par scartâ i dâts scjadûts.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Contadôr
+    .title = Timp par tirâ dongje ducj i contadôrs.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Dade
+    .title = Dade di timp osservade tra doi campions.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Blocs
+    .title = Timp par cuistâ il bloc prime dal campionament.
 
 ## Publish panel
 ## These strings are used in the publishing panel.
