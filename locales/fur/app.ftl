@@ -281,6 +281,13 @@ Home--load-from-url-submit-button =
     .value = Cjame
 Home--documentation-button = Documentazion
 Home--menu-button = Ative il boton { -profiler-brand-name } tal menù
+Home--menu-button-instructions =
+    Ative il boton dal menù dal profiladôr par scomençâ a regjistrâ un
+    profîl di prestazions in { -firefox-brand-name }, dopo analizilu e condividilu cun profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Tu puedis ancje profilâ { -firefox-android-brand-name }. Par vê plui
+    informazions, consulte cheste documentazion:
+    <a>Creâ un profîl di { -firefox-android-brand-name } dret sul dispositîf</a>.
 Home--record-instructions-start-stop = Interomp e invie la profiladure
 Home--record-instructions-capture-load = Cature e cjame profîl
 Home--additional-content-title = Cjame profîi esistents
