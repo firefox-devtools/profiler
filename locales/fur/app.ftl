@@ -473,9 +473,17 @@ MenuButtons--metaInfo--arguments = Argoments:
 ## Strings refer to specific types of builds, and should be kept in English.
 
 MenuButtons--metaInfo--build-type-debug = Debug
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
+MenuButtons--metaInfo--platform = Plateforme
+MenuButtons--metaInfo--device = Dispositîf:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = SO:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Metrichis visivis
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
