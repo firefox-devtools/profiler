@@ -321,6 +321,14 @@ ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nol è stât 
 # Variables:
 #   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
 ListOfPublishedProfiles--uploaded-profile-information-label = Viôt e gjestìs dutis lis tôs regjistrazions (altris { $profilesRestCount })
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Gjestìs cheste regjistrazion
+       *[other] Gjestìs chestis regjistrazions
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
