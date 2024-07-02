@@ -300,6 +300,7 @@ Home--record-instructions = Par inviâ la profilazion, fâs clic sul boton par s
 Home--instructions-content = La regjistrazion dai profîi e je pussibile dome cun <a>{ -firefox-brand-name }</a>. Al è pussibil visualizâ i profîi esistents cun cualsisei navigadôr moderni.
 Home--record-instructions-start-stop = Interomp e invie la profiladure
 Home--record-instructions-capture-load = Cature e cjame profîl
+Home--profiler-motto = Cature un profîl des prestazions. Analizilu. Condividilu. Rint il Web plui svelt.
 Home--additional-content-title = Cjame profîi esistents
 Home--additional-content-content = Tu puedis <strong>strissinâ e molâ</strong> achì un profîl par cjariâlu, opûr:
 Home--compare-recordings-info = Tu puedis ancje paragonâ diviersis regjistrazions. <a>Vierç la interface pal confront</a>.
@@ -527,10 +528,37 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Dade
     .title = Dade di timp osservade tra doi campions.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Blocs
     .title = Timp par cuistâ il bloc prime dal campionament.
+MenuButtons--metaOverheadStatistics-overhead-duration = Duradis dal overhead:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Percentuâl di overhead:
+MenuButtons--metaOverheadStatistics-profiled-duration = Durade profilade:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Inclût threads platâts
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Inclût i dâts di altris schedis
+MenuButtons--publish--renderCheckbox-label-hidden-time = Inclût dade di timp platât
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Inclût videadis
+MenuButtons--publish--renderCheckbox-label-resource = Inclût URL e percors des risorsis
+MenuButtons--publish--renderCheckbox-label-extension = Inclût informazions su lis estensions
+MenuButtons--publish--renderCheckbox-label-preference = Inclût valôrs des impostazions
+MenuButtons--publish--renderCheckbox-label-private-browsing = Inclût i dâts dai barcons di navigazion privade
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Chest profîl al conten dâts di navigazion privade
+MenuButtons--publish--reupload-performance-profile = Torne cjame in rêt il profîl des prestazions
+MenuButtons--publish--share-performance-profile = Condivît il profîl des prestazions
+MenuButtons--publish--info-description = Cjame in rêt il to profîl e rindilu acessibil a ducj cul colegament.
+MenuButtons--publish--info-description-default = Par impostazion predefinide, i tiei dâts personâi a vegnin gjavâts.
+MenuButtons--publish--info-description-firefox-nightly2 = Chest profîl al rive di { -firefox-nightly-brand-name }, duncje par impostazion predefinide la plui part des informazions e ven includude.
+MenuButtons--publish--include-additional-data = Inclût dâts in plui che a podaressin jessi identificabii
+MenuButtons--publish--button-upload = Cjarie in rêt
+MenuButtons--publish--upload-title = Daûr a cjariâ in rêt il profîl…
+MenuButtons--publish--cancel-upload = Anule cjariament in rêt
+MenuButtons--publish--message-something-went-wrong = Orpo, alc al è lât strucj dilunc il cjariament in rêt dal profîl.
+MenuButtons--publish--message-try-again = Torne prove
+MenuButtons--publish--download = Discjame
+MenuButtons--publish--compressing = Daûr a comprimi…
+MenuButtons--publish--error-while-compressing = Erôr dilunc la compression, prove a deselezionâ cualchi casele di control par ridusi lis dimensions dal profîl.
 
 ## NetworkSettings
 ## This is used in the network chart.
