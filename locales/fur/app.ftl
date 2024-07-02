@@ -293,6 +293,11 @@ Home--profile-firefox-android-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Cheste istance dal profiladôr no je rivade a conetisi al WebChannel e duncje no pues ativâ il Boton dal profiladôr tal menù.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable = Cheste istance dal profiladôr no je rivade a conetisi al WebChannel. Di solit al significhe che e je in esecuzion suntun host diviers di chel indicât te impostazion <code>devtools.performance.recording.ui-base-url</code>. Se tu vuelis caturâ gnûfs profîi cun cheste istance e dâur il control programatic dal boton dal menù dal profiladôr, vierç <code>about:config</code> e modifiche cheste impostazion.
+Home--record-instructions = Par inviâ la profilazion, fâs clic sul boton par scomençâ la regjistrazion opûr dopre lis scurtis di tastiere. La icone e devente blu se e je ative la regjistrazion di un profîl. Frache <kbd>Cature</kbd> par cjariâ i dâts su profiler.firefox.com.
+Home--instructions-content = La regjistrazion dai profîi e je pussibile dome cun <a>{ -firefox-brand-name }</a>. Al è pussibil visualizâ i profîi esistents cun cualsisei navigadôr moderni.
 Home--record-instructions-start-stop = Interomp e invie la profiladure
 Home--record-instructions-capture-load = Cature e cjame profîl
 Home--additional-content-title = Cjame profîi esistents
