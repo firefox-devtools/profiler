@@ -563,21 +563,52 @@ MenuButtons--publish--error-while-compressing = Erôr dilunc la compression, pro
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Filtre rêts:
+    .title = Visualize dome lis richiestis di rêt che a corispuindin a un ciert non
 
 ## Timestamp formatting primitive
 
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Savevistu che tu puedis doprâ la virgule (,) par fâ ricercjis cun plui tiermins?
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Elimine
+    .title = Fâs clic achì par eliminâ il profîl { $smallProfileName }
 
 ## Profile Delete Panel
 ## This panel is displayed when the user clicks on the Profile Delete Button,
 ## it's a confirmation dialog.
 
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = Al è capitât un erôr dilunc la eliminazion di chest profîl. <a>Passe chi sore cul mouse par vê altris informazions.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Elimine “{ $profileName }”
+ProfileDeletePanel--dialog-confirmation-question = Eliminâ pardabon i dâts cjariâts in rêt par chest profîl? I colegaments che prime a jerin condividûts no funzionaran plui.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Anule
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -601,14 +632,41 @@ MenuButtons--publish--error-while-compressing = Erôr dilunc la compression, pro
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--panel-search =
+    .label = Filtre stacks:
+    .title = Visualize dome i stacks che a contegnin une funzion là che il so non al corispuint a cheste sotstringhe
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Arbul des clamadis
+TabBar--flame-graph-tab = Grafic a flame
+TabBar--stack-chart-tab = Grafic a pile
+TabBar--marker-chart-tab = Grafic a marcadôrs
+TabBar--marker-table-tab = Tabele marcadôrs
+TabBar--network-tab = Rêt
+TabBar--js-tracer-tab = Tracer JS
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process = Mostre dome chest procès
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Mostre dome “{ $trackName } ”
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Plate “{ $trackName }”
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Nissun risultât cjatât par “<span>{ $searchFilter }</span>”
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Plate procès
 
 ## TrackMemoryGraph
 ## This is used to show the memory graph of that process in the timeline part of
