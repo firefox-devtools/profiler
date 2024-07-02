@@ -357,6 +357,7 @@ MenuButtons--metaOverheadStatistics-max = Maksimum
 MenuButtons--metaOverheadStatistics-min = Minimum
 MenuButtons--metaOverheadStatistics-overhead-duration = Ek yük süreleri:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ek yük yüzdesi:
+MenuButtons--metaOverheadStatistics-profiled-duration = Profillenen süre:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -481,6 +482,8 @@ StackSettings--implementation-all-frames = Tüm çerçeveler
     .title = Yığın çerçevelerini filtreleme
 StackSettings--implementation-javascript2 = JavaScript
     .title = Yalnızca JavaScript yürütmesiyle ilgili yığın çerçevelerini göster
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Yığın filtresi:
 StackSettings--use-data-source-label = Veri kaynağı:
 StackSettings--show-user-timing = Kullanıcı zamanlamasını göster
 
@@ -533,6 +536,7 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
+TrackMemoryGraph--memory-range-in-graph = grafikteki bellek aralığı
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
