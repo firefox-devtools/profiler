@@ -288,6 +288,11 @@ Home--profile-firefox-android-instructions =
     Tu puedis ancje profilâ { -firefox-android-brand-name }. Par vê plui
     informazions, consulte cheste documentazion:
     <a>Creâ un profîl di { -firefox-android-brand-name } dret sul dispositîf</a>.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Cheste istance dal profiladôr no je rivade a conetisi al WebChannel e duncje no pues ativâ il Boton dal profiladôr tal menù.
 Home--record-instructions-start-stop = Interomp e invie la profiladure
 Home--record-instructions-capture-load = Cature e cjame profîl
 Home--additional-content-title = Cjame profîi esistents
