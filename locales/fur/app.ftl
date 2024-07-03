@@ -609,24 +609,55 @@ ProfileDeletePanel--dialog-title = Elimine “{ $profileName }”
 ProfileDeletePanel--dialog-confirmation-question = Eliminâ pardabon i dâts cjariâts in rêt par chest profîl? I colegaments che prime a jerin condividûts no funzionaran plui.
 ProfileDeletePanel--dialog-cancel-button =
     .value = Anule
+ProfileDeletePanel--dialog-delete-button =
+    .value = Elimine
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Daûr a eliminâ…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = I dâts cjariâts in rêt a son stâts eliminâts cun sucès.
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Interval complet ({ $fullRangeDuration })
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Importazion dal profîl dret di { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Leture dal file e analisi dal profîl…
+ProfileLoaderAnimation--loading-local = No ancjemò implementât.
+ProfileLoaderAnimation--loading-public = Daûr a discjariâ e a elaborâ il profîl…
+ProfileLoaderAnimation--loading-from-url = Daûr a discjariâ e a elaborâ il profîl…
+ProfileLoaderAnimation--loading-compare = Leture e elaborazion dai profîi…
+ProfileLoaderAnimation--loading-view-not-found = Viodude no cjatade
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Torne ae pagjine iniziâl
 
 ## Root
 
+Root--error-boundary-message =
+    .message = Orpo, al è capitât un erôr no cognossût in profiler.firefox.com.
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--applying-button = Daûr a aplicâ…
+ServiceWorkerManager--pending-button = Apliche e torne cjame
+ServiceWorkerManager--installed-button = Torne cjame la aplicazion
+ServiceWorkerManager--updated-while-not-ready = E je stade aplicade une gnove version de aplicazion prime che cheste pagjine e fossi cjariade dal dut. Al è pussibil che tu viodedis malfunzionaments.
+ServiceWorkerManager--new-version-is-ready = E je stade aplicade une gnove version de aplicazion e e je pronte pal ûs.
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
