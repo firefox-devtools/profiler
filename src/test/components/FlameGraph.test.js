@@ -135,11 +135,18 @@ describe('FlameGraph', function () {
     // Make sure that we have the tooltip persisted.
     expect(getTooltip()).toBeTruthy();
 
+    // Flush the draw log to make sure we properly draw the graph later.
+    flushDrawLog();
+
     // Do something that updates the flame graph component.
     fireEvent.keyDown(div, { key: 'Enter' });
 
     // Now the tooltip should not be displayed because it could show invalid data.
     expect(getTooltip()).toBeFalsy();
+
+    // Make sure that the graph is rendered properly.
+    const drawCalls = flushDrawLog();
+    expect(drawCalls.length).toBeGreaterThan(0);
   });
 
   it('has a tooltip that matches the snapshot with categories', () => {
