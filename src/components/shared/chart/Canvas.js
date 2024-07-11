@@ -368,10 +368,11 @@ export class ChartCanvas<Item> extends React.Component<
         // selected item can get out of sync. Invalidate it to make sure that
         // it's always fresh. This setState will cause a rerender, but we have
         // to do it to prevent any crashes or incorrect tooltip positions.
+        // This is okay to do it because the main `prevProps !== this.props`
+        // check above will return false and will not schedule additional drawing.
         this.setState({ selectedItem: null });
-      } else {
-        this._scheduleDraw();
       }
+      this._scheduleDraw();
     } else if (
       !hoveredItemsAreEqual(prevState.hoveredItem, this.state.hoveredItem)
     ) {
