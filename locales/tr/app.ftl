@@ -446,6 +446,7 @@ ProfileFilterNavigator--full-range-with-duration = Tam aralık ({ $fullRangeDura
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-unpublished = Profil doğrudan { -firefox-brand-name } tarayıcısından içe aktarılıyor…
 ProfileLoaderAnimation--loading-from-file = Dosya okunuyor ve profil işleniyor…
 ProfileLoaderAnimation--loading-local = Henüz hazır değil.
 ProfileLoaderAnimation--loading-public = Profil indiriliyor ve işleniyor…
@@ -579,6 +580,62 @@ TrackPower--tooltip-average-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
     .label = Geçerli seçimdeki ortalama güç
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Görünür aralıkta harcanan enerji
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
+    .label = Görünür aralıkta harcanan enerji
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
+    .label = Görünür aralıkta harcanan enerji
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
+    .label = Görünür aralıkta harcanan enerji
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Geçerli seçimde harcanan enerji
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
+    .label = Geçerli seçimde harcanan enerji
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
+    .label = Mevcut seçimde harcanan enerji
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
+    .label = Geçerli seçimde harcanan enerji
 
 ## TrackBandwidth
 ## This is used to show how much data was transfered over time.
@@ -605,6 +662,20 @@ TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value 
 #   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
 TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
     .label = Bu zamana kadar aktarılan veriler
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } g CO₂e)
+    .label = Görünür aralıkta aktarılan veriler
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g CO₂e)
+    .label = Geçerli seçimde aktarılan veriler
 
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
@@ -641,6 +712,11 @@ BottomBox--source-code-not-available-title = Kaynak kodu mevcut değil
 # a file.
 # Assembly refers to the low-level programming language.
 BottomBox--assembly-code-not-available-title = Assembly kodu mevcut değil
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Desteklenen senaryolar ve planlanan iyileştirmeler için <a>sorun #4520</a>’ye bakabilirsiniz.
 SourceView--close-button =
     .title = Kaynak görünümünü kapat
 
@@ -648,6 +724,19 @@ SourceView--close-button =
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
 
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = { $pathInArchive } dosyası { $url } arşivinde bulunamadı.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = { $url } adresindeki arşiv ayrıştırılamadı: { $parsingErrorMessage }
 
 ## Toggle buttons in the top right corner of the bottom box
 
