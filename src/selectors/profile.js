@@ -708,7 +708,7 @@ export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
     for (const page of pageList) {
       if (page.embedderInnerWindowID === undefined) {
         // This is the top most page, which means the web page itself.
-        appendPageMap(page.tabID, page.innerWindowID);
+        appendPageMap(page.tabID, page);
       } else {
         // This is an iframe, we should find its parent to see find top most
         // TabID, which is the tab ID for our case.
