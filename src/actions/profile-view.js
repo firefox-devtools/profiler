@@ -1362,7 +1362,7 @@ function _findOtherVisibleThread(
     const localTrackOrder = getLocalTrackOrder(getState(), globalTrack.pid);
     const hiddenLocalTracks = getHiddenLocalTracks(getState(), globalTrack.pid);
     const localTrackIndexesToIgnore = localTrackIndexesToIgnoreByPid
-      ? localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set()
+      ? (localTrackIndexesToIgnoreByPid.get(globalTrack.pid) ?? new Set())
       : new Set();
 
     for (const trackIndex of localTrackOrder) {
