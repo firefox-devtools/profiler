@@ -46,6 +46,10 @@ AppViewRouter--route-not-found--home =
 # Variables:
 #   $fileName (String) - Name of the file to open.
 CallNodeContextMenu--show-file = <strong>{ $fileName }</strong> dosyasını göster
+CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Tümünü genişlet
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -214,6 +218,10 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 
 MarkerContextMenu--start-selection-here = Seçimi buradan başlat
 MarkerContextMenu--end-selection-here = Seçimi burada sonlandır
+MarkerContextMenu--start-selection-at-marker-start = Seçimi işaretçinin <strong>başlangıcından</strong> başlat
+MarkerContextMenu--start-selection-at-marker-end = Seçimi işaretçinin <strong>sonundan</strong> başlat
+MarkerContextMenu--end-selection-at-marker-start = Seçimi işaretçinin <strong>başlangıcında</strong> bitir
+MarkerContextMenu--end-selection-at-marker-end = Seçimi işaretçinin <strong>sonunda</strong> bitir
 MarkerContextMenu--copy-description = Açıklamayı kopyala
 MarkerContextMenu--copy-call-stack = Çağrı yığınını kopyala
 MarkerContextMenu--copy-url = URL’yi kopyala
@@ -356,6 +364,10 @@ MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } y�
 MenuButtons--metaOverheadStatistics-mean = Ortalama
 MenuButtons--metaOverheadStatistics-max = Maksimum
 MenuButtons--metaOverheadStatistics-min = Minimum
+MenuButtons--metaOverheadStatistics-statkeys-counter = Sayaç
+    .title = Tüm sayaçları toplama süresi.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Aralık
+    .title = İki örnek arasındaki gözlenen aralık.
 MenuButtons--metaOverheadStatistics-overhead-duration = Ek yük süreleri:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ek yük yüzdesi:
 MenuButtons--metaOverheadStatistics-profiled-duration = Profillenen süre:
@@ -393,6 +405,17 @@ MenuButtons--publish--error-while-compressing = Sıkıştırma sırasında hata 
 
 ## Timestamp formatting primitive
 
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
@@ -690,6 +713,11 @@ TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g C
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Alt ağacı daralt: { $item }
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
@@ -708,6 +736,11 @@ SourceView--loading-browser-connection = { -firefox-brand-name } bekleniyor…
 # Displayed whenever the source view was not able to get the source code for
 # a file.
 BottomBox--source-code-not-available-title = Kaynak kodu mevcut değil
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Desteklenen senaryolar ve planlanan iyileştirmeler için <a>sorun #3741</a>’e bakabilirsiniz.
 # Displayed whenever the assembly view was not able to get the assembly code for
 # a file.
 # Assembly refers to the low-level programming language.
