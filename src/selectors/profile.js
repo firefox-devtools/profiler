@@ -348,6 +348,114 @@ export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
   createSelector(getThreads, correlateIPCMarkers);
 
 /**
+ * Returns an InnerWindowID -> TabID map, so we can find the TabID of a given
+ * innerWindowID quickly. Returns null if there are no pages in the profile.
+ */
+export const getInnerWindowIDToTabMap: Selector<Map<
+  InnerWindowID,
+  TabID,
+> | null> = createSelector(
+  getPageList,
+  getInnerWindowIDToPageMap,
+  (pages, innerWindowIDToPageMap) => {
+    if (!pages || innerWindowIDToPageMap === null) {
+      // Return null if there are no pages.
+      return null;
+    }
+
+    const innerWindowIDToTabMap: Map<InnerWindowID, TabID> = new Map();
+    const getTopMostParent = (page) => {
+      if (page.embedderInnerWindowID === 0) {
+        return page;
+      }
+
+      // We are using a Map to make this more performant.
+      // It should be 1-2 loop iteration in 99% of the cases.
+      const parent = innerWindowIDToPageMap.get(page.embedderInnerWindowID);
+      if (parent !== undefined) {
+        return getTopMostParent(parent);
+      }
+      return page;
+    };
+    for (const page of pages) {
+      const topMostParent = getTopMostParent(page);
+      innerWindowIDToTabMap.set(page.innerWindowID, topMostParent.tabID);
+    }
+
+    return innerWindowIDToTabMap;
+  }
+);
+
+/**
+ * Return a map of tab to thread indexes map. This is useful for learning which
+ * threads are involved for tabs. This is mainly used for the tab selector.
+ */
+export const getTabToThreadIndexesMap: Selector<Map<ThreadIndex, Set<TabID>>> =
+  createSelector(
+    getThreads,
+    getInnerWindowIDToTabMap,
+    (threads, innerWindowIDToTabMap) => {
+      const tabToThreadIndexesMap = new Map();
+      if (!innerWindowIDToTabMap) {
+        return tabToThreadIndexesMap;
+      }
+
+      for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
+        const thread = threads[threadIdx];
+
+        // First go over the innerWindowIDs of the samples.
+        for (let i = 0; i < thread.frameTable.length; i++) {
+          const innerWindowID = thread.frameTable.innerWindowID[i];
+          if (innerWindowID === null) {
+            continue;
+          }
+
+          const tabID = innerWindowIDToTabMap.get(innerWindowID);
+          if (tabID === undefined) {
+            continue;
+          }
+
+          let threadIndexes = tabToThreadIndexesMap.get(tabID);
+          if (!threadIndexes) {
+            threadIndexes = new Set();
+            tabToThreadIndexesMap.set(tabID, threadIndexes);
+          }
+          threadIndexes.add(threadIdx);
+        }
+
+        // Then go over the markers.
+        for (let i = 0; i < thread.markers.length; i++) {
+          const markerData = thread.markers.data[i];
+
+          if (!markerData) {
+            continue;
+          }
+
+          if (
+            markerData.innerWindowID !== null &&
+            markerData.innerWindowID !== undefined
+          ) {
+            const innerWindowID = markerData.innerWindowID;
+            const tabID = innerWindowIDToTabMap.get(innerWindowID);
+            if (tabID === undefined) {
+              continue;
+            }
+
+            let threadIndexes = tabToThreadIndexesMap.get(tabID);
+            if (!threadIndexes) {
+              threadIndexes = new Set();
+              tabToThreadIndexesMap.set(tabID, threadIndexes);
+            }
+            threadIndexes.add(threadIdx);
+          }
+        }
+      }
+
+      return tabToThreadIndexesMap;
+    }
+  );
+
+/**
  * Tracks
  *
  * Tracks come in two flavors: global tracks and local tracks.
