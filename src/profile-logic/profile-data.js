@@ -2930,7 +2930,8 @@ export function filterToRetainedAllocations(
  * Returns null if we don't have information about pages (in older profiles).
  */
 export function extractProfileFilterPageData(
-  pagesMapByTabID: Map<TabID, PageList> | null
+  pagesMapByTabID: Map<TabID, PageList> | null,
+  extensionIDToNameMap: Map<string, string> | null
 ): Map<TabID, ProfileFilterPageData> {
   if (pagesMapByTabID === null) {
     // We don't have pages array (which is the case for older profiles). Return early.
@@ -2976,6 +2977,12 @@ export function extractProfileFilterPageData(
 
     try {
       const page = new URL(pageUrl);
+      let extensionName = null;
+      if (extensionIDToNameMap && pageUrl.startsWith('moz-extension://')) {
+        // Find the real name of the extension.
+        extensionName = extensionIDToNameMap.get(page.origin + '/');
+      }
+
       // FIXME(Bug 1620546): This is not ideal and we should get the favicon
       // either during profile capture or profile pre-process.
       const favicon = new URL('/favicon.ico', page.origin);
@@ -2985,7 +2992,7 @@ export function extractProfileFilterPageData(
       }
       pageDataByTabID.set(tabID, {
         origin: page.origin,
-        hostname: page.hostname,
+        hostname: extensionName ?? page.hostname,
         favicon: favicon.href,
       });
     } catch (e) {
