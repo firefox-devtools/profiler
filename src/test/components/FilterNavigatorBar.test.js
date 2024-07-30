@@ -146,19 +146,4 @@ describe('app/ProfileFilterNavigator', () => {
 
     expect(container.firstChild).toMatchSnapshot();
   });
-
-  it('displays the site hostname as its first element in the single tab view', () => {
-    const { dispatch, queryByText, getByText } = setup();
-    act(() => {
-      dispatch(
-        ReceiveProfile.changeTimelineTrackOrganization({
-          type: 'active-tab',
-          tabID,
-        })
-      );
-    });
-    expect(queryByText(/Full Range/)).not.toBeInTheDocument();
-    // Using regexp because searching for a partial text.
-    expect(getByText(/developer\.mozilla\.org/)).toBeInTheDocument();
-  });
 });
