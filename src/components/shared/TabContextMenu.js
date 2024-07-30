@@ -11,15 +11,16 @@ import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeTabFilter } from 'firefox-profiler/actions/receive-profile';
 import { getTabFilter } from '../../selectors/url-state';
-import { getProfileFilterPageDataByTabID } from 'firefox-profiler/selectors/profile';
+import { getProfileFilterSortedPageData } from 'firefox-profiler/selectors/profile';
 
-import type { TabID, ProfileFilterPageData } from 'firefox-profiler/types';
+import type { TabID } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { SortedTabPageData } from 'firefox-profiler/selectors/profile';
 
 type StateProps = {|
   +tabFilter: TabID | null,
-  +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
+  +sortedPageData: SortedTabPageData | null,
 |};
 
 type DispatchProps = {|
@@ -36,8 +37,8 @@ class TabContextMenuImpl extends React.PureComponent<Props> {
   };
 
   renderContextMenuContents() {
-    const { pageDataByTabID, tabFilter } = this.props;
-    if (!pageDataByTabID) {
+    const { sortedPageData, tabFilter } = this.props;
+    if (!sortedPageData) {
       return null;
     }
 
@@ -57,7 +58,7 @@ class TabContextMenuImpl extends React.PureComponent<Props> {
         >
           Full Profile
         </MenuItem>
-        {[...pageDataByTabID].map(([tabID, pageData]) => (
+        {sortedPageData.map(({ tabID, pageData }) => (
           <MenuItem
             key={tabID}
             onClick={this._handleClick}
@@ -89,10 +90,10 @@ class TabContextMenuImpl extends React.PureComponent<Props> {
 export const TabContextMenu = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state) => {
     const tabFilter = getTabFilter(state);
-    const pageDataByTabID = getProfileFilterPageDataByTabID(state);
+    const sortedPageData = getProfileFilterSortedPageData(state);
     return {
       tabFilter,
-      pageDataByTabID,
+      sortedPageData,
     };
   },
   mapDispatchToProps: {

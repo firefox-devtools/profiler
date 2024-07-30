@@ -1051,7 +1051,7 @@ export function computeDefaultVisibleThreads(
   // First, compute a score for every thread.
   const maxCpuDeltaPerInterval = computeMaxCPUDeltaPerInterval(profile);
   let scores = threads.map((thread, threadIndex) => {
-    const score = _computeThreadDefaultVisibilityScore(
+    const score = computeThreadDefaultVisibilityScore(
       profile,
       thread,
       maxCpuDeltaPerInterval
@@ -1099,7 +1099,7 @@ export function computeDefaultVisibleThreads(
   return new Set(finalList.map(({ threadIndex }) => threadIndex));
 }
 
-type DefaultVisibilityScore = {|
+export type DefaultVisibilityScore = {|
   // Whether this thread is one of the essential threads that
   // should always be kept (unless there's too many of them).
   isEssentialFirefoxThread: boolean,
@@ -1123,7 +1123,7 @@ const AUDIO_THREAD_SAMPLE_SCORE_BOOST_FACTOR = 40;
 // See the DefaultVisibilityScore type for details.
 // If we have too many threads, we use this score to compare between
 // "interesting" threads to make sure we keep the most interesting ones.
-function _computeThreadDefaultVisibilityScore(
+export function computeThreadDefaultVisibilityScore(
   profile: Profile,
   thread: Thread,
   maxCpuDeltaPerInterval: number | null
