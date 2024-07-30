@@ -663,6 +663,16 @@ export type ProfileFilterPageData = {|
   favicon: string | null,
 |};
 
+/**
+ * Information about the Tab selector state that is sorted by their tab activity
+ * scores.
+ */
+export type SortedTabPageData = Array<{|
+  tabID: TabID,
+  tabScore: number,
+  pageData: ProfileFilterPageData,
+|}>;
+
 export type CallNodeLeafAndSummary = {|
   // This property stores the amount of unit (time, bytes, count, etc.) spent in the
   // stacks' leaf nodes.

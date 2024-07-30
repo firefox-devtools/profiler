@@ -5,6 +5,7 @@
 // @flow
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
+import * as CPU from '../profile-logic/cpu';
 import * as UrlState from './url-state';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
@@ -80,7 +81,10 @@ import type {
   ExtraProfileInfoSection,
   TableViewOptions,
   ExtensionTable,
+  SortedTabPageData,
 } from 'firefox-profiler/types';
+
+import type { DefaultVisibilityScore } from '../profile-logic/tracks';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
@@ -714,6 +718,26 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   }
 );
 
+export const getMaxCPUDeltaPerInterval: Selector<number | null> =
+  createSelector(getProfile, CPU.computeMaxCPUDeltaPerInterval);
+
+export const getThreadActivityScores: Selector<Array<DefaultVisibilityScore>> =
+  createSelector(
+    getProfile,
+    getMaxCPUDeltaPerInterval,
+    (profile, maxCpuDeltaPerInterval) => {
+      const { threads } = profile;
+
+      return threads.map((thread) =>
+        Tracks.computeThreadDefaultVisibilityScore(
+          profile,
+          thread,
+          maxCpuDeltaPerInterval
+        )
+      );
+    }
+  );
+
 /**
  * Get the pages array and construct a Map of pages that we can use to get the
  * relationships of tabs. The constructed map is `Map<TabID,Page[]>`.
@@ -902,6 +926,46 @@ export const getProfileFilterPageDataByTabID: Selector<
   getExtensionIdToNameMap,
   extractProfileFilterPageData
 );
+
+/**
+ * Get the profile filter page data for all the tabs and return a sorted array
+ * of tabs data with their score.
+ */
+export const getProfileFilterSortedPageData: Selector<SortedTabPageData> =
+  createSelector(
+    getProfileFilterPageDataByTabID,
+    getTabToThreadIndexesMap,
+    getThreadActivityScores,
+    (pageDataByTabID, tabToThreadIndexesMap, threadActivityScores) => {
+      const pageDataWithScore = [];
+      // Generate the pageDataWithScore array
+      for (const [tabID, pageData] of pageDataByTabID.entries()) {
+        let tabScore = 0;
+        const threadIndexes = tabToThreadIndexesMap.get(tabID);
+        if (!threadIndexes) {
+          // Couldn't find any thread indexes for the tab. Do not show it.
+          continue;
+        }
+        for (const threadIndex of threadIndexes.values()) {
+          const threadScore = threadActivityScores[threadIndex];
+          if (!threadScore) {
+            throw new Error('Failed to find the thread score!');
+          }
+
+          tabScore += threadScore.boostedSampleScore;
+        }
+        pageDataWithScore.push({
+          tabID,
+          tabScore,
+          pageData,
+        });
+      }
+
+      // Sort the tabs by their activity.
+      pageDataWithScore.sort((a, b) => b.tabScore - a.tabScore);
+      return pageDataWithScore;
+    }
+  );
 
 /**
  * This returns the hostname and favicon information for the current tab id.
