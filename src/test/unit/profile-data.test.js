@@ -990,7 +990,7 @@ describe('extractProfileFilterPageData', function () {
   it('extracts the page data when there is only one relevant page', function () {
     // Adding only the https://www.mozilla.org page.
     const pagesMap = new Map([[pages.mozilla.tabID, [pages.mozilla]]]);
-    const pageData = extractProfileFilterPageData(pagesMap);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
     expect([...pageData]).toEqual([
       [
         pages.mozilla.tabID,
@@ -1008,7 +1008,7 @@ describe('extractProfileFilterPageData', function () {
       [pages.profiler.tabID, [pages.profiler, pages.exampleSubFrame]],
     ]);
 
-    const pageData = extractProfileFilterPageData(pagesMap);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
     expect([...pageData]).toEqual([
       [
         pages.profiler.tabID,
@@ -1026,7 +1026,7 @@ describe('extractProfileFilterPageData', function () {
       [pages.profiler.tabID, [pages.aboutBlank, pages.profiler]],
     ]);
 
-    const pageData = extractProfileFilterPageData(pagesMap);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
     expect([...pageData]).toEqual([
       [
         pages.profiler.tabID,
@@ -1042,7 +1042,7 @@ describe('extractProfileFilterPageData', function () {
   it('extracts the page data when there is only about:blank as relevant page', function () {
     const pagesMap = new Map([[pages.aboutBlank.tabID, [pages.aboutBlank]]]);
 
-    const pageData = extractProfileFilterPageData(pagesMap);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
     expect([...pageData]).toEqual([
       [
         pages.aboutBlank.tabID,
@@ -1062,7 +1062,7 @@ describe('extractProfileFilterPageData', function () {
       [pages.exampleSubFrame.tabID, [pages.exampleSubFrame]],
     ]);
 
-    const pageData = extractProfileFilterPageData(pagesMap);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
     expect([...pageData]).toEqual([]);
     expect(console.error).toHaveBeenCalled();
   });
@@ -1072,7 +1072,7 @@ describe('extractProfileFilterPageData', function () {
       [pages.mozilla.tabID, [pages.mozilla]],
       [pages.profiler.tabID, [pages.profiler, pages.exampleSubFrame]],
     ]);
-    const pageData = extractProfileFilterPageData(pagesMap);
+    const pageData = extractProfileFilterPageData(pagesMap, null);
     expect([...pageData]).toEqual([
       [
         pages.mozilla.tabID,
