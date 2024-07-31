@@ -557,6 +557,18 @@ type UrlStateAction =
       +type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
       +kind: string,
       +category: IndexIntoCategoryList,
+    |}
+  | {|
+      +type: 'CHANGE_TAB_FILTER',
+      +tabID: TabID | null,
+      +selectedThreadIndexes: Set<ThreadIndex>,
+      +globalTracks: GlobalTrack[],
+      +globalTrackOrder: TrackIndex[],
+      +hiddenGlobalTracks: Set<TrackIndex>,
+      +localTracksByPid: Map<Pid, LocalTrack[]>,
+      +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      +selectedTab: TabSlug,
     |};
 
 type IconsAction =

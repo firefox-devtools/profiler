@@ -5,6 +5,7 @@
 // @flow
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
+import * as CPU from '../profile-logic/cpu';
 import * as UrlState from './url-state';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
@@ -78,7 +79,10 @@ import type {
   IndexIntoSamplesTable,
   ExtraProfileInfoSection,
   TableViewOptions,
+  ExtensionTable,
 } from 'firefox-profiler/types';
+
+import type { DefaultVisibilityScore } from '../profile-logic/tracks';
 
 export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
@@ -211,6 +215,10 @@ const getMarkerSchemaGecko: Selector<MarkerSchema[]> = (state) =>
 // See SampleUnits type definition for more information.
 export const getSampleUnits: Selector<SampleUnits | void> = (state) =>
   getMeta(state).sampleUnits;
+
+// Get all extensions in the profile metadata.
+export const getExtensionTable: Selector<ExtensionTable | void> = (state) =>
+  getMeta(state).extensions;
 
 /**
  * Firefox profiles will always have categories. However, imported profiles may not
@@ -346,6 +354,135 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
 
 export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
   createSelector(getThreads, correlateIPCMarkers);
+
+/**
+ * Returns an InnerWindowID -> Page map, so we can look up the page from inner
+ * window id quickly. Returns null if there are no pages in the profile.
+ */
+export const getInnerWindowIDToPageMap: Selector<Map<
+  InnerWindowID,
+  Page,
+> | null> = createSelector(getPageList, (pages) => {
+  if (!pages) {
+    // Return null if there are no pages.
+    return null;
+  }
+
+  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
+  for (const page of pages) {
+    innerWindowIDToPageMap.set(page.innerWindowID, page);
+  }
+
+  return innerWindowIDToPageMap;
+});
+
+/**
+ * Returns an InnerWindowID -> TabID map, so we can find the TabID of a given
+ * innerWindowID quickly. Returns null if there are no pages in the profile.
+ */
+export const getInnerWindowIDToTabMap: Selector<Map<
+  InnerWindowID,
+  TabID,
+> | null> = createSelector(
+  getPageList,
+  getInnerWindowIDToPageMap,
+  (pages, innerWindowIDToPageMap) => {
+    if (!pages || innerWindowIDToPageMap === null) {
+      // Return null if there are no pages.
+      return null;
+    }
+
+    const innerWindowIDToTabMap: Map<InnerWindowID, TabID> = new Map();
+    const getTopMostParent = (page) => {
+      if (page.embedderInnerWindowID === 0) {
+        return page;
+      }
+
+      // We are using a Map to make this more performant.
+      // It should be 1-2 loop iteration in 99% of the cases.
+      const parent = innerWindowIDToPageMap.get(page.embedderInnerWindowID);
+      if (parent !== undefined) {
+        return getTopMostParent(parent);
+      }
+      return page;
+    };
+    for (const page of pages) {
+      const topMostParent = getTopMostParent(page);
+      innerWindowIDToTabMap.set(page.innerWindowID, topMostParent.tabID);
+    }
+
+    return innerWindowIDToTabMap;
+  }
+);
+
+/**
+ * Return a map of tab to thread indexes map. This is useful for learning which
+ * threads are involved for tabs. This is mainly used for the tab selector.
+ */
+export const getTabToThreadIndexesMap: Selector<Map<TabID, Set<ThreadIndex>>> =
+  createSelector(
+    getThreads,
+    getInnerWindowIDToTabMap,
+    (threads, innerWindowIDToTabMap) => {
+      const tabToThreadIndexesMap = new Map();
+      if (!innerWindowIDToTabMap) {
+        return tabToThreadIndexesMap;
+      }
+
+      for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
+        const thread = threads[threadIdx];
+
+        // First go over the innerWindowIDs of the samples.
+        for (let i = 0; i < thread.frameTable.length; i++) {
+          const innerWindowID = thread.frameTable.innerWindowID[i];
+          if (innerWindowID === null) {
+            continue;
+          }
+
+          const tabID = innerWindowIDToTabMap.get(innerWindowID);
+          if (tabID === undefined) {
+            continue;
+          }
+
+          let threadIndexes = tabToThreadIndexesMap.get(tabID);
+          if (!threadIndexes) {
+            threadIndexes = new Set();
+            tabToThreadIndexesMap.set(tabID, threadIndexes);
+          }
+          threadIndexes.add(threadIdx);
+        }
+
+        // Then go over the markers.
+        for (let i = 0; i < thread.markers.length; i++) {
+          const markerData = thread.markers.data[i];
+
+          if (!markerData) {
+            continue;
+          }
+
+          if (
+            markerData.innerWindowID !== null &&
+            markerData.innerWindowID !== undefined
+          ) {
+            const innerWindowID = markerData.innerWindowID;
+            const tabID = innerWindowIDToTabMap.get(innerWindowID);
+            if (tabID === undefined) {
+              continue;
+            }
+
+            let threadIndexes = tabToThreadIndexesMap.get(tabID);
+            if (!threadIndexes) {
+              threadIndexes = new Set();
+              tabToThreadIndexesMap.set(tabID, threadIndexes);
+            }
+            threadIndexes.add(threadIdx);
+          }
+        }
+      }
+
+      return tabToThreadIndexesMap;
+    }
+  );
 
 /**
  * Tracks
@@ -653,26 +790,35 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   }
 );
 
-/**
- * Returns an InnerWindowID -> Page map, so we can look up the page from inner
- * window id quickly. Returns null if there are no pages in the profile.
- */
-export const getInnerWindowIDToPageMap: Selector<Map<
-  InnerWindowID,
-  Page,
-> | null> = createSelector(getPageList, (pages) => {
-  if (!pages) {
-    // Return null if there are no pages.
-    return null;
-  }
+export const getMaxCPUDeltaPerInterval: Selector<number | null> =
+  createSelector(getProfile, CPU.computeMaxCPUDeltaPerInterval);
 
-  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
-  for (const page of pages) {
-    innerWindowIDToPageMap.set(page.innerWindowID, page);
-  }
+export const getThreadScoresMap: Selector<
+  Map<ThreadIndex, DefaultVisibilityScore>,
+> = createSelector(
+  getProfile,
+  getMaxCPUDeltaPerInterval,
+  (profile, maxCpuDeltaPerInterval) => {
+    const scoresMap = new Map();
 
-  return innerWindowIDToPageMap;
-});
+    for (
+      let threadIndex = 0;
+      threadIndex < profile.threads.length;
+      threadIndex++
+    ) {
+      const thread = profile.threads[threadIndex];
+      const score = Tracks.computeThreadDefaultVisibilityScore(
+        profile,
+        thread,
+        maxCpuDeltaPerInterval
+      );
+
+      scoresMap.set(threadIndex, score);
+    }
+
+    return scoresMap;
+  }
+);
 
 /**
  * Get the pages array and construct a Map of pages that we can use to get the
@@ -706,26 +852,24 @@ export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
     };
 
     for (const page of pageList) {
-      if (page.embedderInnerWindowID === undefined) {
-        // This is the top most page, which means the web page itself.
-        appendPageMap(page.tabID, page);
-      } else {
-        // This is an iframe, we should find its parent to see find top most
-        // TabID, which is the tab ID for our case.
-        const getTopMostParent = (item) => {
-          // We are using a Map to make this more performant.
-          // It should be 1-2 loop iteration in 99% of the cases.
-          const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
-          if (parent !== undefined) {
-            return getTopMostParent(parent);
-          }
+      // If this is an iframe, we recursively visit its parent.
+      const getTopMostParent = (item) => {
+        if (item.embedderInnerWindowID === 0) {
           return item;
-        };
+        }
 
-        const parent = getTopMostParent(page);
-        // Now we have the top most parent. We can append the pageMap.
-        appendPageMap(parent.tabID, page);
-      }
+        // We are using a Map to make this more performant.
+        // It should be 1-2 loop iteration in 99% of the cases.
+        const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
+        if (parent !== undefined) {
+          return getTopMostParent(parent);
+        }
+        return item;
+      };
+
+      const topMostParent = getTopMostParent(page);
+      // Now we have the top most parent. We can append the pageMap.
+      appendPageMap(topMostParent.tabID, page);
     }
 
     return pageMap;
@@ -836,19 +980,100 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
   }
 );
 
+export const getExtensionIDToNameMap: Selector<Map<string, string> | null> =
+  createSelector(getExtensionTable, (extensions) => {
+    if (!extensions) {
+      return null;
+    }
+
+    const extensionIDtoNameMap = new Map();
+    for (let i = 0; i < extensions.length; i++) {
+      extensionIDtoNameMap.set(extensions.baseURL[i], extensions.name[i]);
+    }
+    return extensionIDtoNameMap;
+  });
+
 /**
- * Extracts the data of the first page on the tab filtered profile.
- * Currently we assume that we don't change the origin of webpages while
- * profiling in web developer preset. That's why we are simply getting the
- * first page we find that belongs to the active tab. Returns null if profiler
- * is not in the single tab view at the moment.
+ * Extract the hostname and favicon from the last page if we are in single tab
+ * Extract the hostname and favicon from the last page for all tab ids. we
+ * view. We assume that the user wants to know about the last loaded page in
+ * assume that the user wants to know about the last loaded page in this tab.
+ * this tab.
+ * returns an empty Map if we don't have information about pages (in older profiles).
  */
-export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> =
+export const getProfileFilterPageDataByTabID: Selector<
+  Map<TabID, ProfileFilterPageData>,
+> = createSelector(
+  getPagesMap,
+  getExtensionIDToNameMap,
+  extractProfileFilterPageData
+);
+
+// FIXME: Possibly move this to types directory.
+export type SortedTabPageData = Array<{|
+  tabID: TabID,
+  tabScore: number,
+  pageData: ProfileFilterPageData,
+|}>;
+
+/**
+ * Get the profile filter page data for all the tabs and return a sorted array
+ * of tabs data with their score.
+ */
+export const getProfileFilterSortedPageData: Selector<SortedTabPageData> =
   createSelector(
-    getPageList,
-    getRelevantInnerWindowIDsForCurrentTab,
-    extractProfileFilterPageData
+    getProfileFilterPageDataByTabID,
+    getTabToThreadIndexesMap,
+    getThreadScoresMap,
+    (pageDataByTabID, tabToThreadIndexesMap, threadScoresMap) => {
+      const pageDataWithScore = [];
+      // Generate the pageDataWithScore array
+      for (const [tabID, pageData] of pageDataByTabID.entries()) {
+        let tabScore = 0;
+        const threadIndexes = tabToThreadIndexesMap.get(tabID);
+        if (!threadIndexes) {
+          // Couldn't find any thread indexes for the tab. Do not show it.
+          continue;
+        }
+        for (const [threadIndex] of threadIndexes.entries()) {
+          const threadScore = threadScoresMap.get(threadIndex);
+          if (!threadScore) {
+            throw new Error('Failed to find the thread score!');
+          }
+
+          tabScore += threadScore.boostedSampleScore;
+        }
+        pageDataWithScore.push({
+          tabID,
+          tabScore,
+          pageData,
+        });
+      }
+
+      // Sort the tabs by their activity.
+      pageDataWithScore.sort((a, b) => b.tabScore - a.tabScore);
+      return pageDataWithScore;
+    }
   );
+
+/**
+ * This returns the hostname and favicon information for the current tab id.
+ * Returns null if profiler is not in the single tab view at the moment.
+ * TODO: This is only used for the active tab view. Remove it later.
+ */
+export const getProfileFilterPageData: Selector<
+  ProfileFilterPageData | null,
+> = (state) => {
+  const pageDataByTabID = getProfileFilterPageDataByTabID(state);
+  const activeTabID = getActiveTabID(state);
+  const timelineTrackOrganization =
+    UrlState.getTimelineTrackOrganization(state);
+  if (activeTabID === null || timelineTrackOrganization.type !== 'active-tab') {
+    return null;
+  }
+
+  return pageDataByTabID.get(activeTabID) ?? null;
+};
 
 /**
  * Get the map of Thread ID -> Thread Name for easy access.

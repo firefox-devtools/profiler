@@ -85,6 +85,7 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
 const globalTracks: Reducer<GlobalTrack[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+    case 'CHANGE_TAB_FILTER':
       return action.globalTracks;
     default:
       return state;
@@ -103,6 +104,7 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
     case 'VIEW_FULL_PROFILE':
     case 'ENABLE_EVENT_DELAY_TRACKS':
     case 'ENABLE_EXPERIMENTAL_PROCESS_CPU_TRACKS':
+    case 'CHANGE_TAB_FILTER':
       return action.localTracksByPid;
     default:
       return state;

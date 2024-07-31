@@ -34,6 +34,7 @@ import type {
   FullProfileSpecificUrlState,
   ActiveTabSpecificProfileUrlState,
   NativeSymbolInfo,
+  TabID,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -154,6 +155,10 @@ export const getHiddenLocalTracksByPid: Selector<Map<Pid, Set<TrackIndex>>> = (
 export const getLocalTrackOrderByPid: Selector<Map<Pid, TrackIndex[]>> = (
   state
 ) => getFullProfileSpecificState(state).localTrackOrderByPid;
+export const getTabFilter: Selector<TabID | null> = (state) =>
+  getFullProfileSpecificState(state).tabFilter;
+export const hasTabFilter: Selector<boolean> = (state) =>
+  getTabFilter(state) !== null;
 
 /**
  * This selector does a simple lookup in the set of hidden tracks for a PID, and ensures
