@@ -90,6 +90,7 @@ CallTree--divergent-inlining-badge =
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Hakkındaki bilgileri görüntülemek için bir düğüm seçin.
+CallTreeSidebar--call-node-details = Çağrı düğümü ayrıntıları
 
 ## CallTreeSidebar timing information
 ##
@@ -421,6 +422,7 @@ MenuButtons--publish--reupload-performance-profile = Performans Profilini Yenide
 MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
 MenuButtons--publish--info-description = Profilinizi yükleyerek bağlantıya sahip herkesin erişmesini sağlayın.
 MenuButtons--publish--info-description-default = Varsayılan olarak kişisel verileriniz kaldırılır.
+MenuButtons--publish--info-description-firefox-nightly2 = Bu profil { -firefox-nightly-brand-name }’ye ait olduğu için çoğu bilgi varsayılan olarak dahil edilmiştir.
 MenuButtons--publish--include-additional-data = Tanımlanabilir olabilecek ek verileri dahil et
 MenuButtons--publish--button-upload = Yükle
 MenuButtons--publish--upload-title = Profil yükleniyor…
@@ -757,6 +759,31 @@ TrackSearchField--search-input =
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
 TransformNavigator--complete = Tamamlanmış “{ $item }”
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Daralt: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Odak düğümü: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Odak: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Odak kategorisi: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Birleştir: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
@@ -801,6 +828,15 @@ SourceView--close-button =
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
 
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Bu dosya için bilinen çapraz kökenli erişilebilen bir URL yok.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = { $url } adresi getirilirken bir ağ hatası oluştu: { $networkErrorMessage }
 # Displayed below SourceView--cannot-obtain-source, if a file could not be found in
 # an archive file (.tar.gz) which was downloaded from crates.io.
 # Variables:
