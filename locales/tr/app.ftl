@@ -106,9 +106,14 @@ CallTreeSidebar--call-node-details = Çağrı düğümü ayrıntıları
 ## in the functions it called. "Running time" is the time spent in the function
 ## itself, including the time spent in the functions it called.
 
+CallTreeSidebar--traced-running-time =
+    .label = İzlenen çalışma süresi
 CallTreeSidebar--running-time =
     .label = Çalışma süresi
+CallTreeSidebar--running-size =
+    .label = Çalışma boyutu
 CallTreeSidebar--categories = Kategoriler
+CallTreeSidebar--implementation = Yürütme
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -263,10 +268,16 @@ MarkerContextMenu--select-the-sender-thread = “<strong>{ $threadName }</strong
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = İşaretçileri filtrele:
+    .title = Yalnızca belirli bir adla eşleşen işaretçileri görüntüler
+MarkerSettings--marker-filters =
+    .title = İşaretçi filtreleri
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Hakkındaki bilgileri görüntülemek için bir işaretçi seçin.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -343,7 +354,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } mantıksal çekirdek
     }
 MenuButtons--metaInfo--profiling-started = Kayıt başlama tarihi:
-MenuButtons--metaInfo--profiling-session = Kayıt uzunluğu:
+MenuButtons--metaInfo--profiling-session = Kaydın uzunluğu:
 MenuButtons--metaInfo--main-process-started = Ana işlemin başlama tarihi:
 MenuButtons--metaInfo--main-process-ended = Ana işlemin bitiş tarihi:
 MenuButtons--metaInfo--interval = Aralık:
@@ -397,6 +408,8 @@ MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } y�
 MenuButtons--metaOverheadStatistics-mean = Ortalama
 MenuButtons--metaOverheadStatistics-max = Maksimum
 MenuButtons--metaOverheadStatistics-min = Minimum
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Ek yük
+    .title = Tüm iş parçacıklarını örnekleme süresi.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Sayaç
     .title = Tüm sayaçları toplama süresi.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Aralık
@@ -436,6 +449,9 @@ MenuButtons--publish--error-while-compressing = Sıkıştırma sırasında hata 
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Ağları filtrele:
+    .title = Yalnızca belirli bir adla eşleşen ağ isteklerini görüntüler
 
 ## Timestamp formatting primitive
 
@@ -528,6 +544,9 @@ Root--error-boundary-message =
 ServiceWorkerManager--applying-button = Uygulanıyor…
 ServiceWorkerManager--pending-button = Uygula ve yeniden yükle
 ServiceWorkerManager--installed-button = Uygulamayı yeniden yükle
+ServiceWorkerManager--updated-while-not-ready =
+    Bu sayfa tam olarak yüklenmeden önce uygulamanın
+    yeni bir sürümü uygulandı. Sayfayı hatalı görebilirsiniz.
 ServiceWorkerManager--new-version-is-ready = Uygulamanın yeni sürümü indirildi ve kullanıma hazır.
 ServiceWorkerManager--hide-notice-button =
     .title = Yeniden yükleme bildirimini gizle
@@ -784,6 +803,16 @@ TransformNavigator--focus-category = Odak kategorisi: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Birleştir: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Özyinelemeyi daralt: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion-only = Yalnızca doğrudan özyinelemeyi daralt: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
