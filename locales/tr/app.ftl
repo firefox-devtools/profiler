@@ -36,6 +36,14 @@ AppViewRouter--error-local = Henüz hazır değil.
 AppViewRouter--error-public = Profil indirilemedi.
 AppViewRouter--error-from-url = Profil indirilemedi.
 AppViewRouter--error-compare = Profiller getirilemedi.
+# This error message is displayed when a Safari-specific error state is encountered.
+# Importing profiles from URLs such as http://127.0.0.1:someport/ is not possible in Safari.
+# https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
+AppViewRouter--error-from-localhost-url-safari =
+    <a>Safari’deki bir kısıtlama</a> nedeniyle { -profiler-brand-name }
+    bu tarayıcıda yerel makineden profilleri içe aktaramıyor. Lütfen
+    bu sayfayı Safari yerine { -firefox-brand-name } veya Chrome’da açın.
+    .title = Safari yerel profilleri içe aktaramıyor
 AppViewRouter--route-not-found--home =
     .specialMessage = Ulaşmaya çalıştığınız URL tanınamadı.
 
@@ -46,6 +54,11 @@ AppViewRouter--route-not-found--home =
 # Variables:
 #   $fileName (String) - Name of the file to open.
 CallNodeContextMenu--show-file = <strong>{ $fileName }</strong> dosyasını göster
+CallNodeContextMenu--transform-merge-function = Fonksiyonu birleştir
+    .title =
+        Bir fonksiyonun birleştirilmesi onu profilden kaldırıp
+        süresini onu çağıran fonksiyona atar. Bu işlem, fonksiyonun
+        ağaçta çağrıldığı her yerde gerçekleşir.
 CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
@@ -169,11 +182,14 @@ Home--menu-button = { -profiler-brand-name } menü düğmesini etkinleştir
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Bu profilleyici örneği WebChannel’a bağlanamadığı için profilleyici menü düğmesini etkinleştiremez.
+Home--instructions-content =
+    Performans profilleri yalnızca <a>{ -firefox-brand-name }</a> ile kaydedilebilir.
+    Ancak mevcut profiller herhangi bir modern tarayıcıda görüntülenebilir.
 Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
 Home--profiler-motto = Performans profili yakalayın. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
 Home--additional-content-title = Mevcut profilleri yükleyin
-Home--additional-content-content = Bir profil dosyasını yüklemek için buraya <strong>sürükleyip bırakabilirsiniz</strong> ya da:
+Home--additional-content-content = Profil dosyasını buraya <strong>sürükleyip bırakarak</strong> yükleyebilirsiniz ya da:
 Home--compare-recordings-info = Ayrıca kayıtları karşılaştırabilirsiniz. <a>Karşılaştırma arayüzünü aç.</a>
 Home--your-recent-uploaded-recordings-title = Son yüklediğiniz kayıtlar
 
@@ -227,6 +243,16 @@ MarkerContextMenu--copy-call-stack = Çağrı yığınını kopyala
 MarkerContextMenu--copy-url = URL’yi kopyala
 MarkerContextMenu--copy-page-url = Sayfa URL’sini kopyala
 MarkerContextMenu--copy-as-json = JSON olarak kopyala
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = “<strong>{ $threadName }</strong>” alıcı iş parçacığını seç
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = “<strong>{ $threadName }</strong>” gönderen iş parçacığını seç
 
 ## MarkerFiltersContextMenu
 ## This is the menu when filter icon is clicked in Marker Chart and Marker Table
@@ -257,7 +283,7 @@ MenuButtons--index--metaInfo-button =
 MenuButtons--index--full-view = Tam Görünüm
 MenuButtons--index--cancel-upload = Yüklemeyi İptal Et
 MenuButtons--index--share-upload =
-    .label = Yerel Profili Yükle
+    .label = Yerel profili yükle
 MenuButtons--index--share-re-upload =
     .label = Yeniden Yükle
 MenuButtons--index--share-error-uploading =
@@ -343,6 +369,7 @@ MenuButtons--metaInfo--arguments = Argümanlar:
 ## Strings refer to specific types of builds, and should be kept in English.
 
 MenuButtons--metaInfo--build-type-debug = Hata ayıklama
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
@@ -353,6 +380,11 @@ MenuButtons--metaInfo--os = İşletim sistemi:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Görsel metrikler
+MenuButtons--metaInfo--speed-index = Hız indisi:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Perceptual hız indisi:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Contentful hız indisi:
 MenuButtons--metaInfo-renderRowOfList-label-features = Özellikler:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = İş parçacıkları filtresi:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Uzantılar:
@@ -511,6 +543,9 @@ StackSettings--implementation-javascript2 = JavaScript
 StackSettings--stack-implementation-label = Yığın filtresi:
 StackSettings--use-data-source-label = Veri kaynağı:
 StackSettings--show-user-timing = Kullanıcı zamanlamasını göster
+StackSettings--panel-search =
+    .label = Yığınları filtrele:
+    .title = Yalnızca adı bu alt dizgiyle eşleşen bir fonksiyon içeren yığınları görüntüler
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -703,6 +738,9 @@ TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g C
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Filtre terimlerini girin
+    .title = Yalnızca belirli bir metinle eşleşen izleri görüntüler
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -713,6 +751,12 @@ TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g C
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Tamamlanmış “{ $item }”
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
