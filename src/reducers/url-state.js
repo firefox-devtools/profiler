@@ -24,6 +24,7 @@ import type {
   SourceViewState,
   AssemblyViewState,
   IsOpenPerPanelState,
+  TabID,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -508,6 +509,19 @@ const localTrackOrderChangedPids: Reducer<Set<Pid>> = (
   }
 };
 
+/**
+ * This state controls whether or not we are filtering the full view for a
+ * specific Firefox tab.
+ */
+const tabFilter: Reducer<TabID | null> = (state = null, action) => {
+  switch (action.type) {
+    case 'CHANGE_TAB_FILTER':
+      return action.tabID;
+    default:
+      return state;
+  }
+};
+
 // If you update this reducer, please don't forget to update the profileName
 // reducer below as well.
 const pathInZipFile: Reducer<string | null> = (state = null, action) => {
@@ -671,6 +685,7 @@ const fullProfileSpecific = combineReducers({
   localTrackOrderByPid,
   localTrackOrderChangedPids,
   showJsTracerSummary,
+  tabFilter,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading

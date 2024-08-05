@@ -21,7 +21,11 @@ import {
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
 } from '../actions/profile-view';
-import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
+import {
+  changeSelectedTab,
+  changeProfilesToCompare,
+  changeTabFilter,
+} from '../actions/app';
 import {
   stateFromLocation,
   getQueryStringFromUrlState,
@@ -1982,5 +1986,60 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     expect(
       urlStateSelectors.getAssemblyViewIsOpen(newStore.getState())
     ).toBeFalse();
+  });
+});
+
+describe('tab selector', function () {
+  function setup() {
+    const store = _getStoreWithURL();
+    return store;
+  }
+
+  it('can serialize the tabFilter properly', function () {
+    const { dispatch, getState } = setup();
+
+    // Change the tab filter.
+    let tabID = 123;
+    dispatch(changeTabFilter(tabID));
+
+    // Check if the state update happened properly.
+    expect(urlStateSelectors.getTabFilter(getState())).toBe(tabID);
+    expect(urlStateSelectors.hasTabFilter(getState())).toBe(true);
+
+    // Check if the URL update happened properly.
+    let queryString = getQueryStringFromState(getState());
+    expect(queryString).toContain(`tabID=${tabID}`);
+
+    // Change it again and check.
+    tabID = 321;
+    dispatch(changeTabFilter(tabID));
+    expect(urlStateSelectors.getTabFilter(getState())).toBe(tabID);
+    expect(urlStateSelectors.hasTabFilter(getState())).toBe(true);
+    queryString = getQueryStringFromState(getState());
+    expect(queryString).toContain(`tabID=${tabID}`);
+  });
+
+  it('null value does not appear in the url', function () {
+    const { dispatch, getState } = setup();
+
+    // Change the tab filter.
+    const tabID = null;
+    dispatch(changeTabFilter(tabID));
+
+    // Check if the URL update happened properly.
+    expect(urlStateSelectors.getTabFilter(getState())).toBe(tabID);
+    expect(urlStateSelectors.hasTabFilter(getState())).toBe(false);
+
+    // Make sure that null tabID is not present in the URL.
+    const queryString = getQueryStringFromState(getState());
+    expect(queryString).not.toContain('tabID');
+  });
+
+  it('can unserialize the tabFilter from URLs', () => {
+    const tabID = 123;
+    const { getState } = _getStoreWithURL({ search: `?tabID=${tabID}` });
+
+    expect(urlStateSelectors.getTabFilter(getState())).toEqual(tabID);
+    expect(urlStateSelectors.hasTabFilter(getState())).toEqual(true);
   });
 });

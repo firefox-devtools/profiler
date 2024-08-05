@@ -50,6 +50,7 @@ import type {
   UrlState,
   UploadedProfileInformation,
   IndexIntoCategoryList,
+  TabID,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -426,5 +427,18 @@ export function toggleOpenCategoryInSidebar(
     type: 'TOGGLE_SIDEBAR_OPEN_CATEGORY',
     kind,
     category,
+  };
+}
+
+/**
+ * Change the selected browser tab filter for the profile.
+ * TabID here means the unique ID for a give browser tab and corresponds to
+ * multiple pages in the `profile.pages` array.
+ * If it's null it will undo the filter and will show the full profile.
+ */
+export function changeTabFilter(tabID: TabID | null): Action {
+  return {
+    type: 'CHANGE_TAB_FILTER',
+    tabID,
   };
 }
