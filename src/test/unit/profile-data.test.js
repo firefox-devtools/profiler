@@ -575,6 +575,111 @@ describe('profile-data', function () {
   });
 });
 
+describe('getInvertedCallNodeInfo', function () {
+  function setup(plaintextSamples) {
+    const { profile, funcNamesDictPerThread } =
+      getProfileFromTextSamples(plaintextSamples);
+
+    const thread = profile.threads[0];
+    const funcNamesDict = funcNamesDictPerThread[0];
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
+    const defaultCategory = categories.findIndex((c) => c.name === 'Other');
+    const nonInvertedCallNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+
+    const invertedCallNodeInfo = getInvertedCallNodeInfo(
+      thread,
+      nonInvertedCallNodeInfo.getNonInvertedCallNodeTable(),
+      nonInvertedCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+      defaultCategory
+    );
+
+    // This function is used to test `getSuffixOrderIndexRangeForCallNode` and
+    // `getSuffixOrderedCallNodes`. To find the non-inverted call nodes with
+    // a call path suffix, `nodesWithSuffix` gets the inverted node X for the
+    // given call path suffix, and lists non-inverted nodes in X's "suffix
+    // order index range".
+    // These are the nodes whose call paths, if inverted, would correspond to
+    // inverted call nodes that are descendants of X.
+    function nodesWithSuffix(callPathSuffix) {
+      const invertedNodeForSuffix = ensureExists(
+        invertedCallNodeInfo.getCallNodeIndexFromPath(
+          [...callPathSuffix].reverse()
+        )
+      );
+      const [rangeStart, rangeEnd] =
+        invertedCallNodeInfo.getSuffixOrderIndexRangeForCallNode(
+          invertedNodeForSuffix
+        );
+      const suffixOrderedCallNodes =
+        invertedCallNodeInfo.getSuffixOrderedCallNodes();
+      const nonInvertedCallNodes = new Set();
+      for (let i = rangeStart; i < rangeEnd; i++) {
+        nonInvertedCallNodes.add(suffixOrderedCallNodes[i]);
+      }
+      return nonInvertedCallNodes;
+    }
+
+    return {
+      funcNamesDict,
+      nonInvertedCallNodeInfo,
+      invertedCallNodeInfo,
+      nodesWithSuffix,
+    };
+  }
+
+  it('creates a correct suffix order for this example profile', function () {
+    const {
+      funcNamesDict: { A, B, C },
+      nonInvertedCallNodeInfo,
+      nodesWithSuffix,
+    } = setup(`
+      A  A  A  A  A  A  A
+         B  B  B  A  A  C
+            A  C     B
+    `);
+
+    const cnA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A]);
+    const cnAB = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B]);
+    const cnABA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, A]);
+    const cnABC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, C]);
+    const cnAA = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, A]);
+    const cnAAB = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, A, B]);
+    const cnAC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, C]);
+
+    expect(nodesWithSuffix([A])).toEqual(new Set([cnA, cnABA, cnAA]));
+    expect(nodesWithSuffix([B])).toEqual(new Set([cnAB, cnAAB]));
+    expect(nodesWithSuffix([A, B])).toEqual(new Set([cnAB, cnAAB]));
+    expect(nodesWithSuffix([A, A, B])).toEqual(new Set([cnAAB]));
+    expect(nodesWithSuffix([C])).toEqual(new Set([cnABC, cnAC]));
+  });
+
+  it('creates a correct suffix order for a different example profile', function () {
+    const {
+      funcNamesDict: { A, B, C },
+      nonInvertedCallNodeInfo,
+      nodesWithSuffix,
+    } = setup(`
+      A  A  A  C
+         B  B
+            C
+    `);
+
+    const cnABC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([A, B, C]);
+    const cnC = nonInvertedCallNodeInfo.getCallNodeIndexFromPath([C]);
+
+    expect(nodesWithSuffix([B, C])).toEqual(new Set([cnABC]));
+    expect(nodesWithSuffix([C])).toEqual(new Set([cnABC, cnC]));
+  });
+});
+
 describe('symbolication', function () {
   describe('AddressLocator', function () {
     const libs = [

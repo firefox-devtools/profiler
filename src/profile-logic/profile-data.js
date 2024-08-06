@@ -474,12 +474,72 @@ export function getInvertedCallNodeInfo(
         invertedStackIndexToCallNodeIndex[invertedStackIndex];
     }
   }
+
+  // TEMPORARY: Compute a suffix order for the entire non-inverted call node table.
+  // See the CallNodeInfoInverted interface for more details about the suffix order.
+  // By the end of this commit stack, the suffix order will be computed incrementally
+  // as inverted nodes are created; we won't compute the entire order upfront.
+  const nonInvertedCallNodeCount = nonInvertedCallNodeTable.length;
+  const suffixOrderedCallNodes = new Uint32Array(nonInvertedCallNodeCount);
+  const suffixOrderIndexes = new Uint32Array(nonInvertedCallNodeCount);
+  for (let i = 0; i < nonInvertedCallNodeCount; i++) {
+    suffixOrderedCallNodes[i] = i;
+  }
+  suffixOrderedCallNodes.sort((a, b) =>
+    _compareNonInvertedCallNodesInSuffixOrder(a, b, nonInvertedCallNodeTable)
+  );
+  for (let i = 0; i < suffixOrderedCallNodes.length; i++) {
+    suffixOrderIndexes[suffixOrderedCallNodes[i]] = i;
+  }
+
   return new CallNodeInfoInvertedImpl(
     callNodeTable,
     nonInvertedCallNodeTable,
     nonInvertedStackIndexToCallNodeIndex,
-    stackIndexToNonInvertedCallNodeIndex
+    stackIndexToNonInvertedCallNodeIndex,
+    suffixOrderedCallNodes,
+    suffixOrderIndexes
   );
+}
+
+// Compare two non-inverted call nodes in "suffix order".
+// The suffix order is defined as the lexicographical order of the inverted call
+// path, or, in other words, the "backwards" lexicographical order of the
+// non-inverted call paths.
+//
+// Example of some suffix ordered non-inverted call paths:
+//       [0]
+//    [0, 0]
+//    [2, 0]
+// [4, 5, 1]
+//    [4, 5]
+function _compareNonInvertedCallNodesInSuffixOrder(
+  callNodeA: IndexIntoCallNodeTable,
+  callNodeB: IndexIntoCallNodeTable,
+  nonInvertedCallNodeTable: CallNodeTable
+): number {
+  // Walk up both and stop at the first non-matching function.
+  // Walking up the non-inverted tree is equivalent to walking down the
+  // inverted tree.
+  while (true) {
+    const funcA = nonInvertedCallNodeTable.func[callNodeA];
+    const funcB = nonInvertedCallNodeTable.func[callNodeB];
+    if (funcA !== funcB) {
+      return funcA - funcB;
+    }
+    callNodeA = nonInvertedCallNodeTable.prefix[callNodeA];
+    callNodeB = nonInvertedCallNodeTable.prefix[callNodeB];
+    if (callNodeA === callNodeB) {
+      break;
+    }
+    if (callNodeA === -1) {
+      return -1;
+    }
+    if (callNodeB === -1) {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 // Given a stack index `needleStack` and a call node in the inverted tree

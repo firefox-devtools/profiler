@@ -5,6 +5,7 @@
 // @flow
 
 import { hashPath } from 'firefox-profiler/utils/path';
+import { bisectEqualRange } from 'firefox-profiler/utils/bisect';
 
 import type {
   IndexIntoFuncTable,
@@ -13,6 +14,7 @@ import type {
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
+  SuffixOrderIndex,
 } from 'firefox-profiler/types';
 
 /**
@@ -222,11 +224,78 @@ export class CallNodeInfoInvertedImpl
   extends CallNodeInfoImpl
   implements CallNodeInfoInverted
 {
+  // This is a Map<SuffixOrderIndex, IndexIntoNonInvertedCallNodeTable>.
+  // It lists the non-inverted call nodes in "suffix order", i.e. ordered by
+  // comparing their call paths from back to front.
+  _suffixOrderedCallNodes: Uint32Array;
+  // This is the inverse of _suffixOrderedCallNodes; i.e. it is a
+  // Map<IndexIntoNonInvertedCallNodeTable, SuffixOrderIndex>.
+  _suffixOrderIndexes: Uint32Array;
+
+  constructor(
+    callNodeTable: CallNodeTable,
+    nonInvertedCallNodeTable: CallNodeTable,
+    stackIndexToCallNodeIndex: Int32Array,
+    stackIndexToNonInvertedCallNodeIndex: Int32Array,
+    suffixOrderedCallNodes: Uint32Array,
+    suffixOrderIndexes: Uint32Array
+  ) {
+    super(
+      callNodeTable,
+      nonInvertedCallNodeTable,
+      stackIndexToCallNodeIndex,
+      stackIndexToNonInvertedCallNodeIndex
+    );
+    this._suffixOrderedCallNodes = suffixOrderedCallNodes;
+    this._suffixOrderIndexes = suffixOrderIndexes;
+  }
+
   isInverted(): boolean {
     return true;
   }
 
   asInverted(): CallNodeInfoInverted | null {
     return this;
+  }
+
+  getSuffixOrderedCallNodes(): Uint32Array {
+    return this._suffixOrderedCallNodes;
+  }
+
+  getSuffixOrderIndexes(): Uint32Array {
+    return this._suffixOrderIndexes;
+  }
+
+  getSuffixOrderIndexRangeForCallNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): [SuffixOrderIndex, SuffixOrderIndex] {
+    const callPath = this.getCallNodePathFromIndex(callNodeIndex);
+    return bisectEqualRange(
+      this._suffixOrderedCallNodes,
+      (callNodeIndex: IndexIntoCallNodeTable) => {
+        let currentCallNodeIndex = callNodeIndex;
+        for (let i = 0; i < callPath.length - 1; i++) {
+          const expectedFunc = callPath[i];
+          const currentFunc =
+            this._nonInvertedCallNodeTable.func[currentCallNodeIndex];
+          if (currentFunc < expectedFunc) {
+            return -1;
+          }
+          if (currentFunc > expectedFunc) {
+            return 1;
+          }
+          const prefix =
+            this._nonInvertedCallNodeTable.prefix[currentCallNodeIndex];
+          if (prefix === -1) {
+            return -1;
+          }
+          currentCallNodeIndex = prefix;
+        }
+        const expectedFunc = callPath[callPath.length - 1];
+        const currentFunc =
+          this._nonInvertedCallNodeTable.func[currentCallNodeIndex];
+        return currentFunc - expectedFunc;
+      }
+    );
   }
 }
