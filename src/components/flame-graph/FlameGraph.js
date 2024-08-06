@@ -344,6 +344,11 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       displayStackType,
     } = this.props;
 
+    const tracedTimingNonInverted =
+      tracedTiming !== null && tracedTiming.type === 'NON_INVERTED'
+        ? tracedTiming.timings
+        : null;
+
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
 
     return (
@@ -394,7 +399,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               isInverted,
               samples,
               unfilteredSamples,
-              tracedTiming,
+              tracedTiming: tracedTimingNonInverted,
               displayImplementation,
               displayStackType,
             }}

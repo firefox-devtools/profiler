@@ -199,8 +199,42 @@ export class CallNodeInfoImpl implements CallNodeInfo {
     return null;
   }
 
+  getRoots(): IndexIntoCallNodeTable[] {
+    const roots = [];
+    if (this._callNodeTable.length !== 0) {
+      for (
+        let invertedRoot = 0;
+        invertedRoot !== -1;
+        invertedRoot = this._callNodeTable.nextSibling[invertedRoot]
+      ) {
+        roots.push(invertedRoot);
+      }
+    }
+    return roots;
+  }
+
   isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean {
     return this._callNodeTable.prefix[callNodeIndex] === -1;
+  }
+
+  getChildren(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[] {
+    if (
+      this._callNodeTable.subtreeRangeEnd[callNodeIndex] ===
+      callNodeIndex + 1
+    ) {
+      return [];
+    }
+
+    const children = [];
+    const firstChild = callNodeIndex + 1;
+    for (
+      let childCallNodeIndex = firstChild;
+      childCallNodeIndex !== -1;
+      childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
+    ) {
+      children.push(childCallNodeIndex);
+    }
+    return children;
   }
 }
 
