@@ -344,6 +344,16 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       displayStackType,
     } = this.props;
 
+    // Get the CallTreeTimingsNonInverted out of tracedTiming. We pass this
+    // along rather than the more generic CallTreeTimings type so that the
+    // FlameGraphCanvas component can operate on the more specialized type.
+    // (CallTreeTimingsNonInverted and CallTreeTimingsInverted are very
+    // different, and the flame graph is only used with non-inverted timings.)
+    const tracedTimingNonInverted =
+      tracedTiming !== null && tracedTiming.type === 'NON_INVERTED'
+        ? tracedTiming.timings
+        : null;
+
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
 
     return (
@@ -394,7 +404,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               isInverted,
               samples,
               unfilteredSamples,
-              tracedTiming,
+              tracedTiming: tracedTimingNonInverted,
               displayImplementation,
               displayStackType,
             }}
