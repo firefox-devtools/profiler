@@ -187,8 +187,147 @@ export type SuffixOrderIndex = number;
 /**
  * A sub-interface of CallNodeInfo with additional functionality for the inverted
  * call tree.
+ *
+ * # The Suffix Order
+ *
+ * We define an alternative ordering of the *non-inverted* call nodes, called the
+ * "suffix order", which is useful when interacting with the *inverted* tree.
+ * The suffix order is stored by two Uint32Array side tables, returned by
+ * getSuffixOrderedCallNodes() and getSuffixOrderIndexes().
+ * getSuffixOrderedCallNodes() maps a suffix order index to a non-inverted call
+ * node, and getSuffixOrderIndexes() is the reverse, mapping a non-inverted call
+ * node to its suffix order index.
+ *
+ * ## Background
+ *
+ * Many operations we do in the profiler require the ability to do an efficient
+ * "ancestor" check:
+ *
+ *  - For a call node X in the call tree, what's its "total"?
+ *  - When call node X in the call tree is selected, which samples should be
+ *    highlighted in the activity graph, and which samples should contribute to
+ *    the category breakdown in the sidebar?
+ *  - For how many samples has the clicked call node X been observed in a certain
+ *    line of code / in a certain instruction?
+ *
+ * We answer these questions by iterating over samples, getting the sample's
+ * call node Y, and checking whether the selected / clicked node X is an ancestor
+ * of Y.
+ *
+ * In the non-inverted call tree, the ordering in the call node table gives us a
+ * quick way to do these checks: For a call node X, all its descendant call nodes
+ * are in a contiguous range between X and callNodeTable.subtreeRangeEnd[X].
+ *
+ * We want to have a similar ability for the *inverted* call tree, but without
+ * computing a full inverted call node table. The suffix order gives us this
+ * ability. It's based on the following insights:
+ *
+ *  1. Non-inverted call nodes are "enough" for many purposes even in inverted mode:
+ *
+ *     When doing the per-sample checks listed above, we don't need an *inverted*
+ *     call node for each sample. We just need an inverted call node for the
+ *     clicked / selected node, and then we can check if the sample's
+ *     *non-inverted* call node contributes to the selected / clicked *inverted*
+ *     call node.
+ *     A non-inverted call node is just a representation of a call path. You can
+ *     read that call path from front to back, or you can read it from back to
+ *     front. If you read it from back to front that's the inverted call path.
+ *
+ *  2. We can store multiple different orderings of the non-inverted call node
+ *     table.
+ *
+ *     The non-inverted call node table remains ordered in depth-first traversal
+ *     order of the non-inverted tree, as described in the "Call node ordering"
+ *     section on the CallNodeTable type. The suffix order is an additional,
+ *     alternative ordering that we store on the side.
+ *
+ * ## Definition
+ *
+ * We define the suffix order as the lexicographic order of the inverted call path.
+ * Or as the lexicographic order of the non-inverted call paths "when reading back to front".
+ *
+ * D -> B comes before A -> C, because B comes before C.
+ * D -> B comes after A -> B, because B == B and D comes after A.
+ * D -> B comes before A -> D -> B, because B == B, D == D, and "end of path" comes before A.
+ *
+ * ## Example
+ *
+ * ### Non-inverted call tree:
+ *
+ * Legend:
+ *
+ * cnX: Non-inverted call node index X
+ * soX: Suffix order index X
+ *
+ * ```
+ *   Tree            Left aligned    Right aligned        Reordered by suffix
+ * - [cn0] A      =  A            =            A [so0]    [so0] [cn0] A
+ *   - [cn1] B    =  A -> B       =       A -> B [so3]    [so1] [cn4] A <- A
+ *     - [cn2] A  =  A -> B -> A  =  A -> B -> A [so2] ↘↗ [so2] [cn2] A <- B <- A
+ *     - [cn3] C  =  A -> B -> C  =  A -> B -> C [so6] ↗↘ [so3] [cn1] B <- A
+ *   - [cn4] A    =  A -> A       =       A -> A [so1]    [so4] [cn5] B <- A <- A
+ *     - [cn5] B  =  A -> A -> B  =  A -> A -> B [so4]    [so5] [cn6] C <- A
+ *   - [cn6] C    =  A -> C       =       A -> C [so5]    [so6] [cn3] C <- B <- A
+ * ```
+ *
+ * ### Inverted call tree:
+ *
+ * Legend, continued:
+ *
+ * inX:     Inverted call node index X
+ * so:X..Y: Suffix order index range soX..soY (soY excluded)
+ *
+ * ```
+ *                                                 Represents call paths ending in
+ * - [in0] A  (so:0..3)        =  A             =            ... A (cn0, cn4, cn2)
+ *   - [in1] A  (so:1..2)      =  A <- A        =       ... A -> A (cn4)
+ *   - [in2] B  (so:2..3)      =  A <- B        =       ... B -> A (cn2)
+ *     - [in3] A  (so:2..3)    =  A <- B <- A   =  ... A -> B -> A (cn2)
+ * - [in4] B  (so:3..5)        =  B             =            ... B (cn1, cn5)
+ *   - [in5] A  (so:3..5)      =  B <- A        =       ... A -> B (cn1, cn5)
+ *     - [in6] A  (so:4..5)    =  B <- A <- A   =  ... A -> A -> B (cn5)
+ * - [in7] C  (so:5..7)        =  C             =            ... C (cn6, cn3)
+ *   - [in8] A  (so:5..6)      =  C <- A        =       ... A -> C (cn6)
+ *   - [in9] B  (so:6..7)      =  C <- B        =       ... B -> C (cn3)
+ *     - [in10] A  (so:6..7)   =  C <- B <- A   =  ... A -> B -> C (cn3)
+ * ```
+ *
+ * In the suffix order, call paths become grouped in such a way that call paths
+ * which belong to the same *inverted* tree node (i.e. which share a suffix) end
+ * up ordered next to each other. This makes it so that a node in the inverted
+ * tree can refer to all its represented call paths with a single contiguous range.
+ *
+ * In this example, inverted tree node `in5` represents all call paths which end
+ * in A -> B. Both `cn1` and `cn5` do so; `cn1` is A -> B and `cn5` is A -> A -> B.
+ * In the suffix order, `cn1` and `cn5` end up next to each other, at positions
+ * `so3` and `so4`. This means that the two paths can be referred to via the suffix
+ * order index range 3..5.
+ *
+ * Suffix ordered call nodes: [0, 4, 2, 1, 5, 6, 3] (soX -> cnY)
+ * Suffix order indexes:      [0, 3, 2, 6, 1, 4, 5] (cnX -> soY)
+ *
  */
 export interface CallNodeInfoInverted extends CallNodeInfo {
+  // Get a mapping SuffixOrderIndex -> IndexIntoNonInvertedCallNodeTable.
+  // This array contains all non-inverted call node indexes, ordered by
+  // call path suffix. See "suffix order" in the documentation above.
+  getSuffixOrderedCallNodes(): Uint32Array;
+
+  // Returns the inverse of getSuffixOrderedCallNodes(), i.e. a mapping
+  // IndexIntoNonInvertedCallNodeTable -> SuffixOrderIndex.
+  getSuffixOrderIndexes(): Uint32Array;
+
+  // Get the [start, exclusiveEnd] range of suffix order indexes for this
+  // inverted tree node. This lets you list the non-inverted call nodes which
+  // "contribute to" the given inverted call node. Or put differently, it lets
+  // you iterate over the non-inverted call nodes whose call paths "end with"
+  // the call path suffix represented by the inverted node.
+  // By the definition of the suffix order, all non-inverted call nodes whose
+  // call path ends with the suffix defined by the inverted call node `callNodeIndex`
+  // will be in a contiguous range in the suffix order.
+  getSuffixOrderIndexRangeForCallNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): [SuffixOrderIndex, SuffixOrderIndex];
 }
 
 export type LineNumber = number;
