@@ -169,9 +169,9 @@ export function callTreeFromProfile(
       thread.samples,
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
-        callNodeInfo.getStackIndexToCallNodeIndex()
+        callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
       ),
-      callNodeInfo.getCallNodeTable().length
+      callNodeInfo.getNonInvertedCallNodeTable().length
     )
   );
   return getCallTree(

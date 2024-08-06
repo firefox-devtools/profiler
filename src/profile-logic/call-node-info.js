@@ -200,8 +200,45 @@ export class CallNodeInfoImpl implements CallNodeInfo {
     return null;
   }
 
+  getRoots(): IndexIntoCallNodeTable[] {
+    const roots = [];
+    if (this._callNodeTable.length !== 0) {
+      // The call node with index 0 is guaruanteed to be a root, by construction
+      // of the call node table.
+      // Start with node 0 and add its siblings.
+      for (
+        let root = 0;
+        root !== -1;
+        root = this._callNodeTable.nextSibling[root]
+      ) {
+        roots.push(root);
+      }
+    }
+    return roots;
+  }
+
   isRoot(callNodeIndex: IndexIntoCallNodeTable): boolean {
     return this._callNodeTable.prefix[callNodeIndex] === -1;
+  }
+
+  getChildren(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[] {
+    if (
+      this._callNodeTable.subtreeRangeEnd[callNodeIndex] ===
+      callNodeIndex + 1
+    ) {
+      return [];
+    }
+
+    const children = [];
+    const firstChild = callNodeIndex + 1;
+    for (
+      let childCallNodeIndex = firstChild;
+      childCallNodeIndex !== -1;
+      childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
+    ) {
+      children.push(childCallNodeIndex);
+    }
+    return children;
   }
 }
 
