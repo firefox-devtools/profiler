@@ -2810,7 +2810,7 @@ CallTree {
   ],
   "_children": Array [],
   "_displayDataByIndex": Map {},
-  "_internal": CallTreeInternalImpl {
+  "_internal": CallTreeInternalNonInverted {
     "_callNodeHasChildren": Uint8Array [
       1,
       1,
