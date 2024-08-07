@@ -2041,6 +2041,7 @@ export function handleCallNodeTransformShortcut(
     const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const funcIndex = callNodeTable.func[callNodeIndex];
     const category = callNodeTable.category[callNodeIndex];
+    const nonInvertedCallNodeTable = callNodeInfo.getNonInvertedCallNodeTable();
 
     switch (event.key) {
       case 'F':
@@ -2099,7 +2100,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'r': {
-        if (funcHasRecursiveCall(callNodeTable, funcIndex)) {
+        if (funcHasRecursiveCall(nonInvertedCallNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-recursion',
@@ -2110,7 +2111,7 @@ export function handleCallNodeTransformShortcut(
         break;
       }
       case 'R': {
-        if (funcHasDirectRecursiveCall(callNodeTable, funcIndex)) {
+        if (funcHasDirectRecursiveCall(nonInvertedCallNodeTable, funcIndex)) {
           dispatch(
             addTransformToStack(threadsKey, {
               type: 'collapse-direct-recursion',
