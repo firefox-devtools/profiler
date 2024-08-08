@@ -110,7 +110,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
               <button
                 type="button"
                 className="profileViewerZipButton"
-                title="View all files in the zip file"
+                title="View all files in the archive"
                 onClick={returnToZipFileList}
               />
             ) : null}

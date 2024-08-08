@@ -89,7 +89,7 @@ class WindowTitleImpl extends PureComponent<Props> {
           document.title = title;
         } else if (listingZipFile) {
           /* We're looking at the zip file contents. */
-          document.title = 'Zip File Contents' + SEPARATOR + PRODUCT;
+          document.title = 'Archive Contents' + SEPARATOR + PRODUCT;
         } else {
           /* There's no profile yet, but we're not looking at a zip file.
            * Let's use a sensible default, but do not throw because we forgot a
