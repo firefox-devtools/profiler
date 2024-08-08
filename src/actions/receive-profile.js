@@ -1283,7 +1283,7 @@ async function _extractZipFromResponse(
     // Catch the error if unable to load the zip.
     return zip;
   } catch (error) {
-    const message = 'Unable to unzip the zip file.';
+    const message = 'Unable to open the archive file.';
     reportError(message);
     reportError('Error:', error);
     reportError('Fetch response:', response);
@@ -1409,7 +1409,7 @@ export function retrieveProfileOrZipFromUrl(
         default:
           throw assertExhaustiveCheck(
             response.responseType,
-            'Expected to receive a zip file or profile from _fetchProfile.'
+            'Expected to receive an archive or profile from _fetchProfile.'
           );
       }
     } catch (error) {

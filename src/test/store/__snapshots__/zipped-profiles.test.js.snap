@@ -7,7 +7,7 @@ Array [
     [SyntaxError: Unexpected token o in JSON at position 1],
   ],
   Array [
-    "Failed to process the profile in the zip file with the following error:",
+    "Failed to process the profile in the archive with the following error:",
   ],
   Array [
     [Error: Unserializing the profile failed: SyntaxError: Unexpected token o in JSON at position 1],
