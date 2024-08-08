@@ -195,8 +195,15 @@ export class ZipFileTree {
           encodeURIComponent(this._zipFileTable.path[zipTableIndex]);
       }
 
+      let name = this._zipFileTable.partName[zipTableIndex];
+      const EXTENSIONS_TO_OMIT = ['.json', '.json.gz'];
+      const matchedExtension = EXTENSIONS_TO_OMIT.find(extension => name.endsWith(extension));
+      if (matchedExtension) {
+        name = name.slice(0, name.length - matchedExtension.length);
+      }
+
       displayData = {
-        name: this._zipFileTable.partName[zipTableIndex],
+        name,
         url,
         zipTableIndex,
       };

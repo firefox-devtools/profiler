@@ -36,7 +36,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0"
-              style="height: 420px;"
+              style="height: 510px;"
             >
               <div
                 class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -97,11 +97,23 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   class="treeViewRow treeViewRowFixedColumns even"
                   style="height: 30px; line-height: 30px;"
                 />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns odd"
+                  style="height: 30px; line-height: 30px;"
+                />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns even"
+                  style="height: 30px; line-height: 30px;"
+                />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns odd"
+                  style="height: 30px; line-height: 30px;"
+                />
               </div>
             </div>
             <div
               class="treeViewBodyInner treeViewBodyInner1"
-              style="height: 420px; min-width: 3000px;"
+              style="height: 510px; min-width: 3000px;"
             >
               <div
                 class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -175,7 +187,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     <a
                       href="http://localhost/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json"
                     >
-                      profile1.json
+                      profile1
                     </a>
                   </span>
                 </div>
@@ -200,7 +212,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     <a
                       href="http://localhost/from-url//calltree/?file=foo%2Fprofile2.json"
                     >
-                      profile2.json
+                      profile2
                     </a>
                   </span>
                 </div>
@@ -245,9 +257,9 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeViewRowColumn treeViewMainColumn name"
                   >
                     <a
-                      href="http://localhost/from-url//calltree/?file=baz%2Fprofile3.json"
+                      href="http://localhost/from-url//calltree/?file=baz%2Fprofile3.json.gz"
                     >
-                      profile3.json
+                      profile3
                     </a>
                   </span>
                 </div>
@@ -404,7 +416,76 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     <a
                       href="http://localhost/from-url//calltree/?file=boat%2Fship%2Fnew%2Fanything%2Fexplore%2Fyes%2Fprofile4.json"
                     >
-                      profile4.json
+                      profile4
+                    </a>
+                  </span>
+                </div>
+                <div
+                  aria-expanded="true"
+                  aria-level="1"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns odd"
+                  id="treeViewRow-13"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 0px;"
+                  />
+                  <span
+                    class="treeRowToggleButton expanded canBeExpanded"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    not
+                  </span>
+                </div>
+                <div
+                  aria-expanded="true"
+                  aria-level="2"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns even"
+                  id="treeViewRow-14"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 15px;"
+                  />
+                  <span
+                    class="treeRowToggleButton expanded canBeExpanded"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    a
+                  </span>
+                </div>
+                <div
+                  aria-level="3"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns odd"
+                  id="treeViewRow-15"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 30px;"
+                  />
+                  <span
+                    class="treeRowToggleButton collapsed leaf"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    <a
+                      href="http://localhost/from-url//calltree/?file=not%2Fa%2Fprofile.pdf"
+                    >
+                      profile.pdf
                     </a>
                   </span>
                 </div>

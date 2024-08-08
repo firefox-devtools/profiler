@@ -33,9 +33,10 @@ describe('calltree/ZipFileTree', function () {
     const { store } = await storeWithZipFile([
       'foo/bar/profile1.json',
       'foo/profile2.json',
-      'baz/profile3.json',
+      'baz/profile3.json.gz',
       // Use a file with a big depth to test the automatic expansion at load time.
       'boat/ship/new/anything/explore/yes/profile4.json',
+      'not/a/profile.pdf'
     ]);
 
     const renderResult = render(
@@ -63,19 +64,46 @@ describe('calltree/ZipFileTree', function () {
     [
       'foo',
       'bar',
-      'profile1.json',
-      'profile2.json',
+      'profile1',
+      'profile2',
       'baz',
-      'profile3.json',
+      'profile3',
+      'profile4',
     ].forEach((fileName) => screen.getByText(fileName));
   });
+
+  it('removes .json and .json.gz extensions', async () => {
+    await setup();
+
+    [
+      'profile1',
+      'profile2',
+      'profile3',
+      'profile4',
+    ].forEach((fileName) => screen.getByText(fileName));
+
+    [
+      'profile1.json',
+      'profile2.json',
+      'profile3.json.gz',
+      'profile4.json',
+    ].forEach((fileName) => {
+      expect(() => screen.getByText(fileName)).toThrow();
+    });
+  });
+
+  it('preserves extensions other than .json and .json.gz', async () => {
+    await setup();
+
+    screen.getByText('profile.pdf');
+  })
 
   describe('clicking on a profile link', function () {
     const setupClickingTest = async () => {
       const setupResult = await setup();
       const { store, container } = setupResult;
 
-      const profile1OpenLink = screen.getByText('profile1.json');
+      const profile1OpenLink = screen.getByText('profile1');
 
       const waitUntilDoneProcessingZip = () =>
         act(() =>
