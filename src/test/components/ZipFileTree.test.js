@@ -36,7 +36,7 @@ describe('calltree/ZipFileTree', function () {
       'baz/profile3.json.gz',
       // Use a file with a big depth to test the automatic expansion at load time.
       'boat/ship/new/anything/explore/yes/profile4.json',
-      'not/a/profile.pdf'
+      'not/a/profile.pdf',
     ]);
 
     const renderResult = render(
@@ -75,12 +75,9 @@ describe('calltree/ZipFileTree', function () {
   it('removes .json and .json.gz extensions', async () => {
     await setup();
 
-    [
-      'profile1',
-      'profile2',
-      'profile3',
-      'profile4',
-    ].forEach((fileName) => screen.getByText(fileName));
+    ['profile1', 'profile2', 'profile3', 'profile4'].forEach((fileName) =>
+      screen.getByText(fileName)
+    );
 
     [
       'profile1.json',
@@ -95,8 +92,8 @@ describe('calltree/ZipFileTree', function () {
   it('preserves extensions other than .json and .json.gz', async () => {
     await setup();
 
-    screen.getByText('profile.pdf');
-  })
+    expect(screen.getByText('profile.pdf')).toBeInTheDocument();
+  });
 
   describe('clicking on a profile link', function () {
     const setupClickingTest = async () => {
