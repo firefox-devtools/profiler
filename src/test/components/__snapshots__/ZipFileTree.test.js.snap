@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`calltree/ZipFileTree clicking on a profile link kicks off the profile loading process when clicked 1`] = `"Loading the profile from the zip file..."`;
+exports[`calltree/ZipFileTree clicking on a profile link kicks off the profile loading process when clicked 1`] = `"Loading the profile from the archive..."`;
 
 exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
 <section
@@ -16,7 +16,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
         Firefox Profiler
       </h1>
       <p>
-        Choose a profile from this zip file
+        Choose a profile from this archive
       </p>
     </header>
     <div
