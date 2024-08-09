@@ -4,7 +4,7 @@
 // @flow
 import {
   getCallTree,
-  computeCallNodeLeafAndSummary,
+  computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
@@ -133,13 +133,13 @@ export function callTreeFromProfile(
   );
   const callTreeTimings = computeCallTreeTimings(
     callNodeInfo,
-    computeCallNodeLeafAndSummary(
+    computeCallNodeSelfAndSummary(
       thread.samples,
       getSampleIndexToCallNodeIndex(
         thread.samples.stack,
-        callNodeInfo.getStackIndexToCallNodeIndex()
+        callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
       ),
-      callNodeInfo.getCallNodeTable().length
+      callNodeInfo.getNonInvertedCallNodeTable().length
     )
   );
   return getCallTree(
