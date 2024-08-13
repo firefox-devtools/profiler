@@ -1136,7 +1136,8 @@ describe('extractProfileFilterPageData', function () {
     aboutBlank: 2,
     profiler: 3,
     exampleSubFrame: 4,
-    unknown: 5,
+    exampleTopFrame: 5,
+    unknown: 6,
   };
   // This is the `profile.pages` array.
   const pages = [
@@ -1164,6 +1165,12 @@ describe('extractProfileFilterPageData', function () {
       url: 'https://example.com/subframe',
       // This is a subframe of the page above.
       embedderInnerWindowID: innerWindowIds.profiler,
+    },
+    {
+      tabID: 2222,
+      innerWindowID: innerWindowIds.exampleTopFrame,
+      url: 'https://example.com',
+      embedderInnerWindowID: 0,
     },
   ];
 
@@ -1238,6 +1245,20 @@ describe('extractProfileFilterPageData', function () {
 
     expect(pageData).toEqual(null);
     expect(console.error).toHaveBeenCalled();
+  });
+
+  it('extracts the page data of the last frame when there are multiple relevant pages', function () {
+    const relevantPages = new Set([
+      innerWindowIds.profiler,
+      innerWindowIds.exampleTopFrame,
+    ]);
+
+    const pageData = extractProfileFilterPageData(pages, relevantPages);
+    expect(pageData).toEqual({
+      origin: 'https://example.com',
+      hostname: 'example.com',
+      favicon: 'https://example.com/favicon.ico',
+    });
   });
 });
 
