@@ -347,6 +347,13 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     const { committedRange, width } = this.props;
     const { selectionStart, selectionEnd } = previewSelection;
 
+    if (!Number.isFinite(selectionStart) || !Number.isFinite(selectionEnd)) {
+      // Do not render the selection overlay if there is no data to display in
+      // the timeline. This prevents a crash on range selection if the profile
+      // is completely empty.
+      return null;
+    }
+
     const beforeWidth =
       ((selectionStart - committedRange.start) /
         (committedRange.end - committedRange.start)) *
@@ -429,6 +436,17 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
         (committedRange.end - committedRange.start);
     }
 
+    let mousePosTimestamp = null;
+    if (mouseTimePosition !== null && Number.isFinite(mouseTimePosition)) {
+      // Only compute and display the timestamp when there is a mouse position
+      // and the position is not NaN or Infinity which is the case when there
+      // is no data in the timeline.
+      mousePosTimestamp = getFormattedTimeLength(
+        mouseTimePosition - zeroAt,
+        (committedRange.end - committedRange.start) / width
+      );
+    }
+
     return (
       <div
         className={classNames('timelineSelection', className)}
@@ -445,19 +463,16 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
           className="timelineSelectionHoverLine"
           style={{
             visibility:
-              previewSelection.isModifying || hoverLocation === null
+              previewSelection.isModifying ||
+              hoverLocation === null ||
+              isNaN(hoverLocation)
                 ? 'hidden'
                 : undefined,
             left: hoverLocation === null ? '0' : `${hoverLocation}px`,
           }}
         >
           <span className="timelineSelectionOverlayTime">
-            {mouseTimePosition !== null
-              ? getFormattedTimeLength(
-                  mouseTimePosition - zeroAt,
-                  (committedRange.end - committedRange.start) / width
-                )
-              : null}
+            {mousePosTimestamp}
           </span>
         </div>
       </div>
