@@ -2954,9 +2954,9 @@ export function extractProfileFilterPageData(
     }
 
     if (topMostPages.length === 0) {
-      // There should be at least one relevant page.
+      // There should be at least one topmost page.
       console.error(
-        `Expected a relevant page for tabID ${tabID} but couldn't find it.`
+        `Expected at least one topmost page for tabID ${tabID} but couldn't find it.`
       );
       continue;
     }
