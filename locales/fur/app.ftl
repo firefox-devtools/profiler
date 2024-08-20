@@ -352,8 +352,13 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Stabilìs selezion in base ae durade dal marcadôr
 MarkerContextMenu--start-selection-here = Scomence la selezion achì
 MarkerContextMenu--end-selection-here = Finìs la selezion achì
+MarkerContextMenu--start-selection-at-marker-start = Scomence la selezion al <strong>inizi</strong> dal marcadôr
+MarkerContextMenu--start-selection-at-marker-end = Scomence la selezion ae <strong>fin</strong> dal marcadôr
+MarkerContextMenu--end-selection-at-marker-start = Termine la selezion al <strong>inizi</strong> dal marcadôr
+MarkerContextMenu--end-selection-at-marker-end = Termine la selezion ae <strong>fin</strong> dal marcadôr
 MarkerContextMenu--copy-description = Copie descrizion
 MarkerContextMenu--copy-call-stack = Copie stack de clamade
 MarkerContextMenu--copy-url = Copie URL
@@ -374,14 +379,24 @@ MarkerContextMenu--select-the-sender-thread = Selezione il thread dal mitent “
 ## This is the menu when filter icon is clicked in Marker Chart and Marker Table
 ## panels.
 
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Scarte i campions fûr dai marcadôrs corispondents a “<strong>{ $filter }</strong>”
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Filtre marcadôrs:
+    .title = Visualize dome marcadôrs che a corispuindin a un ciert non
+MarkerSettings--marker-filters =
+    .title = Filtris pai marcadôrs
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Selezione un marcadôr par visualizâ sôs informazions.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -684,9 +699,12 @@ StackSettings--call-tree-strategy-native-retained-allocations = Memorie mantignu
 StackSettings--call-tree-native-allocations = Memorie assegnade
     .title = Fâs un sunt doprant i bytes de memorie assegnade
 StackSettings--call-tree-strategy-native-deallocations-memory = Memorie disassegnade
-    .title = Fâs un sunt doprant i bytes de memorie dis-assegnade, dal sît che al veve assegnât la memorie
+    .title = Fâs un sunt doprant i bytes de memorie dis-assegnade, dal sît là che la memorie e jere stade assegnade
 StackSettings--call-tree-strategy-native-deallocations-sites = Sîts disassegnâts
     .title = Fâs un sunt doprant i bytes di memorie disassegnade, dal sît là che la memorie e jere stade disassegnade
+StackSettings--invert-call-stack = Invertìs stack di clamade
+    .title = Ordene in base al timp doprât intun grop di clamade, ignorant i fîs.
+StackSettings--show-user-timing = Mostre timp utent
 StackSettings--panel-search =
     .label = Filtre stacks:
     .title = Visualize dome i stacks che a contegnin une funzion là che il so non al corispuint a cheste sotstringhe
@@ -710,15 +728,27 @@ TrackContextMenu--only-show-this-process = Mostre dome chest procès
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Mostre dome “{ $trackName } ”
+TrackContextMenu--hide-other-screenshots-tracks = Plate altris liniis Videadis.
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Plate “{ $trackName }”
+TrackContextMenu--show-all-tracks = Mostre dutis lis liniis
+TrackContextMenu--show-local-tracks-in-process = Mostre dutis lis liniis in chest procès
+# This is used in the tracks context menu as a button to show all the tracks
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Mostre dutis lis liniis corispondentis
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Plate dutis lis liniis corispondentis
 # This is used in the tracks context menu when the search filter doesn't match
 # any track.
 # Variables:
 #   $searchFilter (String) - The search filter string that user enters.
 TrackContextMenu--no-results-found = Nissun risultât cjatât par “<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Plate linie
 # This button appears when hovering a global track name and is displayed as an X icon.
 TrackNameButton--hide-process =
     .title = Plate procès
@@ -872,6 +902,9 @@ TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g C
 ## TrackSearchField
 ## The component that is used for the search input in the track context menu.
 
+TrackSearchField--search-input =
+    .placeholder = Inserìs i tiermins di cirî
+    .title = Visualize nome liniis che a corispuindin a un ciert test
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -938,6 +971,10 @@ TransformNavigator--collapse-direct-recursion-only = Strenç dome ricorsion dire
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--collapse-function-subtree = Strenç sot-arbul: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Scarte campions fûr dai marcadôrs corispondents: “{ $item }”
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
