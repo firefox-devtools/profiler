@@ -836,21 +836,34 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
 
 /**
  * Extract the hostname and favicon from the last page if we are in single tab
+ * Extract the hostname and favicon from the last page for all tab ids. we
  * view. We assume that the user wants to know about the last loaded page in
+ * assume that the user wants to know about the last loaded page in this tab.
  * this tab.
- * Returns null if profiler is not in the single tab view at the moment.
+ * returns an empty Map if we don't have information about pages (in older profiles).
  */
-export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> =
-  createSelector(
-    getPageList,
-    getRelevantInnerWindowIDsForCurrentTab,
-    (pageList, relevantPages) => {
-      if (relevantPages.size === 0) {
-        return null;
-      }
-      return extractProfileFilterPageData(pageList, relevantPages);
-    }
-  );
+export const getProfileFilterPageDataByTabID: Selector<
+  Map<TabID, ProfileFilterPageData>,
+> = createSelector(getPagesMap, extractProfileFilterPageData);
+
+/**
+ * This returns the hostname and favicon information for the current tab id.
+ * Returns null if profiler is not in the single tab view at the moment.
+ * TODO: This is only used for the active tab view. Remove it later.
+ */
+export const getProfileFilterPageData: Selector<
+  ProfileFilterPageData | null,
+> = (state) => {
+  const pageDataByTabID = getProfileFilterPageDataByTabID(state);
+  const activeTabID = getActiveTabID(state);
+  const timelineTrackOrganization =
+    UrlState.getTimelineTrackOrganization(state);
+  if (activeTabID === null || timelineTrackOrganization.type !== 'active-tab') {
+    return null;
+  }
+
+  return pageDataByTabID.get(activeTabID) ?? null;
+};
 
 /**
  * Get the map of Thread ID -> Thread Name for easy access.
