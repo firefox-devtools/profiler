@@ -2927,7 +2927,7 @@ export function filterToRetainedAllocations(
 /**
  * Extract the hostname and favicon from the last page for all tab ids. we
  * assume that the user wants to know about the last loaded page in this tab.
- * returns null if we don't have information about pages (in older profiles).
+ * Returns null if we don't have information about pages (in older profiles).
  */
 export function extractProfileFilterPageData(
   pagesMapByTabID: Map<TabID, PageList> | null
