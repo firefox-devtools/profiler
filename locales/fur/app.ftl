@@ -668,9 +668,25 @@ ServiceWorkerManager--hide-notice-button =
 
 StackSettings--implementation-all-frames = Ducj i ricuadris
     .title = No sta filtrâ i ricuadris dal stack
+StackSettings--implementation-javascript2 = JavaScript
+    .title = Mostre dome i ricuadris dal stack corelâts ae esecuzion di JavaScript
+StackSettings--implementation-native2 = Natîf
+    .title = Mostre dome i ricuadris dal stack pal codiç natîf
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Filtre stacks:
 StackSettings--use-data-source-label = Sorzint dâts:
+StackSettings--call-tree-strategy-timing = Timps
+    .title = Fâs un sunt doprant i stacks campionâts dal codiç eseguît vie pal timp
+StackSettings--call-tree-strategy-js-allocations = Assegnazions JavaScript
+    .title = Fâs un sunt doprant i bytes di JavaScript assegnâts (ignore disassegnazions)
+StackSettings--call-tree-strategy-native-retained-allocations = Memorie mantignude
+    .title = Fâs un sunt doprant i bytes de memorie che a son stâts assegnâts e mai liberâts te selezion di anteprime corinte
+StackSettings--call-tree-native-allocations = Memorie assegnade
+    .title = Fâs un sunt doprant i bytes de memorie assegnade
+StackSettings--call-tree-strategy-native-deallocations-memory = Memorie disassegnade
+    .title = Fâs un sunt doprant i bytes de memorie dis-assegnade, dal sît che al veve assegnât la memorie
+StackSettings--call-tree-strategy-native-deallocations-sites = Sîts disassegnâts
+    .title = Fâs un sunt doprant i bytes di memorie disassegnade, dal sît là che la memorie e jere stade disassegnade
 StackSettings--panel-search =
     .label = Filtre stacks:
     .title = Visualize dome i stacks che a contegnin une funzion là che il so non al corispuint a cheste sotstringhe
