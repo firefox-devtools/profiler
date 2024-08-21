@@ -3683,3 +3683,86 @@ export function determineTimelineType(profile: Profile): TimelineType {
   // Have both category and CPU usage information. Use 'cpu-category'.
   return 'cpu-category';
 }
+
+/**
+ * Compute a map of tab to thread indexes map. This is useful for learning which
+ * threads are involved for tabs. This is mainly used for the tab selector on
+ * the top left corner.
+ */
+export function computeTabToThreadIndexesMap(
+  threads: Thread[],
+  innerWindowIDToTabMap: Map<InnerWindowID, TabID> | null
+): Map<TabID, Set<ThreadIndex>> {
+  const tabToThreadIndexesMap = new Map();
+  if (!innerWindowIDToTabMap) {
+    // There is no pages information in the profile, return an empty map.
+    return tabToThreadIndexesMap;
+  }
+
+  // We need to iterate over all the samples and markers once to figure out
+  // which innerWindowIDs are present in each thread. This is probably not
+  // very cheap, but it'll allow us to not compute this information every
+  // time when we need it.
+  for (let threadIdx = 0; threadIdx < threads.length; threadIdx++) {
+    const thread = threads[threadIdx];
+
+    // First go over the innerWindowIDs of the samples.
+    for (let i = 0; i < thread.frameTable.length; i++) {
+      const innerWindowID = thread.frameTable.innerWindowID[i];
+      if (innerWindowID === null) {
+        continue;
+      }
+
+      const tabID = innerWindowIDToTabMap.get(innerWindowID);
+      if (tabID === undefined) {
+        // We couldn't find the tab of this innerWindowID, this should
+        // never happen, it might indicate a bug in Firefox.
+        console.warn(
+          `Failed to find the tabID of innerWindowID ${innerWindowID}`
+        );
+        continue;
+      }
+
+      let threadIndexes = tabToThreadIndexesMap.get(tabID);
+      if (!threadIndexes) {
+        threadIndexes = new Set();
+        tabToThreadIndexesMap.set(tabID, threadIndexes);
+      }
+      threadIndexes.add(threadIdx);
+    }
+
+    // Then go over the markers to find their innerWindowIDs.
+    for (let i = 0; i < thread.markers.length; i++) {
+      const markerData = thread.markers.data[i];
+
+      if (!markerData) {
+        continue;
+      }
+
+      if (
+        markerData.innerWindowID !== null &&
+        markerData.innerWindowID !== undefined
+      ) {
+        const innerWindowID = markerData.innerWindowID;
+        const tabID = innerWindowIDToTabMap.get(innerWindowID);
+        if (tabID === undefined) {
+          // We couldn't find the tab of this innerWindowID, this should
+          // never happen, it might indicate a bug in Firefox.
+          console.warn(
+            `Failed to find the tabID of innerWindowID ${innerWindowID}`
+          );
+          continue;
+        }
+
+        let threadIndexes = tabToThreadIndexesMap.get(tabID);
+        if (!threadIndexes) {
+          threadIndexes = new Set();
+          tabToThreadIndexesMap.set(tabID, threadIndexes);
+        }
+        threadIndexes.add(threadIdx);
+      }
+    }
+  }
+
+  return tabToThreadIndexesMap;
+}

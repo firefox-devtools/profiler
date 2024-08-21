@@ -14,6 +14,7 @@ import {
   getFriendlyThreadName,
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
+  computeTabToThreadIndexesMap,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -348,6 +349,61 @@ export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
   createSelector(getThreads, correlateIPCMarkers);
 
 /**
+ * Returns an InnerWindowID -> Page map, so we can look up the page from inner
+ * window id quickly. Returns null if there are no pages in the profile.
+ */
+export const getInnerWindowIDToPageMap: Selector<Map<
+  InnerWindowID,
+  Page,
+> | null> = createSelector(getPageList, (pages) => {
+  if (!pages) {
+    // Return null if there are no pages.
+    return null;
+  }
+
+  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
+  for (const page of pages) {
+    innerWindowIDToPageMap.set(page.innerWindowID, page);
+  }
+
+  return innerWindowIDToPageMap;
+});
+
+/**
+ * Returns an InnerWindowID -> TabID map, so we can find the TabID of a given
+ * innerWindowID quickly. Returns null if there are no pages in the profile.
+ */
+export const getInnerWindowIDToTabMap: Selector<Map<
+  InnerWindowID,
+  TabID,
+> | null> = createSelector(getPageList, (pages) => {
+  if (!pages) {
+    // Return null if there are no pages.
+    return null;
+  }
+
+  const innerWindowIDToTabMap: Map<InnerWindowID, TabID> = new Map();
+  for (const page of pages) {
+    innerWindowIDToTabMap.set(page.innerWindowID, page.tabID);
+  }
+
+  return innerWindowIDToTabMap;
+});
+
+/**
+ * Return a map of tab to thread indexes map. This is useful for learning which
+ * threads are involved for tabs. This is mainly used for the tab selector on
+ * the top left corner.
+ */
+export const getTabToThreadIndexesMap: Selector<Map<TabID, Set<ThreadIndex>>> =
+  createSelector(
+    getThreads,
+    getInnerWindowIDToTabMap,
+    (threads, innerWindowIDToTabMap) =>
+      computeTabToThreadIndexesMap(threads, innerWindowIDToTabMap)
+  );
+
+/**
  * Tracks
  *
  * Tracks come in two flavors: global tracks and local tracks.
@@ -652,27 +708,6 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
     return { hidden, total };
   }
 );
-
-/**
- * Returns an InnerWindowID -> Page map, so we can look up the page from inner
- * window id quickly. Returns null if there are no pages in the profile.
- */
-export const getInnerWindowIDToPageMap: Selector<Map<
-  InnerWindowID,
-  Page,
-> | null> = createSelector(getPageList, (pages) => {
-  if (!pages) {
-    // Return null if there are no pages.
-    return null;
-  }
-
-  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
-  for (const page of pages) {
-    innerWindowIDToPageMap.set(page.innerWindowID, page);
-  }
-
-  return innerWindowIDToPageMap;
-});
 
 /**
  * Get the pages array and construct a Map of pages that we can use to get the
