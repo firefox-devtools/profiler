@@ -48,6 +48,10 @@ import {
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
+import {
+  getEmptyProfile,
+  getEmptyThread,
+} from 'firefox-profiler/profile-logic/data-structures';
 
 import type { Profile, ThreadIndex } from 'firefox-profiler/types';
 
@@ -1400,11 +1404,19 @@ describe('Timeline', function () {
 });
 
 describe('TimelineSelection', () => {
-  function setup() {
+  function setup({ profileLength }: { profileLength: number } = {}) {
     const flushRafCalls = mockRaf();
-    const profileLength = 10;
-    // There are 10 samples in this profile.
-    const { profile } = getProfileFromTextSamples('A  '.repeat(profileLength));
+    // Default to 10 samples in the profile.
+    profileLength = profileLength ?? 10;
+    let profile;
+    if (profileLength === 0) {
+      // Create an empty profile with a single thread since
+      // getProfileFromTextSamples doesn't like empty samples.
+      profile = getEmptyProfile();
+      profile.threads = [getEmptyThread()];
+    } else {
+      profile = getProfileFromTextSamples('A  '.repeat(profileLength)).profile;
+    }
 
     // getBoundingClientRect is already mocked by autoMockElementSize.
     jest
@@ -1484,5 +1496,17 @@ describe('TimelineSelection', () => {
     expect(getTimePositionLinePosition()).toBe(
       (TRACK_WIDTH * samplePosition) / profileLength
     );
+  });
+
+  it('does not crash when there are no samples or markers', () => {
+    const { moveMouseOnThreadCanvas } = setup({ profileLength: 0 });
+
+    // Hover over anywhere in the timeline to check if it'll crash.
+    moveMouseOnThreadCanvas({
+      pageX: TRACK_WIDTH / 2,
+      pageY: TOP + 1,
+    });
+
+    expect(document.body).toMatchSnapshot();
   });
 });

@@ -26,6 +26,11 @@ import './ListOfPublishedProfiles.css';
 // them by clicking on them, or delete them.
 
 function _formatRange(range: StartEndRange): string {
+  if (!Number.isFinite(range.start) || !Number.isFinite(range.end)) {
+    // Do not attempt to show if the range is NaN or Infinity, which happens
+    // if a profile doesn't have any samples or markers.
+    return '';
+  }
   return formatSeconds(range.end - range.start, 3, 1);
 }
 
