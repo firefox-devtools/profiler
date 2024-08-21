@@ -198,7 +198,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
         <div className="zipFileViewerSection">
           <header className="zipFileViewerHeader">
             <h1>Firefox Profiler</h1>
-            <p>Choose a profile from this zip file</p>
+            <p>Choose a profile from this archive</p>
           </header>
           <div className="zipFileViewerMessage">{message}</div>
           <DragAndDropOverlay />
@@ -215,7 +215,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
         className="homeSectionInstallButton"
         onClick={this.props.returnToZipFileList}
       >
-        ← Back to zip file list
+        ← Back to archive list
       </button>
     );
   }
@@ -246,16 +246,18 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
     switch (phase) {
       case 'NO_ZIP_FILE':
         console.error(
-          'Loaded the ZipFileViewer component when there is no zip file.'
+          'Loaded the ZipFileViewer component when there is no archive file.'
         );
-        return this._renderMessage(<span>Error: No zip file was found.</span>);
+        return this._renderMessage(
+          <span>Error: No archive file was found.</span>
+        );
       case 'LIST_FILES_IN_ZIP_FILE':
         return (
           <section className="zipFileViewer">
             <div className="zipFileViewerSection">
               <header className="zipFileViewerHeader">
                 <h1>Firefox Profiler</h1>
-                <p>Choose a profile from this zip file</p>
+                <p>Choose a profile from this archive</p>
               </header>
               <TreeView
                 maxNodeDepth={zipFileMaxDepth}
@@ -278,7 +280,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
         );
       case 'PROCESS_PROFILE_FROM_ZIP_FILE':
         return this._renderMessage(
-          <span>Loading the profile from the zip file...</span>
+          <span>Loading the profile from the archive...</span>
         );
       case 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE':
         return this._renderMessage([
