@@ -248,7 +248,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
         console.error(
           'Loaded the ZipFileViewer component when there is no archive file.'
         );
-        return this._renderMessage(<span>Error: No zip file was found.</span>);
+        return this._renderMessage(<span>Error: No archive file was found.</span>);
       case 'LIST_FILES_IN_ZIP_FILE':
         return (
           <section className="zipFileViewer">
