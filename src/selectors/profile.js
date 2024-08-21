@@ -375,37 +375,19 @@ export const getInnerWindowIDToPageMap: Selector<Map<
 export const getInnerWindowIDToTabMap: Selector<Map<
   InnerWindowID,
   TabID,
-> | null> = createSelector(
-  getPageList,
-  getInnerWindowIDToPageMap,
-  (pages, innerWindowIDToPageMap) => {
-    if (!pages || innerWindowIDToPageMap === null) {
-      // Return null if there are no pages.
-      return null;
-    }
-
-    const innerWindowIDToTabMap: Map<InnerWindowID, TabID> = new Map();
-    const getTopMostParent = (page) => {
-      if (page.embedderInnerWindowID === 0) {
-        return page;
-      }
-
-      // We are using a Map to make this more performant.
-      // It should be 1-2 loop iteration in 99% of the cases.
-      const parent = innerWindowIDToPageMap.get(page.embedderInnerWindowID);
-      if (parent !== undefined) {
-        return getTopMostParent(parent);
-      }
-      return page;
-    };
-    for (const page of pages) {
-      const topMostParent = getTopMostParent(page);
-      innerWindowIDToTabMap.set(page.innerWindowID, topMostParent.tabID);
-    }
-
-    return innerWindowIDToTabMap;
+> | null> = createSelector(getPageList, (pages) => {
+  if (!pages) {
+    // Return null if there are no pages.
+    return null;
   }
-);
+
+  const innerWindowIDToTabMap: Map<InnerWindowID, TabID> = new Map();
+  for (const page of pages) {
+    innerWindowIDToTabMap.set(page.innerWindowID, page.tabID);
+  }
+
+  return innerWindowIDToTabMap;
+});
 
 /**
  * Return a map of tab to thread indexes map. This is useful for learning which
