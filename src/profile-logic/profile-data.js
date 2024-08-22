@@ -3709,7 +3709,8 @@ export function computeTabToThreadIndexesMap(
     // First go over the innerWindowIDs of the samples.
     for (let i = 0; i < thread.frameTable.length; i++) {
       const innerWindowID = thread.frameTable.innerWindowID[i];
-      if (innerWindowID === null) {
+      if (innerWindowID === null || innerWindowID === 0) {
+        // Zero value also means null for innerWindowID.
         continue;
       }
 
@@ -3741,7 +3742,9 @@ export function computeTabToThreadIndexesMap(
 
       if (
         markerData.innerWindowID !== null &&
-        markerData.innerWindowID !== undefined
+        markerData.innerWindowID !== undefined &&
+        // Zero value also means null for innerWindowID.
+        markerData.innerWindowID !== 0
       ) {
         const innerWindowID = markerData.innerWindowID;
         const tabID = innerWindowIDToTabMap.get(innerWindowID);
