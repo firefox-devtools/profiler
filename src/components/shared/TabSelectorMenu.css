@@ -1,0 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.tabSelectorMenuItem.checkable {
+  padding-right: 10px;
+  padding-left: 20px;
+}
+
+.react-contextmenu-item.tabSelectorMenuItem.checked:not(
+    .react-contextmenu-item--disabled
+  )::before {
+  /* Move the checkmark to the left instead of right, as it's logically better. */
+  left: 8px;
+}
