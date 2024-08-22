@@ -106,12 +106,12 @@ Array [
 ]
 `;
 
-exports[`actions/receive-profile _fetchProfile fails if a bad zip file is passed in 1`] = `[Error: Unable to unzip the zip file. The full error information has been printed out to the DevTool’s console.]`;
+exports[`actions/receive-profile _fetchProfile fails if a bad zip file is passed in 1`] = `[Error: Unable to open the archive file. The full error information has been printed out to the DevTool’s console.]`;
 
 exports[`actions/receive-profile _fetchProfile fails if a bad zip file is passed in 2`] = `
 Array [
   Array [
-    "Unable to unzip the zip file.",
+    "Unable to open the archive file.",
   ],
   Array [
     "Error:",
