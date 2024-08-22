@@ -561,6 +561,14 @@ type UrlStateAction =
   | {|
       +type: 'CHANGE_TAB_FILTER',
       +tabID: TabID | null,
+      +selectedThreadIndexes: Set<ThreadIndex>,
+      +globalTracks: GlobalTrack[],
+      +globalTrackOrder: TrackIndex[],
+      +hiddenGlobalTracks: Set<TrackIndex>,
+      +localTracksByPid: Map<Pid, LocalTrack[]>,
+      +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      +selectedTab: TabSlug,
     |};
 
 type IconsAction =

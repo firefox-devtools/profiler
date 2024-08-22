@@ -40,7 +40,11 @@ import {
   getActiveTabID,
   getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
-import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
+import {
+  getSelectedTab,
+  getTabFilter,
+} from 'firefox-profiler/selectors/url-state';
+import { getTabToThreadIndexesMap } from 'firefox-profiler/selectors/profile';
 import {
   withHistoryReplaceStateAsync,
   withHistoryReplaceStateSync,
@@ -288,9 +292,15 @@ export function finalizeFullProfileView(
   return (dispatch, getState) => {
     const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
-    const globalTracks = computeGlobalTracks(profile);
+    const tabToThreadIndexesMap = getTabToThreadIndexesMap(getState());
+    const globalTracks = computeGlobalTracks(
+      profile,
+      hasUrlInfo ? getTabFilter(getState()) : null,
+      tabToThreadIndexesMap
+    );
     const localTracksByPid = computeLocalTracksByPid(
       profile,
+      globalTracks,
       getMarkerSchemaByName(getState())
     );
 
@@ -1731,5 +1741,110 @@ export function retrieveProfileForRawUrl(
 
     // Profile may be null if the response was a zip file.
     return getProfileOrNull(getState());
+  };
+}
+
+/**
+ * Change the selected browser tab filter for the profile.
+ * TabID here means the unique ID for a give browser tab and corresponds to
+ * multiple pages in the `profile.pages` array.
+ * If it's null it will undo the filter and will show the full profile.
+ */
+export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const profile = getProfile(getState());
+    const tabToThreadIndexesMap = getTabToThreadIndexesMap(getState());
+    // Compute the global tracks, they will be filtered by tabID if it's
+    // non-null and will not filter if it's null.
+    const globalTracks = computeGlobalTracks(
+      profile,
+      tabID,
+      tabToThreadIndexesMap
+    );
+    // Passing the global tracks to see which ones we have.
+    const localTracksByPid = computeLocalTracksByPid(
+      profile,
+      globalTracks,
+      getMarkerSchemaByName(getState())
+    );
+
+    const legacyThreadOrder = getLegacyThreadOrder(getState());
+    const globalTrackOrder = initializeGlobalTrackOrder(
+      globalTracks,
+      null, // Passing null to urlGlobalTrackOrder to reinitilize it.
+      legacyThreadOrder
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      null, // Passing null to urlTrackOrderByPid to reinitilize it.
+      localTracksByPid,
+      legacyThreadOrder,
+      profile
+    );
+
+    const tracksWithOrder = {
+      globalTracks,
+      globalTrackOrder,
+      localTracksByPid,
+      localTrackOrderByPid,
+    };
+
+    let hiddenTracks = null;
+
+    // For non-initial profile loads, initialize the set of hidden tracks from
+    // information in the URL.
+    const legacyHiddenThreads = getLegacyHiddenThreads(getState());
+    if (legacyHiddenThreads !== null) {
+      hiddenTracks = tryInitializeHiddenTracksLegacy(
+        tracksWithOrder,
+        legacyHiddenThreads,
+        profile
+      );
+    }
+    if (hiddenTracks === null) {
+      // Compute a default set of hidden tracks.
+      // This is the case for the initial profile load.
+      // We also get here if the URL info was ignored, for example if
+      // respecting it would have caused all threads to become hidden.
+      hiddenTracks = computeDefaultHiddenTracks(tracksWithOrder, profile);
+    }
+
+    const selectedThreadIndexes = initializeSelectedThreadIndex(
+      null, // maybeSelectedThreadIndexes
+      getVisibleThreads(tracksWithOrder, hiddenTracks),
+      profile
+    );
+
+    // If the currently selected tab is only visible when the selected track
+    // has samples, verify that the selected track has samples, and if not
+    // select the marker chart.
+    let selectedTab = getSelectedTab(getState());
+    if (tabsShowingSampleData.includes(selectedTab)) {
+      let hasSamples = false;
+      for (const threadIndex of selectedThreadIndexes) {
+        const thread = profile.threads[threadIndex];
+        const { samples, jsAllocations, nativeAllocations } = thread;
+        hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
+          hasUsefulSamples(table, thread)
+        );
+        if (hasSamples) {
+          break;
+        }
+      }
+      if (!hasSamples) {
+        selectedTab = 'marker-chart';
+      }
+    }
+
+    dispatch({
+      type: 'CHANGE_TAB_FILTER',
+      tabID,
+      selectedThreadIndexes,
+      selectedTab,
+      globalTracks,
+      globalTrackOrder,
+      localTracksByPid,
+      localTrackOrderByPid,
+      ...hiddenTracks,
+    });
   };
 }

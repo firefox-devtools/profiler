@@ -10,6 +10,7 @@ import classNames from 'classnames';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { changeTabFilter } from 'firefox-profiler/actions/receive-profile';
 import { getTabFilter } from '../../selectors/url-state';
 import { getProfileFilterPageDataByTabID } from 'firefox-profiler/selectors/profile';
 
@@ -21,15 +22,17 @@ type StateProps = {|
   +pageDataByTabID: Map<TabID, ProfileFilterPageData> | null,
 |};
 
-type DispatchProps = {||};
+type DispatchProps = {|
+  +changeTabFilter: typeof changeTabFilter,
+|};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 import './TabSelectorMenu.css';
 
 class TabSelectorMenuImpl extends React.PureComponent<Props> {
-  _handleClick = (_event: SyntheticEvent<>, _data: {| id: TabID |}): void => {
-    // FIXME: Implement tab switching.
+  _handleClick = (_event: SyntheticEvent<>, data: {| id: TabID |}): void => {
+    this.props.changeTabFilter(data.id);
   };
 
   renderTabSelectorMenuContents() {
@@ -90,6 +93,9 @@ export const TabSelectorMenu = explicitConnect<{||}, StateProps, DispatchProps>(
       tabFilter: getTabFilter(state),
       pageDataByTabID: getProfileFilterPageDataByTabID(state),
     }),
+    mapDispatchToProps: {
+      changeTabFilter,
+    },
     component: TabSelectorMenuImpl,
   }
 );
