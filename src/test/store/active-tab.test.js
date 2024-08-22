@@ -174,7 +174,7 @@ describe('ActiveTab', function () {
       const { getState } = setup(profile, false);
       expect(getHumanReadableActiveTabTracks(getState())).toEqual([
         'main track [tab] SELECTED',
-        '  - iframe: Page #2',
+        '  - iframe: https://www.youtube.com/',
       ]);
     });
 

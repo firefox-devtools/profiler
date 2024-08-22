@@ -596,7 +596,7 @@ describe('ctxId', function () {
     const resourceTracks = getActiveTabResourceTracks(getState());
     expect(resourceTracks).toEqual([
       {
-        name: 'Page #2',
+        name: 'https://www.youtube.com/',
         type: 'sub-frame',
         threadIndex: 1,
       },
