@@ -11,6 +11,10 @@
   column-gap: 5px;
 }
 
+.profileFilterNavigator--tab-selector:not(.disabled) {
+  cursor: pointer;
+}
+
 /* This is the dropdown arrow on the left of the button. */
 .profileFilterNavigator--tab-selector::before {
   position: absolute;
