@@ -914,6 +914,11 @@ function getSymbolStore(
             body: json,
             method: 'POST',
             mode: 'cors',
+            // Use a profiler-specific user agent, so that the symbolication server knows
+            // what's making this request.
+            headers: new Headers({
+              'User-Agent': `FirefoxProfiler/1.0 (+${location.origin})`,
+            }),
           });
           return response.json();
         }
