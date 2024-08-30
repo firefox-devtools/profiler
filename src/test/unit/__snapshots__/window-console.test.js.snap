@@ -34,6 +34,8 @@ Array [
 %cwindow.experimental%c - The object that holds flags of all the experimental features.
 %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing \\"accented\\" or \\"bidi\\" to this function, or disable using no parameters.
 %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing \\"cpu-category\\", \\"category\\", or \\"stack\\".
+%cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use \\"await\\" to call it.
+%cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by \\"retrieveRawProfileDataFromBrowser\\".
 
 The profile format is documented here:
 %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
