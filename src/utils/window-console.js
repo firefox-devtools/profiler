@@ -173,6 +173,30 @@ export function addDataToWindowObject(
     return rawGeckoProfile;
   };
 
+  target.saveToDisk = async function (
+    rawGeckoProfile: MixedObject | ArrayBuffer,
+    filename?: string
+  ) {
+    const arrayBuffer =
+      String(rawGeckoProfile) === '[object ArrayBuffer]'
+        ? rawGeckoProfile
+        : JSON.stringify(rawGeckoProfile);
+
+    const blob = new Blob([arrayBuffer], {
+      type: 'application/octet-strea',
+    });
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Trigger the download programmatically
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobUrl;
+    downloadLink.download = filename ?? 'profile.data';
+    downloadLink.click();
+
+    // Clean up the URL object
+    URL.revokeObjectURL(blobUrl);
+  };
+
   target.shortenUrl = shortenUrl;
   target.getState = getState;
   target.selectors = selectorsForConsole;
@@ -232,6 +256,7 @@ export function logFriendlyPreamble() {
       %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
       %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category", "category", or "stack".
       %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use "await" to call it.
+      %cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by "retrieveRawProfileDataFromBrowser".
 
       The profile format is documented here:
       %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
