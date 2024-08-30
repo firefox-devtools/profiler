@@ -102,7 +102,10 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
         </>
       );
     } else {
-      // This is for the tab selector.
+      // pageDataByTabID will be empty if there is no page information in the
+      // profile or when the page information is empty. This could happen for
+      // older profiles and profiles from external importers that don't have
+      // this information.
       if (pageDataByTabID && pageDataByTabID.size > 0) {
         const pageData =
           tabFilter !== null ? pageDataByTabID.get(tabFilter) : null;
@@ -119,7 +122,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
               <>
                 {pageData.favicon ? <Icon iconUrl={pageData.favicon} /> : null}
                 <span title={pageData.origin}>
-                  {pageData?.hostname} (
+                  {pageData.hostname} (
                   {getFormattedTimeLength(rootRange.end - rootRange.start)})
                 </span>
               </>

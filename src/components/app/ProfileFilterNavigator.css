@@ -5,30 +5,24 @@
 .profileFilterNavigator--tab-selector {
   display: flex;
   align-items: center;
+  column-gap: 5px;
 
   /* Padding for the arrow on the left side. */
-  padding-left: 20px;
-  column-gap: 5px;
-}
-
-.profileFilterNavigator--tab-selector:not(.disabled) {
-  cursor: pointer;
+  padding-inline-start: 20px;
 }
 
 /* This is the dropdown arrow on the left of the button. */
 .profileFilterNavigator--tab-selector::before {
   position: absolute;
-  top: 4px;
-  left: 4px;
   border-top: 6px solid;
   border-right: 4px solid transparent;
   border-bottom: 0 solid transparent;
   border-left: 4px solid transparent;
-  margin-top: 5px;
-  margin-right: 5px;
-  margin-left: 5px;
+  margin: 5px 5px 0;
   color: var(--internal-selected-color);
   content: '';
+  inset-block-start: 4px;
+  inset-inline-start: 4px;
 }
 
 .profileFilterNavigator--tab-selector.disabled::before {
