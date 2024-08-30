@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
+import { screen } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TabSelectorMenu } from 'firefox-profiler/components/shared/TabSelectorMenu';
@@ -38,7 +39,7 @@ describe('app/TabSelectorMenu', () => {
     profile.threads[1].frameTable.length++;
 
     const store = storeWithProfile(profile);
-    const renderResults = render(
+    render(
       <Provider store={store}>
         <TabSelectorMenu />
       </Provider>
@@ -46,49 +47,48 @@ describe('app/TabSelectorMenu', () => {
 
     return {
       profile,
-      ...renderResults,
       ...extraPageData,
       ...store,
     };
   }
 
   it('should render properly', () => {
-    const { container } = setup();
-    expect(container.firstChild).toMatchSnapshot();
+    setup();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('should not render when the profile does not contain any page data', () => {
     const store = storeWithProfile(getProfileWithNiceTracks());
-    const { container } = render(
+    render(
       <Provider store={store}>
         <TabSelectorMenu />
       </Provider>
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('should switch tabs properly', () => {
-    const { getState, getByText, firstTabTabID, secondTabTabID } = setup();
+    const { getState, firstTabTabID, secondTabTabID } = setup();
 
     // Check that there is no tab filter at first.
     expect(getTabFilter(getState())).toBe(null);
 
     // Change the tab filter by clicking on the menu item.
-    const mozillaTab = getByText('mozilla.org');
+    const mozillaTab = screen.getByText('mozilla.org');
     fireFullClick(mozillaTab);
 
     // Check the tab filter again, it should match the first tab in the profile.
     expect(getTabFilter(getState())).toBe(firstTabTabID);
 
     // Change the tab filter again.
-    const profilerTab = getByText('profiler.firefox.com');
+    const profilerTab = screen.getByText('profiler.firefox.com');
     fireFullClick(profilerTab);
 
     // Check the tab filter again, it should match the second tab in the profile.
     expect(getTabFilter(getState())).toBe(secondTabTabID);
 
     // Change the tab filter to all tabs and windows
-    const allTabs = getByText('All tabs and windows');
+    const allTabs = screen.getByText('All tabs and windows');
     fireFullClick(allTabs);
 
     // Check the tab filter again, it should be null, meaning all tabs and windows.
@@ -96,7 +96,7 @@ describe('app/TabSelectorMenu', () => {
   });
 
   it('should display the relevant threads after tab switch', () => {
-    const { getState, getByText, firstTabTabID, secondTabTabID } = setup();
+    const { getState, firstTabTabID, secondTabTabID } = setup();
 
     // Check that there is no tab filter at first.
     expect(getTabFilter(getState())).toBe(null);
@@ -109,7 +109,7 @@ describe('app/TabSelectorMenu', () => {
     ]);
 
     // Change the tab filter by clicking on the menu item.
-    const profilerTab = getByText('profiler.firefox.com');
+    const profilerTab = screen.getByText('profiler.firefox.com');
     fireFullClick(profilerTab);
 
     // Check the tab filter again, it should match the second tab in the profile.
@@ -125,7 +125,7 @@ describe('app/TabSelectorMenu', () => {
     ]);
 
     // Change the tab filter again.
-    const mozillaTab = getByText('mozilla.org');
+    const mozillaTab = screen.getByText('mozilla.org');
     fireFullClick(mozillaTab);
 
     // Check the tab filter again, it should match the first tab in the profile.
@@ -136,7 +136,7 @@ describe('app/TabSelectorMenu', () => {
     ]);
 
     // Change the tab filter to all tabs and windows.
-    const allTabs = getByText('All tabs and windows');
+    const allTabs = screen.getByText('All tabs and windows');
     fireFullClick(allTabs);
 
     // Check the tab filter again, it should be null, meaning full profile.
