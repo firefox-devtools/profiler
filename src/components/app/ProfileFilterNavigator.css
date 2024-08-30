@@ -7,8 +7,8 @@
   align-items: center;
   column-gap: 5px;
 
-  /* Padding for the arrow on the left side. */
-  padding-inline-start: 20px;
+  /* Padding for the arrow on the left side and a bit on the other for hover. */
+  padding-inline: 20px 5px;
 }
 
 /* This is the dropdown arrow on the left of the button. */
@@ -25,7 +25,7 @@
   inset-inline-start: 4px;
 }
 
-.profileFilterNavigator--tab-selector.disabled::before {
+span.profileFilterNavigator--tab-selector::before {
   /* Disabled tab selector indicates this with a grayed out arrow. */
   color: var(--grey-30);
 }

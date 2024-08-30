@@ -59,7 +59,7 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
   );
 
   _showTabSelectorMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
-    if (this.props.items.length > 0) {
+    if (this.props.items.length > 0 || this.props.uncommittedItem) {
       // Do nothing if there are committed ranges. We only allow users to change
       // the tab if they are on root range.
       return;
@@ -110,36 +110,56 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
         const pageData =
           tabFilter !== null ? pageDataByTabID.get(tabFilter) : null;
 
-        firstItem = (
-          <span
-            onClick={this._showTabSelectorMenu}
-            className={classNames('profileFilterNavigator--tab-selector', {
-              disabled: items.length > 0,
-            })}
-          >
+        const itemContents = pageData ? (
+          <>
             {/* Show the page data if the profile is filtered by tab */}
-            {pageData ? (
-              <>
-                {pageData.favicon ? <Icon iconUrl={pageData.favicon} /> : null}
-                <span title={pageData.origin}>
-                  {pageData.hostname} (
-                  {getFormattedTimeLength(rootRange.end - rootRange.start)})
-                </span>
-              </>
-            ) : (
-              <Localized
-                id="ProfileFilterNavigator--full-range-with-duration"
-                vars={{
-                  fullRangeDuration: getFormattedTimeLength(
-                    rootRange.end - rootRange.start
-                  ),
-                }}
-              >
-                Full Range
-              </Localized>
-            )}
-          </span>
+            {pageData.favicon ? <Icon iconUrl={pageData.favicon} /> : null}
+            <span title={pageData.origin}>
+              {pageData.hostname} (
+              {getFormattedTimeLength(rootRange.end - rootRange.start)})
+            </span>
+          </>
+        ) : (
+          <Localized
+            id="ProfileFilterNavigator--full-range-with-duration"
+            vars={{
+              fullRangeDuration: getFormattedTimeLength(
+                rootRange.end - rootRange.start
+              ),
+            }}
+          >
+            Full Range
+          </Localized>
         );
+
+        if (items.length === 0 && !uncommittedItem) {
+          // It should be a clickable button if there are no committed ranges.
+          firstItem = (
+            <button
+              type="button"
+              onClick={this._showTabSelectorMenu}
+              className={classNames(
+                'filterNavigatorBarItemContent',
+                'profileFilterNavigator--tab-selector'
+              )}
+            >
+              {itemContents}
+            </button>
+          );
+        } else {
+          // There are committed ranges, don't make it button because this will
+          // be wrapped with a button.
+          firstItem = (
+            <span
+              className={classNames(
+                'filterNavigatorBarItemContent',
+                'profileFilterNavigator--tab-selector'
+              )}
+            >
+              {itemContents}
+            </span>
+          );
+        }
       } else {
         firstItem = (
           <Localized
