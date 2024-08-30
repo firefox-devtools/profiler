@@ -476,7 +476,7 @@ export function computeGlobalTracks(
     mainThreadIndex: number | null,
   };
   const globalTracksByPid: Map<Pid, ProcessTrack> = new Map();
-  const globalTracks: GlobalTrack[] = [];
+  let globalTracks: GlobalTrack[] = [];
 
   // Create the global tracks.
   for (
@@ -553,6 +553,14 @@ export function computeGlobalTracks(
     }
   }
 
+  // Filter the global tracks by current tab.
+  globalTracks = filterGlobalTracksByTab(
+    globalTracks,
+    profile,
+    tabID,
+    tabToThreadIndexesMap
+  );
+
   // When adding a new track type, this sort ensures that the newer tracks are added
   // at the end so that the global track indexes are stable and backwards compatible.
   globalTracks.sort(
@@ -561,13 +569,7 @@ export function computeGlobalTracks(
       GLOBAL_TRACK_INDEX_ORDER[a.type] - GLOBAL_TRACK_INDEX_ORDER[b.type]
   );
 
-  // At the end, we need to filter global tracks by current tab.
-  return filterGlobalTracksByTab(
-    globalTracks,
-    profile,
-    tabID,
-    tabToThreadIndexesMap
-  );
+  return globalTracks;
 }
 
 /**
