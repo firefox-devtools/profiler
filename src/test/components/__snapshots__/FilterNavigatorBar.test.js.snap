@@ -10,12 +10,7 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 1`] 
     <span
       class="filterNavigatorBarItemContent"
     >
-      <button
-        class="filterNavigatorBarItemContent profileFilterNavigator--tab-selector"
-        type="button"
-      >
-        Full Range (⁨51ms⁩)
-      </button>
+      Full Range (⁨51ms⁩)
     </span>
   </li>
 </ol>
@@ -32,11 +27,7 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 2`] 
       class="filterNavigatorBarItemContent"
       type="button"
     >
-      <span
-        class="filterNavigatorBarItemContent profileFilterNavigator--tab-selector"
-      >
-        Full Range (⁨51ms⁩)
-      </span>
+      Full Range (⁨51ms⁩)
     </button>
   </li>
   <li
@@ -62,11 +53,7 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
       class="filterNavigatorBarItemContent"
       type="button"
     >
-      <span
-        class="filterNavigatorBarItemContent profileFilterNavigator--tab-selector"
-      >
-        Full Range (⁨51ms⁩)
-      </span>
+      Full Range (⁨51ms⁩)
     </button>
   </li>
   <li

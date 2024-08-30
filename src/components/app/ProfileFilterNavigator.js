@@ -106,7 +106,8 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
       // profile or when the page information is empty. This could happen for
       // older profiles and profiles from external importers that don't have
       // this information.
-      if (pageDataByTabID && pageDataByTabID.size > 0) {
+      // eslint-disable-next-line no-constant-condition
+      if (false && pageDataByTabID && pageDataByTabID.size > 0) {
         const pageData =
           tabFilter !== null ? pageDataByTabID.get(tabFilter) : null;
 
