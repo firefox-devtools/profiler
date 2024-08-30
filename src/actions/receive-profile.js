@@ -1000,39 +1000,47 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
+// From a BrowserConnectionStatus, this unwraps the included browserConnection
+// when possible.
+export function unwrapBrowserConnection(
+  browserConnectionStatus: BrowserConnectionStatus
+): BrowserConnection {
+  switch (browserConnectionStatus.status) {
+    case 'ESTABLISHED':
+      // Good. This is the normal case.
+      break;
+    // The other cases are error cases.
+    case 'NOT_FIREFOX':
+      throw new Error('/from-browser only works in Firefox browsers');
+    case 'NO_ATTEMPT':
+      throw new Error(
+        'retrieveProfileFromBrowser should never be called while browserConnectionStatus is NO_ATTEMPT'
+      );
+    case 'WAITING':
+      throw new Error(
+        'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
+      );
+    case 'DENIED':
+      throw browserConnectionStatus.error;
+    case 'TIMED_OUT':
+      throw new Error('Timed out when waiting for reply to WebChannel message');
+    default:
+      throw assertExhaustiveCheck(browserConnectionStatus.status);
+  }
+
+  // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
+  return browserConnectionStatus.browserConnection;
+}
+
 export function retrieveProfileFromBrowser(
   browserConnectionStatus: BrowserConnectionStatus,
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     try {
-      switch (browserConnectionStatus.status) {
-        case 'ESTABLISHED':
-          // Good. This is the normal case.
-          break;
-        // The other cases are error cases.
-        case 'NOT_FIREFOX':
-          throw new Error('/from-browser only works in Firefox browsers');
-        case 'NO_ATTEMPT':
-          throw new Error(
-            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is NO_ATTEMPT'
-          );
-        case 'WAITING':
-          throw new Error(
-            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
-          );
-        case 'DENIED':
-          throw browserConnectionStatus.error;
-        case 'TIMED_OUT':
-          throw new Error(
-            'Timed out when waiting for reply to WebChannel message'
-          );
-        default:
-          throw assertExhaustiveCheck(browserConnectionStatus.status);
-      }
-
-      // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
-      const browserConnection = browserConnectionStatus.browserConnection;
+      const browserConnection = unwrapBrowserConnection(
+        browserConnectionStatus
+      );
 
       // XXX update state to show that we're connected to the browser
 
