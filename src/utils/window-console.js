@@ -174,16 +174,22 @@ export function addDataToWindowObject(
   };
 
   target.saveToDisk = async function (
-    rawGeckoProfile: MixedObject | ArrayBuffer,
+    unknownObject: ArrayBuffer | mixed,
     filename?: string
   ) {
-    const arrayBuffer =
-      String(rawGeckoProfile) === '[object ArrayBuffer]'
-        ? rawGeckoProfile
-        : JSON.stringify(rawGeckoProfile);
+    if (unknownObject === undefined || unknownObject === null) {
+      console.error("We can't save a null or undefined variable.");
+      return;
+    }
 
-    const blob = new Blob([arrayBuffer], {
-      type: 'application/octet-strea',
+    const arrayBufferOrString =
+      typeof unknownObject === 'string' ||
+      String(unknownObject) === '[object ArrayBuffer]'
+        ? unknownObject
+        : JSON.stringify(unknownObject);
+
+    const blob = new Blob([arrayBufferOrString], {
+      type: 'application/octet-stream',
     });
     const blobUrl = URL.createObjectURL(blob);
 
