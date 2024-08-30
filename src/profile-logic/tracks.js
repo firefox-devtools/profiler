@@ -254,8 +254,8 @@ export function initializeLocalTrackOrderByPid(
 /**
  * Take a profile and figure out all of the local tracks, and organize them by PID.
  * availableGlobalTracks is being sent by the caller to see which globalTracks
- * are present. They could have been filtered out by the tab selector so we
- * should ignore them.
+ * are present. The ones that have been filtered out by the tab selector
+ * should be ignored.
  */
 export function computeLocalTracksByPid(
   profile: Profile,
@@ -264,7 +264,7 @@ export function computeLocalTracksByPid(
 ): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
-  // Create a new set of avaiable pids, so we can filter out the local tracks
+  // Create a new set of available pids, so we can filter out the local tracks
   // if their globalTracks are also filtered out by the tab selector.
   const availablePids = new Set();
   for (const globalTrack of availableGlobalTracks) {
@@ -586,6 +586,9 @@ function filterGlobalTracksByTab(
 
   const threadIndexes = tabToThreadIndexesMap.get(tabID);
   if (!threadIndexes) {
+    // This is not really a possible path. It might indicate a bug on the frontend
+    // or backend.
+    console.warn(`Failed to find the thread indexes for given tab ${tabID}`);
     return globalTracks;
   }
 
@@ -596,7 +599,7 @@ function filterGlobalTracksByTab(
       case 'process': {
         const { mainThreadIndex } = globalTrack;
         if (mainThreadIndex === null) {
-          // Do not incldue the global track if it doesn't have any main thread
+          // Do not include the global track if it doesn't have any main thread
           // index.
           continue;
         }

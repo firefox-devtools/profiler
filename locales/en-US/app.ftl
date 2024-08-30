@@ -812,7 +812,7 @@ TabBar--js-tracer-tab = JS Tracer
 ## range at the top left corner for profiler analysis view. It's used to switch
 ## between tabs that were captured in the profile.
 
-TabSelectorMenu--full-profile = Full Profile
+TabSelectorMenu--all-tabs-and-windows = All tabs and windows
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the

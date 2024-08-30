@@ -87,11 +87,11 @@ describe('app/TabSelectorMenu', () => {
     // Check the tab filter again, it should match the second tab in the profile.
     expect(getTabFilter(getState())).toBe(secondTabTabID);
 
-    // Change the tab filter to the full profile.
-    const fullProfile = getByText('Full Profile');
-    fireFullClick(fullProfile);
+    // Change the tab filter to all tabs and windows
+    const allTabs = getByText('All tabs and windows');
+    fireFullClick(allTabs);
 
-    // Check the tab filter again, it should be null, meaning full profile.
+    // Check the tab filter again, it should be null, meaning all tabs and windows.
     expect(getTabFilter(getState())).toBe(null);
   });
 
@@ -135,9 +135,9 @@ describe('app/TabSelectorMenu', () => {
       'show [thread GeckoMain default] SELECTED',
     ]);
 
-    // Change the tab filter to the full profile.
-    const fullProfile = getByText('Full Profile');
-    fireFullClick(fullProfile);
+    // Change the tab filter to all tabs and windows.
+    const allTabs = getByText('All tabs and windows');
+    fireFullClick(allTabs);
 
     // Check the tab filter again, it should be null, meaning full profile.
     expect(getTabFilter(getState())).toBe(null);

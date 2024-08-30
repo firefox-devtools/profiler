@@ -148,7 +148,6 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     // Bottom box: (fallthrough)
     case 'UPDATE_BOTTOM_BOX':
     case 'CLOSE_BOTTOM_BOX_FOR_TAB':
-      // case 'CHANGE_TAB_FILTER':
       return state + 1;
     default:
       return state;

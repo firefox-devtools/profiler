@@ -25,7 +25,7 @@ exports[`app/TabSelectorMenu should render properly 1`] = `
     role="menuitem"
     tabindex="-1"
   >
-    Full Profile
+    All tabs and windows
   </div>
   <div
     aria-checked="true"

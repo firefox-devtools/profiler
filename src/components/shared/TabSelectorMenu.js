@@ -45,7 +45,6 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
     return (
       <>
         <MenuItem
-          key={0}
           onClick={this._handleClick}
           data={{ id: null }}
           attributes={{
@@ -56,7 +55,9 @@ class TabSelectorMenuImpl extends React.PureComponent<Props> {
             'aria-checked': tabFilter === null ? 'false' : 'true',
           }}
         >
-          <Localized id="TabSelectorMenu--full-profile">Full Profile</Localized>
+          <Localized id="TabSelectorMenu--all-tabs-and-windows">
+            All tabs and windows
+          </Localized>
         </MenuItem>
         {[...pageDataByTabID].map(([tabID, pageData]) => (
           <MenuItem

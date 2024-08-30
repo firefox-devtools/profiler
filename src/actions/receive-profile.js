@@ -1761,7 +1761,6 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
       tabID,
       tabToThreadIndexesMap
     );
-    // Passing the global tracks to see which ones we have.
     const localTracksByPid = computeLocalTracksByPid(
       profile,
       globalTracks,
