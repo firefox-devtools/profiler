@@ -43,6 +43,8 @@ import { TrackSearchField } from 'firefox-profiler/components/shared/TrackSearch
 import {
   getSearchFilteredGlobalTracks,
   getSearchFilteredLocalTracksByPid,
+  getTypeFilteredGlobalTracks,
+  getTypeFilteredLocalTracksByPid,
 } from 'firefox-profiler/profile-logic/tracks';
 import { ContextMenuNoHidingOnEnter } from 'firefox-profiler/components/shared/ContextMenuNoHidingOnEnter';
 import classNames from 'classnames';
@@ -315,6 +317,74 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         hideLocalTrack(pid, trackIndex);
       }
     }
+  };
+
+  _getRightClickedTrackType = (): string => {
+    const { rightClickedTrack, localTracksByPid, globalTracks } = this.props;
+
+    if (rightClickedTrack === null) {
+      throw new Error(
+          'Attempted to isolate the process with no right clicked track.'
+      );
+    }
+
+    let track;
+    if (rightClickedTrack.type === 'local') {
+      const localTracks = ensureExists(localTracksByPid.get(rightClickedTrack.pid));
+      track = localTracks[rightClickedTrack.trackIndex]
+    } else {
+      track = globalTracks[rightClickedTrack.trackIndex];
+    }
+
+    return track.type;
+  };
+
+  _hideTracksByType = (_): void => {
+    const {
+      rightClickedTrack,
+      globalTracks,
+      globalTrackNames,
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+      hideProvidedTracks,
+    } = this.props;
+    const type = this._getRightClickedTrackType();
+
+    if (rightClickedTrack === null) {
+      throw new Error(
+          'Attempted to isolate the process with no right clicked track.'
+      );
+    }
+
+    const typeFilteredGlobalTracks = getTypeFilteredGlobalTracks(
+        globalTracks,
+        globalTrackNames,
+        threads,
+        type,
+    );
+    const typeFilteredLocalTracksByPid = getTypeFilteredLocalTracksByPid(
+        localTracksByPid,
+        localTrackNamesByPid,
+        threads,
+        type,
+    );
+
+    if (
+        typeFilteredGlobalTracks === null ||
+        typeFilteredLocalTracksByPid === null
+    ) {
+      // This shouldn't happen!
+      console.warn('Unexpected null type filtered tracks');
+      return;
+    }
+
+
+    hideProvidedTracks(
+        typeFilteredGlobalTracks,
+        typeFilteredLocalTracksByPid
+    );
+
   };
 
   _isolateProcess = () => {
@@ -846,6 +916,43 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     );
   }
 
+  renderHideTrackByType() {
+    const { rightClickedTrack } = this.props;
+    if (rightClickedTrack === null) {
+      return null;
+    }
+
+    //When adding more allowed types, we need to take care that we can't enter one of the following cases:
+    //1. Hiding a global track that still has visible local tracks
+    //2. No more visible tracks
+    //3. One global track without any data is displayed
+    //(all its local track are hidden + it doesn't have any data itself)
+
+    const ALLOWED_TYPES = [
+      'screenshots',
+      'memory',
+      'network',
+      'ipc',
+      'event-delay',
+    ];
+
+    const type = this._getRightClickedTrackType();
+
+    if (ALLOWED_TYPES.includes(type)) {
+      return (
+          <MenuItem
+              preventClose={false}
+              onClick={this._hideTracksByType}
+          >
+            <Localized id="TrackContextMenu--hide-all-tracks-by-selected-track-type" vars={{ type }}>
+              <>Hide all tracks of type “{type}”</>
+            </Localized>
+          </MenuItem>
+      );
+    }
+    return null;
+  }
+
   renderShowAllTracks() {
     const { rightClickedTrack } = this.props;
     if (rightClickedTrack !== null) {
@@ -1080,13 +1187,15 @@ class TimelineTrackContextMenuImpl extends PureComponent<
     const isolateScreenshot = this.renderIsolateScreenshot();
     const showLocalTracksInProcess = this.renderShowLocalTracksInThisProcess();
     const hideTrack = this.renderHideTrack();
+    const hideTrackByType = this.renderHideTrackByType();
     const separator =
       isolateProcessMainThread ||
       isolateProcess ||
       isolateLocalTrack ||
       isolateScreenshot ||
       showLocalTracksInProcess ||
-      hideTrack ? (
+      hideTrack ||
+      hideTrackByType ? (
         <div className="react-contextmenu-separator" />
       ) : null;
     const searchFilteredGlobalTracks = getSearchFilteredGlobalTracks(
@@ -1171,6 +1280,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
         {isolateLocalTrack}
         {isolateScreenshot}
         {hideTrack}
+        {hideTrackByType}
         {showLocalTracksInProcess ? (
           <div className="react-contextmenu-separator" />
         ) : null}

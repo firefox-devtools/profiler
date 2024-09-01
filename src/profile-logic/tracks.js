@@ -1307,6 +1307,66 @@ export function getSearchFilteredLocalTracksByPid(
   return searchFilteredLocalTracksByPid;
 }
 
+export function getTypeFilteredGlobalTracks(
+    tracks: GlobalTrack[],
+    globalTrackNames: string[],
+    threads: Thread[],
+    type: string
+): Set<TrackIndex> | null {
+  if (!type) {
+    return null;
+  }
+
+  const typeFilteredGlobalTracks = new Set();
+
+  for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+    const globalTrack = tracks[trackIndex];
+
+    if (globalTrack.type === type) {
+      typeFilteredGlobalTracks.add(trackIndex);
+    }
+  }
+
+  return typeFilteredGlobalTracks;
+}
+
+/**
+ * Get the type and return the filtered by type local tracks by Pid.
+ */
+export function getTypeFilteredLocalTracksByPid(
+    localTracksByPid: Map<Pid, LocalTrack[]>,
+    localTrackNamesByPid: Map<Pid, string[]>,
+    threads: Thread[],
+    type: string
+): Map<Pid, Set<TrackIndex>> | null {
+  if (!type) {
+    return null;
+  }
+
+  const typeFilteredLocalTracksByPid = new Map();
+  for (const [pid, tracks] of localTracksByPid) {
+    const typeFilteredLocalTracks = new Set();
+    const localTrackNames = localTrackNamesByPid.get(pid);
+
+    if (localTrackNames === undefined) {
+      throw new Error('Failed to get the local track names');
+    }
+
+    for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+      const localTrack = tracks[trackIndex];
+      if (localTrack.type) {
+        typeFilteredLocalTracks.add(trackIndex);
+      }
+    }
+    if (typeFilteredLocalTracks.size > 0) {
+      // Only add the global track when the are some search filtered local tracks.
+      typeFilteredLocalTracksByPid.set(pid, typeFilteredLocalTracks);
+    }
+  }
+
+  return typeFilteredLocalTracksByPid;
+}
+
 /**
  * Returns the track reference from tid.
  * Returns null if the given tid is not found.
