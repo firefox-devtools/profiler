@@ -324,14 +324,16 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     if (rightClickedTrack === null) {
       throw new Error(
-          'Attempted to isolate the process with no right clicked track.'
+        'Attempted to isolate the process with no right clicked track.'
       );
     }
 
     let track;
     if (rightClickedTrack.type === 'local') {
-      const localTracks = ensureExists(localTracksByPid.get(rightClickedTrack.pid));
-      track = localTracks[rightClickedTrack.trackIndex]
+      const localTracks = ensureExists(
+        localTracksByPid.get(rightClickedTrack.pid)
+      );
+      track = localTracks[rightClickedTrack.trackIndex];
     } else {
       track = globalTracks[rightClickedTrack.trackIndex];
     }
@@ -353,38 +355,33 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     if (rightClickedTrack === null) {
       throw new Error(
-          'Attempted to isolate the process with no right clicked track.'
+        'Attempted to isolate the process with no right clicked track.'
       );
     }
 
     const typeFilteredGlobalTracks = getTypeFilteredGlobalTracks(
-        globalTracks,
-        globalTrackNames,
-        threads,
-        type,
+      globalTracks,
+      globalTrackNames,
+      threads,
+      type
     );
     const typeFilteredLocalTracksByPid = getTypeFilteredLocalTracksByPid(
-        localTracksByPid,
-        localTrackNamesByPid,
-        threads,
-        type,
+      localTracksByPid,
+      localTrackNamesByPid,
+      threads,
+      type
     );
 
     if (
-        typeFilteredGlobalTracks === null ||
-        typeFilteredLocalTracksByPid === null
+      typeFilteredGlobalTracks === null ||
+      typeFilteredLocalTracksByPid === null
     ) {
       // This shouldn't happen!
       console.warn('Unexpected null type filtered tracks');
       return;
     }
 
-
-    hideProvidedTracks(
-        typeFilteredGlobalTracks,
-        typeFilteredLocalTracksByPid
-    );
-
+    hideProvidedTracks(typeFilteredGlobalTracks, typeFilteredLocalTracksByPid);
   };
 
   _isolateProcess = () => {
@@ -940,14 +937,14 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     if (ALLOWED_TYPES.includes(type)) {
       return (
-          <MenuItem
-              preventClose={false}
-              onClick={this._hideTracksByType}
+        <MenuItem preventClose={false} onClick={this._hideTracksByType}>
+          <Localized
+            id="TrackContextMenu--hide-all-tracks-by-selected-track-type"
+            vars={{ type }}
           >
-            <Localized id="TrackContextMenu--hide-all-tracks-by-selected-track-type" vars={{ type }}>
-              <>Hide all tracks of type “{type}”</>
-            </Localized>
-          </MenuItem>
+            <>Hide all tracks of type “{type}”</>
+          </Localized>
+        </MenuItem>
       );
     }
     return null;

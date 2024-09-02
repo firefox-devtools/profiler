@@ -1307,11 +1307,14 @@ export function getSearchFilteredLocalTracksByPid(
   return searchFilteredLocalTracksByPid;
 }
 
+/**
+ * Get the search filter and return the type filtered global tracks.
+ */
 export function getTypeFilteredGlobalTracks(
-    tracks: GlobalTrack[],
-    globalTrackNames: string[],
-    threads: Thread[],
-    type: string
+  tracks: GlobalTrack[],
+  globalTrackNames: string[],
+  threads: Thread[],
+  type: string
 ): Set<TrackIndex> | null {
   if (!type) {
     return null;
@@ -1334,10 +1337,10 @@ export function getTypeFilteredGlobalTracks(
  * Get the type and return the filtered by type local tracks by Pid.
  */
 export function getTypeFilteredLocalTracksByPid(
-    localTracksByPid: Map<Pid, LocalTrack[]>,
-    localTrackNamesByPid: Map<Pid, string[]>,
-    threads: Thread[],
-    type: string
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+  localTrackNamesByPid: Map<Pid, string[]>,
+  threads: Thread[],
+  type: string
 ): Map<Pid, Set<TrackIndex>> | null {
   if (!type) {
     return null;
