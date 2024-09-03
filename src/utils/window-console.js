@@ -61,6 +61,13 @@ export function addDataToWindowObject(
     },
   });
 
+  defineProperty(target, 'selectedMarker', {
+    enumerable: true,
+    get() {
+      return selectorsForConsole.selectedThread.getSelectedMarker(getState());
+    },
+  });
+
   target.experimental = {
     enableEventDelayTracks() {
       const areEventDelayTracksEnabled = dispatch(
@@ -253,6 +260,7 @@ export function logFriendlyPreamble() {
       %cwindow.profile%c - The currently loaded profile
       %cwindow.filteredThread%c - The current filtered thread
       %cwindow.filteredMarkers%c - The current filtered and processed markers
+      %cwindow.selectedMarker%c - The selected processed marker in the current thread
       %cwindow.callTree%c - The call tree of the current filtered thread
       %cwindow.getState%c - The function that returns the current Redux state.
       %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
@@ -280,6 +288,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.filteredMarkers"
+    bold,
+    reset,
+    // "window.selectedMarker"
     bold,
     reset,
     // "window.callTree"
