@@ -306,6 +306,12 @@ export function logFriendlyPreamble() {
     // "window.toggleTimelineType"
     bold,
     reset,
+    // "window.retrieveRawProfileDataFromBrowser"
+    bold,
+    reset,
+    // "window.saveToDisk"
+    bold,
+    reset,
     // "processed-profile-format.md"
     link,
     reset,
