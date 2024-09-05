@@ -53,14 +53,11 @@ describe('calltree/ZipFileTree', function () {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  // getByText is an assertion, but eslint doesn't know that.
-
   it('contains a list of all the files', async () => {
     await setup();
 
     // We're looping through all expected files and check if we can find an
     // element with the file name as text content.
-    // getByText throws if it doesn't find an element with this text content.
     [
       'foo',
       'bar',
