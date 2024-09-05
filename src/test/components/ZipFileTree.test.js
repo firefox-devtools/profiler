@@ -54,7 +54,7 @@ describe('calltree/ZipFileTree', function () {
   });
 
   // getByText is an assertion, but eslint doesn't know that.
-  // eslint-disable-next-line jest/expect-expect
+
   it('contains a list of all the files', async () => {
     await setup();
 
@@ -69,14 +69,16 @@ describe('calltree/ZipFileTree', function () {
       'baz',
       'profile3',
       'profile4',
-    ].forEach((fileName) => screen.getByText(fileName));
+    ].forEach((fileName) =>
+      expect(screen.getByText(fileName)).toBeInTheDocument()
+    );
   });
 
   it('removes .json and .json.gz extensions', async () => {
     await setup();
 
     ['profile1', 'profile2', 'profile3', 'profile4'].forEach((fileName) =>
-      screen.getByText(fileName)
+      expect(screen.getByText(fileName)).toBeInTheDocument()
     );
 
     [
@@ -84,9 +86,9 @@ describe('calltree/ZipFileTree', function () {
       'profile2.json',
       'profile3.json.gz',
       'profile4.json',
-    ].forEach((fileName) => {
-      expect(() => screen.getByText(fileName)).toThrow();
-    });
+    ].forEach((fileName) =>
+      expect(screen.queryByText(fileName)).not.toBeInTheDocument()
+    );
   });
 
   it('preserves extensions other than .json and .json.gz', async () => {
