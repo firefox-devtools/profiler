@@ -257,7 +257,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeViewRowColumn treeViewMainColumn name"
                   >
                     <a
-                      href="http://localhost/from-url//calltree/?file=baz%2Fprofile3.json.gz"
+                      href="http://localhost/from-url//calltree/?file=baz%2Fprofile3.json"
                     >
                       profile3
                     </a>

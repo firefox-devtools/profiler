@@ -33,7 +33,7 @@ describe('calltree/ZipFileTree', function () {
     const { store } = await storeWithZipFile([
       'foo/bar/profile1.json',
       'foo/profile2.json',
-      'baz/profile3.json.gz',
+      'baz/profile3.json',
       // Use a file with a big depth to test the automatic expansion at load time.
       'boat/ship/new/anything/explore/yes/profile4.json',
       'not/a/profile.pdf',
@@ -71,7 +71,7 @@ describe('calltree/ZipFileTree', function () {
     );
   });
 
-  it('removes .json and .json.gz extensions', async () => {
+  it('removes .json extensions', async () => {
     await setup();
 
     ['profile1', 'profile2', 'profile3', 'profile4'].forEach((fileName) =>
@@ -81,14 +81,14 @@ describe('calltree/ZipFileTree', function () {
     [
       'profile1.json',
       'profile2.json',
-      'profile3.json.gz',
+      'profile3.json',
       'profile4.json',
     ].forEach((fileName) =>
       expect(screen.queryByText(fileName)).not.toBeInTheDocument()
     );
   });
 
-  it('preserves extensions other than .json and .json.gz', async () => {
+  it('preserves extensions other than .json', async () => {
     await setup();
 
     expect(screen.getByText('profile.pdf')).toBeInTheDocument();

@@ -196,7 +196,7 @@ export class ZipFileTree {
       }
 
       let name = this._zipFileTable.partName[zipTableIndex];
-      const EXTENSIONS_TO_OMIT = ['.json', '.json.gz'];
+      const EXTENSIONS_TO_OMIT = ['.json'];
       const matchedExtension = EXTENSIONS_TO_OMIT.find((extension) =>
         name.endsWith(extension)
       );
