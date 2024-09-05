@@ -1983,7 +1983,7 @@ const _upgraders = {
       samples.stack = samples.stack.map((oldStackIndex) =>
         oldStackIndex === null
           ? null
-          : mapForSamplingSelfStacks.get(oldStackIndex) ?? null
+          : (mapForSamplingSelfStacks.get(oldStackIndex) ?? null)
       );
       markers.data.forEach((data) => {
         if (data && 'cause' in data && data.cause) {
@@ -1994,7 +1994,7 @@ const _upgraders = {
         jsAllocations.stack = jsAllocations.stack.map((oldStackIndex) =>
           oldStackIndex === null
             ? null
-            : mapForSyncBacktraces.get(oldStackIndex) ?? null
+            : (mapForSyncBacktraces.get(oldStackIndex) ?? null)
         );
       }
       if (nativeAllocations !== undefined) {
@@ -2002,7 +2002,7 @@ const _upgraders = {
           (oldStackIndex) =>
             oldStackIndex === null
               ? null
-              : mapForSyncBacktraces.get(oldStackIndex) ?? null
+              : (mapForSyncBacktraces.get(oldStackIndex) ?? null)
         );
       }
     }

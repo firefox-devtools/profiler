@@ -162,7 +162,7 @@ describe('WindowTitle', () => {
       </Provider>
     );
 
-    expect(document.title).toBe('Zip File Contents – Firefox Profiler');
+    expect(document.title).toBe('Archive Contents – Firefox Profiler');
 
     await act(() =>
       store.dispatch(

@@ -14,6 +14,7 @@ import {
   getFriendlyThreadName,
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
+  computeTabToThreadIndexesMap,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -348,6 +349,61 @@ export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
   createSelector(getThreads, correlateIPCMarkers);
 
 /**
+ * Returns an InnerWindowID -> Page map, so we can look up the page from inner
+ * window id quickly. Returns null if there are no pages in the profile.
+ */
+export const getInnerWindowIDToPageMap: Selector<Map<
+  InnerWindowID,
+  Page,
+> | null> = createSelector(getPageList, (pages) => {
+  if (!pages) {
+    // Return null if there are no pages.
+    return null;
+  }
+
+  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
+  for (const page of pages) {
+    innerWindowIDToPageMap.set(page.innerWindowID, page);
+  }
+
+  return innerWindowIDToPageMap;
+});
+
+/**
+ * Returns an InnerWindowID -> TabID map, so we can find the TabID of a given
+ * innerWindowID quickly. Returns null if there are no pages in the profile.
+ */
+export const getInnerWindowIDToTabMap: Selector<Map<
+  InnerWindowID,
+  TabID,
+> | null> = createSelector(getPageList, (pages) => {
+  if (!pages) {
+    // Return null if there are no pages.
+    return null;
+  }
+
+  const innerWindowIDToTabMap: Map<InnerWindowID, TabID> = new Map();
+  for (const page of pages) {
+    innerWindowIDToTabMap.set(page.innerWindowID, page.tabID);
+  }
+
+  return innerWindowIDToTabMap;
+});
+
+/**
+ * Return a map of tab to thread indexes map. This is useful for learning which
+ * threads are involved for tabs. This is mainly used for the tab selector on
+ * the top left corner.
+ */
+export const getTabToThreadIndexesMap: Selector<Map<TabID, Set<ThreadIndex>>> =
+  createSelector(
+    getThreads,
+    getInnerWindowIDToTabMap,
+    (threads, innerWindowIDToTabMap) =>
+      computeTabToThreadIndexesMap(threads, innerWindowIDToTabMap)
+  );
+
+/**
  * Tracks
  *
  * Tracks come in two flavors: global tracks and local tracks.
@@ -654,27 +710,6 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 );
 
 /**
- * Returns an InnerWindowID -> Page map, so we can look up the page from inner
- * window id quickly. Returns null if there are no pages in the profile.
- */
-export const getInnerWindowIDToPageMap: Selector<Map<
-  InnerWindowID,
-  Page,
-> | null> = createSelector(getPageList, (pages) => {
-  if (!pages) {
-    // Return null if there are no pages.
-    return null;
-  }
-
-  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
-  for (const page of pages) {
-    innerWindowIDToPageMap.set(page.innerWindowID, page);
-  }
-
-  return innerWindowIDToPageMap;
-});
-
-/**
  * Get the pages array and construct a Map of pages that we can use to get the
  * relationships of tabs. The constructed map is `Map<TabID,Page[]>`.
  * The TabID we use in that map is the TabID of the topmost frame. That corresponds
@@ -696,35 +731,33 @@ export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
 
     // Construction of TabID to Page array map.
     const pageMap: Map<TabID, Page[]> = new Map();
-    const appendPageMap = (tabID, page) => {
+
+    for (const page of pageList) {
+      // If this is an iframe, we recursively visit its parent.
+      const getTopMostParent = (item) => {
+        if (item.embedderInnerWindowID === 0) {
+          return item;
+        }
+
+        // We are using a Map to make this more performant.
+        // It should be 1-2 loop iteration in 99% of the cases.
+        const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
+        if (parent !== undefined) {
+          return getTopMostParent(parent);
+        }
+        // This is very unlikely to happen.
+        return item;
+      };
+
+      const topMostParent = getTopMostParent(page);
+
+      // Now we have the top most parent. We can append the pageMap.
+      const { tabID } = topMostParent;
       const tabEntry = pageMap.get(tabID);
       if (tabEntry === undefined) {
         pageMap.set(tabID, [page]);
       } else {
         tabEntry.push(page);
-      }
-    };
-
-    for (const page of pageList) {
-      if (page.embedderInnerWindowID === undefined) {
-        // This is the top most page, which means the web page itself.
-        appendPageMap(page.tabID, page.innerWindowID);
-      } else {
-        // This is an iframe, we should find its parent to see find top most
-        // TabID, which is the tab ID for our case.
-        const getTopMostParent = (item) => {
-          // We are using a Map to make this more performant.
-          // It should be 1-2 loop iteration in 99% of the cases.
-          const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
-          if (parent !== undefined) {
-            return getTopMostParent(parent);
-          }
-          return item;
-        };
-
-        const parent = getTopMostParent(page);
-        // Now we have the top most parent. We can append the pageMap.
-        appendPageMap(parent.tabID, page);
       }
     }
 
@@ -837,18 +870,35 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
 );
 
 /**
- * Extracts the data of the first page on the tab filtered profile.
- * Currently we assume that we don't change the origin of webpages while
- * profiling in web developer preset. That's why we are simply getting the
- * first page we find that belongs to the active tab. Returns null if profiler
- * is not in the single tab view at the moment.
+ * Extract the hostname and favicon from the last page if we are in single tab
+ * Extract the hostname and favicon from the last page for all tab ids. we
+ * view. We assume that the user wants to know about the last loaded page in
+ * assume that the user wants to know about the last loaded page in this tab.
+ * this tab.
+ * returns an empty Map if we don't have information about pages (in older profiles).
  */
-export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> =
-  createSelector(
-    getPageList,
-    getRelevantInnerWindowIDsForCurrentTab,
-    extractProfileFilterPageData
-  );
+export const getProfileFilterPageDataByTabID: Selector<
+  Map<TabID, ProfileFilterPageData>,
+> = createSelector(getPagesMap, extractProfileFilterPageData);
+
+/**
+ * This returns the hostname and favicon information for the current tab id.
+ * Returns null if profiler is not in the single tab view at the moment.
+ * TODO: This is only used for the active tab view. Remove it later.
+ */
+export const getProfileFilterPageData: Selector<
+  ProfileFilterPageData | null,
+> = (state) => {
+  const pageDataByTabID = getProfileFilterPageDataByTabID(state);
+  const activeTabID = getActiveTabID(state);
+  const timelineTrackOrganization =
+    UrlState.getTimelineTrackOrganization(state);
+  if (activeTabID === null || timelineTrackOrganization.type !== 'active-tab') {
+    return null;
+  }
+
+  return pageDataByTabID.get(activeTabID) ?? null;
+};
 
 /**
  * Get the map of Thread ID -> Thread Name for easy access.

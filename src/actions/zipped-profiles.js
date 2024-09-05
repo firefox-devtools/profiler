@@ -50,7 +50,7 @@ export function viewProfileFromZip(
     const file = zipFileTable.file[zipFileIndex];
     if (!file) {
       throw new Error(
-        'Attempted to load a zip file that did not exist or was a directory.'
+        'Attempted to load an archive that did not exist or was a directory.'
       );
     }
 
@@ -74,7 +74,7 @@ export function viewProfileFromZip(
       }
     } catch (error) {
       console.error(
-        'Failed to process the profile in the zip file with the following error:'
+        'Failed to process the profile in the archive with the following error:'
       );
       console.error(error);
       dispatch({ type: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE', error });
