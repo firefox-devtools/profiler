@@ -85,6 +85,7 @@ import type {
   GCMajorAborted,
   PhaseTimes,
   SerializableProfile,
+  SerializableCounter,
   ExternalMarkersData,
   MarkerSchema,
   ProfileMeta,
@@ -1717,19 +1718,54 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   return result;
 }
 
+function _serializeSamples({ time, ...restOfSamples }): any {
+  let lastTime = 0;
+  return {
+    timeDeltas: time.map((t) => {
+      const timeDelta = t - lastTime;
+      lastTime = t;
+      return timeDelta;
+    }),
+    ...restOfSamples,
+  };
+}
+
+function _unserializeSamples({ timeDeltas, time, ...restOfSamples }): any {
+  let lastTime = 0;
+  return {
+    time:
+      time ||
+      ensureExists(timeDeltas).map((delta) => {
+        lastTime = lastTime + delta;
+        return lastTime;
+      }),
+    ...restOfSamples,
+  };
+}
+
 /**
  * The UniqueStringArray is a class, and is not serializable. This function turns
  * a profile into the serializable variant.
  */
 export function makeProfileSerializable({
   threads,
+  counters,
   ...restOfProfile
 }: Profile): SerializableProfile {
   return {
     ...restOfProfile,
-    threads: threads.map(({ stringTable, ...restOfThread }) => {
+    counters: counters
+      ? counters.map(({ samples, ...restOfCounter }) => {
+          return {
+            ...restOfCounter,
+            samples: _serializeSamples(samples),
+          };
+        })
+      : counters,
+    threads: threads.map(({ stringTable, samples, ...restOfThread }) => {
       return {
         ...restOfThread,
+        samples: _serializeSamples(samples),
         stringArray: stringTable.serializeToArray(),
       };
     }),
@@ -1750,13 +1786,25 @@ export function serializeProfile(profile: Profile): string {
  */
 function _unserializeProfile({
   threads,
+  counters,
   ...restOfProfile
 }: SerializableProfile): Profile {
   return {
     ...restOfProfile,
-    threads: threads.map(({ stringArray, ...restOfThread }) => {
+    counters: counters
+      ? ((counters: any[]): SerializableCounter[]).map(
+          ({ samples, ...restOfCounter }) => {
+            return {
+              ...restOfCounter,
+              samples: _unserializeSamples(samples),
+            };
+          }
+        )
+      : counters,
+    threads: threads.map(({ stringArray, samples, ...restOfThread }) => {
       return {
         ...restOfThread,
+        samples: _unserializeSamples(samples),
         stringTable: new UniqueStringArray(stringArray),
       };
     }),
