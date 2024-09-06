@@ -135,6 +135,12 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
+   * This returns the maximum marker index.
+   */
+  const getMarkerListLength: Selector<number> = (state) =>
+    getFullMarkerList(state).length;
+
+  /**
    * This selector returns a function that's used to retrieve a marker object
    * from its MarkerIndex:
    *
@@ -739,6 +745,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerIndexToRawMarkerIndexes,
     getFullMarkerList,
     getFullMarkerListIndexes,
+    getMarkerListLength,
     getNetworkMarkerIndexes,
     getSearchFilteredNetworkMarkerIndexes,
     getAreMarkerPanelsEmptyInFullRange,

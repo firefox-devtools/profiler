@@ -57,6 +57,7 @@ type StateProps = {|
   +getMarker: (MarkerIndex) => Marker,
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
+  +markerListLength: number,
   +timeRange: StartEndRange,
   +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
@@ -105,6 +106,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
   render() {
     const {
       maxMarkerRows,
+      markerListLength,
       timeRange,
       threadsKey,
       markerTimingAndBuckets,
@@ -156,6 +158,7 @@ class MarkerChartImpl extends React.PureComponent<Props> {
               chartProps={{
                 markerTimingAndBuckets,
                 getMarker,
+                markerListLength,
                 // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 updatePreviewSelection,
                 changeMouseTimePosition,
@@ -196,6 +199,7 @@ export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
+      markerListLength: selectedThreadSelectors.getMarkerListLength(state),
       timeRange: getCommittedRange(state),
       threadsKey: getSelectedThreadsKey(state),
       previewSelection: getPreviewSelection(state),

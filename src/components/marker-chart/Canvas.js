@@ -80,6 +80,7 @@ type OwnProps = {|
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +rowHeight: CssPixels,
   +getMarker: (MarkerIndex) => Marker,
+  +markerListLength: number,
   +threadsKey: ThreadsKey,
   +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
   +changeMouseTimePosition: ChangeMouseTimePosition,
@@ -164,11 +165,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     const rightClickedRow: number | void =
       rightClickedMarkerIndex === null
         ? undefined
-        : markerIndexToTimingRow.get(rightClickedMarkerIndex);
+        : markerIndexToTimingRow[rightClickedMarkerIndex];
     let newRow: number | void =
       hoveredMarker === null
         ? undefined
-        : markerIndexToTimingRow.get(hoveredMarker);
+        : markerIndexToTimingRow[hoveredMarker];
     if (
       timelineTrackOrganization.type === 'active-tab' &&
       newRow === undefined &&
@@ -190,7 +191,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       let oldRow: number | void =
         prevHoveredMarker === null
           ? undefined
-          : markerIndexToTimingRow.get(prevHoveredMarker);
+          : markerIndexToTimingRow[prevHoveredMarker];
       if (
         timelineTrackOrganization.type === 'active-tab' &&
         oldRow === undefined &&
@@ -254,8 +255,10 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _getMarkerIndexToTimingRow = memoize(
     (
       markerTimingAndBuckets: MarkerTimingAndBuckets
-    ): Map<MarkerIndex, number> => {
-      const markerIndexToTimingRow = new Map();
+    ): Uint32Array /* like Map<MarkerIndex, RowIndex> */ => {
+      const markerIndexToTimingRow = new Uint32Array(
+        this.props.markerListLength
+      );
       for (
         let rowIndex = 0;
         rowIndex < markerTimingAndBuckets.length;
@@ -270,7 +273,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
           timingIndex < markerTiming.length;
           timingIndex++
         ) {
-          markerIndexToTimingRow.set(markerTiming.index[timingIndex], rowIndex);
+          markerIndexToTimingRow[markerTiming.index[timingIndex]] = rowIndex;
         }
       }
       return markerIndexToTimingRow;
