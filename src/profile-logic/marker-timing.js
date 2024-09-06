@@ -110,7 +110,7 @@ export function getMarkerTiming(
         // The chart will then be responsible for drawing this differently.
         marker.end === null ? marker.start : marker.end
       );
-      markerTiming.label.push(getLabel(markerIndex));
+      markerTiming.label.push(() => getLabel(markerIndex));
       markerTiming.index.push(markerIndex);
       markerTiming.length++;
     };

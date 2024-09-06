@@ -48,7 +48,7 @@ type MarkerDrawingInformation = {|
   +w: CssPixels,
   +h: CssPixels,
   +isInstantMarker: boolean,
-  +text: string,
+  +textGetter: () => string,
 |};
 
 // We can hover over multiple items with Marker chart when we are in the active
@@ -290,13 +290,13 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     w: CssPixels,
     h: CssPixels,
     isInstantMarker: boolean,
-    text: string,
+    textGetter: () => string,
     isHighlighted: boolean = false
   ) {
     if (isInstantMarker) {
       this.drawOneInstantMarker(ctx, x, y, h, isHighlighted);
     } else {
-      this.drawOneIntervalMarker(ctx, x, y, w, h, text, isHighlighted);
+      this.drawOneIntervalMarker(ctx, x, y, w, h, textGetter, isHighlighted);
     }
   }
 
@@ -306,7 +306,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     y: CssPixels,
     w: CssPixels,
     h: CssPixels,
-    text: string,
+    textGetter: () => string,
     isHighlighted: boolean
   ) {
     const { marginLeft } = this.props;
@@ -354,7 +354,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
 
       if (w2 > textMeasurement.minWidth) {
-        const fittedText = textMeasurement.getFittedText(text, w2);
+        const fittedText = textMeasurement.getFittedText(textGetter(), w2);
         if (fittedText) {
           ctx.fillStyle = isHighlighted ? 'white' : 'black';
           ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
@@ -477,7 +477,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
           x = Math.round(x * devicePixelRatio) / devicePixelRatio;
           w = Math.round(w * devicePixelRatio) / devicePixelRatio;
 
-          const text = markerTiming.label[i];
+          const textGetter = markerTiming.label[i];
           const markerIndex = markerTiming.index[i];
 
           const isHighlighted =
@@ -486,7 +486,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
             selectedMarkerIndex === markerIndex;
 
           if (isHighlighted) {
-            highlightedMarkers.push({ x, y, w, h, isInstantMarker, text });
+            highlightedMarkers.push({
+              x,
+              y,
+              w,
+              h,
+              isInstantMarker,
+              textGetter,
+            });
           } else if (
             // Always render non-dot markers and markers that are larger than
             // one pixel.
@@ -496,7 +503,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
             x !== previousMarkerDrawnAtX
           ) {
             previousMarkerDrawnAtX = x;
-            this.drawOneMarker(ctx, x, y, w, h, isInstantMarker, text);
+            this.drawOneMarker(ctx, x, y, w, h, isInstantMarker, textGetter);
           }
         }
       }
@@ -512,7 +519,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         highlightedMarker.w,
         highlightedMarker.h,
         highlightedMarker.isInstantMarker,
-        highlightedMarker.text,
+        highlightedMarker.textGetter,
         true /* isHighlighted */
       );
     });

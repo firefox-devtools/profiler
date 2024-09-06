@@ -401,7 +401,7 @@ export type MarkerTiming = {|
   // End time in milliseconds. It will equals start for instant markers.
   end: number[],
   index: MarkerIndex[],
-  label: string[],
+  label: Array<() => string>,
   name: string,
   bucket: string,
   // True if this marker timing contains only instant markers.
