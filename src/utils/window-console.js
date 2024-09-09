@@ -2,11 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { stripIndent } from 'common-tags';
+import { stripIndent, oneLine } from 'common-tags';
 import type { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from 'firefox-profiler/actions';
 import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
+import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -57,6 +58,13 @@ export function addDataToWindowObject(
           state
         );
       return markerIndexes.map(getMarker);
+    },
+  });
+
+  defineProperty(target, 'selectedMarker', {
+    enumerable: true,
+    get() {
+      return selectorsForConsole.selectedThread.getSelectedMarker(getState());
     },
   });
 
@@ -148,6 +156,60 @@ export function addDataToWindowObject(
     `);
   };
 
+  target.retrieveRawProfileDataFromBrowser = async function (): Promise<
+    MixedObject | ArrayBuffer | null,
+  > {
+    // Note that a new connection is created instead of reusing the one in the
+    // redux state, as an attempt to make it work even in the worst situations.
+    const browserConnectionStatus = await createBrowserConnection();
+    const browserConnection = actions.unwrapBrowserConnection(
+      browserConnectionStatus
+    );
+    const rawGeckoProfile = await browserConnection.getProfile({
+      onThirtySecondTimeout: () => {
+        console.log(
+          oneLine`
+            We were unable to connect to the browser within thirty seconds.
+            This might be because the profile is big or your machine is slower than usual.
+            Still waiting...
+          `
+        );
+      },
+    });
+
+    return rawGeckoProfile;
+  };
+
+  target.saveToDisk = async function (
+    unknownObject: ArrayBuffer | mixed,
+    filename?: string
+  ) {
+    if (unknownObject === undefined || unknownObject === null) {
+      console.error("We can't save a null or undefined variable.");
+      return;
+    }
+
+    const arrayBufferOrString =
+      typeof unknownObject === 'string' ||
+      String(unknownObject) === '[object ArrayBuffer]'
+        ? unknownObject
+        : JSON.stringify(unknownObject);
+
+    const blob = new Blob([arrayBufferOrString], {
+      type: 'application/octet-stream',
+    });
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Trigger the download programmatically
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobUrl;
+    downloadLink.download = filename ?? 'profile.data';
+    downloadLink.click();
+
+    // Clean up the URL object
+    URL.revokeObjectURL(blobUrl);
+  };
+
   target.shortenUrl = shortenUrl;
   target.getState = getState;
   target.selectors = selectorsForConsole;
@@ -182,11 +244,11 @@ export function logFriendlyPreamble() {
       "    | \\     / |  | '_ \\| '__/ _ \\|  _| | |/ _ \\ '_|  ",
       '    |/ \\ _ / \\|  | |_) | | | (_) | | | | |  __/ |    ',
       '    |         |  | .__/|_|  \\___/|_| |_|_|\\___|_|    ',
-      '    /  -    - \\  |_|                                     ',
-      '  ,-    V__V   -.                                     ',
-      ' -=  __-  * - .,=-                                    ',
-      '  `\\_    -   _/                                       ',
-      "      `-----'                                         ",
+      '    /  -    - \\  |_|                                 ',
+      '  ,-    V__V   -.                                    ',
+      ' -=  __-  * - .,=-                                   ',
+      '  `\\_    -   _/                                      ',
+      "      `-----'                                        ",
     ].join('\n'),
     'font-family: Menlo, monospace;'
   );
@@ -198,6 +260,7 @@ export function logFriendlyPreamble() {
       %cwindow.profile%c - The currently loaded profile
       %cwindow.filteredThread%c - The current filtered thread
       %cwindow.filteredMarkers%c - The current filtered and processed markers
+      %cwindow.selectedMarker%c - The selected processed marker in the current thread
       %cwindow.callTree%c - The call tree of the current filtered thread
       %cwindow.getState%c - The function that returns the current Redux state.
       %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
@@ -206,6 +269,8 @@ export function logFriendlyPreamble() {
       %cwindow.experimental%c - The object that holds flags of all the experimental features.
       %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
       %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category", "category", or "stack".
+      %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use "await" to call it.
+      %cwindow.saveToDisk%c - Saves to a file the parameter passed to it, with an optional filename parameter. You can use that to save the profile returned by "retrieveRawProfileDataFromBrowser".
 
       The profile format is documented here:
       %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
@@ -223,6 +288,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.filteredMarkers"
+    bold,
+    reset,
+    // "window.selectedMarker"
     bold,
     reset,
     // "window.callTree"
@@ -247,6 +315,12 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.toggleTimelineType"
+    bold,
+    reset,
+    // "window.retrieveRawProfileDataFromBrowser"
+    bold,
+    reset,
+    // "window.saveToDisk"
     bold,
     reset,
     // "processed-profile-format.md"

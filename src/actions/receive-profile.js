@@ -914,6 +914,11 @@ function getSymbolStore(
             body: json,
             method: 'POST',
             mode: 'cors',
+            // Use a profiler-specific user agent, so that the symbolication server knows
+            // what's making this request.
+            headers: new Headers({
+              'User-Agent': `FirefoxProfiler/1.0 (+${location.origin})`,
+            }),
           });
           return response.json();
         }
@@ -995,39 +1000,47 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
+// From a BrowserConnectionStatus, this unwraps the included browserConnection
+// when possible.
+export function unwrapBrowserConnection(
+  browserConnectionStatus: BrowserConnectionStatus
+): BrowserConnection {
+  switch (browserConnectionStatus.status) {
+    case 'ESTABLISHED':
+      // Good. This is the normal case.
+      break;
+    // The other cases are error cases.
+    case 'NOT_FIREFOX':
+      throw new Error('/from-browser only works in Firefox browsers');
+    case 'NO_ATTEMPT':
+      throw new Error(
+        'retrieveProfileFromBrowser should never be called while browserConnectionStatus is NO_ATTEMPT'
+      );
+    case 'WAITING':
+      throw new Error(
+        'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
+      );
+    case 'DENIED':
+      throw browserConnectionStatus.error;
+    case 'TIMED_OUT':
+      throw new Error('Timed out when waiting for reply to WebChannel message');
+    default:
+      throw assertExhaustiveCheck(browserConnectionStatus.status);
+  }
+
+  // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
+  return browserConnectionStatus.browserConnection;
+}
+
 export function retrieveProfileFromBrowser(
   browserConnectionStatus: BrowserConnectionStatus,
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async (dispatch) => {
     try {
-      switch (browserConnectionStatus.status) {
-        case 'ESTABLISHED':
-          // Good. This is the normal case.
-          break;
-        // The other cases are error cases.
-        case 'NOT_FIREFOX':
-          throw new Error('/from-browser only works in Firefox browsers');
-        case 'NO_ATTEMPT':
-          throw new Error(
-            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is NO_ATTEMPT'
-          );
-        case 'WAITING':
-          throw new Error(
-            'retrieveProfileFromBrowser should never be called while browserConnectionStatus is WAITING'
-          );
-        case 'DENIED':
-          throw browserConnectionStatus.error;
-        case 'TIMED_OUT':
-          throw new Error(
-            'Timed out when waiting for reply to WebChannel message'
-          );
-        default:
-          throw assertExhaustiveCheck(browserConnectionStatus.status);
-      }
-
-      // Now we know that browserConnectionStatus.status === 'ESTABLISHED'.
-      const browserConnection = browserConnectionStatus.browserConnection;
+      const browserConnection = unwrapBrowserConnection(
+        browserConnectionStatus
+      );
 
       // XXX update state to show that we're connected to the browser
 
@@ -1283,7 +1296,7 @@ async function _extractZipFromResponse(
     // Catch the error if unable to load the zip.
     return zip;
   } catch (error) {
-    const message = 'Unable to unzip the zip file.';
+    const message = 'Unable to open the archive file.';
     reportError(message);
     reportError('Error:', error);
     reportError('Fetch response:', response);
@@ -1409,7 +1422,7 @@ export function retrieveProfileOrZipFromUrl(
         default:
           throw assertExhaustiveCheck(
             response.responseType,
-            'Expected to receive a zip file or profile from _fetchProfile.'
+            'Expected to receive an archive or profile from _fetchProfile.'
           );
       }
     } catch (error) {
