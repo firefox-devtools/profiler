@@ -36,6 +36,7 @@ describe('calltree/ZipFileTree', function () {
       'baz/profile3.json',
       // Use a file with a big depth to test the automatic expansion at load time.
       'boat/ship/new/anything/explore/yes/profile4.json',
+      'not/a/profile.pdf',
     ]);
 
     const renderResult = render(
@@ -52,22 +53,45 @@ describe('calltree/ZipFileTree', function () {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  // getByText is an assertion, but eslint doesn't know that.
-  // eslint-disable-next-line jest/expect-expect
   it('contains a list of all the files', async () => {
     await setup();
 
     // We're looping through all expected files and check if we can find an
     // element with the file name as text content.
-    // getByText throws if it doesn't find an element with this text content.
     [
       'foo',
       'bar',
+      'profile1',
+      'profile2',
+      'baz',
+      'profile3',
+      'profile4',
+    ].forEach((fileName) =>
+      expect(screen.getByText(fileName)).toBeInTheDocument()
+    );
+  });
+
+  it('removes .json extensions', async () => {
+    await setup();
+
+    ['profile1', 'profile2', 'profile3', 'profile4'].forEach((fileName) =>
+      expect(screen.getByText(fileName)).toBeInTheDocument()
+    );
+
+    [
       'profile1.json',
       'profile2.json',
-      'baz',
       'profile3.json',
-    ].forEach((fileName) => screen.getByText(fileName));
+      'profile4.json',
+    ].forEach((fileName) =>
+      expect(screen.queryByText(fileName)).not.toBeInTheDocument()
+    );
+  });
+
+  it('preserves extensions other than .json', async () => {
+    await setup();
+
+    expect(screen.getByText('profile.pdf')).toBeInTheDocument();
   });
 
   describe('clicking on a profile link', function () {
@@ -75,7 +99,7 @@ describe('calltree/ZipFileTree', function () {
       const setupResult = await setup();
       const { store, container } = setupResult;
 
-      const profile1OpenLink = screen.getByText('profile1.json');
+      const profile1OpenLink = screen.getByText('profile1');
 
       const waitUntilDoneProcessingZip = () =>
         act(() =>
