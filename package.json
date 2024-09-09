@@ -78,6 +78,7 @@
     "jszip": "^3.10.1",
     "memoize-immutable": "^3.0.0",
     "memoize-one": "^6.0.0",
+    "minimist": "^1.2.8",
     "mixedtuplemap": "^1.0.0",
     "namedtuplemap": "^1.0.0",
     "photon-colors": "^3.3.2",
