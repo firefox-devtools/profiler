@@ -104,11 +104,11 @@ const symbolStore = new SymbolStore(symbolStoreDB, {
     },
 
     requestSymbolsFromBrowser: async (requests) => {
-        return new Promise((resolve, reject) => { resolve([]); });
+        return [];
     },
 
     requestSymbolTableFromBrowser: async (lib) => {
-        return new Promise((resolve, reject) => { resolve([]); });
+        return [];
     },
   });
 
