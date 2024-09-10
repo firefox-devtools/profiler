@@ -176,7 +176,7 @@ if (config.mode === 'production') {
 const symbolication_tool_config = {
   name: 'symbolication-tool',
   target: 'node',
-  mode: 'development',
+  mode: process.env.NODE_ENV,
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'symbolicator.js'
