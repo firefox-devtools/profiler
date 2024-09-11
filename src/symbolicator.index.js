@@ -103,11 +103,11 @@ const symbolStore = new SymbolStore(symbolStoreDB, {
       }
     },
 
-    requestSymbolsFromBrowser: async (requests) => {
+    requestSymbolsFromBrowser: async () => {
         return [];
     },
 
-    requestSymbolTableFromBrowser: async (lib) => {
+    requestSymbolTableFromBrowser: async () => {
         return [];
     },
   });
@@ -138,7 +138,7 @@ profile.threads = profile.threads.map((oldThread, threadIndex) => {
   if (symbolicationSteps === undefined) {
     return oldThread;
   }
-  const { thread, _ } = applySymbolicationSteps(oldThread, symbolicationSteps);
+  const { thread, } = applySymbolicationSteps(oldThread, symbolicationSteps);
   return thread;
 });
 
