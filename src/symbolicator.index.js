@@ -9,7 +9,7 @@ import {
 import * as MozillaSymbolicationAPI from './profile-logic/mozilla-symbolication-api';
 import { SymbolsNotFoundError } from './profile-logic/errors';
 
-var argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2));
 if (!('input' in argv 
   && 'output' in argv 
   && 'server' in argv))
@@ -19,8 +19,8 @@ if (!('input' in argv
 }
 
 console.log(`Loading profile from ${argv.input}`);
-var serializedProfile = JSON.parse(fs.readFileSync(argv.input, 'utf8'));
-var profile = await unserializeProfileOfArbitraryFormat(serializedProfile);
+const serializedProfile = JSON.parse(fs.readFileSync(argv.input, 'utf8'));
+const profile = await unserializeProfileOfArbitraryFormat(serializedProfile);
 if (profile === undefined) {
     throw new Error('Unable to parse the profile.');
 }
