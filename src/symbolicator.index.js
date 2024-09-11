@@ -43,33 +43,30 @@ class InMemorySymbolDB {
         return `${debugName}:${breakpadId}`;
     }
 
-    storeSymbolTable(
+    async storeSymbolTable(
         debugName: string,
         breakpadId: string,
         symbolTable: SymbolTableAsTuple
       ): Promise<void> {
         this._dict[this._makeKey(debugName, breakpadId)] = symbolTable;
-        return new Promise((resolve, reject) => resolve());
       }
 
-    getSymbolTable(
+    async getSymbolTable(
         debugName: string,
         breakpadId: string
       ): Promise<SymbolTableAsTuple> {
-        return new Promise((resolve, reject) => {
-            const key = this._makeKey(debugName, breakpadId);
-            if (key in this._dict) {
-                resolve(this._dict[key]);
-            } else {
-                reject(new SymbolsNotFoundError(
-                    'The requested library does not exist in the database.',
-                    { debugName, breakpadId }
-                  ));
-            }
-        });
+        const key = this._makeKey(debugName, breakpadId);
+        if (key in this._dict) {
+          return this._dict[key];
+        } 
+          throw new SymbolsNotFoundError(
+            'The requested library does not exist in the database.',
+            { debugName, breakpadId }
+          );
+        
       }
 
-    close(): Promise<void> { return new Promise((resolve, reject) => resolve()); }
+    async close(): Promise<void> { }
 };
 
 const symbolStoreDB = new InMemorySymbolDB();
