@@ -140,4 +140,3 @@ profile.meta.symbolicated = true;
 console.log(`Saving profile to ${argv.output}`);
 fs.writeFileSync(argv.output, JSON.stringify(profile));
 console.log('Finished.');
-process.exit(0);
