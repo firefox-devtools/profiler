@@ -1,14 +1,14 @@
 // @flow
 const fs = require('fs');
 
-import { unserializeProfileOfArbitraryFormat } from './profile-logic/process-profile';
-import { SymbolStore } from './profile-logic/symbol-store';
+import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
+import { SymbolStore } from '../profile-logic/symbol-store';
 import {
   symbolicateProfile,
   applySymbolicationSteps,
-} from './profile-logic/symbolication';
-import * as MozillaSymbolicationAPI from './profile-logic/mozilla-symbolication-api';
-import { SymbolsNotFoundError } from './profile-logic/errors';
+} from '../profile-logic/symbolication';
+import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
+import { SymbolsNotFoundError } from '../profile-logic/errors';
 
 const argv = require('minimist')(process.argv.slice(2));
 if (!('input' in argv && 'output' in argv && 'server' in argv)) {
