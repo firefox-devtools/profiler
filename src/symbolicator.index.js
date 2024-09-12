@@ -1,4 +1,5 @@
-var fs = require('fs');
+// @flow
+const fs = require('fs');
 
 import { unserializeProfileOfArbitraryFormat } from './profile-logic/process-profile';
 import { SymbolStore } from './profile-logic/symbol-store';
