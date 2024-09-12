@@ -174,14 +174,14 @@ if (config.mode === 'production') {
 }
 
 const symbolication_tool_config = {
-  name: 'symbolication-tool',
+  name: 'symbolicator-cli',
   target: 'node',
   mode: process.env.NODE_ENV,
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'symbolicator.js',
   },
-  entry: './src/symbolicator.index.js',
+  entry: './src/symbolicator-cli/index.js',
   module: {
     rules: [
       {
