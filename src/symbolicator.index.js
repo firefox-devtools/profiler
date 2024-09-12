@@ -33,10 +33,10 @@ if (profile === undefined) {
  */
 class InMemorySymbolDB {
 
-    _dict: Map<string, SymbolTableAsTuple>
+    _store: Map<string, SymbolTableAsTuple>;
 
     constructor() {
-        this._dict = new Map();
+        this._store = new Map();
     }
 
     _makeKey(debugName: String, breakpadId: string): string {
@@ -48,7 +48,7 @@ class InMemorySymbolDB {
         breakpadId: string,
         symbolTable: SymbolTableAsTuple
       ): Promise<void> {
-        this._dict[this._makeKey(debugName, breakpadId)] = symbolTable;
+        this._store[this._makeKey(debugName, breakpadId)] = symbolTable;
       }
 
     async getSymbolTable(
@@ -56,8 +56,8 @@ class InMemorySymbolDB {
         breakpadId: string
       ): Promise<SymbolTableAsTuple> {
         const key = this._makeKey(debugName, breakpadId);
-        if (key in this._dict) {
-          return this._dict[key];
+        if (key in this._store) {
+          return this._store[key];
         } 
           throw new SymbolsNotFoundError(
             'The requested library does not exist in the database.',
