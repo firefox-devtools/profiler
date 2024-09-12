@@ -230,7 +230,7 @@ export class SymbolStore {
 
   constructor(dbNamePrefixOrDB, symbolProvider: SymbolProvider) {
     this._symbolProvider = symbolProvider;
-    if (typeof(dbNamePrefixOrDB) === 'string') {
+    if (typeof dbNamePrefixOrDB === 'string') {
       this._db = new SymbolStoreDB(`${dbNamePrefixOrDB}-symbol-tables`);
     } else {
       this._db = dbNamePrefixOrDB;

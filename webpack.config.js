@@ -179,7 +179,7 @@ const symbolication_tool_config = {
   mode: process.env.NODE_ENV,
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'symbolicator.js'
+    filename: 'symbolicator.js',
   },
   entry: './src/symbolicator.index.js',
   module: {
@@ -188,13 +188,13 @@ const symbolication_tool_config = {
         test: /\.js$/,
         use: ['babel-loader'],
         include: includes.concat(es6modulePaths),
-      }
-    ]
+      },
+    ],
   },
   experiments: {
     // Make WebAssembly work just like in webpack v4
     syncWebAssembly: true,
-  }
+  },
 };
 
 module.exports = [config, symbolication_tool_config];
