@@ -7,23 +7,11 @@ import {
   symbolicateProfile,
   applySymbolicationSteps,
 } from '../profile-logic/symbolication';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import type { SymbolTableAsTuple } from '../profile-logic/symbol-store-db';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { SymbolsNotFoundError } from '../profile-logic/errors';
-
-const argv = require('minimist')(process.argv.slice(2));
-if (!('input' in argv && 'output' in argv && 'server' in argv)) {
-  console.error(
-    'Missing mandatory argument. Usage: symbolicator.js --input <path/to/input.json> --output <path/to/output.json> --server <URI of symbolication server>'
-  );
-  process.exit(1);
-}
-
-console.log(`Loading profile from ${argv.input}`);
-const serializedProfile = JSON.parse(fs.readFileSync(argv.input, 'utf8'));
-const profile = await unserializeProfileOfArbitraryFormat(serializedProfile);
-if (profile === undefined) {
-  throw new Error('Unable to parse the profile.');
-}
+import type { ThreadIndex } from '../types';
 
 /**
  * Simple 'in-memory' symbol DB that conforms to the same interface as SymbolStoreDB but
@@ -38,7 +26,7 @@ class InMemorySymbolDB {
     this._store = new Map();
   }
 
-  _makeKey(debugName: String, breakpadId: string): string {
+  _makeKey(debugName: string, breakpadId: string): string {
     return `${debugName}:${breakpadId}`;
   }
 
@@ -47,7 +35,7 @@ class InMemorySymbolDB {
     breakpadId: string,
     symbolTable: SymbolTableAsTuple
   ): Promise<void> {
-    this._store[this._makeKey(debugName, breakpadId)] = symbolTable;
+    this._store.set(this._makeKey(debugName, breakpadId), symbolTable);
   }
 
   async getSymbolTable(
@@ -55,8 +43,9 @@ class InMemorySymbolDB {
     breakpadId: string
   ): Promise<SymbolTableAsTuple> {
     const key = this._makeKey(debugName, breakpadId);
-    if (key in this._store) {
-      return this._store[key];
+    const value = this._store.get(key);
+    if (typeof value !== 'undefined') {
+      return value;
     }
     throw new SymbolsNotFoundError(
       'The requested library does not exist in the database.',
@@ -67,76 +56,100 @@ class InMemorySymbolDB {
   async close(): Promise<void> {}
 }
 
-const symbolStoreDB = new InMemorySymbolDB();
+const argv = require('minimist')(process.argv.slice(2));
+if (!('input' in argv && 'output' in argv && 'server' in argv)) {
+  console.error(
+    'Missing mandatory argument. Usage: symbolicator.js --input <path/to/input.json> --output <path/to/output.json> --server <URI of symbolication server>'
+  );
+  process.exit(1);
+}
 
-/**
- * SymbolStore implementation which just forwards everything to the symbol server in
- * MozillaSymbolicationAPI format. No support for getting symbols from 'the browser' as
- * there is no browser in this context.
- */
-const symbolStore = new SymbolStore(symbolStoreDB, {
-  requestSymbolsFromServer: async (requests) => {
-    for (const { lib } of requests) {
-      console.log(`  Loading symbols for ${lib.debugName}`);
-    }
-    try {
-      return await MozillaSymbolicationAPI.requestSymbols(
-        'symbol server',
-        requests,
-        async (path, json) => {
-          const response = await fetch(argv.server + path, {
-            body: json,
-            method: 'POST',
-          });
-          return response.json();
-        }
-      );
-    } catch (e) {
-      throw new Error(
-        `There was a problem with the symbolication API request to the symbol server: ${e.message}`
-      );
-    }
-  },
-
-  requestSymbolsFromBrowser: async () => {
-    return [];
-  },
-
-  requestSymbolTableFromBrowser: async () => {
-    return [];
-  },
-});
-
-console.log('Symbolicating...');
-
-const symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]> =
-  new Map();
-await symbolicateProfile(
-  profile,
-  symbolStore,
-  (threadIndex: ThreadIndex, symbolicationStepInfo: SymbolicationStepInfo) => {
-    let threadSteps = symbolicationStepsPerThread.get(threadIndex);
-    if (threadSteps === undefined) {
-      threadSteps = [];
-      symbolicationStepsPerThread.set(threadIndex, threadSteps);
-    }
-    threadSteps.push(symbolicationStepInfo);
+async function run(options) {
+  console.log(`Loading profile from ${options.input}`);
+  const serializedProfile = JSON.parse(fs.readFileSync(options.input, 'utf8'));
+  const profile = await unserializeProfileOfArbitraryFormat(serializedProfile);
+  if (profile === undefined) {
+    throw new Error('Unable to parse the profile.');
   }
-);
 
-console.log('Applying collected symbolication steps...');
+  const symbolStoreDB = new InMemorySymbolDB();
 
-profile.threads = profile.threads.map((oldThread, threadIndex) => {
-  const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
-  if (symbolicationSteps === undefined) {
-    return oldThread;
-  }
-  const { thread } = applySymbolicationSteps(oldThread, symbolicationSteps);
-  return thread;
+  /**
+   * SymbolStore implementation which just forwards everything to the symbol server in
+   * MozillaSymbolicationAPI format. No support for getting symbols from 'the browser' as
+   * there is no browser in this context.
+   */
+  const symbolStore = new SymbolStore(symbolStoreDB, {
+    requestSymbolsFromServer: async (requests) => {
+      for (const { lib } of requests) {
+        console.log(`  Loading symbols for ${lib.debugName}`);
+      }
+      try {
+        return await MozillaSymbolicationAPI.requestSymbols(
+          'symbol server',
+          requests,
+          async (path, json) => {
+            const response = await fetch(options.server + path, {
+              body: json,
+              method: 'POST',
+            });
+            return response.json();
+          }
+        );
+      } catch (e) {
+        throw new Error(
+          `There was a problem with the symbolication API request to the symbol server: ${e.message}`
+        );
+      }
+    },
+
+    requestSymbolsFromBrowser: async () => {
+      return [];
+    },
+
+    requestSymbolTableFromBrowser: async () => {
+      throw new Error('Not supported in this context');
+    },
+  });
+
+  console.log('Symbolicating...');
+
+  const symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]> =
+    new Map();
+  await symbolicateProfile(
+    profile,
+    symbolStore,
+    (
+      threadIndex: ThreadIndex,
+      symbolicationStepInfo: SymbolicationStepInfo
+    ) => {
+      let threadSteps = symbolicationStepsPerThread.get(threadIndex);
+      if (threadSteps === undefined) {
+        threadSteps = [];
+        symbolicationStepsPerThread.set(threadIndex, threadSteps);
+      }
+      threadSteps.push(symbolicationStepInfo);
+    }
+  );
+
+  console.log('Applying collected symbolication steps...');
+
+  profile.threads = profile.threads.map((oldThread, threadIndex) => {
+    const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
+    if (symbolicationSteps === undefined) {
+      return oldThread;
+    }
+    const { thread } = applySymbolicationSteps(oldThread, symbolicationSteps);
+    return thread;
+  });
+
+  profile.meta.symbolicated = true;
+
+  console.log(`Saving profile to ${options.output}`);
+  fs.writeFileSync(options.output, JSON.stringify(profile));
+  console.log('Finished.');
+}
+
+run(argv).catch((err) => {
+  console.error(err);
 });
-
-profile.meta.symbolicated = true;
-
-console.log(`Saving profile to ${argv.output}`);
-fs.writeFileSync(argv.output, JSON.stringify(profile));
-console.log('Finished.');
